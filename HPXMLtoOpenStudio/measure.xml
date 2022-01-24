@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f34ae15e-3ac4-46f6-83b6-ababf01e376b</version_id>
-  <version_modified>20220121T023718Z</version_modified>
+  <version_id>226e97ed-1d4a-4dc7-b19a-04bdb51099a9</version_id>
+  <version_modified>20220124T183234Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -560,6 +560,12 @@
       <checksum>214BDBB8</checksum>
     </file>
     <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E5EBAB3E</checksum>
+    </file>
+    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -570,6 +576,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4F273F16</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ECC1A13D</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -601,6 +613,18 @@
       <checksum>7CA11663</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>282585F2</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/heat-pump.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8E4AD331</checksum>
+    </file>
+    <file>
       <filename>schedule_files/heatpump/hourly_operating_mode_schedule.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -619,34 +643,10 @@
       <checksum>2DFF87CD</checksum>
     </file>
     <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E5EBAB3E</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/heat-pump.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8E4AD331</checksum>
-    </file>
-    <file>
       <filename>schedule_files/tank.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2DFF87CD</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>ECC1A13D</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>85D7C63B</checksum>
     </file>
   </files>
 </measure>
