@@ -4765,7 +4765,7 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="CambiumGEAs_simple">
+	<xs:simpleType name="CambiumRegionGEAs_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="AZNMc"/>
 			<xs:enumeration value="CAMXc"/>
@@ -4789,9 +4789,9 @@
 			<xs:enumeration value="SRVCc"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="CambiumGEAS">
+	<xs:complexType name="CambiumRegionGEAs">
 		<xs:simpleContent>
-			<xs:extension base="CambiumGEAs_simple">
+			<xs:extension base="CambiumRegionGEAs_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
