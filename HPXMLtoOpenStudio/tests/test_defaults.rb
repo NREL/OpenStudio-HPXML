@@ -45,11 +45,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = 10
     hpxml.header.use_max_load_for_heat_pumps = false
     hpxml.header.allow_increased_fixed_capacities = true
-    hpxml.header.state_code = 'AZ'
-    hpxml.header.time_zone_utc_offset = -7
+    hpxml.header.state_code = 'CA'
+    hpxml.header.time_zone_utc_offset = -8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true, 'AZ', -7)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true, 'CA', -8)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil

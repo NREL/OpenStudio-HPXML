@@ -480,8 +480,4 @@ class Constants
             'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
             'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']
   end
-
-  def self.TimeZones
-    return (-12..14).to_a
-  end
 end
