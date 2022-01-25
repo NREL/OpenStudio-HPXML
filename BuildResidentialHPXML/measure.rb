@@ -144,14 +144,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('State code of the home address.')
     args << arg
 
-    site_time_zone_choices = OpenStudio::StringVector.new
-    Constants.TimeZones.each do |tz|
-      site_time_zone_choices << "#{tz}"
-    end
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_time_zone', site_time_zone_choices, false)
-    arg.setDisplayName('Site: Time Zone')
-    arg.setDescription('Time zone, for UTC offset, of the home address.')
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_time_zone_utc_offset', false)
+    arg.setDisplayName('Site: Time Zone UTC Offset')
+    arg.setDescription('Time zone UTC offset of the home address. Must be between -12 and 14.')
+    arg.setUnits('hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -3162,6 +3158,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:window_aspect_ratio] <= 0)
     errors << 'Window aspect ratio must be greater than zero.' if error
 
+    if args[:site_time_zone_utc_offset].is_initialized
+      error = (args[:site_time_zone_utc_offset].get < -12) || (args[:site_time_zone_utc_offset].get > 14)
+      errors << 'Time zone UTC offset must be between -12 and 14.' if error
+    end
+
     return errors
   end
 
@@ -3410,8 +3411,8 @@ class HPXMLFile
       hpxml.header.state_code = args[:site_state_code].get
     end
 
-    if args[:site_time_zone].is_initialized
-      hpxml.header.time_zone_utc_offset = args[:site_time_zone].get
+    if args[:site_time_zone_utc_offset].is_initialized
+      hpxml.header.time_zone_utc_offset = args[:site_time_zone_utc_offset].get
     end
 
     if args[:emissions_scenario_names].is_initialized
