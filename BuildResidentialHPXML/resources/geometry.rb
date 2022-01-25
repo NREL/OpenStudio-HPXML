@@ -1683,9 +1683,12 @@ class Geometry
     if attic_type != HPXML::AtticTypeFlatRoof
       attic_space = get_attic_space(model, x, y, average_ceiling_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height)
       if attic_type == HPXML::AtticTypeConditioned
-        attic_space.setName("#{attic_type} space")
+        attic_space_name = HPXML::LocationLivingSpace
+        attic_space.setName(attic_space_name)
         attic_space.setThermalZone(living_zone)
         attic_space.setSpaceType(living_space_type)
+        attic_space_type = OpenStudio::Model::SpaceType.new(model)
+        attic_space_type.setStandardsSpaceType(attic_space_name)
       else
         attic_spaces << attic_space
       end
@@ -1743,7 +1746,7 @@ class Geometry
       OpenStudio::Model.intersectSurfaces(spaces)
       OpenStudio::Model.matchSurfaces(spaces)
 
-      # set foundation walls to ground
+      # Foundation space boundary conditions
       spaces = model.getSpaces
       spaces.each do |space|
         next unless get_space_floor_z(space) + UnitConversions.convert(space.zOrigin, 'm', 'ft') < 0
@@ -1793,9 +1796,6 @@ class Geometry
           attic_space_name = HPXML::LocationAtticUnvented
         end
         attic_zone.setName(attic_space_name)
-      elsif attic_type == HPXML::AtticTypeConditioned
-        attic_space.setThermalZone(living_zone)
-        attic_space_name = HPXML::LocationLivingSpace
       end
       attic_space.setName(attic_space_name)
       attic_space_type = OpenStudio::Model::SpaceType.new(model)
@@ -1929,25 +1929,25 @@ class Geometry
     return attic_space
   end
 
-  def self.create_multifamily(runner:,
-                              model:,
-                              geometry_unit_cfa:,
-                              geometry_average_ceiling_height:,
-                              geometry_building_num_units:,
-                              geometry_unit_aspect_ratio:,
-                              geometry_inset_width:,
-                              geometry_inset_depth:,
-                              geometry_inset_position:,
-                              geometry_balcony_depth:,
-                              geometry_foundation_type:,
-                              geometry_foundation_height:,
-                              geometry_rim_joist_height:,
-                              geometry_attic_type:,
-                              geometry_unit_left_wall_is_adiabatic:,
-                              geometry_unit_right_wall_is_adiabatic:,
-                              geometry_unit_front_wall_is_adiabatic:,
-                              geometry_unit_back_wall_is_adiabatic:,
-                              **remainder)
+  def self.create_apartment(runner:,
+                            model:,
+                            geometry_unit_cfa:,
+                            geometry_average_ceiling_height:,
+                            geometry_building_num_units:,
+                            geometry_unit_aspect_ratio:,
+                            geometry_inset_width:,
+                            geometry_inset_depth:,
+                            geometry_inset_position:,
+                            geometry_balcony_depth:,
+                            geometry_foundation_type:,
+                            geometry_foundation_height:,
+                            geometry_rim_joist_height:,
+                            geometry_attic_type:,
+                            geometry_unit_left_wall_is_adiabatic:,
+                            geometry_unit_right_wall_is_adiabatic:,
+                            geometry_unit_front_wall_is_adiabatic:,
+                            geometry_unit_back_wall_is_adiabatic:,
+                            **remainder)
 
     cfa = geometry_unit_cfa
     average_ceiling_height = geometry_average_ceiling_height
