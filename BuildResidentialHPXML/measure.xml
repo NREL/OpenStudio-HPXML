@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>20113118-8512-45b0-b9df-b4b790b6f3c2</version_id>
-  <version_modified>20220125T002908Z</version_modified>
+  <version_id>35b81621-6954-48e0-93de-d248e88168c1</version_id>
+  <version_modified>20220125T184108Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5912,6 +5912,102 @@
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
+    <argument>
+      <name>emissions_natural_gas_units</name>
+      <display_name>Emissions: Natural Gas Units</display_name>
+      <description>Natural gas emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_natural_gas_values</name>
+      <display_name>Emissions: Natural Gas Values</display_name>
+      <description>Natural gas emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_propane_units</name>
+      <display_name>Emissions: Propane Units</display_name>
+      <description>Propane emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_propane_values</name>
+      <display_name>Emissions: Propane Values</display_name>
+      <description>Propane emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_fuel_oil_units</name>
+      <display_name>Emissions: Fuel Oil Units</display_name>
+      <description>Fuel oil emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_fuel_oil_values</name>
+      <display_name>Emissions: Fuel Oil Values</display_name>
+      <description>Fuel oil emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_coal_units</name>
+      <display_name>Emissions: Coal Units</display_name>
+      <description>Coal emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_coal_values</name>
+      <display_name>Emissions: Coal Values</display_name>
+      <description>Coal emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_wood_units</name>
+      <display_name>Emissions: Wood Units</display_name>
+      <description>Wood emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_wood_values</name>
+      <display_name>Emissions: Wood Values</display_name>
+      <description>Wood emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_wood_pellets_units</name>
+      <display_name>Emissions: Wood Pellets Units</display_name>
+      <description>Wood pellets emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_wood_pellets_values</name>
+      <display_name>Emissions: Wood Pellets Values</display_name>
+      <description>Wood pellets emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
   </arguments>
   <outputs />
   <provenances />
@@ -6225,12 +6321,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>DF784FEA</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-right-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EE8D1A0D</checksum>
     </file>
     <file>
       <filename>extra_files/extra-mf-unvented-crawlspace-right-middle-rear-units.xml</filename>
@@ -6689,10 +6779,16 @@
       <checksum>6977E044</checksum>
     </file>
     <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>11F1EF69</checksum>
+    </file>
+    <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7221D74F</checksum>
+      <checksum>24A6CCF1</checksum>
     </file>
     <file>
       <version>
@@ -6703,7 +6799,55 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D6FCDD83</checksum>
+      <checksum>56BE0B9A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1C2C3DDC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/error-invalid-living-and-garage-1.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0FEA5D8B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/error-invalid-living-and-garage-2.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>54090807</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-emissions-fossil-fuel-factors.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B3CD3314</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-ambient.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>312408D2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-ambient - Copy.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C028936D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-ambient.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C028936D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-time-zone-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>075A2A0F</checksum>
     </file>
   </files>
 </measure>

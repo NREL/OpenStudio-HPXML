@@ -2898,6 +2898,31 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.')
     args << arg
 
+    fossil_fuels = [
+      HPXML::FuelTypeNaturalGas,
+      HPXML::FuelTypePropane,
+      HPXML::FuelTypeOil,
+      HPXML::FuelTypeCoal,
+      HPXML::FuelTypeWoodCord,
+      HPXML::FuelTypeWoodPellets
+    ]
+
+    fossil_fuels.each do |fossil_fuel|
+      underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
+      all_caps_case = fossil_fuel.split(' ').map(&:capitalize).join(' ')
+      cap_case = fossil_fuel.capitalize
+
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument("emissions_#{underscore_case}_units", false)
+      arg.setDisplayName("Emissions: #{all_caps_case} Units")
+      arg.setDescription("#{cap_case} emissions factors units. If multiple scenarios, use a comma-separated list.")
+      args << arg
+
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument("emissions_#{underscore_case}_values", false)
+      arg.setDisplayName("Emissions: #{all_caps_case} Values")
+      arg.setDescription("#{cap_case} emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.")
+      args << arg
+    end
+
     return args
   end
 
@@ -3101,13 +3126,50 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                   args[:emissions_electricity_units].is_initialized,
                                   args[:emissions_electricity_values_or_filepaths].is_initialized]
     error = (emissions_args_initialized.uniq.size != 1)
-    errors << 'Did not specify either no emissions arguments or all emissions arguments.' if error
+    errors << 'Did not specify either no required emissions arguments or all required emissions arguments.' if error
+
+    error = ([args[:emissions_natural_gas_units].is_initialized, args[:emissions_natural_gas_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no natural gas emissions arguments or all natural gas emissions arguments.' if error
+
+    error = ([args[:emissions_propane_units].is_initialized, args[:emissions_propane_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no propane emissions arguments or all propane emissions arguments.' if error
+
+    error = ([args[:emissions_fuel_oil_units].is_initialized, args[:emissions_fuel_oil_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no fuel oil emissions arguments or all fuel oil emissions arguments.' if error
+
+    error = ([args[:emissions_coal_units].is_initialized, args[:emissions_coal_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no coal emissions arguments or all coal emissions arguments.' if error
+
+    error = ([args[:emissions_wood_units].is_initialized, args[:emissions_wood_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no wood cord emissions arguments or all wood cord emissions arguments.' if error
+
+    error = ([args[:emissions_wood_pellets_units].is_initialized, args[:emissions_wood_pellets_values].is_initialized].uniq.size != 1)
+    errors << 'Did not specify either no wood pellets emissions arguments or all wood pellets emissions arguments.' if error
 
     if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]
       emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
                                     args[:emissions_types].get.split(',').length,
                                     args[:emissions_electricity_units].get.split(',').length,
                                     args[:emissions_electricity_values_or_filepaths].get.split(',').length]
+
+      emissions_scenario_lengths += [args[:emissions_natural_gas_units].get.split(',').length] if args[:emissions_natural_gas_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_natural_gas_values].get.split(',').length] if args[:emissions_natural_gas_values].is_initialized
+
+      emissions_scenario_lengths += [args[:emissions_propane_units].get.split(',').length] if args[:emissions_propane_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_propane_values].get.split(',').length] if args[:emissions_propane_values].is_initialized
+
+      emissions_scenario_lengths += [args[:emissions_fuel_oil_units].get.split(',').length] if args[:emissions_fuel_oil_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_fuel_oil_values].get.split(',').length] if args[:emissions_fuel_oil_values].is_initialized
+
+      emissions_scenario_lengths += [args[:emissions_coal_units].get.split(',').length] if args[:emissions_coal_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_coal_values].get.split(',').length] if args[:emissions_coal_values].is_initialized
+
+      emissions_scenario_lengths += [args[:emissions_wood_units].get.split(',').length] if args[:emissions_wood_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_wood_values].get.split(',').length] if args[:emissions_wood_values].is_initialized
+
+      emissions_scenario_lengths += [args[:emissions_wood_pellets_units].get.split(',').length] if args[:emissions_wood_pellets_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_wood_pellets_values].get.split(',').length] if args[:emissions_wood_pellets_values].is_initialized
+
       error = (emissions_scenario_lengths.uniq.size != 1)
       errors << 'One or more emissions arguments does not have enough comma-separated elements specified.' if error
     end
@@ -3406,16 +3468,53 @@ class HPXMLFile
       emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
       emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
 
-      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths)
+      natural_gas_units = args[:emissions_natural_gas_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      natural_gas_values = args[:emissions_natural_gas_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      propane_units = args[:emissions_propane_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      propane_values = args[:emissions_propane_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      fuel_oil_units = args[:emissions_fuel_oil_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      fuel_oil_values = args[:emissions_fuel_oil_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      coal_units = args[:emissions_coal_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      coal_values = args[:emissions_coal_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      wood_units = args[:emissions_wood_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      wood_values = args[:emissions_wood_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      wood_pellets_units = args[:emissions_wood_pellets_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      wood_pellets_values = args[:emissions_wood_pellets_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+
+      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths, natural_gas_units, natural_gas_values, propane_units, propane_values, fuel_oil_units, fuel_oil_values, coal_units, coal_values, wood_units, wood_values, wood_pellets_units, wood_pellets_values)
       emissions_scenarios.each do |emissions_scenario|
-        name, emissions_type, elec_units, elec_value_or_schedule_filepath = emissions_scenario
+        name, emissions_type, elec_units, elec_value_or_schedule_filepath, natural_gas_units, natural_gas_value, propane_units, propane_value, fuel_oil_units, fuel_oil_value, coal_units, coal_value, wood_units, wood_value, wood_pellets_units, wood_pellets_value = emissions_scenario
         elec_value = Float(elec_value_or_schedule_filepath) rescue nil
         elec_schedule_filepath = elec_value_or_schedule_filepath if elec_value.nil?
+        natural_gas_value = Float(natural_gas_value) rescue nil
+        propane_value = Float(propane_value) rescue nil
+        fuel_oil_value = Float(fuel_oil_value) rescue nil
+        coal_value = Float(coal_value) rescue nil
+        wood_value = Float(wood_value) rescue nil
+        wood_pellets_value = Float(wood_pellets_value) rescue nil
+
         hpxml.header.emissions_scenarios.add(name: name,
                                              emissions_type: emissions_type,
                                              elec_units: elec_units,
                                              elec_value: elec_value,
-                                             elec_schedule_filepath: elec_schedule_filepath)
+                                             elec_schedule_filepath: elec_schedule_filepath,
+                                             natural_gas_units: natural_gas_units,
+                                             natural_gas_value: natural_gas_value,
+                                             propane_units: propane_units,
+                                             propane_value: propane_value,
+                                             fuel_oil_units: fuel_oil_units,
+                                             fuel_oil_value: fuel_oil_value,
+                                             coal_units: coal_units,
+                                             coal_value: coal_value,
+                                             wood_units: wood_units,
+                                             wood_value: wood_value,
+                                             wood_pellets_units: wood_pellets_units,
+                                             wood_pellets_value: wood_pellets_value)
       end
     end
   end
