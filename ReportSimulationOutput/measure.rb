@@ -105,15 +105,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('timestamps_daylight_saving_time', false)
-    arg.setDisplayName('Generate Timeseries Output: TimeDST Column')
-    arg.setDescription('Optionally generate, in addition to the default local standard Time column, a local clock TimeDST column. Requires that daylight saving time is enabled.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('add_timeseries_dst_column', false)
+    arg.setDisplayName('Generate Timeseries Output: Add TimeDST Column')
+    arg.setDescription('Optionally add, in addition to the default local standard Time column, a local clock TimeDST column. Requires that daylight saving time is enabled.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('timestamps_coordinated_universal_time', false)
-    arg.setDisplayName('Generate Timeseries Output: TimeUTC Column')
-    arg.setDescription('Optionally generate, in addition to the default local standard Time column, a local clock TimeUTC column.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('add_timeseries_utc_column', false)
+    arg.setDisplayName('Generate Timeseries Output: Add TimeUTC Column')
+    arg.setDescription('Optionally add, in addition to the default local standard Time column, a local clock TimeUTC column. If the time zone UTC offset is not provided in the HPXML file, the time zone in the EPW header will be used.')
     arg.setDefaultValue(false)
     args << arg
 
