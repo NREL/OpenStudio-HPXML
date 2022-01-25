@@ -900,6 +900,12 @@ class HPXML < Object
 
       errors += @emissions_scenarios.check_for_errors
 
+      if not @time_zone_utc_offset.nil?
+        if not (@time_zone_utc_offset >= -12 && @time_zone_utc_offset <= 14)
+          errors << "Time Zone UTC Offset (#{@time_zone_utc_offset}) must be between -12 and 14."
+        end
+      end
+
       return errors
     end
 
