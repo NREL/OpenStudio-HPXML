@@ -2888,6 +2888,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
+    arg.setDisplayName('Emissions: Scenario Names')
+    arg.setDescription('Names of emissions scenarios. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_types', false)
+    arg.setDisplayName('Emissions: Types')
+    arg.setDescription('Types of emissions (e.g., CO2, NOx, etc.). If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_units', false)
+    arg.setDisplayName('Emissions: Electricity Units')
+    arg.setDescription('Electricity emissions factors units. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_values_or_filepaths', false)
+    arg.setDisplayName('Emissions: Electricity Values or File Paths')
+    arg.setDescription('Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
     return args
   end
 
@@ -3076,6 +3096,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = args[:rim_joist_assembly_r].is_initialized && !args[:geometry_rim_joist_height].is_initialized
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
+
+    emissions_args_initialized = [args[:emissions_scenario_names].is_initialized,
+                                  args[:emissions_types].is_initialized,
+                                  args[:emissions_electricity_units].is_initialized,
+                                  args[:emissions_electricity_values_or_filepaths].is_initialized]
+    error = (emissions_args_initialized.uniq.size != 1)
+    errors << 'Did not specify either no emissions arguments or all emissions arguments.' if error
+
+    if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]
+      emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
+                                    args[:emissions_types].get.split(',').length,
+                                    args[:emissions_electricity_units].get.split(',').length,
+                                    args[:emissions_electricity_values_or_filepaths].get.split(',').length]
+      error = (emissions_scenario_lengths.uniq.size != 1)
+      errors << 'One or more emissions arguments does not have enough comma-separated elements specified.' if error
+    end
 
     return warnings, errors
   end
@@ -3322,6 +3358,25 @@ class HPXMLFile
 
     if args[:site_time_zone].is_initialized
       hpxml.header.time_zone_utc_offset = args[:site_time_zone].get
+    end
+
+    if args[:emissions_scenario_names].is_initialized
+      emissions_scenario_names = args[:emissions_scenario_names].get.split(',').map(&:strip)
+      emissions_types = args[:emissions_types].get.split(',').map(&:strip)
+      emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
+      emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
+
+      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths)
+      emissions_scenarios.each do |emissions_scenario|
+        name, emissions_type, elec_units, elec_value_or_schedule_filepath = emissions_scenario
+        elec_value = Float(elec_value_or_schedule_filepath) rescue nil
+        elec_schedule_filepath = elec_value_or_schedule_filepath if elec_value.nil?
+        hpxml.header.emissions_scenarios.add(name: name,
+                                             emissions_type: emissions_type,
+                                             elec_units: elec_units,
+                                             elec_value: elec_value,
+                                             elec_schedule_filepath: elec_schedule_filepath)
+      end
     end
   end
 

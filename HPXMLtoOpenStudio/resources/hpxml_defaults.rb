@@ -191,8 +191,9 @@ class HPXMLDefaults
     end
 
     if (not epw_file.nil?) && hpxml.header.state_code.nil?
-      if Constants.StateCodes.include? epw_file.stateProvinceRegion
-        hpxml.header.state_code = epw_file.stateProvinceRegion
+      state_province_region = epw_file.stateProvinceRegion.upcase
+      if /^[A-Z]{2}$/.match(state_province_region)
+        hpxml.header.state_code = state_province_region
         hpxml.header.state_code_isdefaulted = true
       end
     end
