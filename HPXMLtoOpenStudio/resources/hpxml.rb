@@ -984,8 +984,8 @@ class HPXML < Object
         XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
         XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
         if not @time_zone_utc_offset.nil?
-          extension = XMLHelper.add_element(address, 'extension')
-          XMLHelper.add_element(extension, 'TimeZoneUTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted)
+          time_zone = XMLHelper.add_element(address, 'TimeZone')
+          XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted)
         end
       end
       project_status = XMLHelper.add_element(building, 'ProjectStatus')

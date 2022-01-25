@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0519edca-9032-41ec-acf3-f39f4e070f75</version_id>
-  <version_modified>20220125T202449Z</version_modified>
+  <version_id>52cc2102-327f-4d04-b874-1fe7719be97f</version_id>
+  <version_modified>20220125T232218Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -332,24 +332,6 @@
       <checksum>9EC3B4D6</checksum>
     </file>
     <file>
-      <filename>hpxml_schema/BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0A466508</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schema/HPXML.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BC20DACA</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schema/HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>80061D4B</checksum>
-    </file>
-    <file>
       <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -607,16 +589,34 @@
       <checksum>E728439F</checksum>
     </file>
     <file>
+      <filename>hpxml_schema/HPXML.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F7F0EA30</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schema/HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>58AFDF7E</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6AF2577F</checksum>
+      <checksum>8F56A598</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F6082485</checksum>
+      <checksum>516E7512</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schema/HPXMLBaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>418C6EB5</checksum>
     </file>
   </files>
 </measure>

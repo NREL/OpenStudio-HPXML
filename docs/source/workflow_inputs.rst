@@ -276,7 +276,7 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   ``SiteID``                               id                            Yes                 Unique identifier
   ``Address/StateCode``                    string                        No        See [#]_  State/territory where the home is located
   ``Address/ZipCode``                      string           See [#]_     No                  ZIP Code where the home is located
-  ``Address/extension/TimeZoneUTCOffset``  integer          See [#]_     No        See [#]_  Difference in decimal hours between the home's time zone and UTC
+  ``Address/TimeZone/UTCOffset``           double           See [#]_     No        See [#]_  Difference in decimal hours between the home's time zone and UTC
   =======================================  ========  =====  ===========  ========  ========  ===============
 
   .. [#] If StateCode not provided, defaults according to the EPW weather file header.

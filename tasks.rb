@@ -4574,8 +4574,8 @@ def create_schematron_hpxml_validator(hpxml_docs)
   puts 'Generating HPXMLvalidator.xml...'
   elements_in_sample_files = get_elements_from_sample_files(hpxml_docs)
 
-  base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'BaseElements.xsd'))
-  base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
+  hpxml_base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLBaseElements.xsd'))
+  hpxml_base_elements_xsd_doc = Oga.parse_xml(hpxml_base_elements_xsd)
 
   # construct dictionary for enumerations and min/max values of HPXML data types
   hpxml_data_types_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLDataTypes.xsd'))
@@ -4617,7 +4617,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   # construct complexType and group elements dictionary
   complex_type_or_group_dict = {}
   ['//xs:complexType', '//xs:group', '//xs:element'].each do |param|
-    base_elements_xsd_doc.xpath(param).each do |param_type|
+    hpxml_base_elements_xsd_doc.xpath(param).each do |param_type|
       next if param_type.name == 'element' && (not ['XMLTransactionHeaderInformation', 'ProjectStatus', 'SoftwareInfo'].include?(param_type.get('name')))
       next if param_type.get('name').nil?
 
@@ -4632,7 +4632,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
         next unless element.name == 'extension'
 
         base_element_name = element.get('base').to_s
-        base_elements_xsd_doc.xpath("#{param}[@name='#{base_element_name}']").each do |base_element|
+        hpxml_base_elements_xsd_doc.xpath("#{param}[@name='#{base_element_name}']").each do |base_element|
           base_element.each_node do |element|
             elements['base'] << element
           end

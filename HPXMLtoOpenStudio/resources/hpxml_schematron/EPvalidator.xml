@@ -99,7 +99,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:Site/h:Address'>
       <sch:assert role='ERROR' test='count(h:StateCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StateCode</sch:assert>
       <sch:assert role='ERROR' test='count(h:ZipCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ZipCode</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:TimeZoneUTCOffset) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TimeZoneUTCOffset</sch:assert>
+      <sch:assert role='ERROR' test='count(h:TimeZone/h:UTCOffset) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TimeZone/UTCOffset</sch:assert>
     </sch:rule>
   </sch:pattern>
 
