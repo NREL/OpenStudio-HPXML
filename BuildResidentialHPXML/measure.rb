@@ -288,39 +288,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Right')
     args << arg
 
-    # Currently hiding these detailed and seldom used geometry inputs
-
-    # arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_inset_width', true)
-    # arg.setDisplayName('Geometry: Inset Width')
-    # arg.setUnits('ft')
-    # arg.setDescription("The width of the inset. Only applies to #{HPXML::ResidentialTypeApartment}s.")
-    # arg.setDefaultValue(0.0)
-    # args << arg
-
-    # arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_inset_depth', true)
-    # arg.setDisplayName('Geometry: Inset Depth')
-    # arg.setUnits('ft')
-    # arg.setDescription("The depth of the inset. Only applies to #{HPXML::ResidentialTypeApartment}s.")
-    # arg.setDefaultValue(0.0)
-    # args << arg
-
-    # inset_position_choices = OpenStudio::StringVector.new
-    # inset_position_choices << 'Right'
-    # inset_position_choices << 'Left'
-
-    # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_inset_position', inset_position_choices, true)
-    # arg.setDisplayName('Geometry: Inset Position')
-    # arg.setDescription("The position of the inset. Only applies to #{HPXML::ResidentialTypeApartment}s.")
-    # arg.setDefaultValue('Right')
-    # args << arg
-
-    # arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_balcony_depth', true)
-    # arg.setDisplayName('Geometry: Balcony Depth')
-    # arg.setUnits('ft')
-    # arg.setDescription("The depth of the balcony. Only applies to #{HPXML::ResidentialTypeApartment}s.")
-    # arg.setDefaultValue(0.0)
-    # args << arg
-
     foundation_type_choices = OpenStudio::StringVector.new
     foundation_type_choices << HPXML::FoundationTypeSlab
     foundation_type_choices << HPXML::FoundationTypeCrawlspaceVented
@@ -3133,10 +3100,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
     errors << 'Single-family attached units cannot be below another unit.' if error
 
-    # These detailed geometry inputs are not currently exposed
-    # error = (args[:geometry_balcony_depth] > 0) && (args[:geometry_inset_width] * args[:geometry_inset_depth] == 0)
-    # errors << 'Specified a balcony, but there is not inset.' if error
-
     error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_roof_type] == 'hip') && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
     errors << 'Cannot handle protruding garage and hip roof.' if error
 
@@ -3319,12 +3282,6 @@ class HPXMLFile
     elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
       args[:geometry_rim_joist_height] = 0.0
     end
-
-    # These detailed geometry inputs are not currently exposed
-    args[:geometry_inset_width] = 0.0
-    args[:geometry_inset_depth] = 0.0
-    args[:geometry_inset_position] = 'Right'
-    args[:geometry_balcony_depth] = 0.0
 
     if model.getSpaces.size > 0
       runner.registerError('Starting model is not empty.')

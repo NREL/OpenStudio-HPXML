@@ -1935,10 +1935,6 @@ class Geometry
                             geometry_average_ceiling_height:,
                             geometry_building_num_units:,
                             geometry_unit_aspect_ratio:,
-                            geometry_inset_width:,
-                            geometry_inset_depth:,
-                            geometry_inset_position:,
-                            geometry_balcony_depth:,
                             geometry_foundation_type:,
                             geometry_foundation_height:,
                             geometry_rim_joist_height:,
@@ -1953,10 +1949,6 @@ class Geometry
     average_ceiling_height = geometry_average_ceiling_height
     num_units = geometry_building_num_units.get
     aspect_ratio = geometry_unit_aspect_ratio
-    inset_width = geometry_inset_width
-    inset_depth = geometry_inset_depth
-    inset_position = geometry_inset_position
-    balcony_depth = geometry_balcony_depth
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
     rim_joist_height = geometry_rim_joist_height
@@ -1979,13 +1971,10 @@ class Geometry
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
     average_ceiling_height = UnitConversions.convert(average_ceiling_height, 'ft', 'm')
     foundation_height = UnitConversions.convert(foundation_height, 'ft', 'm')
-    inset_width = UnitConversions.convert(inset_width, 'ft', 'm')
-    inset_depth = UnitConversions.convert(inset_depth, 'ft', 'm')
-    balcony_depth = UnitConversions.convert(balcony_depth, 'ft', 'm')
     rim_joist_height = UnitConversions.convert(rim_joist_height, 'ft', 'm')
 
     # calculate the dimensions of the unit
-    footprint = cfa + inset_width * inset_depth
+    footprint = cfa
     x = Math.sqrt(footprint / aspect_ratio)
     y = footprint / x
 
@@ -1996,40 +1985,7 @@ class Geometry
     ne_point = OpenStudio::Point3d.new(x, 0, rim_joist_height)
     sw_point = OpenStudio::Point3d.new(0, -y, rim_joist_height)
     se_point = OpenStudio::Point3d.new(x, -y, rim_joist_height)
-
-    if inset_width * inset_depth > 0
-      if inset_position == 'Right'
-        # unit footprint
-        inset_point = OpenStudio::Point3d.new(x - inset_width, inset_depth - y, rim_joist_height)
-        front_point = OpenStudio::Point3d.new(x - inset_width, -y, rim_joist_height)
-        side_point = OpenStudio::Point3d.new(x, inset_depth - y, rim_joist_height)
-        living_polygon = make_polygon(sw_point, nw_point, ne_point, side_point, inset_point, front_point)
-        # unit balcony
-        if balcony_depth > 0
-          inset_point = OpenStudio::Point3d.new(x - inset_width, inset_depth - y, average_ceiling_height + rim_joist_height)
-          side_point = OpenStudio::Point3d.new(x, inset_depth - y, average_ceiling_height + rim_joist_height)
-          se_point = OpenStudio::Point3d.new(x, inset_depth - y - balcony_depth, average_ceiling_height + rim_joist_height)
-          front_point = OpenStudio::Point3d.new(x - inset_width, inset_depth - y - balcony_depth, average_ceiling_height + rim_joist_height)
-          shading_surface = OpenStudio::Model::ShadingSurface.new(OpenStudio::Point3dVector.new([front_point, se_point, side_point, inset_point]), model)
-        end
-      else
-        # unit footprint
-        inset_point = OpenStudio::Point3d.new(inset_width, inset_depth - y, rim_joist_height)
-        front_point = OpenStudio::Point3d.new(inset_width, -y, rim_joist_height)
-        side_point = OpenStudio::Point3d.new(0, inset_depth - y, rim_joist_height)
-        living_polygon = make_polygon(side_point, nw_point, ne_point, se_point, front_point, inset_point)
-        # unit balcony
-        if balcony_depth > 0
-          inset_point = OpenStudio::Point3d.new(inset_width, inset_depth - y, average_ceiling_height + rim_joist_height)
-          side_point = OpenStudio::Point3d.new(0, inset_depth - y, average_ceiling_height + rim_joist_height)
-          sw_point = OpenStudio::Point3d.new(0, inset_depth - y - balcony_depth, average_ceiling_height + rim_joist_height)
-          front_point = OpenStudio::Point3d.new(inset_width, inset_depth - y - balcony_depth, average_ceiling_height + rim_joist_height)
-          shading_surface = OpenStudio::Model::ShadingSurface.new(OpenStudio::Point3dVector.new([front_point, sw_point, side_point, inset_point]), model)
-        end
-      end
-    else
-      living_polygon = make_polygon(sw_point, nw_point, ne_point, se_point)
-    end
+    living_polygon = make_polygon(sw_point, nw_point, ne_point, se_point)
 
     # foundation
     if (foundation_height > 0) && foundation_polygon.nil?
@@ -2049,13 +2005,6 @@ class Geometry
     living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
     living_space.setSpaceType(living_space_type)
     living_space.setThermalZone(living_zone)
-
-    # add the balcony
-    if balcony_depth > 0
-      shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
-      shading_surface_group.setSpace(living_space)
-      shading_surface.setShadingSurfaceGroup(shading_surface_group)
-    end
 
     # Map surface facades to adiabatic walls
     adb_facade_hash = { 'left' => adiabatic_left_wall, 'right' => adiabatic_right_wall, 'front' => adiabatic_front_wall, 'back' => adiabatic_back_wall }
