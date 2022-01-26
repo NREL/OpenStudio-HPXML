@@ -5710,7 +5710,7 @@
 					<xs:sequence>
 						<xs:element name="SiteID" type="SystemIdentifiersInfoType"/>
 						<xs:element maxOccurs="unbounded" minOccurs="0" ref="ExternalResource"/>
-						<xs:element name="Address" type="AddressInformation"/>
+						<xs:element name="Address" type="AddressInformation" minOccurs="0"/>
 						<xs:element minOccurs="0" name="SchoolDistrict" type="HPXMLString"/>
 						<xs:element minOccurs="0" name="eGridRegion" type="eGridRegions">
 							<xs:annotation>
