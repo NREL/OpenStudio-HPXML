@@ -2541,6 +2541,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
+  elsif ['base-misc-emissions.xml'].include? hpxml_file
+    hpxml.header.egrid_region = 'Western'
+    hpxml.header.egrid_subregion = 'RMPA'
+    hpxml.header.cambium_region_gea = 'RMPAc'
   end
 
   # --------------------- #
