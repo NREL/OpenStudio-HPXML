@@ -1664,8 +1664,6 @@ class Geometry
       end
     end
 
-    attic_spaces = []
-
     # additional floors
     (2..num_floors).to_a.each do |story|
       new_living_space = living_space.clone.to_Space.get
@@ -1680,6 +1678,7 @@ class Geometry
     end
 
     # attic
+    attic_spaces = []
     if attic_type != HPXML::AtticTypeFlatRoof
       attic_space = get_attic_space(model, x, y, average_ceiling_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height)
       if attic_type == HPXML::AtticTypeConditioned
@@ -1934,11 +1933,14 @@ class Geometry
                             geometry_unit_cfa:,
                             geometry_average_ceiling_height:,
                             geometry_building_num_units:,
+                            geometry_unit_num_floors_above_grade:,
                             geometry_unit_aspect_ratio:,
                             geometry_foundation_type:,
                             geometry_foundation_height:,
                             geometry_rim_joist_height:,
                             geometry_attic_type:,
+                            geometry_roof_type:,
+                            geometry_roof_pitch:,
                             geometry_unit_left_wall_is_adiabatic:,
                             geometry_unit_right_wall_is_adiabatic:,
                             geometry_unit_front_wall_is_adiabatic:,
@@ -1948,11 +1950,14 @@ class Geometry
     cfa = geometry_unit_cfa
     average_ceiling_height = geometry_average_ceiling_height
     num_units = geometry_building_num_units.get
+    num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
     rim_joist_height = geometry_rim_joist_height
     attic_type = geometry_attic_type
+    roof_type = geometry_roof_type
+    roof_pitch = geometry_roof_pitch
     adiabatic_left_wall = geometry_unit_left_wall_is_adiabatic
     adiabatic_right_wall = geometry_unit_right_wall_is_adiabatic
     adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
@@ -2036,9 +2041,15 @@ class Geometry
           if (adb_levels.include? surface.surfaceType)
             surface.setOutsideBoundaryCondition('Adiabatic')
           end
-
         end
       end
+    end
+
+    # attic
+    attic_spaces = []
+    if [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include? attic_type
+      attic_space = get_attic_space(model, x, y, average_ceiling_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height)
+      attic_spaces << attic_space
     end
 
     # foundation
@@ -2111,6 +2122,54 @@ class Geometry
             surface.setOutsideBoundaryCondition('Outdoors')
           end
         end
+      end
+    end
+
+    # put all of the spaces in the model into a vector
+    spaces = OpenStudio::Model::SpaceVector.new
+    model.getSpaces.each do |space|
+      spaces << space
+    end
+
+    # intersect and match surfaces for each space in the vector
+    OpenStudio::Model.intersectSurfaces(spaces)
+    OpenStudio::Model.matchSurfaces(spaces)
+
+    if [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(attic_type)
+      attic_spaces.each do |attic_space|
+        attic_space.remove
+      end
+      attic_space = get_attic_space(model, x, y, average_ceiling_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height)
+
+      # set these to the attic zone
+      if (attic_type == HPXML::AtticTypeVented) || (attic_type == HPXML::AtticTypeUnvented)
+        # create attic zone
+        attic_zone = OpenStudio::Model::ThermalZone.new(model)
+        attic_space.setThermalZone(attic_zone)
+        if attic_type == HPXML::AtticTypeVented
+          attic_space_name = HPXML::LocationAtticVented
+        elsif attic_type == HPXML::AtticTypeUnvented
+          attic_space_name = HPXML::LocationAtticUnvented
+        end
+        attic_zone.setName(attic_space_name)
+      end
+      attic_space.setName(attic_space_name)
+      attic_space_type = OpenStudio::Model::SpaceType.new(model)
+      attic_space_type.setStandardsSpaceType(attic_space_name)
+      attic_space.setSpaceType(attic_space_type)
+
+      # Adiabatic surfaces for attic walls
+      attic_space.surfaces.each do |surface|
+        os_facade = get_facade_for_surface(surface)
+        next unless surface.surfaceType == 'Wall'
+        next unless adb_facades.include? os_facade
+
+        x_ft = UnitConversions.convert(x, 'm', 'ft')
+        max_x = getSurfaceXValues([surface]).max
+        min_x = getSurfaceXValues([surface]).min
+        next if ((max_x - x_ft).abs >= 0.01) && (min_x > 0)
+
+        surface.setOutsideBoundaryCondition('Adiabatic')
       end
     end
 
