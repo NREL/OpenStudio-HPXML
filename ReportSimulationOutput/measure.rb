@@ -522,7 +522,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         ts -= utc_offset
       end
 
-      timestamps << ts.iso8601
+      ts_iso8601 = ts.iso8601
+      ts_iso8601 = ts_iso8601.delete('Z') if timestamps_local_time != 'UTC'
+      timestamps << ts_iso8601
     end
 
     return timestamps
