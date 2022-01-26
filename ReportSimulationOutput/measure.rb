@@ -376,8 +376,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
       include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
       include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
-      timestamps_daylight_saving_time = runner.getOptionalBoolArgumentValue('timestamps_daylight_saving_time', user_arguments)
-      timestamps_coordinated_universal_time = runner.getOptionalBoolArgumentValue('timestamps_coordinated_universal_time', user_arguments)
+      add_timeseries_dst_column = runner.getOptionalBoolArgumentValue('add_timeseries_dst_column', user_arguments)
+      add_timeseries_utc_column = runner.getOptionalBoolArgumentValue('add_timeseries_utc_column', user_arguments)
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
@@ -428,13 +428,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @timestamps = get_timestamps(timeseries_frequency)
     if timeseries_frequency != 'none'
-      if timestamps_daylight_saving_time.is_initialized
+      if add_timeseries_dst_column.is_initialized
         @timestamps_dst = 'DST'
-        timestamps_dst = get_timestamps(timeseries_frequency, @timestamps_dst) if timestamps_daylight_saving_time.get
+        timestamps_dst = get_timestamps(timeseries_frequency, @timestamps_dst) if add_timeseries_dst_column.get
       end
-      if timestamps_coordinated_universal_time.is_initialized
+      if add_timeseries_utc_column.is_initialized
         @timestamps_utc = 'UTC'
-        timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc) if timestamps_coordinated_universal_time.get
+        timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc) if add_timeseries_utc_column.get
       end
     end
 
