@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e9525499-c2e3-4499-9f0b-65527111b2aa</version_id>
-  <version_modified>20220126T042350Z</version_modified>
+  <version_id>d3cadaa4-5de3-4abd-864c-fae7f59ea42a</version_id>
+  <version_modified>20220126T160046Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -583,12 +583,6 @@
       <checksum>F7F0EA30</checksum>
     </file>
     <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>486961E5</checksum>
-    </file>
-    <file>
       <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -613,10 +607,16 @@
       <checksum>7252D3FB</checksum>
     </file>
     <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A4F4BC59</checksum>
+    </file>
+    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>A6218045</checksum>
+      <checksum>7499B4A6</checksum>
     </file>
   </files>
 </measure>
