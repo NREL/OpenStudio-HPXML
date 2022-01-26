@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>bc975aef-d849-40d7-a569-2aed5bd77c75</version_id>
-  <version_modified>20220126T005024Z</version_modified>
+  <version_id>7e9410f8-081f-4b0e-8f7b-6746b2f1ea6d</version_id>
+  <version_modified>20220126T172248Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -6035,17 +6035,6 @@
       <checksum>24A6CCF1</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>56BE0B9A</checksum>
-    </file>
-    <file>
       <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6854,6 +6843,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>F0FB2E25</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>ECBD79B8</checksum>
     </file>
   </files>
 </measure>

@@ -3468,23 +3468,53 @@ class HPXMLFile
       emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
       emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
 
-      natural_gas_units = args[:emissions_natural_gas_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      natural_gas_values = args[:emissions_natural_gas_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_natural_gas_units].is_initialized
+        natural_gas_units = args[:emissions_natural_gas_units].get.split(',').map(&:strip)
+        natural_gas_values = args[:emissions_natural_gas_values].get.split(',').map(&:strip)
+      else
+        natural_gas_units = [nil] * emissions_scenario_names.size
+        natural_gas_values = [nil] * emissions_scenario_names.size
+      end
 
-      propane_units = args[:emissions_propane_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      propane_values = args[:emissions_propane_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_propane_units].is_initialized
+        propane_units = args[:emissions_propane_units].get.split(',').map(&:strip)
+        propane_values = args[:emissions_propane_values].get.split(',').map(&:strip)
+      else
+        propane_units = [nil] * emissions_scenario_names.size
+        propane_values = [nil] * emissions_scenario_names.size
+      end
 
-      fuel_oil_units = args[:emissions_fuel_oil_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      fuel_oil_values = args[:emissions_fuel_oil_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_fuel_oil_units].is_initialized
+        fuel_oil_units = args[:emissions_fuel_oil_units].get.split(',').map(&:strip)
+        fuel_oil_values = args[:emissions_fuel_oil_values].get.split(',').map(&:strip)
+      else
+        fuel_oil_units = [nil] * emissions_scenario_names.size
+        fuel_oil_values = [nil] * emissions_scenario_names.size
+      end
 
-      coal_units = args[:emissions_coal_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      coal_values = args[:emissions_coal_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_coal_units].is_initialized
+        coal_units = args[:emissions_coal_units].get.split(',').map(&:strip)
+        coal_values = args[:emissions_coal_values].get.split(',').map(&:strip)
+      else
+        coal_units = [nil] * emissions_scenario_names.size
+        coal_values = [nil] * emissions_scenario_names.size
+      end
 
-      wood_units = args[:emissions_wood_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      wood_values = args[:emissions_wood_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_wood_units].is_initialized
+        wood_units = args[:emissions_wood_units].get.split(',').map(&:strip)
+        wood_values = args[:emissions_wood_values].get.split(',').map(&:strip)
+      else
+        wood_units = [nil] * emissions_scenario_names.size
+        wood_values = [nil] * emissions_scenario_names.size
+      end
 
-      wood_pellets_units = args[:emissions_wood_pellets_units].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
-      wood_pellets_values = args[:emissions_wood_pellets_values].get.split(',').map(&:strip) rescue [nil] * emissions_scenario_names.size
+      if args[:emissions_wood_pellets_units].is_initialized
+        wood_pellets_units = args[:emissions_wood_pellets_units].get.split(',').map(&:strip)
+        wood_pellets_values = args[:emissions_wood_pellets_values].get.split(',').map(&:strip)
+      else
+        wood_pellets_units = [nil] * emissions_scenario_names.size
+        wood_pellets_values = [nil] * emissions_scenario_names.size
+      end
 
       emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths, natural_gas_units, natural_gas_values, propane_units, propane_values, fuel_oil_units, fuel_oil_values, coal_units, coal_values, wood_units, wood_values, wood_pellets_units, wood_pellets_values)
       emissions_scenarios.each do |emissions_scenario|
