@@ -153,7 +153,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-mf-no-building-num-units.xml' => 'base-mf.xml',
       'error-mf-all-adiabatic-walls.xml' => 'base-mf.xml',
       'error-mf-two-stories.xml' => 'base-mf.xml',
-      'error-mf-vented-attic.xml' => 'base-mf.xml',
+      'error-mf-conditioned-attic.xml' => 'base-mf.xml',
       'error-dhw-indirect-without-boiler.xml' => 'base-sfd.xml',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
       'error-zero-number-of-bedrooms.xml' => 'base-sfd.xml',
@@ -214,7 +214,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-mf-no-building-num-units.xml' => 'Did not specify the number of units in the building for single-family attached or apartment units.',
       'error-mf-all-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic.',
       'error-mf-two-stories.xml' => 'Apartment units can only have one above-grade floor.',
-      'error-mf-vented-attic.xml' => 'Apartment units can only have a flat roof or be below another apartment unit.',
+      'error-mf-conditioned-attic.xml' => 'Conditioned attic type for apartment units is not currently supported.',
       'error-dhw-indirect-without-boiler.xml' => 'Must specify a boiler when modeling an indirect water heater type.',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'Units with a conditioned attic must have at least two above-grade floors.',
       'error-zero-number-of-bedrooms.xml' => 'Number of bedrooms must be greater than zero.',
@@ -1073,8 +1073,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_back_wall_is_adiabatic'] = true
     elsif ['error-mf-two-stories.xml'].include? hpxml_file
       args['geometry_unit_num_floors_above_grade'] = 2
-    elsif ['error-mf-vented-attic.xml'].include? hpxml_file
-      args['geometry_attic_type'] = HPXML::AtticTypeVented
+    elsif ['error-mf-conditioned-attic.xml'].include? hpxml_file
+      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
     elsif ['error-dhw-indirect-without-boiler.xml'].include? hpxml_file
       args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     elsif ['error-conditioned-attic-with-one-floor-above-grade.xml'].include? hpxml_file
