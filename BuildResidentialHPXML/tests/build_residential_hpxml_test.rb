@@ -39,13 +39,14 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'extra-zero-freezer-kwh.xml' => 'base-sfd.xml',
       'extra-zero-clothes-washer-kwh.xml' => 'base-sfd.xml',
       'extra-zero-dishwasher-kwh.xml' => 'base-sfd.xml',
-      'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
+
       'extra-gas-pool-heater-with-zero-kwh.xml' => 'base-sfd.xml',
       'extra-gas-hot-tub-heater-with-zero-kwh.xml' => 'base-sfd.xml',
       'extra-no-rim-joists.xml' => 'base-sfd.xml',
       'extra-iecc-zone-different-than-epw.xml' => 'base-sfd.xml',
       'extra-state-code-different-than-epw.xml' => 'base-sfd.xml',
 
+      'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
       'extra-sfa-atticroof-conditioned-eaves-hip.xml' => 'extra-sfa-atticroof-conditioned-eaves-gable.xml',
       'extra-mf-eaves.xml' => 'extra-mf-slab.xml',
@@ -68,6 +69,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'extra-sfa-unvented-crawlspace-right.xml' => 'extra-sfa-unvented-crawlspace.xml',
       'extra-sfa-unconditioned-basement-middle.xml' => 'extra-sfa-unconditioned-basement.xml',
       'extra-sfa-unconditioned-basement-right.xml' => 'extra-sfa-unconditioned-basement.xml',
+
+      'extra-mf-atticroof-flat.xml' => 'base-mf.xml',
+      'extra-mf-atticroof-vented.xml' => 'base-mf.xml',
 
       'extra-mf-slab.xml' => 'base-mf.xml',
       'extra-mf-vented-crawlspace.xml' => 'base-mf.xml',
@@ -829,12 +833,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['clothes_dryer_location'] = 'none'
     elsif ['extra-zero-dishwasher-kwh.xml'].include? hpxml_file
       args['dishwasher_efficiency'] = 0
-    elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
-      args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
-      args['ducts_supply_leakage_to_outside_value'] = 0.0
-      args['ducts_return_leakage_to_outside_value'] = 0.0
-      args['ducts_supply_location'] = HPXML::LocationBasementConditioned
-      args['ducts_return_location'] = HPXML::LocationBasementConditioned
     elsif ['extra-gas-pool-heater-with-zero-kwh.xml'].include? hpxml_file
       args['pool_present'] = true
       args['pool_heater_type'] = HPXML::HeaterTypeGas
@@ -850,6 +848,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['site_iecc_zone'] = '6B'
     elsif ['extra-state-code-different-than-epw.xml'].include? hpxml_file
       args['site_state_code'] = 'WY'
+    elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
+      args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
+      args['ducts_supply_leakage_to_outside_value'] = 0.0
+      args['ducts_return_leakage_to_outside_value'] = 0.0
+      args['ducts_supply_location'] = HPXML::LocationBasementConditioned
+      args['ducts_return_location'] = HPXML::LocationBasementConditioned
     elsif ['extra-sfa-atticroof-conditioned-eaves-gable.xml'].include? hpxml_file
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = HPXML::AtticTypeConditioned
@@ -907,6 +911,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
            'extra-sfa-unvented-crawlspace-right.xml',
            'extra-sfa-unconditioned-basement-right.xml'].include? hpxml_file
       args['geometry_unit_left_wall_is_adiabatic'] = true
+    elsif ['extra-mf-atticroof-flat.xml'].include? hpxml_file
+      args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
+    elsif ['extra-mf-atticroof-vented.xml'].include? hpxml_file
+      args['geometry_attic_type'] = HPXML::AtticTypeVented
     elsif ['extra-mf-slab.xml'].include? hpxml_file
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
