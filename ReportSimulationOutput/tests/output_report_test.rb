@@ -1062,7 +1062,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'timestamps_daylight_saving_time' => true }
+                  'add_timeseries_dst_column' => true }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
@@ -1085,7 +1085,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'timestamps_coordinated_universal_time' => true }
+                  'add_timeseries_utc_column' => true }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
@@ -1108,8 +1108,8 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'timestamps_daylight_saving_time' => true,
-                  'timestamps_coordinated_universal_time' => true }
+                  'add_timeseries_dst_column' => true,
+                  'add_timeseries_utc_column' => true }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
