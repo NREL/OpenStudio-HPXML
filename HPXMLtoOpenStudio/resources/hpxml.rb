@@ -977,7 +977,7 @@ class HPXML < Object
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
-      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?)
+      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @cambium_region_gea.nil?)
         site = XMLHelper.add_element(building, 'Site')
         site_id = XMLHelper.add_element(site, 'SiteID')
         XMLHelper.add_attribute(site_id, 'id', 'SiteID')
