@@ -5714,17 +5714,17 @@
 						<xs:element minOccurs="0" name="SchoolDistrict" type="HPXMLString"/>
 						<xs:element minOccurs="0" name="eGridRegion" type="eGridRegions">
 							<xs:annotation>
-								<xs:documentation>Emissions and Generation Resource Integrated Database (eGRID) region, as defined by EPA.</xs:documentation>
+								<xs:documentation>Emissions and Generation Resource Integrated Database (eGRID) region.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="eGridSubregion" type="eGridSubregions">
 							<xs:annotation>
-								<xs:documentation>Emissions and Generation Resource Integrated Database (eGRID) subregion, as defined by EPA.</xs:documentation>
+								<xs:documentation>Emissions and Generation Resource Integrated Database (eGRID) subregion.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="CambiumRegionGEA" type="CambiumRegionGEAs">
 							<xs:annotation>
-								<xs:documentation>Generation and Emission Assessment (GEA) region, as defined by NREL for the Cambium dataset.</xs:documentation>
+								<xs:documentation>Cambium Generation and Emission Assessment (GEA) region.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="TimeZone">
