@@ -559,7 +559,7 @@ class Waterheater
       storage_ht = 3.0 * storage_diam # ft
       storage_tank.setTankVolume(UnitConversions.convert(solar_thermal_system.storage_volume, 'gal', 'm^3'))
       storage_tank.setTankHeight(UnitConversions.convert(storage_ht, 'ft', 'm'))
-      storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, 'in', 'm'))
+      storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, 'ft', 'm'))
       storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, 'ft', 'm'))
       storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, 'ft', 'm') / 3.0)
     end

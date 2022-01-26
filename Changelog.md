@@ -14,6 +14,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
+- Fixes solar hot water storage tank perimeter in EnergyPlus model.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 
