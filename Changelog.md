@@ -8,6 +8,7 @@ __New Features__
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
   - Adds support for ambient foundations for single-family attached and apartment units.
+  - Adds support for unconditioned attics for apartment units.
   - Adds an optional argument to allow the HPXML file to be written with default values applied.
 - ReportSimulationOutput measure:
   - Allows user-specified annual/timeseries output file names.
