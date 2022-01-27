@@ -204,7 +204,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_floors_above_grade', true)
     arg.setDisplayName('Geometry: Unit Number of Floors Above Grade')
     arg.setUnits('#')
-    arg.setDescription("The number of floors above grade in the unit. Conditioned attics are included. Assumed to be 1 if #{HPXML::ResidentialTypeApartment}.")
+    arg.setDescription("The number of floors above grade in the unit. Attic type #{HPXML::AtticTypeConditioned} are included. Assumed to be 1 for #{HPXML::ResidentialTypeApartment}s.")
     arg.setDefaultValue(2)
     args << arg
 
@@ -306,7 +306,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', foundation_type_choices, true)
     arg.setDisplayName('Geometry: Foundation Type')
-    arg.setDescription('The foundation type of the building.')
+    arg.setDescription("The foundation type of the building. Foundation types #{HPXML::FoundationTypeBasementConditioned} and #{HPXML::FoundationTypeCrawlspaceConditioned} are not allowed for #{HPXML::ResidentialTypeApartment}s.")
     arg.setDefaultValue(HPXML::FoundationTypeSlab)
     args << arg
 
@@ -339,7 +339,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_attic_type', attic_type_choices, true)
     arg.setDisplayName('Geometry: Attic Type')
-    arg.setDescription('The attic type of the building.')
+    arg.setDescription("The attic type of the building. Attic type #{HPXML::AtticTypeConditioned} is not allowed for #{HPXML::ResidentialTypeApartment}s.")
     arg.setDefaultValue(HPXML::AtticTypeVented)
     args << arg
 
