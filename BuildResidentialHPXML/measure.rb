@@ -3128,8 +3128,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     Constants.FossilFuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
-      error = ([args[:emissions_fossil_fuel_units].is_initialized, args["emissions_#{underscore_case}_values".to_sym].is_initialized].uniq.size != 1)
-      errors << "Did not specify #{fossil_fuel} emissions values with fossil fuel emissions units." if error
+      if args["emissions_#{underscore_case}_values".to_sym].is_initialized
+        error = !args[:emissions_fossil_fuel_units].is_initialized
+        errors << "Did not specify fossil fuel emissions units for #{fossil_fuel} emissions values." if error
+      end
     end
 
     if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]

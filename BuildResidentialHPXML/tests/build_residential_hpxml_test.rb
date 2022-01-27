@@ -226,7 +226,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-rim-joist-assembly-r-but-no-height.xml' => 'Specified a rim joist assembly R-value but no rim joist height.',
       'error-emissions-args-not-all-specified.xml' => 'Did not specify all required emissions arguments.',
       'error-emissions-args-not-all-same-size.xml' => 'One or more emissions arguments does not have enough comma-separated elements specified.',
-      'error-emissions-natural-gas-args-not-all-specified.xml' => 'Did not specify natural gas emissions values with fossil fuel emissions units.',
+      'error-emissions-natural-gas-args-not-all-specified.xml' => 'Did not specify fossil fuel emissions units for natural gas emissions values.',
       'error-invalid-aspect-ratio.xml' => 'Aspect ratio must be greater than zero.',
       'error-negative-foundation-height.xml' => 'Foundation height cannot be negative.',
       'error-too-many-floors.xml' => 'Number of above-grade floors must be six or less.',
@@ -865,7 +865,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['emissions_fuel_oil_values'] = '161.0, 0.0015'
       args['emissions_coal_values'] = '211.1, 0.0020'
       args['emissions_wood_values'] = '200.0, 0.0025'
-      args['emissions_wood_pellets_values'] = '150.0, 0.0030'
     elsif ['extra-time-zone-different-than-epw.xml'].include? hpxml_file
       args['site_time_zone_utc_offset'] = '-6'
     elsif ['extra-sfa-atticroof-conditioned-eaves-gable.xml'].include? hpxml_file
