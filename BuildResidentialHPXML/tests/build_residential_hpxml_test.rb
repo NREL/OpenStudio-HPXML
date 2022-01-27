@@ -223,9 +223,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfd-with-shared-system.xml' => 'Specified a shared system for a single-family detached unit.',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'Specified a rim joist height but no rim joist assembly R-value.',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'Specified a rim joist assembly R-value but no rim joist height.',
-      'error-emissions-args-not-all-specified.xml' => 'Did not specify either no required emissions arguments or all required emissions arguments.',
+      'error-emissions-args-not-all-specified.xml' => 'Did not specify all required emissions arguments.',
       'error-emissions-args-not-all-same-size.xml' => 'One or more emissions arguments does not have enough comma-separated elements specified.',
-      'error-emissions-natural-gas-args-not-all-specified.xml' => 'Did not specify either no natural gas emissions arguments or all natural gas emissions arguments.',
+      'error-emissions-natural-gas-args-not-all-specified.xml' => 'Did not specify natural gas emissions values with fossil fuel emissions units.',
       'error-invalid-aspect-ratio.xml' => 'Aspect ratio must be greater than zero.',
       'error-negative-foundation-height.xml' => 'Foundation height cannot be negative.',
       'error-too-many-floors.xml' => 'Number of above-grade floors must be six or less.',
@@ -858,17 +858,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['emissions_types'] = 'CO2, SO2'
       args['emissions_electricity_units'] = "#{HPXML::EmissionsScenario::UnitsKgPerMWh}, #{HPXML::EmissionsScenario::UnitsLbPerMWh}"
       args['emissions_electricity_values_or_filepaths'] = '392.6, 0.384'
-      args['emissions_natural_gas_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
+      args['emissions_fossil_fuel_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_natural_gas_values'] = '117.6, 0.0006'
-      args['emissions_propane_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_propane_values'] = '136.6, 0.0002'
-      args['emissions_fuel_oil_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_fuel_oil_values'] = '161.0, 0.0015'
-      args['emissions_coal_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_coal_values'] = '211.1, 0.0020'
-      args['emissions_wood_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_wood_values'] = '200.0, 0.0025'
-      args['emissions_wood_pellets_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
       args['emissions_wood_pellets_values'] = '150.0, 0.0030'
     elsif ['extra-sfa-atticroof-conditioned-eaves-gable.xml'].include? hpxml_file
       args['geometry_unit_num_floors_above_grade'] = 2
