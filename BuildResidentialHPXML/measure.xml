@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>29c6467c-c88e-45bd-9114-cdd5672f608b</version_id>
-  <version_modified>20220126T202149Z</version_modified>
+  <version_id>95667efb-4a47-4f89-a5e7-d3e35a04a935</version_id>
+  <version_modified>20220127T170344Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -447,6 +447,15 @@
           <display_name>WY</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>site_time_zone_utc_offset</name>
+      <display_name>Site: Time Zone UTC Offset</display_name>
+      <description>Time zone UTC offset of the home address. Must be between -12 and 14.</description>
+      <type>Double</type>
+      <units>hr</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>weather_station_epw_filepath</name>
@@ -6683,40 +6692,10 @@
       <checksum>72383EF2</checksum>
     </file>
     <file>
-      <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1C2C3DDC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-invalid-living-and-garage-1.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0FEA5D8B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-invalid-living-and-garage-2.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>54090807</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-ambient.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>312408D2</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-ambient - Copy.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C028936D</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-ambient.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C028936D</checksum>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2E568E41</checksum>
     </file>
     <file>
       <version>
@@ -6727,49 +6706,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3835EB1D</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-time-zone-different-than-epw.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>614C5C50</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-invalid-time-zone.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F0FB2E25</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-emissions-fossil-fuel-factors.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B3CD3314</checksum>
+      <checksum>9856B86B</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EF287B65</checksum>
-    </file>
-    <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2E568E41</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-atticroof-flat.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>228BA7BB</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-atticroof-vented.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EC0F1768</checksum>
+      <checksum>88259D10</checksum>
     </file>
   </files>
 </measure>
