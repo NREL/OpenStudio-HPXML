@@ -12,7 +12,7 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 basedir = File.expand_path(File.dirname(__FILE__))
 
 def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, add_comp_loads, add_utility_bills,
-                 output_format, building_id, ep_input_format, detailed_schedules_type)
+                 output_format, building_id, ep_input_format, detailed_schedules_type, timeseries_time_column_types)
   measures_dir = File.join(basedir, '..')
 
   measures = {}
@@ -53,6 +53,8 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
   args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
   args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
+  args['add_timeseries_dst_column'] = timeseries_time_column_types.include? 'DST'
+  args['add_timeseries_utc_column'] = timeseries_time_column_types.include? 'UTC'
   update_args_hash(measures, measure_subdir, args)
 
   # Add hpxml output measure to workflow
@@ -137,6 +139,11 @@ OptionParser.new do |opts|
 
   opts.on('--add-detailed-schedule TYPE', ['smooth', 'stochastic'], 'Add detailed schedule of type (smooth, stochastic)') do |t|
     options[:detailed_schedules_type] = t
+  end
+
+  options[:timeseries_time_column_types] = []
+  opts.on('--add-timeseries-time-column TYPE', ['DST', 'UTC'], 'Add timeseries time column (DST, UTC); can be called multiple times') do |t|
+    options[:timeseries_time_column_types] << t
   end
 
   options[:add_utility_bills] = false
@@ -233,7 +240,7 @@ rundir = File.join(options[:output_dir], 'run')
 puts "HPXML: #{options[:hpxml]}"
 success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs,
                        options[:skip_validation], options[:add_comp_loads], options[:add_utility_bills], options[:output_format], options[:building_id],
-                       options[:ep_input_format], options[:detailed_schedules_type])
+                       options[:ep_input_format], options[:detailed_schedules_type], options[:timeseries_time_column_types])
 
 if not success
   exit! 1
