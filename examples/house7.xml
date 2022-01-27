@@ -44,6 +44,7 @@
                             <SystemIdentifier id="roof1"/>
                             <RoofColor>medium</RoofColor>
                             <RoofType>plastic/rubber/synthetic sheeting</RoofType><!-- tar and gravel -->
+                            <RoofArea>900</RoofArea>
                         </Roof>
                     </Roofs>
                     <Attics>
@@ -57,7 +58,6 @@
                                     <NominalRValue>19</NominalRValue>
                                 </Layer>
                             </AtticRoofInsulation>
-                            <Area>900</Area>
                         </Attic>
                     </Attics>
                 </AtticAndRoof>

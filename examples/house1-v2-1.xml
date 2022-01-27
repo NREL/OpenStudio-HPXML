@@ -57,6 +57,7 @@
                                     <NominalRValue>13</NominalRValue>
                                 </Layer>
                             </AtticFloorInsulation>
+                            <Area>810</Area>
                         </Attic>
                     </Attics>
                 </AtticAndRoof>
