@@ -57,6 +57,7 @@
                             <SystemIdentifier id="roof1"/>
                             <RoofColor>medium</RoofColor>
                             <RoofType>wood shingles or shakes</RoofType>
+                            <RoofArea>843</RoofArea>
                         </Roof>
                         <Roof>
                             <SystemIdentifier id="roof2"/>
@@ -75,7 +76,6 @@
                                     <NominalRValue>25</NominalRValue>
                                 </Layer>
                             </AtticRoofInsulation>
-                            <Area>843</Area>
                         </Attic>
                         <Attic>
                             <SystemIdentifier id="attic2"/>

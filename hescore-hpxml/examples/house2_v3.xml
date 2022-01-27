@@ -86,6 +86,7 @@
                 <FrameFloors>
                     <FrameFloor>
                         <SystemIdentifier id="framefloor1"/>
+                        <Area>810</Area>
                         <Insulation>
                             <SystemIdentifier id="attic1ins"/>
                             <Layer>

@@ -54,6 +54,7 @@
                             <SystemIdentifier id="roof1"/>
                             <RoofColor>medium</RoofColor>
                             <RoofType>slate or tile shingles</RoofType>
+                            <RoofArea>679</RoofArea>
                         </Roof>
                     </Roofs>
                     <Attics>

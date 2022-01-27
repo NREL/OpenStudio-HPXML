@@ -299,7 +299,7 @@
                                             },
                                             "assembly_code": {
                                                 "type": "string",
-                                                "enum": ["kwwf00", "kwwf03", "kwwf07", "kwwf11", "kwwf15", "kwwf19", "kwwf21"],
+                                                "enum": ["kwwf00", "kwwf03", "kwwf07", "kwwf11", "kwwf13", "kwwf15", "kwwf19", "kwwf21"],
                                                 "description": "Knee wall assembly code"
                                             }
                                         }
@@ -432,12 +432,34 @@
                                     {
                                         "if": {
                                             "properties": {
+                                                "roof_type": {"enum": ["cath_ceiling"]}    
+                                            },
+                                            "required": ["roof_type"]
+                                        },
+                                        "then": {
+                                            "not": { "required": ["ceiling_area", "ceiling_assembly_code"]}
+                                        }
+                                    },
+                                    {
+                                        "if": {
+                                            "properties": {
                                                 "roof_color": {"enum": ["cool_color"]}
                                             },
                                             "required": ["roof_color"]
                                         },
                                         "then": {
                                             "required": ["roof_absorptance"]
+                                        }
+                                    },
+                                    {
+                                        "if": {
+                                            "properties": {
+                                                "roof_color": {"not": {"enum": ["cool_color"]}}
+                                            },
+                                            "required": ["roof_color"]
+                                        },
+                                        "then": {
+                                            "not": {"required": ["roof_absorptance"]}
                                         }
                                     },
                                     {

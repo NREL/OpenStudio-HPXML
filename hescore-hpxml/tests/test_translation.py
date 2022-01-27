@@ -42,8 +42,7 @@ class ComparatorBase(object):
                 y.sort(key=lambda k: k.get('side'))
             for i, (xitem, yitem) in enumerate(zip(x, y)):
                 self._compare_item(xitem, yitem, curpath + [str(i)])
-        elif isinstance(x, float):
-            self.assertTrue(isinstance(y, float))
+        elif isinstance(x, float) or isinstance(y, float):
             self.assertAlmostEqual(x, y)
         else:
             self.assertEqual(x, y, '{}: item not equal'.format('.'.join(curpath)))
@@ -875,7 +874,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         # run translation
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf49')
-        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['roof_area'], 1200.0)
+        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
 
         # HPXML v3
         tr_v3 = self._load_xmlfile('hescore_min_v3')
@@ -971,7 +970,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         # run translation
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf49')
-        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['roof_area'], 1200.0)
+        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
         # Set kneewall R-value to 11 and attic floor R-value to zero
         kneewall_rvalue_el.text = '11'
         attic_floor_rvalue_el = self.xpath('//h:Attic/h:AtticFloorInsulation/h:Layer/h:NominalRValue')
@@ -979,7 +978,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         # run translation
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf00')
-        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['roof_area'], 1200.0)
+        self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
 
     def test_gable_wall_ignore(self):
         tr = self._load_xmlfile('hescore_min_v3')
@@ -1003,7 +1002,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         att_to_roof.addnext(E.AttachedToWall(idref='wall2'))
 
         resp = tr.hpxml_to_hescore()
-        assert resp['building']['zone']['zone_roof'][0]['roof_area'] == 1200
+        assert resp['building']['zone']['zone_roof'][0]['ceiling_area'] == 1200
 
     def test_wall_construction_ps_low_r(self):
         """
@@ -2843,6 +2842,11 @@ class TestHEScore2019Updates(unittest.TestCase, ComparatorBase):
 
         duct3oc1.text = 'conditioned space'  # set back to cond_space to avoid previous error message
         rooftype.text = 'flat roof'  # change attic type
+        roofid = rooftype.getparent().xpath('h:AttachedToRoof/@idref', namespaces=tr.ns)[0]
+        el = self.xpath('//h:Roof[h:SystemIdentifier/@id=$roofid]/h:RadiantBarrier', roofid=roofid)
+        area_el = el.makeelement(tr.addns('h:RoofArea'))
+        area_el.text = '810'
+        el.addprevious(area_el)
         self.assertRaisesRegex(TranslationError,
                                'HVAC distribution: duct2 location: uncond_attic not exists in zone_roof/floor types.',
                                tr.hpxml_to_hescore)
@@ -2910,9 +2914,11 @@ class TestHEScore2019Updates(unittest.TestCase, ComparatorBase):
         )
         is_attic_cond = etree.SubElement(etree.SubElement(attic, tr.addns('h:extension')), tr.addns('h:Conditioned'))
         is_attic_cond.text = 'true'
-        d = tr.hpxml_to_hescore()
-        roof_type = d['building']['zone']['zone_roof'][0]['roof_type']
-        self.assertEqual(roof_type, 'cond_attic')
+        self.assertRaisesRegex(
+            TranslationError,
+            r'Attic \w+: Cannot translate HPXML AtticType other to HEScore rooftype.',
+            tr.hpxml_to_hescore
+        )
         is_attic_cond.text = 'false'
         self.assertRaisesRegex(
             TranslationError,
@@ -3359,6 +3365,9 @@ class TestHEScore2021Updates(unittest.TestCase, ComparatorBase):
 
 class TestHEScoreV3(unittest.TestCase, ComparatorBase):
 
+    def test_hescore_min_v3(self):
+        self._do_full_compare('hescore_min_v3', 'hescore_min')
+
     def test_attic_with_multiple_roofs(self):
         tr = self._load_xmlfile('hescore_min_v3')
         el = self.xpath('//h:Attic/h:AttachedToRoof')
@@ -3407,6 +3416,12 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         attic_type_el = el.getparent().getparent()
         flatroof = etree.SubElement(attic_type_el, tr.addns('h:FlatRoof'))
         attic_type_el.remove(el.getparent())
+        attic_el = attic_type_el.getparent()
+        roofid = attic_el.xpath('h:AttachedToRoof/@idref', namespaces=tr.ns)[0]
+        roof_sysid_el = self.xpath('//h:Roof/h:SystemIdentifier[@id=$roofid]', roofid=roofid)
+        area_el = el.makeelement(tr.addns('h:Area'))
+        area_el.text = '1200'
+        roof_sysid_el.addnext(area_el)
         d = tr.hpxml_to_hescore()
         self.assertEqual(d['building']['zone']['zone_roof'][0]['roof_type'], 'cath_ceiling')
         type_attic = etree.SubElement(attic_type_el, tr.addns('h:Attic'))
@@ -3417,7 +3432,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         type_attic.remove(type_attic[0])
         etree.SubElement(type_attic, tr.addns('h:Conditioned')).text = "true"
         d = tr.hpxml_to_hescore()
-        self.assertEqual(d['building']['zone']['zone_roof'][0]['roof_type'], 'cond_attic')
+        self.assertEqual(d['building']['zone']['zone_roof'][0]['roof_type'], 'cath_ceiling')
 
     def test_mini_split_cooling_only(self):
         tr = self._load_xmlfile('hescore_min_v3')
@@ -3502,7 +3517,6 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         # two attics, two frame floors, lacking frame floor area for attic area
         roof = self.xpath('//h:Roofs/h:Roof')
         frame_floor = self.xpath('//h:FrameFloors/h:FrameFloor')
-        frame_floor.remove(self.xpath('//h:FrameFloors/h:FrameFloor/h:Area'))
         attic = self.xpath('//h:Attics/h:Attic')
         attic2 = deepcopy(attic)
         tr.xpath(attic2, 'h:SystemIdentifier').attrib['id'] = 'attic2'
@@ -3513,14 +3527,14 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         roof.addnext(roof2)
         frame_floor2 = deepcopy(frame_floor)
         frame_floor.addnext(frame_floor2)
+        frame_floor2.remove(tr.xpath(frame_floor2, 'h:Area'))
         tr.xpath(roof2, 'h:SystemIdentifier').attrib['id'] = "roof2"
         tr.xpath(roof2, 'h:Insulation/h:SystemIdentifier').attrib['id'] = "attic1roofins2"
         tr.xpath(frame_floor2, 'h:SystemIdentifier').attrib['id'] = "framefloor2"
         tr.xpath(frame_floor2, 'h:Insulation/h:SystemIdentifier').attrib['id'] = "attic1flrins2"
         self.assertRaisesRegex(
-            TranslationError,
-            r'If there are more than one Attic elements, each needs an area. '
-            r'Please specify under its attached FrameFloor/Roof element.',
+            ElementNotFoundError,
+            r"FrameFloors/FrameFloor\[2\]/Area",
             tr.hpxml_to_hescore)
 
         # two frame floors, one attic, lacking frame floor areas for attic area
@@ -3530,8 +3544,8 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         attached_to_ff2.attrib['idref'] = "framefloor2"
         attached_to_ff.addnext(attached_to_ff2)
         self.assertRaisesRegex(
-            TranslationError,
-            r'If there are more than one FrameFloor elements attached to attic, each needs an area.',
+            ElementNotFoundError,
+            r"FrameFloors/FrameFloor\[2\]/Area",
             tr.hpxml_to_hescore)
 
         # two roofs, one attic, lacking roof areas for roof area (attic use footprint area)
@@ -3541,8 +3555,8 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         attached_to_roof2.attrib['idref'] = "roof2"
         attached_to_roof.addnext(attached_to_roof2)
         self.assertRaisesRegex(
-            TranslationError,
-            r'If there are more than one Roof elements attached to a single attic, each needs an area.',
+            ElementNotFoundError,
+            r"Roofs/Roof\[1\]/Area",
             tr.hpxml_to_hescore)
 
         # Two roofs, but both unattached.
@@ -3552,7 +3566,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         attached_to_roof.attrib['idref'] = 'no_roof'
         self.assertRaisesRegex(
             TranslationError,
-            r'Attic attic1 does not have a roof associated with it.',
+            r'There is no roof with id',
             tr.hpxml_to_hescore)
 
         # one roof, attach existing roof to attic
@@ -3629,7 +3643,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         tr_v3 = self._load_xmlfile('townhouse_walls_v3')
         d = tr.hpxml_to_hescore()
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['zone']['zone_roof'][0]['roof_area'], 1200)
+        self.assertEqual(d_v3['building']['zone']['zone_roof'][0]['ceiling_area'], 1200)
         self.assertEqual(d, d_v3)
 
     def test_v3_duct_location(self):

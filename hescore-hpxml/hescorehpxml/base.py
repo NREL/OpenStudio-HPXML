@@ -1121,14 +1121,10 @@ class HPXMLtoHEScoreTranslatorBase(object):
 
     def get_building_zone_roof(self, b, footprint_area):
 
-        def get_predominant_roof_property(atticd, attic_key):
-            roof_area_by_cat = {}
+        def get_predominant_roof_property(atticds, attic_key):
+            roof_area_by_cat = defaultdict(float)
             for atticd in atticds:
-                try:
-                    roof_area_by_cat[atticd[attic_key]] += atticd['roof_area']
-                except KeyError:
-                    roof_area_by_cat[atticd[attic_key]] = atticd['roof_area']
-
+                roof_area_by_cat[atticd[attic_key]] += atticd.get('roof_area', atticd.get('ceiling_area'))
             return max(roof_area_by_cat, key=lambda x: roof_area_by_cat[x])
 
         def roof_round_to_nearest(roofid, *args):
@@ -1140,19 +1136,22 @@ class HPXMLtoHEScoreTranslatorBase(object):
         xpath = self.xpath
 
         # building.zone.zone_roof--------------------------------------------------
-        attics = xpath(b, 'descendant::h:Attics/h:Attic', aslist=True, raise_err=True)
-        roofs = xpath(b, 'descendant::h:Roof', aslist=True, raise_err=True)
+        attics = {}
+        for attic in xpath(b, 'descendant::h:Attics/h:Attic', aslist=True, raise_err=True):
+            atticid = xpath(attic, 'h:SystemIdentifier/@id', raise_err=True, aslist=False)
+            attics[atticid] = attic
+        roofs = {}
+        for roof in xpath(b, 'descendant::h:Roof', aslist=True, raise_err=True):
+            roofid = xpath(roof, 'h:SystemIdentifier/@id', raise_err=True, aslist=False)
+            roofs[roofid] = roof
 
         atticds = []
-        for attic in attics:
-            atticid = xpath(attic, 'h:SystemIdentifier/@id', raise_err=True)
+        for atticid, attic in attics.items():
             roofids = xpath(attic, 'h:AttachedToRoof/@idref', aslist=True)
-            attic_roofs = xpath(b, 'descendant::h:Roof[contains("{}", h:SystemIdentifier/@id)]'.format(roofids),
-                                aslist=True)
 
-            if len(attic_roofs) == 0:
+            if len(roofids) == 0:
                 if len(roofs) == 1:
-                    attic_roofs = roofs
+                    roofids = list(roofs.keys())
                 else:
                     raise TranslationError(
                         'Attic {} does not have a roof associated with it.'.format(atticid)
@@ -1161,40 +1160,46 @@ class HPXMLtoHEScoreTranslatorBase(object):
             atticd = {}
             atticds.append(atticd)
 
-            # Attic area
-            is_one_roof = (len(attics) == 1)
-            atticd['roof_area'] = self.get_attic_area(attic, is_one_roof, footprint_area, attic_roofs, b)
-
             # Roof type
             atticd['rooftype'] = self.get_attic_type(attic, atticid)
 
+            # Ceiling or Roof area
+            if atticd['rooftype'] == 'vented_attic':
+                atticd['ceiling_area'] = self.get_ceiling_area(attic)
+            else:
+                assert atticd['rooftype'] == 'cath_ceiling'
+                atticd['roof_area'] = sum(self.get_attic_roof_area(roofs[roofid]) for roofid in roofids)
+
             # Get other roof information from attached Roof nodes.
             attic_roof_ls = []
-            # Loop added for hpxml v3 where multiple roofs can be attached to the same attic
-            for roof in attic_roofs:
-                attic_roofs_d = {}
-                attic_roof_ls.append(attic_roofs_d)
-                roofid = xpath(roof, 'h:SystemIdentifier/@id', raise_err=True)
-                attic_roofs_d['roof_id'] = roofid
+            for roofid in roofids:
+                try:
+                    roof = roofs[roofid]
+                except KeyError:
+                    raise TranslationError(f"There is no roof with id: {roofid}")
+
+                attic_roof_d = {
+                    'roof_id': roofid
+                }
+                attic_roof_ls.append(attic_roof_d)
+
                 # Roof area
-                attic_roofs_d['roof_area'] = self.get_attic_roof_area(roof)
-                if attic_roofs_d['roof_area'] is None:
-                    if len(attic_roofs) == 1:
-                        attic_roofs_d['roof_area'] = atticd['roof_area']
+                try:
+                    attic_roof_d['roof_area'] = self.get_attic_roof_area(roof)
+                except ElementNotFoundError:
+                    if len(roofids) == 1:
+                        attic_roof_d['roof_area'] = 1.0
                     else:
-                        raise TranslationError(
-                            'If there are more than one Roof elements attached to a single attic, each needs an area.')
-                else:
-                    attic_roofs_d['roof_area'] = convert_to_type(float, attic_roofs_d['roof_area'])
+                        raise
 
                 # Roof color
                 solar_absorptance = convert_to_type(float, xpath(roof, 'h:SolarAbsorptance/text()'))
-                attic_roofs_d['roof_absorptance'] = solar_absorptance
                 if solar_absorptance is not None:
-                    attic_roofs_d['roofcolor'] = 'cool_color'
+                    attic_roof_d['roof_absorptance'] = solar_absorptance
+                    attic_roof_d['roofcolor'] = 'cool_color'
                 else:
                     try:
-                        attic_roofs_d['roofcolor'] = {
+                        attic_roof_d['roofcolor'] = {
                             'light': 'light',
                             'medium': 'medium',
                             'medium dark': 'medium_dark',
@@ -1202,39 +1207,42 @@ class HPXMLtoHEScoreTranslatorBase(object):
                             'reflective': 'white'
                         }[xpath(roof, 'h:RoofColor/text()', raise_err=True)]
                     except KeyError:
-                        raise TranslationError('Attic {}: Invalid or missing RoofColor in Roof: {}'.format(atticid,
-                                                                                                           attic_roofs_d['roof_id']))  # noqa: E501
+                        raise TranslationError(
+                            f"Attic {atticid}: Invalid or missing RoofColor in Roof: {attic_roof_d['roof_id']}"
+                        )
 
                 # Exterior finish
                 hpxml_roof_type = xpath(roof, 'h:RoofType/text()')
                 try:
-                    attic_roofs_d['extfinish'] = {'shingles': 'co',
-                                                  'slate or tile shingles': 'rc',
-                                                  'wood shingles or shakes': 'wo',
-                                                  'asphalt or fiberglass shingles': 'co',
-                                                  'metal surfacing': 'co',
-                                                  'expanded polystyrene sheathing': None,
-                                                  'plastic/rubber/synthetic sheeting': 'tg',
-                                                  'concrete': 'lc',
-                                                  'cool roof': None,
-                                                  'green roof': None,
-                                                  'no one major type': None,
-                                                  'other': None}[hpxml_roof_type]
-                    assert attic_roofs_d['extfinish'] is not None
+                    attic_roof_d['extfinish'] = {
+                        'shingles': 'co',
+                        'slate or tile shingles': 'rc',
+                        'wood shingles or shakes': 'wo',
+                        'asphalt or fiberglass shingles': 'co',
+                        'metal surfacing': 'co',
+                        'expanded polystyrene sheathing': None,
+                        'plastic/rubber/synthetic sheeting': 'tg',
+                        'concrete': 'lc',
+                        'cool roof': None,
+                        'green roof': None,
+                        'no one major type': None,
+                        'other': None
+                    }[hpxml_roof_type]
+                    assert attic_roof_d['extfinish'] is not None
                 except (KeyError, AssertionError):
                     raise TranslationError(
                         'Attic {}: HEScore does not have an analogy to the HPXML roof type: {} for Roof : {}'.format(
-                            atticid, hpxml_roof_type, attic_roofs_d['roof_id']))
+                            atticid, hpxml_roof_type, attic_roof_d['roof_id']))
 
                 # construction type
                 has_rigid_sheathing = self.attic_has_rigid_sheathing(attic, roof)
                 has_radiant_barrier = xpath(roof, 'h:RadiantBarrier="true"')
                 if has_radiant_barrier:
-                    attic_roofs_d['roofconstype'] = 'rb'
+                    attic_roof_d['roofconstype'] = 'rb'
                 elif has_rigid_sheathing:
-                    attic_roofs_d['roofconstype'] = 'ps'
+                    attic_roof_d['roofconstype'] = 'ps'
                 else:
-                    attic_roofs_d['roofconstype'] = 'wf'
+                    attic_roof_d['roofconstype'] = 'wf'
 
                 roof_assembly_rvalue = self.get_attic_roof_assembly_rvalue(attic, roof)
                 if roof_assembly_rvalue is not None:
@@ -1243,60 +1251,64 @@ class HPXMLtoHEScoreTranslatorBase(object):
                         # The actual radiant barrier model in OS will handle the radiant barrier.
                         constype_for_lookup = 'wf'
                     else:
-                        constype_for_lookup = attic_roofs_d['roofconstype']
+                        constype_for_lookup = attic_roof_d['roofconstype']
                     closest_roof_code, closest_code_rvalue = \
                         min([(doe2code, code_rvalue)
                              for doe2code, code_rvalue in self.roof_assembly_eff_rvalues.items()
                              if doe2code[2:4] in constype_for_lookup and
-                             doe2code[6:8] == attic_roofs_d['extfinish']],
+                             doe2code[6:8] == attic_roof_d['extfinish']],
                             key=lambda x: abs(x[1] - float(roof_assembly_rvalue)))
-                    attic_roofs_d['roof_assembly_rvalue'] = closest_code_rvalue
+                    attic_roof_d['roof_assembly_rvalue'] = closest_code_rvalue
                     # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
                     # in the HPXML. Only model with radiant barrier code if R-value = 0 and radiant barrier.
-                    if attic_roofs_d['roofconstype'] == 'rb' and int(closest_roof_code[4:6]) > 0:
-                        attic_roofs_d['roofconstype'] = 'wf'  # overwrite the roofconstype
+                    if attic_roof_d['roofconstype'] == 'rb' and int(closest_roof_code[4:6]) > 0:
+                        attic_roof_d['roofconstype'] = 'wf'  # overwrite the roofconstype
                 elif self.every_attic_roof_layer_has_nominal_rvalue(attic, roof):
                     # roof center of cavity R-value
                     roof_rvalue = self.get_attic_roof_rvalue(attic, roof)
-                    if attic_roofs_d['roofconstype'] == 'rb':
+                    if attic_roof_d['roofconstype'] == 'rb':
                         # Use effective R-value for wood frame roof without radiant barrier.
                         # The actual radiant barrier model in OS will handle the radiant barrier.
                         roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21, 27, 30))
-                        lookup_code = f"rfwf{roof_rvalue:02d}{attic_roofs_d['extfinish']}"
+                        lookup_code = f"rfwf{roof_rvalue:02d}{attic_roof_d['extfinish']}"
                         # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
                         # in the HPXML. Only model with radiant barrier code if R-value = 0 and radiant barrier.
                         if roof_rvalue > 0:
-                            attic_roofs_d['roofconstype'] = 'wf'  # overwrite the roofconstype
-                    elif attic_roofs_d['roofconstype'] == 'wf':
+                            attic_roof_d['roofconstype'] = 'wf'  # overwrite the roofconstype
+                    elif attic_roof_d['roofconstype'] == 'wf':
                         roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21, 27, 30))
-                        lookup_code = f"rf{attic_roofs_d['roofconstype']}{roof_rvalue:02d}{attic_roofs_d['extfinish']}"
-                    elif attic_roofs_d['roofconstype'] == 'ps':
+                        lookup_code = f"rf{attic_roof_d['roofconstype']}{roof_rvalue:02d}{attic_roof_d['extfinish']}"
+                    elif attic_roof_d['roofconstype'] == 'ps':
                         # subtract the R-value of the rigid sheating in the HEScore construction.
-                        if attic_roofs_d['roofconstype'] == 'ps':
+                        if attic_roof_d['roofconstype'] == 'ps':
                             roof_rvalue = max(roof_rvalue - 5, 0)
                         roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21))
-                        lookup_code = f"rf{attic_roofs_d['roofconstype']}{roof_rvalue:02d}{attic_roofs_d['extfinish']}"
-                    attic_roofs_d['roof_assembly_rvalue'] = self.roof_assembly_eff_rvalues[lookup_code]
+                        lookup_code = f"rf{attic_roof_d['roofconstype']}{roof_rvalue:02d}{attic_roof_d['extfinish']}"
+                    attic_roof_d['roof_assembly_rvalue'] = self.roof_assembly_eff_rvalues[lookup_code]
                 else:
                     raise TranslationError(
                         'Every roof insulation layer needs a NominalRValue or '
-                        f"AssemblyEffectiveRValue needs to be defined, roof_id = {attic_roofs_d['roof_id']}")
+                        f"AssemblyEffectiveRValue needs to be defined, roof_id = {attic_roof_d['roof_id']}")
 
             # Sum of Roof Areas in the same Attic
             attic_roof_area_sum = sum([attic_roofs_dict['roof_area'] for attic_roofs_dict in attic_roof_ls])
 
             # Roof type, roof color, exterior finish, construction type
-            for roof_key in ('roofconstype', 'extfinish', 'roofcolor', 'roof_absorptance'):
-                roof_area_by_cat = {}
+            for roof_key in ('roofconstype', 'extfinish', 'roofcolor'):
+                roof_area_by_cat = defaultdict(float)
                 for attic_roofs_dict in attic_roof_ls:
-                    try:
-                        roof_area_by_cat[attic_roofs_dict[roof_key]] += attic_roofs_dict['roof_area']
-                    except KeyError:
-                        roof_area_by_cat[attic_roofs_dict[roof_key]] = attic_roofs_dict['roof_area']
+                    roof_area_by_cat[attic_roofs_dict[roof_key]] += attic_roofs_dict['roof_area']
                 atticd[roof_key] = max(roof_area_by_cat, key=lambda x: roof_area_by_cat[x])
 
-            if atticd['roof_absorptance'] is None:
-                del atticd['roof_absorptance']
+            # Calculate the area weighted solar absorptance only if it's cool_color
+            if atticd['roofcolor'] == 'cool_color':
+                cool_color_roof_absorptance_sum = 0.0
+                cool_color_roof_area_sum = 0.0
+                for attic_roofs_dict in attic_roof_ls:
+                    if attic_roofs_dict['roofcolor'] == 'cool_color':
+                        cool_color_roof_absorptance_sum += attic_roofs_dict['roof_absorptance'] * attic_roofs_dict['roof_area']
+                        cool_color_roof_area_sum += attic_roofs_dict['roof_area']
+                atticd['roof_absorptance'] = cool_color_roof_absorptance_sum / cool_color_roof_area_sum
 
             # ids of hpxml roofs along for the ride
             atticd['_roofid'] = set([attic_roofs_dict['roof_id'] for attic_roofs_dict in attic_roof_ls])
@@ -1328,6 +1340,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
                 raise TranslationError(
                     'Every attic floor insulation layer needs a NominalRValue or '
                     f"AssemblyEffectiveRValue needs to be defined, attic_id = {atticid}")
+
         if len(atticds) == 0:
             raise TranslationError('There are no Attic elements in this building.')
         elif len(atticds) <= 2:
@@ -1348,25 +1361,26 @@ class HPXMLtoHEScoreTranslatorBase(object):
             for rooftype, atticds in list(attics_by_rooftype.items()):
                 combined_atticd = {}
 
-                # Roof Area
-                combined_atticd['roof_area'] = sum([atticd['roof_area'] for atticd in atticds])
+                # Roof or Ceiling Area
+                ceiling_or_roof_area_key = 'roof_area' if rooftype == 'cath_ceiling' else 'ceiling_area'
+                combined_atticd[ceiling_or_roof_area_key] = sum([atticd[ceiling_or_roof_area_key] for atticd in atticds])
 
                 # Roof type, roof color, exterior finish, construction type
                 for attic_key in ('roofconstype', 'extfinish', 'roofcolor', 'rooftype'):
-                    combined_atticd[attic_key] = get_predominant_roof_property(atticd, attic_key)
+                    combined_atticd[attic_key] = get_predominant_roof_property(atticds, attic_key)
                 if combined_atticd['roofcolor'] == 'cool_color':
-                    combined_atticd['roof_absorptance'] = get_predominant_roof_property(atticd, 'roof_absorptance')
+                    combined_atticd['roof_absorptance'] = get_predominant_roof_property(atticds, 'roof_absorptance')
 
                 # ids of hpxml roofs along for the ride
                 combined_atticd['_roofids'] = set().union(*[atticd['_roofid'] for atticd in atticds])
 
                 # Calculate roof area weighted assembly R-value or center of cavity R-value
-                combined_atticd['roof_assembly_rvalue'] = combined_atticd['roof_area'] / \
-                    sum([atticd['roof_area'] / atticd['roof_assembly_rvalue'] for atticd in atticds])
+                combined_atticd['roof_assembly_rvalue'] = combined_atticd[ceiling_or_roof_area_key] / \
+                    sum([atticd[ceiling_or_roof_area_key] / atticd['roof_assembly_rvalue'] for atticd in atticds])
 
                 # Calculate attic floor weighted average center-of-cavity R-value
-                combined_atticd['attic_floor_assembly_rvalue'] = combined_atticd['roof_area'] / \
-                    sum([atticd['roof_area'] / atticd['attic_floor_assembly_rvalue'] for atticd in atticds])
+                combined_atticd['attic_floor_assembly_rvalue'] = combined_atticd[ceiling_or_roof_area_key] / \
+                    sum([atticd[ceiling_or_roof_area_key] / atticd['attic_floor_assembly_rvalue'] for atticd in atticds])
 
                 combined_atticds.append(combined_atticd)
 
@@ -1375,7 +1389,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
             del attics_by_rooftype
 
         # Order the attic/roofs from largest to smallest
-        atticds.sort(key=lambda x: x['roof_area'], reverse=True)
+        atticds.sort(key=lambda x: x.get('roof_area', x.get('ceiling_area')), reverse=True)
 
         # Take the largest two
         zone_roof = []
@@ -1403,15 +1417,19 @@ class HPXMLtoHEScoreTranslatorBase(object):
             # store it all
             zone_roof_item = OrderedDict()
             zone_roof_item['roof_name'] = 'roof%d' % i
-            zone_roof_item['roof_area'] = atticd['roof_area']
             zone_roof_item['roof_assembly_code'] = roof_code
             zone_roof_item['roof_color'] = atticd['roofcolor']
             if 'roof_absorptance' in atticd:
                 zone_roof_item['roof_absorptance'] = atticd['roof_absorptance']
             zone_roof_item['roof_type'] = atticd['rooftype']
             zone_roof_item['_roofids'] = atticd['_roofids']
-            if atticd['rooftype'] != 'cath_ceiling':
+            if atticd['rooftype'] == 'vented_attic':
+                zone_roof_item['ceiling_area'] = atticd['ceiling_area']
                 zone_roof_item['ceiling_assembly_code'] = attic_floor_code
+            else:
+                assert atticd['rooftype'] == 'cath_ceiling'
+                zone_roof_item['roof_area'] = atticd['roof_area']
+
             zone_roof.append(zone_roof_item)
 
         return zone_roof

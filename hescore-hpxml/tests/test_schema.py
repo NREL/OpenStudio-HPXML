@@ -53,7 +53,7 @@ def test_example_files():
         js_schema = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
         js = get_example_json(hpxml_filebase)
         errors = get_error_messages(js, js_schema)
-        assert len(errors) == 0
+        assert len(errors) == 0, f"{examplefile} is invalid"
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
@@ -154,10 +154,10 @@ def test_invalid_building_zone(hpxml_filebase):
     js['building']['zone'].append(zone)
     errors = get_error_messages(js, js_schema)
     if hpxml_filebase == 'townhouse_walls':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_area': 1200.0") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 1200.0") and
                    error.endswith("is not of type 'object'") for error in errors)
     elif hpxml_filebase == 'house1':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_area': 810") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 810") and
                    error.endswith("is not of type 'object'") for error in errors)
 
 
@@ -183,26 +183,8 @@ def test_invalid_roof(hpxml_filebase):
     js2['building']['zone']['zone_roof'][0]['roof_type'] = 'cath_ceiling'
     js2['building']['zone']['zone_roof'][0]['roof_absorptance'] = 0.6
     errors = get_error_messages(js2, js_schema)
-    if hpxml_filebase == 'townhouse_walls':
-        assert ("{'required': ['ceiling_assembly_code']} is not allowed for {'roof_name': 'roof1', "
-                "'roof_area': 1200.0, 'roof_assembly_code': 'rfwf00co', 'roof_color': 'medium', "
-                "'roof_type': 'cath_ceiling', 'ceiling_assembly_code': 'ecwf49', "
-                "'zone_skylight': {'skylight_area': 11.0, 'skylight_method': 'code', 'skylight_code': 'dcab', "
-                "'solar_screen': False}, 'roof_absorptance': 0.6}") in errors
-        assert ("{'required': ['roof_absorptance']} is not allowed for {'roof_name': 'roof1', "
-                "'roof_area': 1200.0, 'roof_assembly_code': 'rfwf00co', 'roof_color': 'medium', "
-                "'roof_type': 'cath_ceiling', 'ceiling_assembly_code': 'ecwf49', "
-                "'zone_skylight': {'skylight_area': 11.0, 'skylight_method': 'code', 'skylight_code': 'dcab', "
-                "'solar_screen': False}, 'roof_absorptance': 0.6}") in errors
-    elif hpxml_filebase == 'house1':
-        assert ("{'required': ['ceiling_assembly_code']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
-                "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf11', 'zone_skylight': {'skylight_area': 0}, "
-                "'roof_absorptance': 0.6}") in errors
-        assert ("{'required': ['roof_absorptance']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
-                "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf11', 'zone_skylight': {'skylight_area': 0}, "
-                "'roof_absorptance': 0.6}") in errors
+    assert any(x.find("{'required': ['ceiling_area', 'ceiling_assembly_code']} is not allowed") > -1 for x in errors)
+    assert any(x.find("{'required': ['roof_absorptance']} is not allowed") > -1 for x in errors)
 
 
 def test_invalid_skylight():

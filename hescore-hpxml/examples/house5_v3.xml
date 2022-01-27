@@ -57,6 +57,7 @@
                             </Attic>
                         </AtticType>
                         <AttachedToRoof idref="roof1"/>
+                        <AttachedToFrameFloor idref="atticceiling1"/>
                     </Attic>
                 </Attics>
                 <Foundations>
@@ -128,6 +129,10 @@
                     </FoundationWall>
                 </FoundationWalls>
                 <FrameFloors>
+                    <FrameFloor>
+                        <SystemIdentifier id="atticceiling1"/>
+                        <Area>898</Area>
+                    </FrameFloor>
                     <FrameFloor>
                         <SystemIdentifier id="crawlflr"/>
                         <Area>371</Area>
