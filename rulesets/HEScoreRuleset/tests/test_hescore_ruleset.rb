@@ -408,11 +408,64 @@ class HEScoreRulesetTest < MiniTest::Test
     eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'energy_star')
     assert_in_epsilon(eff11, 8.5, small_number)
 
+    err9 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier1', nil, '9')
+    end
+    assert_match(/Could not lookup CEE region for IECC climate zone/, err9.message)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier1', nil, '2A')
+    assert_in_epsilon(eff10, 15.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier1', nil, '2A')
+    assert_in_epsilon(eff11, 8.5, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier1', nil, '7')
+    assert_in_epsilon(eff10, 15.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier1', nil, '7')
+    assert_in_epsilon(eff11, 9.0, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier2', nil, '2A')
+    assert_in_epsilon(eff10, 16.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier2', nil, '2A')
+    assert_in_epsilon(eff11, 9.0, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier2', nil, '7')
+    assert_in_epsilon(eff10, 16.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier2', nil, '7')
+    assert_in_epsilon(eff11, 9.5, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier3', nil, '2A')
+    assert_in_epsilon(eff10, 18.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier3', nil, '2A')
+    assert_in_epsilon(eff11, 9.5, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'cee_tier3', nil, '7')
+    assert_in_epsilon(eff10, 18.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'cee_tier3', nil, '7')
+    assert_in_epsilon(eff11, 10.0, small_number)
+
     eff10 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'SEER', 'energy_star')
     assert_in_epsilon(eff10, 15.0, small_number)
 
     eff11 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'HSPF', 'energy_star')
     assert_in_epsilon(eff11, 8.5, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'SEER', 'cee_tier1')
+    assert_in_epsilon(eff10, 18.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'HSPF', 'cee_tier1')
+    assert_in_epsilon(eff11, 10.0, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, 'central air conditioner', 'electricity', 'SEER', 'cee_tier1')
+    assert_in_epsilon(eff10, 16.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'central air conditioner', 'electricity', 'SEER', 'cee_tier2')
+    assert_in_epsilon(eff11, 18.0, small_number)
 
     err12 = assert_raises RuntimeError do
       lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'SEER', 'bogus_performance_id')
