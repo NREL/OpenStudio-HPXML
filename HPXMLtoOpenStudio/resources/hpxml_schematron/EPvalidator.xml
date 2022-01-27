@@ -18,9 +18,9 @@
   <sch:pattern>
     <sch:title>[Building]</sch:title>
     <sch:rule context='/h:HPXML/h:Building'>
-      <sch:assert role='ERROR' test='count(h:Site) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Building/Site</sch:assert> <!-- See [BuildingSite] -->
-      <sch:assert role='ERROR' test='count(h:ProjectStatus/h:EventType) = 1'>Expected 1 element(s) for xpath: Building/ProjectStatus/EventType</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BuildingDetails) = 1'>Expected 1 element(s) for xpath: Building/BuildingDetails</sch:assert> <!-- See [BuildingDetails] -->
+      <sch:assert role='ERROR' test='count(h:Site) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Site</sch:assert> <!-- See [BuildingSite] -->
+      <sch:assert role='ERROR' test='count(h:ProjectStatus/h:EventType) = 1'>Expected 1 element(s) for xpath: ProjectStatus/EventType</sch:assert>
+      <sch:assert role='ERROR' test='count(h:BuildingDetails) = 1'>Expected 1 element(s) for xpath: BuildingDetails</sch:assert> <!-- See [BuildingDetails] -->
     </sch:rule>
   </sch:pattern>
   

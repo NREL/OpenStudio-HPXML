@@ -3158,11 +3158,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:window_aspect_ratio] <= 0)
     errors << 'Window aspect ratio must be greater than zero.' if error
 
-    if args[:site_time_zone_utc_offset].is_initialized
-      error = (args[:site_time_zone_utc_offset].get < -12) || (args[:site_time_zone_utc_offset].get > 14)
-      errors << 'Time zone UTC offset must be between -12 and 14.' if error
-    end
-
     return errors
   end
 

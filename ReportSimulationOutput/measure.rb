@@ -429,12 +429,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @timestamps = get_timestamps(timeseries_frequency)
     if timeseries_frequency != 'none'
       if add_timeseries_dst_column.is_initialized
-        @timestamps_dst = 'DST'
-        timestamps_dst = get_timestamps(timeseries_frequency, @timestamps_dst) if add_timeseries_dst_column.get
+        timestamps_dst = get_timestamps(timeseries_frequency, 'DST') if add_timeseries_dst_column.get
       end
       if add_timeseries_utc_column.is_initialized
-        @timestamps_utc = 'UTC'
-        timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc) if add_timeseries_utc_column.get
+        timestamps_utc = get_timestamps(timeseries_frequency, 'UTC') if add_timeseries_utc_column.get
       end
     end
 
@@ -1427,17 +1425,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if timestamps_dst
-      timestamps2 = ["Time#{@timestamps_dst}", nil]
+      timestamps2 = [['TimeDST', nil]]
       timestamps_dst.each do |timestamp|
-        timestamps2 << timestamp
+        timestamps2[0] << timestamp
       end
+    else
+      timestamps2 = []
     end
 
     if timestamps_utc
-      timestamps3 = ["Time#{@timestamps_utc}", nil]
+      timestamps3 = [['TimeUTC', nil]]
       timestamps_utc.each do |timestamp|
-        timestamps3 << timestamp
+        timestamps3[0] << timestamp
       end
+    else
+      timestamps3 = []
     end
 
     if include_timeseries_fuel_consumptions
@@ -1504,15 +1506,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     if output_format == 'csv'
       # Assemble data
-      if timestamps_dst && timestamps_utc
-        data = data.zip(timestamps2, timestamps3, *fuel_data, *emissions_data, *end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
-      elsif timestamps_dst
-        data = data.zip(timestamps2, *fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
-      elsif timestamps_utc
-        data = data.zip(timestamps3, *fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
-      else
-        data = data.zip(*fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
-      end
+      data = data.zip(*timestamps2, *timestamps3, *fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
 
       # Error-check
       n_elements = []
@@ -1529,8 +1523,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       h = {}
       h['Time'] = data[2..-1]
-      h["Time#{@timestamps_dst}"] = timestamps2[2..-1] if timestamps_dst
-      h["Time#{@timestamps_utc}"] = timestamps3[2..-1] if timestamps_utc
+      h['TimeDST'] = timestamps2[2..-1] if timestamps_dst
+      h['TimeUTC'] = timestamps3[2..-1] if timestamps_utc
 
       [fuel_data, end_use_data, emissions_data, hot_water_use_data, total_loads_data, comp_loads_data, zone_temps_data, airflows_data, weather_data].each do |d|
         d.each do |o|
