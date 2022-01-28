@@ -1093,21 +1093,60 @@ class Schedule
 
     return begin_month, begin_day, end_month, end_day
   end
+
+  def self.schedules_file_includes_col_name(schedules_file, col_name)
+    schedules_file_includes_col_name = false
+    if not schedules_file.nil?
+      if schedules_file.schedules.keys.include?(col_name)
+        schedules_file_includes_col_name = true
+      end
+    end
+    return schedules_file_includes_col_name
+  end
 end
 
 class SchedulesFile
+  # Constants
+  ColumnOccupants = 'occupants'
+  ColumnLightingInterior = 'lighting_interior'
+  ColumnLightingExterior = 'lighting_exterior'
+  ColumnLightingGarage = 'lighting_garage'
+  ColumnLightingExteriorHoliday = 'lighting_exterior_holiday'
+  ColumnCookingRange = 'cooking_range'
+  ColumnRefrigerator = 'refrigerator'
+  ColumnExtraRefrigerator = 'extra_refrigerator'
+  ColumnFreezer = 'freezer'
+  ColumnDishwasher = 'dishwasher'
+  ColumnClothesWasher = 'clothes_washer'
+  ColumnClothesDryer = 'clothes_dryer'
+  ColumnCeilingFan = 'ceiling_fan'
+  ColumnPlugLoadsOther = 'plug_loads_other'
+  ColumnPlugLoadsTV = 'plug_loads_tv'
+  ColumnPlugLoadsVehicle = 'plug_loads_vehicle'
+  ColumnPlugLoadsWellPump = 'plug_loads_well_pump'
+  ColumnFuelLoadsGrill = 'fuel_loads_grill'
+  ColumnFuelLoadsLighting = 'fuel_loads_lighting'
+  ColumnFuelLoadsFireplace = 'fuel_loads_fireplace'
+  ColumnPoolPump = 'pool_pump'
+  ColumnPoolHeater = 'pool_heater'
+  ColumnHotTubPump = 'hot_tub_pump'
+  ColumnHotTubHeater = 'hot_tub_heater'
+  ColumnHotWaterDishwasher = 'hot_water_dishwasher'
+  ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
+  ColumnHotWaterFixtures = 'hot_water_fixtures'
+  ColumnVacancy = 'vacancy'
+
   def initialize(runner: nil,
                  model: nil,
-                 year: nil,
-                 schedules_path:,
-                 **remainder)
+                 schedules_paths:,
+                 col_names:)
+    return if schedules_paths.empty?
 
     @runner = runner
     @model = model
-    @year = year
-    @schedules_path = schedules_path
+    @schedules_paths = schedules_paths
 
-    import(col_names: Constants.ScheduleColNames.keys)
+    import(col_names: col_names)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
@@ -1119,47 +1158,72 @@ class SchedulesFile
     get_external_file
   end
 
+  def nil?
+    if @schedules.nil?
+      return true
+    end
+
+    return false
+  end
+
   def import(col_names:)
     @schedules = {}
-    columns = CSV.read(@schedules_path).transpose
-    columns.each do |col|
-      unless col_names.include? col[0]
-        fail "Schedule column name '#{col[0]}' is invalid. [context: #{@schedules_path}]"
-      end
+    @schedules_paths.each do |schedules_path|
+      columns = CSV.read(schedules_path).transpose
+      columns.each do |col|
+        col_name = col[0]
+        unless col_names.include? col_name
+          fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]" unless [SchedulesFile::ColumnVacancy].include?(col_name)
+        end
 
-      values = col[1..-1].reject { |v| v.nil? }
-      values = validate_schedule(col_name: col[0], values: values)
-      @schedules[col[0]] = values
+        values = col[1..-1].reject { |v| v.nil? }
+
+        begin
+          values = values.map { |v| Float(v) }
+        rescue ArgumentError
+          fail "Schedule value must be numeric for column '#{col_name}'. [context: #{schedules_path}]"
+        end
+
+        if @schedules.keys.include? col_name
+          fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
+        end
+
+        @schedules[col_name] = values
+      end
     end
   end
 
-  def validate_schedule(col_name:,
-                        values:)
-
+  def validate_schedules(year:)
+    @year = year
     num_hrs_in_year = Constants.NumHoursInYear(@year)
-    schedule_length = values.length
 
-    begin
-      values = values.map { |v| Float(v) }
-    rescue ArgumentError
-      fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
+    @schedules_paths.each do |schedules_path|
+      columns = CSV.read(schedules_path).transpose
+      columns.each do |col|
+        col_name = col[0]
+        values = col[1..-1].reject { |v| v.nil? }
+        values = values.map { |v| Float(v) }
+        schedule_length = values.length
+
+        if max_value_one[col_name]
+          if values.max > 1
+            fail "Schedule max value for column '#{col_name}' must be 1. [context: #{schedules_path}]"
+          end
+        end
+
+        if min_value_zero[col_name]
+          if values.min < 0
+            fail "Schedule min value for column '#{col_name}' must be non-negative. [context: #{schedules_path}]"
+          end
+        end
+
+        valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
+        valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
+        unless valid_num_rows.include? schedule_length
+          fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
+        end
+      end
     end
-
-    if (1.0 - values.max).abs > 0.01
-      fail "Schedule max value for column '#{col_name}' must be 1. [context: #{@schedules_path}]"
-    end
-
-    if values.min < 0
-      fail "Schedule min value for column '#{col_name}' must be non-negative. [context: #{@schedules_path}]"
-    end
-
-    valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
-    valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
-    unless valid_num_rows.include? schedule_length
-      fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
-    end
-
-    return values
   end
 
   def export
@@ -1189,7 +1253,12 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
+    headers = []
+    @schedules_paths.each do |schedules_path|
+      next if schedules_path.nil?
+
+      headers += CSV.open(schedules_path, 'r') { |csv| csv.first }
+    end
     col_num = headers.index(col_name)
     return col_num
   end
@@ -1203,8 +1272,7 @@ class SchedulesFile
     end
 
     if @schedules[col_name].nil?
-      @runner.registerError("Could not find the '#{col_name}' schedule.")
-      return false
+      return
     end
 
     col_index = get_col_index(col_name: col_name)
@@ -1225,6 +1293,10 @@ class SchedulesFile
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   def annual_equivalent_full_load_hrs(col_name:,
                                       schedules: nil)
+    if @schedules[col_name].nil?
+      return
+    end
+
     if schedules.nil?
       schedules = @schedules # the schedules before vacancy is applied
     end
@@ -1242,6 +1314,9 @@ class SchedulesFile
   # is at 1.0, so that, for the given schedule values, the equipment will consume annual_kwh energy in a year.
   def calc_design_level_from_annual_kwh(col_name:,
                                         annual_kwh:)
+    if @schedules[col_name].nil?
+      return
+    end
 
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     design_level = annual_kwh * 1000.0 / ann_equiv_full_load_hrs # W
@@ -1252,6 +1327,9 @@ class SchedulesFile
   # Similar to ann_equiv_full_load_hrs, but for thermal energy
   def calc_design_level_from_annual_therm(col_name:,
                                           annual_therm:)
+    if @schedules[col_name].nil?
+      return
+    end
 
     annual_kwh = UnitConversions.convert(annual_therm, 'therm', 'kWh')
     design_level = calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: annual_kwh)
@@ -1263,6 +1341,10 @@ class SchedulesFile
   # level
   def calc_design_level_from_daily_kwh(col_name:,
                                        daily_kwh:)
+    if @schedules[col_name].nil?
+      return
+    end
+
     full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = full_load_hrs / num_days_in_year
@@ -1273,6 +1355,10 @@ class SchedulesFile
 
   # similar to calc_design_level_from_daily_kwh but for water usage
   def calc_peak_flow_from_daily_gpm(col_name:, daily_water:)
+    if @schedules[col_name].nil?
+      return
+    end
+
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = ann_equiv_full_load_hrs / num_days_in_year
@@ -1292,18 +1378,89 @@ class SchedulesFile
   end
 
   def set_vacancy
-    return unless @tmp_schedules.keys.include? 'vacancy'
-    return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
+    return unless @tmp_schedules.keys.include? ColumnVacancy
+    return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
-    col_names = Constants.ScheduleColNames
+    col_names = SchedulesFile.ColumnNames
 
-    @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
-      col_names.keys.each do |col_name|
-        next if col_names[col_name].nil?
-        next unless col_names[col_name] # skip those unaffected by vacancy
+    @tmp_schedules[col_names[0]].each_with_index do |ts, i|
+      col_names.each do |col_name|
+        next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
-        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['vacancy'][i])
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
     end
+  end
+
+  def self.ColumnNames
+    return SchedulesFile.OccupancyColumnNames
+  end
+
+  def self.OccupancyColumnNames
+    return [
+      ColumnOccupants,
+      ColumnLightingInterior,
+      ColumnLightingExterior,
+      ColumnLightingGarage,
+      ColumnLightingExteriorHoliday,
+      ColumnCookingRange,
+      ColumnRefrigerator,
+      ColumnExtraRefrigerator,
+      ColumnFreezer,
+      ColumnDishwasher,
+      ColumnClothesWasher,
+      ColumnClothesDryer,
+      ColumnCeilingFan,
+      ColumnPlugLoadsOther,
+      ColumnPlugLoadsTV,
+      ColumnPlugLoadsVehicle,
+      ColumnPlugLoadsWellPump,
+      ColumnFuelLoadsGrill,
+      ColumnFuelLoadsLighting,
+      ColumnFuelLoadsFireplace,
+      ColumnPoolPump,
+      ColumnPoolHeater,
+      ColumnHotTubPump,
+      ColumnHotTubHeater,
+      ColumnHotWaterDishwasher,
+      ColumnHotWaterClothesWasher,
+      ColumnHotWaterFixtures
+    ]
+  end
+
+  def affected_by_vacancy
+    affected_by_vacancy = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      affected_by_vacancy[column_name] = true
+      next unless [ColumnRefrigerator,
+                   ColumnExtraRefrigerator,
+                   ColumnFreezer,
+                   ColumnPoolPump,
+                   ColumnPoolHeater,
+                   ColumnHotTubPump,
+                   ColumnHotTubHeater].include? column_name
+
+      affected_by_vacancy[column_name] = false
+    end
+    return affected_by_vacancy
+  end
+
+  def max_value_one
+    max_value_one = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      max_value_one[column_name] = true
+    end
+    return max_value_one
+  end
+
+  def min_value_zero
+    min_value_zero = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      min_value_zero[column_name] = true
+    end
+    return min_value_zero
   end
 end
