@@ -190,6 +190,7 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -200,6 +201,7 @@ def create_hpxmls
     'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
     'base-hvac-autosize-boiler-elec-only.xml' => 'base-hvac-boiler-elec-only.xml',
     'base-hvac-autosize-boiler-gas-central-ac-1-speed.xml' => 'base-hvac-boiler-gas-central-ac-1-speed.xml',
     'base-hvac-autosize-boiler-gas-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -4010,7 +4012,18 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                             fraction_served: 0.25,
                             location: HPXML::LocationLivingSpace)
   end
-
+  if ['base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
+      'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml'].include? hpxml_file
+    # Switch backup boiler with hydronic distribution to backup furnace with air distribution
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
+    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
+    hpxml.hvac_distributions[0].air_type = HPXML::AirTypeRegularVelocity
+    hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[1].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
+  end
+    
   # ------------------ #
   # HPXML WaterHeating #
   # ------------------ #
