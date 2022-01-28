@@ -2321,6 +2321,8 @@ class HVACSizing
       if hpxml_hvac.is_a?(HPXML::HeatPump)
         if not hpxml_hvac.backup_heating_capacity.nil?
           hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_heating_capacity
+        elsif not hpxml_hvac.backup_system.nil?
+          hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_system.heating_capacity
         end
       end
 
