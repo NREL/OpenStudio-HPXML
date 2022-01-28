@@ -2306,7 +2306,7 @@ class HVACSizing
       end
       if hpxml_hvac.is_a?(HPXML::HeatingSystem) && hpxml_hvac.is_heat_pump_backup_system
         # Use the same load fractions as the heat pump
-        heat_pump = @hpxml.heat_pumps.select{ |hp| hp.backup_system_idref == hpxml_hvac.id }[0]
+        heat_pump = @hpxml.heat_pumps.select { |hp| hp.backup_system_idref == hpxml_hvac.id }[0]
         hvac.HeatingLoadFraction = heat_pump.fraction_heat_load_served
         hvac.CoolingLoadFraction = heat_pump.fraction_cool_load_served
       end

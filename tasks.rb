@@ -4023,7 +4023,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
   end
-    
+
   # ------------------ #
   # HPXML WaterHeating #
   # ------------------ #
