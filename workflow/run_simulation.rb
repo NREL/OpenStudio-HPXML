@@ -61,6 +61,7 @@ def run_design(basedir, rundir, design, resultsdir, json, hourly_output, debug, 
     args['timeseries_frequency'] = 'monthly'
     args['include_timeseries_fuel_consumptions'] = false
     args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_emissions'] = false
     args['include_timeseries_hot_water_uses'] = true
     args['include_timeseries_total_loads'] = false
     args['include_timeseries_component_loads'] = false
@@ -77,6 +78,7 @@ def run_design(basedir, rundir, design, resultsdir, json, hourly_output, debug, 
       args['timeseries_frequency'] = 'hourly'
       args['include_timeseries_fuel_consumptions'] = false
       args['include_timeseries_end_use_consumptions'] = true
+      args['include_timeseries_emissions'] = false
       args['include_timeseries_hot_water_uses'] = true
       args['include_timeseries_total_loads'] = false
       args['include_timeseries_component_loads'] = false
