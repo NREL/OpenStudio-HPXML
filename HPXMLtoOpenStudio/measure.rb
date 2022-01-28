@@ -133,8 +133,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       if skip_validation
         stron_paths = []
       else
-        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                       File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml'),
+                       File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
       end
       hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
       hpxml.errors.each do |error|
@@ -216,16 +216,16 @@ class OSModel
 
     # Init
 
+    check_file_references(hpxml_path)
+    @schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        col_names: SchedulesFile.ColumnNames)
+
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    set_defaults_and_globals(runner, output_dir, epw_file, weather)
+    set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
+    @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
-
-    @schedules_file = nil
-    unless @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
-                                          schedules_path: @hpxml.header.schedules_filepath)
-    end
 
     # Conditioned space/zone
 
@@ -299,7 +299,37 @@ class OSModel
 
   private
 
-  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather)
+  def self.check_file_references(hpxml_path)
+    # Check/update file references
+    @hpxml.header.schedules_filepaths = @hpxml.header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
+
+    @hpxml.header.emissions_scenarios.each do |scenario|
+      if @hpxml.header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
+        fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
+      end
+      next if scenario.elec_schedule_filepath.nil?
+
+      scenario.elec_schedule_filepath = FilePath.check_path(scenario.elec_schedule_filepath,
+                                                            File.dirname(hpxml_path),
+                                                            'Emissions File')
+      data = File.readlines(scenario.elec_schedule_filepath)
+      if data.size != 8760
+        fail "Emissions File has invalid number of rows (#{data.size}). Must be 8760."
+      end
+      if data.select { |x| x.include? ',' }.size > 0
+        fail 'Emissions File has multiple columns. Must be a single column of data.'
+      end
+      if data.map(&:strip).map { |x| Float(x) rescue nil }.any? nil
+        fail 'Emissions File has non-numeric values.'
+      end
+    end
+  end
+
+  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -315,7 +345,7 @@ class OSModel
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -545,7 +575,7 @@ class OSModel
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
+    Geometry.apply_occupants(model, runner, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
   def self.create_or_get_space(model, spaces, location)
@@ -1868,7 +1898,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
+      MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
     end
   end
 
@@ -1887,7 +1917,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      MiscLoads.apply_fuel(model, runner, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
 
@@ -1901,6 +1931,8 @@ class OSModel
       next if pool.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      next if pool.pump_type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
 
@@ -1908,6 +1940,8 @@ class OSModel
       next if hot_tub.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      next if hot_tub.pump_type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
@@ -2030,6 +2064,11 @@ class OSModel
 
   def self.add_photovoltaics(runner, model)
     @hpxml.pv_systems.each do |pv_system|
+      next if pv_system.inverter_efficiency == @hpxml.pv_systems[0].inverter_efficiency
+
+      fail 'Expected all InverterEfficiency values to be equal.'
+    end
+    @hpxml.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
     end
   end
@@ -2058,6 +2097,10 @@ class OSModel
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
+    emissions_scenario_names = @hpxml.header.emissions_scenarios.map { |s| s.name }.to_s
+    additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
+    emissions_scenario_types = @hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s
+    additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
   end
 
   def self.map_to_string(map)
