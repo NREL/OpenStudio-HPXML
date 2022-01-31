@@ -243,6 +243,8 @@
                                     "roof_assembly_code": {
                                         "type": "string",
                                         "enum": ["rfwf00co", "rfwf00wo", "rfwf00rc", "rfwf00lc", "rfwf00tg",
+                                                 "rfwf03co", "rfwf03wo", "rfwf03rc", "rfwf03lc", "rfwf03tg",
+                                                 "rfwf07co", "rfwf07wo", "rfwf07rc", "rfwf07lc", "rfwf07tg",
                                                  "rfwf11co", "rfwf11wo", "rfwf11rc", "rfwf11lc", "rfwf11tg",
                                                  "rfwf13co", "rfwf13wo", "rfwf13rc", "rfwf13lc", "rfwf13tg",
                                                  "rfwf15co", "rfwf15wo", "rfwf15rc", "rfwf15lc", "rfwf15tg",
@@ -252,6 +254,8 @@
                                                  "rfwf30co", "rfwf30wo", "rfwf30rc", "rfwf30lc", "rfwf30tg",
                                                  "rfrb00co", "rfrb00wo", "rfrb00rc", "rfrb00lc", "rfrb00tg",
                                                  "rfps00co", "rfps00wo", "rfps00rc", "rfps00lc", "rfps00tg",
+                                                 "rfps03co", "rfps03wo", "rfps03rc", "rfps03lc", "rfps03tg",
+                                                 "rfps07co", "rfps07wo", "rfps07rc", "rfps07lc", "rfps07tg",
                                                  "rfps11co", "rfps11wo", "rfps11rc", "rfps11lc", "rfps11tg",
                                                  "rfps13co", "rfps13wo", "rfps13rc", "rfps13lc", "rfps13tg",
                                                  "rfps15co", "rfps15wo", "rfps15rc", "rfps15lc", "rfps15tg",
@@ -277,9 +281,9 @@
                                     },
                                     "ceiling_assembly_code": {
                                         "type": "string",
-                                        "enum": ["ecwf00", "ecwf03", "ecwf06", "ecwf09", "ecwf11", "ecwf19",
-                                                 "ecwf21", "ecwf25", "ecwf30", "ecwf38", "ecwf44", "ecwf49",
-                                                 "ecwf60"],
+                                        "enum": ["ecwf00", "ecwf03", "ecwf06", "ecwf09", "ecwf11", "ecwf13", "ecwf15",
+                                                 "ecwf19", "ecwf21", "ecwf25", "ecwf30", "ecwf35", "ecwf38", "ecwf44",
+                                                 "ecwf49", "ecwf55", "ecwf60"],
                                         "description": "Ceiling construction assembly code (required unless roof_type is cath_ceiling)"
                                     },
                                     "zone_skylight": {
@@ -319,7 +323,12 @@
                                             },
                                             "solar_screen": {
                                                 "type": "boolean",
-                                                "description": "Does this window have a solar screen?"
+                                                "description": "Does this skylight have a solar screen?"
+                                            },
+                                            "storm_type": {
+                                                "type": "string",
+                                                "enum": ["clear", "low-e"],
+                                                "description": "Type of storm for this skylight"
                                             }
                                         },
                                         "allOf": [
@@ -492,8 +501,8 @@
                                     },
                                     "floor_assembly_code": {
                                         "type": "string",
-                                        "enum": ["efwf00ca", "efwf11ca", "efwf13ca", "efwf15ca", "efwf19ca",
-                                                 "efwf21ca", "efwf25ca", "efwf30ca", "efwf38ca"],
+                                        "enum": ["efwf00ca", "efwf03ca", "efwf07ca", "efwf11ca", "efwf13ca", "efwf15ca", "efwf19ca",
+                                                 "efwf21ca", "efwf25ca", "efwf30ca", "efwf35ca", "efwf38ca"],
                                         "description": "Floor construction assembly code (only used if foundation_type is not slab_on_grade)"
                                     }
                                 },
@@ -588,8 +597,10 @@
                                                  "ewps21wo", "ewps21st", "ewps21vi", "ewps21al", "ewps21br",
                                                  "ewov19wo", "ewov19st", "ewov19vi", "ewov19al", "ewov19br",
                                                  "ewov21wo", "ewov21st", "ewov21vi", "ewov21al", "ewov21br",
+                                                 "ewov25wo", "ewov25st", "ewov25vi", "ewov25al", "ewov25br",
                                                  "ewov27wo", "ewov27st", "ewov27vi", "ewov27al", "ewov27br",
                                                  "ewov33wo", "ewov33st", "ewov33vi", "ewov33al", "ewov33br",
+                                                 "ewov35wo", "ewov35st", "ewov35vi", "ewov35al", "ewov35br",
                                                  "ewov38wo", "ewov38st", "ewov38vi", "ewov38al", "ewov38br",
                                                  "ewbr00nn", "ewbr05nn", "ewbr10nn",
                                                  "ewcb00st", "ewcb00br", "ewcb00nn",
@@ -636,6 +647,11 @@
                                             "solar_screen": {
                                                 "type": "boolean",
                                                 "description": "Does this window have a solar screen?"
+                                            },
+                                            "storm_type": {
+                                                "type": "string",
+                                                "enum": ["clear", "low-e"],
+                                                "description": "Type of storm for this window"
                                             }
                                         }
                                     }
@@ -708,7 +724,6 @@
                                             },
                                             "efficiency_level": {
                                                 "type": "string",
-                                                "enum": ["energy_star"],
                                                 "description": "Efficiency level upgrade of the heating system (Optional)"
                                             }
                                         },
@@ -738,6 +753,11 @@
                                                                 "description": "AFUE of heating equipment (only used if efficiency_method is user)"
                                                             }
                                                         }
+                                                    },
+                                                    "properties": {
+                                                        "efficiency_level": {
+                                                            "enum": ["energy_star"]
+                                                        }
                                                     }
                                                 }
                                             },
@@ -752,6 +772,23 @@
                                                             "minimum": 6,
                                                             "maximum": 20,
                                                             "description": "HSPF of heating equipment (only used if efficiency_method is user)"
+                                                        }
+                                                    },
+                                                    "if":{
+                                                        "properties": {"type": {"const": "heat_pump"}}
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]
+                                                            }
+                                                        }
+                                                    },
+                                                    "else": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star", "cee_tier1"]
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -812,7 +849,6 @@
                                             },
                                             "efficiency_level": {
                                                 "type": "string",
-                                                "enum": ["energy_star"],
                                                 "description": "Efficiency level upgrade of the cooling system (Optional)"
                                             }
                                         },
@@ -829,6 +865,23 @@
                                                             "maximum": 40,
                                                             "description": "SEER of cooling equipment (only used if efficiency_method is user)"
                                                         }
+                                                    },
+                                                    "if":{
+                                                        "properties": {"type": {"const": "heat_pump"}}
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]
+                                                            }
+                                                        }
+                                                    },
+                                                    "else": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star", "cee_tier1", "cee_tier2"]
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             },
@@ -843,6 +896,23 @@
                                                             "minimum": 8,
                                                             "maximum": 40,
                                                             "description": "EER of cooling equipment (only used if efficiency_method is user)"
+                                                        }
+                                                    },
+                                                    "if":{
+                                                        "properties": {"type": {"const": "mini_split"}}
+                                                    },
+                                                    "then": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star", "cee_tier1"]
+                                                            }
+                                                        }
+                                                    },
+                                                    "else": {
+                                                        "properties": {
+                                                            "efficiency_level": {
+                                                                "enum": ["energy_star"]
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -974,7 +1044,7 @@
                                                         "properties": {
                                                             "heating": {
                                                                 "properties": {
-                                                                    "efficiency_level": {"const": "energy_star"}
+                                                                    "efficiency_level": {"enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]}
                                                                 },
                                                                 "required": ["efficiency_level"]
                                                             }
@@ -1189,7 +1259,7 @@
                                                         "properties": {
                                                             "cooling": {
                                                                 "properties": {
-                                                                    "efficiency_level": {"const": "energy_star"}
+                                                                    "efficiency_level": {"enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]}
                                                                 },
                                                                 "required": ["efficiency_level"]
                                                             }

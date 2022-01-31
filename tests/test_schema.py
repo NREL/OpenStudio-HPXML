@@ -269,7 +269,7 @@ def test_invalid_floor(hpxml_filebase):
     elif hpxml_filebase == 'house1':
         assert ("{'required': ['floor_assembly_code']} is not allowed for {'floor_name': 'floor1', "
                 "'floor_area': 810.0, 'foundation_type': 'slab_on_grade', 'foundation_insulation_level': 0, "
-                "'floor_assembly_code': 'efwf00ca'}") in errors
+                "'floor_assembly_code': 'efwf07ca'}") in errors
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
@@ -415,8 +415,20 @@ def test_invalid_heating(hpxml_filebase):
     js3['building']['systems']['hvac'][0]['heating']['efficiency'] = 1.1
     errors = get_error_messages(js3, js_schema)
     assert "1.1 is less than the minimum of 6" in errors
+    del js3['building']['systems']['hvac'][0]['heating']['efficiency']
+    js3['building']['systems']['hvac'][0]['heating']['efficiency_level'] = 'cee_tier'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier' is not one of ['energy_star', 'cee_tier1', 'cee_tier2', 'cee_tier3']" in errors
+    del js3['building']['systems']['hvac'][0]['heating']['efficiency_level']
     # mini-split
     js3['building']['systems']['hvac'][0]['heating']['type'] = 'mini_split'
+    js3['building']['systems']['hvac'][0]['heating']['efficiency_level'] = 'cee_tier2'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier2' is not one of ['energy_star', 'cee_tier1']" in errors
+    js3['building']['systems']['hvac'][0]['heating']['efficiency_level'] = 'cee_tier3'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier3' is not one of ['energy_star', 'cee_tier1']" in errors
+    del js3['building']['systems']['hvac'][0]['heating']['efficiency_level']
     js3['building']['systems']['hvac'][0]['heating']['efficiency'] = 20.1
     errors = get_error_messages(js3, js_schema)
     assert "20.1 is greater than the maximum of 20" in errors
@@ -484,6 +496,10 @@ def test_invalid_cooling(hpxml_filebase):
     del js3['building']['systems']['hvac'][0]['cooling']['efficiency_method']
     errors = get_error_messages(js3, js_schema)
     assert "'efficiency_method' is a required property" in errors
+    js3['building']['systems']['hvac'][0]['cooling']['efficiency_level'] = 'cee_tier3'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier3' is not one of ['energy_star', 'cee_tier1', 'cee_tier2']" in errors
+    del js3['building']['systems']['hvac'][0]['cooling']['efficiency_level']
     js3['building']['systems']['hvac'][0]['cooling']['efficiency_method'] = 'shipment_weighted'
     errors = get_error_messages(js3, js_schema)
     assert "'year' is a required property" in errors
@@ -496,6 +512,11 @@ def test_invalid_cooling(hpxml_filebase):
     js3['building']['systems']['hvac'][0]['cooling']['type'] = 'heat_pump'
     errors = get_error_messages(js3, js_schema)
     assert "7.9 is less than the minimum of 8" in errors
+    del js3['building']['systems']['hvac'][0]['cooling']['efficiency']
+    js3['building']['systems']['hvac'][0]['cooling']['efficiency_level'] = 'cee_tier'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier' is not one of ['energy_star', 'cee_tier1', 'cee_tier2', 'cee_tier3']" in errors
+    del js3['building']['systems']['hvac'][0]['cooling']['efficiency_level']
     # packaged dx
     js3['building']['systems']['hvac'][0]['cooling']['type'] = 'packaged_dx'
     js3['building']['systems']['hvac'][0]['cooling']['efficiency'] = 40.1
@@ -505,7 +526,16 @@ def test_invalid_cooling(hpxml_filebase):
     js3['building']['systems']['hvac'][0]['cooling']['type'] = 'mini_split'
     errors = get_error_messages(js3, js_schema)
     assert "40.1 is greater than the maximum of 40" in errors
+    del js3['building']['systems']['hvac'][0]['cooling']['efficiency']
+    js3['building']['systems']['hvac'][0]['cooling']['efficiency_level'] = 'cee_tier2'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier2' is not one of ['energy_star', 'cee_tier1']" in errors
+    js3['building']['systems']['hvac'][0]['cooling']['efficiency_level'] = 'cee_tier3'
+    errors = get_error_messages(js3, js_schema)
+    assert "'cee_tier3' is not one of ['energy_star', 'cee_tier1']" in errors
+    del js3['building']['systems']['hvac'][0]['cooling']['efficiency_level']
     # gchp
+    js3['building']['systems']['hvac'][0]['cooling']['efficiency'] = 40.1
     js3['building']['systems']['hvac'][0]['cooling']['type'] = 'gchp'
     errors = get_error_messages(js3, js_schema)
     assert "40.1 is greater than the maximum of 40" in errors

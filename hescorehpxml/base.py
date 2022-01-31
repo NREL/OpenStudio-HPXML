@@ -1252,7 +1252,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
                             key=lambda x: abs(x[1] - float(roof_assembly_rvalue)))
                     attic_roofs_d['roof_assembly_rvalue'] = closest_code_rvalue
                     # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
-                    # in the HPXML. Only model with radiant barrier code if R-value = 0 and radiant barrier.
                     if attic_roofs_d['roofconstype'] == 'rb' and int(closest_roof_code[4:6]) > 0:
                         attic_roofs_d['roofconstype'] = 'wf'  # overwrite the roofconstype
                 elif self.every_attic_roof_layer_has_nominal_rvalue(attic, roof):
@@ -1277,6 +1276,9 @@ class HPXMLtoHEScoreTranslatorBase(object):
                         roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21))
                         lookup_code = f"rf{attic_roofs_d['roofconstype']}{roof_rvalue:02d}{attic_roofs_d['extfinish']}"
                     attic_roofs_d['roof_assembly_rvalue'] = self.roof_assembly_eff_rvalues[lookup_code]
+                    # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
+                    if has_radiant_barrier and roof_rvalue > 0:
+                        attic_roofs_d['roofconstype'] = 'wf'
                 else:
                     raise TranslationError(
                         'Every roof insulation layer needs a NominalRValue or '
