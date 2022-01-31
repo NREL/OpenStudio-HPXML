@@ -1191,7 +1191,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         self.assertEqual(res['building']['zone']['zone_wall'][1]['wall_assembly_code'], 'ewwf13wo')
         self.assertEqual(res['building']['zone']['zone_wall'][2]['wall_assembly_code'], 'ewwf13wo')
         self.assertEqual(res['building']['zone']['zone_wall'][3]['wall_assembly_code'], 'ewwf13wo')
-        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf00wo')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf03wo')
         self.assertEqual(res['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf25')
         self.assertEqual(res['building']['zone']['zone_floor'][0]['floor_assembly_code'], 'efwf30ca')
 
@@ -3377,7 +3377,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         el.addnext(el_2)
         res = tr.hpxml_to_hescore()
         # Currently, roofs attached to the same attic are combined.
-        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf00co')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf07co')
         self.xpath('//h:Roof[1]/h:Insulation/h:Layer/h:NominalRValue').text = '19'
         self.xpath('//h:Roof[2]/h:Insulation/h:Layer/h:NominalRValue').text = '27'
         res2 = tr.hpxml_to_hescore()

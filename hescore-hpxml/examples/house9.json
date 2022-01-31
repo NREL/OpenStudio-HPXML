@@ -8,7 +8,7 @@
   },
   "building": {
     "about": {
-      "assessment_date": "2021-12-28",
+      "assessment_date": "2022-01-27",
       "shape": "rectangle",
       "year_built": 1950,
       "number_bedrooms": 4,
@@ -24,7 +24,7 @@
         {
           "roof_name": "roof1",
           "roof_area": 2176.0,
-          "roof_assembly_code": "rfwf00wo",
+          "roof_assembly_code": "rfwf03wo",
           "roof_color": "cool_color",
           "roof_absorptance": 0.85,
           "roof_type": "vented_attic",
