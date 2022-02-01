@@ -21,7 +21,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/measures/HEScoreRuleset/tests/test_hescore_ruleset.rb",
             "args": [
-                "-n", "test_foundation_area_lookup"
+                "-n", "test_regression_files"
             ]
         },
         {

@@ -16,6 +16,7 @@ class HEScoreRulesetTest < MiniTest::Test
     args_hash = {}
 
     Dir["#{this_dir}/../../../workflow/regression_files/*.json"].sort.each do |json|
+      # next if File.basename(json, ".json") != "Roof2_cathedral_ceiling_kneewall"
       puts "Testing #{File.absolute_path(json)}..."
 
       args_hash['json_path'] = File.absolute_path(json)
@@ -620,12 +621,22 @@ class HEScoreRulesetTest < MiniTest::Test
       wall_code_by_id[wallid] = wall_code
     end
 
+    in_doc['building']['zone']['zone_roof'].each do |roof|
+      next unless roof.key?('knee_wall')
+      knee_wall_code = roof['knee_wall']['assembly_code']
+      knee_wall_id = "#{roof['roof_name']}_knee_wall"
+      wall_code_by_id[knee_wall_id] = knee_wall_code
+    end
+
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
       eff_rvalue = XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue', :float)
       wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       next if wall_code_by_id[wallid].nil?
-
-      assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
+      if wallid.end_with?("_knee_wall")
+        assert_in_epsilon(eff_rvalue, get_knee_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
+      else
+        assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
+      end
     end
 
     roof_code_by_id = {}
