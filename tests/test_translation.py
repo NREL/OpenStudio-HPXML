@@ -868,13 +868,30 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
             )
         )
         wall1.addnext(wall2)
+        wall3 = E.Wall(
+            E.SystemIdentifier(id='wall3'),
+            E.ExteriorAdjacentTo('attic'),
+            E.WallType(E.WoodStud()),
+            E.Area('200'),
+            E.Insulation(
+                E.SystemIdentifier(id='wall3ins'),
+                E.Layer(
+                    E.InstallationType('cavity'),
+                    E.NominalRValue('15')
+                )
+            )
+        )
+        wall2.addnext(wall3)
         # Reference wall in Attic
         attic_type = self.xpath('//h:Attic/h:AtticType')
-        attic_type.addprevious(etree.Element(tr.addns('h:AtticKneeWall'), {'idref': 'wall2'}))
+        for wallid in ('wall2', 'wall3'):
+            attic_type.addprevious(etree.Element(tr.addns('h:AtticKneeWall'), {'idref': wallid}))
         # run translation
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf49')
         self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['area'], 400)
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['assembly_code'], 'kwwf13')
 
         # HPXML v3
         tr_v3 = self._load_xmlfile('hescore_min_v3')
@@ -896,9 +913,25 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
             )
         )
         wall1.addnext(wall2)
+        wall3 = E.Wall(
+            E.SystemIdentifier(id='wall3'),
+            E.ExteriorAdjacentTo('attic'),
+            E.AtticWallType('knee wall'),
+            E.WallType(E.WoodStud()),
+            E.Area('200'),
+            E.Insulation(
+                E.SystemIdentifier(id='wall3ins'),
+                E.Layer(
+                    E.InstallationType('cavity'),
+                    E.NominalRValue('15')
+                )
+            )
+        )
+        wall2.addnext(wall3)
         # Reference wall in Attic
         attached_to_roof = self.xpath('//h:Attic/h:AttachedToRoof')
-        attached_to_roof.addnext(etree.Element(tr_v3.addns('h:AttachedToWall'), {'idref': 'wall2'}))
+        for wallid in ('wall2', 'wall3'):
+            attached_to_roof.addnext(etree.Element(tr_v3.addns('h:AttachedToWall'), {'idref': wallid}))
         # run translation
         resp_v3 = tr_v3.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'], resp_v3['building']['zone']['zone_roof'])
@@ -971,6 +1004,8 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf49')
         self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['assembly_code'], 'kwwf00')
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['area'], 200)
         # Set kneewall R-value to 11 and attic floor R-value to zero
         kneewall_rvalue_el.text = '11'
         attic_floor_rvalue_el = self.xpath('//h:Attic/h:AtticFloorInsulation/h:Layer/h:NominalRValue')
@@ -979,6 +1014,8 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         resp = tr.hpxml_to_hescore()
         self.assertEqual(resp['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf00')
         self.assertAlmostEqual(resp['building']['zone']['zone_roof'][0]['ceiling_area'], 1200.0)
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['assembly_code'], 'kwwf11')
+        self.assertEqual(resp['building']['zone']['zone_roof'][0]['knee_wall']['area'], 200)
 
     def test_gable_wall_ignore(self):
         tr = self._load_xmlfile('hescore_min_v3')
@@ -3367,6 +3404,9 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
 
     def test_hescore_min_v3(self):
         self._do_full_compare('hescore_min_v3', 'hescore_min')
+
+    def test_house9(self):
+        self._do_full_compare('house9')
 
     def test_attic_with_multiple_roofs(self):
         tr = self._load_xmlfile('hescore_min_v3')

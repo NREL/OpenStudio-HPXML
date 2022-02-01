@@ -8,7 +8,7 @@
   },
   "building": {
     "about": {
-      "assessment_date": "2022-01-26",
+      "assessment_date": "2022-01-27",
       "shape": "rectangle",
       "year_built": 1950,
       "number_bedrooms": 4,
@@ -29,6 +29,10 @@
           "roof_type": "vented_attic",
           "ceiling_area": 2176.0,
           "ceiling_assembly_code": "ecwf25",
+          "knee_wall": {
+            "area": 1000.0,
+            "assembly_code": "kwwf03"
+          },
           "zone_skylight": {
             "skylight_area": 0
           }
