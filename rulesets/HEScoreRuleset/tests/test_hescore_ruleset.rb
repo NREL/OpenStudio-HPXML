@@ -623,6 +623,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
     in_doc['building']['zone']['zone_roof'].each do |roof|
       next unless roof.key?('knee_wall')
+
       knee_wall_code = roof['knee_wall']['assembly_code']
       knee_wall_id = "#{roof['roof_name']}_knee_wall"
       wall_code_by_id[knee_wall_id] = knee_wall_code
@@ -632,7 +633,8 @@ class HEScoreRulesetTest < MiniTest::Test
       eff_rvalue = XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue', :float)
       wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       next if wall_code_by_id[wallid].nil?
-      if wallid.end_with?("_knee_wall")
+
+      if wallid.end_with?('_knee_wall')
         assert_in_epsilon(eff_rvalue, get_knee_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
       else
         assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
@@ -670,7 +672,7 @@ class HEScoreRulesetTest < MiniTest::Test
       end
     end
 
-    if not (has_cathedral_ceiling)
+    if not has_cathedral_ceiling
       assert_in_epsilon(cfa * ceil_height, cbv, 0.01)
     elsif has_cathedral_ceiling
       assert(cfa * ceil_height < cbv)

@@ -204,6 +204,7 @@ class HEScoreRuleset
   def self.set_enclosure_knee_walls(json, new_hpxml)
     json['building']['zone']['zone_roof'].each do |orig_roof|
       next unless orig_roof.key?('knee_wall')
+
       orig_knee_wall = orig_roof['knee_wall']
       assembly_r_value = get_knee_wall_effective_r_from_doe2code(orig_knee_wall['assembly_code'])
 
