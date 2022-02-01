@@ -56,10 +56,7 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                           # noqa: E501
                           )
 
-    def get_wall_assembly_rvalue(self, v2_wall, wall):
-        return convert_to_type(float, self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
-
-    def every_wall_layer_has_nominal_rvalue(self, v2_wall, wall):
+    def every_wall_layer_has_nominal_rvalue(self, wall):
         # This variable will be true if every wall layer has a NominalRValue *or*
         # if there are no insulation layers
         wall_layers = self.xpath(wall, 'h:Insulation/h:Layer', aslist=True)
@@ -95,8 +92,9 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
         return every_layer_has_nominal_rvalue
 
-    def get_attic_knee_walls(self, attic, b):
+    def get_attic_knee_walls(self, attic):
         knee_walls = []
+        b = self.xpath(attic, 'ancestor::h:Building')
         for kneewall_idref in self.xpath(attic, 'h:AttachedToWall/@idref', aslist=True):
             wall = self.xpath(
                 b,

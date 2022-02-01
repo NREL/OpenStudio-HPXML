@@ -150,11 +150,11 @@ for each frame floor. The nearest discrete R-value from the list of possible R-v
 is used to determine an assembly code. 
 Then, the assembly R-value of the corresponding assembly code from the lookup table is used. 
 The lookup table can be found at `hescorehpxml\\lookups\\lu_floor_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
 
 If assembly R-value is used, the discrete R-value nearest to assembly R-value
 from the lookup table is used. The lookup table can be found at `hescorehpxml\\lookups\\lu_floor_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
 
 When more than one HPXML ``FrameFloor`` element must be combined into one floor
 construction for HEScore, a weighted average assembly R-value is determined by weighting the U-values by area.

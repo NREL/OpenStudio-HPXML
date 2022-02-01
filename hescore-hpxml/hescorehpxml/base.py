@@ -2,6 +2,7 @@ from __future__ import division
 from builtins import map
 from builtins import zip
 from builtins import object
+from copy import deepcopy
 import csv
 import datetime as dt
 import json
@@ -95,6 +96,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         self._roof_assembly_eff_rvalues = None
         self._ceiling_assembly_eff_rvalues = None
         self._floor_assembly_eff_rvalues = None
+        self._knee_wall_assembly_eff_rvalues = None
 
     def xpath(self, el, xpathquery, aslist=False, raise_err=False, **kwargs):
         if isinstance(el, etree._ElementTree):
@@ -157,6 +159,9 @@ class HPXMLtoHEScoreTranslatorBase(object):
         # Write out the scrubbed doc
         etree.ElementTree(root).write(outfile_obj, pretty_print=True)
 
+    def get_wall_assembly_rvalue(self, wall):
+        return convert_to_type(float, self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+
     def get_wall_assembly_code_and_rvalue(self, hpxmlwall):
         xpath = self.xpath
         wallid = xpath(hpxmlwall, 'h:SystemIdentifier/@id', raise_err=True)
@@ -185,7 +190,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         assembly_eff_rvalue = None
 
         # Assembly effective R-value or None if element not present
-        assembly_eff_rvalue = self.get_wall_assembly_rvalue(hpxmlwall, hpxmlwall)
+        assembly_eff_rvalue = self.get_wall_assembly_rvalue(hpxmlwall)
 
         # Siding
         if wall_type == 'WoodStud':
@@ -238,7 +243,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
             )
             return closest_wall_code, assembly_eff_rvalue
 
-        elif self.every_wall_layer_has_nominal_rvalue(hpxmlwall, hpxmlwall):
+        elif self.every_wall_layer_has_nominal_rvalue(hpxmlwall):
             # If the wall as a NominalRValue element for every layer (or there are no layers)
             # and there isn't an AssemblyEffectiveRValue element
             wall_rvalue = xpath(hpxmlwall, 'sum(h:Insulation/h:Layer/h:NominalRValue)', raise_err=True)
@@ -419,28 +424,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
                           'mini-split': 'mini_split',
                           'ground-to-air': 'gchp',
                           'ground-to-water': 'gchp'}
-
-    def get_attic_knee_wall_rvalue_and_area(self, attic, b, knee_walls):
-        knee_wall_dict_ls = []
-        for knee_wall in knee_walls:
-            assembly_eff_rvalue = self.get_wall_assembly_rvalue(knee_wall, knee_wall)
-            if assembly_eff_rvalue is not None:
-                rvalue = assembly_eff_rvalue
-            elif self.every_wall_layer_has_nominal_rvalue(knee_wall, knee_wall):
-                rvalue = self.xpath(knee_wall, 'sum(h:Insulation/h:Layer/h:NominalRValue)')
-            wall_area = convert_to_type(float, self.xpath(knee_wall, 'h:Area/text()'))
-            if wall_area is None:
-                raise TranslationError('All attic knee walls need an Area specified')
-            knee_wall_dict_ls.append({'area': wall_area, 'rvalue': rvalue})
-        # Average
-        knee_wall_area = sum(x['area'] for x in knee_wall_dict_ls)
-        try:
-            knee_wall_r = knee_wall_area / \
-                          sum(x['area'] / x['rvalue'] for x in knee_wall_dict_ls)
-        except ZeroDivisionError:
-            knee_wall_r = 0
-
-        return knee_wall_r, knee_wall_area
 
     def add_fuel_type(self, fuel_type):
         # Some fuel types are not included in fuel_type_mapping, throw an error if not mapped.
@@ -1087,7 +1070,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         return bldg_about
 
     def get_assembly_eff_rvalues_dict(self, construction):
-        assert construction in ['wall', 'roof', 'ceiling', 'floor']
+        assert construction in ['wall', 'roof', 'ceiling', 'floor', 'knee_wall']
         with open(os.path.join(thisdir, 'lookups', f'lu_{construction}_eff_rvalue.csv'), newline='') as f:
             reader = csv.DictReader(f)
             assembly_eff_rvalues = {}
@@ -1118,6 +1101,12 @@ class HPXMLtoHEScoreTranslatorBase(object):
         if self._floor_assembly_eff_rvalues is None:
             self._floor_assembly_eff_rvalues = self.get_assembly_eff_rvalues_dict('floor')
         return self._floor_assembly_eff_rvalues
+
+    @property
+    def knee_wall_assembly_eff_rvalues(self):
+        if self._knee_wall_assembly_eff_rvalues is None:
+            self._knee_wall_assembly_eff_rvalues = self.get_assembly_eff_rvalues_dict('knee_wall')
+        return self._knee_wall_assembly_eff_rvalues
 
     def get_building_zone_roof(self, b, footprint_area):
 
@@ -1313,22 +1302,44 @@ class HPXMLtoHEScoreTranslatorBase(object):
             # ids of hpxml roofs along for the ride
             atticd['_roofid'] = set([attic_roofs_dict['roof_id'] for attic_roofs_dict in attic_roof_ls])
 
-            # Calculate roof area weighted assembly R-value or center of cavity R-value for attic,
+            # Knee Walls
+            if atticd['rooftype'] == 'vented_attic':
+                knee_wall_ds = []
+                for knee_wall in self.get_attic_knee_walls(attic):
+                    knee_wall_d = {}
+                    knee_wall_d['assembly_eff_rvalue'] = self.get_wall_assembly_rvalue(knee_wall)
+                    if knee_wall_d['assembly_eff_rvalue'] is not None:
+                        knee_wall_d['assembly_code'], _ = min(
+                            self.knee_wall_assembly_eff_rvalues.items(),
+                            key=lambda x: abs(x[1] - knee_wall_d['assembly_eff_rvalue'])
+                        )
+                    elif self.every_wall_layer_has_nominal_rvalue(knee_wall):
+                        nominal_rvalue = self.xpath(knee_wall, 'sum(h:Insulation/h:Layer/h:NominalRValue)')
+                        knee_wall_d['assembly_code'], knee_wall_d['assembly_eff_rvalue'] = min(
+                            self.knee_wall_assembly_eff_rvalues.items(),
+                            key=lambda x: abs(int(re.search(r'(\d+)', x[0]).group(1)) - nominal_rvalue)
+                        )
+                    else:
+                        raise TranslationError(
+                            'Attic knee walls need to have either an AssemblyRValue '
+                            'or a NominalRValue on every insulation layer.'
+                        )
+                    knee_wall_d['area'] = float(self.xpath(knee_wall, 'h:Area/text()', raise_err=True))
+                    knee_wall_ds.append(knee_wall_d)
+                atticd['knee_walls'] = knee_wall_ds
+
+            # Calculate roof area weighted assembly R-value
             # might be combined later by averaging again
             atticd['roof_assembly_rvalue'] = attic_roof_area_sum / \
                 sum([attic_roofs_dict['roof_area'] / attic_roofs_dict['roof_assembly_rvalue']
                     for attic_roofs_dict in attic_roof_ls])
 
-            # Questions: here we didn't have any input validation of floor attachment based on attic type, should we
-            # enhance it? Currently, a building with attic can skip specifying attic floors (0 rvalue passed) while
-            # one with cathedral ceiling can have floor specified (though it will be silently ignored in output).
-            # attic floor center of cavity R-value or assembly R-value
             attic_floor_rvalue = self.get_attic_floor_assembly_rvalue(attic, b)
             if attic_floor_rvalue is not None:
-                closest_attic_floor_code, closest_code_rvalue = \
-                    min([(doe2code, code_rvalue)
-                         for doe2code, code_rvalue in self.ceiling_assembly_eff_rvalues.items()],
-                        key=lambda x: abs(x[1] - attic_floor_rvalue))
+                _, closest_code_rvalue = min(
+                        self.ceiling_assembly_eff_rvalues.items(),
+                        key=lambda x: abs(x[1] - attic_floor_rvalue)
+                    )
                 atticd['attic_floor_assembly_rvalue'] = closest_code_rvalue
             elif self.every_attic_floor_layer_has_nominal_rvalue(attic, b):
                 attic_floor_rvalue = self.get_attic_floor_rvalue(attic, b)
@@ -1382,6 +1393,11 @@ class HPXMLtoHEScoreTranslatorBase(object):
                 combined_atticd['attic_floor_assembly_rvalue'] = combined_atticd[ceiling_or_roof_area_key] / \
                     sum([atticd[ceiling_or_roof_area_key] / atticd['attic_floor_assembly_rvalue'] for atticd in atticds])
 
+                # Knee Walls
+                combined_atticd['knee_walls'] = []
+                for atticd in atticds:
+                    combined_atticd['knee_walls'].extend(atticd.get('knee_walls', []))
+
                 combined_atticds.append(combined_atticd)
 
             atticds = combined_atticds
@@ -1414,6 +1430,29 @@ class HPXMLtoHEScoreTranslatorBase(object):
                     key=lambda x: abs(x[1] - atticd['attic_floor_assembly_rvalue']))
             attic_floor_code = closest_floor_code
 
+            # Knee Walls
+            if len(atticd.get('knee_walls', [])) == 0:
+                knee_wall_d = None
+            elif len(atticd['knee_walls']) == 1:
+                knee_wall = atticd['knee_walls'][0]
+                knee_wall_d = deepcopy(knee_wall)
+                del knee_wall_d['assembly_eff_rvalue']
+            else:
+                ua = 0
+                area = 0
+                for kw in atticd['knee_walls']:
+                    ua += kw['area'] / kw['assembly_eff_rvalue']
+                    area += kw['area']
+                eff_rvalue = area / ua
+                assembly_code, _ = min(
+                    self.knee_wall_assembly_eff_rvalues.items(),
+                    key=lambda x: abs(x[1] - eff_rvalue)
+                )
+                knee_wall_d = {
+                    'area': area,
+                    'assembly_code': assembly_code
+                }
+
             # store it all
             zone_roof_item = OrderedDict()
             zone_roof_item['roof_name'] = 'roof%d' % i
@@ -1429,6 +1468,8 @@ class HPXMLtoHEScoreTranslatorBase(object):
             else:
                 assert atticd['rooftype'] == 'cath_ceiling'
                 zone_roof_item['roof_area'] = atticd['roof_area']
+            if knee_wall_d:
+                zone_roof_item['knee_wall'] = knee_wall_d
 
             zone_roof.append(zone_roof_item)
 

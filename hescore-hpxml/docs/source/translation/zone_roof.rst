@@ -5,23 +5,8 @@ Roof and Attic
 
 HPXML allows the specification of multiple ``Attic`` elements, each of which
 relates to one (HPXML v2) or more (HPXML v3) ``Roof`` elements. That relation is
-optional in HPXML, but is required for HEScore when there is more than one
-``Attic`` or ``Roof`` because it is important to know which roof relates to each
-attic space. An area is required for each Attic if there is more than one
-``Attic`` element.
-
-.. _`attic area`:
-
-  - In HPXML v2, areas can be specified directly by ``Attic/AtticArea``.
-  - In HPXML v3, translator first searches all the ``Area`` of ``FrameFloor`` 
-    whose id is the same as what referred in ``Attic/AttachedToFrameFloor``, and
-    sums all areas up. Otherwise, the ``Area`` of ``Roof`` whose id is the same
-    as what referred in ``Attic/AttachedToRoof`` will be searched and summed for
-    each attic.
-
-If there is only one ``Attic`` element, the footprint area of the building is
-assumed. If there's only one roof in HPXML, it will be automatically attached to
-attic.
+optional in HPXML, but is required for HEScore because it is important to know
+which roof relates to each attic space. 
 
 .. _rooftype:
 
@@ -81,6 +66,68 @@ attic. This is discussed in more detail in :ref:`roof-rvalues`.
    Starting from HPXML v3, HPXML allows multiple floors/roofs attached to a
    single attic. The properties of the floors/roofs attached to the same attic
    are combined into a single one.
+
+.. _`attic area`:
+
+Attic and Roof Area
+*******************
+
+Home Energy Score needs to know the area of the thermal boundary between the
+living space and unconditioned spaces. The areas needed depend on which
+:ref:`rooftype` is selected.
+
+It's best practice to provide areas for all roof and attic floor surfaces
+regardless of Attic/Roof type. 
+
+
+Vented Attic
+------------
+
+The thermal boundary for a vented attic is at the floor of the attic. In **HPXML
+v2** that area is attached to the
+``Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic`` element:
+
+.. literalinclude:: ../../../examples/hescore_min.xml
+   :lines: 65-82
+   :emphasize-lines: 17
+
+In **HPXML v3** that area is retrieved from a referenced ``FrameFloor`` element
+from the ``Building/BuildingDetails/Enclosure/Attics/Attic`` element:
+
+.. literalinclude:: ../../../examples/hescore_min_v3.xml
+   :lines: 56-65
+   :emphasize-lines: 9
+
+.. literalinclude:: ../../../examples/hescore_min_v3.xml
+   :lines: 108-117
+   :emphasize-lines: 2-3
+
+If there are more than one ``Roof`` elements attached to an attic (HPXML v3
+since HPXML v2 only allows one roof to be referenced per ``Attic``), you will
+need to provide an area for each one so that the most common roof color and
+exterior finishes may be selected.
+
+
+Cathedral Ceiling
+-----------------
+
+The thermal boundary for a cathedral ceiling is the roof deck, so the area of
+the roofs attached to the attic are used.
+
+In **HPXML v2** a single ``Roof`` can be referenced by the ``Attic`` and the
+area of that roof is used.
+
+.. literalinclude:: ../../../examples/house3.xml
+   :lines: 51-73
+   :emphasize-lines: 7
+
+In **HPXML v3** multiple ``Roof`` elements can be referenced by the ``Attic``
+and the sum of those ares is used. The properties of the roofs will be area
+weighted as described below.
+
+.. literalinclude:: ../../../examples/house3_v3.xml
+   :lines: 39, 51-59, 69-82, 173
+   :emphasize-lines: 14
 
 Roof Color
 **********
@@ -223,28 +270,25 @@ The roof R-value can be described by using ``NominalRValue`` or ``AssemblyRValue
 If a user wishes to use a nominal R-value, ``NominalRValue`` elements for all layers need to be provided.
 Otherwise, ``AssemblyRValue`` elements for each layer need to be provided.
 
-If nominal R-value is used, the R-value is summed for all insulation layers. If the roof construction 
-was determined to have :ref:`rigid-sheathing`, an R-value of 5 is subtracted from the roof R-value sum
-to account for the R-value of the sheathing in the HEScore construction.
-The nearest discrete R-value from the list of possible R-values for that roof type
-is used to determine an assembly code. 
-Then, the assembly R-value of the corresponding 
-assembly code from the lookup table is used. The lookup table can be found 
-at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
+If nominal R-value is used, the R-value is summed for all insulation layers. If
+the roof construction was determined to have :ref:`rigid-sheathing`, an R-value
+of 5 is subtracted from the roof R-value sum to account for the R-value of the
+sheathing in the HEScore construction. The nearest discrete R-value from the
+list of possible R-values for that roof type is used to determine an assembly
+code. Then, the assembly R-value of the corresponding assembly code from the
+lookup table is used. The lookup table can be found at
+`hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
 
 If assembly R-value is used, the discrete R-value nearest to assembly R-value
 from the lookup table is used. The lookup table can be found at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
-If the attic has more than one ``Roof`` element, a weighted average assembly R-value is determined
-by weighting the U-values by area.
-Then the discrete R-value nearest to the weighted average assembly R-value from the lookup table is used.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
 
-Starting from HPXML v3, multiple roofs are allowed to be attached to the same attic. 
-If the attic has more than one ``Roof`` element with roof insulation,
-a weighted average R-value is calculated using assembly R-value for each ``Roof``, 
-whether nominal R-value or assembly R-value is used. 
-The weighted average is calculated by weighting the U-values by area.
+If the attic has more than one ``Roof`` element and/or if multiple attics of the
+same type and their associated roofs are to be combined, a weighted average
+assembly R-value is determined by weighting the U-values by area. Then the
+discrete R-value nearest to the weighted average assembly R-value from the
+lookup table is used.
 
 .. math::
    :nowrap:
@@ -257,7 +301,7 @@ The weighted average is calculated by weighting the U-values by area.
 
 Then the nearest discrete R-value to the weighted average R-value from the lookup table is used.
 The lookup table can be found at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
 
 Attic R-value
 *************
@@ -269,7 +313,7 @@ If nominal R-value is used, the attic floor center-of-cavity R-values are each R
 than the nominal R-values in the enumeration list.
 
 If assembly R-value is used, the lookup table at `hescorehpxml\\lookups\\lu_ceiling_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_ceiling_eff_rvalue.csv>`_
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_ceiling_eff_rvalue.csv>`_
 is used. 
 
 If the primary roof type is determined to be a cathedral ceiling, then an attic
@@ -280,14 +324,19 @@ R-value is not calculated.
 Knee Walls
 **********
 
-In HPXML v2, knee walls are specified via the ``Attic/AtticKneeWall`` element.
+The Home Energy Score Q1 2022 release includes the ability to directly model
+knee walls. As such, the workaround of adding knee wall area to attic floor area
+is no longer used. Knee walls are now directly translated and passed to Home
+Energy Score as follows:
 
-Starting from HPXML v3, knee walls are specified via wall attachment in
+In **HPXML v2**, knee walls are specified via the ``Attic/AtticKneeWall`` element.
+
+In **HPXML v3**, knee walls are specified via wall attachment in
 ``Attic/AttachedToWall``. The attached wall must have ``AtticWallType`` of "knee
 wall". See below an example:
 
 .. code-block:: xml
-   :emphasize-lines: 10, 15-30
+   :emphasize-lines: 10, 16, 18, 22, 26-27
 
    <Attics>
       <Attic>
@@ -315,25 +364,27 @@ wall". See below an example:
               <SystemIdentifier id="kneewallins"/>
               <Layer>
                   <InstallationType>cavity</InstallationType>
-                  <NominalRValue>10</NominalRValue>
+                  <NominalRValue>11</NominalRValue>
               </Layer>
           </Insulation>
       </Wall>
    <Walls>
 
-If an attic has knee walls specified, the area of the knee walls will be added
-to the attic floor area.
-
 The knee walls R-value can be described by nominal R-value or assembly R-value.
 
-If nominal R-value is used, the knee walls center-of-cavity R-value will be reflected 
-in the area weighted center-of-cavity effective R-value of the attic floor. 
-The knee walls center-of-cavity R-value is R-1.8 greater than the nominal R-value.
+If nominal R-value is used, the nearest assembly code by R-value *in the code* is
+selected and the assembly R-value is looked up for that code.
 
-If assembly R-value is used, the knee walls assembly R-value will be reflected in
-the area weighted assembly effective R-value of the attic floor.
+If assembly R-value is used, the nearest assembly code *by assembly R-value* is
+looked up from that table. 
 
-The averaged center-of-cavity or assembly effective R value is combined from all knee walls 
-and attic floors attached to the same attic. The highest weighted attic floor 
-construction type is selected.
+.. csv-table:: Knee Wall Assembly Codes and R-values
+   :header-rows: 1
+   :file: ../../../hescorehpxml/lookups/lu_knee_wall_eff_rvalue.csv
+
+If an attic has more than one knee wall and/or if multiple attics of the same
+type need to be combined, the area weighted average assembly effective R-value
+is calculated from all the associated knee walls. The areas of all the knee
+walls are summed. The assembly code with the nearest assembly effective R-value
+is chosed to represent the knee walls.
 
