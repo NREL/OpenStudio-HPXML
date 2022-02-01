@@ -651,13 +651,6 @@ class HEScoreRulesetTest < MiniTest::Test
     ceil_height = in_doc['building']['about']['floor_to_ceiling_height']
     cbv = XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume', :float)
 
-    has_conditioned_attic = false
-    in_doc['building']['zone']['zone_roof'].each do |roof|
-      if roof['roof_type'] == 'cond_attic'
-        has_conditioned_attic = true
-        break
-      end
-    end
     has_cathedral_ceiling = false
     in_doc['building']['zone']['zone_roof'].each do |roof|
       if roof['roof_type'] == 'cath_ceiling'
@@ -666,12 +659,10 @@ class HEScoreRulesetTest < MiniTest::Test
       end
     end
 
-    if not (has_cathedral_ceiling || has_conditioned_attic)
+    if not (has_cathedral_ceiling)
       assert_in_epsilon(cfa * ceil_height, cbv, 0.01)
-    elsif has_cathedral_ceiling && (not has_conditioned_attic)
+    elsif has_cathedral_ceiling
       assert(cfa * ceil_height < cbv)
-    elsif (not has_cathedral_ceiling) && has_conditioned_attic
-      assert(cfa * ceil_height > cbv)
     end
   end
 end
