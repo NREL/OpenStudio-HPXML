@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>hpxm_lto_he_score</name>
+  <uid>c984bb9e-4ac4-4930-a399-9d23f8f6936a</uid>
+  <version_id>ba6e2b49-d779-44ff-8217-63d15a8edb7e</version_id>
+  <version_modified>20220201T194223Z</version_modified>
+  <xml_checksum>2C38F48B</xml_checksum>
+  <class_name>HPXMLtoHEScore</class_name>
+  <display_name>HEScore-HPXML</display_name>
+  <description>Translates HPXML files to a Home Energy Score input json file</description>
+  <modeler_description>Defines the set of arguments needed for ResStock that are not available in BuildResidentialHPXML.</modeler_description>
+  <arguments>
+    <argument>
+      <name>hpxml_path</name>
+      <display_name>HPXML Filepath</display_name>
+      <description>Path of HPXML file to be translated</description>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>output_path</name>
+      <display_name>HEScore JSON Output Filepath</display_name>
+      <description>Path of HEScore JSON file that is output by the translator</description>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+  </arguments>
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Whole Building.Space Types</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>0A4CA3A1</checksum>
+    </file>
+  </files>
+</measure>
