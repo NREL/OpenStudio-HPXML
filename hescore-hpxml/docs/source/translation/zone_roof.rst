@@ -27,7 +27,7 @@ type according to the following mapping.
    unvented attic         vented_attic
    vented attic           vented_attic
    venting unknown attic  vented_attic
-   other                  *see note below*
+   other                  *not translated*
    =====================  ================
 
 .. table:: HPXML Attic Type to HEScore Roof type mapping (HPXML v3)
@@ -38,22 +38,21 @@ type according to the following mapping.
    CathedralCeiling            cath_ceiling
    FlatRoof                    cath_ceiling
    Attic/CapeCod = 'true'      cath_ceiling
-   Attic/Conditioned = 'true'  cond_attic
+   Attic/Conditioned = 'true'  cath_ceiling
    Attic                       vented_attic
    Other                       *not translated*
    ==========================  ================
 
 .. note::
-   
-   Prior to HPXML v3, there's no existing HPXML element capturing a conditioned attic.
-   The only way to model a HEScore ``cond_attic`` is to specify HPXML Attic Type
-   to be ``other`` with an extra element ``Attic/extension/Conditioned`` to be
-   ``true``.
 
-   Otherwise, HPXML Attic Type ``other`` will not be translated and will
-   result in a translation error.
+   The attic/roof type ``cond_attic`` has been removed from HEScore as of Q1
+   2022. Homes with conditioned attics should be described in a way that
+   translates to a cathedral ceiling. In HPXML v3, the conditioned attic type is
+   automatically translated to cathedral ceiling. In HPXML v2, the extension
+   workaround to specify a conditioned attic has been removed and the user will
+   need to identify the house as having an attic type that translates to
+   cathedral ceiling to achieve the desired effect. 
 
-   
 HEScore can accept up to two attic/roof constructions. If there are more than
 two specified in HPXML, the properties of the ``Attic`` elements with
 the same roof type are combined. For variables with a discrete selection the
