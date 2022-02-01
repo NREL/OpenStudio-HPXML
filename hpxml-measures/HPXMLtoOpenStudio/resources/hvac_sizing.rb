@@ -102,11 +102,11 @@ class HVACSizing
 
     @cool_design_grains = UnitConversions.convert(weather.design.CoolingHumidityRatio, 'lbm/lbm', 'grains')
 
-    # # Calculate the design temperature differences
-    @ctd = weather.design.CoolingDrybulb - @cool_setpoint
-    @htd = @heat_setpoint - weather.design.HeatingDrybulb
+    # Calculate the design temperature differences
+    @ctd = [weather.design.CoolingDrybulb - @cool_setpoint, 0.0].max
+    @htd = [@heat_setpoint - weather.design.HeatingDrybulb, 0.0].max
 
-    # # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
+    # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
     dtr = weather.design.DailyTemperatureRange
 
     if dtr < 16.0
@@ -989,7 +989,7 @@ class HVACSizing
 
     # FUTURE: Consolidate code w/ airflow.rb
     infil_volume = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = @hpxml.inferred_infiltration_height(infil_volume)
+    infil_height = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_height.nil? }[0].infiltration_height
     sla = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
       if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
@@ -2303,6 +2303,12 @@ class HVACSizing
       end
       if hpxml_hvac.respond_to? :fraction_cool_load_served
         hvac.CoolingLoadFraction = hpxml_hvac.fraction_cool_load_served
+      end
+      if hpxml_hvac.is_a?(HPXML::HeatingSystem) && hpxml_hvac.is_heat_pump_backup_system
+        # Use the same load fractions as the heat pump
+        heat_pump = @hpxml.heat_pumps.select { |hp| hp.backup_system_idref == hpxml_hvac.id }[0]
+        hvac.HeatingLoadFraction = heat_pump.fraction_heat_load_served
+        hvac.CoolingLoadFraction = heat_pump.fraction_cool_load_served
       end
 
       # Capacities

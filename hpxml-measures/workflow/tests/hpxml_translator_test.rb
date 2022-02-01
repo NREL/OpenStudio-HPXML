@@ -251,7 +251,7 @@ class HPXMLTest < MiniTest::Test
     # Check that simulation works using template2.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stocastic-schedules.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stochastic-schedules.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -389,7 +389,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    stron_paths = [File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')]
+    stron_paths = [File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schematron_validators: stron_paths) # Validate in.xml to ensure it can be run back through OS-HPXML
     if not hpxml.errors.empty?
       puts 'ERRORS:'
@@ -497,7 +497,7 @@ class HPXMLTest < MiniTest::Test
 
   def _test_schema_validation(xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources'))
+    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema'))
     hpxml_doc = XMLHelper.parse_file(xml)
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
@@ -1200,8 +1200,13 @@ class HPXMLTest < MiniTest::Test
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
-      if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
-        assert_operator(energy_htg, :>, 0)
+      if htg_fuels.include? fuel
+        if (not hpxml_path.include? 'location-miami') && \
+           (not hpxml_path.include? 'location-honolulu') && \
+           (not hpxml_path.include? 'location-phoenix') && \
+           (not (hpxml_path.include?('autosize') && hpxml_path.include?('backup')))
+          assert_operator(energy_htg, :>, 0)
+        end
       else
         assert_equal(0, energy_htg)
       end
@@ -1241,8 +1246,11 @@ class HPXMLTest < MiniTest::Test
 
     output_keys = []
     results.each do |xml, xml_results|
-      output_keys = xml_results.keys
-      break
+      xml_results.keys.each do |key|
+        next if output_keys.include? key
+
+        output_keys << key
+      end
     end
 
     column_headers = ['HPXML']
