@@ -529,7 +529,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
       # Create HPXML object
       if ['battery-pv-output-power-low'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-pv-battery-outside.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-pv-battery.xml'))
         hpxml.batteries[0].rated_power_output = 0.1
         hpxml.pv_systems[0].max_power_output = 0.1
         hpxml.pv_systems[1].max_power_output = 0.1
