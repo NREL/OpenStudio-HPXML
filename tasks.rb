@@ -349,6 +349,7 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+    'base-pv-2.xml' => 'base-pv.xml',
     'base-pv-battery.xml' => 'base-battery.xml',
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
@@ -2355,6 +2356,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
+  elsif ['base-pv-2.xml'].include? hpxml_file
+    args['pv_system_2_max_power_output'] = 3000
   end
 
   # Battery

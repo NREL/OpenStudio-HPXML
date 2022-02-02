@@ -26,6 +26,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills = {
       'Electricity: Fixed ($)' => 0.0,
       'Electricity: Marginal ($)' => 0.0,
+      'Electricity: Credit ($)' => 0.0,
       'Electricity: Total ($)' => 0.0,
       'Natural Gas: Fixed ($)' => 0.0,
       'Natural Gas: Marginal ($)' => 0.0,
@@ -126,13 +127,76 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
+  def test_simple_calculations_auto_rates_pv_net_metering_user
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv.xml'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 144.0
+    @expected_bills['Electricity: Marginal ($)'] = 1046.85
+    @expected_bills['Electricity: Credit ($)'] = 804.72
+    @expected_bills['Electricity: Total ($)'] = 386.12
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_auto_rates_pv_net_metering_user_net_producer
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv-2.xml'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 144.0
+    @expected_bills['Electricity: Marginal ($)'] = 1046.85
+    @expected_bills['Electricity: Credit ($)'] = 1123.08
+    @expected_bills['Electricity: Total ($)'] = 67.77
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_auto_rates_pv_net_metering_retail
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv.xml'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 144.0
+    @expected_bills['Electricity: Marginal ($)'] = 1046.85
+    @expected_bills['Electricity: Credit ($)'] = 804.72
+    @expected_bills['Electricity: Total ($)'] = 386.12
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_auto_rates_pv_net_metering_retail_net_producer
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv-2.xml'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 144.0
+    @expected_bills['Electricity: Marginal ($)'] = 1046.85
+    @expected_bills['Electricity: Credit ($)'] = 1306.37
+    @expected_bills['Electricity: Total ($)'] = -115.52
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
   def test_simple_calculations_auto_rates_pv_feed_in_tariff
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv.xml'
     @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
-    @expected_bills['Electricity: Marginal ($)'] = 101.29
+    @expected_bills['Electricity: Marginal ($)'] = 1046.85
+    @expected_bills['Electricity: Credit ($)'] = 945.56
     @expected_bills['Electricity: Total ($)'] = 245.29
     @expected_bills['Natural Gas: Fixed ($)'] = 96.0
     @expected_bills['Natural Gas: Marginal ($)'] = 94.01

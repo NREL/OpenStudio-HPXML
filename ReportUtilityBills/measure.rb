@@ -121,6 +121,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('Net Metering')
     args << arg
 
+    pv_annual_excess_sellback_rate_type_choices = OpenStudio::StringVector.new
+    pv_annual_excess_sellback_rate_type_choices << 'User-Specified'
+    pv_annual_excess_sellback_rate_type_choices << 'Retail Electricity Cost'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_annual_excess_sellback_rate_type', pv_annual_excess_sellback_rate_type_choices, true)
+    arg.setDisplayName('PV: Net Metering Annual Excess Sellback Rate Type')
+    arg.setDescription("The type of annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering'.")
+    arg.setDefaultValue('User-Specified')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_net_metering_annual_excess_sellback_rate', true)
+    arg.setDisplayName('PV: Net Metering Annual Excess Sellback Rate')
+    arg.setUnits('$/kWh')
+    arg.setDescription("The annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'.")
+    arg.setDefaultValue(0.03)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_feed_in_tariff_rate', true)
     arg.setDisplayName('PV: Feed-In Tariff Rate')
     arg.setUnits('$/kWh')
@@ -133,11 +150,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   class UtilityRate
     def initialize()
-      fixedmonthlycharge = false
-      flatratebuy = 0.0
-      feed_in_tariff = false
+      @fixedmonthlycharge = false
+      @flatratebuy = 0.0
+      @net_metering_excess_sellback_type = false
+      @net_metering_user_excess_sellback_rate = false
+      @feed_in_tariff_rate = false
     end
-    attr_accessor(:fixedmonthlycharge, :flatratebuy, :feed_in_tariff)
+    attr_accessor(:fixedmonthlycharge, :flatratebuy,
+                  :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
+                  :feed_in_tariff_rate)
   end
 
   class UtilityBill
@@ -150,7 +171,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       @monthly_fixed_charge = []
 
       @monthly_production_credit = []
-      @annual_production_credit = []
+      @annual_production_credit = 0.0
     end
     attr_accessor(:annual_energy_charge, :annual_fixed_charge, :annual_total,
                   :monthly_energy_charge, :monthly_fixed_charge,
@@ -221,10 +242,18 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Get utility rates
     @utility_rates.each do |fuel_type, rate|
+      next if @fuels[[fuel_type, false]].timeseries.sum == 0
+
       if fuel_type == FT::Elec
         rate.fixedmonthlycharge = args[:electricity_fixed_charge]
         rate.flatratebuy = args[:electricity_marginal_rate]
-        rate.feed_in_tariff = args[:pv_feed_in_tariff_rate]
+
+        # Net Metering
+        rate.net_metering_excess_sellback_type = args[:pv_annual_excess_sellback_rate_type] if args[:pv_compensation_type] == 'Net Metering'
+        rate.net_metering_user_excess_sellback_rate = args[:pv_net_metering_annual_excess_sellback_rate] if rate.net_metering_excess_sellback_type == 'User-Specified'
+
+        # Feed-In Tariff
+        rate.feed_in_tariff_rate = args[:pv_feed_in_tariff_rate] if args[:pv_compensation_type] == 'Feed-In Tariff'
       elsif fuel_type == FT::Gas
         rate.fixedmonthlycharge = args[:natural_gas_fixed_charge]
         rate.flatratebuy = args[:natural_gas_marginal_rate]
@@ -252,13 +281,29 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Calculate utility bills
+    net_elec = 0
     @fuels.each do |(fuel_type, is_production), fuel|
       rate = @utility_rates[fuel_type]
       bill = @utility_bills[fuel_type]
 
-      CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill)
+      net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+    end
 
-      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge
+    # Annual true up
+    rate = @utility_rates[FT::Elec]
+    bill = @utility_bills[FT::Elec]
+    if rate.net_metering_excess_sellback_type == 'User-Specified'
+      if bill.annual_production_credit > bill.annual_energy_charge
+        bill.annual_production_credit = bill.annual_energy_charge
+      end
+      if net_elec < 0
+        bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
+      end
+    end
+
+    # Calculate annual bill
+    @utility_bills.each do |_, bill|
+      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
     end
 
     # Report results
@@ -351,7 +396,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return values
   end
 
-  def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge = nil)
+  def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge)
     cols = CSV.read("#{File.dirname(__FILE__)}/resources/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
     cols[0].each_with_index do |rate_state, i|
       next if rate_state != state_code
@@ -367,30 +412,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def teardown
-    @sqlFile.close()
-
-    # Ensure sql file is immediately freed; otherwise we can get
-    # errors on Windows when trying to delete this file.
-    GC.start()
-  end
-
   def write_output(runner, utility_bills, output_format, output_path)
     line_break = nil
 
     segment, _ = utility_bills.keys[0].split(':', 2)
     segment = segment.strip
     results_out = []
-    utility_bills.each do |key, utility_bill|
+    utility_bills.each do |key, bill|
       new_segment, _ = key.split(':', 2)
       new_segment = new_segment.strip
       if new_segment != segment
         results_out << [line_break]
         segment = new_segment
       end
-      results_out << ["#{key}: Fixed ($)", utility_bill.annual_fixed_charge.round(2)] if [FT::Elec, FT::Gas].include? key
-      results_out << ["#{key}: Marginal ($)", utility_bill.annual_energy_charge.round(2)] if [FT::Elec, FT::Gas].include? key
-      results_out << ["#{key}: Total ($)", utility_bill.annual_total.round(2)]
+      results_out << ["#{key}: Fixed ($)", bill.annual_fixed_charge.round(2)] if [FT::Elec, FT::Gas].include? key
+      results_out << ["#{key}: Marginal ($)", bill.annual_energy_charge.round(2)] if [FT::Elec, FT::Gas].include? key
+      results_out << ["#{key}: Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
+      results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
 
     if output_format == 'csv'
@@ -409,6 +447,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
     end
     runner.registerInfo("Wrote bills output to #{output_path}.")
+  end
+
+  def teardown
+    @sqlFile.close()
+
+    # Ensure sql file is immediately freed; otherwise we can get
+    # errors on Windows when trying to delete this file.
+    GC.start()
   end
 end
 
