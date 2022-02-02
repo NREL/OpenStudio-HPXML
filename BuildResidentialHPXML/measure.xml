@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ce933a5e-55ba-4d28-ade3-c82f0daa82d8</version_id>
-  <version_modified>20220127T194158Z</version_modified>
+  <version_id>e65a58f1-6aa9-4307-b730-3019cc0707a5</version_id>
+  <version_modified>20220202T153959Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5998,6 +5998,23 @@
       <checksum>2E568E41</checksum>
     </file>
     <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>988FB8C9</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9B83F726</checksum>
+    </file>
+    <file>
       <filename>extra_files/extra-auto.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6752,23 +6769,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>1B214F55</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>988FB8C9</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>9B83F726</checksum>
     </file>
     <file>
       <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
