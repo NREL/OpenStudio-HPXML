@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a1b48c10-284b-4272-8658-bccc7d21fe09</version_id>
-  <version_modified>20220128T184536Z</version_modified>
+  <version_id>7f2ef688-6a8c-4592-a798-b171b114f7d4</version_id>
+  <version_modified>20220201T154310Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -252,12 +252,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>04E10882</checksum>
-    </file>
-    <file>
-      <filename>test_battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7C0EFC71</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -524,12 +518,6 @@
       <checksum>415B6E65</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3B02B666</checksum>
-    </file>
-    <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -558,12 +546,6 @@
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>35DA8C7E</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C1D85587</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
@@ -601,22 +583,34 @@
       <checksum>4D63BC65</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>09288DCF</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>861C9AF0</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb.bak</filename>
-      <filetype>bak</filetype>
+      <filename>test_battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>574D5312</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>926B103B</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EF8E6C30</checksum>
+      <checksum>EB160960</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3378D320</checksum>
     </file>
   </files>
 </measure>
