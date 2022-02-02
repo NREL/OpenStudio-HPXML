@@ -1,16 +1,40 @@
 # frozen_string_literal: true
 
-class UtilityBill
-  def self.calculate_simple(fuels, fuel_type, utility_bill, fixed_charge, marginal_rate, total_elec_produced_timeseries, pv_feed_in_tariff_rate)
-    energy = fuels[fuel_type].timeseries_output
+class CalculateUtilityBill
+  def self.simple(fuel_type, fuel_time_series, is_production, rate, bill, realtimeprice = false)
+    monthly_fuel_cost = []
 
-    utility_bill.fixed = 12.0 * fixed_charge if (!energy.all? { |x| x == 0.0 } && !fixed_charge.nil?)
-    utility_bill.marginal = energy.collect { |x| x * marginal_rate }.sum
+    (0..11).to_a.each do |month|
+      if is_production && fuel_type == FT::Elec && rate.feed_in_tariff
+        monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff
+      elsif !is_production && fuel_type == FT::Elec && realtimeprice
+        monthly_fuel_cost[month] = fuel_time_series[month] * realtimeprice[month] # hour?
+      else
+        monthly_fuel_cost[month] = fuel_time_series[month] * rate.flatratebuy
+      end
 
-    if !pv_feed_in_tariff_rate.nil? # has pv
-      utility_bill.marginal -= total_elec_produced_timeseries.collect { |x| x * pv_feed_in_tariff_rate }.sum
-    end
+      if fuel_type == FT::Elec && is_production && !fuel_time_series.all? { |x| x == 0.0 }
 
-    utility_bill.total = utility_bill.fixed + utility_bill.marginal
+      end
+
+      if is_production
+        if rate.feed_in_tariff
+
+        elsif realtimeprice
+
+        else
+
+        end
+      else
+        bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
+        if rate.fixedmonthlycharge
+          bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge
+        else
+          bill.monthly_fixed_charge[month] = 0
+        end
+        bill.annual_energy_charge += bill.monthly_energy_charge[month]
+        bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+      end
+    end # end monthly
   end
 end

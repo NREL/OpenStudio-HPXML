@@ -49,7 +49,7 @@
         "wood_pellets_marginal_rate": "auto",
         "coal_marginal_rate": "auto",
         "pv_compensation_type": "Net Metering",
-        "pv_feed_in_tariff_rate": 12.0
+        "pv_feed_in_tariff_rate": 0.12
       },
       "measure_dir_name": "ReportUtilityBills"
     }
