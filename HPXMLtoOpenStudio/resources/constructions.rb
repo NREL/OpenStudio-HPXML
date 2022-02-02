@@ -1818,7 +1818,7 @@ class Constructions
     # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
     # U-factor and SHGC adjustment based on the data obtained from the above reference
     if base_ufactor < 0.45
-      fail "Invalid base window U-Factor for storm windows upgrade '#{base_ufactor}'"
+      fail "Unexpected base window U-Factor (#{base_ufactor}) for a storm window."
     end
 
     if storm_type == 'clear'
