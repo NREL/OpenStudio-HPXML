@@ -1276,9 +1276,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
                         roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21))
                         lookup_code = f"rf{attic_roofs_d['roofconstype']}{roof_rvalue:02d}{attic_roofs_d['extfinish']}"
                     attic_roofs_d['roof_assembly_rvalue'] = self.roof_assembly_eff_rvalues[lookup_code]
-                    # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
-                    if has_radiant_barrier and roof_rvalue > 0:
-                        attic_roofs_d['roofconstype'] = 'wf'
                 else:
                     raise TranslationError(
                         'Every roof insulation layer needs a NominalRValue or '
