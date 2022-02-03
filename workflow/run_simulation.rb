@@ -81,6 +81,10 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
     args['wood_cord_marginal_rate'] = Constants.Auto
     args['wood_pellets_marginal_rate'] = Constants.Auto
     args['coal_marginal_rate'] = Constants.Auto
+    args['pv_compensation_type'] = 'Net Metering'
+    args['pv_annual_excess_sellback_rate_type'] = 'User-Specified'
+    args['pv_net_metering_annual_excess_sellback_rate'] = 0.03
+    args['pv_feed_in_tariff_rate'] = 0.12
     update_args_hash(measures, measure_subdir, args)
   end
 
