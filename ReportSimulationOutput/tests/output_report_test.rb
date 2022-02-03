@@ -340,7 +340,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     'co2CambiumHourlyLowRECostsLRMERRMPAPropane',
     'co2CambiumHourlyLowRECostsLRMERRMPAWoodCord',
     'co2CambiumHourlyLowRECostsLRMERRMPAWoodPellets',
-    'co2CambiumAnnualMidCaseAERNationalCoal',
+    'co2CambiumHourlyLowRECostsLRMERRMPACoal',
     'co2CambiumAnnualMidCaseAERNationalTotal',
     'co2CambiumAnnualMidCaseAERNationalElectricity',
     'co2CambiumAnnualMidCaseAERNationalNaturalGas',
