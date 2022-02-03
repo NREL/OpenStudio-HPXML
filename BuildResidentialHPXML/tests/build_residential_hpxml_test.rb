@@ -1118,7 +1118,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['emissions_scenario_names'] = 'Scenario1'
       args['emissions_types'] = 'CO2,CO2'
       args['emissions_electricity_units'] = HPXML::EmissionsScenario::UnitsLbPerMWh
-      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv'
+      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv'
     elsif ['error-emissions-natural-gas-args-not-all-specified.xml'].include? hpxml_file
       args['emissions_natural_gas_values'] = '117.6'
     elsif ['error-invalid-aspect-ratio.xml'].include? hpxml_file

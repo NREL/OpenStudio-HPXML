@@ -121,7 +121,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hpxml.header.emissions_scenarios.add(name: emissions_type,
                                            emissions_type: emissions_type,
                                            elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
-                                           elec_schedule_filepath: File.join(File.dirname(__FILE__), '..', 'resources', 'data', 'cambium', 'StdScen21_MidCase_hourly_AZNMc_2022.csv'),
+                                           elec_schedule_filepath: File.join(File.dirname(__FILE__), '..', 'resources', 'data', 'cambium', 'LRMER_MidCase.csv'),
                                            elec_schedule_number_of_header_rows: 99,
                                            elec_schedule_column_number: 88,
                                            natural_gas_units: HPXML::EmissionsScenario::UnitsLbPerMBtu,
