@@ -48,6 +48,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('Simple')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('custom_tariff', false)
+    arg.setDisplayName('Electricity: Custom Tariff File Location')
+    arg.setDescription('Absolute/relative path of the json. Relative paths are relative to the HPXML file?')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', true)
     arg.setDisplayName('Electricity: Fixed Charge')
     arg.setUnits('$/month')
@@ -152,13 +157,29 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     def initialize()
       @fixedmonthlycharge = false
       @flatratebuy = 0.0
+      @realtimeprice = []
+
       @net_metering_excess_sellback_type = false
       @net_metering_user_excess_sellback_rate = false
+
       @feed_in_tariff_rate = false
+
+      @energyratestructure = []
+      @energyweekdayschedule = []
+      @energyweekendschedule = []
+
+      @demandratestructure = []
+      @demandweekdayschedule = []
+      @demandweekendschedule = []
+
+      @flatdemandstructure = []
     end
-    attr_accessor(:fixedmonthlycharge, :flatratebuy,
+    attr_accessor(:fixedmonthlycharge, :flatratebuy, :realtimeprice,
                   :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
-                  :feed_in_tariff_rate)
+                  :feed_in_tariff_rate,
+                  :energyratestructure, :energyweekdayschedule, :energyweekendschedule,
+                  :demandratestructure, :demandweekdayschedule, :demandweekendschedule,
+                  :flatdemandstructure)
   end
 
   class UtilityBill
@@ -245,8 +266,40 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next if @fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
-        rate.fixedmonthlycharge = args[:electricity_fixed_charge]
-        rate.flatratebuy = args[:electricity_marginal_rate]
+        if args[:electricity_bill_type] == 'Simple'
+          rate.fixedmonthlycharge = args[:electricity_fixed_charge]
+          rate.flatratebuy = args[:electricity_marginal_rate]
+        elsif args[:electricity_bill_type] == 'Detailed'
+          if args[:custom_tariff].is_initialized
+            hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+            filepath = FilePath.check_path(args[:custom_tariff].get,
+                                           File.dirname(hpxml_path),
+                                           'Tariff File')
+            fileread = File.read(filepath)
+            tariff = JSON.parse(fileread, symbolize_names: true)
+            tariff = tariff[:items][0]
+
+            if tariff.keys.include?(:realtimepricing)
+              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+              rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
+            else
+              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+              rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
+
+              rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
+              rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
+              rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
+
+              rate.demandratestructure = tariff[:demandratestructure] if tariff.keys.include?(:demandratestructure)
+              rate.demandweekdayschedule = tariff[:demandweekdayschedule] if tariff.keys.include?(:demandweekdayschedule)
+              rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
+
+              rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
+            end
+          else
+            # TODO: autoselect a tariff?
+          end
+        end
 
         # Net Metering
         rate.net_metering_excess_sellback_type = args[:pv_annual_excess_sellback_rate_type] if args[:pv_compensation_type] == 'Net Metering'
@@ -286,7 +339,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       rate = @utility_rates[fuel_type]
       bill = @utility_bills[fuel_type]
 
-      net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+      if fuel_type == FT::Elec
+        if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
+          net_elec = CalculateUtilityBill.detailed_electric(@fuels, rate, bill, net_elec)
+        else
+          net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+        end
+      else
+        net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+      end
     end
 
     # Annual true up

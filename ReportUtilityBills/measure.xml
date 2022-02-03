@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>1d87f273-c67c-4869-a381-9316e1d5bbd7</version_id>
-  <version_modified>20220202T213952Z</version_modified>
+  <version_id>2fe20f58-2911-4850-8581-6a57afd64907</version_id>
+  <version_modified>20220203T211218Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -49,16 +49,22 @@
       <checksum>D205D809</checksum>
     </file>
     <file>
+      <filename>Simple.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>572C09BD</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>2551F05D</checksum>
+      <checksum>584329A9</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3A4381FA</checksum>
+      <checksum>9856251A</checksum>
     </file>
     <file>
       <version>
@@ -69,7 +75,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BC4EA467</checksum>
+      <checksum>0325F434</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1417452B</checksum>
     </file>
   </files>
 </measure>

@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 class CalculateUtilityBill
-  def self.simple(fuel_type, fuel_time_series, is_production, rate, bill, net_elec, realtimeprice = false)
+  def self.simple(fuel_type, fuel_time_series, is_production, rate, bill, net_elec)
     monthly_fuel_cost = []
 
     (0..11).to_a.each do |month|
       if is_production && fuel_type == FT::Elec && rate.feed_in_tariff_rate
         monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff_rate
-      elsif !is_production && fuel_type == FT::Elec && realtimeprice
-        monthly_fuel_cost[month] = fuel_time_series[month] * realtimeprice[month] # hour?
+      elsif !is_production && fuel_type == FT::Elec && !rate.realtimeprice.empty?
+        monthly_fuel_cost[month] = fuel_time_series[month] * rate.realtimeprice[month] # hour?
       else
         monthly_fuel_cost[month] = fuel_time_series[month] * rate.flatratebuy
       end
@@ -16,7 +16,7 @@ class CalculateUtilityBill
       if fuel_type == FT::Elec && fuel_time_series.sum != 0 # has PV
         if is_production
           net_elec -= fuel_time_series[month]
-          if realtimeprice
+          if !rate.realtimeprice.empty?
 
           end
         else
@@ -25,7 +25,7 @@ class CalculateUtilityBill
       end
 
       if is_production
-        if realtimeprice
+        if !rate.realtimeprice.empty?
 
         else
           bill.monthly_production_credit[month] = monthly_fuel_cost[month]
@@ -42,6 +42,11 @@ class CalculateUtilityBill
         bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
     end
+    return net_elec
+  end
+
+  def self.detailed_electric(fuels, rate, bill, net_elec)
+    # TODO
     return net_elec
   end
 end
