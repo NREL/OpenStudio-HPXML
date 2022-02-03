@@ -39,6 +39,7 @@
       "arguments": {
         "output_format": "csv",
         "electricity_bill_type": "Simple",
+        "custom_tariff": "", 
         "electricity_fixed_charge": 12.0,
         "electricity_marginal_rate": "auto",
         "natural_gas_fixed_charge": 8.0,

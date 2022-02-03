@@ -205,6 +205,36 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
+  def test_simple_calculations_real_time_pricing
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['custom_tariff'] = '../../ReportUtilityBills/resources/Sample Real-Time Pricing Rate.json'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 108.0
+    @expected_bills['Electricity: Marginal ($)'] = 433.82
+    @expected_bills['Electricity: Total ($)'] = 541.82
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_electric_calculation
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['custom_tariff'] = '../../ReportUtilityBills/resources/Simple.json'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 0.0
+    @expected_bills['Electricity: Marginal ($)'] = 0.0
+    @expected_bills['Electricity: Total ($)'] = 0.0
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
   def test_warning_semi_annual_run_period
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml'
     bills_csv = _test_measure()
