@@ -234,7 +234,7 @@ For each scenario, electricity emissions factors must be entered as an ``/HPXML/
   =================================  ================  =====  ===========  ========  ========  ============================================================
 
   .. [#] Units choices are "lb/MWh" and "kg/MWh".
-  .. [#] ScheduleFilePath must point to a file with 8760 numeric hourly values.
+  .. [#] ScheduleFilePath must point to a CSV file with 8760 numeric hourly values.
          Sources of electricity emissions data include `NREL's Cambium database <https://www.nrel.gov/analysis/cambium.html>`_ and `EPA's eGRID <https://www.epa.gov/egrid>`_.
 
 If an electricity schedule file is used, additional information can be entered in the ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor``.
