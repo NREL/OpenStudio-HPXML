@@ -631,7 +631,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
                             'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
                             'emissions-duplicate-names' => ['Found multiple Emissions Scenarios with the Scenario Name='],
-                            'emissions-non-numeric' => ['Emissions File has non-numeric values.'],
                             'emissions-wrong-columns' => ['Emissions File has too few columns. Cannot find column number'],
                             'emissions-wrong-filename' => ["Emissions File file path 'invalid-wrong-filename.csv' does not exist."],
                             'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
@@ -707,13 +706,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['emissions-duplicate-names'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
         hpxml.header.emissions_scenarios << hpxml.header.emissions_scenarios[0].dup
-      elsif ['emissions-non-numeric'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
-        scenario = hpxml.header.emissions_scenarios[1]
-        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), scenario.elec_schedule_filepath))
-        csv_data[10][scenario.elec_schedule_column_number - 1] = 'NA'
-        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml.header.emissions_scenarios[1].elec_schedule_filepath = @tmp_csv_path
       elsif ['emissions-wrong-columns'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
         scenario = hpxml.header.emissions_scenarios[1]

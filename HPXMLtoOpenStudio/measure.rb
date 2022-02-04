@@ -331,14 +331,8 @@ class OSModel
       if data.size != 8760 + num_header_rows
         fail "Emissions File has invalid number of rows (#{data.size}). Expected 8760 plus #{num_header_rows} header row(s)."
       end
-
-      data = data[num_header_rows, 8760] # Remove header rows
-
-      if col_index > data.map { |x| x.count(',') }.min
+      if col_index > data[num_header_rows, 8760].map { |x| x.count(',') }.min
         fail "Emissions File has too few columns. Cannot find column number (#{scenario.elec_schedule_column_number})."
-      end
-      if data.map { |x| x.split(',')[col_index].to_s.strip }.map { |x| Float(x) rescue nil }.any? nil
-        fail 'Emissions File has non-numeric values.'
       end
     end
   end
