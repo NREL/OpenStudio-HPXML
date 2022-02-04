@@ -3098,9 +3098,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     emissions_args_initialized = [args[:emissions_scenario_names].is_initialized,
                                   args[:emissions_types].is_initialized,
                                   args[:emissions_electricity_units].is_initialized,
-                                  args[:emissions_electricity_values_or_filepaths].is_initialized,
-                                  args[:emissions_electricity_number_of_header_rows].is_initialized,
-                                  args[:emissions_electricity_column_numbers].is_initialized]
+                                  args[:emissions_electricity_values_or_filepaths].is_initialized]
     error = (emissions_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required emissions arguments.' if error
 
@@ -3114,19 +3112,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]
-      emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
-                                    args[:emissions_types].get.split(',').length,
-                                    args[:emissions_electricity_units].get.split(',').length,
-                                    args[:emissions_electricity_values_or_filepaths].get.split(',').length,
-                                    args[:emissions_electricity_number_of_header_rows].get.split(',').length,
-                                    args[:emissions_electricity_column_numbers].get.split(',').length]
+      emissions_scenario_lengths = [args[:emissions_scenario_names].get.count(','),
+                                    args[:emissions_types].get.count(','),
+                                    args[:emissions_electricity_units].get.count(','),
+                                    args[:emissions_electricity_values_or_filepaths].get.count(',')]
 
-      emissions_scenario_lengths += [args[:emissions_fossil_fuel_units].get.split(',').length] if args[:emissions_fossil_fuel_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_electricity_number_of_header_rows].get.count(',')] if args[:emissions_electricity_number_of_header_rows].is_initialized
+      emissions_scenario_lengths += [args[:emissions_electricity_column_numbers].get.count(',')] if args[:emissions_electricity_column_numbers].is_initialized
 
       Constants.FossilFuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
-        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].get.split(',').length] if args["emissions_#{underscore_case}_values".to_sym].is_initialized
+        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].get.count(',')] if args["emissions_#{underscore_case}_values".to_sym].is_initialized
       end
 
       error = (emissions_scenario_lengths.uniq.size != 1)
@@ -3420,9 +3417,17 @@ class HPXMLFile
       emissions_types = args[:emissions_types].get.split(',').map(&:strip)
       emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
       emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
-      emissions_electricity_number_of_header_rows = args[:emissions_electricity_number_of_header_rows].get.split(',').map(&:strip)
-      emissions_electricity_column_numbers = args[:emissions_electricity_column_numbers].get.split(',').map(&:strip)
 
+      if args[:emissions_electricity_number_of_header_rows].is_initialized
+        emissions_electricity_number_of_header_rows = args[:emissions_electricity_number_of_header_rows].get.split(',').map(&:strip)
+      else
+        emissions_electricity_number_of_header_rows = [nil] * emissions_scenario_names.size
+      end
+      if args[:emissions_electricity_column_numbers].is_initialized
+        emissions_electricity_column_numbers = args[:emissions_electricity_column_numbers].get.split(',').map(&:strip)
+      else
+        emissions_electricity_column_numbers = [nil] * emissions_scenario_names.size
+      end
       if args[:emissions_fossil_fuel_units].is_initialized
         fuel_units = args[:emissions_fossil_fuel_units].get.split(',').map(&:strip)
       else

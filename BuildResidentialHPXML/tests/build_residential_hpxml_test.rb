@@ -305,8 +305,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
           next if hpxml_file.start_with?('error')
 
-          puts "\nError: Did not successfully generate #{hpxml_file}."
-          exit!
+          flunk "Error: Did not successfully generate #{hpxml_file}."
         end
 
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
@@ -330,9 +329,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           fail "ERRORS: #{errors}"
         end
       rescue Exception => e
-        puts "\n#{e}\n#{e.backtrace.join('\n')}"
-        puts "\nError: Did not successfully generate #{hpxml_file}."
-        exit!
+        flunk "Error: Did not successfully generate #{hpxml_file}.\n#{e}\n#{e.backtrace.join('\n')}"
       end
     end
   end
