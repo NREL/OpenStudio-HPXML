@@ -220,7 +220,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       @annual_total = 0.0
 
       @monthly_energy_charge = []
-      @monthly_fixed_charge = []
+      @monthly_fixed_charge = [0] * 12
 
       @monthly_production_credit = []
       @annual_production_credit = 0.0

@@ -29,12 +29,12 @@ class CalculateUtilityBill
 
       if fuel_type == FT::Elec && fuel_time_series.sum != 0 # has PV
         if is_production
-          net_elec -= fuel_time_series[month]
+          net_elec -= fuel_time_series[hour]
           if !rate.realtimeprice.empty?
             net_elec_cost += fuel_time_series[hour] * rate.realtimeprice[hour]
           end
         else
-          net_elec += fuel_time_series[month]
+          net_elec += fuel_time_series[hour]
         end
       end
 
@@ -43,17 +43,14 @@ class CalculateUtilityBill
       if is_production
         if !rate.realtimeprice.empty?
           bill.monthly_production_credit[month] = net_elec_cost
-          bill.annual_production_credit += bill.monthly_production_credit[month]
         else
           bill.monthly_production_credit[month] = monthly_fuel_cost[month]
-          bill.annual_production_credit += bill.monthly_production_credit[month]
         end
+        bill.annual_production_credit += bill.monthly_production_credit[month]
       else
         bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
-        bill.monthly_fixed_charge[month] = 0
-        if rate.fixedmonthlycharge
-          bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge
-        end
+        bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge if rate.fixedmonthlycharge
+
         bill.annual_energy_charge += bill.monthly_energy_charge[month]
         bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
