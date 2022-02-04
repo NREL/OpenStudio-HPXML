@@ -3293,13 +3293,7 @@ class HPXMLFile
       end
     end
 
-    if args[:apply_defaults].is_initialized
-      apply_defaults = args[:apply_defaults].get
-    else
-      apply_defaults = false
-    end
-
-    if apply_defaults
+    if args[:apply_defaults].is_initialized && args[:apply_defaults].get
       eri_version = Constants.ERIVersions[-1]
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
