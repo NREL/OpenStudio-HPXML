@@ -153,6 +153,37 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
+  # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
+  def energyPlusOutputRequests(runner, user_arguments)
+    super(runner, user_arguments)
+
+    result = OpenStudio::IdfObjectVector.new
+    return result if runner.halted
+
+    model = runner.lastOpenStudioModel
+    if model.empty?
+      runner.registerError('Cannot find OpenStudio model.')
+      return false
+    end
+    @model = model.get
+
+    # use the built-in error checking
+    if !runner.validateUserArguments(arguments(model), user_arguments)
+      return result
+    end
+
+    setup_outputs()
+
+    # Fuel outputs
+    @fuels.each do |fuel_type, fuel|
+      fuel.meters.each do |meter|
+        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get
+      end
+    end
+
+    return result.uniq
+  end
+
   class UtilityRate
     def initialize()
       @fixedmonthlycharge = false
@@ -241,11 +272,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
     @model.setSqlFile(@sqlFile)
 
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
+    building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     # Require full year
-    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
+    if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
       runner.registerWarning('A full annual simulation is required for calculating utility bills.')
       return true
     end
@@ -256,8 +289,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     setup_outputs()
 
-    timeseries_frequency = 'monthly'
-    @timestamps = [0] * 12 # size is used but not contents
+    timeseries_frequency = 'hourly'
+    @timestamps = get_timestamps(timeseries_frequency)
 
     get_outputs(timeseries_frequency)
 
@@ -324,7 +357,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_state_average_marginal_rate(hpxml.header.state_code, fuel_type, rate.fixedmonthlycharge)
+          rate.flatratebuy = get_state_average_marginal_rate(@hpxml.header.state_code, fuel_type, rate.fixedmonthlycharge)
         elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
           rate.flatratebuy = 0.1 # FIXME: can we get these somewhere?
         end
@@ -343,10 +376,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
           net_elec = CalculateUtilityBill.detailed_electric(@fuels, rate, bill, net_elec)
         else
-          net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+          net_elec = CalculateUtilityBill.simple(fuel_type, @hpxml.header.sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
         end
       else
-        net_elec = CalculateUtilityBill.simple(fuel_type, fuel.timeseries, is_production, rate, bill, net_elec)
+        net_elec = CalculateUtilityBill.simple(fuel_type, @hpxml.header.sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
 
@@ -378,6 +411,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     write_output(runner, @utility_bills, output_format, output_path)
 
     teardown()
+
     return true
   end
 
@@ -516,6 +550,34 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Ensure sql file is immediately freed; otherwise we can get
     # errors on Windows when trying to delete this file.
     GC.start()
+  end
+
+  def get_timestamps(timeseries_frequency)
+    if timeseries_frequency == 'hourly'
+      interval_type = 1
+    elsif timeseries_frequency == 'daily'
+      interval_type = 2
+    elsif timeseries_frequency == 'monthly'
+      interval_type = 3
+    elsif timeseries_frequency == 'timestep'
+      interval_type = -1
+    end
+
+    query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
+    values = @sqlFile.execAndReturnVectorOfString(query)
+    fail "Query error: #{query}" unless values.is_initialized
+
+    timestamps = []
+    values.get.each do |value|
+      year, month, day, hour, minute = value.split(' ')
+      ts = Time.utc(year, month, day, hour, minute)
+
+      ts_iso8601 = ts.iso8601
+      ts_iso8601 = ts_iso8601.delete('Z')
+      timestamps << ts_iso8601
+    end
+
+    return timestamps
   end
 end
 
