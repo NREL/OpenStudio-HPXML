@@ -55,6 +55,10 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
+      - name: Install software
+        run: |
+          rm -f Gemfile.lock && bundle install
+
       - name: Run workflow tests
         run: |
           bundle exec rake test_workflow
