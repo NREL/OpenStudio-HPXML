@@ -48,9 +48,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('Simple')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('custom_tariff', false)
-    arg.setDisplayName('Electricity: Custom Tariff File Location')
-    arg.setDescription('Absolute/relative path of the json. Relative paths are relative to the HPXML file?')
+    utility_rate_type_choices = OpenStudio::StringVector.new
+    utility_rate_type_choices << 'Autoselect OpenEI'
+    utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
+    utility_rate_type_choices << 'Sample Tiered Rate'
+    utility_rate_type_choices << 'Sample Time-of-Use Rate'
+    utility_rate_type_choices << 'Sample Tiered Time-of-Use Rate'
+    utility_rate_type_choices << 'User-Specified'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
+    arg.setDisplayName('Electricity: Utility Rate Type')
+    arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
+    arg.setDefaultValue('Autoselect OpenEI')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
+    arg.setDisplayName('Electricity: User-Specified Utility Rate')
+    arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', true)
@@ -277,10 +291,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    # Require full year
+    # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
       runner.registerWarning('A full annual simulation is required for calculating utility bills.')
       return true
+    end
+
+    # Require user-specified utility rate if 'User-Specified'
+    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
+      runner.registerError('Must specify a utility rate json path when choosing User-Specified utility rate type.')
+      return false
     end
 
     # Set paths
@@ -302,12 +322,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         if args[:electricity_bill_type] == 'Simple'
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
           rate.flatratebuy = args[:electricity_marginal_rate]
+
         elsif args[:electricity_bill_type] == 'Detailed'
-          if args[:custom_tariff].is_initialized
-            hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-            filepath = FilePath.check_path(args[:custom_tariff].get,
-                                           File.dirname(hpxml_path),
-                                           'Tariff File')
+          if args[:electricity_utility_rate_type].get != 'Autoselect OpenEI'
+            if args[:electricity_utility_rate_type].get == 'User-Specified'
+              path = args[:electricity_utility_rate_user_specified].get
+
+              hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+              filepath = FilePath.check_path(path,
+                                             File.dirname(hpxml_path),
+                                             'Tariff File')
+            else # sample rates
+              custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
+              custom_rate_file = "#{args[:electricity_utility_rate_type].get}.json"
+              filepath = File.join(custom_rates_folder, custom_rate_file)
+            end
+
             fileread = File.read(filepath)
             tariff = JSON.parse(fileread, symbolize_names: true)
             tariff = tariff[:items][0]
@@ -315,6 +345,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             if tariff.keys.include?(:realtimepricing)
               rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
               rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
+
             else
               rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
               rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
@@ -330,7 +361,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
               rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
             end
           else
-            # TODO: autoselect a tariff?
+            # TODO
           end
         end
 
@@ -492,7 +523,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge)
-    cols = CSV.read("#{File.dirname(__FILE__)}/resources/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
+    cols = CSV.read("#{File.dirname(__FILE__)}/resources/Data/UtilityRates/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
     cols[0].each_with_index do |rate_state, i|
       next if rate_state != state_code
 

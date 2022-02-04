@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>28cc5200-5c86-47f0-b93f-5e14f9e869c4</version_id>
-  <version_modified>20220204T214300Z</version_modified>
+  <version_id>8c8b8efe-8c52-49f9-80c1-3bb85bcace16</version_id>
+  <version_modified>20220204T230236Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -25,52 +25,16 @@
   </attributes>
   <files>
     <file>
-      <filename>Electricity.csv</filename>
-      <filetype>csv</filetype>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6C2CC8FC</checksum>
-    </file>
-    <file>
-      <filename>Fuel Oil.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FBAE07C0</checksum>
-    </file>
-    <file>
-      <filename>Natural Gas.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>43EDF817</checksum>
-    </file>
-    <file>
-      <filename>Propane.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D205D809</checksum>
-    </file>
-    <file>
-      <filename>Simple.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>572C09BD</checksum>
-    </file>
-    <file>
-      <filename>Sample Real-Time Pricing Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1417452B</checksum>
+      <checksum>7A4D5CAF</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9683DBB4</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7A4D5CAF</checksum>
+      <checksum>33B23A0F</checksum>
     </file>
     <file>
       <version>
@@ -81,7 +45,55 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B9E842CF</checksum>
+      <checksum>EE98AE6E</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1417452B</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Tiered Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E7521706</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Tiered Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>97083DFE</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6BE68A8D</checksum>
+    </file>
+    <file>
+      <filename>Data/UtilityRates/Electricity.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6C2CC8FC</checksum>
+    </file>
+    <file>
+      <filename>Data/UtilityRates/Fuel Oil.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FBAE07C0</checksum>
+    </file>
+    <file>
+      <filename>Data/UtilityRates/Natural Gas.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>43EDF817</checksum>
+    </file>
+    <file>
+      <filename>Data/UtilityRates/Propane.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D205D809</checksum>
     </file>
   </files>
 </measure>

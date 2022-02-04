@@ -205,9 +205,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
-  def test_simple_calculations_real_time_pricing
+  def test_detailed_electric_calculations_real_time_pricing
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['custom_tariff'] = '../../ReportUtilityBills/resources/Sample Real-Time Pricing Rate.json'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 108.0
@@ -220,10 +220,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
-  def test_simple_calculations_real_time_pricing_leap_year
+  def test_detailed_electric_calculations_real_time_pricing_leap_year
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-location-AMY-2012.xml'
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['custom_tariff'] = '../../ReportUtilityBills/resources/Sample Real-Time Pricing Rate.json'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 108.0
@@ -236,9 +236,55 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
-  def test_detailed_electric_calculation
+  def test_detailed_electric_calculations_tiered_rate
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['custom_tariff'] = '../../ReportUtilityBills/resources/Simple.json'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 0.0
+    @expected_bills['Electricity: Marginal ($)'] = 0.0
+    @expected_bills['Electricity: Total ($)'] = 0.0
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_electric_calculations_time_of_use_rate
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 0.0
+    @expected_bills['Electricity: Marginal ($)'] = 0.0
+    @expected_bills['Electricity: Total ($)'] = 0.0
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_electric_calculations_tiered_time_of_use_rate
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 0.0
+    @expected_bills['Electricity: Marginal ($)'] = 0.0
+    @expected_bills['Electricity: Total ($)'] = 0.0
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_electric_calculations_user_specified_rate
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/Data/CustomRates/Sample Tiered Rate.json'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 0.0
@@ -258,7 +304,19 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
 
-    assert(log_lines.any? { |log_line| log_line.include?('A full annual simulation is required') })
+    assert(log_lines.any? { |log_line| log_line.include?('A full annual simulation is required for calculating utility bills.') })
+  end
+
+  def test_error_user_specified_but_no_rates
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    bills_csv = _test_measure(false)
+    assert(!File.exist?(bills_csv))
+
+    log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
+
+    assert(log_lines.any? { |log_line| log_line.include?('Must specify a utility rate json path when choosing User-Specified utility rate type.') })
   end
 
   def get_actual_bills(bills_csv)
@@ -272,7 +330,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _test_measure()
+  def _test_measure(expected_success = true)
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-report-utility-bills.osw')
@@ -297,11 +355,11 @@ class ReportUtilityBillsTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(@args_hash.size, found_args.size)
+    assert_equal(@args_hash.size, found_args.size) # FIXME
 
     # Run OSW
-    success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
-    assert_equal(true, success)
+    actual_success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
+    assert_equal(expected_success, actual_success)
 
     # Cleanup
     File.delete(osw_path)
