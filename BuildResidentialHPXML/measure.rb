@@ -2845,12 +2845,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
-    arg.setDisplayName('Apply default values')
-    arg.setDescription('Sets OS-HPXML default values in the HPXML output file')
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
     arg.setDisplayName('Emissions: Scenario Names')
     arg.setDescription('Names of emissions scenarios. If multiple scenarios, use a comma-separated list.')
@@ -2897,9 +2891,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
+    arg.setDisplayName('Apply default values?')
+    arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_validation', false)
     arg.setDisplayName('Apply Validation?')
-    arg.setDescription('If true, validates the output HPXML file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).')
+    arg.setDescription('If true, validates the HPXML output file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).')
     arg.setDefaultValue(false)
     args << arg
 
