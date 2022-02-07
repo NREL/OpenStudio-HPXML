@@ -186,70 +186,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return result
     end
 
-    setup_outputs()
+    fuels, _, _ = setup_outputs()
 
     # Fuel outputs
-    @fuels.each do |fuel_type, fuel|
+    fuels.each do |fuel_type, fuel|
       fuel.meters.each do |meter|
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get
       end
     end
 
     return result.uniq
-  end
-
-  class UtilityRate
-    def initialize()
-      @fixedmonthlycharge = false
-      @flatratebuy = 0.0
-      @realtimeprice = []
-
-      @net_metering_excess_sellback_type = false
-      @net_metering_user_excess_sellback_rate = false
-
-      @feed_in_tariff_rate = false
-
-      @energyratestructure = []
-      @energyweekdayschedule = []
-      @energyweekendschedule = []
-
-      @demandratestructure = []
-      @demandweekdayschedule = []
-      @demandweekendschedule = []
-
-      @flatdemandstructure = []
-    end
-    attr_accessor(:fixedmonthlycharge, :flatratebuy, :realtimeprice,
-                  :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
-                  :feed_in_tariff_rate,
-                  :energyratestructure, :energyweekdayschedule, :energyweekendschedule,
-                  :demandratestructure, :demandweekdayschedule, :demandweekendschedule,
-                  :flatdemandstructure)
-  end
-
-  class UtilityBill
-    def initialize()
-      @annual_energy_charge = 0.0
-      @annual_fixed_charge = 0.0
-      @annual_total = 0.0
-
-      @monthly_energy_charge = []
-      @monthly_fixed_charge = [0] * 12
-
-      @monthly_production_credit = []
-      @annual_production_credit = 0.0
-    end
-    attr_accessor(:annual_energy_charge, :annual_fixed_charge, :annual_total,
-                  :monthly_energy_charge, :monthly_fixed_charge,
-                  :monthly_production_credit, :annual_production_credit)
-  end
-
-  class Fuel
-    def initialize(meters: [])
-      @meters = meters
-      @timeseries = []
-    end
-    attr_accessor(:meters, :timeseries, :units)
   end
 
   # define what happens when the measure is run
@@ -307,16 +253,49 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     output_dir = File.dirname(@sqlFile.path.to_s)
     output_path = File.join(output_dir, "results_bills.#{output_format}")
 
-    setup_outputs()
+    # Setup outputs
+    fuels, utility_rates, utility_bills = setup_outputs()
 
+    # Get timestamps
     timeseries_frequency = 'hourly'
     @timestamps = get_timestamps(timeseries_frequency)
 
-    get_outputs(timeseries_frequency)
+    # Get outputs
+    get_outputs(fuels, timeseries_frequency)
 
     # Get utility rates
-    @utility_rates.each do |fuel_type, rate|
-      next if @fuels[[fuel_type, false]].timeseries.sum == 0
+    get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code)
+
+    # Calculate utility bills
+    net_elec = 0
+    get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year, net_elec)
+
+    # Annual true up
+    annual_true_up(utility_rates, utility_bills, net_elec)
+
+    # Calculate annual bill
+    utility_bills.each do |_, bill|
+      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
+    end
+
+    # Report results
+    utility_bills.each do |fuel_type, utility_bill|
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} $")
+      utility_bill = utility_bill.annual_total.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill)
+    end
+
+    # Write results
+    write_output(runner, utility_bills, output_format, output_path)
+
+    teardown()
+
+    return true
+  end
+
+  def get_utility_rates(fuels, utility_rates, args, state_code)
+    utility_rates.each do |fuel_type, rate|
+      next if fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Simple'
@@ -388,7 +367,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_state_average_marginal_rate(@hpxml.header.state_code, fuel_type, rate.fixedmonthlycharge)
+          rate.flatratebuy = get_state_average_marginal_rate(state_code, fuel_type, rate.fixedmonthlycharge)
         elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
           rate.flatratebuy = 0.1 # FIXME: can we get these somewhere?
         end
@@ -396,27 +375,28 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         rate.flatratebuy = Float(rate.flatratebuy)
       end
     end
+  end
 
-    # Calculate utility bills
-    net_elec = 0
-    @fuels.each do |(fuel_type, is_production), fuel|
-      rate = @utility_rates[fuel_type]
-      bill = @utility_bills[fuel_type]
+  def get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year, net_elec)
+    fuels.each do |(fuel_type, is_production), fuel|
+      rate = utility_rates[fuel_type]
+      bill = utility_bills[fuel_type]
 
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
-          net_elec = CalculateUtilityBill.detailed_electric(@fuels, rate, bill, net_elec)
+          net_elec = CalculateUtilityBill.detailed_electric(fuels, rate, bill, net_elec)
         else
-          net_elec = CalculateUtilityBill.simple(fuel_type, @hpxml.header.sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
+          net_elec = CalculateUtilityBill.simple(fuel_type, sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
         end
       else
-        net_elec = CalculateUtilityBill.simple(fuel_type, @hpxml.header.sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
+        net_elec = CalculateUtilityBill.simple(fuel_type, sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
+  end
 
-    # Annual true up
-    rate = @utility_rates[FT::Elec]
-    bill = @utility_bills[FT::Elec]
+  def annual_true_up(utility_rates, utility_bills, net_elec)
+    rate = utility_rates[FT::Elec]
+    bill = utility_bills[FT::Elec]
     if rate.net_metering_excess_sellback_type == 'User-Specified'
       if bill.annual_production_credit > bill.annual_energy_charge
         bill.annual_production_credit = bill.annual_energy_charge
@@ -425,25 +405,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
       end
     end
-
-    # Calculate annual bill
-    @utility_bills.each do |_, bill|
-      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
-    end
-
-    # Report results
-    @utility_bills.each do |fuel_type, utility_bill|
-      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} $")
-      utility_bill = utility_bill.annual_total.round(2)
-      runner.registerValue(utility_bill_type_str, utility_bill)
-    end
-
-    # Write results
-    write_output(runner, @utility_bills, output_format, output_path)
-
-    teardown()
-
-    return true
   end
 
   def setup_outputs()
@@ -457,41 +418,43 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return 'kBtu'
     end
 
-    @fuels = {}
-    @fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
-    @fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
-    @fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
-    @fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
-    @fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
-    @fuels[[FT::WoodCord, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodCord}:Facility"])
-    @fuels[[FT::WoodPellets, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodPellets}:Facility"])
-    @fuels[[FT::Coal, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeCoal}:Facility"])
+    fuels = {}
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
+    fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
+    fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
+    fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
+    fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
+    fuels[[FT::WoodCord, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodCord}:Facility"])
+    fuels[[FT::WoodPellets, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodPellets}:Facility"])
+    fuels[[FT::Coal, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeCoal}:Facility"])
 
-    @fuels.each do |(fuel_type, is_production), fuel|
+    fuels.each do |(fuel_type, is_production), fuel|
       fuel.units = get_timeseries_units_from_fuel_type(fuel_type)
     end
 
-    @utility_rates = {}
-    @utility_rates[FT::Elec] = UtilityRate.new
-    @utility_rates[FT::Gas] = UtilityRate.new
-    @utility_rates[FT::Oil] = UtilityRate.new
-    @utility_rates[FT::Propane] = UtilityRate.new
-    @utility_rates[FT::WoodCord] = UtilityRate.new
-    @utility_rates[FT::WoodPellets] = UtilityRate.new
-    @utility_rates[FT::Coal] = UtilityRate.new
+    utility_rates = {}
+    utility_rates[FT::Elec] = UtilityRate.new
+    utility_rates[FT::Gas] = UtilityRate.new
+    utility_rates[FT::Oil] = UtilityRate.new
+    utility_rates[FT::Propane] = UtilityRate.new
+    utility_rates[FT::WoodCord] = UtilityRate.new
+    utility_rates[FT::WoodPellets] = UtilityRate.new
+    utility_rates[FT::Coal] = UtilityRate.new
 
-    @utility_bills = {}
-    @utility_bills[FT::Elec] = UtilityBill.new
-    @utility_bills[FT::Gas] = UtilityBill.new
-    @utility_bills[FT::Oil] = UtilityBill.new
-    @utility_bills[FT::Propane] = UtilityBill.new
-    @utility_bills[FT::WoodCord] = UtilityBill.new
-    @utility_bills[FT::WoodPellets] = UtilityBill.new
-    @utility_bills[FT::Coal] = UtilityBill.new
+    utility_bills = {}
+    utility_bills[FT::Elec] = UtilityBill.new
+    utility_bills[FT::Gas] = UtilityBill.new
+    utility_bills[FT::Oil] = UtilityBill.new
+    utility_bills[FT::Propane] = UtilityBill.new
+    utility_bills[FT::WoodCord] = UtilityBill.new
+    utility_bills[FT::WoodPellets] = UtilityBill.new
+    utility_bills[FT::Coal] = UtilityBill.new
+
+    return fuels, utility_rates, utility_bills
   end
 
-  def get_outputs(timeseries_frequency)
-    @fuels.each do |(fuel_type, is_production), fuel|
+  def get_outputs(fuels, timeseries_frequency)
+    fuels.each do |(fuel_type, is_production), fuel|
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
       unit_conv /= 139.0 if fuel_type == FT::Oil
       unit_conv /= 91.6 if fuel_type == FT::Propane

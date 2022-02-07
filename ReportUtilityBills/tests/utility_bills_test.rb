@@ -2,9 +2,12 @@
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require_relative '../../HPXMLtoOpenStudio/resources/constants'
+require_relative '../../HPXMLtoOpenStudio/resources/energyplus'
+require_relative '../../HPXMLtoOpenStudio/resources/schedules'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require_relative '../measure.rb'
+require 'csv'
 
 class ReportUtilityBillsTest < MiniTest::Test
   def setup
@@ -282,6 +285,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_detailed_electric_calculations_user_specified_rate
+    skip
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/Data/CustomRates/Sample Tiered Rate.json'
@@ -321,6 +325,53 @@ class ReportUtilityBillsTest < MiniTest::Test
       actual_bills[key] = Float(value)
     end
     return actual_bills
+  end
+
+  def test_custom_timeseries
+    skip
+    # Setup
+    measure = ReportUtilityBills.new
+    args = Hash[@args_hash.collect { |k, v| [k.to_sym, v] }]
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    output_format = 'csv'
+    output_path = File.join(File.dirname(__FILE__), "results_bills.#{output_format}")
+
+    # hpxml = HPXML.new(hpxml_path: args[:hpxml_path])
+    state_code = 'CO' # TODO
+    sim_calendar_year = 2007 # TODO
+
+    # Setup outputs
+    fuels, utility_rates, utility_bills = measure.setup_outputs()
+
+    # Get outputs
+    fuels.each do |(fuel_type, is_production), fuel|
+      fuel.timeseries = [1] * 8760 # TODO
+    end
+
+    # Get utility rates
+    measure.get_utility_rates(fuels, utility_rates, args, state_code)
+
+    # Get utility bills
+    net_elec = 0
+    measure.get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year, net_elec)
+
+    # Annual true up
+    measure.annual_true_up(utility_rates, utility_bills, net_elec)
+
+    # Calculate annual bill
+    utility_bills.each do |_, bill|
+      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
+    end
+
+    # Write results
+    measure.write_output(runner, utility_bills, output_format, output_path)
+
+    bills_csv = File.join(File.dirname(__FILE__), 'results_bills.csv')
+    assert(File.exist?(bills_csv))
+    # @expected_bills # TODO
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+    FileUtils.rm_rf(bills_csv)
   end
 
   def _test_measure(expected_error: nil, expected_warning: nil)

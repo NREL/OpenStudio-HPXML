@@ -1,5 +1,59 @@
 # frozen_string_literal: true
 
+class Fuel
+  def initialize(meters: [])
+    @meters = meters
+    @timeseries = []
+  end
+  attr_accessor(:meters, :timeseries, :units)
+end
+
+class UtilityRate
+  def initialize()
+    @fixedmonthlycharge = false
+    @flatratebuy = 0.0
+    @realtimeprice = []
+
+    @net_metering_excess_sellback_type = false
+    @net_metering_user_excess_sellback_rate = false
+
+    @feed_in_tariff_rate = false
+
+    @energyratestructure = []
+    @energyweekdayschedule = []
+    @energyweekendschedule = []
+
+    @demandratestructure = []
+    @demandweekdayschedule = []
+    @demandweekendschedule = []
+
+    @flatdemandstructure = []
+  end
+  attr_accessor(:fixedmonthlycharge, :flatratebuy, :realtimeprice,
+                :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
+                :feed_in_tariff_rate,
+                :energyratestructure, :energyweekdayschedule, :energyweekendschedule,
+                :demandratestructure, :demandweekdayschedule, :demandweekendschedule,
+                :flatdemandstructure)
+end
+
+class UtilityBill
+  def initialize()
+    @annual_energy_charge = 0.0
+    @annual_fixed_charge = 0.0
+    @annual_total = 0.0
+
+    @monthly_energy_charge = []
+    @monthly_fixed_charge = [0] * 12
+
+    @monthly_production_credit = []
+    @annual_production_credit = 0.0
+  end
+  attr_accessor(:annual_energy_charge, :annual_fixed_charge, :annual_total,
+                :monthly_energy_charge, :monthly_fixed_charge,
+                :monthly_production_credit, :annual_production_credit)
+end
+
 class CalculateUtilityBill
   def self.simple(fuel_type, year, fuel_time_series, is_production, rate, bill, net_elec)
     sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, 12, 31)
