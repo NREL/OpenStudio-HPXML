@@ -19,7 +19,6 @@
         "output_format": "csv",
         "electricity_bill_type": "Simple",
         "electricity_utility_rate_type": "Autoselect OpenEI",
-        "electricity_utility_rate_user_specified": "",
         "electricity_fixed_charge": 12.0,
         "electricity_marginal_rate": "auto",
         "natural_gas_fixed_charge": 8.0,

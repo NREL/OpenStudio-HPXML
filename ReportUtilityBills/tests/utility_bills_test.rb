@@ -299,24 +299,17 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_warning_semi_annual_run_period
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml'
-    bills_csv = _test_measure()
+    expected_warning = 'A full annual simulation is required for calculating utility bills.'
+    bills_csv = _test_measure(expected_warning: expected_warning)
     assert(!File.exist?(bills_csv))
-
-    log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
-
-    assert(log_lines.any? { |log_line| log_line.include?('A full annual simulation is required for calculating utility bills.') })
   end
 
   def test_error_user_specified_but_no_rates
-    skip
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    bills_csv = _test_measure(false)
+    expected_error = 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
+    bills_csv = _test_measure(expected_error: expected_error)
     assert(!File.exist?(bills_csv))
-
-    log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
-
-    assert(log_lines.any? { |log_line| log_line.include?('Must specify a utility rate json path when choosing User-Specified utility rate type.') })
   end
 
   def get_actual_bills(bills_csv)
@@ -330,7 +323,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _test_measure(expected_success = true)
+  def _test_measure(expected_error: nil, expected_warning: nil)
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-report-utility-bills.osw')
@@ -355,16 +348,28 @@ class ReportUtilityBillsTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(@args_hash.size, found_args.size) # FIXME
+    assert_equal(@args_hash.size, found_args.size)
 
     # Run OSW
-    actual_success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
-    assert_equal(expected_success, actual_success)
+    success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
+    if not success
+      flunk 'Error: Unknown.' if expected_error.nil?
+    end
 
     # Cleanup
     File.delete(osw_path)
 
     bills_csv = File.join(File.dirname(template_osw), 'run', 'results_bills.csv')
+
+    # check warnings/errors
+    log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
+    if not expected_error.nil?
+      assert(log_lines.any? { |log_line| log_line.include?(expected_error) })
+    end
+    if not expected_warning.nil?
+      assert(log_lines.any? { |log_line| log_line.include?(expected_warning) })
+    end
+
     return bills_csv
   end
 end

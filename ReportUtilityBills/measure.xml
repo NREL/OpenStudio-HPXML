@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>8c8b8efe-8c52-49f9-80c1-3bb85bcace16</version_id>
-  <version_modified>20220204T230236Z</version_modified>
+  <version_id>e827d3b4-8de2-4fc1-89cb-e6c618eba529</version_id>
+  <version_modified>20220207T221733Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -29,12 +29,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7A4D5CAF</checksum>
-    </file>
-    <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>33B23A0F</checksum>
     </file>
     <file>
       <version>
@@ -94,6 +88,12 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>D205D809</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>28064E31</checksum>
     </file>
   </files>
 </measure>
