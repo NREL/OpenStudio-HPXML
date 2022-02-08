@@ -6,13 +6,16 @@ from jsonschema import ValidationError, SchemaError
 from .base import HPXMLtoHEScoreTranslatorBase
 from .hpxml2 import HPXML2toHEScoreTranslator
 from .hpxml3 import HPXML3toHEScoreTranslator
+from .hpxml4 import HPXML4toHEScoreTranslator
 from .exceptions import HPXMLtoHEScoreError
 
 
 def HPXMLtoHEScoreTranslator(hpxmlfilename):
     schema_version = HPXMLtoHEScoreTranslatorBase.detect_hpxml_version(hpxmlfilename)
     major_version = schema_version[0]
-    if major_version == 3:
+    if major_version == 4:
+        return HPXML4toHEScoreTranslator(hpxmlfilename)
+    elif major_version == 3:
         return HPXML3toHEScoreTranslator(hpxmlfilename)
     elif major_version == 2:
         return HPXML2toHEScoreTranslator(hpxmlfilename)
@@ -38,16 +41,21 @@ def main(argv=sys.argv[1:]):
     )
     parser.add_argument(
         '--projectid',
-        help='HPXML project id to use in translating HPwES data if there are more than one <Project/> elements. Default: first one.' # noqa 501
+        help='HPXML project id to use in translating HPwES data if there are more than one <Project/> elements. Default: first one.'  # noqa 501
     )
     parser.add_argument(
         '--contractorid',
-        help='HPXML contractor id to use in translating HPwES data if there are more than one <Contractor/> elements. Default: first one.' # noqa 501
+        help='HPXML contractor id to use in translating HPwES data if there are more than one <Contractor/> elements. Default: first one.'  # noqa 501
     )
     parser.add_argument(
         '--scrubbed-hpxml',
         type=argparse.FileType('wb'),
         help='Path to save HPXML file scrubbed of PII.'
+    )
+    parser.add_argument(
+        '--resstock',
+        action='store_true',
+        help='Run with a ResStock-generated HPXML file'
     )
 
     args = parser.parse_args(argv)
@@ -75,7 +83,8 @@ def main(argv=sys.argv[1:]):
             args.output,
             hpxml_bldg_id=args.bldgid,
             hpxml_project_id=args.projectid,
-            hpxml_contractor_id=args.contractorid
+            hpxml_contractor_id=args.contractorid,
+            resstock_file=args.resstock
         )
     except (HPXMLtoHEScoreError, ValidationError, SchemaError) as ex:
         exclass = type(ex).__name__
