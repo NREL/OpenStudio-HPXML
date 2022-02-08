@@ -267,8 +267,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code)
 
     # Calculate utility bills
-    net_elec = 0
-    get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year, net_elec)
+    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year)
 
     # Annual true up
     annual_true_up(utility_rates, utility_bills, net_elec)
@@ -377,7 +376,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year, net_elec)
+  def get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year)
+    net_elec = 0
     fuels.each do |(fuel_type, is_production), fuel|
       rate = utility_rates[fuel_type]
       bill = utility_bills[fuel_type]
@@ -392,6 +392,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         net_elec = CalculateUtilityBill.simple(fuel_type, sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
+    return net_elec
   end
 
   def annual_true_up(utility_rates, utility_bills, net_elec)
