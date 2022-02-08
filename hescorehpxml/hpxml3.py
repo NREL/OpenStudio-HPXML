@@ -1,13 +1,6 @@
-from .base import HPXMLtoHEScoreTranslatorBase
+from .base import HPXMLtoHEScoreTranslatorBase, convert_to_type
 from collections import OrderedDict
 from .exceptions import TranslationError
-
-
-def convert_to_type(type_, value):
-    if value is None:
-        return value
-    else:
-        return type_(value)
 
 
 class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):

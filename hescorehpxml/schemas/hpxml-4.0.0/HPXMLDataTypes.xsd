@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="3.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="4.0">
 	<xs:simpleType name="DataSource">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="user"/>
@@ -57,7 +57,7 @@
 	</xs:complexType>
 	<xs:simpleType name="schemaVersionType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="3.0"/>
+			<xs:enumeration value="4.0"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!--Address Information Below-->
@@ -458,6 +458,9 @@
 	</xs:complexType>
 	<xs:simpleType name="IECCYear_simple">
 		<xs:restriction base="xs:integer">
+			<xs:enumeration value="2021"/>
+			<xs:enumeration value="2018"/>
+			<xs:enumeration value="2015"/>
 			<xs:enumeration value="2012"/>
 			<xs:enumeration value="2009"/>
 			<xs:enumeration value="2006"/>
@@ -1132,6 +1135,8 @@
 			<xs:enumeration value="concrete block"/>
 			<xs:enumeration value="concrete block foam core"/>
 			<xs:enumeration value="concrete block vermiculite core"/>
+			<xs:enumeration value="concrete block perlite core"/>
+			<xs:enumeration value="concrete block solid core"/>
 			<xs:enumeration value="double brick"/>
 			<xs:enumeration value="wood"/>
 		</xs:restriction>
@@ -1550,16 +1555,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FuelLoadControlType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadControlType">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadControlType_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="RadiantBarrierLocation_simple">
 		<xs:annotation>
 			<xs:documentation>Enumerations from http://www.fsec.ucf.edu/en/publications/pdf/FSEC-DN-7-84.pdf</xs:documentation>
@@ -1623,6 +1618,7 @@
 			<xs:enumeration value="horizontal slider"/>
 			<xs:enumeration value="picture"/>
 			<xs:enumeration value="awning"/>
+			<xs:enumeration value="tilt and turn"/>
 			<xs:enumeration value="egress"/>
 			<xs:enumeration value="jalousie"/>
 			<xs:enumeration value="bay"/>
@@ -1630,7 +1626,7 @@
 			<xs:enumeration value="glass block"/>
 			<xs:enumeration value="bow"/>
 			<xs:enumeration value="hopper"/>
-			<xs:enumeration value="door window"/>
+			<xs:enumeration value="door glazing"/>
 			<xs:enumeration value="sliding glass door"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
@@ -1648,6 +1644,7 @@
 			<xs:enumeration value="double-pane"/>
 			<xs:enumeration value="triple-pane"/>
 			<xs:enumeration value="multi-layered"/>
+			<xs:enumeration value="glass block"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2886,6 +2883,9 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="air"/>
 			<xs:enumeration value="argon"/>
+			<xs:enumeration value="krypton"/>
+			<xs:enumeration value="xenon"/>
+			<xs:enumeration value="nitrogen"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2898,6 +2898,7 @@
 	</xs:complexType>
 	<xs:simpleType name="GlassType_simple">
 		<xs:restriction base="xs:string">
+			<xs:enumeration value="clear"/>
 			<xs:enumeration value="low-e"/>
 			<xs:enumeration value="tinted"/>
 			<xs:enumeration value="reflective"/>
@@ -3804,6 +3805,7 @@
 			<xs:enumeration value="ERCOT"/>
 			<xs:enumeration value="Hawaii"/>
 			<xs:enumeration value="Western"/>
+			<xs:enumeration value="Puerto Rico"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="eGridRegions">
@@ -4283,6 +4285,7 @@
 			<xs:enumeration value="platform"/>
 			<xs:enumeration value="balloon"/>
 			<xs:enumeration value="timber"/>
+			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="FramingType">
@@ -4711,15 +4714,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:complexType name="Season">
-		<xs:sequence>
-			<xs:element maxOccurs="1" minOccurs="0" name="BeginMonth" type="Month"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="BeginDayOfMonth" type="DayOfMonth"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="EndMonth" type="Month"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
-		</xs:sequence>
-		<xs:attribute name="dataSource" type="DataSource"/>
-	</xs:complexType>
 	<xs:simpleType name="Month_simple">
 		<xs:restriction base="xs:integer">
 			<xs:minInclusive value="1"/>
@@ -4755,6 +4749,88 @@
 	<xs:complexType name="StormLocation">
 		<xs:simpleContent>
 			<xs:extension base="StormLocation_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="BatteryCapacityUnits_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="kWh"/>
+			<xs:enumeration value="Ah"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="BatteryCapacityUnits">
+		<xs:simpleContent>
+			<xs:extension base="BatteryCapacityUnits_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="CambiumRegionGEAs_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AZNMc"/>
+			<xs:enumeration value="CAMXc"/>
+			<xs:enumeration value="ERCTc"/>
+			<xs:enumeration value="FRCCc"/>
+			<xs:enumeration value="MROEc"/>
+			<xs:enumeration value="MROWc"/>
+			<xs:enumeration value="NEWEc"/>
+			<xs:enumeration value="NWPPc"/>
+			<xs:enumeration value="NYSTc"/>
+			<xs:enumeration value="RFCEc"/>
+			<xs:enumeration value="RFCMc"/>
+			<xs:enumeration value="RFCWc"/>
+			<xs:enumeration value="RMPAc"/>
+			<xs:enumeration value="SPNOc"/>
+			<xs:enumeration value="SPSOc"/>
+			<xs:enumeration value="SRMVc"/>
+			<xs:enumeration value="SRMWc"/>
+			<xs:enumeration value="SRSOc"/>
+			<xs:enumeration value="SRTVc"/>
+			<xs:enumeration value="SRVCc"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CambiumRegionGEAs">
+		<xs:simpleContent>
+			<xs:extension base="CambiumRegionGEAs_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="eGridSubregions_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AKGD"/>
+			<xs:enumeration value="AKMS"/>
+			<xs:enumeration value="AZNM"/>
+			<xs:enumeration value="CAMX"/>
+			<xs:enumeration value="ERCT"/>
+			<xs:enumeration value="FRCC"/>
+			<xs:enumeration value="HIMS"/>
+			<xs:enumeration value="HIOA"/>
+			<xs:enumeration value="MROE"/>
+			<xs:enumeration value="MROW"/>
+			<xs:enumeration value="NEWE"/>
+			<xs:enumeration value="NWPP"/>
+			<xs:enumeration value="NYCW"/>
+			<xs:enumeration value="NYLI"/>
+			<xs:enumeration value="NYUP"/>
+			<xs:enumeration value="PRMS"/>
+			<xs:enumeration value="RFCE"/>
+			<xs:enumeration value="RFCM"/>
+			<xs:enumeration value="RFCW"/>
+			<xs:enumeration value="RMPA"/>
+			<xs:enumeration value="SPNO"/>
+			<xs:enumeration value="SPSO"/>
+			<xs:enumeration value="SRMV"/>
+			<xs:enumeration value="SRMW"/>
+			<xs:enumeration value="SRSO"/>
+			<xs:enumeration value="SRTV"/>
+			<xs:enumeration value="SRVC"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="eGridSubregions">
+		<xs:simpleContent>
+			<xs:extension base="eGridSubregions_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>

@@ -86,8 +86,9 @@ class HPXMLtoHEScoreTranslatorBase(object):
         schematree = etree.parse(self.schemapath)
         self.schema = etree.XMLSchema(schematree)
         if not self.schema.validate(self.hpxmldoc):
+            log = self.schema.error_log
             raise TranslationError(
-                'Failed to validate against the following HPXML schema: {}'.format(self.SCHEMA_DIR)
+                'Failed to validate against the following HPXML schema: {}\n{}'.format(self.SCHEMA_DIR, log)
             )
         self.ns = {'xs': 'http://www.w3.org/2001/XMLSchema'}
         self.ns['h'] = schematree.xpath('//xs:schema/@targetNamespace', namespaces=self.ns)[0]
@@ -203,15 +204,19 @@ class HPXMLtoHEScoreTranslatorBase(object):
             sidingtype = 'nn'
         elif wall_type in ('ConcreteMasonryUnit', 'Stone'):
             hpxmlsiding = xpath(hpxmlwall, 'h:Siding/text()')
-            if hpxmlsiding is None:
+            if hpxmlsiding is None or hpxmlsiding.lower() == 'none':
                 sidingtype = 'nn'
             else:
                 sidingtype = sidingmap[hpxmlsiding]
                 if sidingtype not in ('st', 'br'):
-                    raise TranslationError(
-                        f'Wall {wallid}: is a CMU and needs a siding of stucco, brick, or none to translate '
-                        f'to HEScore. It has a siding type of {hpxmlsiding}'
-                    )
+                    if self.resstock:
+                        # Fix CMU siding type to most common (brick) if file is output from resstock
+                        sidingtype = 'br'
+                    else:
+                        raise TranslationError(
+                            f'Wall {wallid}: is a CMU and needs a siding of stucco, brick, or none to translate '
+                            f'to HEScore. It has a siding type of {hpxmlsiding}'
+                        )
         elif wall_type == 'StrawBale':
             sidingtype = 'st'
         else:
@@ -436,7 +441,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         knee_wall_area = sum(x['area'] for x in knee_wall_dict_ls)
         try:
             knee_wall_r = knee_wall_area / \
-                          sum(x['area'] / x['rvalue'] for x in knee_wall_dict_ls)
+                sum(x['area'] / x['rvalue'] for x in knee_wall_dict_ls)
         except ZeroDivisionError:
             knee_wall_r = 0
 
@@ -481,9 +486,9 @@ class HPXMLtoHEScoreTranslatorBase(object):
         allowed_fuel_types = {'heat_pump': ('electric',),
                               'mini_split': ('electric',),
                               'central_furnace': ('natural_gas', 'lpg', 'fuel_oil', 'electric'),
-                              'wall_furnace': ('natural_gas', 'lpg'),
+                              'wall_furnace': ('natural_gas', 'lpg', 'fuel_oil', 'electric'),
                               'baseboard': ('electric',),
-                              'boiler': ('natural_gas', 'lpg', 'fuel_oil'),
+                              'boiler': ('natural_gas', 'lpg', 'fuel_oil', 'electric'),
                               'gchp': ('electric',),
                               'none': tuple(),
                               'wood_stove': ('cord_wood', 'pellet_wood')}
@@ -651,7 +656,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
         duct_fracs_by_hescore_duct_loc = dict([(key, value / total_duct_frac)
                                                for key, value
                                                in list(duct_fracs_by_hescore_duct_loc.items())])
-
         # Gather the ducts by type
         hvac_distribution['duct'] = []
         hvacd_sortlist = []
@@ -771,7 +775,8 @@ class HPXMLtoHEScoreTranslatorBase(object):
             self,
             hpxml_bldg_id=None,
             hpxml_project_id=None,
-            hpxml_contractor_id=None
+            hpxml_contractor_id=None,
+            resstock_file=False
     ):
         '''
         Convert a HPXML building file to a python dict with the same structure as the HEScore API
@@ -820,6 +825,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
                 c = xpath(self.hpxmldoc, 'h:Contractor[1]')
 
         self.schema.assertValid(self.hpxmldoc)
+        self.resstock = resstock_file
 
         # Create return dict
         hescore_inputs = OrderedDict()
@@ -885,12 +891,13 @@ class HPXMLtoHEScoreTranslatorBase(object):
         xpath = self.xpath
         ns = self.ns
         bldgaddr = OrderedDict()
-        hpxmladdress = xpath(b, 'h:Site/h:Address[h:AddressType="street"]', raise_err=True)
-        bldgaddr['address'] = ' '.join(hpxmladdress.xpath('h:Address1/text() | h:Address2/text()', namespaces=ns))
-        if not bldgaddr['address'].strip():
-            raise ElementNotFoundError(hpxmladdress, 'h:Address1/text() | h:Address2/text()', {})
-        bldgaddr['city'] = xpath(b, 'h:Site/h:Address/h:CityMunicipality/text()', raise_err=True)
-        bldgaddr['state'] = xpath(b, 'h:Site/h:Address/h:StateCode/text()', raise_err=True)
+        if not self.resstock:
+            hpxmladdress = xpath(b, 'h:Site/h:Address[h:AddressType="street"]', raise_err=True)
+            bldgaddr['address'] = ' '.join(hpxmladdress.xpath('h:Address1/text() | h:Address2/text()', namespaces=ns))
+            if not bldgaddr['address'].strip():
+                raise ElementNotFoundError(hpxmladdress, 'h:Address1/text() | h:Address2/text()', {})
+            bldgaddr['state'] = xpath(b, 'h:Site/h:Address/h:StateCode/text()', raise_err=True)
+            bldgaddr['city'] = xpath(b, 'h:Site/h:Address/h:CityMunicipality/text()', raise_err=True)
         hpxml_zipcode = xpath(b, 'h:Site/h:Address/h:ZipCode/text()', raise_err=True)
         bldgaddr['zip_code'] = re.match(r"([0-9]{5})(-[0-9]{4})?", hpxml_zipcode).group(1)
         transaction_type = xpath(self.hpxmldoc, 'h:XMLTransactionHeaderInformation/h:Transaction/text()')
@@ -1018,7 +1025,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         if avg_ceiling_ht is None:
             try:
                 avg_ceiling_ht = float(xpath(bldg_cons_el, 'h:ConditionedBuildingVolume/text()', raise_err=True)) / \
-                                 float(xpath(bldg_cons_el, 'h:ConditionedFloorArea/text()', raise_err=True))
+                    float(xpath(bldg_cons_el, 'h:ConditionedFloorArea/text()', raise_err=True))
             except ElementNotFoundError:
                 raise TranslationError(
                     'Either AverageCeilingHeight or both ConditionedBuildingVolume and ConditionedFloorArea are '
@@ -1064,9 +1071,9 @@ class HPXMLtoHEScoreTranslatorBase(object):
             elif xpath(blower_door_test, 'h:BuildingAirLeakage/h:UnitofMeasure/text()') == 'ACH':
                 bldg_about['envelope_leakage'] = bldg_about['floor_to_ceiling_height'] * bldg_about[
                     'conditioned_floor_area'] * \
-                                                 float(xpath(blower_door_test,
-                                                             'h:BuildingAirLeakage/h:AirLeakage/text()',
-                                                             raise_err=True)) / 60.
+                    float(xpath(blower_door_test,
+                                'h:BuildingAirLeakage/h:AirLeakage/text()',
+                                raise_err=True)) / 60.
             else:
                 raise TranslationError('BuildingAirLeakage/UnitofMeasure must be either "CFM" or "ACH"')
             bldg_about['envelope_leakage'] = int(python2round(bldg_about['envelope_leakage']))
@@ -2385,13 +2392,16 @@ class HPXMLtoHEScoreTranslatorBase(object):
                     'MaxPowerOutput, NumberOfPanels, or CollectorArea is required for every PVSystem.'
                 )
 
-            manufacture_years = [
-                int(x) for x in self.xpath(
-                    pvsystem,
-                    'h:YearInverterManufactured/text()|h:YearModulesManufactured/text()',
-                    aslist=True
-                )
-            ]
+            if self.resstock:
+                manufacture_years = [2016]
+            else:
+                manufacture_years = [
+                    int(x) for x in self.xpath(
+                        pvsystem,
+                        'h:YearInverterManufactured/text()|h:YearModulesManufactured/text()',
+                        aslist=True
+                    )
+                ]
             if manufacture_years:
                 years.append(max(manufacture_years))  # Use the latest year of manufacture
             else:

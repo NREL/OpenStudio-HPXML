@@ -1,12 +1,5 @@
-from .base import HPXMLtoHEScoreTranslatorBase
+from .base import HPXMLtoHEScoreTranslatorBase, convert_to_type
 from .exceptions import TranslationError
-
-
-def convert_to_type(type_, value):
-    if value is None:
-        return value
-    else:
-        return type_(value)
 
 
 class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
