@@ -64,8 +64,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_pv_none
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_None.csv')
-    @hpxml.pv_systems = []
-    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
+    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, [], 2007)
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     assert_equal(@expected_bills, actual_bills)
@@ -75,7 +74,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
-    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @pv_systems_1kW, 2007)
+    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -160.22
