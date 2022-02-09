@@ -467,10 +467,25 @@ Design loads are based on block load ACCA Manual J calculations.
 Utility Bill Outputs
 --------------------
 
-TODO
+OpenStudio-HPXML can optionally generate a utility bills output file.
+The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json``) and located in the run directory.
+Monthly fixed charges and marginal rates, as well as PV compensation types/rates/fees, are defined to determine how utility bills are calculated.
 
-Electricity
-~~~~~~~~~~~
+The file includes:
 
-Natural Gas
-~~~~~~~~~~~
+   =============================================  ====================
+   Type                                           Notes
+   =============================================  ====================
+   Electricity: Fixed ($)                         Annual fixed charges for electricity.
+   Electricity: Marginal ($)                      Annual energy charges for electricity.
+   Electricity: PV Credit ($)                     Annual production credit for PV.
+   Electricity: Total ($)                         Annual total charges for electricity.
+   Natural Gas: Fixed ($)                         Annual fixed charges for natural gas.
+   Natural Gas: Marginal ($)                      Annual energy charges for natural gas.
+   Natural Gas: Total ($)                         Annual total charges for natural gas.
+   Fuel Oil: Total ($)                            Annual total charges for fuel oil.
+   Propane: Total ($)                             Annual total charges for propane.
+   Wood Cord: Total ($)                           Annual total charges for wood cord.
+   Wood Pellets: Total ($)                        Annual total charges for wood pellets.
+   Coal: Total ($)                                Annual total charges for coal.
+   =============================================  ====================
