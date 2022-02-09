@@ -169,9 +169,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     model = runner.lastOpenStudioModel
     if model.empty?
-      runner.registerError('Cannot find OpenStudio model.')
-      return false
+      return result
     end
+
     model = model.get
     @model = model
 
