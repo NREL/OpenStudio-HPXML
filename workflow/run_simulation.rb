@@ -65,26 +65,24 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
 
   # Add utility bills measure to workflow
   if add_utility_bills
-    measures['ReportSimulationOutput'][0]['timeseries_frequency'] = 'monthly'
-    measures['ReportSimulationOutput'][0]['include_timeseries_fuel_consumptions'] = true
-
     measure_subdir = 'ReportUtilityBills'
     args = {}
     args['output_format'] = output_format
-    args['electricity_bill_type'] = 'Simple'
-    args['electricity_fixed_charge'] = 12.0
-    args['electricity_marginal_rate'] = Constants.Auto
+    args['electricity_fixed_charge'] = 8.0
+    args['electricity_marginal_rate'] = '0.1180'
     args['natural_gas_fixed_charge'] = 8.0
-    args['natural_gas_marginal_rate'] = Constants.Auto
-    args['fuel_oil_marginal_rate'] = Constants.Auto
-    args['propane_marginal_rate'] = Constants.Auto
-    args['wood_cord_marginal_rate'] = Constants.Auto
-    args['wood_pellets_marginal_rate'] = Constants.Auto
-    args['coal_marginal_rate'] = Constants.Auto
+    args['natural_gas_marginal_rate'] = '0.8804'
+    args['fuel_oil_marginal_rate'] = '2.8000'
+    args['propane_marginal_rate'] = '2.2200'
+    args['wood_cord_marginal_rate'] = '0.0500'
+    args['wood_pellets_marginal_rate'] = '0.0500'
+    args['coal_marginal_rate'] = '0.0500'
     args['pv_compensation_type'] = 'Net Metering'
     args['pv_annual_excess_sellback_rate_type'] = 'User-Specified'
     args['pv_net_metering_annual_excess_sellback_rate'] = 0.03
     args['pv_feed_in_tariff_rate'] = 0.12
+    args['pv_grid_connection_fee_units'] = '$/kW'
+    args['pv_monthly_grid_connection_fee'] = 0.0
     update_args_hash(measures, measure_subdir, args)
   end
 

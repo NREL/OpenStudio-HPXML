@@ -157,6 +157,24 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, component_loads.size)
   end
 
+  def test_run_simulation_utility_bills
+    # Run w/ --add-utility-bills
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-utility-bills"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
+    assert(File.exist? csv_output_path)
+  end
+
   def test_template_osw
     # Check that simulation works using template.osw
     require 'json'
@@ -293,48 +311,6 @@ class HPXMLTest < MiniTest::Test
     File.delete(xml_path_test)
     xml_path_test = File.join(File.dirname(__FILE__), '..', 'built-stochastic-schedules.xml')
     File.delete(xml_path_test)
-  end
-
-  def test_template_osw_with_utility_bills
-    # Check that simulation works using template-report-utility-bills.osw
-    require 'json'
-
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-report-utility-bills.osw')
-
-    # Create derivative OSW for testing
-    osw_path_test = osw_path.gsub('.osw', '_test.osw')
-    FileUtils.cp(osw_path, osw_path_test)
-
-    # Turn on debug mode
-    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-    json[:steps][0][:arguments][:debug] = true
-
-    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so update dir name
-      json[:steps][0][:measure_dir_name] = 'project'
-    end
-
-    File.open(osw_path_test, 'w') do |f|
-      f.write(JSON.pretty_generate(json))
-    end
-
-    command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path_test}"
-    system(command, err: File::NULL)
-
-    # Check for output files
-    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
-    assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_bills.csv')
-    assert(File.exist? csv_output_path)
-
-    # Check for debug files
-    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
-    assert(File.exist? osm_path)
-    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-
-    # Cleanup
-    File.delete(osw_path_test)
   end
 
   def test_multiple_building_ids
