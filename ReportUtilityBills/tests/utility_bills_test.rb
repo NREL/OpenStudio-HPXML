@@ -14,38 +14,141 @@ require_relative '../measure.rb'
 require 'csv'
 
 class ReportUtilityBillsTest < MiniTest::Test
+  # BEopt building:
+  # - 600 sq ft (30 x 20), Denver EPW
+  # - Propane cooking range
+  # - Oil Standard water heater
+  # - USA_CO_Denver.Intl.AP EPW location
+  # - All other options left at default values
+  # Then retrieve 1.csv from output folder, change headers to OpenStudio headers, and subtract Produced column from Facility column
+
   def setup
     @args_hash = {}
     @args_hash['hpxml_path'] = '../workflow/sample_files/base.xml'
-    @args_hash['electricity_bill_type'] = 'Simple'
-    @args_hash['electricity_fixed_charge'] = 12.0
-    @args_hash['electricity_marginal_rate'] = Constants.Auto
+    @args_hash['electricity_fixed_charge'] = 8.0
+    @args_hash['electricity_marginal_rate'] = '0.1080'
     @args_hash['natural_gas_fixed_charge'] = 8.0
-    @args_hash['natural_gas_marginal_rate'] = Constants.Auto
-    @args_hash['fuel_oil_marginal_rate'] = Constants.Auto
-    @args_hash['propane_marginal_rate'] = Constants.Auto
-    @args_hash['wood_cord_marginal_rate'] = Constants.Auto
-    @args_hash['wood_pellets_marginal_rate'] = Constants.Auto
-    @args_hash['coal_marginal_rate'] = Constants.Auto
+    @args_hash['natural_gas_marginal_rate'] = '0.6472'
+    @args_hash['fuel_oil_marginal_rate'] = '2.6000'
+    @args_hash['propane_marginal_rate'] = '1.9900'
+    @args_hash['wood_cord_marginal_rate'] = ''
+    @args_hash['wood_pellets_marginal_rate'] = ''
+    @args_hash['coal_marginal_rate'] = ''
     @args_hash['pv_compensation_type'] = 'Net Metering'
     @args_hash['pv_feed_in_tariff_rate'] = 0.12
+    @args_hash['pv_grid_connection_fee_units'] = '$/kW'
+    @args_hash['pv_monthly_grid_connection_fee'] = 0.0
 
     @expected_bills = {
-      'Electricity: Fixed ($)' => 0.0,
-      'Electricity: Marginal ($)' => 0.0,
-      'Electricity: Credit ($)' => 0.0,
-      'Electricity: Total ($)' => 0.0,
-      'Natural Gas: Fixed ($)' => 0.0,
-      'Natural Gas: Marginal ($)' => 0.0,
-      'Natural Gas: Total ($)' => 0.0,
-      'Fuel Oil: Total ($)' => 0.0,
-      'Propane: Total ($)' => 0.0,
+      'Electricity: Fixed ($)' => 96.0,
+      'Electricity: Marginal ($)' => 568.69,
+      'Electricity: PV Credit ($)' => 0.0,
+      'Electricity: Total ($)' => 664.69,
+      'Natural Gas: Fixed ($)' => 96.0,
+      'Natural Gas: Marginal ($)' => 129.09,
+      'Natural Gas: Total ($)' => 225.09,
+      'Fuel Oil: Total ($)' => 343.55,
+      'Propane: Total ($)' => 61.97,
       'Wood Cord: Total ($)' => 0.0,
       'Wood Pellets: Total ($)' => 0.0,
       'Coal: Total ($)' => 0.0
     }
 
     @measure = ReportUtilityBills.new
+  end
+
+  def test_simple_calculations_pv_none
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+
+    bills_csv = _custom_calcs(fuels, utility_rates, utility_bills, 2007)
+    assert(File.exist?(bills_csv))
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_pv_1kW
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+
+    bills_csv = _custom_calcs(fuels, utility_rates, utility_bills, 2007)
+    assert(File.exist?(bills_csv))
+    actual_bills = get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -160.22
+    @expected_bills['Electricity: Total ($)'] = 504.48
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_pv_10kW
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+
+    bills_csv = _custom_calcs(fuels, utility_rates, utility_bills, 2007)
+    assert(File.exist?(bills_csv))
+    actual_bills = get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -1607.48
+    @expected_bills['Electricity: Total ($)'] = -942.79
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def _load_timeseries(fuels, path)
+    columns = CSV.read(File.join(File.dirname(__FILE__), path)).transpose
+    columns.each do |col|
+      col_name = col[0]
+      next if col_name == 'Date/Time'
+
+      values = col[1..-1].map { |v| Float(v) }
+
+      if col_name == 'ELECTRICITY:UNIT_1 [J](Hourly)'
+        fuel = fuels[[FT::Elec, false]]
+        unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
+        fuel.timeseries = values.map { |v| v * unit_conv }
+      elsif col_name == 'GAS:UNIT_1 [J](Hourly)'
+        fuel = fuels[[FT::Gas, false]]
+        unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
+        fuel.timeseries = values.map { |v| v * unit_conv }
+      elsif col_name == 'Appl_1:ExteriorEquipment:Propane [J](Hourly)'
+        fuel = fuels[[FT::Propane, false]]
+        unit_conv = UnitConversions.convert(1.0, 'J', fuel.units) / 91.6
+        fuel.timeseries = values.map { |v| v * unit_conv }
+      elsif col_name == 'FUELOIL:UNIT_1 [m3](Hourly)'
+        fuel = fuels[[FT::Oil, false]]
+        unit_conv = UnitConversions.convert(1.0, 'm^3', 'gal')
+        fuel.timeseries = values.map { |v| v * unit_conv }
+      elsif col_name == 'PV:ELECTRICITY_1 [J](Hourly) '
+        fuel = fuels[[FT::Elec, true]]
+        unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
+        fuel.timeseries = values.map { |v| v * unit_conv }
+      end
+    end
+
+    fuels.each do |(fuel_type, is_production), fuel|
+      fuel.timeseries = [0] * 8760 if fuel.timeseries.empty? # FIXME
+    end
+  end
+
+  def _custom_calcs(fuels, utility_rates, utility_bills, sim_calendar_year)
+    args = Hash[@args_hash.collect { |k, v| [k.to_sym, v] }]
+    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    output_format = 'csv'
+    output_path = File.join(File.dirname(__FILE__), "results_bills.#{output_format}")
+
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), '..', args[:hpxml_path]))
+
+    @measure.get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems)
+    net_elec = @measure.get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year)
+    @measure.annual_true_up(utility_rates, utility_bills, net_elec)
+    @measure.get_annual_bills(utility_bills)
+
+    @measure.write_output(runner, utility_bills, output_format, output_path)
+
+    bills_csv = File.join(File.dirname(__FILE__), 'results_bills.csv')
+
+    return bills_csv
   end
 
   def test_simple_calculations_auto_rates
@@ -322,6 +425,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(!File.exist?(bills_csv))
   end
 
+  def test_error_dse
+    # TODO
+  end
+
   def get_actual_bills(bills_csv)
     actual_bills = {}
     File.readlines(bills_csv).each do |line|
@@ -331,73 +438,6 @@ class ReportUtilityBillsTest < MiniTest::Test
       actual_bills[key] = Float(value)
     end
     return actual_bills
-  end
-
-  def test_simple_calculations_auto_rates_2
-    fuels, utility_rates, utility_bills = @measure.setup_outputs()
-
-    _load_timeseries(fuels, '../resources/test_simple_calculations_auto_rates.csv')
-
-    bills_csv = _custom_calcs(fuels, utility_rates, utility_bills)
-    assert(File.exist?(bills_csv))
-    @expected_bills['Electricity: Fixed ($)'] = 144.0
-    @expected_bills['Electricity: Marginal ($)'] = 1046.86
-    @expected_bills['Electricity: Total ($)'] = 1190.86
-    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
-    @expected_bills['Natural Gas: Total ($)'] = 190.01
-    actual_bills = get_actual_bills(bills_csv)
-    assert_equal(@expected_bills, actual_bills)
-  end
-
-  def _load_timeseries(fuels, path)
-    columns = CSV.read(File.join(File.dirname(__FILE__), path)).transpose
-    columns.each do |col|
-      col_name = col[0]
-      next if col_name == 'Time'
-
-      old_units = col[1]
-      values = col[2..-1].map { |v| Float(v) }
-
-      # FIXME: not sure what the format of this timeseries file will be
-      if col_name == 'Fuel Use: Electricity: Total'
-        new_units = fuels[[FT::Elec, false]].units
-        unit_conv = UnitConversions.convert(1.0, old_units, new_units)
-        fuels[[FT::Elec, false]].timeseries = values.map { |v| v * unit_conv }
-      elsif col_name == 'Fuel Use: Natural Gas: Total'
-        new_units = fuels[[FT::Gas, false]].units
-        unit_conv = UnitConversions.convert(1.0, old_units, new_units)
-        fuels[[FT::Gas, false]].timeseries = values.map { |v| v * unit_conv }
-      end
-    end
-
-    fuels.each do |(fuel_type, is_production), fuel|
-      fuel.timeseries = [0] * 8760 if fuel.timeseries.empty? # FIXME
-    end
-  end
-
-  def _custom_calcs(fuels, utility_rates, utility_bills)
-    args = Hash[@args_hash.collect { |k, v| [k.to_sym, v] }]
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    output_format = 'csv'
-    output_path = File.join(File.dirname(__FILE__), "results_bills.#{output_format}")
-
-    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), '..', args[:hpxml_path]))
-    # HPXMLDefaults.apply(hpxml, eri_version, weather) # so we don't have to hardcode sim_calendar_year
-
-    @measure.get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code)
-    net_elec = @measure.get_utility_bills(fuels, utility_rates, utility_bills, args, 2007)
-    @measure.annual_true_up(utility_rates, utility_bills, net_elec)
-
-    utility_bills.each do |_, bill|
-      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
-    end
-
-    @measure.write_output(runner, utility_bills, output_format, output_path)
-
-    bills_csv = File.join(File.dirname(__FILE__), 'results_bills.csv')
-
-    return bills_csv
   end
 
   def _test_measure(expected_error: nil, expected_warning: nil)

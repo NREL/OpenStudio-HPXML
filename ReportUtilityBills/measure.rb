@@ -38,34 +38,34 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('csv')
     args << arg
 
-    electricity_bill_type_choices = OpenStudio::StringVector.new
-    electricity_bill_type_choices << 'Simple'
-    electricity_bill_type_choices << 'Detailed'
+    # electricity_bill_type_choices = OpenStudio::StringVector.new
+    # electricity_bill_type_choices << 'Simple'
+    # electricity_bill_type_choices << 'Detailed'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_bill_type', electricity_bill_type_choices, true)
-    arg.setDisplayName('Electricity: Simple or Detailed')
-    arg.setDescription("Choose either 'Simple' or 'Detailed'. If 'Simple' is selected, electric utility bills are calculated based on user-defined fixed charge and marginal rate. If 'Detailed' is selected, electric utility bills are calculated based on either: a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.")
-    arg.setDefaultValue('Simple')
-    args << arg
+    # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_bill_type', electricity_bill_type_choices, true)
+    # arg.setDisplayName('Electricity: Simple or Detailed')
+    # arg.setDescription("Choose either 'Simple' or 'Detailed'. If 'Simple' is selected, electric utility bills are calculated based on user-defined fixed charge and marginal rate. If 'Detailed' is selected, electric utility bills are calculated based on either: a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.")
+    # arg.setDefaultValue('Simple')
+    # args << arg
 
-    utility_rate_type_choices = OpenStudio::StringVector.new
-    utility_rate_type_choices << 'Autoselect OpenEI'
-    utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
-    utility_rate_type_choices << 'Sample Tiered Rate'
-    utility_rate_type_choices << 'Sample Time-of-Use Rate'
-    utility_rate_type_choices << 'Sample Tiered Time-of-Use Rate'
-    utility_rate_type_choices << 'User-Specified'
+    # utility_rate_type_choices = OpenStudio::StringVector.new
+    # utility_rate_type_choices << 'Autoselect OpenEI'
+    # utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
+    # utility_rate_type_choices << 'Sample Tiered Rate'
+    # utility_rate_type_choices << 'Sample Time-of-Use Rate'
+    # utility_rate_type_choices << 'Sample Tiered Time-of-Use Rate'
+    # utility_rate_type_choices << 'User-Specified'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
-    arg.setDisplayName('Electricity: Utility Rate Type')
-    arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
-    arg.setDefaultValue('Autoselect OpenEI')
-    args << arg
+    # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
+    # arg.setDisplayName('Electricity: Utility Rate Type')
+    # arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
+    # arg.setDefaultValue('Autoselect OpenEI')
+    # args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
-    arg.setDisplayName('Electricity: User-Specified Utility Rate')
-    arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
-    args << arg
+    # arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
+    # arg.setDisplayName('Electricity: User-Specified Utility Rate')
+    # arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
+    # args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', true)
     arg.setDisplayName('Electricity: Fixed Charge')
@@ -77,8 +77,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', true)
     arg.setDisplayName('Electricity: Marginal Rate')
     arg.setUnits('$/kWh')
-    arg.setDescription("Price per kilowatt-hour for electricity. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per kilowatt-hour for electricity.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natural_gas_fixed_charge', true)
@@ -91,43 +90,37 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', true)
     arg.setDisplayName('Natural Gas: Marginal Rate')
     arg.setUnits('$/therm')
-    arg.setDescription("Price per therm for natural gas. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per therm for natural gas.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', true)
     arg.setDisplayName('Fuel Oil: Marginal Rate')
     arg.setUnits('$/gal')
-    arg.setDescription("Price per gallon for fuel oil. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per gallon for fuel oil.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('propane_marginal_rate', true)
     arg.setDisplayName('Propane: Marginal Rate')
     arg.setUnits('$/gal')
-    arg.setDescription("Price per gallon for propane. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per gallon for propane.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_cord_marginal_rate', true)
     arg.setDisplayName('Wood Cord: Marginal Rate')
     arg.setUnits('$/kBtu')
-    arg.setDescription("Price per kBtu for wood cord. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per kBtu for wood cord.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_pellets_marginal_rate', true)
     arg.setDisplayName('Wood Pellets: Marginal Rate')
     arg.setUnits('$/kBtu')
-    arg.setDescription("Price per kBtu for wood pellets. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per kBtu for wood pellets.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('coal_marginal_rate', true)
     arg.setDisplayName('Coal: Marginal Rate')
     arg.setUnits('$/kBtu')
-    arg.setDescription("Price per kBtu for coal. Use '#{Constants.Auto} for state-average value from EIA.")
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('Price per kBtu for coal.')
     args << arg
 
     pv_compensation_type_choices = OpenStudio::StringVector.new
@@ -162,6 +155,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setUnits('$/kWh')
     arg.setDescription("The annual full/gross tariff rate for PV. Only applies if the PV compensation type is 'Feed-In Tariff'.")
     arg.setDefaultValue(0.12)
+    args << arg
+
+    pv_grid_connection_fee_units_choices = OpenStudio::StringVector.new
+    pv_grid_connection_fee_units_choices << '$/kW'
+    pv_grid_connection_fee_units_choices << '$'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_grid_connection_fee_units', pv_grid_connection_fee_units_choices, true)
+    arg.setDisplayName('PV: Grid Connection Fee Units')
+    arg.setDescription('Units for PV grid connection fee. Only applies when there is PV.')
+    arg.setDefaultValue('$/kW')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_monthly_grid_connection_fee', true)
+    arg.setDisplayName('PV: Monthly Grid Connection Fee')
+    arg.setUnits('$')
+    arg.setDescription('Monthly fee for PV grid connection. Only applies when there is PV.')
+    arg.setDefaultValue(0.0)
     args << arg
 
     return args
@@ -217,6 +227,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
+    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
 
     output_format = args[:output_format].get
 
@@ -235,10 +246,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     # Require full annual simulation
-    if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
+    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
       runner.registerWarning('A full annual simulation is required for calculating utility bills.')
       return true
     end
@@ -264,18 +275,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_outputs(fuels, timeseries_frequency)
 
     # Get utility rates
-    get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code)
+    get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems)
 
     # Calculate utility bills
-    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year)
+    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, hpxml.header.sim_calendar_year)
 
     # Annual true up
     annual_true_up(utility_rates, utility_bills, net_elec)
 
-    # Calculate annual bill
-    utility_bills.each do |_, bill|
-      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge - bill.annual_production_credit
-    end
+    # Calculate annual bills
+    get_annual_bills(utility_bills)
 
     # Report results
     utility_bills.each do |fuel_type, utility_bill|
@@ -292,7 +301,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_utility_rates(fuels, utility_rates, args, state_code)
+  def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems)
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
@@ -300,6 +309,17 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         if args[:electricity_bill_type] == 'Simple'
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
           rate.flatratebuy = args[:electricity_marginal_rate]
+
+          # Grid connection fee
+          if pv_systems.size > 0
+            if args[:pv_grid_connection_fee_units] == '$/kW'
+              pv_systems.each do |pv_system|
+                monthly_fee = args[:pv_monthly_grid_connection_fee] * UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
+              end
+            elsif monthly_fee = args[:pv_monthly_grid_connection_fee]
+            end
+            rate.fixedmonthlycharge += monthly_fee
+          end
 
         elsif args[:electricity_bill_type] == 'Detailed'
           if args[:electricity_utility_rate_type].get != 'Autoselect OpenEI'
@@ -367,8 +387,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
           rate.flatratebuy = get_state_average_marginal_rate(state_code, fuel_type, rate.fixedmonthlycharge)
-        elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
-          rate.flatratebuy = 0.1 # FIXME: can we get these somewhere?
         end
       else
         rate.flatratebuy = Float(rate.flatratebuy)
@@ -405,6 +423,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if net_elec < 0
         bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
       end
+    end
+  end
+
+  def get_annual_bills(utility_bills)
+    utility_bills.each do |_, bill|
+      if bill.annual_production_credit > 0
+        bill.annual_production_credit *= -1
+      end
+
+      bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
     end
   end
 
@@ -515,9 +543,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         results_out << [line_break]
         segment = new_segment
       end
+
       results_out << ["#{key}: Fixed ($)", bill.annual_fixed_charge.round(2)] if [FT::Elec, FT::Gas].include? key
       results_out << ["#{key}: Marginal ($)", bill.annual_energy_charge.round(2)] if [FT::Elec, FT::Gas].include? key
-      results_out << ["#{key}: Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
+      results_out << ["#{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
       results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
 
