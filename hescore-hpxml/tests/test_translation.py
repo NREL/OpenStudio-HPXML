@@ -935,7 +935,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         roof.append(roof_ins)
         # run translation
         resp_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(resp_v3['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf11co')
+        self.assertEqual(resp_v3['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf07co')
 
     def test_attic_knee_wall_zero_rvalue(self):
         tr = self._load_xmlfile('hescore_min')
@@ -3377,7 +3377,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         el.addnext(el_2)
         res = tr.hpxml_to_hescore()
         # Currently, roofs attached to the same attic are combined.
-        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf07co')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf03co')
         self.xpath('//h:Roof[1]/h:Insulation/h:Layer/h:NominalRValue').text = '19'
         self.xpath('//h:Roof[2]/h:Insulation/h:Layer/h:NominalRValue').text = '27'
         res2 = tr.hpxml_to_hescore()
