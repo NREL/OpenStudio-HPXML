@@ -869,7 +869,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Expected value
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
-    cap = 0.0
+    cap = UnitConversions.convert(water_heating_system.related_hvac_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     ua = UnitConversions.convert(5.056, 'Btu/(hr*F)', 'W/K')
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
     loc = water_heating_system.location
@@ -884,26 +884,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
-
-    # Heat exchanger
-    assert_equal(1, model.getHeatExchangerFluidToFluids.size)
-    hx = model.getHeatExchangerFluidToFluids[0]
-    hx_attached_to_boiler = false
-    hx_attached_to_tank = false
-    model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.demandComponents.select { |comp| comp == hx }.empty?
-      next if plant_loop.supplyComponents.select { |comp| comp.name.get.include? 'boiler' }.empty?
-
-      hx_attached_to_boiler = true
-    end
-    model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select { |comp| comp == hx }.empty?
-      next if plant_loop.demandComponents.select { |comp| comp == wh }.empty?
-
-      hx_attached_to_tank = true
-    end
-    assert_equal(hx_attached_to_boiler, true)
-    assert_equal(hx_attached_to_tank, true)
   end
 
   def test_tank_combi_tankless
@@ -916,7 +896,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Expected value
     tank_volume = UnitConversions.convert(1, 'gal', 'm^3') # convert to actual volume
-    cap = 0.0
+    cap = UnitConversions.convert(water_heating_system.related_hvac_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
@@ -932,26 +912,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
-
-    # Heat exchanger
-    assert_equal(1, model.getHeatExchangerFluidToFluids.size)
-    hx = model.getHeatExchangerFluidToFluids[0]
-    hx_attached_to_boiler = false
-    hx_attached_to_tank = false
-    model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.demandComponents.select { |comp| comp == hx }.empty?
-      next if plant_loop.supplyComponents.select { |comp| comp.name.get.include? 'boiler' }.empty?
-
-      hx_attached_to_boiler = true
-    end
-    model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select { |comp| comp == hx }.empty?
-      next if plant_loop.demandComponents.select { |comp| comp == wh }.empty?
-
-      hx_attached_to_tank = true
-    end
-    assert_equal(hx_attached_to_boiler, true)
-    assert_equal(hx_attached_to_tank, true)
   end
 
   def test_tank_heat_pump
