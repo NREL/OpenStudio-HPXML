@@ -1614,9 +1614,6 @@ class OSModel
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
       Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map)
     end
-
-    # Add combi-system EMS program with water use equipment information
-    Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
   end
 
   def self.add_cooling_system(runner, model, spaces, airloop_map)

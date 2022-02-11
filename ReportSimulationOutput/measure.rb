@@ -2100,14 +2100,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_BoilerHotWater.is_initialized
-        is_combi_boiler = false
-        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
-          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
-        end
-        if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
-          fuel = object.to_BoilerHotWater.get.fuelType
-          return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
-        end
+        fuel = object.to_BoilerHotWater.get.fuelType
+        return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
         vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
@@ -2225,12 +2219,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameCombiWaterHeatingEnergy(nil)
-          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-          return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameCombiSpaceHeatingEnergy(nil)
-          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end
@@ -2260,13 +2248,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         else
           capacity = object.to_WaterHeaterStratified.get.heater1Capacity.get
         end
-        is_combi_boiler = false
-        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
-          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
-        end
         if capacity == 0 && object.name.to_s.include?(Constants.ObjectNameSolarHotWater)
           return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
-        elsif capacity > 0 || is_combi_boiler # Active water heater only (e.g., exclude desuperheater and solar thermal storage tanks)
+        elsif capacity > 0 # Active water heater only (e.g., exclude desuperheater and solar thermal storage tanks)
           return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
         end
 
