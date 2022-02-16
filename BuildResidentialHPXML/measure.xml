@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>52e30d38-8259-4735-96e2-996a1bd57b16</version_id>
-  <version_modified>20220205T181123Z</version_modified>
+  <version_id>4c5c9737-1e1f-4ca2-a5c2-9bfc93b733dc</version_id>
+  <version_modified>20220216T185542Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -18,6 +18,24 @@
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>hpxml_path_relative_to_run_directory</name>
+      <display_name>HPXML File Path Relative to Run Directory</display_name>
+      <description>Whether the relative path of the HPXML file is relative to the run directory.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>software_info_program_used</name>
@@ -6831,17 +6849,6 @@
       <checksum>EC0F1768</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2D2857D8</checksum>
-    </file>
-    <file>
       <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6870,6 +6877,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>C028936D</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>89902187</checksum>
     </file>
   </files>
 </measure>

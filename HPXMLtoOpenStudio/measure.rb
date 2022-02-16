@@ -60,6 +60,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('hpxml_path_relative_to_run_directory', false)
+    arg.setDisplayName('HPXML File Path Relative to Run Directory')
+    arg.setDescription('Whether the relative path of the HPXML file is relative to the run directory.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', true)
     arg.setDisplayName('Directory for Output Files')
     arg.setDescription('Absolute/relative path for the output files directory.')
@@ -113,7 +118,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+      if args[:hpxml_path_relative_to_run_directory].is_initialized && args[:hpxml_path_relative_to_run_directory].get
+        hpxml_path = File.expand_path(hpxml_path)
+      else
+        hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+      end
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
