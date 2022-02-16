@@ -63,6 +63,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('hpxml_path_relative_to_run_directory', false)
     arg.setDisplayName('HPXML File Path Relative to Run Directory')
     arg.setDescription('Whether the relative path of the HPXML file is relative to the run directory.')
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', true)
@@ -111,6 +112,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
+    hpxml_path_relative_to_run_directory = runner.getBoolArgumentValue('hpxml_path_relative_to_run_directory', user_arguments)
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
     add_component_loads = runner.getBoolArgumentValue('add_component_loads', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
@@ -118,7 +120,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
-      if args[:hpxml_path_relative_to_run_directory].is_initialized && args[:hpxml_path_relative_to_run_directory].get
+      if hpxml_path_relative_to_run_directory
         hpxml_path = File.expand_path(hpxml_path)
       else
         hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
