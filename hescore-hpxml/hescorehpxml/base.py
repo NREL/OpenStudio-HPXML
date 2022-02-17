@@ -185,15 +185,24 @@ class HPXMLtoHEScoreTranslatorBase(object):
             except RoundOutOfBounds:
                 raise TranslationError('Wall R-value outside HEScore bounds, wall id: %s' % wallid)
 
-        # construction type
-        wall_type = xpath(hpxmlwall, 'name(h:WallType/*)', raise_err=True)
-        assembly_eff_rvalue = None
-
         # Assembly effective R-value or None if element not present
         assembly_eff_rvalue = self.get_wall_assembly_rvalue(hpxmlwall)
 
-        # Siding
+        # Construction type and Siding
+        wall_type = xpath(hpxmlwall, 'name(h:WallType/*)', raise_err=True)
         if wall_type == 'WoodStud':
+            has_rigid_ins = xpath(
+                hpxmlwall,
+                'boolean(h:Insulation/h:Layer[h:NominalRValue > 0][h:InstallationType="continuous"][boolean('
+                'h:InsulationMaterial/h:Rigid)])'
+            )
+            if has_rigid_ins or\
+                    tobool(xpath(hpxmlwall, 'h:WallType/h:WoodStud/h:ExpandedPolystyreneSheathing/text()')):
+                wallconstype = 'ps'
+            elif tobool(xpath(hpxmlwall, 'h:WallType/h:WoodStud/h:OptimumValueEngineering/text()')):
+                wallconstype = 'ov'
+            else:
+                wallconstype = 'wf'
             hpxmlsiding = xpath(hpxmlwall, 'h:Siding/text()')
             try:
                 sidingtype = sidingmap[hpxmlsiding]
@@ -205,8 +214,10 @@ class HPXMLtoHEScoreTranslatorBase(object):
                         f'Wall {wallid}: There is no HEScore wall siding equivalent for the HPXML option: {hpxmlsiding}'
                     )
         elif wall_type == 'StructuralBrick':
+            wallconstype = 'br'
             sidingtype = 'nn'
         elif wall_type in ('ConcreteMasonryUnit', 'Stone'):
+            wallconstype = 'cb'
             hpxmlsiding = xpath(hpxmlwall, 'h:Siding/text()')
             if hpxmlsiding is None:
                 sidingtype = 'nn'
@@ -218,27 +229,17 @@ class HPXMLtoHEScoreTranslatorBase(object):
                         f'to HEScore. It has a siding type of {hpxmlsiding}'
                     )
         elif wall_type == 'StrawBale':
+            wallconstype = 'sb'
             sidingtype = 'st'
         else:
             raise TranslationError(f'Wall type {wall_type} not supported, wall id: {wallid}')
 
         # R-value and construction code
         if assembly_eff_rvalue is not None:
-            # If there's an AssemblyEffectiveRValue element
-            try:
-                doe2walltypes = {
-                    'WoodStud': ('ps', 'ov', 'wf'),
-                    'StructuralBrick': ('br',),
-                    'ConcreteMasonryUnit': ('cb',),
-                    'Stone': ('cb',),
-                    'StrawBale': ('st',)
-                }[wall_type]
-            except KeyError:
-                raise TranslationError(f'Wall type {wall_type} not supported, wall id: {wallid}')
             closest_wall_code, closest_code_rvalue = min(
                 [(doe2code, code_rvalue)
                  for doe2code, code_rvalue in self.wall_assembly_eff_rvalues.items()
-                 if doe2code[2:4] in doe2walltypes and doe2code[6:8] == sidingtype],
+                 if doe2code[2:4] == wallconstype and doe2code[6:8] == sidingtype],
                 key=lambda x: abs(x[1] - assembly_eff_rvalue)
             )
             return closest_wall_code, assembly_eff_rvalue
@@ -247,34 +248,19 @@ class HPXMLtoHEScoreTranslatorBase(object):
             # If the wall as a NominalRValue element for every layer (or there are no layers)
             # and there isn't an AssemblyEffectiveRValue element
             wall_rvalue = xpath(hpxmlwall, 'sum(h:Insulation/h:Layer/h:NominalRValue)', raise_err=True)
-            if wall_type == 'WoodStud':
-                has_rigid_ins = xpath(
-                    hpxmlwall,
-                    'boolean(h:Insulation/h:Layer[h:NominalRValue > 0][h:InstallationType="continuous"][boolean('
-                    'h:InsulationMaterial/h:Rigid)])'
-                )
-                if has_rigid_ins or\
-                        tobool(xpath(hpxmlwall, 'h:WallType/h:WoodStud/h:ExpandedPolystyreneSheathing/text()')):
-                    wallconstype = 'ps'
-                    # account for the rigid foam sheathing in the construction code
-                    wall_rvalue = max(0, wall_rvalue - 5)
-                    rvalue = wall_round_to_nearest(wall_rvalue, (0, 3, 7, 11, 13, 15, 19, 21))
-                elif tobool(xpath(hpxmlwall, 'h:WallType/h:WoodStud/h:OptimumValueEngineering/text()')):
-                    wallconstype = 'ov'
-                    rvalue = wall_round_to_nearest(wall_rvalue, (19, 21, 27, 33, 38))
-                else:
-                    wallconstype = 'wf'
-                    rvalue = wall_round_to_nearest(wall_rvalue, (0, 3, 7, 11, 13, 15, 19, 21))
-            elif wall_type == 'StructuralBrick':
-                wallconstype = 'br'
+            if wallconstype == 'ps':
+                # account for the rigid foam sheathing in the construction code
+                wall_rvalue = max(0, wall_rvalue - 5)
+                rvalue = wall_round_to_nearest(wall_rvalue, (0, 3, 7, 11, 13, 15, 19, 21))
+            elif wallconstype == 'ov':
+                rvalue = wall_round_to_nearest(wall_rvalue, (19, 21, 25, 27, 33, 35, 38))
+            elif wallconstype == 'wf':
+                rvalue = wall_round_to_nearest(wall_rvalue, (0, 3, 7, 11, 13, 15, 19, 21))
+            elif wallconstype == 'br':
                 rvalue = wall_round_to_nearest(wall_rvalue, (0, 5, 10))
-            elif wall_type in ('ConcreteMasonryUnit', 'Stone'):
-                wallconstype = 'cb'
+            elif wallconstype == 'cb':
                 rvalue = wall_round_to_nearest(wall_rvalue, (0, 3, 6))
-            else:
-                # We will have already thrown an error above if this is another wall type.
-                assert wall_type == 'StrawBale'
-                wallconstype = 'sb'
+            elif wallconstype == 'sb':
                 rvalue = 0
 
             wall_code = f'ew{wallconstype}{rvalue:02d}{sidingtype}'
@@ -1249,7 +1235,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
                             key=lambda x: abs(x[1] - float(roof_assembly_rvalue)))
                     attic_roof_d['roof_assembly_rvalue'] = closest_code_rvalue
                     # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
-                    # in the HPXML. Only model with radiant barrier code if R-value = 0 and radiant barrier.
                     if attic_roof_d['roofconstype'] == 'rb' and int(closest_roof_code[4:6]) > 0:
                         attic_roof_d['roofconstype'] = 'wf'  # overwrite the roofconstype
                 elif self.every_attic_roof_layer_has_nominal_rvalue(attic, roof):
@@ -1258,20 +1243,20 @@ class HPXMLtoHEScoreTranslatorBase(object):
                     if attic_roof_d['roofconstype'] == 'rb':
                         # Use effective R-value for wood frame roof without radiant barrier.
                         # The actual radiant barrier model in OS will handle the radiant barrier.
-                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21, 27, 30))
+                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 3, 7, 11, 13, 15, 19, 21, 25, 27, 30))
                         lookup_code = f"rfwf{roof_rvalue:02d}{attic_roof_d['extfinish']}"
                         # Model as a roof without radiant barrier if R-value is > 0 and the radiant barrier is present
                         # in the HPXML. Only model with radiant barrier code if R-value = 0 and radiant barrier.
                         if roof_rvalue > 0:
                             attic_roof_d['roofconstype'] = 'wf'  # overwrite the roofconstype
                     elif attic_roof_d['roofconstype'] == 'wf':
-                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21, 27, 30))
+                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 3, 7, 11, 13, 15, 19, 21, 25, 27, 30))
                         lookup_code = f"rf{attic_roof_d['roofconstype']}{roof_rvalue:02d}{attic_roof_d['extfinish']}"
                     elif attic_roof_d['roofconstype'] == 'ps':
                         # subtract the R-value of the rigid sheating in the HEScore construction.
                         if attic_roof_d['roofconstype'] == 'ps':
                             roof_rvalue = max(roof_rvalue - 5, 0)
-                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 11, 13, 15, 19, 21))
+                        roof_rvalue = roof_round_to_nearest(roofid, roof_rvalue, (0, 3, 7, 11, 13, 15, 19, 21))
                         lookup_code = f"rf{attic_roof_d['roofconstype']}{roof_rvalue:02d}{attic_roof_d['extfinish']}"
                     attic_roof_d['roof_assembly_rvalue'] = self.roof_assembly_eff_rvalues[lookup_code]
                 else:
@@ -1297,7 +1282,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
                     if attic_roofs_dict['roofcolor'] == 'cool_color':
                         cool_color_roof_absorptance_sum += attic_roofs_dict['roof_absorptance'] * attic_roofs_dict['roof_area']
                         cool_color_roof_area_sum += attic_roofs_dict['roof_area']
-                atticd['roof_absorptance'] = cool_color_roof_absorptance_sum / cool_color_roof_area_sum
+                atticd['roof_absorptance'] = round(cool_color_roof_absorptance_sum / cool_color_roof_area_sum, 2)
 
             # ids of hpxml roofs along for the ride
             atticd['_roofid'] = set([attic_roofs_dict['roof_id'] for attic_roofs_dict in attic_roof_ls])
@@ -1344,7 +1329,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
             elif self.every_attic_floor_layer_has_nominal_rvalue(attic, b):
                 attic_floor_rvalue = self.get_attic_floor_rvalue(attic, b)
                 closest_attic_floor_rvalue = roof_round_to_nearest(
-                    roofid, attic_floor_rvalue, (0, 3, 6, 9, 11, 19, 21, 25, 30, 38, 44, 49, 60))
+                    roofid, attic_floor_rvalue, (0, 3, 6, 9, 11, 13, 15, 19, 21, 25, 30, 35, 38, 44, 49, 55, 60))
                 lookup_code = f"ecwf{closest_attic_floor_rvalue:02d}"
                 atticd['attic_floor_assembly_rvalue'] = self.ceiling_assembly_eff_rvalues[lookup_code]
             else:
