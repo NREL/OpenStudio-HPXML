@@ -58,7 +58,11 @@ class HPXMLtoHEScore < OpenStudio::Measure::ModelMeasure
     outfile = File.expand_path(outfile)
 
     runner.registerInfo('Translating HPXML to HEScore JSON')
-    command = "hpxml2hescore #{hpxml_path} -o #{outfile} --resstock"
+
+    this_dir = File.dirname(__FILE__)
+    translator_path = File.join(this_dir, '../../hescore-hpxml/hescorehpxml/__init__.py')
+
+    command = "python3 #{translator_path} #{hpxml_path} -o #{outfile}  --resstock"
     stdout, stderr, status = Open3.capture3(command)
 
     if not status.success?

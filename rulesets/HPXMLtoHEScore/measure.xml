@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_he_score</name>
   <uid>c984bb9e-4ac4-4930-a399-9d23f8f6936a</uid>
-  <version_id>ba6e2b49-d779-44ff-8217-63d15a8edb7e</version_id>
-  <version_modified>20220201T194223Z</version_modified>
+  <version_id>b87c78c9-bd89-48f7-b0e7-20f0f7b02f87</version_id>
+  <version_modified>20220217T004641Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>HPXMLtoHEScore</class_name>
   <display_name>HEScore-HPXML</display_name>
@@ -50,7 +50,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0A4CA3A1</checksum>
+      <checksum>BD5CF3A5</checksum>
     </file>
   </files>
 </measure>
