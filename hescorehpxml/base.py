@@ -181,7 +181,6 @@ class HPXMLtoHEScoreTranslatorBase(object):
                 raise TranslationError('Wall R-value outside HEScore bounds, wall id: %s' % wallid)
 
         # Assembly effective R-value or None if element not present
-        assembly_eff_rvalue = None
         assembly_eff_rvalue = self.get_wall_assembly_rvalue(hpxmlwall, hpxmlwall)
 
         # Construction type and Siding
