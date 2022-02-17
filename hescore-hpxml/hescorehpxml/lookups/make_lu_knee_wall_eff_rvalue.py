@@ -6,7 +6,7 @@ import re
 
 def main():
     here = pathlib.Path(__file__).resolve().parent
-    json_schema_filename = here / '..' / '..' / '..' / 'hescore-hpxml' / 'hescorehpxml' / 'schemas' / 'hescore_json.schema.json'
+    json_schema_filename = here / '..' / 'schemas' / 'hescore_json.schema.json'
     assert json_schema_filename.exists()
 
     with json_schema_filename.open('r') as f:
