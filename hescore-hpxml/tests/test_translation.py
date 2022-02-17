@@ -935,7 +935,7 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         roof.append(roof_ins)
         # run translation
         resp_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(resp_v3['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf11co')
+        self.assertEqual(resp_v3['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf07co')
 
     def test_attic_knee_wall_zero_rvalue(self):
         tr = self._load_xmlfile('hescore_min')
@@ -1185,13 +1185,64 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         self.assertEqual(res['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf38')
         self.assertEqual(res['building']['zone']['zone_floor'][0]['floor_assembly_code'], 'efwf15ca')
 
+        tr = self._load_xmlfile('hescore_min_assembly_rvalue')
+        E = self.element_maker()
+        woodstud_wall = self.xpath('//h:Walls/h:Wall[1]/h:WallType/h:WoodStud')
+        wall1_walltype = woodstud_wall.getparent()
+        wall1_walltype.remove(woodstud_wall)
+        wall1_walltype.append(
+            E.WoodStud(
+                E.OptimumValueEngineering('true')
+            )
+        )
+        wall1_assmbly_rvalue = self.xpath('//h:Walls/h:Wall[1]/h:Insulation/h:AssemblyEffectiveRValue')
+        wall1_assmbly_rvalue.text = '33.0'
+        roof_assembly_rvalue = self.xpath('//h:Roofs/h:Roof[1]/h:Insulation/h:AssemblyEffectiveRValue')
+        roof_assembly_rvalue.text = '6.5'
+        ff1_assembly_rvalue = self.xpath('//h:FrameFloors/h:FrameFloor[1]/h:Insulation/h:AssemblyEffectiveRValue')
+        ff1_assembly_rvalue.text = '36.0'
+        ff2_assembly_rvalue = self.xpath('//h:FrameFloors/h:FrameFloor[2]/h:Insulation/h:AssemblyEffectiveRValue')
+        ff2_assembly_rvalue.text = '12.0'
+        res = tr.hpxml_to_hescore()
+        self.assertEqual(res['building']['zone']['zone_wall'][0]['wall_assembly_code'], 'ewov35br')
+        self.assertEqual(res['building']['zone']['zone_wall'][1]['wall_assembly_code'], 'ewov35br')
+        self.assertEqual(res['building']['zone']['zone_wall'][2]['wall_assembly_code'], 'ewov35br')
+        self.assertEqual(res['building']['zone']['zone_wall'][3]['wall_assembly_code'], 'ewov35br')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf03co')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf35')
+        self.assertEqual(res['building']['zone']['zone_floor'][0]['floor_assembly_code'], 'efwf07ca')
+
+        tr = self._load_xmlfile('hescore_min_assembly_rvalue')
+        E = self.element_maker()
+        woodstud_wall = self.xpath('//h:Walls/h:Wall[1]/h:WallType/h:WoodStud')
+        wall1_walltype = woodstud_wall.getparent()
+        wall1_walltype.remove(woodstud_wall)
+        wall1_walltype.append(
+            E.WoodStud(
+                E.OptimumValueEngineering('true')
+            )
+        )
+        wall1_assmbly_rvalue = self.xpath('//h:Walls/h:Wall[1]/h:Insulation/h:AssemblyEffectiveRValue')
+        wall1_ins = wall1_assmbly_rvalue.getparent()
+        wall1_ins.append(
+            E.Layer(
+                E.NominalRValue('23.2')
+            )
+        )
+        wall1_ins.remove(wall1_assmbly_rvalue)
+        res = tr.hpxml_to_hescore()
+        self.assertEqual(res['building']['zone']['zone_wall'][0]['wall_assembly_code'], 'ewov25br')
+        self.assertEqual(res['building']['zone']['zone_wall'][1]['wall_assembly_code'], 'ewov25br')
+        self.assertEqual(res['building']['zone']['zone_wall'][2]['wall_assembly_code'], 'ewov25br')
+        self.assertEqual(res['building']['zone']['zone_wall'][3]['wall_assembly_code'], 'ewov25br')
+
         tr = self._load_xmlfile('house9')
         res = tr.hpxml_to_hescore()
         self.assertEqual(res['building']['zone']['zone_wall'][0]['wall_assembly_code'], 'ewwf15wo')
         self.assertEqual(res['building']['zone']['zone_wall'][1]['wall_assembly_code'], 'ewwf13wo')
         self.assertEqual(res['building']['zone']['zone_wall'][2]['wall_assembly_code'], 'ewwf13wo')
         self.assertEqual(res['building']['zone']['zone_wall'][3]['wall_assembly_code'], 'ewwf13wo')
-        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf00wo')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf03wo')
         self.assertEqual(res['building']['zone']['zone_roof'][0]['ceiling_assembly_code'], 'ecwf25')
         self.assertEqual(res['building']['zone']['zone_floor'][0]['floor_assembly_code'], 'efwf30ca')
 
@@ -3377,7 +3428,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         el.addnext(el_2)
         res = tr.hpxml_to_hescore()
         # Currently, roofs attached to the same attic are combined.
-        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf00co')
+        self.assertEqual(res['building']['zone']['zone_roof'][0]['roof_assembly_code'], 'rfwf03co')
         self.xpath('//h:Roof[1]/h:Insulation/h:Layer/h:NominalRValue').text = '19'
         self.xpath('//h:Roof[2]/h:Insulation/h:Layer/h:NominalRValue').text = '27'
         res2 = tr.hpxml_to_hescore()

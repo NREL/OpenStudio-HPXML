@@ -197,11 +197,11 @@ def test_invalid_roof(hpxml_filebase):
     elif hpxml_filebase == 'house1':
         assert ("{'required': ['ceiling_assembly_code']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
                 "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf11', 'zone_skylight': {'skylight_area': 0}, "
+                "'ceiling_assembly_code': 'ecwf13', 'zone_skylight': {'skylight_area': 0}, "
                 "'roof_absorptance': 0.6}") in errors
         assert ("{'required': ['roof_absorptance']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
                 "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf11', 'zone_skylight': {'skylight_area': 0}, "
+                "'ceiling_assembly_code': 'ecwf13', 'zone_skylight': {'skylight_area': 0}, "
                 "'roof_absorptance': 0.6}") in errors
 
 
@@ -269,7 +269,7 @@ def test_invalid_floor(hpxml_filebase):
     elif hpxml_filebase == 'house1':
         assert ("{'required': ['floor_assembly_code']} is not allowed for {'floor_name': 'floor1', "
                 "'floor_area': 810.0, 'foundation_type': 'slab_on_grade', 'foundation_insulation_level': 0, "
-                "'floor_assembly_code': 'efwf00ca'}") in errors
+                "'floor_assembly_code': 'efwf03ca'}") in errors
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
