@@ -251,7 +251,7 @@ def test_invalid_floor(hpxml_filebase):
     elif hpxml_filebase == 'house1':
         assert ("{'required': ['floor_assembly_code']} is not allowed for {'floor_name': 'floor1', "
                 "'floor_area': 810.0, 'foundation_type': 'slab_on_grade', 'foundation_insulation_level': 0, "
-                "'floor_assembly_code': 'efwf00ca'}") in errors
+                "'floor_assembly_code': 'efwf03ca'}") in errors
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
