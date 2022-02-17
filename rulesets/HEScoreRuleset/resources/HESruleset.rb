@@ -1177,7 +1177,7 @@ end
 
 def get_effective_r_value_from_lu_tbl(doe2code, lu_tablename)
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), "#{lu_tablename}.csv"), headers: true) do |row|
+  CSV.foreach(File.join($path_to_const_code_lookups, "#{lu_tablename}.csv"), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
@@ -1189,6 +1189,8 @@ end
 def get_wall_effective_r_from_doe2code(doe2code)
   return get_effective_r_value_from_lu_tbl(doe2code, 'lu_wall_eff_rvalue')
 end
+
+$path_to_const_code_lookups = File.join(File.dirname(__FILE__), '..', '..', '..', 'hescore-hpxml', 'hescorehpxml', 'lookups')
 
 $roof_color_map = {
   'white' => HPXML::ColorReflective,
