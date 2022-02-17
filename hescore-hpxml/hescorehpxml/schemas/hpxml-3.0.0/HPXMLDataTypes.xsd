@@ -1164,20 +1164,14 @@
 			<xs:enumeration value="ground"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
-			<xs:enumeration value="other heated space"/>
 			<xs:enumeration value="other housing unit"/>
 			<xs:enumeration value="other housing unit above"/>
 			<xs:enumeration value="other housing unit below"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="AdjacentTo">
-		<xs:annotation>
-			<xs:documentation>DEPRECATION WARNING: Choices "other housing unit above" and "other housing unit below" will be deprecated in the future. Use Ceiling vs FrameFloor to describe whether "other housing unit" is above or below the given surface.</xs:documentation>
-		</xs:annotation>
 		<xs:simpleContent>
 			<xs:extension base="AdjacentTo_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
@@ -1262,18 +1256,6 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<!--Insulation Below-->
-	<xs:simpleType name="AssemblyRValue_simple">
-		<xs:restriction base="xs:double">
-			<xs:minExclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="AssemblyRValue">
-		<xs:simpleContent>
-			<xs:extension base="AssemblyRValue_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="DoorThirdPartyCertifications_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Energy Star"/>
@@ -1550,16 +1532,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FuelLoadControlType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadControlType">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadControlType_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="RadiantBarrierLocation_simple">
 		<xs:annotation>
 			<xs:documentation>Enumerations from http://www.fsec.ucf.edu/en/publications/pdf/FSEC-DN-7-84.pdf</xs:documentation>
@@ -1611,33 +1583,6 @@
 	<xs:complexType name="DHWThirdPartyCertification">
 		<xs:simpleContent>
 			<xs:extension base="DHWThirdPartyCertification_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="WindowType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="double hung"/>
-			<xs:enumeration value="single hung"/>
-			<xs:enumeration value="casement"/>
-			<xs:enumeration value="horizontal slider"/>
-			<xs:enumeration value="picture"/>
-			<xs:enumeration value="awning"/>
-			<xs:enumeration value="egress"/>
-			<xs:enumeration value="jalousie"/>
-			<xs:enumeration value="bay"/>
-			<xs:enumeration value="garden"/>
-			<xs:enumeration value="glass block"/>
-			<xs:enumeration value="bow"/>
-			<xs:enumeration value="hopper"/>
-			<xs:enumeration value="door window"/>
-			<xs:enumeration value="sliding glass door"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="WindowType">
-		<xs:simpleContent>
-			<xs:extension base="WindowType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -1802,9 +1747,6 @@
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="room air conditioner"/>
 			<xs:enumeration value="evaporative cooler"/>
-			<xs:enumeration value="chiller"/>
-			<xs:enumeration value="cooling tower"/>
-			<xs:enumeration value="packaged terminal air conditioner"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -1818,7 +1760,6 @@
 	<xs:simpleType name="CoolingEfficiencyUnits_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="SEER"/>
-			<xs:enumeration value="CEER"/>
 			<xs:enumeration value="EER"/>
 			<xs:enumeration value="COP"/>
 			<xs:enumeration value="kW/ton"/>
@@ -1896,9 +1837,6 @@
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="ground-to-air"/>
 			<xs:enumeration value="ground-to-water"/>
-			<xs:enumeration value="packaged terminal heat pump"/>
-			<xs:enumeration value="water-loop-to-air"/>
-			<xs:enumeration value="variable refrigerant flow"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="HeatPumpType">
@@ -1925,7 +1863,81 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<!--Heating System Information Below-->
+	<xs:simpleType name="AFUE_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="AFUE">
+		<xs:simpleContent>
+			<xs:extension base="AFUE_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="COP_simple">
+		<xs:restriction base="xs:double">
+			<xs:minExclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="COP">
+		<xs:simpleContent>
+			<xs:extension base="COP_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<!--HVAC Distribution Below-->
+	<xs:simpleType name="HSPF_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="HSPF">
+		<xs:simpleContent>
+			<xs:extension base="HSPF_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="SEER_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SEER">
+		<xs:simpleContent>
+			<xs:extension base="SEER_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="EER_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EER">
+		<xs:simpleContent>
+			<xs:extension base="EER_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="kWperTon_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="kWperTon">
+		<xs:simpleContent>
+			<xs:extension base="kWperTon_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="DuctType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="supply"/>
@@ -1977,10 +1989,6 @@
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="interstitial space"/>
 			<xs:enumeration value="living space"/>
-			<xs:enumeration value="other heated space"/>
-			<xs:enumeration value="other housing unit"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
@@ -2160,12 +2168,8 @@
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="mechanical closet"/>
-			<xs:enumeration value="other exterior"/>
-			<xs:enumeration value="other heated space"/>
-			<xs:enumeration value="other housing unit"/>
 			<xs:enumeration value="other interior"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
+			<xs:enumeration value="other exterior"/>
 			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
@@ -2718,7 +2722,6 @@
 			<xs:enumeration value="baseboard"/>
 			<xs:enumeration value="radiant floor"/>
 			<xs:enumeration value="radiant ceiling"/>
-			<xs:enumeration value="water loop"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2734,7 +2737,6 @@
 			<xs:enumeration value="regular velocity"/>
 			<xs:enumeration value="high velocity"/>
 			<xs:enumeration value="gravity"/>
-			<xs:enumeration value="fan coil"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="AirDistributionType">
@@ -2794,19 +2796,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FuelLoadType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="grill"/>
-			<xs:enumeration value="lighting"/>
-			<xs:enumeration value="fireplace"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadType">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadType_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="PlugLoadLocation_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="interior"/>
@@ -2820,17 +2809,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FuelLoadLocation_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="interior"/>
-			<xs:enumeration value="exterior"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadLocation">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadLocation_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="PlugLoadUnits_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="kWh/year"/>
@@ -2842,30 +2820,6 @@
 			<xs:extension base="PlugLoadUnits_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="FuelLoadUnits_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="therm/year"/>
-			<xs:enumeration value="Btuh"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadUnits">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadUnits_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PoolHeaterUnits_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="kWh/year"/>
-			<xs:enumeration value="therm/year"/>
-			<xs:enumeration value="W"/>
-			<xs:enumeration value="Btuh"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="PoolHeaterUnits">
-		<xs:simpleContent>
-			<xs:extension base="PoolHeaterUnits_simple"/>
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="WindowCondition_simple">
@@ -2912,20 +2866,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="GlazingMaterial_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="glass"/>
-			<xs:enumeration value="plastic"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="GlazingMaterial">
-		<xs:simpleContent>
-			<xs:extension base="GlazingMaterial_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="ClothesWasherType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="top loader"/>
@@ -2966,10 +2906,6 @@
 			<xs:enumeration value="laundry room"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
-			<xs:enumeration value="other heated space"/>
-			<xs:enumeration value="other housing unit"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -3030,16 +2966,26 @@
 			<xs:enumeration value="kitchen"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
-			<xs:enumeration value="other heated space"/>
-			<xs:enumeration value="other housing unit"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="RefrigeratorLocation">
 		<xs:simpleContent>
 			<xs:extension base="RefrigeratorLocation_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="DehumidifierLocation_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="living space"/>
+			<xs:enumeration value="basement"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DehumidifierLocation">
+		<xs:simpleContent>
+			<xs:extension base="DehumidifierLocation_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -3448,29 +3394,11 @@
 			<xs:enumeration value="composite shingle siding"/>
 			<xs:enumeration value="masonite siding"/>
 			<xs:enumeration value="other"/>
-			<xs:enumeration value="none"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="Siding">
 		<xs:simpleContent>
 			<xs:extension base="Siding_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="InteriorFinish_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="gypsum board"/>
-			<xs:enumeration value="gypsum composite board"/>
-			<xs:enumeration value="plaster"/>
-			<xs:enumeration value="wood"/>
-			<xs:enumeration value="other"/>
-			<xs:enumeration value="none"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="InteriorFinish">
-		<xs:simpleContent>
-			<xs:extension base="InteriorFinish_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -4278,20 +4206,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FramingType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="platform"/>
-			<xs:enumeration value="balloon"/>
-			<xs:enumeration value="timber"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FramingType">
-		<xs:simpleContent>
-			<xs:extension base="FramingType_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="AtticWallType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="gable"/>
@@ -4315,21 +4229,6 @@
 	<xs:complexType name="MinutesPerDay">
 		<xs:simpleContent>
 			<xs:extension base="MinutesPerDay_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="UsageBin_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="very small"/>
-			<xs:enumeration value="low"/>
-			<xs:enumeration value="medium"/>
-			<xs:enumeration value="high"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="UsageBin">
-		<xs:simpleContent>
-			<xs:extension base="UsageBin_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -4410,10 +4309,6 @@
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="living space"/>
-			<xs:enumeration value="other heated space"/>
-			<xs:enumeration value="other housing unit"/>
-			<xs:enumeration value="other multifamily buffer space"/>
-			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
@@ -4631,130 +4526,6 @@
 	<xs:complexType name="SolarThermalSystemEnergyFactor">
 		<xs:simpleContent>
 			<xs:extension base="SolarThermalSystemEnergyFactor_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="DehumidifierType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="portable"/>
-			<xs:enumeration value="whole-home"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="DehumidifierType">
-		<xs:simpleContent>
-			<xs:extension base="DehumidifierType_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="CompressorType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="single stage"/>
-			<xs:enumeration value="two stage"/>
-			<xs:enumeration value="variable speed"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="CompressorType">
-		<xs:simpleContent>
-			<xs:extension base="CompressorType_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PVSystemMaxPowerOutput_simple">
-		<xs:restriction base="Power_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemMaxPowerOutput">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemMaxPowerOutput_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PVSystemCollectorArea_simple">
-		<xs:restriction base="SurfaceArea_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemCollectorArea">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemCollectorArea_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PVSystemNumberOfPanels_simple">
-		<xs:restriction base="IntegerGreaterThanZero_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemNumberOfPanels">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemNumberOfPanels_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PerformanceClass_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="residential"/>
-			<xs:enumeration value="architectural"/>
-			<xs:enumeration value="light commercial"/>
-			<xs:enumeration value="commercial"/>
-			<xs:enumeration value="heavy commercial"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="PerformanceClass">
-		<xs:annotation>
-			<xs:documentation>The North American Fenestration Standard/Specification for windows, doors and, skylights provides a method for rating the structural performance, water resistance and air leakage of fenestration products.</xs:documentation>
-		</xs:annotation>
-		<xs:simpleContent>
-			<xs:extension base="PerformanceClass_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:complexType name="Season">
-		<xs:sequence>
-			<xs:element maxOccurs="1" minOccurs="0" name="BeginMonth" type="Month"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="BeginDayOfMonth" type="DayOfMonth"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="EndMonth" type="Month"/>
-			<xs:element maxOccurs="1" minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
-		</xs:sequence>
-		<xs:attribute name="dataSource" type="DataSource"/>
-	</xs:complexType>
-	<xs:simpleType name="Month_simple">
-		<xs:restriction base="xs:integer">
-			<xs:minInclusive value="1"/>
-			<xs:maxInclusive value="12"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="Month">
-		<xs:simpleContent>
-			<xs:extension base="Month_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="DayOfMonth_simple">
-		<xs:restriction base="xs:integer">
-			<xs:minInclusive value="1"/>
-			<xs:maxInclusive value="31"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="DayOfMonth">
-		<xs:simpleContent>
-			<xs:extension base="DayOfMonth_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="StormLocation_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="interior"/>
-			<xs:enumeration value="exterior"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="StormLocation">
-		<xs:simpleContent>
-			<xs:extension base="StormLocation_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>

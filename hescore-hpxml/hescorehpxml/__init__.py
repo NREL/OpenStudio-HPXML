@@ -3,10 +3,10 @@ import logging
 import os
 import sys
 from jsonschema import ValidationError, SchemaError
-from .base import HPXMLtoHEScoreTranslatorBase
-from .hpxml2 import HPXML2toHEScoreTranslator
-from .hpxml3 import HPXML3toHEScoreTranslator
-from .hpxml4 import HPXML4toHEScoreTranslator
+from hescorehpxml.base import HPXMLtoHEScoreTranslatorBase
+from hescorehpxml.hpxml2 import HPXML2toHEScoreTranslator
+from hescorehpxml.hpxml3 import HPXML3toHEScoreTranslator
+from hescorehpxml.hpxml4 import HPXML4toHEScoreTranslator
 from .exceptions import HPXMLtoHEScoreError
 
 
