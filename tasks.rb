@@ -232,6 +232,8 @@ def create_hpxmls
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
     'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
     'base-hvac-autosize-pthp.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-cop.xml' => 'base-hvac-room-ac-with-reverse-cycle-cop.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-hspf.xml' => 'base-hvac-room-ac-with-reverse-cycle-hspf.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -302,6 +304,8 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-reverse-cycle-cop.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-room-ac-with-reverse-cycle-hspf.xml' => 'base-hvac-pthp.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-setpoints-daily-schedules.xml' => 'base-hvac-setpoints-daily-setbacks.xml',
@@ -2032,6 +2036,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpPTHP
     args['heat_pump_cooling_efficiency'] = 11.4
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-room-ac-with-reverse-cycle-hspf.xml'].include? hpxml_file
+    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRACwithReverseCycle
+    args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF
+    args['heat_pump_heating_efficiency'] = 7.7
+    # Fixme: is it possible for this type of heat pump to have bakcup coils?
+    args['heat_pump_backup_type'] = 'none'
+  elsif ['base-hvac-room-ac-with-reverse-cycle-cop.xml'].include? hpxml_file
+    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRACwithReverseCycle
+    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-ptac.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypePTAC

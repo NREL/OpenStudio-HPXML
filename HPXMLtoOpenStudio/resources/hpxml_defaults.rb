@@ -1208,27 +1208,37 @@ class HPXMLDefaults
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
       if [HPXML::HVACTypeHeatPumpAirToAir,
-          HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+          HPXML::HVACTypeHeatPumpPTHP,
+          HPXML::HVACTypeHeatPumpRACwithReverseCycle].include? heat_pump.heat_pump_type
         if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
-          use_eer_cop = true
+          use_eer = true
+          use_cop = true
+        elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpRACwithReverseCycle
+          use_eer = true
+          if not heat_pump.heating_efficiency_cop.nil?
+            use_cop = true
+          else
+            use_cop = false
+          end
         else
-          use_eer_cop = false
+          use_eer = false
+          use_cop = false
         end
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
+        HVAC.set_fan_power_rated(heat_pump) unless (use_cop && use_eer)
         HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer)
         HVAC.set_cool_rated_cfm_per_ton(heat_pump)
         HVAC.set_cool_rated_shrs_gross(heat_pump)
-        HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
+        HVAC.set_cool_rated_eirs(heat_pump) unless use_eer
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
+        HVAC.set_heat_curves_central_air_source(heat_pump, use_cop)
         HVAC.set_heat_rated_cfm_per_ton(heat_pump)
-        HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
+        HVAC.set_heat_rated_eirs(heat_pump) unless use_cop
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
