@@ -323,6 +323,12 @@
               <HeatPumpType>room air conditioner with reverse cycle</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
+              <BackupType>integrated</BackupType>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

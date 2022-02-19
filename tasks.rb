@@ -2040,11 +2040,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRACwithReverseCycle
     args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF
     args['heat_pump_heating_efficiency'] = 7.7
-    # Fixme: is it possible for this type of heat pump to have bakcup coils?
-    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-room-ac-with-reverse-cycle-cop.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRACwithReverseCycle
-    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-ptac.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypePTAC
