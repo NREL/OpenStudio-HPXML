@@ -219,7 +219,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     heat_pump = hpxml.heat_pumps[0]
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
-    supp_htg_capacity = 0.0
+    supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
     eer = heat_pump.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop_cool = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
