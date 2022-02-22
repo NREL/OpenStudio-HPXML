@@ -1,4 +1,4 @@
-<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' schemaVersion='3.0'>
+<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BuildResidentialHPXML</XMLGeneratedBy>
@@ -481,18 +481,18 @@
             <Area>2176.0</Area>
             <Thickness>0.0</Thickness>
             <ExposedPerimeter>194.7</ExposedPerimeter>
-            <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
             <PerimeterInsulation>
               <SystemIdentifier id='Surface_12PerimeterInsulation'/>
               <Layer>
                 <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Surface_12UnderSlabInsulation'/>
               <Layer>
                 <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
             <extension>
