@@ -1160,7 +1160,7 @@ end
 
 def get_wall_effective_r_from_doe2code(doe2code)
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_wall_eff_rvalue.csv'), headers: true) do |row|
+  CSV.foreach(File.join($path_to_const_code_lookups, 'lu_wall_eff_rvalue.csv'), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
@@ -1168,6 +1168,8 @@ def get_wall_effective_r_from_doe2code(doe2code)
   end
   return val
 end
+
+$path_to_const_code_lookups = File.join(File.dirname(__FILE__), '..', '..', '..', 'hescore-hpxml', 'hescorehpxml', 'lookups')
 
 $roof_color_map = {
   'white' => HPXML::ColorReflective,
@@ -1227,7 +1229,7 @@ def get_roof_effective_r_from_doe2code(doe2code)
     doe2code = doe2code.gsub('rb', 'wf')
   end
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_roof_eff_rvalue.csv'), headers: true) do |row|
+  CSV.foreach(File.join($path_to_const_code_lookups, 'lu_roof_eff_rvalue.csv'), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
@@ -1238,7 +1240,7 @@ end
 
 def get_ceiling_effective_r_from_doe2code(doe2code)
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_ceiling_eff_rvalue.csv'), headers: true) do |row|
+  CSV.foreach(File.join($path_to_const_code_lookups, 'lu_ceiling_eff_rvalue.csv'), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
@@ -1249,7 +1251,7 @@ end
 
 def get_floor_effective_r_from_doe2code(doe2code)
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_floor_eff_rvalue.csv'), headers: true) do |row|
+  CSV.foreach(File.join($path_to_const_code_lookups, 'lu_floor_eff_rvalue.csv'), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
