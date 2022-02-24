@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>efb5b3df-f539-4326-b9fd-50dbd724078d</version_id>
-  <version_modified>20220128T164911Z</version_modified>
+  <version_id>401c7082-1dc6-4525-90ee-5847a1afc3ee</version_id>
+  <version_modified>20220201T181605Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -119,13 +119,25 @@
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5733A933</checksum>
+      <checksum>B716040A</checksum>
     </file>
     <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>ACD6BF07</checksum>
+      <checksum>4C4C1489</checksum>
+    </file>
+    <file>
+      <filename>lu_knee_wall_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>46451585</checksum>
+    </file>
+    <file>
+      <filename>make_lu_knee_wall_eff_rvalue.py</filename>
+      <filetype>py</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5EBA0F47</checksum>
     </file>
   </files>
 </measure>

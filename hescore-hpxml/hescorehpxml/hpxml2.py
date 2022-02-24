@@ -41,10 +41,7 @@ class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                           'boolean(h:AtticRoofInsulation/h:Layer[h:NominalRValue > 0][h:InstallationType="continuous"][boolean(h:InsulationMaterial/h:Rigid)])'  # noqa: E501
                           )
 
-    def get_wall_assembly_rvalue(self, wall, v3_wall):
-        return convert_to_type(float, self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
-
-    def every_wall_layer_has_nominal_rvalue(self, wall, v3_wall):
+    def every_wall_layer_has_nominal_rvalue(self, wall):
         # This variable will be true if every wall layer has a NominalRValue *or*
         # if there are no insulation layers
         wall_layers = self.xpath(wall, 'h:Insulation/h:Layer', aslist=True)
@@ -80,8 +77,9 @@ class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
         return every_layer_has_nominal_rvalue
 
-    def get_attic_knee_walls(self, attic, b):
+    def get_attic_knee_walls(self, attic):
         knee_walls = []
+        b = self.xpath(attic, 'ancestor::h:Building')
         for kneewall_idref in self.xpath(attic, 'h:AtticKneeWall/@idref', aslist=True):
             wall = self.xpath(
                 b,
@@ -103,14 +101,10 @@ class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                        'venting unknown attic': 'vented_attic',
                        'other': None}
 
-        if rooftypemap[hpxml_attic_type] is None:
-            attc_is_cond = self.xpath(attic, 'h:extension/h:Conditioned/text()')
-            if attc_is_cond == 'true':
-                return 'cond_attic'
-            else:
-                raise TranslationError(
-                    'Attic {}: Cannot translate HPXML AtticType {} to HEScore rooftype.'.format(atticid,
-                                                                                                hpxml_attic_type))
+        if rooftypemap.get(hpxml_attic_type) is None:
+            raise TranslationError(
+                'Attic {}: Cannot translate HPXML AtticType {} to HEScore rooftype.'.format(atticid,
+                                                                                            hpxml_attic_type))
         return rooftypemap[hpxml_attic_type]
 
     def get_attic_floor_rvalue(self, attic, v3_b):
@@ -132,18 +126,11 @@ class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
         return every_layer_has_nominal_rvalue
 
-    def get_attic_area(self, attic, is_one_roof, footprint_area, v3_roofs, v3_b):
-        attic_area = convert_to_type(float, self.xpath(attic, 'h:Area/text()'))
-        if attic_area is None:
-            if is_one_roof:
-                attic_area = footprint_area
-            else:
-                raise TranslationError(
-                    'If there are more than one Attic elements, each needs an area. Please specify under Attic/Area.')
-        return attic_area
+    def get_ceiling_area(self, attic):
+        return float(self.xpath(attic, 'h:Area/text()', raise_err=True))
 
     def get_attic_roof_area(self, roof):
-        return self.xpath(roof, 'h:RoofArea/text()')
+        return float(self.xpath(roof, 'h:RoofArea/text()', raise_err=True))
 
     def get_framefloor_assembly_rvalue(self, framefloor, v3_framefloor):
         return convert_to_type(float, self.xpath(framefloor, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))

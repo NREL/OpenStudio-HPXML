@@ -71,12 +71,12 @@ The nearest discrete R-value from the list of possible R-values for that wall ty
 is used to determine an assembly code. Then, the assembly R-value of the corresponding 
 assembly code from the lookup table is used. The lookup table can be found 
 at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
 
 If assembly R-value is used, the discrete R-value nearest to assembly R-value
 from the lookup table for that wall type is used. The lookup table can be found
 at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
 
 Wood Frame Walls
 ================
@@ -237,5 +237,5 @@ The weighted average is calculated by weighting the U-values by area.
 
 Then the nearest discrete R-value to the weighted average R-value from the lookup table is used.
 The lookup table can be found at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
-<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
+<https://github.com/NREL/hescore-hpxml/blob/master/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
 

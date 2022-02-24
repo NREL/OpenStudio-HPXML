@@ -23,7 +23,7 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "roof_area": 1306.5,
+          "ceiling_area": 1306.5,
           "roof_assembly_code": "rfwf00co",
           "roof_color": "white",
           "roof_type": "vented_attic",
