@@ -105,6 +105,9 @@ class TestAPIHouses(unittest.TestCase, ComparatorBase):
     def test_house8(self):
         self._do_full_compare('house8')
 
+    def test_house9(self):
+        self._do_full_compare('house9')
+
     def test_assembly_rvalue(self):
         self._do_full_compare('hescore_min_assembly_rvalue')
 
@@ -307,6 +310,14 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         self.assertRaisesRegex(TranslationError,
                                r'Cannot translate HPXML ResidentialFacilityType of .+ into HEScore building shape',
                                tr_v3.hpxml_to_hescore)
+
+    def test_invalid_infiltration_unit_of_measure(self):
+        tr = self._load_xmlfile('hescore_min')
+        el = self.xpath('//h:BuildingAirLeakage/h:UnitofMeasure')
+        el.text = 'CFMnatural'
+        self.assertRaisesRegex(TranslationError,
+                               r'BuildingAirLeakage/UnitofMeasure must be either "CFM50" or "ACH50"',
+                               tr.hpxml_to_hescore)
 
     def test_missing_surroundings(self):
         tr = self._load_xmlfile('townhouse_walls')
