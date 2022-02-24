@@ -16,8 +16,8 @@
       "floor_to_ceiling_height": 8,
       "conditioned_floor_area": 2600,
       "orientation": "south",
-      "blower_door_test": false,
-      "air_sealing_present": false
+      "blower_door_test": true,
+      "envelope_leakage": 2600
     },
     "zone": {
       "zone_roof": [
