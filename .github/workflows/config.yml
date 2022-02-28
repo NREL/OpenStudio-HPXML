@@ -46,6 +46,16 @@ jobs:
           path: coverage
           name: coverage
 
+      - name: Build documentation
+        run: |
+          cd docs
+          make html
+      - name: Save Docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: documentation
+          path: docs/_build/html/
+
   run-workflow-tests:
     runs-on: ubuntu-latest
     container:
