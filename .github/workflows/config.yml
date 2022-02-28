@@ -50,6 +50,7 @@ jobs:
         run: |
           cd docs
           make html
+
       - name: Save Docs
         uses: actions/upload-artifact@v2
         with:
