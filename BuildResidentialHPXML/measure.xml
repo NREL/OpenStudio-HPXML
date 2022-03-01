@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>52e30d38-8259-4735-96e2-996a1bd57b16</version_id>
-  <version_modified>20220205T181123Z</version_modified>
+  <version_id>12e8d031-8bc0-4f9d-9d01-095eff7e84d5</version_id>
+  <version_modified>20220301T174309Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -18,6 +18,24 @@
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>occupancy_calculation_type</name>
+      <display_name>Occupancy Calculation Type</display_name>
+      <description>The type of occupancy calculation type. If 'asset' is chosen, usage multipliers not provided continue to default to 1.0 (meaning energy use is calculated based on floor area, # bedrooms, etc.). If 'operational' is chosen, usage multipliers not provided are calculated based on # occupants, floor area, # bedrooms, etc.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>asset</value>
+          <display_name>asset</display_name>
+        </choice>
+        <choice>
+          <value>operational</value>
+          <display_name>operational</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>software_info_program_used</name>
@@ -6831,17 +6849,6 @@
       <checksum>EC0F1768</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2D2857D8</checksum>
-    </file>
-    <file>
       <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6870,6 +6877,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>C028936D</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>16A1EB41</checksum>
     </file>
   </files>
 </measure>

@@ -60,6 +60,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    occupancy_calculation_type_choices = OpenStudio::StringVector.new
+    occupancy_calculation_type_choices << 'asset'
+    occupancy_calculation_type_choices << 'operational'
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('occupancy_calculation_type', occupancy_calculation_type_choices, true)
+    arg.setDisplayName('Occupancy Calculation Type')
+    arg.setDescription("The type of occupancy calculation type. If 'asset' is chosen, usage multipliers not provided continue to default to 1.0 (meaning energy use is calculated based on floor area, # bedrooms, etc.). If 'operational' is chosen, usage multipliers not provided are calculated based on # occupants, floor area, # bedrooms, etc.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -3361,6 +3370,7 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
 
+    hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type]
     if args[:software_info_program_used].is_initialized
       hpxml.header.software_program_used = args[:software_info_program_used].get
     end
@@ -5562,9 +5572,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_television_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_television_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_television_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_television_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5586,9 +5595,8 @@ class HPXMLFile
       frac_latent = Float(args[:misc_plug_loads_other_frac_latent])
     end
 
-    usage_multiplier = args[:misc_plug_loads_other_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_other_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_other_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5606,9 +5614,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_well_pump_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_well_pump_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_well_pump_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_well_pump_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5624,9 +5631,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_vehicle_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_vehicle_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_vehicle_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_vehicle_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
