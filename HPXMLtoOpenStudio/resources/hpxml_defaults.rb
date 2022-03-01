@@ -1944,9 +1944,9 @@ class HPXMLDefaults
         cooking_range.usage_multiplier = 1.0
         cooking_range.usage_multiplier_isdefaulted = true
       end
-      if hpxml.header.occupancy_calculation_type == 'operational'
-        occ_factor = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-        cooking_range.usage_multiplier *= occ_factor
+      if cooking_range.operational_usage_multiplier.nil?
+        cooking_range.operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
+        cooking_range.operational_usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_range = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCookingRange)
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range

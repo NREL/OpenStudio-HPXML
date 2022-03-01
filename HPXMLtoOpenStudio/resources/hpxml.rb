@@ -5415,7 +5415,7 @@ class HPXML < Object
   end
 
   class CookingRange < BaseElement
-    ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier,
+    ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier, :operational_usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
@@ -5439,6 +5439,7 @@ class HPXML < Object
       XMLHelper.add_element(cooking_range, 'FuelType', @fuel_type, :string) unless @fuel_type.nil?
       XMLHelper.add_element(cooking_range, 'IsInduction', @is_induction, :boolean, @is_induction_isdefaulted) unless @is_induction.nil?
       XMLHelper.add_extension(cooking_range, 'UsageMultiplier', @usage_multiplier, :float, @usage_multiplier_isdefaulted) unless @usage_multiplier.nil?
+      XMLHelper.add_extension(cooking_range, 'OperationalUsageMultiplier', @operational_usage_multiplier, :float, @operational_usage_multiplier_isdefaulted) unless @operational_usage_multiplier.nil?
       XMLHelper.add_extension(cooking_range, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(cooking_range, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(cooking_range, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
@@ -5452,6 +5453,7 @@ class HPXML < Object
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType', :string)
       @is_induction = XMLHelper.get_value(cooking_range, 'IsInduction', :boolean)
       @usage_multiplier = XMLHelper.get_value(cooking_range, 'extension/UsageMultiplier', :float)
+      @operational_usage_multiplier = XMLHelper.get_value(cooking_range, 'extension/OperationalUsageMultiplier', :float)
       @weekday_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekendScheduleFractions', :string)
       @monthly_multipliers = XMLHelper.get_value(cooking_range, 'extension/MonthlyScheduleMultipliers', :string)

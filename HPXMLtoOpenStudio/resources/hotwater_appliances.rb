@@ -10,6 +10,7 @@ class HotWaterAndAppliances
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
+    occ_calc_type = hpxml.header.occupancy_calculation_type
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -184,7 +185,7 @@ class HotWaterAndAppliances
 
     # Cooking Range energy
     if not cooking_range.nil?
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, occ_calc_type, cooking_range, oven, cooking_range.additional_properties.space.nil?)
 
       # Create schedule
       cook_schedule = nil
@@ -369,7 +370,7 @@ class HotWaterAndAppliances
              is_convection: false }
   end
 
-  def self.calc_range_oven_energy(nbeds, cooking_range, oven, is_outside = false)
+  def self.calc_range_oven_energy(nbeds, occ_calc_type, cooking_range, oven, is_outside = false)
     if cooking_range.is_induction
       burner_ef = 0.91
     else
@@ -390,6 +391,11 @@ class HotWaterAndAppliances
 
     annual_kwh *= cooking_range.usage_multiplier
     annual_therm *= cooking_range.usage_multiplier
+
+    if occ_calc_type == 'operational'
+      annual_kwh *= cooking_range.operational_usage_multiplier
+      annual_therm *= cooking_range.operational_usage_multiplier
+    end
 
     if not is_outside
       frac_lost = 0.20
