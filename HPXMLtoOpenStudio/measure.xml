@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0ef63d41-c262-4a7a-b301-8d1b0e2344b2</version_id>
-  <version_modified>20220226T161526Z</version_modified>
+  <version_id>2b65f61e-874d-453a-ba41-9df5f6b7aaea</version_id>
+  <version_modified>20220301T174314Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -434,18 +434,6 @@
       <checksum>D5FC76DC</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DB7F0ADB</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F8A504E5</checksum>
-    </file>
-    <file>
       <filename>data/cambium/LRMER_95DecarbBy2035.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -515,6 +503,18 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>1B8F2ECC</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A3F31645</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D22D6E8</checksum>
     </file>
   </files>
 </measure>

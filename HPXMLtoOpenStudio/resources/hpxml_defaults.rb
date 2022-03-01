@@ -7,6 +7,7 @@ class HPXMLDefaults
   # with the HPXML objects that will ultimately get passed around.
 
   def self.apply(hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
+    unit_type = hpxml.building_construction.residential_facility_type
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -60,7 +61,7 @@ class HPXMLDefaults
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml, schedules_file)
     apply_solar_thermal_systems(hpxml)
-    apply_appliances(hpxml, nbeds, eri_version, schedules_file)
+    apply_appliances(hpxml, nbeds, unit_type, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
     apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
@@ -1697,7 +1698,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_appliances(hpxml, nbeds, eri_version, schedules_file)
+  def self.apply_appliances(hpxml, nbeds, unit_type, eri_version, schedules_file)
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
@@ -1942,6 +1943,10 @@ class HPXMLDefaults
       if cooking_range.usage_multiplier.nil?
         cooking_range.usage_multiplier = 1.0
         cooking_range.usage_multiplier_isdefaulted = true
+      end
+      if hpxml.header.occupancy_calculation_type == 'operational'
+        occ_factor = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
+        cooking_range.usage_multiplier *= occ_factor
       end
       schedules_file_includes_range = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCookingRange)
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range
@@ -2603,5 +2608,26 @@ class HPXMLDefaults
     elsif (azimuth >= 315.0 - 22.5) && (azimuth < 315.0 + 22.5)
       return HPXML::OrientationNorthwest
     end
+  end
+
+  def self.get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, noccs)
+    occ_to_nbr_ratio = noccs / nbeds
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+      occ_factor = occ_to_nbr_ratio**0.51
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      occ_factor = occ_to_nbr_ratio**0.70
+    end
+    return occ_factor
+  end
+
+  def self.get_misc_luls_adjustment_factor(unit_type, nbeds, noccs, cfa)
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+      c = [-0.68, 1.09]
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      c = [-1.47, 1.69]
+    end
+    adj_factor = (0.5 + 0.25 * (c[0] + c[1] * noccs) / 3.0 + 0.25 * cfa / 1920.0) /
+                 (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+    return adj_factor
   end
 end
