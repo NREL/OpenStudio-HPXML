@@ -4,13 +4,16 @@ class HotWaterAndAppliances
   def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map)
 
+    occ_calc_type = hpxml.header.occupancy_calculation_type
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
+    if occ_calc_type == 'operational'
+      fixtures_usage_multiplier *= hpxml.water_heating.water_fixtures_operational_usage_multiplier
+    end
     living_space = spaces[HPXML::LocationLivingSpace]
-    occ_calc_type = hpxml.header.occupancy_calculation_type
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -41,7 +44,7 @@ class HotWaterAndAppliances
 
     # Clothes washer energy
     if not clothes_washer.nil?
-      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, occ_calc_type, clothes_washer, clothes_washer.additional_properties.space.nil?)
 
       # Create schedule
       power_cw_schedule = nil
@@ -69,7 +72,7 @@ class HotWaterAndAppliances
 
     # Clothes dryer energy
     if not clothes_dryer.nil?
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, occ_calc_type, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
 
       # Create schedule
       cd_schedule = nil
@@ -100,7 +103,7 @@ class HotWaterAndAppliances
 
     # Dishwasher energy
     if not dishwasher.nil?
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, occ_calc_type, dishwasher, dishwasher.additional_properties.space.nil?)
 
       # Create schedule
       power_dw_schedule = nil
@@ -437,7 +440,7 @@ class HotWaterAndAppliances
     end
   end
 
-  def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false)
+  def self.calc_dishwasher_energy_gpd(eri_version, nbeds, occ_calc_type, dishwasher, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if dishwasher.rated_annual_kwh.nil?
         dishwasher.rated_annual_kwh = calc_dishwasher_annual_kwh_from_ef(dishwasher.energy_factor)
@@ -464,6 +467,11 @@ class HotWaterAndAppliances
 
     annual_kwh *= dishwasher.usage_multiplier
     gpd *= dishwasher.usage_multiplier
+
+    if occ_calc_type == 'operational'
+      annual_kwh *= dishwasher.operational_usage_multiplier
+      gpd *= dishwasher.operational_usage_multiplier
+    end
 
     if not is_outside
       frac_lost = 0.40
@@ -516,7 +524,7 @@ class HotWaterAndAppliances
     end
   end
 
-  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false)
+  def self.calc_clothes_dryer_energy(eri_version, nbeds, occ_calc_type, clothes_dryer, clothes_washer, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
         clothes_dryer.combined_energy_factor = calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
@@ -557,6 +565,11 @@ class HotWaterAndAppliances
 
     annual_kwh *= clothes_dryer.usage_multiplier
     annual_therm *= clothes_dryer.usage_multiplier
+
+    if occ_calc_type == 'operational'
+      annual_kwh *= clothes_dryer.operational_usage_multiplier
+      annual_therm *= clothes_dryer.operational_usage_multiplier
+    end
 
     if not is_outside
       frac_lost = 0.0
@@ -611,7 +624,7 @@ class HotWaterAndAppliances
     end
   end
 
-  def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false)
+  def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, occ_calc_type, clothes_washer, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       gas_h20 = 0.3914 # (gal/cyc) per (therm/y)
       elec_h20 = 0.0178 # (gal/cyc) per (kWh/y)
@@ -635,6 +648,11 @@ class HotWaterAndAppliances
 
     annual_kwh *= clothes_washer.usage_multiplier
     gpd *= clothes_washer.usage_multiplier
+
+    if occ_calc_type == 'operational'
+      annual_kwh *= clothes_washer.operational_usage_multiplier
+      gpd *= clothes_washer.operational_usage_multiplier
+    end
 
     if not is_outside
       frac_lost = 0.70
