@@ -7,7 +7,6 @@ class HPXMLDefaults
   # with the HPXML objects that will ultimately get passed around.
 
   def self.apply(hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
-    unit_type = hpxml.building_construction.residential_facility_type
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -59,9 +58,9 @@ class HPXMLDefaults
     apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
     apply_water_heaters(hpxml, nbeds, eri_version)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
-    apply_water_fixtures(hpxml, nbeds, unit_type, schedules_file)
+    apply_water_fixtures(hpxml, schedules_file)
     apply_solar_thermal_systems(hpxml)
-    apply_appliances(hpxml, nbeds, unit_type, eri_version, schedules_file)
+    apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
     apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
@@ -1579,16 +1578,12 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_water_fixtures(hpxml, nbeds, unit_type, schedules_file)
+  def self.apply_water_fixtures(hpxml, schedules_file)
     return if hpxml.hot_water_distributions.size == 0
 
     if hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
-    end
-    if hpxml.water_heating.water_fixtures_operational_usage_multiplier.nil?
-      hpxml.water_heating.water_fixtures_operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-      hpxml.water_heating.water_fixtures_operational_usage_multiplier_isdefaulted = true
     end
     schedules_file_includes_fixtures = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnHotWaterFixtures)
     if hpxml.water_heating.water_fixtures_weekday_fractions.nil? && !schedules_file_includes_fixtures
@@ -1702,7 +1697,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_appliances(hpxml, nbeds, unit_type, eri_version, schedules_file)
+  def self.apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
@@ -1734,10 +1729,6 @@ class HPXMLDefaults
       if clothes_washer.usage_multiplier.nil?
         clothes_washer.usage_multiplier = 1.0
         clothes_washer.usage_multiplier_isdefaulted = true
-      end
-      if clothes_washer.operational_usage_multiplier.nil?
-        clothes_washer.operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-        clothes_washer.operational_usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_cw = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnClothesWasher)
       if clothes_washer.weekday_fractions.nil? && !schedules_file_includes_cw
@@ -1778,10 +1769,6 @@ class HPXMLDefaults
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
         clothes_dryer.usage_multiplier_isdefaulted = true
-      end
-      if clothes_dryer.operational_usage_multiplier.nil?
-        clothes_dryer.operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-        clothes_dryer.operational_usage_multiplier_isdefaulted = true
       end
       if clothes_dryer.is_vented.nil?
         clothes_dryer.is_vented = true
@@ -1835,10 +1822,6 @@ class HPXMLDefaults
       if dishwasher.usage_multiplier.nil?
         dishwasher.usage_multiplier = 1.0
         dishwasher.usage_multiplier_isdefaulted = true
-      end
-      if dishwasher.operational_usage_multiplier.nil?
-        dishwasher.operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-        dishwasher.operational_usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_dw = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnDishwasher)
       if dishwasher.weekday_fractions.nil? && !schedules_file_includes_dw
@@ -1959,10 +1942,6 @@ class HPXMLDefaults
       if cooking_range.usage_multiplier.nil?
         cooking_range.usage_multiplier = 1.0
         cooking_range.usage_multiplier_isdefaulted = true
-      end
-      if cooking_range.operational_usage_multiplier.nil?
-        cooking_range.operational_usage_multiplier = get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, hpxml.building_occupancy.number_of_residents)
-        cooking_range.operational_usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_range = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCookingRange)
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range

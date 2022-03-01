@@ -963,6 +963,74 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
   end
 
+  def test_operational_calculation_type
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-occ-calctype-operational.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    unit_type = hpxml.building_construction.residential_facility_type
+    nbeds = hpxml.building_construction.number_of_bedrooms
+    noccs = hpxml.building_occupancy.number_of_residents
+    occ_factor = HPXMLDefaults.get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, noccs)
+
+    # water use equipment peak flows
+    fixture_gpd = 44.60 * occ_factor
+    dist_gpd = 10.2343 * occ_factor
+    cw_gpd = 3.7116 * occ_factor
+    dw_gpd = 2.7342 * occ_factor
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+
+    # electric equipment
+    cw_ee_kwh_yr = 107.059 * occ_factor
+    cw_sens_frac = 0.27
+    cw_lat_frac = 0.03
+    assert_in_epsilon(cw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(cw_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[0], 0.001)
+    assert_in_epsilon(cw_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[1], 0.001)
+
+    dw_ee_kwh_yr = 93.392 * occ_factor
+    dw_sens_frac = 0.3
+    dw_lat_frac = 0.300
+    assert_in_epsilon(dw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher), 0.001)
+    assert_in_epsilon(dw_sens_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[0], 0.001)
+    assert_in_epsilon(dw_lat_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[1], 0.001)
+
+    cd_ee_kwh_yr = 443.317 * occ_factor
+    cd_sens_frac = 0.135
+    cd_lat_frac = 0.015
+    assert_in_epsilon(cd_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer), 0.001)
+    assert_in_epsilon(cd_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesDryer)[0], 0.001)
+    assert_in_epsilon(cd_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesDryer)[1], 0.001)
+
+    rf_ee_kwh_yr = 650.0
+    rf_sens_frac = 1.0
+    rf_lat_frac = 0.0
+    assert_in_epsilon(rf_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameRefrigerator), 0.001)
+    assert_in_epsilon(rf_sens_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[0], 0.001)
+    assert_in_epsilon(rf_lat_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[1], 0.001)
+
+    cook_ee_kwh_yr = 448.0 * occ_factor
+    cook_sens_frac = 0.72
+    cook_lat_frac = 0.080
+    assert_in_epsilon(cook_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameCookingRange), 0.001)
+    assert_in_epsilon(cook_sens_frac, get_ee_fractions(model, Constants.ObjectNameCookingRange)[0], 0.001)
+    assert_in_epsilon(cook_lat_frac, get_ee_fractions(model, Constants.ObjectNameCookingRange)[1], 0.001)
+
+    # other equipment
+    water_sens = -262.507 * occ_factor
+    water_lat = 266.358 * occ_factor
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

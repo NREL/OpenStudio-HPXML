@@ -347,7 +347,6 @@ def create_hpxmls
     'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-shielding-of-home.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
-    # 'base-misc-operational-usage-multiplier.xml' => 'base.xml',
     'base-occ-calctype-operational.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
@@ -2332,12 +2331,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['misc_fuel_loads_fireplace_frac_sensible'] = 0.5
     args['misc_fuel_loads_fireplace_frac_latent'] = 0.1
     args['misc_fuel_loads_fireplace_usage_multiplier'] = 0.9
-    # elsif ['base-misc-operational-usage-multiplier.xml'].include? hpxml_file
-    # args['water_fixtures_operational_usage_multiplier'] = 0.9
-    # args['clothes_washer_operational_usage_multiplier'] = 0.9
-    # args['clothes_dryer_operational_usage_multiplier'] = 0.9
-    # args['dishwasher_operational_usage_multiplier'] = 0.9
-    # args['cooking_range_oven_operational_usage_multiplier'] = 0.9
   elsif ['base-misc-loads-none.xml'].include? hpxml_file
     args['misc_plug_loads_television_present'] = false
     args['misc_plug_loads_other_annual_kwh'] = 0.0

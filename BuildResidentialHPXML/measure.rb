@@ -1879,11 +1879,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_fixtures_operational_usage_multiplier', false)
-    arg.setDisplayName('Water Fixtures: Operational Usage Multiplier')
-    arg.setDescription('TODO.')
-    args << arg
-
     solar_thermal_system_type_choices = OpenStudio::StringVector.new
     solar_thermal_system_type_choices << 'none'
     solar_thermal_system_type_choices << HPXML::SolarThermalSystemType
@@ -2344,11 +2339,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_operational_usage_multiplier', false)
-    arg.setDisplayName('Clothes Washer: Operational Usage Multiplier')
-    arg.setDescription('TODO.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_location', appliance_location_choices, true)
     arg.setDisplayName('Clothes Dryer: Location')
     arg.setDescription('The space type for the clothes dryer location.')
@@ -2397,11 +2387,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Clothes Dryer: Usage Multiplier')
     arg.setDescription('Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_operational_usage_multiplier', false)
-    arg.setDisplayName('Clothes Dryer: Operational Usage Multiplier')
-    arg.setDescription('TODO.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dishwasher_location', appliance_location_choices, true)
@@ -2466,11 +2451,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Dishwasher: Usage Multiplier')
     arg.setDescription('Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_operational_usage_multiplier', false)
-    arg.setDisplayName('Dishwasher: Operational Usage Multiplier')
-    arg.setDescription('TODO.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('refrigerator_location', appliance_location_choices, true)
@@ -2564,11 +2544,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooking Range/Oven: Usage Multiplier')
     arg.setDescription('Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooking_range_oven_operational_usage_multiplier', false)
-    arg.setDisplayName('Cooking Range/Oven: Operational Usage Multiplier')
-    arg.setDescription('TODO.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ceiling_fan_present', true)
@@ -5130,10 +5105,6 @@ class HPXMLFile
     if args[:water_fixtures_usage_multiplier] != 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier = args[:water_fixtures_usage_multiplier]
     end
-
-    if args[:water_fixtures_operational_usage_multiplier].is_initialized
-      hpxml.water_heating.water_fixtures_operational_usage_multiplier = args[:water_fixtures_operational_usage_multiplier].get
-    end
   end
 
   def self.set_solar_thermal(hpxml, runner, args, epw_file)
@@ -5378,10 +5349,6 @@ class HPXMLFile
       usage_multiplier = Float(args[:clothes_washer_usage_multiplier])
     end
 
-    if args[:clothes_washer_operational_usage_multiplier].is_initialized
-      operational_usage_multiplier = args[:clothes_washer_operational_usage_multiplier].get
-    end
-
     hpxml.clothes_washers.add(id: "ClothesWasher#{hpxml.clothes_washers.size + 1}",
                               location: location,
                               modified_energy_factor: modified_energy_factor,
@@ -5392,8 +5359,7 @@ class HPXMLFile
                               label_annual_gas_cost: label_annual_gas_cost,
                               label_usage: label_usage,
                               capacity: capacity,
-                              usage_multiplier: usage_multiplier,
-                              operational_usage_multiplier: operational_usage_multiplier)
+                              usage_multiplier: usage_multiplier)
   end
 
   def self.set_clothes_dryer(hpxml, runner, args)
@@ -5424,10 +5390,6 @@ class HPXMLFile
       usage_multiplier = args[:clothes_dryer_usage_multiplier]
     end
 
-    if args[:clothes_dryer_operational_usage_multiplier].is_initialized
-      operational_usage_multiplier = args[:clothes_dryer_operational_usage_multiplier].get
-    end
-
     hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size + 1}",
                              location: location,
                              fuel_type: args[:clothes_dryer_fuel_type],
@@ -5435,8 +5397,7 @@ class HPXMLFile
                              combined_energy_factor: combined_energy_factor,
                              is_vented: is_vented,
                              vented_flow_rate: vented_flow_rate,
-                             usage_multiplier: usage_multiplier,
-                             operational_usage_multiplier: operational_usage_multiplier)
+                             usage_multiplier: usage_multiplier)
   end
 
   def self.set_dishwasher(hpxml, runner, args)
@@ -5479,10 +5440,6 @@ class HPXMLFile
       usage_multiplier = args[:dishwasher_usage_multiplier]
     end
 
-    if args[:dishwasher_operational_usage_multiplier].is_initialized
-      operational_usage_multiplier = args[:dishwasher_operational_usage_multiplier].get
-    end
-
     hpxml.dishwashers.add(id: "Dishwasher#{hpxml.dishwashers.size + 1}",
                           location: location,
                           rated_annual_kwh: rated_annual_kwh,
@@ -5492,8 +5449,7 @@ class HPXMLFile
                           label_annual_gas_cost: label_annual_gas_cost,
                           label_usage: label_usage,
                           place_setting_capacity: place_setting_capacity,
-                          usage_multiplier: usage_multiplier,
-                          operational_usage_multiplier: operational_usage_multiplier)
+                          usage_multiplier: usage_multiplier)
   end
 
   def self.set_refrigerator(hpxml, runner, args)
@@ -5579,16 +5535,11 @@ class HPXMLFile
       usage_multiplier = args[:cooking_range_oven_usage_multiplier]
     end
 
-    if args[:cooking_range_oven_operational_usage_multiplier].is_initialized
-      operational_usage_multiplier = args[:cooking_range_oven_operational_usage_multiplier].get
-    end
-
     hpxml.cooking_ranges.add(id: "CookingRange#{hpxml.cooking_ranges.size + 1}",
                              location: location,
                              fuel_type: args[:cooking_range_oven_fuel_type],
                              is_induction: is_induction,
-                             usage_multiplier: usage_multiplier,
-                             operational_usage_multiplier: operational_usage_multiplier)
+                             usage_multiplier: usage_multiplier)
 
     if args[:cooking_range_oven_is_convection].is_initialized
       is_convection = args[:cooking_range_oven_is_convection].get

@@ -2407,44 +2407,29 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooking_ranges[0].location = HPXML::LocationBasementConditioned
     hpxml.cooking_ranges[0].is_induction = true
     hpxml.cooking_ranges[0].usage_multiplier = 1.1
-    hpxml.cooking_ranges[0].operational_usage_multiplier = 1.2
     hpxml.cooking_ranges[0].weekday_fractions = ConstantDaySchedule
     hpxml.cooking_ranges[0].weekend_fractions = ConstantDaySchedule
     hpxml.cooking_ranges[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationBasementConditioned, true, 1.1, 1.2, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationBasementConditioned, true, 1.1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.cooking_ranges[0].location = nil
     hpxml.cooking_ranges[0].is_induction = nil
     hpxml.cooking_ranges[0].usage_multiplier = nil
-    hpxml.cooking_ranges[0].operational_usage_multiplier = nil
     hpxml.cooking_ranges[0].weekday_fractions = nil
     hpxml.cooking_ranges[0].weekend_fractions = nil
     hpxml.cooking_ranges[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, 1.0, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
+    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
 
     # Test defaults before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, 1.0, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
-
-    # Test defaults with 1 more occupant
-    hpxml = _create_hpxml('base-occ-calctype-operational.xml')
-    hpxml.cooking_ranges[0].location = nil
-    hpxml.cooking_ranges[0].is_induction = nil
-    hpxml.cooking_ranges[0].usage_multiplier = nil
-    hpxml.cooking_ranges[0].operational_usage_multiplier = nil
-    hpxml.cooking_ranges[0].weekday_fractions = nil
-    hpxml.cooking_ranges[0].weekend_fractions = nil
-    hpxml.cooking_ranges[0].monthly_multipliers = nil
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, 1.22, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
   end
 
   def test_ovens
@@ -3796,11 +3781,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_cooking_range_values(cooking_range, location, is_induction, usage_multiplier, operational_usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_cooking_range_values(cooking_range, location, is_induction, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(location, cooking_range.location)
     assert_equal(is_induction, cooking_range.is_induction)
     assert_equal(usage_multiplier, cooking_range.usage_multiplier)
-    assert_equal(operational_usage_multiplier, cooking_range.operational_usage_multiplier)
     if weekday_sch.nil?
       assert_nil(cooking_range.weekday_fractions)
     else
