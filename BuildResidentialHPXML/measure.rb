@@ -2546,6 +2546,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooking_range_oven_operational_usage_multiplier', false)
+    arg.setDisplayName('Cooking Range/Oven: Operational Usage Multiplier')
+    arg.setDescription('TODO.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ceiling_fan_present', true)
     arg.setDisplayName('Ceiling Fan: Present')
     arg.setDescription('Whether there is are any ceiling fans.')
@@ -5535,11 +5540,16 @@ class HPXMLFile
       usage_multiplier = args[:cooking_range_oven_usage_multiplier]
     end
 
+    if args[:cooking_range_oven_operational_usage_multiplier].is_initialized
+      operational_usage_multiplier = args[:cooking_range_oven_operational_usage_multiplier].get
+    end
+
     hpxml.cooking_ranges.add(id: "CookingRange#{hpxml.cooking_ranges.size + 1}",
                              location: location,
                              fuel_type: args[:cooking_range_oven_fuel_type],
                              is_induction: is_induction,
-                             usage_multiplier: usage_multiplier)
+                             usage_multiplier: usage_multiplier,
+                             operational_usage_multiplier: operational_usage_multiplier)
 
     if args[:cooking_range_oven_is_convection].is_initialized
       is_convection = args[:cooking_range_oven_is_convection].get
