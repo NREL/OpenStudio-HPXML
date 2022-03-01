@@ -89,6 +89,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
     'base-bldgtype-single-family-attached.xml' => 'base.xml',
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
+    'base-calctype-operational.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -486,6 +487,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   args['apply_validation'] = true
 
   if ['base.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = 'asset'
     args['simulation_control_timestep'] = 60
     args['site_iecc_zone'] = '5B'
     args['site_state_code'] = 'CO'
@@ -813,6 +815,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['hot_tub_heater_annual_therm'] = Constants.Auto
     args['hot_tub_heater_usage_multiplier'] = 1.0
   elsif ['ASHRAE_Standard_140/L100AC.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = 'asset'
     args['weather_station_epw_filepath'] = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
     args['geometry_unit_cfa'] = 1539.0
@@ -1403,6 +1406,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['water_heater_efficiency'] = 0.59
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 40000
+  end
+
+  # Occ Calc Type
+  if ['base-calctype-operational.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = 'operational'
+    args['geometry_unit_num_occupants'] = 4
   end
 
   # DHW
