@@ -965,13 +965,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
 
   def test_operational_calculation_type
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-occ-calctype-operational.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-calctype-operational.xml'))
     model, hpxml = _test_measure(args_hash)
 
     unit_type = hpxml.building_construction.residential_facility_type
     nbeds = hpxml.building_construction.number_of_bedrooms
     noccs = hpxml.building_occupancy.number_of_residents
-    occ_factor = HPXMLDefaults.get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, noccs)
+    occ_factor = HPXMLDefaults.get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
 
     # water use equipment peak flows
     fixture_gpd = 44.60 * occ_factor

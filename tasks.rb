@@ -89,6 +89,8 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
     'base-bldgtype-single-family-attached.xml' => 'base.xml',
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
+    'base-calctype-operational.xml' => 'base.xml',
+    'base-calctype-operational-misc-loads-large-uncommon.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -347,7 +349,6 @@ def create_hpxmls
     'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-shielding-of-home.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
-    'base-occ-calctype-operational.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-pv-battery.xml' => 'base-battery.xml',
@@ -1408,6 +1409,13 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['water_heater_heating_capacity'] = 40000
   end
 
+  # Occ Calc Type
+  if ['base-calctype-operational.xml',
+      'base-calctype-operational-misc-loads-large-uncommon.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = 'operational'
+    args['geometry_unit_num_occupants'] = 4
+  end
+
   # DHW
   if ['base-dhw-combi-tankless.xml'].include? hpxml_file
     args['water_heater_type'] = HPXML::WaterHeaterTypeCombiTankless
@@ -2336,12 +2344,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['misc_plug_loads_other_annual_kwh'] = 0.0
     args['misc_plug_loads_other_frac_sensible'] = Constants.Auto
     args['misc_plug_loads_other_frac_latent'] = Constants.Auto
-  end
-
-  # Occ Calc Type
-  if ['base-occ-calctype-operational.xml'].include? hpxml_file
-    args['occupancy_calculation_type'] = 'operational'
-    args['geometry_unit_num_occupants'] = 4
   end
 
   # PV

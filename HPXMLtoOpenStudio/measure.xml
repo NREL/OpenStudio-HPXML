@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ea230d99-f292-45c3-8f9a-ccbcf9c1e90c</version_id>
-  <version_modified>20220302T165342Z</version_modified>
+  <version_id>96e48862-fbb8-49d3-80a7-d75a5aa56893</version_id>
+  <version_modified>20220302T192913Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -132,12 +132,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>6E466F3D</checksum>
-    </file>
-    <file>
-      <filename>test_miscloads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>411B7AF9</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
@@ -470,39 +464,10 @@
       <checksum>CDB0A906</checksum>
     </file>
     <file>
-      <filename>test_hotwater_appliance.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>40F32756</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>193C7498</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A3F31645</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5BAA8B6E</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>4297DBAD</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
@@ -515,6 +480,41 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>974AC59B</checksum>
+    </file>
+    <file>
+      <filename>test_miscloads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>51A7F913</checksum>
+    </file>
+    <file>
+      <filename>test_hotwater_appliance.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4D7EF263</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>84CB5577</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>951FA3C8</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B05BC1D4</checksum>
     </file>
   </files>
 </measure>

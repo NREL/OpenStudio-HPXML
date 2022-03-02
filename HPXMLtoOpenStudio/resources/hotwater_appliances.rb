@@ -4,20 +4,12 @@ class HotWaterAndAppliances
   def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map)
 
-    occ_calc_type = hpxml.header.occupancy_calculation_type
-    unit_type = hpxml.building_construction.residential_facility_type
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
-    noccs = hpxml.building_occupancy.number_of_residents
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-    fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
+    fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier * hpxml.header.additional_properties.hotwater_appliances_adj_factor
     living_space = spaces[HPXML::LocationLivingSpace]
-
-    if occ_calc_type == 'operational'
-      occ_factor = HPXMLDefaults.get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, noccs)
-      fixtures_usage_multiplier *= occ_factor
-    end
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -48,9 +40,7 @@ class HotWaterAndAppliances
 
     # Clothes washer energy
     if not clothes_washer.nil?
-      if occ_calc_type == 'operational'
-        clothes_washer.usage_multiplier *= occ_factor
-      end
+      clothes_washer.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
       cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
 
       # Create schedule
@@ -79,9 +69,7 @@ class HotWaterAndAppliances
 
     # Clothes dryer energy
     if not clothes_dryer.nil?
-      if occ_calc_type == 'operational'
-        clothes_dryer.usage_multiplier *= occ_factor
-      end
+      clothes_dryer.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
 
       # Create schedule
@@ -113,9 +101,7 @@ class HotWaterAndAppliances
 
     # Dishwasher energy
     if not dishwasher.nil?
-      if occ_calc_type == 'operational'
-        dishwasher.usage_multiplier *= occ_factor
-      end
+      dishwasher.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
       dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
 
       # Create schedule
@@ -201,9 +187,7 @@ class HotWaterAndAppliances
 
     # Cooking Range energy
     if not cooking_range.nil?
-      if occ_calc_type == 'operational'
-        cooking_range.usage_multiplier *= occ_factor
-      end
+      cooking_range.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
       cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
 
       # Create schedule

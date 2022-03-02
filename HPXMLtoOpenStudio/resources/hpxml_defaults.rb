@@ -72,6 +72,23 @@ class HPXMLDefaults
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
+
+    # Set operational adjustment factors after all other defaults have been applied
+    set_operational_adjustment_factors(hpxml, cfa, nbeds)
+  end
+
+  def self.set_operational_adjustment_factors(hpxml, cfa, nbeds)
+    if hpxml.header.occupancy_calculation_type == 'asset'
+      hpxml.header.additional_properties.hotwater_appliances_adj_factor = 1.0
+      hpxml.header.additional_properties.misc_loads_adj_factor = 1.0
+
+    elsif hpxml.header.occupancy_calculation_type == 'operational'
+      unit_type = hpxml.building_construction.residential_facility_type
+      noccs = hpxml.building_occupancy.number_of_residents
+
+      hpxml.header.additional_properties.hotwater_appliances_adj_factor = get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
+      hpxml.header.additional_properties.misc_loads_adj_factor = get_misc_loads_adj_factor(unit_type, nbeds, noccs, cfa)
+    end
   end
 
   def self.get_default_azimuths(hpxml)
@@ -2605,7 +2622,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_appliances_and_fixtures_occupancy_factor(unit_type, nbeds, noccs)
+  def self.get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
     occ_to_nbr_ratio = noccs / nbeds
     if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
       occ_factor = occ_to_nbr_ratio**0.51
@@ -2615,7 +2632,7 @@ class HPXMLDefaults
     return occ_factor
   end
 
-  def self.get_misc_luls_adjustment_factor(unit_type, nbeds, noccs, cfa)
+  def self.get_misc_loads_adj_factor(unit_type, nbeds, noccs, cfa)
     if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
       c = [-0.68, 1.09]
     elsif [HPXML::ResidentialTypeSFD].include? unit_type

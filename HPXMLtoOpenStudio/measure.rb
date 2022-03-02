@@ -1885,15 +1885,6 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
-    occ_calc_type = @hpxml.header.occupancy_calculation_type
-    unit_type = @hpxml.building_construction.residential_facility_type
-    cfa = @hpxml.building_construction.conditioned_floor_area
-    nbeds = @hpxml.building_construction.number_of_bedrooms
-    noccs = @hpxml.building_occupancy.number_of_residents
-    if occ_calc_type == 'operational'
-      adj_factor = HPXMLDefaults.get_misc_luls_adjustment_factor(unit_type, nbeds, noccs, cfa)
-    end
-
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         obj_name = Constants.ObjectNameMiscPlugLoads
@@ -1903,14 +1894,11 @@ class OSModel
         obj_name = Constants.ObjectNameMiscElectricVehicleCharging
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         obj_name = Constants.ObjectNameMiscWellPump
+        plug_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       end
       if obj_name.nil?
         runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
         next
-      end
-
-      if occ_calc_type == 'operational'
-        plug_load.usage_multiplier *= adj_factor
       end
 
       MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
@@ -1927,6 +1915,7 @@ class OSModel
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         obj_name = Constants.ObjectNameMiscFireplace
       end
+      fuel_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       if obj_name.nil?
         runner.registerWarning("Unexpected fuel load type '#{fuel_load.fuel_load_type}'. The fuel load will not be modeled.")
         next
@@ -1942,46 +1931,25 @@ class OSModel
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
-    occ_calc_type = @hpxml.header.occupancy_calculation_type
-    unit_type = @hpxml.building_construction.residential_facility_type
-    cfa = @hpxml.building_construction.conditioned_floor_area
-    nbeds = @hpxml.building_construction.number_of_bedrooms
-    noccs = @hpxml.building_occupancy.number_of_residents
-    if occ_calc_type == 'operational'
-      adj_factor = HPXMLDefaults.get_misc_luls_adjustment_factor(unit_type, nbeds, noccs, cfa)
-    end
-
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      if occ_calc_type == 'operational'
-        pool.heater_usage_multiplier *= adj_factor
-      end
-
+      pool.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if pool.pump_type == HPXML::TypeNone
 
-      if occ_calc_type == 'operational'
-        pool.pump_usage_multiplier *= adj_factor
-      end
-
+      pool.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
-      if occ_calc_type == 'operational'
-        hot_tub.heater_usage_multiplier *= adj_factor
-      end
-
+      hot_tub.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if hot_tub.pump_type == HPXML::TypeNone
 
-      if occ_calc_type == 'operational'
-        hot_tub.pump_usage_multiplier *= adj_factor
-      end
-
+      hot_tub.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
       MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
