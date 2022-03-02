@@ -1934,7 +1934,7 @@ class OSModel
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      pool.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+      pool.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if pool.heater_type != HPXML::TypeNone
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if pool.pump_type == HPXML::TypeNone
 
@@ -1945,7 +1945,7 @@ class OSModel
     @hpxml.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
-      hot_tub.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+      hot_tub.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if hot_tub.heater_type != HPXML::TypeNone
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if hot_tub.pump_type == HPXML::TypeNone
 
