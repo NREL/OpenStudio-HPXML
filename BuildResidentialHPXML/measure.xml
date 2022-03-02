@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>52e30d38-8259-4735-96e2-996a1bd57b16</version_id>
-  <version_modified>20220205T181123Z</version_modified>
+  <version_id>fbfefd83-d252-4505-82d0-9ea9afcaea71</version_id>
+  <version_modified>20220301T004154Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -6819,18 +6819,6 @@
       <checksum>EC2C759D</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-mf-atticroof-flat.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>228BA7BB</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-atticroof-vented.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EC0F1768</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -6842,34 +6830,16 @@
       <checksum>2D2857D8</checksum>
     </file>
     <file>
-      <filename>extra_files/error-hip-roof-and-protruding-garage.xml</filename>
+      <filename>extra_files/extra-mf-atticroof-flat.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>1C2C3DDC</checksum>
+      <checksum>68BC0185</checksum>
     </file>
     <file>
-      <filename>extra_files/error-invalid-living-and-garage-1.xml</filename>
+      <filename>extra_files/extra-mf-atticroof-vented.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>0FEA5D8B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-invalid-living-and-garage-2.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>54090807</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-invalid-time-zone.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F0FB2E25</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-ambient - Copy.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C028936D</checksum>
+      <checksum>F7DFE521</checksum>
     </file>
   </files>
 </measure>

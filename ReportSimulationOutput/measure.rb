@@ -1650,6 +1650,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def create_all_object_variables_by_key
     @object_variables_by_key = {}
+    return if @model.nil?
 
     @model.getModelObjects.each do |object|
       next if object.to_AdditionalProperties.is_initialized
