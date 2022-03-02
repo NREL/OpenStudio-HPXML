@@ -2612,7 +2612,7 @@ class HPXMLDefaults
     elsif [HPXML::ResidentialTypeSFD].include? unit_type
       occ_factor = occ_to_nbr_ratio**0.70
     end
-    return occ_factor.round(2)
+    return occ_factor
   end
 
   def self.get_misc_luls_adjustment_factor(unit_type, nbeds, noccs, cfa)
@@ -2623,6 +2623,6 @@ class HPXMLDefaults
     end
     adj_factor = (0.5 + 0.25 * (c[0] + c[1] * noccs) / 3.0 + 0.25 * cfa / 1920.0) /
                  (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
-    return adj_factor.round(2)
+    return adj_factor
   end
 end
