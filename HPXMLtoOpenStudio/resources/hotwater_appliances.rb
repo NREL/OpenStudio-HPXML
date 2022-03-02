@@ -8,7 +8,8 @@ class HotWaterAndAppliances
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-    fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier * hpxml.header.additional_properties.hotwater_appliances_adj_factor
+    fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
+    fixtures_usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor if !fixtures_usage_multiplier.nil?
     living_space = spaces[HPXML::LocationLivingSpace]
 
     # Get appliances, etc.
