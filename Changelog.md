@@ -18,6 +18,7 @@ __New Features__
   - Allows user-specified annual/timeseries output file names.
 
 __Bugfixes__
+- Adds more stringent limits for `AirflowDefectRatio` and `ChargeDefectRatio` (now allows values from 1/10th to 10x the design value).
 - Catches case where leap year is specified but weather file does not contain 8784 hours.
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
