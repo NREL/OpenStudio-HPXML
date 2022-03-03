@@ -107,6 +107,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'duct-leakage-percent' => ['Expected Value to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="Percent"], id: "HVACDistribution1"]'],
                             'duct-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'duct-location-unconditioned-space' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts, id: \"HVACDistribution1\"]"],
+                            'emissions-electricity-schedule' => ['Expected NumberofHeaderRows to be greater than or equal to 0',
+                                                                 'Expected ColumnNumber to be greater than or equal to 1'],
                             'enclosure-attic-missing-roof' => ['There must be at least one roof adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
                             'enclosure-basement-missing-exterior-foundation-wall' => ['There must be at least one exterior foundation wall adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
                             'enclosure-basement-missing-slab' => ['There must be at least one slab adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
@@ -133,6 +135,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
                             'invalid-assembly-effective-rvalue' => ['Expected AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation, id: "Wall1Insulation"]'],
+                            'invalid-calendar-year-low' => ['Expected CalendarYear to be greater than or equal to 1600'],
+                            'invalid-calendar-year-high' => ['Expected CalendarYear to be less than or equal to 9999'],
                             'invalid-duct-area-fractions' => ['Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]',
                                                               'Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]'],
                             'invalid-facility-type' => ['Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]',
@@ -144,8 +148,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-foundation-wall-properties' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall, id: "FoundationWall1"]',
                                                                      'Expected DistanceToBottomOfInsulation to be greater than or equal to DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]',
                                                                      'Expected DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]'],
+                            'invalid-hvac-installation-quality' => ['Expected extension/AirflowDefectRatio to be greater than or equal to -0.9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
+                                                                    'Expected extension/ChargeDefectRatio to be greater than or equal to -0.9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
+                            'invalid-hvac-installation-quality2' => ['Expected extension/AirflowDefectRatio to be less than or equal to 9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
+                                                                     'Expected extension/ChargeDefectRatio to be less than or equal to 9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
                             'invalid-id2' => ['Expected SystemIdentifier with id attribute [context: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight]'],
-                            'invalid-infiltration-volume' => ['Expected InfiltrationVolume to be greater than or equal to ../../../BuildingSummary/BuildingConstruction/ConditionedBuildingVolume [context: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]], id: "AirInfiltrationMeasurement1"]'],
                             'invalid-input-parameters' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
                                                            "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
                                                            "Expected Year to be '2021' or '2018' or '2015' or '2012' or '2009' or '2006' or '2003' [context: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC]",
@@ -157,16 +164,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-number-of-conditioned-floors' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'invalid-number-of-units-served' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]'],
                             'invalid-shared-vent-in-unit-flowrate' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "VentilationFan1"]'],
+                            'invalid-timezone-utcoffset-low' => ['Expected TimeZone/UTCOffset to be greater than or equal to -12'],
+                            'invalid-timezone-utcoffset-high' => ['Expected TimeZone/UTCOffset to be less than or equal to 14'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting]'],
-                            'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution1"]',
-                                                    'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution2"]',
-                                                    'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution5"]',
-                                                    'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution6"]'],
-                            'missing-duct-location' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution1"]',
-                                                        'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution2"]',
-                                                        'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution5"]',
-                                                        'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution6"]'],
+                            'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "HVACDistribution1"]'],
+                            'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution1"]'],
+                            'missing-duct-location' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution1"]'],
                             'missing-elements' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]',
                                                    'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -230,6 +234,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationUnconditionedSpace
         hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationUnconditionedSpace
+      elsif ['emissions-electricity-schedule'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
+        hpxml.header.emissions_scenarios[0].elec_schedule_number_of_header_rows = -1
+        hpxml.header.emissions_scenarios[0].elec_schedule_column_number = 0
       elsif ['enclosure-attic-missing-roof'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.roofs.reverse_each do |roof|
@@ -337,6 +345,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['invalid-assembly-effective-rvalue'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.walls[0].insulation_assembly_r_value = 0.0
+      elsif ['invalid-calendar-year-low'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.header.sim_calendar_year = 1575
+      elsif ['invalid-calendar-year-high'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.header.sim_calendar_year = 20000
       elsif ['invalid-duct-area-fractions'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ducts-area-fractions.xml'))
         hpxml.hvac_distributions[0].ducts[0].duct_surface_area = nil
@@ -355,11 +369,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.foundation_walls[0].depth_below_grade = 9.0
         hpxml.foundation_walls[0].insulation_interior_distance_to_top = 12.0
         hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 10.0
+      elsif ['invalid-hvac-installation-quality'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
+        hpxml.heat_pumps[0].airflow_defect_ratio = -99
+        hpxml.heat_pumps[0].charge_defect_ratio = -99
+      elsif ['invalid-hvac-installation-quality2'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
+        hpxml.heat_pumps[0].airflow_defect_ratio = 99
+        hpxml.heat_pumps[0].charge_defect_ratio = 99
       elsif ['invalid-id2'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-skylights.xml'))
-      elsif ['invalid-infiltration-volume'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.air_infiltration_measurements[0].infiltration_volume = 5400
       elsif ['invalid-input-parameters'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.header.transaction = 'modify'
@@ -386,6 +405,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['invalid-shared-vent-in-unit-flowrate'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-mechvent.xml'))
         hpxml.ventilation_fans[0].rated_flow_rate = 80
+      elsif ['invalid-timezone-utcoffset-low'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.header.time_zone_utc_offset = -13
+      elsif ['invalid-timezone-utcoffset-high'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.header.time_zone_utc_offset = 15
       elsif ['invalid-window-height'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-overhangs.xml'))
         hpxml.windows[1].overhangs_distance_to_bottom_of_window = 1.0
@@ -393,20 +418,17 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         int_cfl = hpxml.lighting_groups.select { |lg| lg.location == HPXML::LocationInterior && lg.lighting_type == HPXML::LightingTypeCFL }[0]
         int_cfl.fraction_of_units_in_location = 0.8
+      elsif ['missing-distribution-cfa-served'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_distributions[0].ducts[1].duct_surface_area = nil
+        hpxml.hvac_distributions[0].ducts[1].duct_location = nil
       elsif ['missing-duct-area'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-multiple.xml'))
-        hpxml.hvac_distributions.each do |hvac_distribution|
-          next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-          hvac_distribution.ducts[1].duct_surface_area = nil
-        end
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area
+        hpxml.hvac_distributions[0].ducts[1].duct_surface_area = nil
       elsif ['missing-duct-location'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-multiple.xml'))
-        hpxml.hvac_distributions.each do |hvac_distribution|
-          next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-          hvac_distribution.ducts[1].duct_location = nil
-        end
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_distributions[0].ducts[1].duct_location = nil
       elsif ['missing-elements'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.building_construction.number_of_conditioned_floors = nil
@@ -521,7 +543,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
       # Create HPXML object
       if ['battery-pv-output-power-low'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-pv-battery-outside.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-pv-battery.xml'))
         hpxml.batteries[0].rated_power_output = 0.1
         hpxml.pv_systems[0].max_power_output = 0.1
         hpxml.pv_systems[1].max_power_output = 0.1
@@ -616,7 +638,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     all_expected_errors = { 'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
                             'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
-                            'heat-pump-backup-system-furnace' => ["Heat pump backup system cannot be of type 'Furnace'."],
+                            'emissions-duplicate-names' => ['Found multiple Emissions Scenarios with the Scenario Name='],
+                            'emissions-wrong-columns' => ['Emissions File has too few columns. Cannot find column number'],
+                            'emissions-wrong-filename' => ["Emissions File file path 'invalid-wrong-filename.csv' does not exist."],
+                            'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
@@ -644,6 +669,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-timestep' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
+                            'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof' => ["Calculated a negative net surface area for surface 'Roof1'."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
@@ -655,8 +681,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'schedule-detailed-bad-values-max-not-one' => ["Schedule max value for column 'lighting_interior' must be 1."],
                             'schedule-detailed-bad-values-negative' => ["Schedule min value for column 'lighting_interior' must be non-negative."],
                             'schedule-detailed-bad-values-non-numeric' => ["Schedule value must be numeric for column 'lighting_interior'."],
+                            'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
                             'schedule-detailed-wrong-columns' => ["Schedule column name 'lighting' is invalid."],
-                            'schedule-detailed-wrong-filename' => ["Schedules file path 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv' does not exist."],
+                            'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
@@ -685,12 +712,25 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['duplicate-id'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.windows[-1].id = hpxml.windows[0].id
-      elsif ['heat-pump-backup-system-furnace'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
-        hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
-        hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
-        hpxml.hvac_distributions[0].annual_heating_dse = 0.9
-        hpxml.hvac_distributions[0].annual_cooling_dse = 0.9
+      elsif ['emissions-duplicate-names'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
+        hpxml.header.emissions_scenarios << hpxml.header.emissions_scenarios[0].dup
+      elsif ['emissions-wrong-columns'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
+        scenario = hpxml.header.emissions_scenarios[1]
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), scenario.elec_schedule_filepath))
+        csv_data[10] = [431.0] * (scenario.elec_schedule_column_number - 1)
+        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
+        hpxml.header.emissions_scenarios[1].elec_schedule_filepath = @tmp_csv_path
+      elsif ['emissions-wrong-filename'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
+        hpxml.header.emissions_scenarios[1].elec_schedule_filepath = 'invalid-wrong-filename.csv'
+      elsif ['emissions-wrong-rows'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
+        scenario = hpxml.header.emissions_scenarios[1]
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), scenario.elec_schedule_filepath))
+        File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
+        hpxml.header.emissions_scenarios[1].elec_schedule_filepath = @tmp_csv_path
       elsif ['heat-pump-backup-system-load-fraction'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
         hpxml.heating_systems[0].fraction_heat_load_served = 0.5
@@ -804,6 +844,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['invalid-windows-physical-properties'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-windows-physical-properties.xml'))
         hpxml.windows[2].thermal_break = false
+      elsif ['leap-year-TMY'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-calendar-year-custom.xml'))
+        hpxml.header.sim_calendar_year = 2008
       elsif ['net-area-negative-roof'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-skylights.xml'))
         hpxml.skylights[0].area = 4000
@@ -836,37 +879,44 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
         hpxml.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml.water_heating_systems.size}"
       elsif ['schedule-detailed-bad-values-max-not-one'].include? error_case
-        csv_data = CSV.read(File.join(File.dirname(__FILE__), '../resources/schedule_files/stochastic.csv'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = @tmp_csv_path
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-bad-values-negative'].include? error_case
-        csv_data = CSV.read(File.join(File.dirname(__FILE__), '../resources/schedule_files/stochastic.csv'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = -0.5
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = @tmp_csv_path
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-bad-values-non-numeric'].include? error_case
-        csv_data = CSV.read(File.join(File.dirname(__FILE__), '../resources/schedule_files/stochastic.csv'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = 'NA'
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = @tmp_csv_path
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
+      elsif ['schedule-detailed-duplicate-columns'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
+        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
+        hpxml.header.schedules_filepaths = []
+        hpxml.header.schedules_filepaths << @tmp_csv_path
+        hpxml.header.schedules_filepaths << @tmp_csv_path
       elsif ['schedule-detailed-wrong-columns'].include? error_case
-        csv_data = CSV.read(File.join(File.dirname(__FILE__), '../resources/schedule_files/stochastic.csv'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[0][1] = 'lighting'
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = @tmp_csv_path
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-wrong-filename'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv'
+        hpxml.header.schedules_filepaths << 'invalid-wrong-filename.csv'
       elsif ['schedule-detailed-wrong-rows'].include? error_case
-        csv_data = CSV.read(File.join(File.dirname(__FILE__), '../resources/schedule_files/stochastic.csv'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-detailed-stochastic.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepath = @tmp_csv_path
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['solar-thermal-system-with-combi-tankless'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-combi-tankless.xml'))
         hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
@@ -995,7 +1045,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       # Create HPXML object
       if ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple.xml'))
-        hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
       else
         fail "Unhandled case: #{warning_case}."
       end
