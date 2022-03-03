@@ -1983,7 +1983,7 @@
                                             "energy_factor": {
                                                 "type": "number",
                                                 "minimum": 0.45,
-                                                "maximum": 1.0
+                                                "maximum": 0.95
                                             }
                                         }
                                     }
@@ -2001,7 +2001,7 @@
                                             "energy_factor": {
                                                 "type": "number",
                                                 "minimum": 0.45,
-                                                "maximum": 1.0
+                                                "maximum": 0.99
                                             }
                                         }
                                     }

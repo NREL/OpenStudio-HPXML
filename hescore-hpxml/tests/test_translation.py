@@ -1650,11 +1650,11 @@ class TestInputOutOfBounds(unittest.TestCase, ComparatorBase):
         self.assertRaisesRegex(InputOutOfBounds,
                                'domestic_hot_water_energy_factor is out of bounds',
                                tr.hpxml_to_hescore)
-        el.text = '1.0'
+        el.text = '0.95'
         res = tr.hpxml_to_hescore()
         dhw = res['building']['systems']['domestic_hot_water']
         self.assertEqual(dhw['efficiency_method'], 'user')
-        self.assertEqual(dhw['energy_factor'], 1.0)
+        self.assertEqual(dhw['energy_factor'], 0.95)
 
     def test_dhw_heat_pump_efficiency(self):
         tr = self._load_xmlfile('hescore_min')
