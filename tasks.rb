@@ -2377,7 +2377,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
 
   # Simulation Control
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
-    args['simulation_control_run_period_calendar_year'] = 2008
+    args['simulation_control_run_period_calendar_year'] = 2010
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     args['simulation_control_daylight_saving_enabled'] = true
     args['simulation_control_daylight_saving_period'] = 'Mar 10 - Nov 6'

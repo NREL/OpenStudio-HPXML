@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.sim_begin_day = 2
     hpxml.header.sim_end_month = 11
     hpxml.header.sim_end_day = 11
-    hpxml.header.sim_calendar_year = 2008
+    hpxml.header.sim_calendar_year = 2009
     hpxml.header.dst_enabled = false
     hpxml.header.dst_begin_month = 3
     hpxml.header.dst_begin_day = 3
@@ -49,7 +49,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.time_zone_utc_offset = -8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true, 'CA', -8)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, false, true, 'CA', -8)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil

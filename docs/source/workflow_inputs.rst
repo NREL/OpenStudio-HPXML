@@ -99,11 +99,12 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``BeginDayOfMonth``                 integer            1 - 31         No        1                            Run period start date
   ``EndMonth``                        integer            1 - 12         No        12 (December)                Run period end date
   ``EndDayOfMonth``                   integer            1 - 31         No        31                           Run period end date
-  ``CalendarYear``                    integer            > 1600         No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
+  ``CalendarYear``                    integer            > 1600 [#]_    No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
   ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight savings enabled?
   ==================================  ========  =======  =============  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
+  .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
 
 If daylight saving is enabled, additional information is specified in ``DaylightSaving``.
@@ -1042,7 +1043,7 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   ``DistributionSystem``                                                idref              See [#]_                    Yes                 ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
   ``extension/FanPowerWattsPerCFM``                                     double             W/cfm      >= 0             No        See [#]_  Fan efficiency at maximum airflow rate [#]_
-  ``extension/AirflowDefectRatio``                                      double             frac       > -1             No        0.0       Deviation between design/installed airflows [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac       -0.9 - 9         No        0.0       Deviation between design/installed airflows [#]_
   ====================================================================  =================  =========  ===============  ========  ========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
@@ -1194,8 +1195,8 @@ If a central air conditioner is specified, additional information is entered in 
   ``SensibleHeatFraction``                                              double             frac         0 - 1            No                   Sensible heat fraction
   ``CompressorType``                                                    string                          See [#]_         No        See [#]_   Type of compressor
   ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0             No        See [#]_   Fan efficiency at maximum airflow rate [#]_
-  ``extension/AirflowDefectRatio``                                      double             frac         > -1             No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                       double             frac         > -1             No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac         -0.9 - 9         No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                       double             frac         -0.9 - 9         No        0.0        Deviation between design/installed charges [#]_
   ====================================================================  =================  ===========  ===============  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1265,8 +1266,8 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9     No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1404,8 +1405,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600             Yes       See [#]_   Rated cooling efficiency or Year installed
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600             Yes       See [#]_   Rated heating efficiency or Year installed
   ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0                      No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                                      double             frac         > -1                      No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                       double             frac         > -1                      No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac         -0.9 - 9                  No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                       double             frac         -0.9 - 9                  No        0.0        Deviation between design/installed charges [#]_
   ====================================================================  =================  ===========  ========================  ========  =========  =================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1440,8 +1441,8 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0                       Yes                  Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0                       Yes                  Rated heating efficiency
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0                      No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                 double    frac    > -1                      No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1                      No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9                  No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9                  No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ========================  ========  =========  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1496,8 +1497,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9     No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
 
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
