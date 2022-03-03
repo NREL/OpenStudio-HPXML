@@ -27,9 +27,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   def setup
     @args_hash = {}
     @args_hash['electricity_fixed_charge'] = 8.0
-    @args_hash['electricity_marginal_rate'] = '0.1080'
+    @args_hash['electricity_marginal_rate'] = Constants.Auto
     @args_hash['natural_gas_fixed_charge'] = 8.0
-    @args_hash['natural_gas_marginal_rate'] = '0.6472'
+    @args_hash['natural_gas_marginal_rate'] = Constants.Auto
     @args_hash['fuel_oil_marginal_rate'] = '2.6000'
     @args_hash['propane_marginal_rate'] = '1.9900'
     @args_hash['wood_cord_marginal_rate'] = ''

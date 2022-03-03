@@ -78,6 +78,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Electricity: Marginal Rate')
     arg.setUnits('$/kWh')
     arg.setDescription('Price per kilowatt-hour for electricity.')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natural_gas_fixed_charge', true)
@@ -91,6 +92,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Natural Gas: Marginal Rate')
     arg.setUnits('$/therm')
     arg.setDescription('Price per therm for natural gas.')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', true)
@@ -575,19 +577,35 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge)
-    cols = CSV.read("#{File.dirname(__FILE__)}/resources/Data/UtilityRates/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
-    cols[0].each_with_index do |rate_state, i|
-      next if rate_state != state_code
+    marginal_rate = nil
+    if fuel_type == FT::Elec
+      year_ix = nil
+      rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/Average_retail_price_of_electricity.csv'))
+      rows.each do |row|
+        # TODO: get state code from state name and match to state_code
+        year_ix = row.index('2021') if row[0] == 'description'
 
-      average_rate = Float(cols[1][i])
-      if [FT::Elec, FT::Gas].include? fuel_type
-        household_consumption = Float(cols[2][i])
-        marginal_rate = average_rate - 12.0 * fixed_charge / household_consumption
-      elsif [FT::Oil, FT::Propane].include? fuel_type
-        marginal_rate = average_rate
+        next if !row[0].include?('Residential : United States')
+
+        marginal_rate = Float(row[year_ix]) / 100.0
       end
-      return marginal_rate
+    elsif fuel_type == FT::Gas
+      state_ix = nil
+      rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
+      rows.each do |row|
+        # TODO: get state code from state name and match to state_code
+        state_ix = row.index('U.S. Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)') if row[0] == 'Date'
+
+        next if ['Back to Contents', 'Sourcekey', 'Date'].include?(row[0])
+
+        marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
+      end
+    elsif fuel_type == FT::Oil
+      # TODO
+    elsif fuel_type == FT::Propane
+      # TODO
     end
+    return marginal_rate
   end
 
   def write_output(runner, utility_bills, output_format, output_path)
