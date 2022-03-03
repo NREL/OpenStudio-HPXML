@@ -203,6 +203,43 @@ If neither simple nor detailed inputs are provided, then schedules are defaulted
 Default schedules are typically smooth, averaged schedules.
 These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
 
+HPXML Occupancy Calculation Type
+********************************
+
+Occupancy-based loads can be calculated through 1) an asset calculation or 2) an operational calculation.
+Calculation types are entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational".
+
+Asset Calculation
+~~~~~~~~~~~~~~~~~
+
+Asset calculations are performed using NumberofBedrooms and ConditionedFloorArea.
+
+Operational Calculation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Operational calculations are performed using NumberofBedrooms, ConditionedFloorArea, and NumberofResidents.
+Adjustments are made to usage multipliers to account for the extra NumberofResidents term.
+TODO: list the adjustment factors here? down below in appliances and misc LULs?
+
+Hot Water and Appliances:
+
+    occ_to_nbr_ratio = noccs / nbeds
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+      occ_factor = occ_to_nbr_ratio**0.51
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      occ_factor = occ_to_nbr_ratio**0.70
+    end
+
+Misc Loads:
+
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+      c = [-0.68, 1.09]
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      c = [-1.47, 1.69]
+    end
+    adj_factor = (0.5 + 0.25 * (c[0] + c[1] * noccs) / 3.0 + 0.25 * cfa / 1920.0) /
+                 (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+
 HPXML Emissions Scenarios
 *************************
 
