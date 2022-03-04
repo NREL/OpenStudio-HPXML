@@ -29,7 +29,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return "Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
+    return "Generates CSV schedule(s) at the specified file path(s), and inserts the CSV schedule file path(s) into the output HPXML file (or overwrites it if one already exists). Occupancy schedules corresponding to 'smooth' are average (e.g., Building America). Occupancy schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
   end
 
   # define the arguments that the user will input
@@ -46,30 +46,55 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     schedules_type_choices << 'stochastic'
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
-    arg.setDisplayName('Schedules: Type')
+    arg.setDisplayName('Occupancy Schedules: Type')
     arg.setDescription('The type of occupant-related schedules to use.')
     arg.setDefaultValue('smooth')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
-    arg.setDisplayName('Schedules: Vacancy Period')
+    arg.setDisplayName('Occupancy Schedules: Vacancy Period')
     arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
-    arg.setDisplayName('Schedules: Random Seed')
+    arg.setDisplayName('Occupancy Schedules: Random Seed')
     arg.setUnits('#')
     arg.setDescription("This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
-    arg.setDisplayName('Schedules: Output CSV Path')
+    arg.setDisplayName('Occupancy Schedules: Output CSV Path')
     arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_nighttime', false)
+    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Nighttime')
+    arg.setDescription('TODO.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_daytime_unoccupied', false)
+    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied')
+    arg.setDescription('TODO.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_nighttime', false)
+    arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Nighttime')
+    arg.setDescription('TODO.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_daytime_unoccupied', false)
+    arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied')
+    arg.setDescription('TODO.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('setpoint_output_csv_path', false)
+    arg.setDisplayName('Setpoint Schedules: Output CSV Path')
+    arg.setDescription('Absolute/relative path of the csv file containing setpoint schedules. Relative paths are relative to the HPXML output path.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
     arg.setDisplayName('HPXML Output File Path')
-    arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.')
+    arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path(s).')
     args << arg
 
     return args
@@ -127,8 +152,18 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
 
+    if args[:cooling_setpoint_offset_nighttime].is_initialized || args[:cooling_setpoint_offset_daytime_unoccupied].is_initialized || args[:heating_setpoint_offset_nighttime] || args[:heating_setpoint_offset_daytime_unoccupied]
+      # create the schedules
+      success = create_setpoint_schedules(runner, hpxml, args)
+      return false if not success
+
+      if !schedules_filepaths.include?(args[:setpoint_output_csv_path].get)
+        XMLHelper.add_element(extension, 'SchedulesFilePath', args[:setpoint_output_csv_path].get, :string)
+      end
+    end
+
     # write out the modified hpxml
-    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
+    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path]) || (args[:setpoint_output_csv_path].is_initialized && !schedules_filepaths.include?(args[:setpoint_output_csv_path].get))
       XMLHelper.write_file(doc, hpxml_output_path)
       runner.registerInfo("Wrote file: #{hpxml_output_path}")
     end
@@ -166,6 +201,42 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     runner.registerInfo("Created #{args[:schedules_type]} schedule with #{info_msgs.join(', ')}")
 
     return true
+  end
+
+  def create_setpoint_schedules(runner, hpxml, args)
+    hvac_control = hpxml.hvac_controls[0]
+
+    htg_setpoint = hvac_control.heating_setpoint_temp
+    clg_setpoint = hvac_control.cooling_setpoint_temp
+
+    rows = []
+
+    setpoints = [[SchedulesFile::ColumnHeatingSetpoint]]
+    setpoints += [[hvac_control.heating_setpoint_temp]] * 8760
+    rows << setpoints
+
+    setpoints = [[SchedulesFile::ColumnCoolingSetpoint]]
+    setpoints += [[hvac_control.cooling_setpoint_temp]] * 8760
+    rows << setpoints
+
+    setpoint_output_csv_path = args[:setpoint_output_csv_path].get
+    unless (Pathname.new setpoint_output_csv_path).absolute?
+      setpoint_output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), setpoint_output_csv_path))
+    end
+
+    CSV.open(setpoint_output_csv_path, 'w') do |csv|
+      rows = rows.transpose
+      columns = []
+      rows[0].each do |column|
+        columns << column[0]
+      end
+      csv << columns
+      rows[1..-1].each do |row|
+        csv << row.map { |x| '%.3g' % x }
+      end
+    end
+
+    runner.registerInfo("Created #{setpoint_output_csv_path}")
   end
 
   def get_simulation_parameters(hpxml, epw_file, args)

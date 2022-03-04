@@ -435,6 +435,38 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
   end
 
+  def test_setpoint_schedules
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
+    @args_hash['cooling_setpoint_offset_nighttime'] = 3
+    @args_hash['cooling_setpoint_offset_daytime_unoccupied'] = 6
+    @args_hash['heating_setpoint_offset_nighttime'] = 9
+    @args_hash['heating_setpoint_offset_daytime_unoccupied'] = 12
+    @args_hash['setpoint_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'setpoints.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('setpoints') })
+
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
+    sf.validate_schedules(year: 2007)
+
+    assert(sf.schedules.keys.include?(SchedulesFile::ColumnHeatingSetpoint))
+    assert(sf.schedules.keys.include?(SchedulesFile::ColumnCoolingSetpoint))
+    assert(sf.schedules[SchedulesFile::ColumnHeatingSetpoint].include?(68))
+    assert(sf.schedules[SchedulesFile::ColumnCoolingSetpoint].include?(78))
+  end
+
   def _test_measure()
     # create an instance of the measure
     measure = BuildResidentialScheduleFile.new
