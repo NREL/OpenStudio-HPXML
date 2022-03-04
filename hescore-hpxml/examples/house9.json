@@ -16,19 +16,23 @@
       "floor_to_ceiling_height": 8,
       "conditioned_floor_area": 2600,
       "orientation": "south",
-      "blower_door_test": false,
-      "air_sealing_present": false
+      "blower_door_test": true,
+      "envelope_leakage": 2600
     },
     "zone": {
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "roof_area": 2176.0,
           "roof_assembly_code": "rfwf03wo",
           "roof_color": "cool_color",
           "roof_absorptance": 0.85,
           "roof_type": "vented_attic",
+          "ceiling_area": 2176.0,
           "ceiling_assembly_code": "ecwf25",
+          "knee_wall": {
+            "area": 1000.0,
+            "assembly_code": "kwwf03"
+          },
           "zone_skylight": {
             "skylight_area": 0
           }

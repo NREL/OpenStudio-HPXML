@@ -131,7 +131,7 @@ is available in HPXML.
 
 Blower Door Test
 ================
-The translator first looks for a blower door test (not an estimate) with units
+The translator first looks for an ``AirInfiltrationMeasurement`` with units
 of :term:`CFM50`. If more than one of the ``AirInfiltrationMeasurement``
 elements have units in :term:`CFM50`, the last one to appear in the document is
 used. If there are no measurements in :term:`CFM50`, it will look for one in
@@ -146,7 +146,6 @@ An example of the minimum expected elements in HPXML follows:
 
    <AirInfiltrationMeasurement>
       <SystemIdentifier id="infilt1"/>
-      <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
       <HousePressure>50</HousePressure><!-- Must be 50 -->
       <BuildingAirLeakage>
          <UnitofMeasure>CFM<!-- or ACH --></UnitofMeasure>
@@ -165,7 +164,6 @@ example of the minimum expected elements in that case looks like:
 
    <AirInfiltrationMeasurement>
       <SystemIdentifier id="infilt2"/>
-      <TypeOfInfiltrationMeasurement>estimate</TypeOfInfiltrationMeasurement>
       <LeakinessDescription>tight</LeakinessDescription>
    </AirInfiltrationMeasurement>
 
@@ -188,12 +186,8 @@ mapping from ``LeakinessDescription``:
 
 If none of the ``AirInfiltrationMeasurement`` elements meet the criteria above
 to specify an estimate, the building is assumed to not have air sealing present.
-
-.. note::
-
-   If a building has no ``AirInfiltrationMeasurement`` elements in the 
-   HPXML document, the house is assumed to not be air sealed.
-   
+If a building has no ``AirInfiltrationMeasurement`` elements in the HPXML
+document, the house is assumed to not be air sealed.
 
 Comments
 ********

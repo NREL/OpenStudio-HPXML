@@ -224,9 +224,6 @@
                             "maxItems": 2,
                             "items": {
                                 "type": "object",
-                                "required": [
-                                    "roof_name"
-                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "roof_name": {
@@ -234,11 +231,17 @@
                                         "enum": ["roof1", "roof2"],
                                         "description": "Name of this roof instance"
                                     },
+                                    "ceiling_area": {
+                                        "type": "number",
+                                        "minimum": 1,
+                                        "maximum": 25000,
+                                        "description": "Area of ceiling (attic floor), used if roof_type = vented_attic"
+                                    },
                                     "roof_area": {
                                         "type": "number",
                                         "minimum": 1,
                                         "maximum": 25000,
-                                        "description": "Area of this roof element"
+                                        "description": "Area of the roof, used if roof_type = cath_ceiling"
                                     },
                                     "roof_assembly_code": {
                                         "type": "string",
@@ -277,7 +280,7 @@
                                     },
                                     "roof_type": {
                                         "type": "string",
-                                        "enum": ["vented_attic", "cond_attic", "cath_ceiling"],
+                                        "enum": ["vented_attic", "cath_ceiling"],
                                         "description": "Type of roof"
                                     },
                                     "ceiling_assembly_code": {
@@ -286,6 +289,25 @@
                                                  "ecwf19", "ecwf21", "ecwf25", "ecwf30", "ecwf35", "ecwf38", "ecwf44",
                                                  "ecwf49", "ecwf55", "ecwf60"],
                                         "description": "Ceiling construction assembly code (required unless roof_type is cath_ceiling)"
+                                    },
+                                    "knee_wall": {
+                                        "type": "object",
+                                        "description": "Knee wall inputs",
+                                        "additionalProperties": false,
+                                        "required": ["area", "assembly_code"],
+                                        "properties": {
+                                            "area": {
+                                                "type": "number",
+                                                "minimum": 1,
+                                                "maximum": 5000,
+                                                "description": "Knee wall area"
+                                            },
+                                            "assembly_code": {
+                                                "type": "string",
+                                                "enum": ["kwwf00", "kwwf03", "kwwf07", "kwwf11", "kwwf13", "kwwf15", "kwwf19", "kwwf21"],
+                                                "description": "Knee wall assembly code"
+                                            }
+                                        }
                                     },
                                     "zone_skylight": {
                                         "type": "object",
@@ -394,72 +416,65 @@
                                         ]
                                     }
                                 },
+                                "required": [
+                                    "roof_name",
+                                    "roof_type",
+                                    "roof_assembly_code",
+                                    "roof_color"
+                                ],
                                 "allOf": [
                                     {
                                         "if": {
                                             "properties": {
-                                                "roof_area": {"exclusiveMinimum": 0}
+                                                "roof_type": {"const": "vented_attic"}
                                             },
-                                            "required": ["roof_area"]
+                                            "required": ["roof_type"]
                                         },
                                         "then": {
-                                            "required": ["roof_assembly_code", "roof_color", "roof_type"]
+                                            "required": ["ceiling_area", "ceiling_assembly_code"]
                                         }
                                     },
                                     {
                                         "if": {
                                             "properties": {
-                                                "roof_name": {"enum": ["roof1", "roof2"]}
+                                                "roof_type": {"enum": ["cath_ceiling"]}    
                                             },
-                                            "required": ["roof_name"]
+                                            "required": ["roof_type"]
                                         },
                                         "then": {
-                                            "required": ["roof_area"]
+                                            "not": { "required": ["ceiling_area", "ceiling_assembly_code"]}
                                         }
                                     },
                                     {
                                         "if": {
                                             "properties": {
-                                                "roof_name": {"enum": ["roof1", "roof2"]},
-                                                "roof_area": {"exclusiveMinimum": 0}
+                                                "roof_color": {"enum": ["cool_color"]}
                                             },
-                                            "required": ["roof_name", "roof_area"]
+                                            "required": ["roof_color"]
                                         },
                                         "then": {
-                                            "allOf": [
-                                                {
-                                                    "if": {
-                                                        "properties": {
-                                                            "roof_color": {"const": "cool_color"}
-                                                        },
-                                                        "required": ["roof_color"]
-                                                    },
-                                                    "then": {
-                                                        "required": ["roof_absorptance"]
-                                                    },
-                                                    "else": {
-                                                        "not": {
-                                                            "required": ["roof_absorptance"]
-                                                        }
-                                                    }
-                                                },
-                                                {
-                                                    "if": {
-                                                        "properties": {
-                                                            "roof_type": {"enum": ["vented_attic", "cond_attic"]}
-                                                        },
-                                                        "required": ["roof_type"]
-                                                    },
-                                                    "then": {
-                                                        "required": ["ceiling_assembly_code"]
-                                                    },
-                                                    "else": {
-                                                        "not": {
-                                                            "required": ["ceiling_assembly_code"]
-                                                        }
-                                                    }
-                                                }
-                                            ]
+                                            "required": ["roof_absorptance"]
+                                        }
+                                    },
+                                    {
+                                        "if": {
+                                            "properties": {
+                                                "roof_color": {"not": {"enum": ["cool_color"]}}
+                                            },
+                                            "required": ["roof_color"]
+                                        },
+                                        "then": {
+                                            "not": {"required": ["roof_absorptance"]}
+                                        }
+                                    },
+                                    {
+                                        "if": {
+                                            "required": ["knee_wall"]
+                                        },
+                                        "then": {
+                                            "properties": {
+                                                "roof_type": {"enum": ["vented_attic"]}
+                                            }
                                         }
                                     }
                                 ]
@@ -1968,7 +1983,7 @@
                                             "energy_factor": {
                                                 "type": "number",
                                                 "minimum": 0.45,
-                                                "maximum": 1.0
+                                                "maximum": 0.95
                                             }
                                         }
                                     }
@@ -1986,7 +2001,7 @@
                                             "energy_factor": {
                                                 "type": "number",
                                                 "minimum": 0.45,
-                                                "maximum": 1.0
+                                                "maximum": 0.99
                                             }
                                         }
                                     }

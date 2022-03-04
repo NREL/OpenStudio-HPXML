@@ -53,7 +53,7 @@ def test_example_files():
         js_schema = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
         js = get_example_json(hpxml_filebase)
         errors = get_error_messages(js, js_schema)
-        assert len(errors) == 0
+        assert len(errors) == 0, f"{examplefile} is invalid"
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
@@ -154,10 +154,10 @@ def test_invalid_building_zone(hpxml_filebase):
     js['building']['zone'].append(zone)
     errors = get_error_messages(js, js_schema)
     if hpxml_filebase == 'townhouse_walls':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_area': 1200.0") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 1200.0") and
                    error.endswith("is not of type 'object'") for error in errors)
     elif hpxml_filebase == 'house1':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_area': 810") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 810") and
                    error.endswith("is not of type 'object'") for error in errors)
 
 
@@ -183,26 +183,8 @@ def test_invalid_roof(hpxml_filebase):
     js2['building']['zone']['zone_roof'][0]['roof_type'] = 'cath_ceiling'
     js2['building']['zone']['zone_roof'][0]['roof_absorptance'] = 0.6
     errors = get_error_messages(js2, js_schema)
-    if hpxml_filebase == 'townhouse_walls':
-        assert ("{'required': ['ceiling_assembly_code']} is not allowed for {'roof_name': 'roof1', "
-                "'roof_area': 1200.0, 'roof_assembly_code': 'rfwf00co', 'roof_color': 'medium', "
-                "'roof_type': 'cath_ceiling', 'ceiling_assembly_code': 'ecwf49', "
-                "'zone_skylight': {'skylight_area': 11.0, 'skylight_method': 'code', 'skylight_code': 'dcab', "
-                "'solar_screen': False}, 'roof_absorptance': 0.6}") in errors
-        assert ("{'required': ['roof_absorptance']} is not allowed for {'roof_name': 'roof1', "
-                "'roof_area': 1200.0, 'roof_assembly_code': 'rfwf00co', 'roof_color': 'medium', "
-                "'roof_type': 'cath_ceiling', 'ceiling_assembly_code': 'ecwf49', "
-                "'zone_skylight': {'skylight_area': 11.0, 'skylight_method': 'code', 'skylight_code': 'dcab', "
-                "'solar_screen': False}, 'roof_absorptance': 0.6}") in errors
-    elif hpxml_filebase == 'house1':
-        assert ("{'required': ['ceiling_assembly_code']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
-                "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf13', 'zone_skylight': {'skylight_area': 0}, "
-                "'roof_absorptance': 0.6}") in errors
-        assert ("{'required': ['roof_absorptance']} is not allowed for {'roof_name': 'roof1', 'roof_area': 810, "
-                "'roof_assembly_code': 'rfrb00co', 'roof_color': 'dark', 'roof_type': 'cath_ceiling', "
-                "'ceiling_assembly_code': 'ecwf13', 'zone_skylight': {'skylight_area': 0}, "
-                "'roof_absorptance': 0.6}") in errors
+    assert any(x.find("{'required': ['ceiling_area', 'ceiling_assembly_code']} is not allowed") > -1 for x in errors)
+    assert any(x.find("{'required': ['roof_absorptance']} is not allowed") > -1 for x in errors)
 
 
 def test_invalid_skylight():
@@ -672,30 +654,41 @@ def test_invalid_domestic_hot_water(hpxml_filebase):
     js4['building']['systems']['domestic_hot_water']['type'] = 'tankless'
     errors = get_error_messages(js4, js_schema)
     if hpxml_filebase == 'townhouse_walls':
-        assert "0.44 is less than the minimum of 0.45" not in errors
-    elif hpxml_filebase == 'house1':
-        assert "0.44 is less than the minimum of 0.45" in errors
+        js4['building']['systems']['domestic_hot_water']['efficiency_method'] = 'user'
+        del js4['building']['systems']['domestic_hot_water']['year']
+    errors = get_error_messages(js4, js_schema)
+    assert "0.44 is less than the minimum of 0.45" in errors
     js4['building']['systems']['domestic_hot_water']['type'] = 'heat_pump'
     js4['building']['systems']['domestic_hot_water']['energy_factor'] = 4.1
     errors = get_error_messages(js4, js_schema)
-    if hpxml_filebase == 'townhouse_walls':
-        assert "4.1 is greater than the maximum of 4.0" not in errors
-    elif hpxml_filebase == 'house1':
-        assert "4.1 is greater than the maximum of 4.0" in errors
+    assert "4.1 is greater than the maximum of 4.0" in errors
     js4['building']['systems']['domestic_hot_water']['type'] = 'indirect'
     errors = get_error_messages(js4, js_schema)
     assert "'combined' was expected" in errors
 
     js5 = copy.deepcopy(js)
+    js5['building']['systems']['domestic_hot_water']['fuel_primary'] = 'natural_gas'
+    js5['building']['systems']['domestic_hot_water']['energy_factor'] = 0.96
+    errors = get_error_messages(js5, js_schema)
+    assert "0.96 is greater than the maximum of 0.95" in errors
+    js5['building']['systems']['domestic_hot_water']['type'] = 'tankless'
+    js5['building']['systems']['domestic_hot_water']['energy_factor'] = 1.0
     if hpxml_filebase == 'townhouse_walls':
-        js5['building']['systems']['domestic_hot_water']['energy_factor'] = 0.6
-        errors = get_error_messages(js5, js_schema)
+        js5['building']['systems']['domestic_hot_water']['efficiency_method'] = 'user'
+        del js5['building']['systems']['domestic_hot_water']['year']
+    errors = get_error_messages(js5, js_schema)
+    assert "1.0 is greater than the maximum of 0.99" in errors
+
+    js6 = copy.deepcopy(js)
+    if hpxml_filebase == 'townhouse_walls':
+        js6['building']['systems']['domestic_hot_water']['energy_factor'] = 0.6
+        errors = get_error_messages(js6, js_schema)
         assert ("{'required': ['energy_factor']} is not allowed for {'category': 'unit', 'type': 'storage', "
                 "'fuel_primary': 'natural_gas', 'efficiency_method': 'shipment_weighted', 'year': 2010, "
                 "'energy_factor': 0.6}") in errors
     elif hpxml_filebase == 'house1':
-        js5['building']['systems']['domestic_hot_water']['year'] = 2021
-        errors = get_error_messages(js5, js_schema)
+        js6['building']['systems']['domestic_hot_water']['year'] = 2021
+        errors = get_error_messages(js6, js_schema)
         assert ("{'required': ['year']} is not allowed for {'category': 'unit', 'type': 'storage', "
                 "'fuel_primary': 'electric', 'efficiency_method': 'user', 'energy_factor': 0.8, "
                 "'year': 2021}") in errors
