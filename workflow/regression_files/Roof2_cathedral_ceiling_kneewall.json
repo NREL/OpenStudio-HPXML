@@ -1,6 +1,6 @@
 {
   "building_address": {
-    "address": "Regression run 9.23",
+    "address": "Regression run 9.78",
     "city": "St Louis",
     "state": "MO",
     "zip_code": "63101",
@@ -10,7 +10,7 @@
     "about": {
       "assessment_date": "2021-06-07",
       "shape": "rectangle",
-      "year_built": 1700,
+      "year_built": 1970,
       "number_bedrooms": 4,
       "num_floor_above_grade": 2,
       "floor_to_ceiling_height": 8,
@@ -55,11 +55,22 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "ceiling_area": 1000,
+          "ceiling_area": 600,
           "roof_type": "vented_attic",
           "roof_color": "medium",
           "roof_assembly_code": "rfwf00co",
-          "ceiling_assembly_code": "ecwf19"
+          "ceiling_assembly_code": "ecwf19",
+          "knee_wall": {
+            "assembly_code": "kwwf11",
+            "area": 200
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 400,
+          "roof_type": "cath_ceiling",
+          "roof_color": "medium",
+          "roof_assembly_code": "rfwf19co"
         }
       ],
       "zone_floor": [
