@@ -38,7 +38,7 @@ require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return 'HPXML Builder (Beta)'
+    return 'HPXML Builder'
   end
 
   # human readable description
