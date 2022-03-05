@@ -152,9 +152,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
 
-    if args[:cooling_setpoint_offset_nighttime].is_initialized || args[:cooling_setpoint_offset_daytime_unoccupied].is_initialized || args[:heating_setpoint_offset_nighttime] || args[:heating_setpoint_offset_daytime_unoccupied]
+    if args[:cooling_setpoint_offset_nighttime].is_initialized || args[:cooling_setpoint_offset_daytime_unoccupied].is_initialized || args[:heating_setpoint_offset_nighttime].is_initialized || args[:heating_setpoint_offset_daytime_unoccupied].is_initialized
       # create the schedules
       success = create_setpoint_schedules(runner, hpxml, args)
+      # FIXME: realistically/eventually we'd pass the new args into the schedule generator, where setpoints.csv would be created/exported
       return false if not success
 
       if !schedules_filepaths.include?(args[:setpoint_output_csv_path].get)
@@ -204,6 +205,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   def create_setpoint_schedules(runner, hpxml, args)
+    # FIXME: temp method until changes are made to the schedule generator
     hvac_control = hpxml.hvac_controls[0]
 
     htg_setpoint = hvac_control.heating_setpoint_temp
