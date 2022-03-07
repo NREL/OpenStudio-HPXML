@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.4.0
 
 __New Features__
-- Allows performing an operational, instead of an asset, calculation through a new `OccupancyCalculationType` input field.
+- **Breaking change**: Allows performing an operational, instead of an asset, calculation through a new required `OccupancyCalculationType` input field.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
