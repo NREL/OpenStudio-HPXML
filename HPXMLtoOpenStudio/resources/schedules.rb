@@ -1398,13 +1398,6 @@ class SchedulesFile
     return SchedulesFile.OccupancyColumnNames + SchedulesFile.SetpointColumnNames
   end
 
-  def self.SetpointColumnNames
-    return [
-      ColumnHeatingSetpoint,
-      ColumnCoolingSetpoint
-    ]
-  end
-
   def self.OccupancyColumnNames
     return [
       ColumnOccupants,
@@ -1437,6 +1430,13 @@ class SchedulesFile
     ]
   end
 
+  def self.SetpointColumnNames
+    return [
+      ColumnHeatingSetpoint,
+      ColumnCoolingSetpoint
+    ]
+  end
+
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
@@ -1448,7 +1448,9 @@ class SchedulesFile
                    ColumnPoolPump,
                    ColumnPoolHeater,
                    ColumnHotTubPump,
-                   ColumnHotTubHeater].include? column_name
+                   ColumnHotTubHeater,
+                   ColumnHeatingSetpoint,
+                   ColumnCoolingSetpoint].include? column_name
 
       affected_by_vacancy[column_name] = false
     end
