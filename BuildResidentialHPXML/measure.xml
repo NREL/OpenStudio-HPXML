@@ -3,11 +3,11 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a405ebc1-3374-40da-9408-2f89f6a2d0dc</version_id>
-  <version_modified>20220303T235241Z</version_modified>
+  <version_id>db9d17fc-601b-446b-b425-a4f3c3036ede</version_id>
+  <version_modified>20220307T161236Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
-  <display_name>HPXML Builder (Beta)</display_name>
+  <display_name>HPXML Builder</display_name>
   <description>Builds a residential HPXML file.</description>
   <modeler_description>TODO</modeler_description>
   <arguments>
@@ -6813,17 +6813,6 @@
       <checksum>1AC59B1D</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2D2857D8</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-mf-atticroof-flat.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6834,6 +6823,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>F7DFE521</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>FD76C5C3</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
