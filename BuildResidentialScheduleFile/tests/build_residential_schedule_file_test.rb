@@ -463,8 +463,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnHeatingSetpoint))
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnCoolingSetpoint))
-    assert(sf.schedules[SchedulesFile::ColumnHeatingSetpoint].include?(68))
-    assert(sf.schedules[SchedulesFile::ColumnCoolingSetpoint].include?(78))
+    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnHeatingSetpoint].uniq[0], UnitConversions.convert(68, 'F', 'C'), 0.01)
+    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnCoolingSetpoint].uniq[0], UnitConversions.convert(78, 'F', 'C'), 0.01)
   end
 
   def _test_measure()

@@ -354,7 +354,7 @@ def create_hpxmls
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
-    'base-schedules-detailed-setpoints.xml' => 'base.xml',
+    'base-schedules-detailed-setpoints.xml' => 'base-schedules-detailed-smooth.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
@@ -2408,15 +2408,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['schedules_type'] = 'smooth'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['cooling_setpoint_offset_nighttime'] = 3
     sch_args['cooling_setpoint_offset_daytime_unoccupied'] = 6
     sch_args['heating_setpoint_offset_nighttime'] = 9
     sch_args['heating_setpoint_offset_daytime_unoccupied'] = 12
     sch_args['setpoint_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end
 

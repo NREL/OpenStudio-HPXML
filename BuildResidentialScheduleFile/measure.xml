@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>0046639a-1c43-4a73-996b-9f89a4608b3e</version_id>
-  <version_modified>20220305T002451Z</version_modified>
+  <version_id>5626d9f5-db8e-4043-8a9f-d0aa0da7b1d1</version_id>
+  <version_modified>20220308T212324Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -68,6 +68,7 @@
       <display_name>Setpoint Schedules: Cooling Setpoint Offset Nighttime</display_name>
       <description>TODO.</description>
       <type>Double</type>
+      <units>deg-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -76,6 +77,7 @@
       <display_name>Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied</display_name>
       <description>TODO.</description>
       <type>Double</type>
+      <units>deg-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -84,6 +86,7 @@
       <display_name>Setpoint Schedules: Heating Setpoint Offset Nighttime</display_name>
       <description>TODO.</description>
       <type>Double</type>
+      <units>deg-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -92,6 +95,7 @@
       <display_name>Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied</display_name>
       <description>TODO.</description>
       <type>Double</type>
+      <units>deg-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -921,7 +925,7 @@
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>540D41FF</checksum>
+      <checksum>490EC35F</checksum>
     </file>
     <file>
       <version>
@@ -932,7 +936,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>82B77F6C</checksum>
+      <checksum>FABC2C8B</checksum>
     </file>
   </files>
 </measure>

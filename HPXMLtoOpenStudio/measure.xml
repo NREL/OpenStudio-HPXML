@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e34d73c6-ee0c-4b63-b4c7-69177dfe564c</version_id>
-  <version_modified>20220307T152918Z</version_modified>
+  <version_id>25d53f19-925a-49c6-ae36-84d4ba25e6fb</version_id>
+  <version_modified>20220308T212327Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -511,16 +511,16 @@
       <checksum>26BD338F</checksum>
     </file>
     <file>
-      <filename>schedule_files/setpoints.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CD66C3B9</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>857FDE3E</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>44053898</checksum>
     </file>
   </files>
 </measure>

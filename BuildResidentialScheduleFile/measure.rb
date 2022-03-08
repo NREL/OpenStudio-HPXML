@@ -13,6 +13,7 @@ require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
+require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -70,21 +71,25 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_nighttime', false)
     arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Nighttime')
     arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_daytime_unoccupied', false)
     arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied')
     arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_nighttime', false)
     arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Nighttime')
     arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_daytime_unoccupied', false)
     arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied')
     arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('setpoint_output_csv_path', false)
@@ -208,17 +213,17 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # FIXME: temp method until changes are made to the schedule generator
     hvac_control = hpxml.hvac_controls[0]
 
-    htg_setpoint = hvac_control.heating_setpoint_temp
-    clg_setpoint = hvac_control.cooling_setpoint_temp
+    htg_setpoint = UnitConversions.convert(hvac_control.heating_setpoint_temp, 'F', 'C')
+    clg_setpoint = UnitConversions.convert(hvac_control.cooling_setpoint_temp, 'F', 'C')
 
     rows = []
 
     setpoints = [[SchedulesFile::ColumnHeatingSetpoint]]
-    setpoints += [[hvac_control.heating_setpoint_temp]] * 8760
+    setpoints += [[htg_setpoint]] * 8760
     rows << setpoints
 
     setpoints = [[SchedulesFile::ColumnCoolingSetpoint]]
-    setpoints += [[hvac_control.cooling_setpoint_temp]] * 8760
+    setpoints += [[clg_setpoint]] * 8760
     rows << setpoints
 
     setpoint_output_csv_path = args[:setpoint_output_csv_path].get
