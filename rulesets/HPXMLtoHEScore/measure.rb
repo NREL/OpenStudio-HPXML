@@ -61,7 +61,7 @@ class HPXMLtoHEScore < OpenStudio::Measure::ModelMeasure
 
     this_dir = File.dirname(__FILE__)
 
-    command = "python3.9 -m hescorehpxml #{hpxml_path} -o #{outfile}  --resstock"
+    command = "hpxml2hescore #{hpxml_path} -o #{outfile} --resstock"
     stdout, stderr, status = Open3.capture3(command)
 
     if not status.success?
