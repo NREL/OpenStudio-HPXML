@@ -15,7 +15,7 @@ end
 
 desc 'Run measure unit tests'
 Rake::TestTask.new('test_measures') do |t|
-  t.test_files = Dir['*/tests/test*.rb'] - Dir['workflow/tests/*.rb']
+  t.test_files = Dir['*/tests/*.rb'] - Dir['workflow/tests/*.rb']
   t.warning = false
   t.verbose = true
 end
