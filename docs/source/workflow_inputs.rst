@@ -212,11 +212,11 @@ One or more emissions scenarios can be entered as an ``/HPXML/SoftwareInfo/exten
   Element                           Type      Units  Constraints  Required  Default   Notes
   ================================  ========  =====  ===========  ========  ========  ============================================================
   ``Name``                          string                        Yes                 Name of the scenario (which shows up in the output file)
-  ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2)
+  ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2e)
   ``EmissionsFactor``               element          >= 1         See [#]_            Emissions factor(s) for a given fuel type
   ================================  ========  =====  ===========  ========  ========  ============================================================
 
-  .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2"), then some emissions factors can be defaulted as described further below.
+  .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2e"), then some emissions factors can be defaulted as described further below.
   .. [#] EmissionsFactor is required for electricity and optional for all non-electric fuel types.
 
 See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated emissions appear in the output files.
@@ -266,20 +266,20 @@ For each scenario, fuel emissions factors can be optionally entered as an ``/HPX
 Default Values
 ~~~~~~~~~~~~~~
 
-If EmissionsType is "CO2", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
+If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
 Values are based on ANSI/RESNET/ICC 301 and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 If no default value is available, a warning will be issued.
 
-  ============  =============  =============  =============
-  Fuel Type     CO2 [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
-  ============  =============  =============  =============
-  natural gas   147.3          0.0922         0.0006
-  propane       177.8          0.1421         0.0002
-  fuel oil      195.9          0.1300         0.0015
-  coal          --             --             --
-  wood          --             --             --
-  wood pellets  --             --             --
-  ============  =============  =============  =============
+  ============  ==============  =============  =============
+  Fuel Type     CO2e [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
+  ============  ==============  =============  =============
+  natural gas   147.3           0.0922         0.0006
+  propane       177.8           0.1421         0.0002
+  fuel oil      195.9           0.1300         0.0015
+  coal          --              --             --
+  wood          --              --             --
+  wood pellets  --              --             --
+  ============  ==============  =============  =============
 
 .. _buildingsite:
 

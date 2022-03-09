@@ -117,7 +117,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_emissions_factors
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    for emissions_type in ['CO2', 'NOx', 'SO2', 'foo']
+    for emissions_type in ['CO2e', 'NOx', 'SO2', 'foo']
       hpxml.header.emissions_scenarios.add(name: emissions_type,
                                            emissions_type: emissions_type,
                                            elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
@@ -168,7 +168,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
-      if scenario.emissions_type == 'CO2'
+      if scenario.emissions_type == 'CO2e'
         natural_gas_value, propane_value, fuel_oil_value = 147.3, 177.8, 195.9 # lb/MBtu
       elsif scenario.emissions_type == 'NOx'
         natural_gas_value, propane_value, fuel_oil_value = 0.0922, 0.1421, 0.1300 # lb/MBtu
