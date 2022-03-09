@@ -78,18 +78,25 @@ class ScheduleGenerator
   end
 
   def create_setpoint_schedules(args:)
-    rows = []
-
-    # TODO: modify setpoint_schedules using optional
-    # - args[:htg_weekday_setpoints]
-    # - args[:htg_weekend_setpoints]
-    # - args[:clg_weekday_setpoints]
-    # - args[:clg_weekend_setpoints]
-    # - args[:ceiling_fan_cooling_setpoint_temp_offset]
-
     setpoint_schedules = {}
-    setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] = [UnitConversions.convert(args[:htg_setpoint], 'F', 'C')] * @total_days_in_year * @steps_in_day
-    setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] = [UnitConversions.convert(args[:clg_setpoint], 'F', 'C')] * @total_days_in_year * @steps_in_day
+
+    setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] = []
+    setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] = []
+
+    (0...@total_days_in_year).to_a.each_with_index do |day, i|
+      today = @sim_start_day + day
+      day_of_week = today.wday
+      if [0, 6].include?(day_of_week) # weekend
+        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekend_setpoints][i]
+        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekend_setpoints][i]
+      else # weekday
+        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekday_setpoints][i]
+        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekday_setpoints][i]
+      end
+    end
+
+    setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint].flatten!
+    setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint].flatten!
 
     # TODO: modify setpoint_schedules using
     # - @schedules[SchedulesFile::ColumnOccupants]

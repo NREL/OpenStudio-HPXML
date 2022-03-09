@@ -10,6 +10,7 @@ require_relative 'resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
+require_relative '../HPXMLtoOpenStudio/resources/hvac'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
@@ -251,24 +252,21 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # Setpoints
     if args[:setpoint_output_csv_path].is_initialized
       hvac_control = hpxml.hvac_controls[0]
+      has_ceiling_fan = (hpxml.ceiling_fans.size > 0)
+      heating_days = [1] * args[:total_days_in_year] # FIXME
+      cooling_days = [1] * args[:total_days_in_year] # FIXME
 
-      if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
-        args[:htg_setpoint] = hvac_control.heating_setpoint_temp
-      else
-        args[:htg_weekday_setpoints] = hvac_control.weekday_heating_setpoints
-        args[:htg_weekend_setpoints] = hvac_control.weekend_heating_setpoints
-      end
+      htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, args[:total_days_in_year])
+      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, args[:total_days_in_year])
+      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = HVAC.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, args[:total_days_in_year])
 
-      if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
-        args[:clg_setpoint] = hvac_control.cooling_setpoint_temp
-      else
-        args[:clg_weekday_setpoints] = hvac_control.weekday_cooling_setpoints
-        args[:clg_weekend_setpoints] = hvac_control.weekend_cooling_setpoints
-      end
+      args[:htg_weekday_setpoints] = htg_weekday_setpoints
+      args[:htg_weekend_setpoints] = htg_weekend_setpoints
 
-      if !hvac_control.ceiling_fan_cooling_setpoint_temp_offset.nil?
-        args[:ceiling_fan_cooling_setpoint_temp_offset] = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
-      end
+      args[:clg_weekday_setpoints] = clg_weekday_setpoints
+      args[:clg_weekend_setpoints] = clg_weekend_setpoints
+
+      args[:ceiling_fan_cooling_setpoint_temp_offset] = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
     end
   end
 end
