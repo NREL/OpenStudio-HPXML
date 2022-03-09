@@ -11,10 +11,12 @@ require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/hvac'
+require_relative '../HPXMLtoOpenStudio/resources/location'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../HPXMLtoOpenStudio/resources/weather'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -119,6 +121,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
 
+    # init
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -134,20 +137,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:hpxml_output_path] = hpxml_output_path
 
     hpxml = HPXML.new(hpxml_path: hpxml_path)
-
-    # create EpwFile object
-    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
-    if not File.exist? epw_path
-      epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
-    end
-    if not File.exist? epw_path
-      runner.registerError("Could not find EPW file at '#{epw_path}'.")
-      return false
-    end
-    epw_file = OpenStudio::EpwFile.new(epw_path)
+    epw_path, cache_path = Location.process_weather(hpxml, runner, model, hpxml_path)
+    weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
 
     # create the schedules
-    success = create_schedules(runner, hpxml, epw_file, args)
+    success = create_schedules(runner, hpxml, weather, epw_file, args)
     return false if not success
 
     # modify the hpxml with the schedules path
@@ -174,11 +168,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def create_schedules(runner, hpxml, epw_file, args)
+  def create_schedules(runner, hpxml, weather, epw_file, args)
     info_msgs = []
 
     get_simulation_parameters(hpxml, epw_file, args)
-    get_generator_inputs(hpxml, epw_file, args)
+    get_generator_inputs(hpxml, weather, epw_file, args)
 
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
     schedule_generator = ScheduleGenerator.new(runner: runner, epw_file: epw_file, **args)
@@ -227,7 +221,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
   end
 
-  def get_generator_inputs(hpxml, epw_file, args)
+  def get_generator_inputs(hpxml, weather, epw_file, args)
     # Occupants
     args[:state] = 'CO'
     args[:state] = epw_file.stateProvinceRegion if Constants.StateCodes.include?(epw_file.stateProvinceRegion)
@@ -257,7 +251,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       cooling_days = [1] * args[:total_days_in_year] # FIXME
 
       htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, args[:total_days_in_year])
-      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, args[:total_days_in_year])
+      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, args[:total_days_in_year], weather)
       htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = HVAC.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, args[:total_days_in_year])
 
       args[:htg_weekday_setpoints] = htg_weekday_setpoints
