@@ -250,9 +250,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       heating_days = [1] * args[:total_days_in_year] # FIXME
       cooling_days = [1] * args[:total_days_in_year] # FIXME
 
-      htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, args[:total_days_in_year])
-      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, args[:total_days_in_year], weather)
-      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = HVAC.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, args[:total_days_in_year])
+      htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, args[:sim_year])
+      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, args[:sim_year], weather)
+      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = HVAC.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, args[:sim_year])
 
       args[:htg_weekday_setpoints] = htg_weekday_setpoints
       args[:htg_weekend_setpoints] = htg_weekend_setpoints

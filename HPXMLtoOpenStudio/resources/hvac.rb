@@ -799,11 +799,9 @@ class HVAC
       cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
     if heating_sch.nil? || cooling_sch.nil? # TODO: support one or the other?
-      num_days = Constants.NumDaysInYear(year)
-
-      htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, num_days)
-      clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, num_days, weather)
-      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, num_days)
+      htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, year)
+      clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
 
       heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
       cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
@@ -820,8 +818,9 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, num_days)
+  def self.create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
     # Create setpoint schedules
+    num_days = Constants.NumDaysInYear(year)
     (0..(num_days - 1)).to_a.each do |i|
       if (heating_days[i] == 1) && (cooling_days[i] == 1) # overlap seasons
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -854,7 +853,9 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
   end
 
-  def self.get_heating_setpoints(hvac_control, num_days)
+  def self.get_heating_setpoints(hvac_control, year)
+    num_days = Constants.NumDaysInYear(year)
+
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
       htg_setpoint = hvac_control.heating_setpoint_temp
@@ -884,7 +885,9 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints
   end
 
-  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, num_days, weather)
+  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+    num_days = Constants.NumDaysInYear(year)
+
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
       # Base cooling setpoint
       clg_setpoint = hvac_control.cooling_setpoint_temp
