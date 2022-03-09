@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>report_res_stock_he_score</name>
+  <uid>e435f38f-11d9-4524-9d6b-ae213ddd5da7</uid>
+  <version_id>e88738e8-86df-47f8-97ca-6e9047c57aa1</version_id>
+  <version_modified>20220307T180455Z</version_modified>
+  <xml_checksum>66989E4A</xml_checksum>
+  <class_name>ReportResStockHEScore</class_name>
+  <display_name>ReportResStockHEScore</display_name>
+  <description>Reports out the HEScore inputs and calculates a score for the simulation.</description>
+  <modeler_description>Reports out the HEScore inputs and calculates a score for the simulation.</modeler_description>
+  <arguments />
+  <outputs />
+  <provenances />
+  <tags />
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>8048DA96</checksum>
+    </file>
+  </files>
+</measure>
