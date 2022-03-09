@@ -58,18 +58,58 @@ class ScheduleGenerator
   def create(args:)
     initialize_schedules
 
-    success = create_average_schedules
-    return false if not success
+    if args[:setpoint_output_csv_path].is_initialized
+      success = create_setpoint_schedules(args: args)
+      return false if not success
+    end
 
     if args[:schedules_type] == 'stochastic'
       success = create_stochastic_schedules(args: args)
       return false if not success
     end
 
+    success = create_average_schedules
+    return false if not success
+
     success = set_vacancy(args: args)
     return false if not success
 
     return true
+  end
+
+  def create_setpoint_schedules(args:)
+    rows = []
+
+    # TODO: modify setpoint_schedules using optional
+    # - args[:htg_weekday_setpoints]
+    # - args[:htg_weekend_setpoints]
+    # - args[:clg_weekday_setpoints]
+    # - args[:clg_weekend_setpoints]
+    # - args[:ceiling_fan_cooling_setpoint_temp_offset]
+
+    setpoint_schedules = {}
+    setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] = [UnitConversions.convert(args[:htg_setpoint], 'F', 'C')] * @total_days_in_year * @steps_in_day
+    setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] = [UnitConversions.convert(args[:clg_setpoint], 'F', 'C')] * @total_days_in_year * @steps_in_day
+
+    # TODO: modify setpoint_schedules using
+    # - @schedules[SchedulesFile::ColumnOccupants]
+    # - args[:cooling_setpoint_offset_nighttime]
+    # - args[:cooling_setpoint_offset_daytime_unoccupied]
+    # - args[:heating_setpoint_offset_nighttime]
+    # - args[:heating_setpoint_offset_daytime_unoccupied]
+
+    setpoint_output_csv_path = args[:setpoint_output_csv_path].get
+    unless (Pathname.new setpoint_output_csv_path).absolute?
+      setpoint_output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), setpoint_output_csv_path))
+    end
+
+    CSV.open(setpoint_output_csv_path, 'w') do |csv|
+      csv << setpoint_schedules.keys
+      rows = setpoint_schedules.values.transpose
+      rows.each do |row|
+        csv << row.map { |x| '%.3g' % x }
+      end
+    end
   end
 
   def create_average_schedules

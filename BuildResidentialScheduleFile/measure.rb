@@ -157,14 +157,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
 
-    if args[:cooling_setpoint_offset_nighttime].is_initialized || args[:cooling_setpoint_offset_daytime_unoccupied].is_initialized || args[:heating_setpoint_offset_nighttime].is_initialized || args[:heating_setpoint_offset_daytime_unoccupied].is_initialized
-      # create the schedules
-      success = create_setpoint_schedules(runner, hpxml, args)
-      # FIXME: realistically/eventually we'd pass the new args into the schedule generator, where setpoints.csv would be created/exported
-      return false if not success
-
+    if args[:setpoint_output_csv_path].is_initialized
       if !schedules_filepaths.include?(args[:setpoint_output_csv_path].get)
         XMLHelper.add_element(extension, 'SchedulesFilePath', args[:setpoint_output_csv_path].get, :string)
+        runner.registerInfo("Created #{args[:setpoint_output_csv_path].get}")
       end
     end
 
@@ -209,43 +205,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def create_setpoint_schedules(runner, hpxml, args)
-    # FIXME: temp method until changes are made to the schedule generator
-    hvac_control = hpxml.hvac_controls[0]
-
-    htg_setpoint = UnitConversions.convert(hvac_control.heating_setpoint_temp, 'F', 'C')
-    clg_setpoint = UnitConversions.convert(hvac_control.cooling_setpoint_temp, 'F', 'C')
-
-    rows = []
-
-    setpoints = [[SchedulesFile::ColumnHeatingSetpoint]]
-    setpoints += [[htg_setpoint]] * 8760
-    rows << setpoints
-
-    setpoints = [[SchedulesFile::ColumnCoolingSetpoint]]
-    setpoints += [[clg_setpoint]] * 8760
-    rows << setpoints
-
-    setpoint_output_csv_path = args[:setpoint_output_csv_path].get
-    unless (Pathname.new setpoint_output_csv_path).absolute?
-      setpoint_output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), setpoint_output_csv_path))
-    end
-
-    CSV.open(setpoint_output_csv_path, 'w') do |csv|
-      rows = rows.transpose
-      columns = []
-      rows[0].each do |column|
-        columns << column[0]
-      end
-      csv << columns
-      rows[1..-1].each do |row|
-        csv << row.map { |x| '%.3g' % x }
-      end
-    end
-
-    runner.registerInfo("Created #{setpoint_output_csv_path}")
-  end
-
   def get_simulation_parameters(hpxml, epw_file, args)
     args[:minutes_per_step] = 60
     if !hpxml.header.timestep.nil?
@@ -268,6 +227,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   def get_generator_inputs(hpxml, epw_file, args)
+    # Occupants
     args[:state] = 'CO'
     args[:state] = epw_file.stateProvinceRegion if Constants.StateCodes.include?(epw_file.stateProvinceRegion)
     args[:state] = hpxml.header.state_code if !hpxml.header.state_code.nil?
@@ -286,6 +246,29 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_vacancy_begin_day] = begin_day
       args[:schedules_vacancy_end_month] = end_month
       args[:schedules_vacancy_end_day] = end_day
+    end
+
+    # Setpoints
+    if args[:setpoint_output_csv_path].is_initialized
+      hvac_control = hpxml.hvac_controls[0]
+
+      if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
+        args[:htg_setpoint] = hvac_control.heating_setpoint_temp
+      else
+        args[:htg_weekday_setpoints] = hvac_control.weekday_heating_setpoints
+        args[:htg_weekend_setpoints] = hvac_control.weekend_heating_setpoints
+      end
+
+      if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
+        args[:clg_setpoint] = hvac_control.cooling_setpoint_temp
+      else
+        args[:clg_weekday_setpoints] = hvac_control.weekday_cooling_setpoints
+        args[:clg_weekend_setpoints] = hvac_control.weekend_cooling_setpoints
+      end
+
+      if !hvac_control.ceiling_fan_cooling_setpoint_temp_offset.nil?
+        args[:ceiling_fan_cooling_setpoint_temp_offset] = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
+      end
     end
   end
 end
