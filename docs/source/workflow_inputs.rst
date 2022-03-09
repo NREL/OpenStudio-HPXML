@@ -267,16 +267,16 @@ Default Values
 ~~~~~~~~~~~~~~
 
 If EmissionsType is "CO2", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
-Values are based on `EPA data <https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-1-external-0>`_ and `EIA data <https://www.eia.gov/environment/emissions/co2_vol_mass.php>`_.
+Values are based on ANSI/RESNET/ICC 301 and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 If no default value is available, a warning will be issued.
 
   ============  =============  =============  =============
   Fuel Type     CO2 [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
   ============  =============  =============  =============
-  natural gas   117.6          0.0922         0.0006
-  propane       136.6          0.1421         0.0002
-  fuel oil      161.0          0.1300         0.0015
-  coal          211.1          --             --
+  natural gas   147.3          0.0922         0.0006
+  propane       177.8          0.1421         0.0002
+  fuel oil      195.9          0.1300         0.0015
+  coal          --             --             --
   wood          --             --             --
   wood pellets  --             --             --
   ============  =============  =============  =============

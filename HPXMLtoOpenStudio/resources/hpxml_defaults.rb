@@ -221,7 +221,7 @@ class HPXMLDefaults
       # Fossil fuels
       default_units = HPXML::EmissionsScenario::UnitsLbPerMBtu
       if scenario.emissions_type.downcase == 'co2'
-        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 117.6, 136.6, 161.0, 211.1, nil, nil
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 147.3, 177.8, 195.9, nil, nil, nil
       elsif scenario.emissions_type.downcase == 'nox'
         natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 0.0922, 0.1421, 0.1300, nil, nil, nil
       elsif scenario.emissions_type.downcase == 'so2'

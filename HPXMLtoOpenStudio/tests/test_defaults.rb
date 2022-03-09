@@ -169,19 +169,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
       if scenario.emissions_type == 'CO2'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 117.6, 136.6, 161.0, 211.1 # lb/MBtu
+        natural_gas_value, propane_value, fuel_oil_value = 147.3, 177.8, 195.9 # lb/MBtu
       elsif scenario.emissions_type == 'NOx'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 0.0922, 0.1421, 0.1300, nil # lb/MBtu
+        natural_gas_value, propane_value, fuel_oil_value = 0.0922, 0.1421, 0.1300 # lb/MBtu
       elsif scenario.emissions_type == 'SO2'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 0.0006, 0.0002, 0.0015, nil # lb/MBtu
+        natural_gas_value, propane_value, fuel_oil_value = 0.0006, 0.0002, 0.0015 # lb/MBtu
       else
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = nil, nil, nil, nil
+        natural_gas_value, propane_value, fuel_oil_value = nil, nil, nil
       end
       _test_default_emissions_values(scenario, 1, 1,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, natural_gas_value,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, propane_value,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, fuel_oil_value,
-                                     HPXML::EmissionsScenario::UnitsLbPerMBtu, coal_value,
+                                     nil, nil,
                                      nil, nil,
                                      nil, nil)
     end
