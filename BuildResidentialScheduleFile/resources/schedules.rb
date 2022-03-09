@@ -58,18 +58,18 @@ class ScheduleGenerator
   def create(args:)
     initialize_schedules
 
-    if args[:setpoint_output_csv_path].is_initialized
-      success = create_setpoint_schedules(args: args)
-      return false if not success
-    end
+    success = create_average_schedules
+    return false if not success
 
     if args[:schedules_type] == 'stochastic'
       success = create_stochastic_schedules(args: args)
       return false if not success
     end
 
-    success = create_average_schedules
-    return false if not success
+    if args[:setpoint_output_csv_path].is_initialized
+      success = create_setpoint_schedules(args: args)
+      return false if not success
+    end
 
     success = set_vacancy(args: args)
     return false if not success
