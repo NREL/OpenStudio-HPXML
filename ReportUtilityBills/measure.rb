@@ -601,11 +601,43 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
       end
     elsif fuel_type == FT::Oil
-      # TODO
+      marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
+
+      # TODO: match state_code to a header
+      header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
+      marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
     elsif fuel_type == FT::Propane
-      # TODO
+      marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
+
+      # TODO: match state_code to a header
+      header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+      marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
     end
     return marginal_rate
+  end
+
+  def get_gallon_marginal_rates(filename)
+    marginal_rates = {}
+
+    rows = CSV.read(File.join(File.dirname(__FILE__), "resources/Data/UtilityRates/#{filename}"))
+    rows = rows[2..-1]
+    headers = rows[0]
+
+    rows = rows.reverse[1..26].transpose
+    rows.each_with_index do |row, i|
+      marginal_rates[headers[i]] = row
+    end
+
+    marginal_rates.delete('Date')
+    marginal_rates.each do |header, values|
+      if values.all? { |x| x.nil? }
+        marginal_rates.delete(header)
+        next
+      end
+      marginal_rates[header] = marginal_rates[header].map { |x| Float(x) }
+    end
+
+    return marginal_rates
   end
 
   def write_output(runner, utility_bills, output_format, output_path)
