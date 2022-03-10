@@ -2323,7 +2323,7 @@ If not entered, the simulation will not include batteries.
 
  .. note::
 
-  A battery in a home with photovoltaics (PV) will be controlled using a simple control strategy. The battery will charge if PV production is greater than the building load and the battery is not charged to its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is not discharged to its minimum capacity.
+  A battery in a home with photovoltaics (PV) will be controlled using a simple control strategy. The battery will charge if PV production is greater than the building load and the battery is below its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is above its minimum capacity.
   
   A battery in a home without PV is assumed to operate as backup and is not modeled.
 
