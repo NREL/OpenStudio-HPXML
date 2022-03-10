@@ -212,11 +212,11 @@ One or more emissions scenarios can be entered as an ``/HPXML/SoftwareInfo/exten
   Element                           Type      Units  Constraints  Required  Default   Notes
   ================================  ========  =====  ===========  ========  ========  ============================================================
   ``Name``                          string                        Yes                 Name of the scenario (which shows up in the output file)
-  ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2)
+  ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2e)
   ``EmissionsFactor``               element          >= 1         See [#]_            Emissions factor(s) for a given fuel type
   ================================  ========  =====  ===========  ========  ========  ============================================================
 
-  .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2"), then some emissions factors can be defaulted as described further below.
+  .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2e"), then some emissions factors can be defaulted as described further below.
   .. [#] EmissionsFactor is required for electricity and optional for all non-electric fuel types.
 
 See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated emissions appear in the output files.
@@ -266,20 +266,20 @@ For each scenario, fuel emissions factors can be optionally entered as an ``/HPX
 Default Values
 ~~~~~~~~~~~~~~
 
-If EmissionsType is "CO2", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
-Values are based on `EPA data <https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-1-external-0>`_ and `EIA data <https://www.eia.gov/environment/emissions/co2_vol_mass.php>`_.
+If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
+Values are based on ANSI/RESNET/ICC 301 and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 If no default value is available, a warning will be issued.
 
-  ============  =============  =============  =============
-  Fuel Type     CO2 [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
-  ============  =============  =============  =============
-  natural gas   117.6          0.0922         0.0006
-  propane       136.6          0.1421         0.0002
-  fuel oil      161.0          0.1300         0.0015
-  coal          211.1          --             --
-  wood          --             --             --
-  wood pellets  --             --             --
-  ============  =============  =============  =============
+  ============  ==============  =============  =============
+  Fuel Type     CO2e [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
+  ============  ==============  =============  =============
+  natural gas   147.3           0.0922         0.0006
+  propane       177.8           0.1421         0.0002
+  fuel oil      195.9           0.1300         0.0015
+  coal          --              --             --
+  wood          --              --             --
+  wood pellets  --              --             --
+  ============  ==============  =============  =============
 
 .. _buildingsite:
 
@@ -2309,17 +2309,23 @@ If not entered, the simulation will not include batteries.
   ``Location``                                          string              See [#]_     No        outside   Location
   ``BatteryType``                                       string              See [#]_     Yes                 Battery type
   ``NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0         No        See [#]_  Nominal (not usable) capacity
-  ``RatedPowerOutput``                                  double   W          >= 0         No        See [#]_  Rated power output
+  ``RatedPowerOutput``                                  double   W          >= 0         No        See [#]_  Power output under non-peak conditions
   ``NominalVoltage``                                    double   V          >= 0         No        50        Nominal voltage
   ``extension/LifetimeModel``                           string              See [#]_     No        None      Lifetime model [#]_
   ====================================================  =======  =========  ===========  ========  ========  ============================================
 
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] BatteryType only choice is "Li-ion".
-  .. [#] NominalCapacity is defaulted to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as (RatedPowerOutput / 1000) / 0.5.
-  .. [#] RatedPowerOutput is defaulted to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * 0.5.
+  .. [#] If NominalCapacity not provided, defaults to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as (RatedPowerOutput / 1000) / 0.5.
+  .. [#] If RatedPowerOutput not provided, defaults to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * 0.5.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
-  .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
+  .. [#] If "None", the battery doesn't degrade over time. If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
+
+ .. note::
+
+  A battery in a home with photovoltaics (PV) will be controlled using a simple control strategy. The battery will charge if PV production is greater than the building load and the battery is below its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is above its minimum capacity.
+  
+  A battery in a home without PV is assumed to operate as backup and is not modeled.
 
 HPXML Generators
 ****************
