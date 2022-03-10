@@ -4,6 +4,7 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require_relative 'resources/util.rb'
+require_relative '../HPXMLtoOpenStudio/resources/location.rb'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
 require_relative '../ReportSimulationOutput/resources/constants.rb'
 
@@ -335,7 +336,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_outputs(fuels)
 
     # Get utility rates
-    get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems)
+    get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems, runner)
 
     # Calculate utility bills
     net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, hpxml.header.sim_calendar_year)
@@ -360,7 +361,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems)
+  def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems, runner = nil)
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
@@ -448,7 +449,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_state_average_marginal_rate(state_code, fuel_type, rate.fixedmonthlycharge)
+          rate.flatratebuy = get_state_average_marginal_rate(runner, state_code, fuel_type)
         end
       else
         rate.flatratebuy = Float(rate.flatratebuy)
@@ -576,44 +577,59 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return values
   end
 
-  def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge)
+  def get_state_average_marginal_rate(runner, state_code, fuel_type)
+    state_name = get_state_code_map[state_code]
+
     marginal_rate = nil
     if fuel_type == FT::Elec
       year_ix = nil
       rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/Average_retail_price_of_electricity.csv'))
       rows.each do |row|
-        # TODO: get state code from state name and match to state_code
         year_ix = row.index('2021') if row[0] == 'description'
-
-        next if !row[0].include?('Residential : United States')
+        next if row[0] != "Residential : #{state_name}"
 
         marginal_rate = Float(row[year_ix]) / 100.0
       end
     elsif fuel_type == FT::Gas
-      state_ix = nil
       rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
-      rows.each do |row|
-        # TODO: get state code from state name and match to state_code
-        state_ix = row.index('U.S. Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)') if row[0] == 'Date'
+      rows = rows[2..-1]
 
-        next if ['Back to Contents', 'Sourcekey', 'Date'].include?(row[0])
-
+      state_ix = rows[0].index("#{state_name} Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)")
+      rows[1..-1].each do |row|
         marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
       end
     elsif fuel_type == FT::Oil
       marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
 
-      # TODO: match state_code to a header
-      header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
+      header = "Weekly #{state_name} Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)"
+      if marginal_rates[header].nil?
+        # TODO: region then national
+        header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
+        runner.registerWarning("Could not find state average #{FT::Oil} rate based on #{state_name}; using national average.") if !runner.nil?
+      end
       marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
     elsif fuel_type == FT::Propane
       marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
 
-      # TODO: match state_code to a header
-      header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+      header = "Weekly #{state_name} Propane Residential Price  (Dollars per Gallon)"
+      if marginal_rates[header].nil?
+        # TODO: region then national
+        header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+        runner.registerWarning("Could not find state average #{FT::Propane} rate based on #{state_name}; using national average.") if !runner.nil?
+      end
       marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
     end
     return marginal_rate
+  end
+
+  def get_state_code_map
+    zones_csv = Location.get_climate_zones
+
+    map = {}
+    CSV.foreach(zones_csv) do |row|
+      map[row[3]] = row[4] if !map.keys.include?(row[3])
+    end
+    return map
   end
 
   def get_gallon_marginal_rates(filename)

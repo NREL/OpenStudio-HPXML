@@ -162,6 +162,21 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(@expected_bills, actual_bills)
   end
 
+  def test_simple_calculations_pv_none_missing_state
+    bad_state_code = 'KY'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, bad_state_code, [], 2007)
+    assert(File.exist?(bills_csv))
+    actual_bills = get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Marginal ($)'] = 606.08
+    @expected_bills['Electricity: Total ($)'] = 702.08
+    @expected_bills['Natural Gas: Marginal ($)'] = 207.86
+    @expected_bills['Natural Gas: Total ($)'] = 303.86
+    @expected_bills['Propane: Total ($)'] = 85.33
+    assert_equal(@expected_bills, actual_bills)
+  end
+
   def test_workflow_wood_cord
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-wood-only.xml'
     @args_hash['wood_cord_marginal_rate'] = '0.0500'

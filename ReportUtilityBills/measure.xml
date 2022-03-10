@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>050c8ae9-1f32-424a-8121-e335fe07e926</version_id>
-  <version_modified>20220310T214116Z</version_modified>
+  <version_id>cfd78ea0-9b24-4b58-b7ed-2313b60a0292</version_id>
+  <version_modified>20220310T223938Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -294,29 +294,6 @@
       <checksum>2CE8192C</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>56E45723</checksum>
-    </file>
-    <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CB4ADFEB</checksum>
-    </file>
-    <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A6CF4EF5</checksum>
-    </file>
-    <file>
       <filename>Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -327,6 +304,29 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>22112EBB</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>5067A708</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E4D20ADB</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>935C6611</checksum>
     </file>
   </files>
 </measure>
