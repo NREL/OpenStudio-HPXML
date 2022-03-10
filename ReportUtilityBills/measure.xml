@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>019268fc-9fd2-4580-85fc-107c80afab63</version_id>
-  <version_modified>20220303T193921Z</version_modified>
+  <version_id>3311945a-73db-4280-a0d8-f41aede724e6</version_id>
+  <version_modified>20220310T150326Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -258,18 +258,6 @@
   </attributes>
   <files>
     <file>
-      <filename>Data/UtilityRates/Natural Gas.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>43EDF817</checksum>
-    </file>
-    <file>
-      <filename>Data/UtilityRates/Propane.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D205D809</checksum>
-    </file>
-    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -309,12 +297,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>89788C3A</checksum>
-    </file>
-    <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A7554E10</checksum>
     </file>
     <file>
       <filename>Data/UtilityRates/Average_retail_price_of_electricity.csv</filename>
