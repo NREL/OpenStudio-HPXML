@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9fc30f02-d863-46c1-bbfb-34c03b1e42ba</version_id>
-  <version_modified>20220311T003629Z</version_modified>
+  <version_id>39c6440f-38a7-427a-a24b-83471216768f</version_id>
+  <version_modified>20220311T014947Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -433,12 +433,6 @@
       <checksum>CDB0A906</checksum>
     </file>
     <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>018A6B56</checksum>
-    </file>
-    <file>
       <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -499,12 +493,6 @@
       <checksum>D21354BE</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5E8D8101</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -515,6 +503,18 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>2E949E71</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C280EAD5</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D9EC2F78</checksum>
     </file>
   </files>
 </measure>

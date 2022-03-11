@@ -3,19 +3,21 @@
 class Battery
   def self.apply(runner, model, battery)
     obj_name = battery.id
-    
+
     rated_power_output = battery.rated_power_output # W
     nominal_voltage = battery.nominal_voltage # V
     if not battery.nominal_capacity_kwh.nil?
       if battery.usable_capacity_kwh.nil?
         fail "UsableCapacity and NominalCapacity for Battery '#{battery.id}' must be in the same units."
       end
+
       nominal_capacity_kwh = battery.nominal_capacity_kwh # kWh
       usable_fraction = battery.usable_capacity_kwh / nominal_capacity_kwh
     else
       if battery.usable_capacity_ah.nil?
         fail "UsableCapacity and NominalCapacity for Battery '#{battery.id}' must be in the same units."
       end
+
       nominal_capacity_kwh = get_kWh_from_Ah(battery.nominal_capacity_ah, nominal_voltage) # kWh
       usable_fraction = battery.usable_capacity_ah / battery.nominal_capacity_ah
     end
