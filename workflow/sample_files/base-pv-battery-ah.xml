@@ -455,7 +455,7 @@
             </NominalCapacity>
             <UsableCapacity>
               <Units>Ah</Units>
-              <Value>320.0</Value>
+              <Value>360.0</Value>
             </UsableCapacity>
             <RatedPowerOutput>15000.0</RatedPowerOutput>
           </Battery>
