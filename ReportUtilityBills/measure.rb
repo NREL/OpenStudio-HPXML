@@ -449,7 +449,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_state_average_marginal_rate(runner, state_code, fuel_type)
+          rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type)
         end
       else
         rate.flatratebuy = Float(rate.flatratebuy)
@@ -577,8 +577,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return values
   end
 
-  def get_state_average_marginal_rate(runner, state_code, fuel_type)
-    state_name = get_state_code_map[state_code]
+  def get_auto_marginal_rate(runner, state_code, fuel_type)
+    state_name = get_state_code_to_state_name[state_code]
 
     marginal_rate = nil
     if fuel_type == FT::Elec
@@ -590,6 +590,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
         marginal_rate = Float(row[year_ix]) / 100.0
       end
+
     elsif fuel_type == FT::Gas
       rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
       rows = rows[2..-1]
@@ -598,38 +599,87 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       rows[1..-1].each do |row|
         marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
       end
+
     elsif fuel_type == FT::Oil
       marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
 
       header = "Weekly #{state_name} Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)"
       if marginal_rates[header].nil?
-        # TODO: region then national
-        header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
-        runner.registerWarning("Could not find state average #{FT::Oil} rate based on #{state_name}; using national average.") if !runner.nil?
+        padd = get_state_code_to_padd[state_code]
+        marginal_rates.each do |k, v|
+          header = k if k.include?(padd)
+        end
+        average = "region (#{padd})"
+
+        if marginal_rates[header].nil?
+          header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
+          average = 'national'
+        end
+
+        runner.registerWarning("Could not find state average #{FT::Oil} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
-      marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
+      marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
+
     elsif fuel_type == FT::Propane
       marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
 
       header = "Weekly #{state_name} Propane Residential Price  (Dollars per Gallon)"
       if marginal_rates[header].nil?
-        # TODO: region then national
-        header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
-        runner.registerWarning("Could not find state average #{FT::Propane} rate based on #{state_name}; using national average.") if !runner.nil?
+        padd = get_state_code_to_padd[state_code]
+        marginal_rates.each do |k, v|
+          header = k if k.include?(padd)
+        end
+        average = "region (#{padd})"
+
+        if marginal_rates[header].nil?
+          header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+          average = 'national'
+        end
+
+        runner.registerWarning("Could not find state average #{FT::Propane} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
-      marginal_rate = (marginal_rates[header].sum / marginal_rates[header].size).round(2)
+      marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
+
     end
-    return marginal_rate
+
+    fail "Could not find a marginal #{fuel_type} rate." if marginal_rate.nil?
+
+    return marginal_rate.round(2)
   end
 
-  def get_state_code_map
+  def get_state_code_to_state_name
     zones_csv = Location.get_climate_zones
 
-    map = {}
-    CSV.foreach(zones_csv) do |row|
-      map[row[3]] = row[4] if !map.keys.include?(row[3])
+    state_code_to_state_name = {}
+    Constants.StateCodes.each do |state_code|
+      CSV.foreach(zones_csv) do |row|
+        next if state_code != row[3]
+        next if state_code_to_state_name.keys.include?(state_code)
+
+        state_code_to_state_name[state_code] = row[4]
+      end
     end
-    return map
+    return state_code_to_state_name
+  end
+
+  def get_state_code_to_padd
+    # https://www.eia.gov/todayinenergy/detail.php?id=4890
+    padd_to_state_codes = { 'PADD 1A' => ['CT', 'MA', 'ME', 'NH', 'RI', 'VT'],
+                            'PADD 1B' => ['DE', 'MD', 'NJ', 'NY', 'PA'],
+                            'PADD 1C' => ['FL', 'GA', 'NC', 'SC', 'WV', 'VA'],
+                            'PADD 2' => ['IA', 'IL', 'IN', 'KS', 'KY', 'MI', 'MN', 'MO', 'ND', 'NE', 'OH', 'OK', 'SD', 'TN', 'WI'],
+                            'PADD 3' => ['AL', 'AR', 'LA', 'MS', 'NM', 'TX'],
+                            'PADD 4' => ['CO', 'ID', 'MT', 'UT', 'WY'],
+                            'PADD 5' => ['AK', 'AZ', 'CA', 'HI', 'NV', 'OR', 'WA'] }
+
+    state_code_to_padd = {}
+    padd_to_state_codes.each do |padd, state_codes|
+      state_codes.each do |state_code|
+        state_code_to_padd[state_code] = padd
+      end
+    end
+
+    return state_code_to_padd
   end
 
   def get_gallon_marginal_rates(filename)

@@ -44,14 +44,14 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     @expected_bills = {
       'Electricity: Fixed ($)' => 96.0,
-      'Electricity: Marginal ($)' => 722.45,
+      'Electricity: Marginal ($)' => 684.54,
       'Electricity: PV Credit ($)' => 0.0,
-      'Electricity: Total ($)' => 818.45,
+      'Electricity: Total ($)' => 780.54,
       'Natural Gas: Fixed ($)' => 96.0,
-      'Natural Gas: Marginal ($)' => 228.38,
-      'Natural Gas: Total ($)' => 324.38,
+      'Natural Gas: Marginal ($)' => 171.54,
+      'Natural Gas: Total ($)' => 267.54,
       'Fuel Oil: Total ($)' => 462.48,
-      'Propane: Total ($)' => 84.09,
+      'Propane: Total ($)' => 76.3,
       'Wood Cord: Total ($)' => 0.0,
       'Wood Pellets: Total ($)' => 0.0,
       'Coal: Total ($)' => 0.0
@@ -77,8 +77,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -203.53
-    @expected_bills['Electricity: Total ($)'] = 614.92
+    @expected_bills['Electricity: PV Credit ($)'] = -192.85
+    @expected_bills['Electricity: Total ($)'] = 587.68
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -89,7 +89,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -1011.0
+    @expected_bills['Electricity: PV Credit ($)'] = -973.09
     @expected_bills['Electricity: Total ($)'] = -192.55
     assert_equal(@expected_bills, actual_bills)
   end
@@ -102,8 +102,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -2042.1
-    @expected_bills['Electricity: Total ($)'] = -1223.65
+    @expected_bills['Electricity: PV Credit ($)'] = -1934.93
+    @expected_bills['Electricity: Total ($)'] = -1154.4
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -116,7 +116,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -178.02
-    @expected_bills['Electricity: Total ($)'] = 640.43
+    @expected_bills['Electricity: Total ($)'] = 602.52
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -129,7 +129,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -1786.09
-    @expected_bills['Electricity: Total ($)'] = -967.64
+    @expected_bills['Electricity: Total ($)'] = -1005.56
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -142,8 +142,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 126.0
-    @expected_bills['Electricity: PV Credit ($)'] = -203.53
-    @expected_bills['Electricity: Total ($)'] = 644.92
+    @expected_bills['Electricity: PV Credit ($)'] = -192.85
+    @expected_bills['Electricity: Total ($)'] = 617.68
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -157,23 +157,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 186.0
-    @expected_bills['Electricity: PV Credit ($)'] = -203.53
-    @expected_bills['Electricity: Total ($)'] = 704.92
-    assert_equal(@expected_bills, actual_bills)
-  end
-
-  def test_simple_calculations_pv_none_missing_state
-    bad_state_code = 'KY'
-    fuels, utility_rates, utility_bills = @measure.setup_outputs()
-    _load_timeseries(fuels, '../tests/PV_None.csv')
-    bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, bad_state_code, [], 2007)
-    assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Marginal ($)'] = 606.08
-    @expected_bills['Electricity: Total ($)'] = 702.08
-    @expected_bills['Natural Gas: Marginal ($)'] = 207.86
-    @expected_bills['Natural Gas: Total ($)'] = 303.86
-    @expected_bills['Propane: Total ($)'] = 85.33
+    @expected_bills['Electricity: PV Credit ($)'] = -192.85
+    @expected_bills['Electricity: Total ($)'] = 677.68
     assert_equal(@expected_bills, actual_bills)
   end
 
@@ -184,8 +169,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1239.05
-    @expected_bills['Electricity: Total ($)'] = 1335.05
+    @expected_bills['Electricity: Marginal ($)'] = 1174.03
+    @expected_bills['Electricity: Total ($)'] = 1270.03
     @expected_bills['Natural Gas: Fixed ($)'] = 0.0
     @expected_bills['Natural Gas: Marginal ($)'] = 0.0
     @expected_bills['Natural Gas: Total ($)'] = 0.0
@@ -202,8 +187,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1225.07
-    @expected_bills['Electricity: Total ($)'] = 1321.07
+    @expected_bills['Electricity: Marginal ($)'] = 1160.78
+    @expected_bills['Electricity: Total ($)'] = 1256.78
     @expected_bills['Natural Gas: Fixed ($)'] = 0.0
     @expected_bills['Natural Gas: Marginal ($)'] = 0.0
     @expected_bills['Natural Gas: Total ($)'] = 0.0
@@ -220,8 +205,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1239.05
-    @expected_bills['Electricity: Total ($)'] = 1335.05
+    @expected_bills['Electricity: Marginal ($)'] = 1174.03
+    @expected_bills['Electricity: Total ($)'] = 1270.03
     @expected_bills['Natural Gas: Fixed ($)'] = 0.0
     @expected_bills['Natural Gas: Marginal ($)'] = 0.0
     @expected_bills['Natural Gas: Total ($)'] = 0.0
@@ -237,14 +222,28 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1399.04
-    @expected_bills['Electricity: Total ($)'] = 1495.04
+    @expected_bills['Electricity: Marginal ($)'] = 1325.62
+    @expected_bills['Electricity: Total ($)'] = 1421.62
     @expected_bills['Natural Gas: Fixed ($)'] = 96.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 243.15
-    @expected_bills['Natural Gas: Total ($)'] = 339.15
+    @expected_bills['Natural Gas: Marginal ($)'] = 182.63
+    @expected_bills['Natural Gas: Total ($)'] = 278.63
     @expected_bills['Fuel Oil: Total ($)'] = 0.0
     @expected_bills['Propane: Total ($)'] = 0.0
     assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_warning_region
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-oil-location-miami-fl.xml'
+    expected_warning = 'Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.'
+    bills_csv = _test_measure(expected_warning: expected_warning)
+    assert(File.exist?(bills_csv))
+  end
+
+  def test_warning_national
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-propane-location-portland-or.xml'
+    expected_warning = 'Could not find state average Propane rate based on Oregon; using national average.'
+    bills_csv = _test_measure(expected_warning: expected_warning)
+    assert(File.exist?(bills_csv))
   end
 
   def test_error_semi_annual_run_period
