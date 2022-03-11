@@ -2149,7 +2149,7 @@ If a shared recirculation system is specified, additional information is entered
   =======================  =======  =====  ===========  ========  ========  =================================
 
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
-  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "timer", or "no control".
+  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
 
 Drain Water Heat Recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~
