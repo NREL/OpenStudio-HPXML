@@ -644,7 +644,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     fail "Could not find a marginal #{fuel_type} rate." if marginal_rate.nil?
 
-    return marginal_rate.round(2)
+    return marginal_rate
   end
 
   def get_state_code_to_state_name
