@@ -708,6 +708,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1031,6 +1032,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -2352,6 +2354,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationOutside
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   elsif ['base-pv-battery.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
@@ -2373,6 +2376,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationGarage
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   end
 
   # Simulation Control
@@ -4303,10 +4307,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   elsif ['base-pv-battery-ah.xml'].include? hpxml_file
-    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    default_values = Battery.get_battery_default_values()
     hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
-                                                                     default_voltage)
+                                                                     default_values[:nominal_voltage])
+    hpxml.batteries[0].usable_capacity_ah = hpxml.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
     hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
   end
 
   # ---------------- #
