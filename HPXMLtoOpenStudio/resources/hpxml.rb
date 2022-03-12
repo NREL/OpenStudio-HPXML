@@ -426,29 +426,6 @@ class HPXML < Object
     return false
   end
 
-  def has_fuel(fuel_type)
-    self.class::HPXML_ATTRS.each do |attribute|
-      hpxml_obj = send(attribute)
-      next unless hpxml_obj.is_a? HPXML::BaseArrayElement
-
-      hpxml_obj.each do |obj|
-        [:fuel_type,
-         :heating_system_fuel,
-         :cooling_system_fuel,
-         :heat_pump_fuel,
-         :backup_heating_fuel,
-         :preheating_fuel,
-         :precooling_fuel].each do |fuel_attribute|
-          next unless obj.respond_to? fuel_attribute
-          next unless obj.send(fuel_attribute) == fuel_type
-
-          return true
-        end
-      end
-    end
-    return false
-  end
-
   def has_fuel_access
     @site.fuels.each do |fuel|
       if fuel != FuelTypeElectricity
