@@ -990,7 +990,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def write_annual_output_results(runner, outputs, output_format, annual_output_path)
     # Set rounding precision.
     # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
-    dig = 2 # Default for annual (or near-annual) data
+    dig = 3 # Default for annual (or near-annual) data
     year = 2000 # Not important
     sim_n_days = (Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
                   Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
@@ -1126,7 +1126,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       vals = []
       sys_ids.each do |sys_id|
         if not hash[sys_id].nil?
-          vals << hash[sys_id]
+          if hash[sys_id].is_a? Float
+            vals << hash[sys_id].round(3)
+          else
+            vals << hash[sys_id]
+          end
         else
           vals << 0.0
         end
@@ -1151,15 +1155,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return new_ids.join(',')
     end
 
-    def round_hash(h, ndigits = 2)
-      # Rounds the hash values to the specified number of digits
-      return h.inject({}) { |hash, (k, v)| hash.merge(k => v.round(ndigits)) }
-    end
-
     # Retrieve info from HPXML object
-    htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids = [], [], [], [], []
-    htg_eecs, clg_eecs, dhw_eecs, vent_prehtg_eecs, vent_preclg_eecs = {}, {}, {}, {}, {}
-    htg_fuels, clg_fuels, dhw_fuels, vent_prehtg_fuels, vent_preclg_fuels = {}, {}, {}, {}, {}
+    htg_ids, clg_ids, dhw_ids, prehtg_ids, preclg_ids = [], [], [], [], []
+    htg_eecs, clg_eecs, dhw_eecs, prehtg_eecs, preclg_eecs = {}, {}, {}, {}, {}
+    htg_fuels, clg_fuels, dhw_fuels, prehtg_fuels, preclg_fuels = {}, {}, {}, {}, {}
     seed_id_map = {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
@@ -1240,15 +1239,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless vent_fan.used_for_whole_building_ventilation
 
       if not vent_fan.preheating_fuel.nil?
-        vent_prehtg_ids << vent_fan.id
-        vent_prehtg_fuels[vent_fan.id] = vent_fan.preheating_fuel
-        vent_prehtg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
+        prehtg_ids << vent_fan.id
+        prehtg_fuels[vent_fan.id] = vent_fan.preheating_fuel
+        prehtg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
       end
       next unless not vent_fan.precooling_fuel.nil?
 
-      vent_preclg_ids << vent_fan.id
-      vent_preclg_fuels[vent_fan.id] = vent_fan.precooling_fuel
-      vent_preclg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
+      preclg_ids << vent_fan.id
+      preclg_fuels[vent_fan.id] = vent_fan.precooling_fuel
+      preclg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
     end
 
     # Apportion ERI Reference loads to systems
@@ -1341,35 +1340,35 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Heating
     results_out << ['ERI: Heating: ID', get_ids(htg_ids, seed_id_map)]
     results_out << ['ERI: Heating: FuelType', ordered_values(htg_fuels, htg_ids)]
-    results_out << ['ERI: Heating: EC', ordered_values(round_hash(htg_ecs), htg_ids)]
-    results_out << ['ERI: Heating: EEC', ordered_values(round_hash(htg_eecs), htg_ids)]
-    results_out << ['ERI: Heating: Load', ordered_values(round_hash(htg_loads), htg_ids)]
+    results_out << ['ERI: Heating: EC', ordered_values(htg_ecs, htg_ids)]
+    results_out << ['ERI: Heating: EEC', ordered_values(htg_eecs, htg_ids)]
+    results_out << ['ERI: Heating: Load', ordered_values(htg_loads, htg_ids)]
 
     # Cooling
     results_out << ['ERI: Cooling: ID', get_ids(clg_ids, seed_id_map)]
     results_out << ['ERI: Cooling: FuelType', ordered_values(clg_fuels, clg_ids)]
-    results_out << ['ERI: Cooling: EC', ordered_values(round_hash(clg_ecs), clg_ids)]
-    results_out << ['ERI: Cooling: EEC', ordered_values(round_hash(clg_eecs), clg_ids)]
-    results_out << ['ERI: Cooling: Load', ordered_values(round_hash(clg_loads), clg_ids)]
+    results_out << ['ERI: Cooling: EC', ordered_values(clg_ecs, clg_ids)]
+    results_out << ['ERI: Cooling: EEC', ordered_values(clg_eecs, clg_ids)]
+    results_out << ['ERI: Cooling: Load', ordered_values(clg_loads, clg_ids)]
 
     # Hot Water
     results_out << ['ERI: Hot Water: ID', get_ids(dhw_ids, seed_id_map)]
     results_out << ['ERI: Hot Water: FuelType', ordered_values(dhw_fuels, dhw_ids)]
-    results_out << ['ERI: Hot Water: EC', ordered_values(round_hash(dhw_ecs), dhw_ids)]
-    results_out << ['ERI: Hot Water: EEC', ordered_values(round_hash(dhw_eecs), dhw_ids)]
-    results_out << ['ERI: Hot Water: Load', ordered_values(round_hash(dhw_loads), dhw_ids)]
+    results_out << ['ERI: Hot Water: EC', ordered_values(dhw_ecs, dhw_ids)]
+    results_out << ['ERI: Hot Water: EEC', ordered_values(dhw_eecs, dhw_ids)]
+    results_out << ['ERI: Hot Water: Load', ordered_values(dhw_loads, dhw_ids)]
 
     # Mech Vent Preheat
-    results_out << ['ERI: Mech Vent Preheating: ID', get_ids(vent_prehtg_ids, seed_id_map)]
-    results_out << ['ERI: Mech Vent Preheating: FuelType', ordered_values(vent_prehtg_fuels, vent_prehtg_ids)]
-    results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(round_hash(prehtg_ecs), vent_prehtg_ids)]
-    results_out << ['ERI: Mech Vent Preheating: EEC', ordered_values(round_hash(vent_prehtg_eecs), vent_prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: ID', get_ids(prehtg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Preheating: FuelType', ordered_values(prehtg_fuels, prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(prehtg_ecs, prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: EEC', ordered_values(prehtg_eecs, prehtg_ids)]
 
     # Mech Vent Precool
-    results_out << ['ERI: Mech Vent Precooling: ID', get_ids(vent_preclg_ids, seed_id_map)]
-    results_out << ['ERI: Mech Vent Precooling: FuelType', ordered_values(vent_preclg_fuels, vent_preclg_ids)]
-    results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(round_hash(preclg_ecs), vent_preclg_ids)]
-    results_out << ['ERI: Mech Vent Precooling: EEC', ordered_values(round_hash(vent_preclg_eecs), vent_preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: ID', get_ids(preclg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Precooling: FuelType', ordered_values(preclg_fuels, preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(preclg_ecs, preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: EEC', ordered_values(preclg_eecs, preclg_ids)]
 
     return results_out
   end
