@@ -1151,7 +1151,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return new_ids.join(',')
     end
 
-    def round_hash(h, ndigits = 3)
+    def round_hash(h, ndigits = 2)
       # Rounds the hash values to the specified number of digits
       return h.inject({}) { |hash, (k, v)| hash.merge(k => v.round(ndigits)) }
     end
@@ -1308,24 +1308,25 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Collect energy consumptions by system
-    htg_ecs, clg_ecs, dhw_ecs, vent_prehtg_ecs, vent_preclg_ecs = {}, {}, {}, {}, {}
+    # Collect energy consumptions (EC) by system
+    htg_ecs, clg_ecs, dhw_ecs, prehtg_ecs, preclg_ecs = {}, {}, {}, {}, {}
+    eut_map = { EUT::Heating => htg_ecs,
+                EUT::HeatingFanPump => htg_ecs,
+                EUT::Cooling => clg_ecs,
+                EUT::CoolingFanPump => clg_ecs,
+                EUT::HotWater => dhw_ecs,
+                EUT::HotWaterRecircPump => dhw_ecs,
+                EUT::HotWaterSolarThermalPump => dhw_ecs,
+                EUT::MechVentPreheat => prehtg_ecs,
+                EUT::MechVentPrecool => preclg_ecs }
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
-      if [EUT::Heating,
-          EUT::HeatingFanPump].include? end_use_type
-        htg_ecs.merge!(end_use.annual_output_by_system)
-      elsif [EUT::Cooling,
-             EUT::CoolingFanPump].include? end_use_type
-        clg_ecs.merge!(end_use.annual_output_by_system)
-      elsif [EUT::HotWater,
-             EUT::HotWaterRecircPump,
-             EUT::HotWaterSolarThermalPump].include? end_use_type
-        dhw_ecs.merge!(end_use.annual_output_by_system)
-      elsif [EUT::MechVentPreheat].include? end_use_type
-        vent_prehtg_ecs.merge!(end_use.annual_output_by_system)
-      elsif [EUT::MechVentPrecool].include? end_use_type
-        vent_preclg_ecs.merge!(end_use.annual_output_by_system)
+      ec_obj = eut_map[end_use_type]
+      next if ec_obj.nil?
+
+      end_use.annual_output_by_system.each do |sys_id, val|
+        ec_obj[sys_id] = 0.0 if ec_obj[sys_id].nil?
+        ec_obj[sys_id] += val
       end
     end
 
@@ -1361,13 +1362,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Mech Vent Preheat
     results_out << ['ERI: Mech Vent Preheating: ID', get_ids(vent_prehtg_ids, seed_id_map)]
     results_out << ['ERI: Mech Vent Preheating: FuelType', ordered_values(vent_prehtg_fuels, vent_prehtg_ids)]
-    results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(round_hash(vent_prehtg_ecs), vent_prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(round_hash(prehtg_ecs), vent_prehtg_ids)]
     results_out << ['ERI: Mech Vent Preheating: EEC', ordered_values(round_hash(vent_prehtg_eecs), vent_prehtg_ids)]
 
     # Mech Vent Precool
     results_out << ['ERI: Mech Vent Precooling: ID', get_ids(vent_preclg_ids, seed_id_map)]
     results_out << ['ERI: Mech Vent Precooling: FuelType', ordered_values(vent_preclg_fuels, vent_preclg_ids)]
-    results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(round_hash(vent_preclg_ecs), vent_preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(round_hash(preclg_ecs), vent_preclg_ids)]
     results_out << ['ERI: Mech Vent Precooling: EEC', ordered_values(round_hash(vent_preclg_eecs), vent_preclg_ids)]
 
     return results_out
