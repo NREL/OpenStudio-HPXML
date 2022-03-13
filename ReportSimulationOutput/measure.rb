@@ -409,7 +409,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       hpxml_name = File.basename(hpxml_path).gsub('.xml', '')
       annual_output_path = File.join(output_dir, "#{hpxml_name}.#{output_format}")
       timeseries_output_path = File.join(output_dir, "#{hpxml_name}_#{timeseries_frequency.capitalize}.#{output_format}")
-      eri_output_path = File.join(output_dir, "#{hpxml_name}_ERI.csv")
     else
       output_dir = File.dirname(@sqlFile.path.to_s)
       if annual_output_file_name.is_initialized
@@ -422,7 +421,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       else
         timeseries_output_path = File.join(output_dir, "results_timeseries.#{output_format}")
       end
-      eri_output_path = nil
     end
 
     @timestamps = get_timestamps(timeseries_frequency)
@@ -455,7 +453,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Write/report results
     write_annual_output_results(runner, outputs, output_format, annual_output_path)
     report_sim_outputs(runner)
-    write_eri_output_results(outputs, eri_output_path)
     write_timeseries_output_results(runner, outputs, output_format,
                                     timeseries_output_path,
                                     timeseries_frequency,
@@ -1054,6 +1051,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(dig - 2)]
     end
 
+    if not @eri_design.nil?
+      results_out = append_eri_results(outputs, results_out, line_break)
+    end
+
     if output_format == 'csv'
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif output_format == 'json'
@@ -1120,20 +1121,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return "#{obj.name} #{obj.annual_units}"
   end
 
-  def write_eri_output_results(outputs, csv_path)
-    return true if csv_path.nil?
-
-    line_break = nil
-
-    def sanitize_string(s)
-      [' ', ':', '/'].each do |c|
-        next unless s.include? c
-
-        s = s.gsub(c, '')
-      end
-      return s
-    end
-
+  def append_eri_results(outputs, results_out, line_break)
     def ordered_values(hash, sys_ids)
       vals = []
       sys_ids.each do |sys_id|
@@ -1143,23 +1131,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           vals << 0.0
         end
       end
-      return vals
-    end
+      return if vals.empty?
 
-    def get_sys_ids_of_interest(type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
-      if type.downcase.include? 'hot water'
-        return dhw_ids
-      elsif type.downcase.include? 'mech vent preheating'
-        return vent_prehtg_ids
-      elsif type.downcase.include? 'mech vent precooling'
-        return vent_preclg_ids
-      elsif type.downcase.include? 'heating'
-        return htg_ids
-      elsif type.downcase.include? 'cooling'
-        return clg_ids
-      end
-
-      return
+      return vals.join(',')
     end
 
     def get_eec_value_numerator(unit)
@@ -1171,16 +1145,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     def get_ids(ids, seed_id_map)
-      return ids.map { |id| seed_id_map[id].nil? ? id : seed_id_map[id] }
+      new_ids = ids.map { |id| seed_id_map[id].nil? ? id : seed_id_map[id] }
+      return if new_ids.empty?
+
+      return new_ids.join(',')
     end
 
-    results_out = []
+    def round_hash(h, ndigits = 3)
+      # Rounds the hash values to the specified number of digits
+      return h.inject({}) { |hash, (k, v)| hash.merge(k => v.round(ndigits)) }
+    end
 
     # Retrieve info from HPXML object
-    # FUTURE: Move this code to the ERI workflow
     htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids = [], [], [], [], []
     htg_eecs, clg_eecs, dhw_eecs, vent_prehtg_eecs, vent_preclg_eecs = {}, {}, {}, {}, {}
-    htg_fuels, dhw_fuels, vent_prehtg_fuels = {}, {}, {}
+    htg_fuels, clg_fuels, dhw_fuels, vent_prehtg_fuels, vent_preclg_fuels = {}, {}, {}, {}, {}
     seed_id_map = {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
@@ -1199,6 +1178,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       clg_ids << clg_system.id
       seed_id_map[clg_system.id] = clg_system.seed_id
+      clg_fuels[clg_system.id] = clg_system.cooling_system_fuel
       if not clg_system.cooling_efficiency_seer.nil?
         clg_eecs[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
       elsif not clg_system.cooling_efficiency_eer.nil?
@@ -1267,10 +1247,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless not vent_fan.precooling_fuel.nil?
 
       vent_preclg_ids << vent_fan.id
+      vent_preclg_fuels[vent_fan.id] = vent_fan.precooling_fuel
       vent_preclg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
     end
 
-    # Calculate ERI Reference Loads
+    # Apportion ERI Reference loads to systems
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
       next unless htg_ids.include? htg_system.id
 
@@ -1297,8 +1278,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         htg_eecs[dfhp_backup_id] = get_eec_value_numerator('Percent') / heat_pump.backup_heating_efficiency_percent
       end
 
-      next unless [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
-
       # Apportion heating load for the two systems
       primary_load, backup_load = nil
       @object_variables_by_key[[LT, LT::Heating]].each do |vals|
@@ -1317,81 +1296,81 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @loads[LT::Heating].annual_output_by_system[heat_pump.id] = total_load * (1.0 - backup_ratio)
     end
 
-    # Sys IDS
-    results_out << ['hpxml_heat_sys_ids', get_ids(htg_ids, seed_id_map).to_s]
-    results_out << ['hpxml_cool_sys_ids', get_ids(clg_ids, seed_id_map).to_s]
-    results_out << ['hpxml_dhw_sys_ids', get_ids(dhw_ids, seed_id_map).to_s]
-    results_out << ['hpxml_vent_preheat_sys_ids', vent_prehtg_ids.to_s]
-    results_out << ['hpxml_vent_precool_sys_ids', vent_preclg_ids.to_s]
-    results_out << [line_break]
-
-    # EECs
-    results_out << ['hpxml_eec_heats', ordered_values(htg_eecs, htg_ids).to_s]
-    results_out << ['hpxml_eec_cools', ordered_values(clg_eecs, clg_ids).to_s]
-    results_out << ['hpxml_eec_dhws', ordered_values(dhw_eecs, dhw_ids).to_s]
-    results_out << ['hpxml_eec_vent_preheats', ordered_values(vent_prehtg_eecs, vent_prehtg_ids).to_s]
-    results_out << ['hpxml_eec_vent_precools', ordered_values(vent_preclg_eecs, vent_preclg_ids).to_s]
-    results_out << [line_break]
-
-    # Fuel types
-    results_out << ['hpxml_heat_fuels', ordered_values(htg_fuels, htg_ids).to_s]
-    results_out << ['hpxml_dwh_fuels', ordered_values(dhw_fuels, dhw_ids).to_s]
-    results_out << ['hpxml_vent_preheat_fuels', ordered_values(vent_prehtg_fuels, vent_prehtg_ids).to_s]
-    results_out << [line_break]
-
-    # Fuel uses
-    @fuels.each do |fuel_type, fuel|
-      key_name = sanitize_string("fuel#{fuel_type}")
-      results_out << [key_name, fuel.annual_output.to_s]
+    # Collect final ERI Reference loads by system
+    htg_loads, clg_loads, dhw_loads = {}, {}, {}
+    @loads.each do |load_type, load|
+      if load_type == LT::Heating
+        htg_loads = load.annual_output_by_system
+      elsif load_type == LT::Cooling
+        clg_loads = load.annual_output_by_system
+      elsif load_type == LT::HotWaterDelivered
+        dhw_loads = load.annual_output_by_system
+      end
     end
-    results_out << [line_break]
 
-    # End Uses
+    # Collect energy consumptions by system
+    htg_ecs, clg_ecs, dhw_ecs, vent_prehtg_ecs, vent_preclg_ecs = {}, {}, {}, {}, {}
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
-      key_name = sanitize_string("enduse#{fuel_type}#{end_use_type}")
-      sys_ids = get_sys_ids_of_interest(end_use_type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
-      if sys_ids.nil?
-        results_out << [key_name, end_use.annual_output.to_s]
-      else
-        results_out << [key_name, ordered_values(end_use.annual_output_by_system, sys_ids).to_s]
-      end
-    end
-    results_out << [line_break]
-
-    # Loads by System
-    @loads.each do |load_type, load|
-      next unless [LT::Heating, LT::Cooling, LT::HotWaterDelivered].include? load_type
-      next if ([LT::Heating, LT::Cooling].include? load_type) &&
-              (not [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design)
-
-      key_name = sanitize_string("load#{load_type}")
-      sys_ids = get_sys_ids_of_interest(load_type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
-      results_out << [key_name, ordered_values(load.annual_output_by_system, sys_ids).to_s]
-    end
-    results_out << [line_break]
-
-    # Emissions Scenarios
-    if not @emissions.empty?
-      @emissions.each do |scenario_key, emission|
-        scenario_type, scenario_name = scenario_key
-        # Include total and disaggregated by fuel
-        key_name = sanitize_string("#{scenario_type.downcase}#{scenario_name}Total")
-        results_out << [key_name, emission.annual_output.to_s]
-        emission.annual_output_by_fuel.each do |fuel, annual_output|
-          key_name = sanitize_string("#{scenario_type.downcase}#{scenario_name}#{fuel}")
-          results_out << [key_name, annual_output.to_s]
-        end
+      if [EUT::Heating,
+          EUT::HeatingFanPump].include? end_use_type
+        htg_ecs.merge!(end_use.annual_output_by_system)
+      elsif [EUT::Cooling,
+             EUT::CoolingFanPump].include? end_use_type
+        clg_ecs.merge!(end_use.annual_output_by_system)
+      elsif [EUT::HotWater,
+             EUT::HotWaterRecircPump,
+             EUT::HotWaterSolarThermalPump].include? end_use_type
+        dhw_ecs.merge!(end_use.annual_output_by_system)
+      elsif [EUT::MechVentPreheat].include? end_use_type
+        vent_prehtg_ecs.merge!(end_use.annual_output_by_system)
+      elsif [EUT::MechVentPrecool].include? end_use_type
+        vent_preclg_ecs.merge!(end_use.annual_output_by_system)
       end
     end
 
-    # Misc
-    results_out << ['hpxml_cfa', @hpxml.building_construction.conditioned_floor_area.to_s]
-    results_out << ['hpxml_nbr', @hpxml.building_construction.number_of_bedrooms.to_s]
-    results_out << ['hpxml_nst', @hpxml.building_construction.number_of_conditioned_floors_above_grade.to_s]
-    results_out << ['hpxml_residential_facility_type', '"' + @hpxml.building_construction.residential_facility_type + '"']
+    results_out << [line_break]
 
-    CSV.open(csv_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
+    # Building
+    results_out << ['ERI: Building: CFA', @hpxml.building_construction.conditioned_floor_area]
+    results_out << ['ERI: Building: NumBedrooms', @hpxml.building_construction.number_of_bedrooms]
+    results_out << ['ERI: Building: NumStories', @hpxml.building_construction.number_of_conditioned_floors_above_grade]
+    results_out << ['ERI: Building: Type', @hpxml.building_construction.residential_facility_type]
+
+    # Heating
+    results_out << ['ERI: Heating: ID', get_ids(htg_ids, seed_id_map)]
+    results_out << ['ERI: Heating: FuelType', ordered_values(htg_fuels, htg_ids)]
+    results_out << ['ERI: Heating: EC', ordered_values(round_hash(htg_ecs), htg_ids)]
+    results_out << ['ERI: Heating: EEC', ordered_values(round_hash(htg_eecs), htg_ids)]
+    results_out << ['ERI: Heating: Load', ordered_values(round_hash(htg_loads), htg_ids)]
+
+    # Cooling
+    results_out << ['ERI: Cooling: ID', get_ids(clg_ids, seed_id_map)]
+    results_out << ['ERI: Cooling: FuelType', ordered_values(clg_fuels, clg_ids)]
+    results_out << ['ERI: Cooling: EC', ordered_values(round_hash(clg_ecs), clg_ids)]
+    results_out << ['ERI: Cooling: EEC', ordered_values(round_hash(clg_eecs), clg_ids)]
+    results_out << ['ERI: Cooling: Load', ordered_values(round_hash(clg_loads), clg_ids)]
+
+    # Hot Water
+    results_out << ['ERI: Hot Water: ID', get_ids(dhw_ids, seed_id_map)]
+    results_out << ['ERI: Hot Water: FuelType', ordered_values(dhw_fuels, dhw_ids)]
+    results_out << ['ERI: Hot Water: EC', ordered_values(round_hash(dhw_ecs), dhw_ids)]
+    results_out << ['ERI: Hot Water: EEC', ordered_values(round_hash(dhw_eecs), dhw_ids)]
+    results_out << ['ERI: Hot Water: Load', ordered_values(round_hash(dhw_loads), dhw_ids)]
+
+    # Mech Vent Preheat
+    results_out << ['ERI: Mech Vent Preheating: ID', get_ids(vent_prehtg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Preheating: FuelType', ordered_values(vent_prehtg_fuels, vent_prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(round_hash(vent_prehtg_ecs), vent_prehtg_ids)]
+    results_out << ['ERI: Mech Vent Preheating: EEC', ordered_values(round_hash(vent_prehtg_eecs), vent_prehtg_ids)]
+
+    # Mech Vent Precool
+    results_out << ['ERI: Mech Vent Precooling: ID', get_ids(vent_preclg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Precooling: FuelType', ordered_values(vent_preclg_fuels, vent_preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(round_hash(vent_preclg_ecs), vent_preclg_ids)]
+    results_out << ['ERI: Mech Vent Precooling: EEC', ordered_values(round_hash(vent_preclg_eecs), vent_preclg_ids)]
+
+    return results_out
   end
 
   def write_timeseries_output_results(runner, outputs, output_format,
@@ -1853,9 +1832,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::MechVentPrecool]))
     @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WholeHouseFan]))
     @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Refrigerator]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Freezer]))
-    end
+    @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Freezer]))
     @end_uses[[FT::Elec, EUT::Dehumidifier]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Dehumidifier]))
     @end_uses[[FT::Elec, EUT::Dishwasher]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Dishwasher]))
     @end_uses[[FT::Elec, EUT::ClothesWasher]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::ClothesWasher]))
@@ -1864,14 +1841,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::CeilingFan]))
     @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Television]))
     @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PlugLoads]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Vehicle]))
-      @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WellPump]))
-      @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolHeater]))
-      @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolPump]))
-      @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubHeater]))
-      @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubPump]))
-    end
+    @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Vehicle]))
+    @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WellPump]))
+    @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolHeater]))
+    @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolPump]))
+    @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubHeater]))
+    @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubPump]))
     @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PV]),
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
@@ -1881,68 +1856,56 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::ClothesDryer]))
     @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::RangeOven]))
     @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PoolHeater]))
-      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotTubHeater]))
-      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Grill]))
-      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Lighting]))
-      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Fireplace]))
-    end
+    @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PoolHeater]))
+    @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotTubHeater]))
+    @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Grill]))
+    @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Lighting]))
+    @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Fireplace]))
     @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Generator]))
     @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Heating]))
     @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::HotWater]))
     @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::ClothesDryer]))
     @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::RangeOven]))
     @end_uses[[FT::Oil, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Grill]))
-      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Lighting]))
-      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Fireplace]))
-    end
+    @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Grill]))
+    @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Lighting]))
+    @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Fireplace]))
     @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Generator]))
     @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Heating]))
     @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::HotWater]))
     @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::ClothesDryer]))
     @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::RangeOven]))
     @end_uses[[FT::Propane, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Grill]))
-      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Lighting]))
-      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Fireplace]))
-    end
+    @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Grill]))
+    @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Lighting]))
+    @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Fireplace]))
     @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Generator]))
     @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Heating]))
     @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::HotWater]))
     @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::ClothesDryer]))
     @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::RangeOven]))
     @end_uses[[FT::WoodCord, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Grill]))
-      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Lighting]))
-      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Fireplace]))
-    end
+    @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Grill]))
+    @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Lighting]))
+    @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Fireplace]))
     @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Generator]))
     @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Heating]))
     @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::HotWater]))
     @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::ClothesDryer]))
     @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::RangeOven]))
     @end_uses[[FT::WoodPellets, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Grill]))
-      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Lighting]))
-      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Fireplace]))
-    end
+    @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Grill]))
+    @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Lighting]))
+    @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Fireplace]))
     @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Generator]))
     @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Heating]))
     @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::HotWater]))
     @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::ClothesDryer]))
     @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::RangeOven]))
     @end_uses[[FT::Coal, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::MechVentPreheat]))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Grill]))
-      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Lighting]))
-      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Fireplace]))
-    end
+    @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Grill]))
+    @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Lighting]))
+    @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Fireplace]))
     @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Generator]))
 
     @end_uses.each do |key, end_use|
