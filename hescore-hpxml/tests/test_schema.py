@@ -154,10 +154,10 @@ def test_invalid_building_zone(hpxml_filebase):
     js['building']['zone'].append(zone)
     errors = get_error_messages(js, js_schema)
     if hpxml_filebase == 'townhouse_walls':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 1200.0") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_assembly_code': 'rfwf00co'") and
                    error.endswith("is not of type 'object'") for error in errors)
     elif hpxml_filebase == 'house1':
-        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'ceiling_area': 810") and
+        assert any(error.startswith("[{'zone_roof': [{'roof_name': 'roof1', 'roof_assembly_code': 'rfrb00co'") and
                    error.endswith("is not of type 'object'") for error in errors)
 
 

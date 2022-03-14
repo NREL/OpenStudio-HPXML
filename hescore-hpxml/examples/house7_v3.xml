@@ -38,6 +38,12 @@
                 </BuildingConstruction>
             </BuildingSummary>
             <Enclosure>
+                <AirInfiltration>
+                    <AirInfiltrationMeasurement>
+                        <SystemIdentifier id="infilt1"/>
+                        <LeakinessDescription>leaky</LeakinessDescription>
+                    </AirInfiltrationMeasurement>
+                </AirInfiltration>
                 <Attics>
                     <Attic>
                         <SystemIdentifier id="attic1"/>

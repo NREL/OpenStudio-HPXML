@@ -23,10 +23,10 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "ceiling_area": 810,
           "roof_assembly_code": "rfrb00co",
           "roof_color": "dark",
           "roof_type": "vented_attic",
+          "ceiling_area": 810.0,
           "ceiling_assembly_code": "ecwf13",
           "zone_skylight": {
             "skylight_area": 0

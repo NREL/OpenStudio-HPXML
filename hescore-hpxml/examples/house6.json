@@ -23,10 +23,10 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "ceiling_area": 1000.0,
           "roof_assembly_code": "rfwf00tg",
           "roof_color": "medium",
           "roof_type": "vented_attic",
+          "ceiling_area": 1000.0,
           "ceiling_assembly_code": "ecwf49",
           "zone_skylight": {
             "skylight_area": 24.0,
@@ -37,10 +37,10 @@
         },
         {
           "roof_name": "roof2",
-          "roof_area": 843.0,
           "roof_assembly_code": "rfwf25wo",
           "roof_color": "medium",
           "roof_type": "cath_ceiling",
+          "roof_area": 843.0,
           "zone_skylight": {
             "skylight_area": 0
           }

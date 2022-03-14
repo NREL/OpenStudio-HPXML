@@ -124,9 +124,13 @@ Infiltration
 HPXML allows the specification of multiple
 ``Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``
 elements, which can contain either a blower door test or a qualitative
-assessment of "leakiness". HEScore can be used with either a measurement from a
-blower door test or by specifying  whether the house has been  air sealed or
-not (boolean). Preference is given to  a blower door test measurement when it
+assessment of "leakiness". HPXML also allows the specification of multiple
+``Building/BuildingDetails/Enclosure/AirInfiltration/AirSealing`` elements, 
+which can contain a qualitative assessment of "leakiness".
+Either of the elements above is required.
+HEScore can be used with either a measurement from a
+blower door test or by specifying  whether the house has been air sealed or
+not (boolean). Preference is given to a blower door test measurement when it
 is available in HPXML. 
 
 Blower Door Test
@@ -157,8 +161,8 @@ Air Sealing Present
 ===================
 
 When a blower door test is not available the translator looks for an
-``AirInfiltrationMeasurement`` that specifies an estimate of leakage. An
-example of the minimum expected elements in that case looks like:
+``AirInfiltrationMeasurement`` or ``AirSealing`` that specifies an estimate of leakage. 
+An example of the minimum expected elements in that case looks like:
 
 .. code-block:: xml
 
@@ -166,6 +170,12 @@ example of the minimum expected elements in that case looks like:
       <SystemIdentifier id="infilt2"/>
       <LeakinessDescription>tight</LeakinessDescription>
    </AirInfiltrationMeasurement>
+
+.. code-block:: xml
+
+   <AirSealing>
+      <SystemIdentifier id="infilt3"/>
+   </AirSealing>
 
 If more than one ``AirInfiltrationMeasurement`` is found that have the above
 elements, the last one to appear in the document is used. Whether the house is
@@ -184,10 +194,7 @@ mapping from ``LeakinessDescription``:
    very leaky             False
    =====================  ===================
 
-If none of the ``AirInfiltrationMeasurement`` elements meet the criteria above
-to specify an estimate, the building is assumed to not have air sealing present.
-If a building has no ``AirInfiltrationMeasurement`` elements in the HPXML
-document, the house is assumed to not be air sealed.
+If ``AirSealing`` is found, the enclosure of the house is assumed to be air-sealed. 
 
 Comments
 ********

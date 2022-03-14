@@ -601,7 +601,10 @@ class HPXMLtoHEScoreTranslatorBase(object):
 
         duct_fracs_by_hescore_duct_loc = defaultdict(float)
         hescore_duct_loc_has_insulation = defaultdict(bool)
-        for duct_el in self.xpath(airdist_el, 'h:Ducts', aslist=True):
+        duct_locs = defaultdict(str)
+        for idx, duct_el in enumerate(self.xpath(airdist_el, 'h:Ducts', aslist=True)):
+            # Duct Identifier
+            duct_id = f'duct{idx}'
 
             # Duct Location
             hpxml_duct_location = self.xpath(duct_el, 'h:DuctLocation/text()')
@@ -610,15 +613,16 @@ class HPXMLtoHEScoreTranslatorBase(object):
             if hescore_duct_location is None:
                 raise TranslationError('No comparable duct location in HEScore: %s' % hpxml_duct_location)
 
+            duct_locs[duct_id] = hescore_duct_location
+
             # Fraction of Duct Area
             frac_duct_area = float(self.xpath(duct_el, 'h:FractionDuctArea/text()', raise_err=True))
-            duct_fracs_by_hescore_duct_loc[hescore_duct_location] += frac_duct_area
+            duct_fracs_by_hescore_duct_loc[duct_id] = frac_duct_area
 
             # Duct Insulation
             duct_has_ins = self.xpath(duct_el, 'h:DuctInsulationRValue > 0 or h:DuctInsulationThickness > 0 or\
                                       count(h:DuctInsulationMaterial[not(h:None)]) > 0')
-            hescore_duct_loc_has_insulation[hescore_duct_location] = \
-                hescore_duct_loc_has_insulation[hescore_duct_location] or duct_has_ins
+            hescore_duct_loc_has_insulation[duct_id] = duct_has_ins
 
         # Renormalize duct fractions so they add up to one (handles supply/return method if both are specified)
         total_duct_frac = sum(duct_fracs_by_hescore_duct_loc.values())
@@ -628,11 +632,19 @@ class HPXMLtoHEScoreTranslatorBase(object):
         # Gather the ducts by type
         hvac_distribution['duct'] = []
         hvacd_sortlist = []
-        for duct_loc, duct_frac in list(duct_fracs_by_hescore_duct_loc.items()):
-            hvacd = {}
-            hvacd['location'] = duct_loc
-            hvacd['fraction'] = duct_frac
-            hvacd_sortlist.append(hvacd)
+        for duct_id, duct_frac in list(duct_fracs_by_hescore_duct_loc.items()):
+            has_same_loc_and_ins = False
+            for d in hvacd_sortlist:
+                if d['location'] == duct_locs[duct_id] and d['insulated'] == hescore_duct_loc_has_insulation[duct_id]:
+                    d['fraction'] += duct_frac
+                    has_same_loc_and_ins = True
+
+            if not has_same_loc_and_ins:
+                hvacd = {}
+                hvacd['location'] = duct_locs[duct_id]
+                hvacd['fraction'] = duct_frac
+                hvacd['insulated'] = hescore_duct_loc_has_insulation[duct_id]
+                hvacd_sortlist.append(hvacd)
 
         # Sort them
         hvacd_sortlist.sort(key=lambda x: (x['fraction'], x['location']), reverse=True)
@@ -644,7 +656,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
             hvacd_out['name'] = 'duct%d' % i
             hvacd_out['location'] = hvacd['location']
             hvacd_out['fraction'] = hvacd['fraction'] / sum_of_top_3_fractions
-            hvacd_out['insulated'] = hescore_duct_loc_has_insulation[hvacd['location']]
+            hvacd_out['insulated'] = hvacd['insulated']
             hvac_distribution['duct'].append(hvacd_out)
 
         # Make sure the fractions add up to 1
@@ -1021,6 +1033,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
 
         blower_door_test = None
         air_infilt_est = None
+        is_enclosure_air_sealed = False
         for air_infilt_meas in b.xpath('h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement',
                                        namespaces=ns):
             # Take the last blower door test that is in CFM50, or if that's not available, ACH50
@@ -1029,11 +1042,19 @@ class HPXMLtoHEScoreTranslatorBase(object):
             if house_pressure == 50 and (blower_door_test_units == 'CFM' or
                                          (blower_door_test_units == 'ACH' and blower_door_test is None)):
                 blower_door_test = air_infilt_meas
-            else:
+            elif air_infilt_meas.xpath('count(h:LeakinessDescription)', namespaces=ns) > 0:
                 air_infilt_est = air_infilt_meas
+        if b.xpath('count(h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirSealing)', namespaces=ns) > 0:
+            is_enclosure_air_sealed = True
         if b.xpath('count(h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement\
                 /h:BuildingAirLeakage)', namespaces=ns) > 0 and blower_door_test is None:
-            raise TranslationError('BuildingAirLeakage/UnitofMeasure must be either "CFM50" or "ACH50"')
+            raise TranslationError(
+                'BuildingAirLeakage/UnitofMeasure must be either "CFM" or "ACH" and HousePressure must be 50')
+        if blower_door_test is None and air_infilt_est is None and not is_enclosure_air_sealed:
+            raise TranslationError(
+                'AirInfiltration must have "AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage" or '
+                '"AirInfiltrationMeasurement/LeakinessDescription" or "AirSealing"')
+        bldg_about['blower_door_test'] = False
         if blower_door_test is not None:
             bldg_about['blower_door_test'] = True
             if xpath(blower_door_test, 'h:BuildingAirLeakage/h:UnitofMeasure/text()') == 'CFM':
@@ -1046,14 +1067,13 @@ class HPXMLtoHEScoreTranslatorBase(object):
                                                              'h:BuildingAirLeakage/h:AirLeakage/text()',
                                                              raise_err=True)) / 60.
             bldg_about['envelope_leakage'] = int(python2round(bldg_about['envelope_leakage']))
-        else:
-            bldg_about['blower_door_test'] = False
-            if b.xpath('count(h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirSealing)', namespaces=ns) > 0 or \
-                    (air_infilt_est is not None and
-                     xpath(air_infilt_est, 'h:LeakinessDescription/text()') in ('tight', 'very tight')):
+        elif air_infilt_est is not None:
+            if xpath(air_infilt_est, 'h:LeakinessDescription/text()') in ('tight', 'very tight'):
                 bldg_about['air_sealing_present'] = True
             else:
                 bldg_about['air_sealing_present'] = False
+        elif is_enclosure_air_sealed:
+            bldg_about['air_sealing_present'] = True
         # Get comments
         extension_comment = xpath(b, 'h:extension/h:Comments/text()')
         if extension_comment is not None:

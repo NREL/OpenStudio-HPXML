@@ -73,8 +73,8 @@ following mapping.
 Duct Fractions
 **************
 
-For each ``Ducts`` element in an air distribution system the ``FracDuctArea`` is summed by
-HEScore :ref:`duct location <ductlocationmapping>`.
+For each ``Ducts`` element with the same insulation level in an air distribution system 
+the ``FracDuctArea`` is summed by HEScore :ref:`duct location <ductlocationmapping>`.
 
 Duct Insulation
 ***************

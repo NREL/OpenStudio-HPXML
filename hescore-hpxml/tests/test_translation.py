@@ -316,7 +316,15 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         el = self.xpath('//h:BuildingAirLeakage/h:UnitofMeasure')
         el.text = 'CFMnatural'
         self.assertRaisesRegex(TranslationError,
-                               r'BuildingAirLeakage/UnitofMeasure must be either "CFM50" or "ACH50"',
+                               r'BuildingAirLeakage/UnitofMeasure must be either "CFM" or "ACH" and HousePressure must be 50',  # noqa: E501
+                               tr.hpxml_to_hescore)
+
+    def test_missing_infiltration(self):
+        tr = self._load_xmlfile('hescore_min')
+        el = self.xpath('//h:BuildingAirLeakage')
+        el.getparent().remove(el)
+        self.assertRaisesRegex(TranslationError,
+                               r'AirInfiltration must have "AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage" or "AirInfiltrationMeasurement/LeakinessDescription" or "AirSealing"',  # noqa: E501
                                tr.hpxml_to_hescore)
 
     def test_missing_surroundings(self):
@@ -1412,6 +1420,70 @@ class TestOtherHouses(unittest.TestCase, ComparatorBase):
         self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['leakage_method'], 'qualitative')
         self.assertNotIn('leakage_to_outside', res['building']['systems']['hvac'][0]['hvac_distribution'])
         self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['sealed'], False)
+
+    def test_ducts_insulation(self):
+        tr = self._load_xmlfile('hescore_min_v3')
+        E = self.element_maker()
+        duct = self.xpath('//h:AirDistribution/h:Ducts')
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('supply'),
+                E.DuctInsulationRValue('4.0'),
+                E.DuctLocation('attic - vented'),
+                E.FractionDuctArea('0.55')
+            )
+        )
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('supply'),
+                E.DuctInsulationRValue('0.0'),
+                E.DuctLocation('attic - vented'),
+                E.FractionDuctArea('0.2')
+            )
+        )
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('return'),
+                E.DuctInsulationRValue('4.0'),
+                E.DuctLocation('attic - vented'),
+                E.FractionDuctArea('0.55')
+            )
+        )
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('return'),
+                E.DuctInsulationRValue('0.0'),
+                E.DuctLocation('attic - vented'),
+                E.FractionDuctArea('0.2')
+            )
+        )
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('supply'),
+                E.DuctInsulationRValue('0.0'),
+                E.DuctLocation('living space'),
+                E.FractionDuctArea('0.25')
+            )
+        )
+        duct.addnext(
+            E.Ducts(
+                E.DuctType('return'),
+                E.DuctInsulationRValue('0.0'),
+                E.DuctLocation('living space'),
+                E.FractionDuctArea('0.25')
+            )
+        )
+        duct.getparent().remove(duct)
+        res = tr.hpxml_to_hescore()
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'], 'uncond_attic')  # noqa E501
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['fraction'], 0.55)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][1]['location'], 'cond_space')   # noqa E501
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][1]['fraction'], 0.25)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][1]['insulated'], False)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][2]['location'], 'uncond_attic')   # noqa E501
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][2]['fraction'], 0.2)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][2]['insulated'], False)
 
 
 class TestInputOutOfBounds(unittest.TestCase, ComparatorBase):
@@ -3848,6 +3920,22 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         res = tr.hpxml_to_hescore()
         self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
+
+    def test_air_sealed_enclosure(self):
+        tr = self._load_xmlfile('hescore_min_v3')
+        res = tr.hpxml_to_hescore()
+        self.assertEqual(res['building']['about']['blower_door_test'], True)
+
+        E = self.element_maker()
+        el = self.xpath('//h:AirInfiltration/h:AirInfiltrationMeasurement')
+        air_sealing = E.AirSealing(
+            E.SystemIdentifier(id='AirSealing1')
+        )
+        el.addnext(air_sealing)
+        el.getparent().remove(el)
+        res = tr.hpxml_to_hescore()
+        self.assertEqual(res['building']['about']['blower_door_test'], False)
+        self.assertEqual(res['building']['about']['air_sealing_present'], True)
 
 
 class TestIrrelevantSurfaces(unittest.TestCase, ComparatorBase):
