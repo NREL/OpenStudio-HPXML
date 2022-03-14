@@ -87,23 +87,35 @@ class ScheduleGenerator
       today = @sim_start_day + day
       day_of_week = today.wday
       if [0, 6].include?(day_of_week) # weekend
-        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekend_setpoints][i]
-        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekend_setpoints][i]
+        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekend_setpoints][i].map { |x| UnitConversions.convert(x, 'C', 'F') }
+        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekend_setpoints][i].map { |x| UnitConversions.convert(x, 'C', 'F') }
       else # weekday
-        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekday_setpoints][i]
-        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekday_setpoints][i]
+        setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint] << args[:htg_weekday_setpoints][i].map { |x| UnitConversions.convert(x, 'C', 'F') }
+        setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint] << args[:clg_weekday_setpoints][i].map { |x| UnitConversions.convert(x, 'C', 'F') }
       end
     end
 
     setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint].flatten!
     setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint].flatten!
 
-    # TODO: modify setpoint_schedules using
-    # - @schedules[SchedulesFile::ColumnOccupants]
-    # - args[:cooling_setpoint_offset_nighttime]
-    # - args[:cooling_setpoint_offset_daytime_unoccupied]
-    # - args[:heating_setpoint_offset_nighttime]
-    # - args[:heating_setpoint_offset_daytime_unoccupied]
+    if !args[:htg_offset_nighttime].nil? || !args[:clg_offset_nighttime].nil? || !args[:htg_offset_daytime_unocc].nil? || !args[:clg_offset_daytime_unocc].nil?
+      @sleep_schedule.each_with_index do |sleep, i|
+        if sleep > 0 # nighttime
+          setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint][i] -= args[:htg_offset_nighttime] unless args[:htg_offset_nighttime].nil?
+          setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint][i] += args[:clg_offset_nighttime] unless args[:clg_offset_nighttime].nil?
+        else # daytime
+          if @schedules[SchedulesFile::ColumnOccupants][i] == 0 # unoccupied
+            setpoint_schedules[SchedulesFile::ColumnHeatingSetpoint][i] -= args[:htg_offset_daytime_unocc] unless args[:htg_offset_daytime_unocc].nil?
+            setpoint_schedules[SchedulesFile::ColumnCoolingSetpoint][i] += args[:clg_offset_daytime_unocc] unless args[:clg_offset_daytime_unocc].nil?
+          end
+        end
+      end
+    end
+
+    # back to C
+    setpoint_schedules.each do |schedule, values|
+      setpoint_schedules[schedule] = setpoint_schedules[schedule].map { |x| UnitConversions.convert(x, 'F', 'C') }
+    end
 
     setpoint_output_csv_path = args[:setpoint_output_csv_path].get
     unless (Pathname.new setpoint_output_csv_path).absolute?
@@ -121,6 +133,7 @@ class ScheduleGenerator
 
   def create_average_schedules
     create_average_occupants
+    create_average_sleep
     create_average_cooking_range
     create_average_plug_loads_other
     create_average_plug_loads_tv
@@ -149,6 +162,11 @@ class ScheduleGenerator
 
   def create_average_occupants
     create_timeseries_from_weekday_weekend_monthly(sch_name: SchedulesFile::ColumnOccupants, weekday_sch: Schedule.OccupantsWeekdayFractions, weekend_sch: Schedule.OccupantsWeekendFractions, monthly_sch: Schedule.OccupantsMonthlyMultipliers)
+  end
+
+  def create_average_sleep
+    # 10pm - 7am
+    @sleep_schedule = [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1] * @total_days_in_year
   end
 
   def create_average_lighting_interior
@@ -405,6 +423,7 @@ class ScheduleGenerator
 
     holiday_lighting_schedule = get_holiday_lighting_sch(holiday_lighting_schedule)
 
+    @sleep_schedule = []
     away_schedule = []
     idle_schedule = []
 
@@ -418,10 +437,10 @@ class ScheduleGenerator
       @steps_in_day.times do |step|
         minute = day * 1440 + step * @minutes_per_step
         index_15 = (minute / 15).to_i
-        sleep = sum_across_occupants(all_simulated_values, 0, index_15).to_f / args[:geometry_num_occupants]
+        @sleep_schedule << sum_across_occupants(all_simulated_values, 0, index_15).to_f / args[:geometry_num_occupants]
         away_schedule << sum_across_occupants(all_simulated_values, 5, index_15).to_f / args[:geometry_num_occupants]
         idle_schedule << sum_across_occupants(all_simulated_values, 6, index_15).to_f / args[:geometry_num_occupants]
-        active_occupancy_percentage = 1 - (away_schedule[-1] + sleep)
+        active_occupancy_percentage = 1 - (away_schedule[-1] + @sleep_schedule[-1])
         @schedules[SchedulesFile::ColumnPlugLoadsOther][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_sch, month, is_weekday, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::ColumnLightingInterior][day * @steps_in_day + step] = scale_lighting_by_occupancy(interior_lighting_schedule, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::ColumnLightingExterior][day * @steps_in_day + step] = get_value_from_daily_sch(lighting_sch, month, is_weekday, minute, 1)
@@ -597,7 +616,7 @@ class ScheduleGenerator
     m = 0
     dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std, 0)
 
-    # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
+    # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
     # Fill in dw_water draw schedule
     step = 0
     while step < mkc_steps_in_a_year
@@ -636,7 +655,7 @@ class ScheduleGenerator
     cw_load_size_probability = schedule_config['hot_water_clothes_washer']['load_size_probability']
     m = 0
     cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std, 0)
-    # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
+    # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
     step = 0
     # Fill in clothes washer water draw schedule based on markov-chain state 2 (laundry)
     while step < mkc_steps_in_a_year

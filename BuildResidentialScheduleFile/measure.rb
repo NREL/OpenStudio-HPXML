@@ -71,18 +71,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_nighttime', false)
-    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Nighttime')
-    arg.setDescription('TODO.')
-    arg.setUnits('deg-F')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_daytime_unoccupied', false)
-    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied')
-    arg.setDescription('TODO.')
-    arg.setUnits('deg-F')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_nighttime', false)
     arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Nighttime')
     arg.setDescription('TODO.')
@@ -91,6 +79,18 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('heating_setpoint_offset_daytime_unoccupied', false)
     arg.setDisplayName('Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied')
+    arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_nighttime', false)
+    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Nighttime')
+    arg.setDescription('TODO.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('cooling_setpoint_offset_daytime_unoccupied', false)
+    arg.setDisplayName('Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied')
     arg.setDescription('TODO.')
     arg.setUnits('deg-F')
     args << arg
@@ -259,6 +259,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       args[:clg_weekday_setpoints] = clg_weekday_setpoints
       args[:clg_weekend_setpoints] = clg_weekend_setpoints
+
+      args[:htg_offset_nighttime] = args[:heating_setpoint_offset_nighttime].get if args[:heating_setpoint_offset_nighttime].is_initialized
+      args[:clg_offset_nighttime] = args[:cooling_setpoint_offset_nighttime].get if args[:cooling_setpoint_offset_nighttime].is_initialized
+
+      args[:htg_offset_daytime_unocc] = args[:heating_setpoint_offset_daytime_unoccupied].get if args[:heating_setpoint_offset_daytime_unoccupied].is_initialized
+      args[:clg_offset_daytime_unocc] = args[:cooling_setpoint_offset_daytime_unoccupied].get if args[:cooling_setpoint_offset_daytime_unoccupied].is_initialized
 
       args[:ceiling_fan_cooling_setpoint_temp_offset] = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
     end

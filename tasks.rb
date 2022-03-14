@@ -2411,20 +2411,20 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   elsif ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
-    sch_args['cooling_setpoint_offset_nighttime'] = 0
-    sch_args['cooling_setpoint_offset_daytime_unoccupied'] = 0
     sch_args['heating_setpoint_offset_nighttime'] = 0
     sch_args['heating_setpoint_offset_daytime_unoccupied'] = 0
+    sch_args['cooling_setpoint_offset_nighttime'] = 0
+    sch_args['cooling_setpoint_offset_daytime_unoccupied'] = 0
     sch_args['setpoint_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-setpoints-daily-schedules.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
-    sch_args['cooling_setpoint_offset_nighttime'] = 0
-    sch_args['cooling_setpoint_offset_daytime_unoccupied'] = 0
     sch_args['heating_setpoint_offset_nighttime'] = 0
     sch_args['heating_setpoint_offset_daytime_unoccupied'] = 0
+    sch_args['cooling_setpoint_offset_nighttime'] = 0
+    sch_args['cooling_setpoint_offset_daytime_unoccupied'] = 0
     sch_args['setpoint_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-schedules.csv'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']

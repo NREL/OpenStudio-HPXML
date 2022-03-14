@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>6df792da-8012-4677-a92a-311304f15117</version_id>
-  <version_modified>20220309T194852Z</version_modified>
+  <version_id>23c20012-b89e-451e-b523-0b1bb6721d2e</version_id>
+  <version_modified>20220314T231338Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -64,24 +64,6 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>cooling_setpoint_offset_nighttime</name>
-      <display_name>Setpoint Schedules: Cooling Setpoint Offset Nighttime</display_name>
-      <description>TODO.</description>
-      <type>Double</type>
-      <units>deg-F</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_setpoint_offset_daytime_unoccupied</name>
-      <display_name>Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied</display_name>
-      <description>TODO.</description>
-      <type>Double</type>
-      <units>deg-F</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>heating_setpoint_offset_nighttime</name>
       <display_name>Setpoint Schedules: Heating Setpoint Offset Nighttime</display_name>
       <description>TODO.</description>
@@ -93,6 +75,24 @@
     <argument>
       <name>heating_setpoint_offset_daytime_unoccupied</name>
       <display_name>Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied</display_name>
+      <description>TODO.</description>
+      <type>Double</type>
+      <units>deg-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>cooling_setpoint_offset_nighttime</name>
+      <display_name>Setpoint Schedules: Cooling Setpoint Offset Nighttime</display_name>
+      <description>TODO.</description>
+      <type>Double</type>
+      <units>deg-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>cooling_setpoint_offset_daytime_unoccupied</name>
+      <display_name>Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied</display_name>
       <description>TODO.</description>
       <type>Double</type>
       <units>deg-F</units>
@@ -919,13 +919,13 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B093015C</checksum>
+      <checksum>90178524</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CCB2BA39</checksum>
+      <checksum>E9242D49</checksum>
     </file>
     <file>
       <version>
@@ -936,7 +936,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F9A7B2F2</checksum>
+      <checksum>C97BC1B7</checksum>
     </file>
   </files>
 </measure>
