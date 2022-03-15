@@ -168,10 +168,11 @@ class Waterheater
                                    loc_schedule: loc_schedule,
                                    model: model,
                                    ua: ua,
-                                   eta_c: water_heating_system.related_hvac_system.heating_efficiency_afue,
+                                   eta_c: water_heating_system.related_hvac_system.heating_efficiency_afue * 0.87, # Adjustment for plant loop impact, got from regression plot compared with previous boiler plant loop approach
                                    is_combi: true)
 
     # Store combi assumed EF for ERI calculation
+    # Fixme: address this with adjustment factor too?
     ef = calc_tank_EF(water_heating_system.water_heater_type, ua, water_heating_system.related_hvac_system.heating_efficiency_afue)
     new_heater.additionalProperties.setFeature('EnergyFactor', ef) # Used by reporting measure
 
