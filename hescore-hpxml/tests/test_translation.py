@@ -3533,6 +3533,20 @@ class TestHEScore2021Updates(unittest.TestCase, ComparatorBase):
         res = tr.hpxml_to_hescore()
         self.assertEqual(res['building_address']['zip_code'], orig_zipcode)
 
+    def test_hpxmlv2_garage_duct_location(self):
+        tr = self._load_xmlfile('hescore_min')
+        el = self.xpath('//h:DuctLocation[1]')
+        el.text = 'garage'
+        basement_el = self.xpath('//h:FoundationType[1]/h:Basement')
+        fnd_type_el = basement_el.getparent()
+        fnd_type_el.remove(basement_el)
+        etree.SubElement(fnd_type_el, tr.addns('h:Garage'))
+        d = tr.hpxml_to_hescore()
+        self.assertEqual(
+            d['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+            'unvented_crawl'
+        )
+
 
 class TestHEScoreV3(unittest.TestCase, ComparatorBase):
 
