@@ -117,6 +117,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('user_output_variables', false)
+    arg.setDisplayName('Generate Timeseries Output: User-Defined Output Variables')
+    arg.setDescription('Optionally generates timeseries output variables. If multiple output variables, use a comma-separated list.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
     arg.setDisplayName('Annual Output File Name')
     arg.setDescription("If not provided, defaults to 'results_annual.csv' (or 'results_annual.json').")
@@ -172,15 +177,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       runner.registerError('Cannot find OpenStudio model.')
       return false
     end
-    model = model.get
-    @model = model
+    @model = model.get
 
     # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
+    if !runner.validateUserArguments(arguments(@model), user_arguments)
       return result
     end
-
-    setup_outputs()
 
     total_loads_program = @model.getModelObjectByName(Constants.ObjectNameTotalLoadsProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
     comp_loads_program = @model.getModelObjectByName(Constants.ObjectNameComponentLoadsProgram.gsub(' ', '_'))
@@ -201,7 +203,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
       include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
       include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
+      @user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
     end
+
+    setup_outputs()
 
     # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries
     # end use consumption because EnergyPlus results may be post-processed due to HVAC DSE.
@@ -335,6 +340,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Optional output variables (timeseries only)
+    @output_variables_requests.each do |output_variable_name, output_variable|
+      result << OpenStudio::IdfObject.load("Output:Variable,*,#{output_variable_name},#{timeseries_frequency};").get
+    end
+
     # Dual-fuel heat pump loads
     if not @object_variables_by_key[[LT, LT::Heating]].nil?
       @object_variables_by_key[[LT, LT::Heating]].each do |vals|
@@ -377,6 +387,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
       add_timeseries_dst_column = runner.getOptionalBoolArgumentValue('add_timeseries_dst_column', user_arguments)
       add_timeseries_utc_column = runner.getOptionalBoolArgumentValue('add_timeseries_utc_column', user_arguments)
+      @user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
@@ -778,6 +789,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           unit_adder = 0
         end
         weather_data.timeseries_output = get_report_variable_data_timeseries(['Environment'], [weather_data.variable], unit_conv, unit_adder, timeseries_frequency)
+      end
+    end
+
+    @output_variables = {}
+    @output_variables_requests.each do |output_variable_name, output_variable|
+      key_values = get_report_variable_data_timeseries_key_values(timeseries_frequency, output_variable_name)
+      key_values.each do |key_value|
+        # TODO: get unit_conv, unit_adder
+        unit_conv = 1
+        unit_adder = 0
+        @output_variables[[output_variable_name, key_value]] = OutputVariable.new
+        @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value}"
+        @output_variables[[output_variable_name, key_value]].timeseries_units = get_report_variable_data_timeseries_units(timeseries_frequency, output_variable_name, key_value)
+        @output_variables[[output_variable_name, key_value]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], unit_conv, unit_adder, timeseries_frequency)
       end
     end
 
@@ -1485,14 +1510,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       weather_data = []
     end
+    if !@output_variables.empty?
+      output_variables_data = @output_variables.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
+    else
+      output_variables_data = []
+    end
 
-    return if fuel_data.size + end_use_data.size + emissions_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + zone_temps_data.size + airflows_data.size + weather_data.size == 0
+    return if fuel_data.size + end_use_data.size + emissions_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + zone_temps_data.size + airflows_data.size + weather_data.size + output_variables_data.size == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     if output_format == 'csv'
       # Assemble data
-      data = data.zip(*timestamps2, *timestamps3, *fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
+      data = data.zip(*timestamps2, *timestamps3, *fuel_data, *end_use_data, *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data, *output_variables_data)
 
       # Error-check
       n_elements = []
@@ -1512,7 +1542,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       h['TimeDST'] = timestamps2[2..-1] if timestamps_dst
       h['TimeUTC'] = timestamps3[2..-1] if timestamps_utc
 
-      [fuel_data, end_use_data, emissions_data, hot_water_use_data, total_loads_data, comp_loads_data, zone_temps_data, airflows_data, weather_data].each do |d|
+      [fuel_data, end_use_data, emissions_data, hot_water_use_data, total_loads_data, comp_loads_data, zone_temps_data, airflows_data, weather_data, output_variables_data].each do |d|
         d.each do |o|
           grp, name = o[0].split(':', 2)
           h[grp] = {} if h[grp].nil?
@@ -1596,6 +1626,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     return values
+  end
+
+  def get_report_variable_data_timeseries_key_values(timeseries_frequency, var)
+    query = "SELECT KeyValue FROM ReportVariableDataDictionary WHERE VariableName='#{var}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}'"
+    values = @sqlFile.execAndReturnVectorOfString(query)
+    fail "Query error: #{query}" unless values.is_initialized
+
+    values = values.get
+
+    return values
+  end
+
+  def get_report_variable_data_timeseries_units(timeseries_frequency, var, kv)
+    query = "SELECT VariableUnits FROM ReportVariableDataDictionary WHERE KeyValue='#{kv}' AND VariableName='#{var}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}'"
+    value = @sqlFile.execAndReturnFirstString(query)
+    fail "Query error: #{query}" unless value.is_initialized
+
+    value = value.get
+
+    return value
   end
 
   def get_tabular_data_value(report_name, report_for_string, table_name, row_names, col_name, units)
@@ -1798,6 +1848,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @timeseries_units = timeseries_units
     end
     attr_accessor(:variable, :variable_units)
+  end
+
+  class OutputVariable < BaseOutput
+    def initialize
+      super()
+    end
+    attr_accessor()
   end
 
   def setup_outputs()
@@ -2066,7 +2123,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Zone Temperatures
-
     @zone_temps = {}
 
     # Airflows
@@ -2092,6 +2148,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @weather.each do |weather_type, weather_data|
       weather_data.name = "Weather: #{weather_type}"
+    end
+
+    # Output Variables
+    @output_variables_requests = {}
+    if @user_output_variables && @user_output_variables.is_initialized
+      output_variables = @user_output_variables.get.split(',').map(&:strip)
+      output_variables.each do |output_variable|
+        @output_variables_requests[output_variable] = OutputVariable.new
+      end
     end
   end
 
