@@ -240,6 +240,11 @@ class ReportSimulationOutputTest < MiniTest::Test
     'Weather: Direct Solar Radiation',
   ]
 
+  BaseHPXMLTimeseriesColsOutputVariables = [
+    'Zone People Occupant Count: LIVING SPACE',
+    'Zone People Total Heating Energy: LIVING SPACE'
+  ]
+
   ERIRows = [
     'hpxml_heat_sys_ids',
     'hpxml_cool_sys_ids',
@@ -1120,6 +1125,32 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[2]))
+  end
+
+  def test_timeseries_user_defined_output_variables
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_emissions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => false,
+                  'include_timeseries_weather' => false,
+                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy' }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsOutputVariables
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsOutputVariables)
   end
 
   def test_eri_designs
