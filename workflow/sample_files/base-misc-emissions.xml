@@ -15,7 +15,7 @@
       <EmissionsScenarios>
         <EmissionsScenario>
           <Name>Cambium Hourly MidCase LRMER RMPA</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
@@ -26,7 +26,7 @@
         </EmissionsScenario>
         <EmissionsScenario>
           <Name>Cambium Hourly LowRECosts LRMER RMPA</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
@@ -37,7 +37,7 @@
         </EmissionsScenario>
         <EmissionsScenario>
           <Name>Cambium Annual MidCase AER National</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
