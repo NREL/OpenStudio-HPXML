@@ -528,7 +528,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnHeatingSetpoint))
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnCoolingSetpoint))
     assert_in_epsilon(sf.schedules[SchedulesFile::ColumnHeatingSetpoint][0], UnitConversions.convert(59, 'F', 'C'), 0.01) # nighttime
-    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnCoolingSetpoint][0], UnitConversions.convert(81, 'F', 'C'), 0.01) # daytime
+    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnCoolingSetpoint][0], UnitConversions.convert(81, 'F', 'C'), 0.01) # nighttime
     assert_in_epsilon(sf.schedules[SchedulesFile::ColumnHeatingSetpoint][7], UnitConversions.convert(68, 'F', 'C'), 0.01) # daytime occupied
     assert_in_epsilon(sf.schedules[SchedulesFile::ColumnCoolingSetpoint][7], UnitConversions.convert(78, 'F', 'C'), 0.01) # daytime occupied
     assert_in_epsilon(sf.schedules[SchedulesFile::ColumnHeatingSetpoint][13], UnitConversions.convert(56, 'F', 'C'), 0.01) # daytime unoccupied

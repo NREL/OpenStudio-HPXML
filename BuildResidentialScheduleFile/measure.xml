@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>23c20012-b89e-451e-b523-0b1bb6721d2e</version_id>
-  <version_modified>20220314T231338Z</version_modified>
+  <version_id>cff51874-f262-4905-a248-de442268dc21</version_id>
+  <version_modified>20220315T182251Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -66,7 +66,7 @@
     <argument>
       <name>heating_setpoint_offset_nighttime</name>
       <display_name>Setpoint Schedules: Heating Setpoint Offset Nighttime</display_name>
-      <description>TODO.</description>
+      <description>The magnitude of the heating setpoint offset (setpoint is lowered) for nighttime hours. For smooth schedules, nighttime hours occur during the period from 10pm - 7am. For stochastic schedules, nighttime hours can vary.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -75,7 +75,7 @@
     <argument>
       <name>heating_setpoint_offset_daytime_unoccupied</name>
       <display_name>Setpoint Schedules: Heating Setpoint Offset Daytime Unoccupied</display_name>
-      <description>TODO.</description>
+      <description>The magnitude of the heating setpoint offset (setpoint is lowered) for daytime unoccupied hours. For smooth schedules, daytime unoccupied hours never occur. For stochastic schedules, daytime unoccupied hours can vary.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -84,7 +84,7 @@
     <argument>
       <name>cooling_setpoint_offset_nighttime</name>
       <display_name>Setpoint Schedules: Cooling Setpoint Offset Nighttime</display_name>
-      <description>TODO.</description>
+      <description>The magnitude of the cooling setpoint offset (setpoint is raised) for nighttime hours. For smooth schedules, nighttime hours occur during the period from 10pm - 7am. For stochastic schedules, nighttime hours can vary.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -93,7 +93,7 @@
     <argument>
       <name>cooling_setpoint_offset_daytime_unoccupied</name>
       <display_name>Setpoint Schedules: Cooling Setpoint Offset Daytime Unoccupied</display_name>
-      <description>TODO.</description>
+      <description>The magnitude of the cooling setpoint offset (setpoint is raised) for daytime unoccupied hours. For smooth schedules, daytime unoccupied hours never occur. For stochastic schedules, daytime unoccupied hours can vary.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -925,7 +925,7 @@
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E9242D49</checksum>
+      <checksum>AAB289FF</checksum>
     </file>
     <file>
       <version>
@@ -936,7 +936,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C97BC1B7</checksum>
+      <checksum>B66EB683</checksum>
     </file>
   </files>
 </measure>
