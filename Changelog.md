@@ -1,5 +1,7 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- Expanded capabilities for scheduling:
+  - Allows modeling detailed HVAC setpoints via a schedule CSV file.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
@@ -13,6 +15,8 @@ __New Features__
   - Adds support for unconditioned attics for apartment units.
   - Adds an optional argument for whether the HPXML file is written with default values applied; defaults to false.
   - Adds an optional argument for whether the HPXML file is validated; defaults to false.
+- BuildResidentialScheduleFile:
+  - Adds optional arguments for offsetting heating/cooling setpoint schedules during nighttime and daytime unoccupied hours.
 - ReportSimulationOutput measure:
   - Add ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
   - Timestamps in results_timeseries.csv are output in ISO 8601 standard format.
