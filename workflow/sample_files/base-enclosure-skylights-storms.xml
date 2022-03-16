@@ -310,10 +310,6 @@
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
-            <StormWindow>
-              <SystemIdentifier id='Skylight1StormWindow'/>
-              <GlassType>clear</GlassType>
-            </StormWindow>
             <AttachedToRoof idref='Roof1'/>
           </Skylight>
           <Skylight>
@@ -327,10 +323,6 @@
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
-            <StormWindow>
-              <SystemIdentifier id='Skylight2StormWindow'/>
-              <GlassType>clear</GlassType>
-            </StormWindow>
             <AttachedToRoof idref='Roof1'/>
           </Skylight>
         </Skylights>

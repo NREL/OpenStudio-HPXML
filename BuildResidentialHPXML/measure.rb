@@ -845,6 +845,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4)
     args << arg
 
+    storm_window_type_choices = OpenStudio::StringVector.new
+    storm_window_type_choices << HPXML::WindowGlassTypeClear
+    storm_window_type_choices << HPXML::WindowGlassTypeLowE
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
+    arg.setDisplayName('Windows: Storm Window Type')
+    arg.setDescription('The type of the storm window.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
     arg.setDisplayName('Skylights: Front Roof Area')
     arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade.")
@@ -881,6 +890,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     skylight_shgc.setDescription('Full-assembly NFRC solar heat gain coefficient.')
     skylight_shgc.setDefaultValue(0.45)
     args << skylight_shgc
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('skylight_storm_type', storm_window_type_choices, false)
+    arg.setDisplayName('Skylights: Storm Window Type')
+    arg.setDescription('The type of the storm window.')
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)
     arg.setDisplayName('Doors: Area')

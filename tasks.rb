@@ -1633,9 +1633,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['window_area_back'] = 0
     args['window_area_left'] = 0
     args['window_area_right'] = 0
+  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
+    args['window_ufactor'] = 0.6
+    args['window_storm_type'] = HPXML::WindowGlassTypeLowE
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
+  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+    args['skylight_ufactor'] = 0.6
+    args['skylight_storm_type'] = HPXML::WindowGlassTypeClear
   end
 
   # Foundation
@@ -2961,20 +2967,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].exterior_shading_factor_winter = 1.0
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
-  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
-    hpxml.skylights[0].ufactor = 0.6
-    hpxml.skylights[0].storm_window_type = 'clear'
-    hpxml.skylights[1].ufactor = 0.6
-    hpxml.skylights[1].storm_window_type = 'clear'
-  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
-    hpxml.windows[0].ufactor = 0.6
-    hpxml.windows[0].storm_window_type = 'low-e'
-    hpxml.windows[1].ufactor = 0.6
-    hpxml.windows[1].storm_window_type = 'low-e'
-    hpxml.windows[2].ufactor = 0.6
-    hpxml.windows[2].storm_window_type = 'low-e'
-    hpxml.windows[3].ufactor = 0.6
-    hpxml.windows[3].storm_window_type = 'low-e'
   elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
     hpxml.partition_wall_mass.area_fraction = 0.8
     hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard

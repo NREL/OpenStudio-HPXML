@@ -892,10 +892,12 @@ class Geometry
                                         window_area_left:,
                                         window_area_right:,
                                         window_aspect_ratio:,
+                                        window_storm_type:,
                                         skylight_area_front:,
                                         skylight_area_back:,
                                         skylight_area_left:,
                                         skylight_area_right:,
+                                        skylight_storm_type:,
                                         **remainder)
     facades = [Constants.FacadeBack, Constants.FacadeRight, Constants.FacadeFront, Constants.FacadeLeft]
 

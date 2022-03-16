@@ -1821,10 +1821,10 @@ class Constructions
       fail "Unexpected base window U-Factor (#{base_ufactor}) for a storm window."
     end
 
-    if storm_type == 'clear'
+    if storm_type == HPXML::WindowGlassTypeClear
       ufactor_abs_reduction = 0.6435 * base_ufactor - 0.1533
       shgc_corr = 0.9
-    elsif storm_type == 'low-e'
+    elsif storm_type == HPXML::WindowGlassTypeLowE
       ufactor_abs_reduction = 0.766 * base_ufactor - 0.1532
       shgc_corr = 0.8
     else
