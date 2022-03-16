@@ -403,7 +403,7 @@ def create_hpxmls
       # Apply measure
       success = apply_measures(measures_dir, measures, runner, model)
 
-      # Report warnings/errors
+      # Report errors
       runner.result.stepErrors.each do |s|
         puts "Error: #{s}"
       end
@@ -446,19 +446,6 @@ def create_hpxmls
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
       hpxml_docs[File.basename(hpxml_file)] = deep_copy_object(hpxml_doc)
-
-      # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/hpxml_schema'))
-      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-      if errors.size > 0
-        fail "ERRORS: #{errors}"
-      end
-
-      # Check for errors
-      errors = hpxml.check_for_errors()
-      if errors.size > 0
-        fail "ERRORS: #{errors}"
-      end
     rescue Exception => e
       puts "\n#{e}\n#{e.backtrace.join('\n')}"
       puts "\nError: Did not successfully generate #{hpxml_file}."
@@ -498,6 +485,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   else
     args['hpxml_path'] = "../workflow/sample_files/#{hpxml_file}"
   end
+  args['apply_validation'] = true
 
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
@@ -2260,10 +2248,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['whole_house_fan_flow_rate'] = Constants.Auto
     args['whole_house_fan_power'] = Constants.Auto
   elsif ['base-misc-emissions.xml'].include? hpxml_file
-    args['emissions_scenario_names'] = 'Cambium 2022 Hourly MidCase AER Using RMPA Region, Cambium 2022 Hourly MidCase AER Using National, Cambium 2022 Annual MidCase AER Using National, eGRID 2019 Total Emissions Rate Using RMPA Region, eGRID 2019 Total Emissions Rate Using RMPA Region'
-    args['emissions_types'] = 'CO2, CO2, CO2, SO2, NOx'
+    args['emissions_scenario_names'] = 'Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA'
+    args['emissions_types'] = 'CO2e, CO2e, CO2e, SO2, NOx'
     args['emissions_electricity_units'] = 'kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh'
-    args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv, 392.6, 0.384, 0.67'
+    args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67'
+    args['emissions_electricity_number_of_header_rows'] = '1, 1, , , '
+    args['emissions_electricity_column_numbers'] = '17, 17, , , '
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     args['extra_refrigerator_location'] = Constants.Auto
     args['extra_refrigerator_rated_annual_kwh'] = 700.0
@@ -2395,7 +2385,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
 
   # Simulation Control
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
-    args['simulation_control_run_period_calendar_year'] = 2008
+    args['simulation_control_run_period_calendar_year'] = 2010
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     args['simulation_control_daylight_saving_enabled'] = true
     args['simulation_control_daylight_saving_period'] = 'Mar 10 - Nov 6'

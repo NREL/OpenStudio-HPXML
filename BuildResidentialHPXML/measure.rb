@@ -38,7 +38,7 @@ require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return 'HPXML Builder (Beta)'
+    return 'HPXML Builder'
   end
 
   # human readable description
@@ -2859,12 +2859,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
-    arg.setDisplayName('Apply default values')
-    arg.setDescription('Sets OS-HPXML default values in the HPXML output file')
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
     arg.setDisplayName('Emissions: Scenario Names')
     arg.setDescription('Names of emissions scenarios. If multiple scenarios, use a comma-separated list.')
@@ -2872,7 +2866,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_types', false)
     arg.setDisplayName('Emissions: Types')
-    arg.setDescription('Types of emissions (e.g., CO2, NOx, etc.). If multiple scenarios, use a comma-separated list.')
+    arg.setDescription('Types of emissions (e.g., CO2e, NOx, etc.). If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_units', false)
@@ -2883,6 +2877,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_values_or_filepaths', false)
     arg.setDisplayName('Emissions: Electricity Values or File Paths')
     arg.setDescription('Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_number_of_header_rows', false)
+    arg.setDisplayName('Emissions: Electricity Files Number of Header Rows')
+    arg.setDescription('The number of header rows in the electricity emissions factor file. Only applies when an electricity filepath is used. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_column_numbers', false)
+    arg.setDisplayName('Emissions: Electricity Files Column Numbers')
+    arg.setDescription('The column number in the electricity emissions factor file. Only applies when an electricity filepath is used. If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_fossil_fuel_units', false)
@@ -2900,6 +2904,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       arg.setDescription("#{cap_case} emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.")
       args << arg
     end
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
+    arg.setDisplayName('Apply Default Values?')
+    arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_validation', false)
+    arg.setDisplayName('Apply Validation?')
+    arg.setDescription('If true, validates the HPXML output file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).')
+    arg.setDefaultValue(false)
+    args << arg
 
     return args
   end
@@ -2947,8 +2963,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
     # Create HPXML file
-    skip_error_checking = false
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file, skip_error_checking)
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -2960,7 +2975,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for invalid HPXML file
-    if not skip_error_checking
+    if args[:apply_validation].is_initialized && args[:apply_validation].get
       if not validate_hpxml(runner, hpxml_path, hpxml_doc)
         return false
       end
@@ -3116,17 +3131,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]
-      emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
-                                    args[:emissions_types].get.split(',').length,
-                                    args[:emissions_electricity_units].get.split(',').length,
-                                    args[:emissions_electricity_values_or_filepaths].get.split(',').length]
+      emissions_scenario_lengths = [args[:emissions_scenario_names].get.count(','),
+                                    args[:emissions_types].get.count(','),
+                                    args[:emissions_electricity_units].get.count(','),
+                                    args[:emissions_electricity_values_or_filepaths].get.count(',')]
 
-      emissions_scenario_lengths += [args[:emissions_fossil_fuel_units].get.split(',').length] if args[:emissions_fossil_fuel_units].is_initialized
+      emissions_scenario_lengths += [args[:emissions_electricity_number_of_header_rows].get.count(',')] if args[:emissions_electricity_number_of_header_rows].is_initialized
+      emissions_scenario_lengths += [args[:emissions_electricity_column_numbers].get.count(',')] if args[:emissions_electricity_column_numbers].is_initialized
 
       Constants.FossilFuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
-        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].get.split(',').length] if args["emissions_#{underscore_case}_values".to_sym].is_initialized
+        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].get.count(',')] if args["emissions_#{underscore_case}_values".to_sym].is_initialized
       end
 
       error = (emissions_scenario_lengths.uniq.size != 1)
@@ -3201,7 +3217,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_file, skip_error_checking)
+  def self.create(runner, model, args, epw_file)
     success = create_geometry_envelope(runner, model, args)
     return false if not success
 
@@ -3284,20 +3300,14 @@ class HPXMLFile
     end
 
     # Check for errors in the HPXML object
-    if not skip_error_checking
+    if args[:apply_validation].is_initialized && args[:apply_validation].get
       errors = hpxml.check_for_errors()
       if errors.size > 0
         fail "ERROR: Invalid HPXML object produced.\n#{errors}"
       end
     end
 
-    if args[:apply_defaults].is_initialized
-      apply_defaults = args[:apply_defaults].get
-    else
-      apply_defaults = false
-    end
-
-    if apply_defaults
+    if args[:apply_defaults].is_initialized && args[:apply_defaults].get
       eri_version = Constants.ERIVersions[-1]
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
@@ -3421,6 +3431,16 @@ class HPXMLFile
       emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
       emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
 
+      if args[:emissions_electricity_number_of_header_rows].is_initialized
+        emissions_electricity_number_of_header_rows = args[:emissions_electricity_number_of_header_rows].get.split(',').map(&:strip)
+      else
+        emissions_electricity_number_of_header_rows = [nil] * emissions_scenario_names.size
+      end
+      if args[:emissions_electricity_column_numbers].is_initialized
+        emissions_electricity_column_numbers = args[:emissions_electricity_column_numbers].get.split(',').map(&:strip)
+      else
+        emissions_electricity_column_numbers = [nil] * emissions_scenario_names.size
+      end
       if args[:emissions_fossil_fuel_units].is_initialized
         fuel_units = args[:emissions_fossil_fuel_units].get.split(',').map(&:strip)
       else
@@ -3438,11 +3458,26 @@ class HPXMLFile
         end
       end
 
-      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths, fuel_units, fuel_values[HPXML::FuelTypeNaturalGas], fuel_values[HPXML::FuelTypePropane], fuel_values[HPXML::FuelTypeOil], fuel_values[HPXML::FuelTypeCoal], fuel_values[HPXML::FuelTypeWoodCord], fuel_values[HPXML::FuelTypeWoodPellets])
+      emissions_scenarios = emissions_scenario_names.zip(emissions_types,
+                                                         emissions_electricity_units,
+                                                         emissions_electricity_values_or_filepaths,
+                                                         emissions_electricity_number_of_header_rows,
+                                                         emissions_electricity_column_numbers,
+                                                         fuel_units,
+                                                         fuel_values[HPXML::FuelTypeNaturalGas],
+                                                         fuel_values[HPXML::FuelTypePropane],
+                                                         fuel_values[HPXML::FuelTypeOil],
+                                                         fuel_values[HPXML::FuelTypeCoal],
+                                                         fuel_values[HPXML::FuelTypeWoodCord],
+                                                         fuel_values[HPXML::FuelTypeWoodPellets])
       emissions_scenarios.each do |emissions_scenario|
-        name, emissions_type, elec_units, elec_value_or_schedule_filepath, fuel_units, natural_gas_value, propane_value, fuel_oil_value, coal_value, wood_value, wood_pellets_value = emissions_scenario
+        name, emissions_type, elec_units, elec_value_or_schedule_filepath, elec_num_headers, elec_column_num, fuel_units, natural_gas_value, propane_value, fuel_oil_value, coal_value, wood_value, wood_pellets_value = emissions_scenario
         elec_value = Float(elec_value_or_schedule_filepath) rescue nil
-        elec_schedule_filepath = elec_value_or_schedule_filepath if elec_value.nil?
+        if elec_value.nil?
+          elec_schedule_filepath = elec_value_or_schedule_filepath
+          elec_num_headers = Integer(elec_num_headers) rescue nil
+          elec_column_num = Integer(elec_column_num) rescue nil
+        end
         natural_gas_value = Float(natural_gas_value) rescue nil
         propane_value = Float(propane_value) rescue nil
         fuel_oil_value = Float(fuel_oil_value) rescue nil
@@ -3455,6 +3490,8 @@ class HPXMLFile
                                              elec_units: elec_units,
                                              elec_value: elec_value,
                                              elec_schedule_filepath: elec_schedule_filepath,
+                                             elec_schedule_number_of_header_rows: elec_num_headers,
+                                             elec_schedule_column_number: elec_column_num,
                                              natural_gas_units: fuel_units,
                                              natural_gas_value: natural_gas_value,
                                              propane_units: fuel_units,

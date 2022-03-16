@@ -325,46 +325,46 @@ class ReportSimulationOutputTest < MiniTest::Test
     'loadHeatingDelivered',
     'loadCoolingDelivered',
     'loadHotWaterDelivered',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionTotal',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionElectricity',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionNaturalGas',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionFuelOil',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionPropane',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionWoodCord',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionWoodPellets',
-    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionCoal',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalTotal',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalElectricity',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalNaturalGas',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalFuelOil',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalPropane',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalWoodCord',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalWoodPellets',
-    'co2Cambium2022HourlyMidCaseAERUsingNationalCoal',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalTotal',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalElectricity',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalNaturalGas',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalFuelOil',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalPropane',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalWoodCord',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalWoodPellets',
-    'co2Cambium2022AnnualMidCaseAERUsingNationalCoal',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionTotal',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionElectricity',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionNaturalGas',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionFuelOil',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionPropane',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionWoodCord',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionWoodPellets',
-    'so2eGRID2019TotalEmissionsRateUsingRMPARegionCoal',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionTotal',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionElectricity',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionNaturalGas',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionFuelOil',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionPropane',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionWoodCord',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionWoodPellets',
-    'noxeGRID2019TotalEmissionsRateUsingRMPARegionCoal',
+    'co2eCambiumHourlyMidCaseLRMERRMPATotal',
+    'co2eCambiumHourlyMidCaseLRMERRMPAElectricity',
+    'co2eCambiumHourlyMidCaseLRMERRMPANaturalGas',
+    'co2eCambiumHourlyMidCaseLRMERRMPAFuelOil',
+    'co2eCambiumHourlyMidCaseLRMERRMPAPropane',
+    'co2eCambiumHourlyMidCaseLRMERRMPAWoodCord',
+    'co2eCambiumHourlyMidCaseLRMERRMPAWoodPellets',
+    'co2eCambiumHourlyMidCaseLRMERRMPACoal',
+    'co2eCambiumHourlyLowRECostsLRMERRMPATotal',
+    'co2eCambiumHourlyLowRECostsLRMERRMPAElectricity',
+    'co2eCambiumHourlyLowRECostsLRMERRMPANaturalGas',
+    'co2eCambiumHourlyLowRECostsLRMERRMPAFuelOil',
+    'co2eCambiumHourlyLowRECostsLRMERRMPAPropane',
+    'co2eCambiumHourlyLowRECostsLRMERRMPAWoodCord',
+    'co2eCambiumHourlyLowRECostsLRMERRMPAWoodPellets',
+    'co2eCambiumHourlyLowRECostsLRMERRMPACoal',
+    'co2eCambiumAnnualMidCaseAERNationalTotal',
+    'co2eCambiumAnnualMidCaseAERNationalElectricity',
+    'co2eCambiumAnnualMidCaseAERNationalNaturalGas',
+    'co2eCambiumAnnualMidCaseAERNationalFuelOil',
+    'co2eCambiumAnnualMidCaseAERNationalPropane',
+    'co2eCambiumAnnualMidCaseAERNationalWoodCord',
+    'co2eCambiumAnnualMidCaseAERNationalWoodPellets',
+    'co2eCambiumAnnualMidCaseAERNationalCoal',
+    'so2eGRIDRMPATotal',
+    'so2eGRIDRMPAElectricity',
+    'so2eGRIDRMPANaturalGas',
+    'so2eGRIDRMPAFuelOil',
+    'so2eGRIDRMPAPropane',
+    'so2eGRIDRMPAWoodCord',
+    'so2eGRIDRMPAWoodPellets',
+    'so2eGRIDRMPACoal',
+    'noxeGRIDRMPATotal',
+    'noxeGRIDRMPAElectricity',
+    'noxeGRIDRMPANaturalGas',
+    'noxeGRIDRMPAFuelOil',
+    'noxeGRIDRMPAPropane',
+    'noxeGRIDRMPAWoodCord',
+    'noxeGRIDRMPAWoodPellets',
+    'noxeGRIDRMPACoal',
     'hpxml_cfa',
     'hpxml_nbr',
     'hpxml_nst',
@@ -382,21 +382,21 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   def emissions_timeseries_cols
-    return ['Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Total',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Electricity',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Natural Gas',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Total',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Electricity',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Natural Gas',
-            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Total',
-            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Electricity',
-            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Natural Gas',
-            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Total',
-            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Electricity',
-            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Natural Gas',
-            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Total',
-            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Electricity',
-            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Natural Gas']
+    return ['Emissions: CO2e: Cambium Hourly MidCase LRMER RMPA: Total',
+            'Emissions: CO2e: Cambium Hourly MidCase LRMER RMPA: Electricity',
+            'Emissions: CO2e: Cambium Hourly MidCase LRMER RMPA: Natural Gas',
+            'Emissions: CO2e: Cambium Hourly LowRECosts LRMER RMPA: Total',
+            'Emissions: CO2e: Cambium Hourly LowRECosts LRMER RMPA: Electricity',
+            'Emissions: CO2e: Cambium Hourly LowRECosts LRMER RMPA: Natural Gas',
+            'Emissions: CO2e: Cambium Annual MidCase AER National: Total',
+            'Emissions: CO2e: Cambium Annual MidCase AER National: Electricity',
+            'Emissions: CO2e: Cambium Annual MidCase AER National: Natural Gas',
+            'Emissions: SO2: eGRID RMPA: Total',
+            'Emissions: SO2: eGRID RMPA: Electricity',
+            'Emissions: SO2: eGRID RMPA: Natural Gas',
+            'Emissions: NOx: eGRID RMPA: Total',
+            'Emissions: NOx: eGRID RMPA: Electricity',
+            'Emissions: NOx: eGRID RMPA: Natural Gas']
   end
 
   def test_annual_only
@@ -412,7 +412,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
@@ -433,7 +433,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
@@ -453,7 +453,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels
@@ -478,7 +478,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels + ['Fuel Use: Electricity: Net']
@@ -504,7 +504,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + emissions_timeseries_cols
@@ -529,7 +529,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEndUses
@@ -554,7 +554,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsWaterUses
@@ -579,7 +579,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsTotalLoads
@@ -605,7 +605,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsComponentLoads
@@ -630,7 +630,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsZoneTemps
@@ -655,7 +655,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
@@ -687,7 +687,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
@@ -712,7 +712,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     add_cols = ['Airflow: Whole House Fan']
@@ -739,7 +739,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
@@ -764,7 +764,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
@@ -789,7 +789,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
@@ -814,7 +814,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsWeather
@@ -839,7 +839,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + all_base_hpxml_timeseries_cols + emissions_timeseries_cols +
@@ -866,7 +866,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + all_base_hpxml_timeseries_cols + emissions_timeseries_cols +
@@ -893,7 +893,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + all_base_hpxml_timeseries_cols + emissions_timeseries_cols +
@@ -918,7 +918,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -939,7 +939,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -960,7 +960,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -981,7 +981,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1002,7 +1002,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1021,7 +1021,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1042,7 +1042,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1063,7 +1063,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
                   'add_timeseries_dst_column' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1086,7 +1086,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
                   'add_timeseries_utc_column' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1110,7 +1110,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_weather' => false,
                   'add_timeseries_dst_column' => true,
                   'add_timeseries_utc_column' => true }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1128,7 +1128,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
     require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
     require 'oga'
-    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-misc-emissions.xml')
+    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
       new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/tests/test-eri.xml')
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
@@ -1139,27 +1139,24 @@ class ReportSimulationOutputTest < MiniTest::Test
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/tests/test-eri.xml',
                     'timeseries_frequency' => 'hourly',
-                    'include_timeseries_fuel_consumptions' => true,
-                    'include_timeseries_end_use_consumptions' => true,
-                    'include_timeseries_hot_water_uses' => true,
-                    'include_timeseries_total_loads' => true,
-                    'include_timeseries_component_loads' => true,
-                    'include_timeseries_zone_temperatures' => true,
-                    'include_timeseries_airflows' => true,
-                    'include_timeseries_weather' => true }
-      annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash, eri_design)
+                    'include_timeseries_fuel_consumptions' => false,
+                    'include_timeseries_end_use_consumptions' => false,
+                    'include_timeseries_hot_water_uses' => false,
+                    'include_timeseries_total_loads' => false,
+                    'include_timeseries_component_loads' => false,
+                    'include_timeseries_zone_temperatures' => false,
+                    'include_timeseries_airflows' => false,
+                    'include_timeseries_weather' => false }
+      annual_csv, timeseries_csv = _test_measure(args_hash, eri_design)
       assert(File.exist?(annual_csv))
-      assert(File.exist?(timeseries_csv))
-      assert(File.exist?(eri_csv))
-      expected_eri_rows = ERIRows
-      actual_eri_rows = File.readlines(eri_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-      assert_equal(expected_eri_rows.sort, actual_eri_rows.sort)
+      assert(!File.exist?(timeseries_csv))
+      expected_annual_rows = AnnualRows
+      actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+      assert(actual_annual_rows.include? 'ERI: Building: CFA')
 
       # Cleanup
       File.delete(new_hpxml_path)
       File.delete(annual_csv)
-      File.delete(timeseries_csv)
-      File.delete(eri_csv)
     end
   end
 
@@ -1202,13 +1199,11 @@ class ReportSimulationOutputTest < MiniTest::Test
       hpxml_name = File.basename(args_hash['hpxml_path']).gsub('.xml', '')
       annual_csv = File.join(output_dir, "#{hpxml_name}.csv")
       timeseries_csv = File.join(output_dir, "#{hpxml_name}_Hourly.csv")
-      eri_csv = File.join(output_dir, "#{hpxml_name}_ERI.csv")
     else
       annual_csv = File.join(File.dirname(template_osw), 'run', 'results_annual.csv')
       timeseries_csv = File.join(File.dirname(template_osw), 'run', 'results_timeseries.csv')
-      eri_csv = nil
     end
-    return annual_csv, timeseries_csv, eri_csv
+    return annual_csv, timeseries_csv
   end
 
   def _parse_time(ts)
