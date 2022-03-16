@@ -240,9 +240,54 @@ class ReportSimulationOutputTest < MiniTest::Test
     'Weather: Direct Solar Radiation',
   ]
 
-  BaseHPXMLTimeseriesColsOutputVariables = [
+  BaseHPXMLTimeseriesColsStandardOutputVariables = [
     'Zone People Occupant Count: LIVING SPACE',
     'Zone People Total Heating Energy: LIVING SPACE'
+  ]
+
+  BaseHPXMLTimeseriesColsAdvancedOutputVariables = [
+    'Surface Construction Index: DOOR1',
+    'Surface Construction Index: FOUNDATIONWALL1',
+    'Surface Construction Index: FRAMEFLOOR1',
+    'Surface Construction Index: FURNITURE MASS LIVING SPACE 1 ABOVE GRADE',
+    'Surface Construction Index: FURNITURE MASS LIVING SPACE 1 BELOW GRADE',
+    'Surface Construction Index: INFERRED CONDITIONED CEILING',
+    'Surface Construction Index: INFERRED CONDITIONED FLOOR',
+    'Surface Construction Index: PARTITION WALL MASS ABOVE GRADE',
+    'Surface Construction Index: PARTITION WALL MASS BELOW GRADE',
+    'Surface Construction Index: RIMJOIST1:0',
+    'Surface Construction Index: RIMJOIST1:90',
+    'Surface Construction Index: RIMJOIST1:180',
+    'Surface Construction Index: RIMJOIST1:270',
+    'Surface Construction Index: ROOF1:0',
+    'Surface Construction Index: ROOF1:90',
+    'Surface Construction Index: ROOF1:180',
+    'Surface Construction Index: ROOF1:270',
+    'Surface Construction Index: SLAB1',
+    'Surface Construction Index: SURFACE 1',
+    'Surface Construction Index: SURFACE 1 REVERSED',
+    'Surface Construction Index: SURFACE 2',
+    'Surface Construction Index: SURFACE 3',
+    'Surface Construction Index: SURFACE 4',
+    'Surface Construction Index: SURFACE 5',
+    'Surface Construction Index: SURFACE 6',
+    'Surface Construction Index: SURFACE DOOR1',
+    'Surface Construction Index: SURFACE WINDOW1',
+    'Surface Construction Index: SURFACE WINDOW2',
+    'Surface Construction Index: SURFACE WINDOW3',
+    'Surface Construction Index: SURFACE WINDOW4',
+    'Surface Construction Index: WALL1:0',
+    'Surface Construction Index: WALL1:90',
+    'Surface Construction Index: WALL1:180',
+    'Surface Construction Index: WALL1:270',
+    'Surface Construction Index: WALL2:0',
+    'Surface Construction Index: WALL2:90',
+    'Surface Construction Index: WALL2:180',
+    'Surface Construction Index: WALL2:270',
+    'Surface Construction Index: WINDOW1',
+    'Surface Construction Index: WINDOW2',
+    'Surface Construction Index: WINDOW3',
+    'Surface Construction Index: WINDOW4'
   ]
 
   ERIRows = [
@@ -1127,7 +1172,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[2]))
   end
 
-  def test_timeseries_user_defined_output_variables
+  def test_timeseries_user_defined_standard_output_variables
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -1143,14 +1188,41 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsOutputVariables
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsStandardOutputVariables
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsOutputVariables)
+    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsStandardOutputVariables)
+  end
+
+  def test_timeseries_user_defined_advanced_output_variables
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_emissions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => false,
+                  'include_timeseries_weather' => false,
+                  'user_output_variables' => 'Surface Construction Index' }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAdvancedOutputVariables
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAdvancedOutputVariables)
   end
 
   def test_eri_designs
