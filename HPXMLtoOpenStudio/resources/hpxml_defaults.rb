@@ -1209,11 +1209,11 @@ class HPXMLDefaults
       hp_ap = heat_pump.additional_properties
       if [HPXML::HVACTypeHeatPumpAirToAir,
           HPXML::HVACTypeHeatPumpPTHP,
-          HPXML::HVACTypeHeatPumpRACwithReverseCycle].include? heat_pump.heat_pump_type
+          HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
           use_eer = true
           use_cop = true
-        elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpRACwithReverseCycle
+        elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpRoom
           use_eer = true
           if not heat_pump.heating_efficiency_cop.nil?
             use_cop = true

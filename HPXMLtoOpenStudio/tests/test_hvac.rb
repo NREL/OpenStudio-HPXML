@@ -209,10 +209,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
-  def test_room_ac_with_reverse_cycle
+  def test_room_heat_pump
     # Not completed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-with-reverse-cycle-hspf.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-heat-pump-hspf.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values

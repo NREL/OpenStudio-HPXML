@@ -1069,7 +1069,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpPTHP
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpRACwithReverseCycle
+    heat_pump_type_choices << HPXML::HVACTypeHeatPumpRoom
 
     heat_pump_heating_efficiency_type_choices = OpenStudio::StringVector.new
     heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF

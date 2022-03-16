@@ -334,8 +334,8 @@ class Constants
     return 'packaged terminal heat pump'
   end
 
-  def self.ObjectNameRACwithReverseCycle
-    return 'room ac with reverse cycle'
+  def self.ObjectNameRoomHP
+    return 'room heat pump'
   end
 
   def self.ObjectNamePTAC
