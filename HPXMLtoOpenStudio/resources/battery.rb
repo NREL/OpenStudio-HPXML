@@ -82,7 +82,7 @@ class Battery
              rated_power_output: 5000.0,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,
-             usable_fraction: 0.9 }
+             usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
   end
 
   def self.get_Ah_from_kWh(nominal_capacity_kwh, nominal_voltage)
