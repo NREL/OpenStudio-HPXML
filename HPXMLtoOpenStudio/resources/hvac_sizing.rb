@@ -500,8 +500,15 @@ class HVACSizing
       window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
       window_true_azimuth = get_true_azimuth(window.azimuth)
       cnt225 = (window_true_azimuth / 22.5).round.to_i
+      
+      if not window.storm_window_type.nil?
+        window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_window_type, window.ufactor, window.shgc)
+      else
+        window_ufactor = window.ufactor
+        window_shgc = window.shgc
+      end
 
-      bldg_design_loads.Heat_Windows += window.ufactor * window.area * @htd
+      bldg_design_loads.Heat_Windows += window_ufactor * window.area * @htd
 
       for hr in -1..12
 
@@ -535,10 +542,10 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given window Direction
-        htm_d = psf_lat[cnt225] * clf_d * window.shgc * window_summer_sf / 0.87 + window.ufactor * ctd_adj
+        htm_d = psf_lat[cnt225] * clf_d * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
 
         # Hourly Heat Transfer Multiplier for a window facing North (fully shaded)
-        htm_n = psf_lat[8] * clf_n * window.shgc * window_summer_sf / 0.87 + window.ufactor * ctd_adj
+        htm_n = psf_lat[8] * clf_n * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
 
         if window_true_azimuth < 180
           surf_azimuth = window_true_azimuth
@@ -632,7 +639,14 @@ class HVACSizing
       cnt225 = (skylight_true_azimuth / 22.5).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
 
-      bldg_design_loads.Heat_Skylights += skylight.ufactor * skylight.area * @htd
+      if not skylight.storm_window_type.nil?
+        skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_window_type, skylight.ufactor, skylight.shgc)
+      else
+        skylight_ufactor = skylight.ufactor
+        skylight_shgc = skylight.shgc
+      end
+
+      bldg_design_loads.Heat_Skylights += skylight_ufactor * skylight.area * @htd
 
       for hr in -1..12
 
@@ -671,8 +685,8 @@ class HVACSizing
         # Hourly Heat Transfer Multiplier for the given skylight Direction
         u_curb = 0.51 # default to wood (Table 2B-3)
         ar_curb = 0.35 # default to small (Table 2B-3)
-        u_eff_skylight = skylight.ufactor + u_curb * ar_curb
-        htm = (sol_h + sol_v) * (skylight.shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        u_eff_skylight = skylight_ufactor + u_curb * ar_curb
+        htm = (sol_h + sol_v) * (skylight_shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
 
         if hr == -1
           alp_load += htm * skylight.area
