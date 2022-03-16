@@ -12,7 +12,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv</SchedulesFilePath>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-offsets.csv</SchedulesFilePath>
     </extension>
   </SoftwareInfo>
   <Building>
