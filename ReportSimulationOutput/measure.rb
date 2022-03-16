@@ -119,7 +119,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('user_output_variables', false)
     arg.setDisplayName('Generate Timeseries Output: User-Defined Output Variables')
-    arg.setDescription('Optionally generates timeseries output variables. If multiple output variables, use a comma-separated list.')
+    arg.setDescription('Optionally generates timeseries output variables. If multiple output variables, use a comma-separated list. Do not include key values; by default all key values will be requested.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
