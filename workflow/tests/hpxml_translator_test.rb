@@ -1022,9 +1022,9 @@ class HPXMLTest < MiniTest::Test
       if subsurface.is_a? HPXML::Skylight
         hpxml_value /= 1.2 # Convert from NFRC 20-degree slope to vertical position
       end
-      if (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Window)
+      if (not subsurface.window_storm_type.nil?) && (subsurface.is_a? HPXML::Window)
         hpxml_value, shgc_adj = Constructions.get_ufactor_shgc_adjusted_by_storms(HPXML::WindowGlassTypeLowE, subsurface.ufactor, subsurface.shgc)
-      elsif (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Skylight)
+      elsif (not subsurface.skylight_storm_type.nil?) && (subsurface.is_a? HPXML::Skylight)
         hpxml_value, shgc_adj = Constructions.get_ufactor_shgc_adjusted_by_storms(HPXML::WindowGlassTypeClear, subsurface.ufactor, subsurface.shgc)
         hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
       end
@@ -1037,9 +1037,9 @@ class HPXMLTest < MiniTest::Test
 
       # SHGC
       hpxml_value = subsurface.shgc
-      if (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Window)
+      if (not subsurface.window_storm_type.nil?) && (subsurface.is_a? HPXML::Window)
         ufactor_adj, hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(HPXML::WindowGlassTypeLowE, subsurface.ufactor, subsurface.shgc)
-      elsif (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Skylight)
+      elsif (not subsurface.skylight_storm_type.nil?) && (subsurface.is_a? HPXML::Skylight)
         ufactor_adj, hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(HPXML::WindowGlassTypeClear, subsurface.ufactor, subsurface.shgc)
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"

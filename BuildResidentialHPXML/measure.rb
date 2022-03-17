@@ -4113,6 +4113,10 @@ class HPXMLFile
         fraction_operable = args[:window_fraction_operable].get
       end
 
+      if args[:window_storm_type].is_initialized
+        window_storm_type = args[:window_storm_type].get
+      end
+
       wall_idref = @surface_ids[surface.name.to_s]
       next if wall_idref.nil?
 
@@ -4121,6 +4125,7 @@ class HPXMLFile
                         azimuth: azimuth,
                         ufactor: args[:window_ufactor],
                         shgc: args[:window_shgc],
+                        window_storm_type: window_storm_type,
                         overhangs_depth: overhangs_depth,
                         overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
                         overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
@@ -4142,6 +4147,10 @@ class HPXMLFile
       sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
       azimuth = Geometry.get_azimuth_from_facade(facade: sub_surface_facade, orientation: args[:geometry_unit_orientation])
 
+      if args[:skylight_storm_type].is_initialized
+        skylight_storm_type = args[:skylight_storm_type].get
+      end
+
       roof_idref = @surface_ids[surface.name.to_s]
       next if roof_idref.nil?
 
@@ -4150,6 +4159,7 @@ class HPXMLFile
                           azimuth: azimuth,
                           ufactor: args[:skylight_ufactor],
                           shgc: args[:skylight_shgc],
+                          skylight_storm_type: skylight_storm_type,
                           roof_idref: roof_idref)
     end
   end

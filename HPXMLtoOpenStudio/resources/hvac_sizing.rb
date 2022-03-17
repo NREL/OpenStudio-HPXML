@@ -500,9 +500,9 @@ class HVACSizing
       window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
       window_true_azimuth = get_true_azimuth(window.azimuth)
       cnt225 = (window_true_azimuth / 22.5).round.to_i
-      
-      if not window.storm_window_type.nil?
-        window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_window_type, window.ufactor, window.shgc)
+
+      if not window.window_storm_type.nil?
+        window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.window_storm_type, window.ufactor, window.shgc)
       else
         window_ufactor = window.ufactor
         window_shgc = window.shgc
@@ -639,8 +639,8 @@ class HVACSizing
       cnt225 = (skylight_true_azimuth / 22.5).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
 
-      if not skylight.storm_window_type.nil?
-        skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_window_type, skylight.ufactor, skylight.shgc)
+      if not skylight.skylight_storm_type.nil?
+        skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.skylight_storm_type, skylight.ufactor, skylight.shgc)
       else
         skylight_ufactor = skylight.ufactor
         skylight_shgc = skylight.shgc
