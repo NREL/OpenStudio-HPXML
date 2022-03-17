@@ -252,6 +252,10 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <StormWindow>
+              <SystemIdentifier id='Window1StormWindow'/>
+              <GlassType>low-e</GlassType>
+            </StormWindow>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -266,6 +270,10 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <StormWindow>
+              <SystemIdentifier id='Window2StormWindow'/>
+              <GlassType>low-e</GlassType>
+            </StormWindow>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -280,6 +288,10 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <StormWindow>
+              <SystemIdentifier id='Window3StormWindow'/>
+              <GlassType>low-e</GlassType>
+            </StormWindow>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -294,6 +306,10 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <StormWindow>
+              <SystemIdentifier id='Window4StormWindow'/>
+              <GlassType>low-e</GlassType>
+            </StormWindow>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
