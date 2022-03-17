@@ -2429,7 +2429,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
     sch_args['setpoint_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth-10-mins.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end

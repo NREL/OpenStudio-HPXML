@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>10</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/smooth-10-mins.csv</SchedulesFilePath>
       <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv</SchedulesFilePath>
     </extension>
   </SoftwareInfo>
