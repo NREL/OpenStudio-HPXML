@@ -79,7 +79,6 @@ class Battery
   def self.get_battery_default_values()
     return { location: HPXML::LocationOutside,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
-             rated_power_output: 5000.0,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,
              usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity

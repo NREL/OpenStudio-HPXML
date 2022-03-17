@@ -2322,8 +2322,8 @@ If not entered, the simulation will not include batteries.
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] BatteryType only choice is "Li-ion".
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.9 if UsableCapacity provided, else (RatedPowerOutput / 1000) / 0.5 if RatedPowerOutput provided, else 10 kWh.
-  .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity if NominalCapacity provided, else 0.9 * (RatedPowerOutput / 1000) / 0.5 if RatedPowerOutput provided, else 9 kWh.
-  .. [#] If RatedPowerOutput not provided, defaults to NominalCapacity * 1000 * 0.5 if NominalCapacity provided, else UsableCapacity / 0.9 * 1000 * 0.5 if UsableCapacity provided, else 5000 W.
+  .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
+  .. [#] If RatedPowerOutput not provided, defaults to 0.5 * NominalCapacity * 1000.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
   .. [#] If "None", the battery doesn't degrade over time. If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
 

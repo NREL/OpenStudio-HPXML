@@ -92,6 +92,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO', -7)
 
+    # Test defaults - calendar year override by AMY year
+    hpxml.header.sim_calendar_year = 2020
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO', -7)
+
     # Test defaults - invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
     hpxml.header.timestep = nil
@@ -370,6 +376,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_attic_values(hpxml_default.attics[0], 1.0 / 300.0)
+
+    # Test defaults w/o Attic element
+    hpxml.attics[0].delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_attic_values(hpxml_default.attics[0], 1.0 / 300.0)
   end
 
   def test_foundations
@@ -382,6 +394,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     hpxml.foundations[0].vented_crawlspace_sla = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_foundation_values(hpxml_default.foundations[0], 1.0 / 150.0)
+
+    # Test defaults w/o Foundation element
+    hpxml.foundations[0].delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_foundation_values(hpxml_default.foundations[0], 1.0 / 150.0)
@@ -676,7 +694,47 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_windows_properties
-    # [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
+    # Test defaults w/ single pane, aluminum frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeAluminum
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersSinglePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(false, hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.windows[0].glass_type)
+    assert_nil(hpxml_default.windows[0].gas_fill)
+
+    # Test defaults w/ double pane, metal frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersDoublePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(true, hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.windows[0].glass_type)
+    assert_equal(HPXML::WindowGasAir, hpxml_default.windows[0].gas_fill)
+
+    # Test defaults w/ single pane, wood frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersTriplePane
+    hpxml.windows[0].glass_type = HPXML::WindowGlassTypeLowE
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_nil(hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeLowE, hpxml_default.windows[0].glass_type)
+    assert_equal(HPXML::WindowGasArgon, hpxml_default.windows[0].gas_fill)
+
+    # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.27, 0.64],
@@ -747,7 +805,47 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_skylights_properties
-    # [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
+    # Test defaults w/ single pane, aluminum frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeAluminum
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersSinglePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(false, hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.skylights[0].glass_type)
+    assert_nil(hpxml_default.skylights[0].gas_fill)
+
+    # Test defaults w/ double pane, metal frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersDoublePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(true, hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.skylights[0].glass_type)
+    assert_equal(HPXML::WindowGasAir, hpxml_default.skylights[0].gas_fill)
+
+    # Test defaults w/ single pane, wood frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersTriplePane
+    hpxml.skylights[0].glass_type = HPXML::WindowGlassTypeLowE
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_nil(hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeLowE, hpxml_default.skylights[0].glass_type)
+    assert_equal(HPXML::WindowGasArgon, hpxml_default.skylights[0].gas_fill)
+
+    # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.98, 0.64],
@@ -1112,6 +1210,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, 0.81)
+
+    # Test defaults w/ wood pellets
+    hpxml.heating_systems[0].year_installed = nil
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodPellets
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, 0.78)
   end
 
   def test_portable_heaters
@@ -2513,7 +2618,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.lighting.garage_monthly_multipliers = ConstantMonthSchedule
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 0.7
-    hpxml.lighting.holiday_period_begin_month = 11
+    hpxml.lighting.holiday_period_begin_month = 10
     hpxml.lighting.holiday_period_begin_day = 19
     hpxml.lighting.holiday_period_end_month = 12
     hpxml.lighting.holiday_period_end_day = 31
@@ -2532,7 +2637,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     grg_wknd_sch: ConstantDaySchedule,
                                     grg_month_mult: ConstantMonthSchedule,
                                     hol_kwh_per_day: 0.7,
-                                    hol_begin_month: 11,
+                                    hol_begin_month: 10,
                                     hol_begin_day: 19,
                                     hol_end_month: 12,
                                     hol_end_day: 31,
@@ -2560,6 +2665,28 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
                                     ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
 
+    # Test defaults w/ holiday lighting
+    hpxml.lighting.holiday_exists = true
+    hpxml.lighting.holiday_kwh_per_day = nil
+    hpxml.lighting.holiday_period_begin_month = nil
+    hpxml.lighting.holiday_period_begin_day = nil
+    hpxml.lighting.holiday_period_end_month = nil
+    hpxml.lighting.holiday_period_end_day = nil
+    hpxml.lighting.holiday_weekday_fractions = nil
+    hpxml.lighting.holiday_weekend_fractions = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
+                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                    ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
+                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers,
+                                    hol_kwh_per_day: 1.1,
+                                    hol_begin_month: 11,
+                                    hol_begin_day: 24,
+                                    hol_end_month: 1,
+                                    hol_end_day: 6,
+                                    hol_wk_sch: Schedule.LightingExteriorHolidayWeekdayFractions,
+                                    hol_wknd_sch: Schedule.LightingExteriorHolidayWeekendFractions })
     # Test defaults w/ garage
     hpxml = _create_hpxml('base-enclosure-garage.xml')
     hpxml.lighting.interior_usage_multiplier = nil
