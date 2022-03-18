@@ -343,7 +343,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
           </HVACControl>
           <HVACDistribution>
@@ -379,10 +378,8 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>10.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

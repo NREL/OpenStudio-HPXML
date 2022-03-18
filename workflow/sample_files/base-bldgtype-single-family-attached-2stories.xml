@@ -156,7 +156,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1371.6999999999998</Area>
+            <Area>1371.7</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -403,7 +403,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -440,10 +439,8 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>37.5</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>3</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

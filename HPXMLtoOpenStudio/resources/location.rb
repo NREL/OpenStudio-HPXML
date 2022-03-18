@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Location
-  def self.apply(model, runner, weather, epw_file, hpxml)
-    apply_year(model, hpxml)
+  def self.apply(model, weather, epw_file, hpxml)
+    apply_year(model, hpxml, epw_file)
     apply_site(model, epw_file)
     apply_dst(model, hpxml)
     apply_ground_temps(model, weather)
@@ -40,7 +40,12 @@ class Location
     site.setElevation(epw_file.elevation)
   end
 
-  def self.apply_year(model, hpxml)
+  def self.apply_year(model, hpxml, epw_file)
+    n_hours = epw_file.data.size
+    if n_hours != 8784 && Date.leap?(hpxml.header.sim_calendar_year)
+      fail "Specified a leap year (#{hpxml.header.sim_calendar_year}) but weather data has #{n_hours} hours."
+    end
+
     year_description = model.getYearDescription
     year_description.setCalendarYear(hpxml.header.sim_calendar_year)
   end
@@ -70,9 +75,9 @@ class Location
   end
 
   def self.get_climate_zones
-    zones_csv = File.join(File.dirname(__FILE__), 'data_climate_zones.csv')
+    zones_csv = File.join(File.dirname(__FILE__), 'data', 'climate_zones.csv')
     if not File.exist?(zones_csv)
-      fail 'Could not find data_climate_zones.csv'
+      fail 'Could not find climate_zones.csv'
     end
 
     return zones_csv

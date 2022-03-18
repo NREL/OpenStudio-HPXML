@@ -11,6 +11,57 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <EmissionsScenarios>
+        <EmissionsScenario>
+          <Name>Cambium Hourly MidCase LRMER RMPA</Name>
+          <EmissionsType>CO2e</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv</ScheduleFilePath>
+            <NumberofHeaderRows>1</NumberofHeaderRows>
+            <ColumnNumber>17</ColumnNumber>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>Cambium Hourly LowRECosts LRMER RMPA</Name>
+          <EmissionsType>CO2e</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv</ScheduleFilePath>
+            <NumberofHeaderRows>1</NumberofHeaderRows>
+            <ColumnNumber>17</ColumnNumber>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>Cambium Annual MidCase AER National</Name>
+          <EmissionsType>CO2e</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <Value>392.6</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>eGRID RMPA</Name>
+          <EmissionsType>SO2</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>lb/MWh</Units>
+            <Value>0.384</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>eGRID RMPA</Name>
+          <EmissionsType>NOx</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>lb/MWh</Units>
+            <Value>0.67</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+      </EmissionsScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -20,6 +71,9 @@
       <Address>
         <StateCode>CO</StateCode>
       </Address>
+      <eGridRegion>Western</eGridRegion>
+      <eGridSubregion>RMPA</eGridSubregion>
+      <CambiumRegionGEA>RMPAc</CambiumRegionGEA>
     </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
@@ -346,13 +400,8 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>programmable thermostat</ControlType>
-            <extension>
-              <WeekdaySetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekdaySetpointTempsHeatingSeason>
-              <WeekendSetpointTempsHeatingSeason>68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70</WeekendSetpointTempsHeatingSeason>
-              <WeekdaySetpointTempsCoolingSeason>80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80</WeekdaySetpointTempsCoolingSeason>
-              <WeekendSetpointTempsCoolingSeason>78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78</WeekendSetpointTempsCoolingSeason>
-            </extension>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -387,10 +436,8 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -427,6 +474,42 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <Photovoltaics>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem1'/>
+            <Location>roof</Location>
+            <ModuleType>standard</ModuleType>
+            <Tracking>fixed</Tracking>
+            <ArrayAzimuth>180</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <MaxPowerOutput>4000.0</MaxPowerOutput>
+            <InverterEfficiency>0.96</InverterEfficiency>
+            <SystemLossesFraction>0.14</SystemLossesFraction>
+          </PVSystem>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem2'/>
+            <Location>roof</Location>
+            <ModuleType>premium</ModuleType>
+            <Tracking>fixed</Tracking>
+            <ArrayAzimuth>90</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <MaxPowerOutput>1500.0</MaxPowerOutput>
+            <InverterEfficiency>0.96</InverterEfficiency>
+            <SystemLossesFraction>0.14</SystemLossesFraction>
+          </PVSystem>
+        </Photovoltaics>
+        <Batteries>
+          <Battery>
+            <SystemIdentifier id='Battery1'/>
+            <Location>outside</Location>
+            <BatteryType>Li-ion</BatteryType>
+            <NominalCapacity>
+              <Units>kWh</Units>
+              <Value>20.0</Value>
+            </NominalCapacity>
+            <RatedPowerOutput>15000.0</RatedPowerOutput>
+          </Battery>
+        </Batteries>
       </Systems>
       <Appliances>
         <ClothesWasher>

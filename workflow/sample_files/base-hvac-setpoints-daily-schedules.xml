@@ -346,9 +346,12 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
-            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
-            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
+            <extension>
+              <WeekdaySetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekdaySetpointTempsHeatingSeason>
+              <WeekendSetpointTempsHeatingSeason>68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70</WeekendSetpointTempsHeatingSeason>
+              <WeekdaySetpointTempsCoolingSeason>80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80</WeekdaySetpointTempsCoolingSeason>
+              <WeekendSetpointTempsCoolingSeason>78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78</WeekendSetpointTempsCoolingSeason>
+            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -383,10 +386,8 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -423,42 +424,6 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id='PVSystem1'/>
-            <Location>roof</Location>
-            <ModuleType>standard</ModuleType>
-            <Tracking>fixed</Tracking>
-            <ArrayAzimuth>180</ArrayAzimuth>
-            <ArrayTilt>20.0</ArrayTilt>
-            <MaxPowerOutput>4000.0</MaxPowerOutput>
-            <InverterEfficiency>0.96</InverterEfficiency>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
-          </PVSystem>
-          <PVSystem>
-            <SystemIdentifier id='PVSystem2'/>
-            <Location>roof</Location>
-            <ModuleType>premium</ModuleType>
-            <Tracking>fixed</Tracking>
-            <ArrayAzimuth>90</ArrayAzimuth>
-            <ArrayTilt>20.0</ArrayTilt>
-            <MaxPowerOutput>1500.0</MaxPowerOutput>
-            <InverterEfficiency>0.96</InverterEfficiency>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
-          </PVSystem>
-        </Photovoltaics>
-        <Batteries>
-          <Battery>
-            <SystemIdentifier id='Battery1'/>
-            <Location>outside</Location>
-            <BatteryType>Li-ion</BatteryType>
-            <NominalCapacity>
-              <Units>kWh</Units>
-              <Value>20.0</Value>
-            </NominalCapacity>
-            <RatedPowerOutput>15000.0</RatedPowerOutput>
-          </Battery>
-        </Batteries>
       </Systems>
       <Appliances>
         <ClothesWasher>

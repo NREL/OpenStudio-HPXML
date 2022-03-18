@@ -54,12 +54,12 @@ class HPXML < Object
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
                  :cooling_systems, :heat_pumps, :hvac_plant, :hvac_controls, :hvac_distributions,
-                 :ventilation_fans, :water_heating_systems,
-                 :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
-                 :pv_systems, :generators, :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                 :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
+                 :water_heating, :solar_thermal_systems, :pv_systems, :generators, :batteries,
+                 :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
-  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
+  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
@@ -532,7 +532,11 @@ class HPXML < Object
     area = 0.0
 
     (@walls + @rim_joists).each do |wall|
+      next unless HPXML::conditioned_locations_this_unit.include? wall.interior_adjacent_to
+
       if wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+        area += wall.area
+      elsif wall.exterior_adjacent_to == wall.interior_adjacent_to
         area += wall.area
       end
     end
@@ -854,14 +858,20 @@ class HPXML < Object
   end
 
   class Header < BaseElement
+    def initialize(hpxml_object, *args)
+      @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code, :zip_code,
+             :egrid_region, :egrid_subregion, :cambium_region_gea, :time_zone_utc_offset,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths]
     attr_accessor(*ATTRS)
+    attr_reader(:emissions_scenarios)
 
     def check_for_errors
       errors = []
@@ -889,11 +899,7 @@ class HPXML < Object
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
 
-      if not @schedules_filepath.nil?
-        unless File.exist? @schedules_filepath
-          errors << "Schedules file path '#{@schedules_filepath}' does not exist."
-        end
-      end
+      errors += @emissions_scenarios.check_for_errors
 
       return errors
     end
@@ -954,21 +960,39 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      if not @schedules_filepath.nil?
+      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        XMLHelper.add_element(extension, 'SchedulesFilePath', @schedules_filepath, :string) unless @schedules_filepath.nil?
+        @schedules_filepaths.each do |schedules_filepath|
+          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+        end
       end
+      @emissions_scenarios.to_oga(software_info)
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
-      if not @state_code.nil?
+      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?)
         site = XMLHelper.add_element(building, 'Site')
         site_id = XMLHelper.add_element(site, 'SiteID')
         XMLHelper.add_attribute(site_id, 'id', 'SiteID')
-        address = XMLHelper.add_element(site, 'Address')
-        XMLHelper.add_element(address, 'StateCode', @state_code, :string)
-        XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
+        if (not @state_code.nil?) || (not @zip_code.nil?)
+          address = XMLHelper.add_element(site, 'Address')
+          XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
+          XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
+        end
+        if not @egrid_region.nil?
+          XMLHelper.add_element(site, 'eGridRegion', @egrid_region, :string, @egrid_region_isdefaulted)
+        end
+        if not @egrid_subregion.nil?
+          XMLHelper.add_element(site, 'eGridSubregion', @egrid_subregion, :string, @egrid_subregion_isdefaulted)
+        end
+        if not @cambium_region_gea.nil?
+          XMLHelper.add_element(site, 'CambiumRegionGEA', @cambium_region_gea, :string, @cambium_region_gea_isdefaulted)
+        end
+        if not @time_zone_utc_offset.nil?
+          time_zone = XMLHelper.add_element(site, 'TimeZone')
+          XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted)
+        end
       end
       project_status = XMLHelper.add_element(building, 'ProjectStatus')
       XMLHelper.add_element(project_status, 'EventType', @event_type, :string)
@@ -1000,11 +1024,114 @@ class HPXML < Object
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
-      @schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @schedules_filepaths = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @emissions_scenarios.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
       @zip_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/ZipCode', :string)
+      @egrid_region = XMLHelper.get_value(hpxml, 'Building/Site/eGridRegion', :string)
+      @egrid_subregion = XMLHelper.get_value(hpxml, 'Building/Site/eGridSubregion', :string)
+      @cambium_region_gea = XMLHelper.get_value(hpxml, 'Building/Site/CambiumRegionGEA', :string)
+      @time_zone_utc_offset = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/UTCOffset', :float)
+    end
+  end
+
+  class EmissionsScenarios < BaseArrayElement
+    def add(**kwargs)
+      self << EmissionsScenario.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(software_info)
+      return if software_info.nil?
+
+      XMLHelper.get_elements(software_info, 'extension/EmissionsScenarios/EmissionsScenario').each do |emissions_scenario|
+        self << EmissionsScenario.new(@hpxml_object, emissions_scenario)
+      end
+    end
+  end
+
+  class EmissionsScenario < BaseElement
+    UnitsKgPerMWh = 'kg/MWh'
+    UnitsKgPerMBtu = 'kg/MBtu'
+    UnitsLbPerMWh = 'lb/MWh'
+    UnitsLbPerMBtu = 'lb/MBtu'
+
+    ATTRS = [:name, :emissions_type, :elec_units, :elec_value, :elec_schedule_filepath,
+             :elec_schedule_number_of_header_rows, :elec_schedule_column_number,
+             :natural_gas_units, :natural_gas_value, :propane_units, :propane_value,
+             :fuel_oil_units, :fuel_oil_value, :coal_units, :coal_value,
+             :wood_units, :wood_value, :wood_pellets_units, :wood_pellets_value]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.emissions_scenarios.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(software_info)
+      emissions_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'EmissionsScenarios'])
+      emissions_scenario = XMLHelper.add_element(emissions_scenarios, 'EmissionsScenario')
+      XMLHelper.add_element(emissions_scenario, 'Name', @name, :string) unless @name.nil?
+      XMLHelper.add_element(emissions_scenario, 'EmissionsType', @emissions_type, :string) unless @emissions_type.nil?
+      if not @elec_schedule_filepath.nil?
+        emissions_factor = XMLHelper.add_element(emissions_scenario, 'EmissionsFactor')
+        XMLHelper.add_element(emissions_factor, 'FuelType', HPXML::FuelTypeElectricity, :string)
+        XMLHelper.add_element(emissions_factor, 'Units', @elec_units, :string)
+        XMLHelper.add_element(emissions_factor, 'ScheduleFilePath', @elec_schedule_filepath, :string)
+        XMLHelper.add_element(emissions_factor, 'NumberofHeaderRows', @elec_schedule_number_of_header_rows, :integer, @elec_schedule_number_of_header_rows_isdefaulted) unless @elec_schedule_number_of_header_rows.nil?
+        XMLHelper.add_element(emissions_factor, 'ColumnNumber', @elec_schedule_column_number, :integer, @elec_schedule_column_number_isdefaulted) unless @elec_schedule_column_number.nil?
+      end
+      { HPXML::FuelTypeElectricity => [@elec_units, @elec_units_isdefaulted,
+                                       @elec_value, @elec_value_isdefaulted],
+        HPXML::FuelTypeNaturalGas => [@natural_gas_units, @natural_gas_units_isdefaulted,
+                                      @natural_gas_value, @natural_gas_value_isdefaulted],
+        HPXML::FuelTypePropane => [@propane_units, @propane_units_isdefaulted,
+                                   @propane_value, @propane_value_isdefaulted],
+        HPXML::FuelTypeOil => [@fuel_oil_units, @fuel_oil_units_isdefaulted,
+                               @fuel_oil_value, @fuel_oil_value_isdefaulted],
+        HPXML::FuelTypeCoal => [@coal_units, @coal_units_isdefaulted,
+                                @coal_value, @coal_value_isdefaulted],
+        HPXML::FuelTypeWoodCord => [@wood_units, @wood_units_isdefaulted,
+                                    @wood_value, @wood_value_isdefaulted],
+        HPXML::FuelTypeWoodPellets => [@wood_pellets_units, @wood_pellets_units_isdefaulted,
+                                       @wood_pellets_value, @wood_pellets_value_isdefaulted] }.each do |fuel, vals|
+        units, units_isdefaulted, value, value_isdefaulted = vals
+        next if value.nil?
+
+        emissions_factor = XMLHelper.add_element(emissions_scenario, 'EmissionsFactor')
+        XMLHelper.add_element(emissions_factor, 'FuelType', fuel, :string)
+        XMLHelper.add_element(emissions_factor, 'Units', units, :string, units_isdefaulted)
+        XMLHelper.add_element(emissions_factor, 'Value', value, :float, value_isdefaulted)
+      end
+    end
+
+    def from_oga(emissions_scenario)
+      return if emissions_scenario.nil?
+
+      @name = XMLHelper.get_value(emissions_scenario, 'Name', :string)
+      @emissions_type = XMLHelper.get_value(emissions_scenario, 'EmissionsType', :string)
+      @elec_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Units", :string)
+      @elec_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Value", :float)
+      @elec_schedule_filepath = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/ScheduleFilePath", :string)
+      @elec_schedule_number_of_header_rows = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/NumberofHeaderRows", :integer)
+      @elec_schedule_column_number = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/ColumnNumber", :integer)
+      @natural_gas_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Units", :string)
+      @natural_gas_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Value", :float)
+      @propane_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypePropane}']/Units", :string)
+      @propane_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypePropane}']/Value", :float)
+      @fuel_oil_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeOil}']/Units", :string)
+      @fuel_oil_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeOil}']/Value", :float)
+      @coal_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeCoal}']/Units", :string)
+      @coal_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeCoal}']/Value", :float)
+      @wood_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/Units", :string)
+      @wood_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/Value", :float)
+      @wood_pellets_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Units", :string)
+      @wood_pellets_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Value", :float)
     end
   end
 
@@ -1196,8 +1323,8 @@ class HPXML < Object
 
       if (not @iecc_year.nil?) && (not @iecc_zone.nil?)
         climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
-        XMLHelper.add_element(climate_zone_iecc, 'Year', @iecc_year, :integer) unless @iecc_year.nil?
-        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @iecc_zone, :string) unless @iecc_zone.nil?
+        XMLHelper.add_element(climate_zone_iecc, 'Year', @iecc_year, :integer, @iecc_year_isdefaulted) unless @iecc_year.nil?
+        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @iecc_zone, :string, @iecc_zone_isdefaulted) unless @iecc_zone.nil?
       end
 
       if not @weather_station_id.nil?
@@ -1269,7 +1396,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', @effective_leakage_area, :float) unless @effective_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', @infiltration_volume, :float, @infiltration_volume_isdefaulted) unless @infiltration_volume.nil?
-      XMLHelper.add_extension(air_infiltration_measurement, 'InfiltrationHeight', @infiltration_height, :float) unless @infiltration_height.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationHeight', @infiltration_height, :float, @infiltration_height_isdefaulted) unless @infiltration_height.nil?
       XMLHelper.add_extension(air_infiltration_measurement, 'Aext', @a_ext, :float) unless @a_ext.nil?
     end
 
@@ -1284,7 +1411,7 @@ class HPXML < Object
       @air_leakage = XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/AirLeakage', :float)
       @effective_leakage_area = XMLHelper.get_value(air_infiltration_measurement, 'EffectiveLeakageArea', :float)
       @infiltration_volume = XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationVolume', :float)
-      @infiltration_height = XMLHelper.get_value(air_infiltration_measurement, 'extension/InfiltrationHeight', :float)
+      @infiltration_height = XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationHeight', :float)
       @a_ext = XMLHelper.get_value(air_infiltration_measurement, 'extension/Aext', :float)
     end
   end
@@ -3791,9 +3918,8 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse,
-             :duct_system_sealed, :duct_leakage_to_outside_testing_exemption, :conditioned_floor_area_served,
-             :number_of_return_registers, :air_type, :hydronic_type]
+    ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -3895,7 +4021,6 @@ class HPXML < Object
         @duct_leakage_measurements.to_oga(distribution)
         @ducts.to_oga(distribution)
         XMLHelper.add_element(distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
-        XMLHelper.add_extension(distribution, 'DuctLeakageToOutsideTestingExemption', @duct_leakage_to_outside_testing_exemption, :boolean) unless @duct_leakage_to_outside_testing_exemption.nil?
       end
 
       if not @duct_system_sealed.nil?
@@ -3926,7 +4051,6 @@ class HPXML < Object
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
         @number_of_return_registers = XMLHelper.get_value(air_distribution, 'NumberofReturnRegisters', :integer)
-        @duct_leakage_to_outside_testing_exemption = XMLHelper.get_value(air_distribution, 'extension/DuctLeakageToOutsideTestingExemption', :boolean)
         @duct_leakage_measurements.from_oga(air_distribution)
         @ducts.from_oga(air_distribution)
       end
@@ -6120,31 +6244,6 @@ class HPXML < Object
       end
       if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area + 1.0) # Allow 1 ft2 of tolerance
         errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
-      end
-    end
-
-    # Check for objects referencing SFA/MF spaces where the building type is not SFA/MF
-    if [ResidentialTypeSFD, ResidentialTypeManufactured].include? @building_construction.residential_facility_type
-      mf_spaces = [LocationOtherHeatedSpace, LocationOtherHousingUnit, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace]
-      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
-        if mf_spaces.include? surface.interior_adjacent_to
-          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to Attached/Multifamily space '#{surface.interior_adjacent_to}'."
-        end
-        if mf_spaces.include? surface.exterior_adjacent_to
-          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to Attached/Multifamily space '#{surface.exterior_adjacent_to}'."
-        end
-      end
-      (@water_heating_systems + @clothes_washers + @clothes_dryers + @dishwashers + @refrigerators + @cooking_ranges).each do |object|
-        if mf_spaces.include? object.location
-          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the object '#{object.id}' is located in Attached/Multifamily space '#{object.location}'."
-        end
-      end
-      @hvac_distributions.each do |hvac_distribution|
-        hvac_distribution.ducts.each do |duct|
-          if mf_spaces.include? duct.duct_location
-            errors << "The building is of type '#{@building_construction.residential_facility_type}' but the HVAC distribution '#{hvac_distribution.id}' has a duct located in Attached/Multifamily space '#{duct.duct_location}'."
-          end
-        end
       end
     end
 

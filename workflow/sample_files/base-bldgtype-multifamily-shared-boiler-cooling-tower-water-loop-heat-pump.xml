@@ -136,15 +136,12 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
           <FrameFloor>
@@ -152,12 +149,15 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
         </FrameFloors>
@@ -271,7 +271,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -316,10 +315,8 @@
                   <DuctLocation>other multifamily buffer space</DuctLocation>
                   <DuctSurfaceArea>20.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>1</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
