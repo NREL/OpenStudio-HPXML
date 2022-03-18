@@ -416,12 +416,6 @@
       <checksum>687661F9</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C2D4BDA</checksum>
-    </file>
-    <file>
       <filename>data/cambium/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
@@ -521,6 +515,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>532F2F5B</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9433C7B7</checksum>
     </file>
   </files>
 </measure>
