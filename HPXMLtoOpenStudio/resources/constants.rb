@@ -77,7 +77,7 @@ class Constants
 
   def self.ERIVersions
     return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
-            '2019AB', '2019ABC', '2019ABCD', '2019ABCDE']
+            '2019AB', '2019ABC', '2019ABCD']
   end
 
   def self.FacadeFront
@@ -106,6 +106,20 @@ class Constants
 
   def self.FluidEthyleneGlycol
     return 'ethylene-glycol'
+  end
+
+  def self.FossilFuels
+    return [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane,
+            HPXML::FuelTypeOil,
+            HPXML::FuelTypeCoal,
+            HPXML::FuelTypeWoodCord,
+            HPXML::FuelTypeWoodPellets]
+  end
+
+  def self.IECCZones
+    return ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
+            '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8']
   end
 
   def self.IsDuctLoadForReport
@@ -466,5 +480,13 @@ class Constants
 
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
+  end
+
+  def self.StateCodes
+    return ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
+            'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
+            'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
+            'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
+            'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']
   end
 end

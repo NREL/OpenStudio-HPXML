@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.sim_begin_day = 2
     hpxml.header.sim_end_month = 11
     hpxml.header.sim_end_day = 11
-    hpxml.header.sim_calendar_year = 2008
+    hpxml.header.sim_calendar_year = 2009
     hpxml.header.dst_enabled = false
     hpxml.header.dst_begin_month = 3
     hpxml.header.dst_begin_day = 3
@@ -45,9 +45,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = 10
     hpxml.header.use_max_load_for_heat_pumps = false
     hpxml.header.allow_increased_fixed_capacities = true
+    hpxml.header.state_code = 'CA'
+    hpxml.header.time_zone_utc_offset = -8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, false, true, 'CA', -8)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -63,9 +65,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
+    hpxml.header.time_zone_utc_offset = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, 'CO', -7)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -82,19 +86,44 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
+    hpxml.header.time_zone_utc_offset = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO', -7)
+
+    # Test defaults - invalid state code
+    hpxml = _create_hpxml('base-location-capetown-zaf.xml')
+    hpxml.header.timestep = nil
+    hpxml.header.sim_begin_month = nil
+    hpxml.header.sim_begin_day = nil
+    hpxml.header.sim_end_month = nil
+    hpxml.header.sim_end_day = nil
+    hpxml.header.sim_calendar_year = nil
+    hpxml.header.dst_enabled = nil
+    hpxml.header.dst_begin_month = nil
+    hpxml.header.dst_begin_day = nil
+    hpxml.header.dst_end_month = nil
+    hpxml.header.dst_end_day = nil
+    hpxml.header.use_max_load_for_heat_pumps = nil
+    hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
+    hpxml.header.time_zone_utc_offset = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, nil, 2)
   end
 
   def test_emissions_factors
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    for emissions_type in ['CO2', 'NOx', 'SO2', 'foo']
+    for emissions_type in ['CO2e', 'NOx', 'SO2', 'foo']
       hpxml.header.emissions_scenarios.add(name: emissions_type,
                                            emissions_type: emissions_type,
                                            elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
-                                           elec_value: 0.0,
+                                           elec_schedule_filepath: File.join(File.dirname(__FILE__), '..', 'resources', 'data', 'cambium', 'LRMER_MidCase.csv'),
+                                           elec_schedule_number_of_header_rows: 1,
+                                           elec_schedule_column_number: 9,
                                            natural_gas_units: HPXML::EmissionsScenario::UnitsLbPerMBtu,
                                            natural_gas_value: 123.0,
                                            propane_units: HPXML::EmissionsScenario::UnitsLbPerMBtu,
@@ -111,7 +140,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
-      _test_default_emissions_values(scenario,
+      _test_default_emissions_values(scenario, 1, 9,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, 123.0,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, 234.0,
                                      HPXML::EmissionsScenario::UnitsKgPerMBtu, 345.0,
@@ -122,6 +151,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     hpxml.header.emissions_scenarios.each do |scenario|
+      scenario.elec_schedule_column_number = nil
       scenario.natural_gas_units = nil
       scenario.natural_gas_value = nil
       scenario.propane_units = nil
@@ -138,20 +168,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
-      if scenario.emissions_type == 'CO2'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 117.6, 136.6, 161.0, 211.1 # lb/MBtu
+      if scenario.emissions_type == 'CO2e'
+        natural_gas_value, propane_value, fuel_oil_value = 147.3, 177.8, 195.9 # lb/MBtu
       elsif scenario.emissions_type == 'NOx'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 0.0922, 0.1421, 0.1300, nil # lb/MBtu
+        natural_gas_value, propane_value, fuel_oil_value = 0.0922, 0.1421, 0.1300 # lb/MBtu
       elsif scenario.emissions_type == 'SO2'
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = 0.0006, 0.0002, 0.0015, nil # lb/MBtu
+        natural_gas_value, propane_value, fuel_oil_value = 0.0006, 0.0002, 0.0015 # lb/MBtu
       else
-        natural_gas_value, propane_value, fuel_oil_value, coal_value = nil, nil, nil, nil
+        natural_gas_value, propane_value, fuel_oil_value = nil, nil, nil
       end
-      _test_default_emissions_values(scenario,
+      _test_default_emissions_values(scenario, 1, 1,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, natural_gas_value,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, propane_value,
                                      HPXML::EmissionsScenario::UnitsLbPerMBtu, fuel_oil_value,
-                                     HPXML::EmissionsScenario::UnitsLbPerMBtu, coal_value,
+                                     nil, nil,
                                      nil, nil,
                                      nil, nil)
     end
@@ -271,6 +301,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_building_construction_values(hpxml_default, 16200, 8, false, 2)
+  end
+
+  def test_climate_and_risk_zones
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.climate_and_risk_zones.iecc_year = 2009
+    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, 2009, '2B')
+
+    # Test defaults
+    hpxml.climate_and_risk_zones.iecc_year = nil
+    hpxml.climate_and_risk_zones.iecc_zone = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, 2006, '5B')
+
+    # Test defaults - invalid IECC zone
+    hpxml = _create_hpxml('base-location-capetown-zaf.xml')
+    hpxml.climate_and_risk_zones.iecc_year = nil
+    hpxml.climate_and_risk_zones.iecc_zone = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, nil, nil)
   end
 
   def test_infiltration
@@ -2042,7 +2097,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_batteries
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-pv-battery-outside.xml')
+    hpxml = _create_hpxml('base-pv-battery.xml')
     hpxml.batteries[0].nominal_capacity_kwh = 45.0
     hpxml.batteries[0].nominal_capacity_ah = nil
     hpxml.batteries[0].rated_power_output = 1234.0
@@ -2879,7 +2934,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day,
-                                  use_max_load_for_heat_pumps, allow_increased_fixed_capacities)
+                                  use_max_load_for_heat_pumps, allow_increased_fixed_capacities, state_code, time_zone_utc_offset)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -2893,11 +2948,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(dst_end_day, hpxml.header.dst_end_day)
     assert_equal(use_max_load_for_heat_pumps, hpxml.header.use_max_load_for_heat_pumps)
     assert_equal(allow_increased_fixed_capacities, hpxml.header.allow_increased_fixed_capacities)
+    if state_code.nil?
+      assert_nil(hpxml.header.state_code)
+    else
+      assert_equal(state_code, hpxml.header.state_code)
+    end
+    assert_equal(time_zone_utc_offset, hpxml.header.time_zone_utc_offset)
   end
 
-  def _test_default_emissions_values(scenario, natural_gas_units, natural_gas_value, propane_units, propane_value,
+  def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,
+                                     natural_gas_units, natural_gas_value, propane_units, propane_value,
                                      fuel_oil_units, fuel_oil_value, coal_units, coal_value, wood_units, wood_value,
                                      wood_pellets_units, wood_pellets_value)
+    assert_equal(elec_schedule_number_of_header_rows, scenario.elec_schedule_number_of_header_rows)
+    assert_equal(elec_schedule_column_number, scenario.elec_schedule_column_number)
     if natural_gas_value.nil?
       assert_nil(scenario.natural_gas_units)
       assert_nil(scenario.natural_gas_value)
@@ -2970,6 +3034,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(hpxml.building_occupancy.monthly_multipliers)
     else
       assert_equal(monthly_mults, hpxml.building_occupancy.monthly_multipliers)
+    end
+  end
+
+  def _test_default_climate_and_risk_zones_values(hpxml, iecc_year, iecc_zone)
+    if iecc_year.nil?
+      assert_nil(hpxml.climate_and_risk_zones.iecc_year)
+    else
+      assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
+    end
+    if iecc_zone.nil?
+      assert_nil(hpxml.climate_and_risk_zones.iecc_zone)
+    else
+      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
     end
   end
 

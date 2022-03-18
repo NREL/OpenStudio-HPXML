@@ -1559,12 +1559,17 @@ class HVAC
   end
 
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp = nil)
+    cycle_fan_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    cycle_fan_sch.setName(obj_name + ' auto fan schedule')
+    Schedule.set_schedule_type_limits(model, cycle_fan_sch, Constants.ScheduleTypeLimitsOnOff)
+    cycle_fan_sch.setValue(0) # 0 denotes that fan cycles on and off to meet the load (i.e., AUTO fan) as opposed to continuous operation
+
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + ' unitary system')
     air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop_unitary.setSupplyFan(fan)
     air_loop_unitary.setFanPlacement('BlowThrough')
-    air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
+    air_loop_unitary.setSupplyAirFanOperatingModeSchedule(cycle_fan_sch)
     air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
     if htg_coil.nil?
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
@@ -4040,7 +4045,7 @@ class HVAC
     return true
   end
 
-  def self.get_hpxml_hvac_systems(hpxml, exclude_hp_backup_systems: false)
+  def self.get_hpxml_hvac_systems(hpxml)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
     # (e.g., a furnace + central air conditioner w/ the same ducts).
@@ -4058,9 +4063,6 @@ class HVAC
     hpxml.heating_systems.each do |heating_system|
       if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
-      end
-      if exclude_hp_backup_systems && heating_system.is_heat_pump_backup_system
-        next
       end
 
       hvac_systems << { cooling: nil,

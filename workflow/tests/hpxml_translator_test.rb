@@ -251,7 +251,7 @@ class HPXMLTest < MiniTest::Test
     # Check that simulation works using template2.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stocastic-schedules.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stochastic-schedules.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -570,6 +570,9 @@ class HPXMLTest < MiniTest::Test
       end
       if !hpxml.pv_systems.empty? && !hpxml.batteries.empty?
         next if log_line.include? "Due to an OpenStudio bug, the battery's rated power output will not be honored; the simulation will proceed without a maximum charge/discharge limit."
+      end
+      if hpxml_path.include? 'base-location-capetown-zaf.xml'
+        next if log_line.include?('OS Message: Minutes field (60) on line 9 of EPW file')
       end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
@@ -1209,8 +1212,13 @@ class HPXMLTest < MiniTest::Test
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
-      if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
-        assert_operator(energy_htg, :>, 0)
+      if htg_fuels.include? fuel
+        if (not hpxml_path.include? 'location-miami') && \
+           (not hpxml_path.include? 'location-honolulu') && \
+           (not hpxml_path.include? 'location-phoenix') && \
+           (not (hpxml_path.include?('autosize') && hpxml_path.include?('backup')))
+          assert_operator(energy_htg, :>, 0)
+        end
       else
         assert_equal(0, energy_htg)
       end
