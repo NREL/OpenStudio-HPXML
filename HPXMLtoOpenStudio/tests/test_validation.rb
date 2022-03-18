@@ -956,7 +956,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                         water_heating_system_idref: 'WaterHeatingSystem1')
       elsif ['storm-windows-unexpected-window-ufactor'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.windows[0].window_storm_type = 'clear'
+        hpxml.windows[0].storm_type = 'clear'
       elsif ['unattached-cfis'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",

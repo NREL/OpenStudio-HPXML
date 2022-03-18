@@ -4125,7 +4125,7 @@ class HPXMLFile
                         azimuth: azimuth,
                         ufactor: args[:window_ufactor],
                         shgc: args[:window_shgc],
-                        window_storm_type: window_storm_type,
+                        storm_type: window_storm_type,
                         overhangs_depth: overhangs_depth,
                         overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
                         overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
@@ -4159,7 +4159,7 @@ class HPXMLFile
                           azimuth: azimuth,
                           ufactor: args[:skylight_ufactor],
                           shgc: args[:skylight_shgc],
-                          skylight_storm_type: skylight_storm_type,
+                          storm_type: skylight_storm_type,
                           roof_idref: roof_idref)
     end
   end

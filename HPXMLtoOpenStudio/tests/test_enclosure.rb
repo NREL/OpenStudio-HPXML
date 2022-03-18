@@ -455,7 +455,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.windows.each do |window|
       window.ufactor = 0.6
-      window.window_storm_type = 'low-e'
+      window.storm_type = 'low-e'
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
