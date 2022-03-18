@@ -516,5 +516,11 @@
       <usage_type>test</usage_type>
       <checksum>2619C31B</checksum>
     </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>532F2F5B</checksum>
+    </file>
   </files>
 </measure>
