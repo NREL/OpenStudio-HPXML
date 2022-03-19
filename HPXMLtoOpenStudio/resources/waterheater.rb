@@ -357,7 +357,7 @@ class Waterheater
       # ProgramCallingManagers
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName("#{combi_sys_id} ProgramManager")
-      program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+      program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
       program_calling_manager.addProgram(combi_ctrl_program)
     end
   end
