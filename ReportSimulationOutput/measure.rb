@@ -568,17 +568,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Obtain from EMS output variable
         load.annual_output = get_report_variable_data_annual(['EMS'], ["#{load.ems_variable}_annual_outvar"])
         if include_timeseries_total_loads
-          load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency)
+          load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, ems_shift: true)
         end
       elsif load.variables.size > 0
         # Obtain from output variable
-        load.variables.map { |v| v[0] }.each do |sys_id|
+        load.variables.map { |v| v[0] }.uniq.each do |sys_id|
           keys = load.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
           vars = load.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
           load.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: load.is_negative)
           if include_timeseries_total_loads && (load_type == LT::HotWaterDelivered)
-            load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, is_negative: load.is_negative)
+            load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, is_negative: load.is_negative, ems_shift: true)
           end
         end
       end
@@ -588,7 +588,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @component_loads.each do |key, comp_load|
       comp_load.annual_output = get_report_variable_data_annual(['EMS'], ["#{comp_load.ems_variable}_annual_outvar"])
       if include_timeseries_component_loads
-        comp_load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{comp_load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', comp_load.timeseries_units), 0, timeseries_frequency)
+        comp_load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{comp_load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', comp_load.timeseries_units), 0, timeseries_frequency, ems_shift: true)
       end
     end
 
@@ -604,7 +604,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Ideal system loads (expected fraction of loads that are not met by partial HVAC (e.g., room AC that meets 30% of load))
     @ideal_system_loads.each do |load_type, ideal_load|
-      ideal_load.variables.map { |v| v[0] }.each do |sys_id|
+      ideal_load.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = ideal_load.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = ideal_load.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
@@ -621,23 +621,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
 
-      end_use.variables.map { |v| v[0] }.each do |sys_id|
+      end_use.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
         end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: end_use.is_negative)
         if include_timeseries_end_use_consumptions
-          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: end_use.is_negative)
+          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: end_use.is_negative, ems_shift: false)
         end
         if include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: end_use.is_negative)
+          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: end_use.is_negative, ems_shift: false)
         end
       end
     end
 
     # Hot Water Uses
     @hot_water_uses.each do |hot_water_type, hot_water|
-      hot_water.variables.map { |v| v[0] }.each do |sys_id|
+      hot_water.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = hot_water.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = hot_water.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
@@ -733,7 +733,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Get zone temperatures
+    # Zone temperatures
     if include_timeseries_zone_temperatures
       zone_names = []
       scheduled_temperature_names = []
@@ -762,12 +762,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Airflows
     if include_timeseries_airflows
       @airflows.each do |airflow_type, airflow|
-        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency, true)
+        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency, ems_shift: false)
       end
     end
 
+    # Weather
     if include_timeseries_weather
       @weather.each do |weather_type, weather_data|
         if weather_data.timeseries_units == 'F'
@@ -1564,14 +1566,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return values
   end
 
-  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift = false, is_negative: false)
+  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, ems_shift: nil)
+    fail 'ems_shift argument not provided' if ems_shift.nil? && key_values.include?('EMS')
     return [0.0] * @timestamps.size if variables.empty?
 
-    if key_values.uniq.size > 1 && key_values.include?('EMS') && !disable_ems_shift
+    if key_values.uniq.size > 1 && key_values.include?('EMS') && ems_shift
       # Split into EMS and non-EMS queries so that the EMS values shift occurs for just the EMS query
       # Remove this code if we ever figure out a better way to handle when EMS output should shift
-      values = get_report_variable_data_timeseries(['EMS'], variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)
-      sum_values = values.zip(get_report_variable_data_timeseries(key_values.select { |k| k != 'EMS' }, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)).map { |x, y| x + y }
+      values = get_report_variable_data_timeseries(['EMS'], variables, unit_conv, unit_adder, timeseries_frequency, is_negative: is_negative, ems_shift: ems_shift)
+      sum_values = values.zip(get_report_variable_data_timeseries(key_values.select { |k| k != 'EMS' }, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: is_negative, ems_shift: ems_shift)).map { |x, y| x + y }
       return sum_values
     end
 
@@ -1585,7 +1588,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     values = values.get
     values += [0.0] * @timestamps.size if values.size == 0
 
-    return values if disable_ems_shift
+    return values unless ems_shift
 
     # Remove this code if we ever figure out a better way to handle when EMS output should shift
     if (key_values.size == 1) && (key_values[0] == 'EMS') && (@timestamps.size > 0)
