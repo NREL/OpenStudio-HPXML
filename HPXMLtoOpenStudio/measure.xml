@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5b7fd1e9-1190-44b3-b797-1e0f520dd56b</version_id>
-  <version_modified>20220315T183058Z</version_modified>
+  <version_id>254d1369-718e-473f-9e2e-08004e62a52e</version_id>
+  <version_modified>20220321T175217Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -210,12 +210,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>868FE0BE</checksum>
-    </file>
-    <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>52135818</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -464,6 +458,12 @@
       <checksum>454FCA4F</checksum>
     </file>
     <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>532F2F5B</checksum>
+    </file>
+    <file>
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -505,16 +505,16 @@
       <checksum>434A4561</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>94F4B659</checksum>
-    </file>
-    <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>A27DF4F1</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9A141315</checksum>
     </file>
   </files>
 </measure>
