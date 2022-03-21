@@ -796,13 +796,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @output_variables_requests.each do |output_variable_name, output_variable|
       key_values = get_report_variable_data_timeseries_key_values(timeseries_frequency, output_variable_name)
       key_values.each do |key_value|
-        # TODO: get unit_conv, unit_adder
-        unit_conv = 1
-        unit_adder = 0
         @output_variables[[output_variable_name, key_value]] = OutputVariable.new
-        @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value}"
+        @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value.split.map(&:capitalize).join(' ')}"
         @output_variables[[output_variable_name, key_value]].timeseries_units = get_report_variable_data_timeseries_units(timeseries_frequency, output_variable_name, key_value)
-        @output_variables[[output_variable_name, key_value]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], unit_conv, unit_adder, timeseries_frequency)
+        @output_variables[[output_variable_name, key_value]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], 1, 0, timeseries_frequency)
       end
     end
 
