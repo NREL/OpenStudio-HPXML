@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>cf3fb0d7-bf3a-4846-a337-555edf8b4e0b</version_id>
-  <version_modified>20220317T004046Z</version_modified>
+  <version_id>263675e2-3d2b-4437-9dba-b2cb84e53c10</version_id>
+  <version_modified>20220321T174902Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -218,12 +218,6 @@
       <checksum>868FE0BE</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>52135818</checksum>
-    </file>
-    <file>
       <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -434,12 +428,6 @@
       <checksum>687661F9</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C2D4BDA</checksum>
-    </file>
-    <file>
       <filename>data/cambium/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
@@ -488,6 +476,24 @@
       <checksum>454FCA4F</checksum>
     </file>
     <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>532F2F5B</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8E16E971</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>108ECEA3</checksum>
+    </file>
+    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -511,6 +517,12 @@
       <checksum>0CA5C178</checksum>
     </file>
     <file>
+      <filename>schedule_files/setpoints-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3FEFEB58</checksum>
+    </file>
+    <file>
       <filename>schedule_files/setpoints-daily-schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -521,18 +533,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>3C362E48</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>108ECEA3</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3FEFEB58</checksum>
     </file>
     <file>
       <filename>schedule_files/smooth-10-mins.csv</filename>
