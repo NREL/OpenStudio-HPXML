@@ -14,6 +14,7 @@ end
 class EUT
   # End Use Types
   Heating = 'Heating'
+  HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
   HeatingFanPump = 'Heating Fans/Pumps'
   Cooling = 'Cooling'
   CoolingFanPump = 'Cooling Fans/Pumps'
