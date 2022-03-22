@@ -97,6 +97,7 @@ class HVAC
         htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+        htg_coil.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
         fan_cfms << htg_cfm
       end
     end
