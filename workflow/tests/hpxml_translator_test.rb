@@ -1199,7 +1199,7 @@ class HPXMLTest < MiniTest::Test
      HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
-      energy_htg = results.fetch("End Use: #{fuel_name}: Heating (MBtu)", 0)
+      energy_htg = results.fetch("End Use: #{fuel_name}: Heating (MBtu)", 0) + results.fetch("End Use: #{fuel_name}: Heating Heat Pump Backup (MBtu)", 0)
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
