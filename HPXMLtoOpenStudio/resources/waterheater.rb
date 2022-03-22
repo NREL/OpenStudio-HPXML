@@ -103,7 +103,10 @@ class Waterheater
         control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
         control_setpoint_schedule.setValue(51.67)
 
-        top_element_setpoint_schedule = setpoint_schedule # Overwritten by EMS later
+        #Note: This gets overwritten by EMS later, see HPWH Control program
+        top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+        top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
+        top_element_setpoint_schedule.setValue(51.67 - 9.00)
       end
     end
     if setpoint_schedule.nil?
@@ -992,6 +995,10 @@ class Waterheater
     ueschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_top_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
     ueschedoverride_actuator.setName("#{obj_name_hpwh} UESchedOverride")
 
+    #Actuator for setpoint schedule
+    hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleConstantValue)
+    hpwhschedoverride_actuator.setName("#{obj_name_hpwh} HPWHSchedOverride")
+
     # EMS for the HPWH control logic
     t_set_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     t_set_sensor.setName("#{obj_name_hpwh} T_set")
@@ -1011,6 +1018,7 @@ class Waterheater
 
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
+    hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
     #If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
     if op_mode == "heat pump only"
       hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, 'F', 'C').round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, 'F', 'C').round(2)})")
@@ -1026,17 +1034,15 @@ class Waterheater
       hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("Else")
-      hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - 16.2")
+      hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - 9.0")
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
       hpwh_ctrl_program.addLine("EndIf")
       #Scheduled operating mode: if in HP only mode, disable both elements (this will override prior logic)
       if not op_mode_schedule.nil?
-        hpwh_ctrl_program.addLine("If #{op_mode_sensor} == HP_only")
-        hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
+        hpwh_ctrl_program.addLine("If #{op_mode_sensor.name} == 1")
         hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = 0")
         hpwh_ctrl_program.addLine("Else")
-        hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{t_set_sensor.name} - 16.2")
-        hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")
+        hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - 9.0")
         hpwh_ctrl_program.addLine("EndIf")
       end
     end
