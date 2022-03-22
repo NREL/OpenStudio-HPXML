@@ -2128,7 +2128,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # End uses
 
       if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
-        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+        is_supplemental_coil = false
+        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
+          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
+        end
+        if not is_supplemental_coil
+          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+        else
+          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
       elsif object.to_CoilHeatingElectric.is_initialized
         is_supplemental_coil = false
@@ -2154,10 +2162,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        is_supplemental_coil = false
+        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
+          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
+        end
+        if not is_supplemental_coil
+          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        else
+          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-        return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
+        is_supplemental_coil = false
+        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
+          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
+        end
+        if not is_supplemental_coil
+          return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
+        else
+          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
       elsif object.to_BoilerHotWater.is_initialized
         is_combi_boiler = false
@@ -2166,7 +2190,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
-          return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+          is_supplemental_coil = false
+          if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
+            is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
+          end
+          if not is_supplemental_coil
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+          else
+            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
+          end
         end
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
