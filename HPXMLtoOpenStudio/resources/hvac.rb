@@ -1529,7 +1529,7 @@ class HVAC
     else
       htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
-    htg_supp_coil.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
+    htg_supp_coil.additionalProperties.setFeature('IsSupplementalCoil', true) # Used by reporting measure
 
     return htg_supp_coil
   end
@@ -2878,7 +2878,6 @@ class HVAC
     htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C')) unless htg_ap.crankcase_temp.nil?
     htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-    htg_coil.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
 
     return htg_coil
   end

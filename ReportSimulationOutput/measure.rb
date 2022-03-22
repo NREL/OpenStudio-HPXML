@@ -657,7 +657,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       dse = htg_system.distribution_system.annual_heating_dse
       @fuels.each do |fuel_type, fuel|
-        [EUT::Heating, EUT::HeatingFanPump].each do |end_use_type|
+        [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
 
@@ -1310,6 +1310,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Collect energy consumptions (EC) by system
     htg_ecs, clg_ecs, dhw_ecs, prehtg_ecs, preclg_ecs = {}, {}, {}, {}, {}
     eut_map = { EUT::Heating => htg_ecs,
+                EUT::HeatingHeatPumpBackup => htg_ecs,
                 EUT::HeatingFanPump => htg_ecs,
                 EUT::Cooling => clg_ecs,
                 EUT::CoolingFanPump => clg_ecs,
@@ -2128,15 +2129,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # End uses
 
       if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
-        is_supplemental_coil = false
-        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-        end
-        if not is_supplemental_coil
-          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
-        else
-          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
-        end
+        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_CoilHeatingElectric.is_initialized
         is_supplemental_coil = false
