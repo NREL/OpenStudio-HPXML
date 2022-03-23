@@ -159,8 +159,13 @@ class HPXMLTest < MiniTest::Test
 
   def test_run_simulation_detailed_schedules
     # Check that the simulation produces stochastic schedules if requested
+    sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
+    tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
+    hpxml = HPXML.new(hpxml_path: File.join(sample_files_path, 'base.xml'))
+    XMLHelper.write_file(hpxml.to_oga, tmp_hpxml_path)
+
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    xml = File.absolute_path(tmp_hpxml_path)
     command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-detailed-schedule stochastic"
     system(command, err: File::NULL)
 
@@ -171,6 +176,11 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'stochastic.csv')
+    assert(File.exist? csv_output_path)
+    
+    # Cleanup
+    File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
   end
 
   def test_run_simulation_timeseries_dst_and_utc
