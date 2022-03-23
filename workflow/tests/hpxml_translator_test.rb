@@ -178,7 +178,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'stochastic.csv')
     assert(File.exist? csv_output_path)
-    
+
     # Cleanup
     File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
   end
@@ -195,10 +195,16 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
-    assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check TimeDST and TimeUTC exist
+    timeseries_rows = CSV.read(csv_output_path)
+    assert_equal(3, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r.start_with?('TimeDST') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r.start_with?('TimeUTC') }.size)
   end
 
   def test_template_osw
