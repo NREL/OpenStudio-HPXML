@@ -433,6 +433,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
+
+    # TODO: check (for reasonable) design levels on model?
   end
 
   def _test_measure()
