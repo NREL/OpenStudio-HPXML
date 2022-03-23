@@ -361,6 +361,7 @@ def create_hpxmls
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic-dhw-tank-model-type-stratified.xml' => 'base-dhw-tank-model-type-stratified.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -2417,6 +2418,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-stochastic-dhw-tank-model-type-stratified.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-dhw-tank-heat-pump-schedules-detailed.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
