@@ -385,7 +385,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(vacancy_hrs, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnVacancy, schedules: sf.tmp_schedules), 0.1)
   end
 
-  def test_10_min_timestep_vacancy
+  def test_10_min_timestep
     hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
@@ -433,8 +433,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-
-    # TODO: check (for reasonable) design levels on model?
   end
 
   def _test_measure()
