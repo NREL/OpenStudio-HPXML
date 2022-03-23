@@ -773,6 +773,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Exterior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.')
     args << arg
 
+    storm_window_type_choices = OpenStudio::StringVector.new
+    storm_window_type_choices << HPXML::WindowGlassTypeClear
+    storm_window_type_choices << HPXML::WindowGlassTypeLowE
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
+    arg.setDisplayName('Windows: Storm Type')
+    arg.setDescription('The type of storm, if present.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_depth', true)
     arg.setDisplayName('Overhangs: Front Depth')
     arg.setDescription('The depth of overhangs for windows for the front facade.')
@@ -845,15 +854,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4)
     args << arg
 
-    storm_window_type_choices = OpenStudio::StringVector.new
-    storm_window_type_choices << HPXML::WindowGlassTypeClear
-    storm_window_type_choices << HPXML::WindowGlassTypeLowE
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
-    arg.setDisplayName('Windows: Storm Window Type')
-    arg.setDescription('The type of the storm window.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
     arg.setDisplayName('Skylights: Front Roof Area')
     arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade.")
@@ -892,8 +892,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << skylight_shgc
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('skylight_storm_type', storm_window_type_choices, false)
-    arg.setDisplayName('Skylights: Storm Window Type')
-    arg.setDescription('The type of the storm window.')
+    arg.setDisplayName('Skylights: Storm Type')
+    arg.setDescription('The type of storm, if present.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)

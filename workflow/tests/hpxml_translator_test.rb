@@ -1019,9 +1019,7 @@ class HPXMLTest < MiniTest::Test
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       end
-      if not subsurface.storm_type.nil?
-        hpxml_value, shgc_adj = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)
-      end
+      hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[0]
       if subsurface.is_a? HPXML::Skylight
         hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
       end
@@ -1034,9 +1032,7 @@ class HPXMLTest < MiniTest::Test
 
       # SHGC
       hpxml_value = subsurface.shgc
-      if not subsurface.storm_type.nil?
-        ufactor_adj, hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)
-      end
+      hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[1]
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_delta(hpxml_value, sql_value, 0.01)

@@ -1815,6 +1815,8 @@ class Constructions
   end
 
   def self.get_ufactor_shgc_adjusted_by_storms(storm_type, base_ufactor, base_shgc)
+    return base_ufactor, base_shgc if storm_type.nil?
+
     # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
     # U-factor and SHGC adjustment based on the data obtained from the above reference
     if base_ufactor < 0.45
