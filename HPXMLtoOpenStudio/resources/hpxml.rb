@@ -224,6 +224,8 @@ class HPXML < Object
   MechVentTypeExhaust = 'exhaust only'
   MechVentTypeHRV = 'heat recovery ventilator'
   MechVentTypeSupply = 'supply only'
+  OccupancyCalculationTypeAsset = 'asset'
+  OccupancyCalculationTypeOperational = 'operational'
   OrientationEast = 'east'
   OrientationNorth = 'north'
   OrientationNortheast = 'northeast'

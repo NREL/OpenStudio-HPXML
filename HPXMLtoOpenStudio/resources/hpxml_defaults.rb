@@ -78,11 +78,11 @@ class HPXMLDefaults
   end
 
   def self.set_operational_adjustment_factors(hpxml, cfa, nbeds)
-    if hpxml.header.occupancy_calculation_type == 'asset'
+    if hpxml.header.occupancy_calculation_type == HPXML::OccupancyCalculationTypeAsset
       hpxml.header.additional_properties.hotwater_appliances_adj_factor = 1.0
       hpxml.header.additional_properties.misc_loads_adj_factor = 1.0
 
-    elsif hpxml.header.occupancy_calculation_type == 'operational'
+    elsif hpxml.header.occupancy_calculation_type == HPXML::OccupancyCalculationTypeOperational
       unit_type = hpxml.building_construction.residential_facility_type
       noccs = hpxml.building_occupancy.number_of_residents
 
