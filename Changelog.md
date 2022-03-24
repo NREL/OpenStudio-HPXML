@@ -4,6 +4,7 @@ __New Features__
 - **Breaking change**: Allows performing an operational, instead of an asset, calculation through a new required `OccupancyCalculationType` input field.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
+- Allows specifying a `StormWindow` element for windows/skylights; U-factors and SHGCs are automatically adjusted.
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Adds support for shared hot water recirculation systems controlled by temperature.
 - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.

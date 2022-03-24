@@ -1069,7 +1069,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
-    assert_equal(2, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
   end
@@ -1092,7 +1093,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
-    assert_equal(2, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[1]))
   end
@@ -1116,7 +1118,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
-    assert_equal(3, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[2]))
