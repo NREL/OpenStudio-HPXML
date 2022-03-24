@@ -359,6 +359,7 @@ def create_hpxmls
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -2413,6 +2414,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-stochastic-10-mins.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end

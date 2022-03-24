@@ -157,6 +157,56 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, component_loads.size)
   end
 
+  def test_run_simulation_detailed_schedules
+    # Check that the simulation produces stochastic schedules if requested
+    sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
+    tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
+    hpxml = HPXML.new(hpxml_path: File.join(sample_files_path, 'base.xml'))
+    XMLHelper.write_file(hpxml.to_oga, tmp_hpxml_path)
+
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.absolute_path(tmp_hpxml_path)
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-detailed-schedule stochastic"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'stochastic.csv')
+    assert(File.exist? csv_output_path)
+
+    # Cleanup
+    File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
+  end
+
+  def test_run_simulation_timeseries_dst_and_utc
+    # Check that the simulation produces timeseries with TimeDST and TimeUTC columns if requested
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --hourly ALL --add-timeseries-time-column DST --add-timeseries-time-column UTC"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check TimeDST and TimeUTC exist
+    timeseries_rows = CSV.read(csv_output_path)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
+  end
+
   def test_template_osw
     # Check that simulation works using template.osw
     require 'json'
