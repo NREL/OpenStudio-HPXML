@@ -39,8 +39,7 @@ class Battery
     battery_mass = (nominal_capacity_kwh / 10.0) * 99.0 # kg
     battery_surface_area = 0.306 * (nominal_capacity_kwh**(2.0 / 3.0)) # m^2
 
-    # Assuming 3/4 of unusable charge is minimum SOC and 1/4 of unusable charge is maximum SOC
-    # FIXME: Waiting on recommended value from Rohit
+    # Assuming 3/4 of unusable charge is minimum SOC and 1/4 of unusable charge is maximum SOC, based on SAM defaults
     minimum_storage_state_of_charge_fraction = 0.75 * (1.0 - usable_fraction)
     maximum_storage_state_of_charge_fraction = 1.0 - 0.25 * (1.0 - usable_fraction)
 
