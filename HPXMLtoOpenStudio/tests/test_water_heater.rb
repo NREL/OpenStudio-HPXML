@@ -1186,21 +1186,21 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert(wh.heater1SetpointTemperatureSchedule.to_ScheduleFile.is_initialized)
+    # assert(wh.heater1SetpointTemperatureSchedule.to_ScheduleFile.is_initialized)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
     # Check heat pump cooling coil cop
     assert_in_epsilon(cop, coil.ratedCOP, 0.001)
 
     # Check schedule
-    assert_equal(14, model.getScheduleFiles.size)
+    assert_equal(15, model.getScheduleFiles.size)
 
     schedule_file_names = []
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
     assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    # assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
+    assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_tank_stratified

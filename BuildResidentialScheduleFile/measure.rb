@@ -13,6 +13,7 @@ require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
+require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -246,7 +247,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
         water_heater_scheduled_setpoint_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), water_heater_scheduled_setpoint_path))
       end
 
-      rows << CSV.read(water_heater_scheduled_setpoint_path)
+      csv = CSV.read(water_heater_scheduled_setpoint_path, headers: true)
+      csv = [[SchedulesFile::ColumnWaterHeaterSetpoint]] + [csv[SchedulesFile::ColumnWaterHeaterSetpoint]].transpose
+      rows << csv
     end
 
     if args[:water_heater_scheduled_operating_mode_path].is_initialized
@@ -255,7 +258,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
         water_heater_scheduled_operating_mode_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), water_heater_scheduled_operating_mode_path))
       end
 
-      rows << CSV.read(water_heater_scheduled_operating_mode_path)
+      csv = CSV.read(water_heater_scheduled_operating_mode_path, headers: true)
+      csv = [[SchedulesFile::ColumnWaterHeaterOperatingMode]] + [csv[SchedulesFile::ColumnWaterHeaterOperatingMode]].transpose
+      rows << csv
     end
 
     water_heater_output_csv_path = args[:water_heater_output_csv_path].get

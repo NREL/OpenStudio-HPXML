@@ -456,7 +456,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
-    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
+    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank.csv'
     @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
     model, hpxml, result = _test_measure()
 
@@ -475,11 +475,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     sf.validate_schedules(year: 2007)
 
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(120))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(125))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(130))
-    assert(!sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(135))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(140))
+    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint][0], UnitConversions.convert(125, 'F', 'C'))
   end
 
   def test_water_heater_heat_pump_scheduled
@@ -487,8 +483,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
-    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv'
-    @args_hash['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv'
+    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heat-pump.csv'
+    @args_hash['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heat-pump.csv'
     @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
     model, hpxml, result = _test_measure()
 
@@ -507,11 +503,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     sf.validate_schedules(year: 2007)
 
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(120))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(125))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(130))
-    assert(!sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(135))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint].include?(140))
+    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint][0], UnitConversions.convert(125, 'F', 'C'))
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
     assert(sf.schedules[SchedulesFile::ColumnWaterHeaterOperatingMode].include?(0))
     assert(sf.schedules[SchedulesFile::ColumnWaterHeaterOperatingMode].include?(1))
