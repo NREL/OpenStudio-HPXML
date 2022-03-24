@@ -184,7 +184,7 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_timeseries_dst_and_utc
-    # Check that the simulation produces stochastic schedules if requested
+    # Check that the simulation produces timeseries with TimeDST and TimeUTC columns if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
     command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --hourly ALL --add-timeseries-time-column DST --add-timeseries-time-column UTC"
@@ -202,9 +202,9 @@ class HPXMLTest < MiniTest::Test
 
     # Check TimeDST and TimeUTC exist
     timeseries_rows = CSV.read(csv_output_path)
-    assert_equal(3, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r.start_with?('TimeDST') }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r.start_with?('TimeUTC') }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
   end
 
   def test_template_osw
