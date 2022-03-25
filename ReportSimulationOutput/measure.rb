@@ -124,8 +124,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('user_output_variables', false)
-    arg.setDisplayName('Generate Timeseries Output: User-Defined Output Variables')
-    arg.setDescription('Optionally generates timeseries output variables. If multiple output variables, use a comma-separated list. Do not include key values; by default all key values will be requested.')
+    arg.setDisplayName('Generate Timeseries Output: EnergyPlus Output Variables')
+    arg.setDescription('Optionally generates timeseries EnergyPlus output variables. If multiple output variables are desired, use a comma-separated list. Do not include key values; by default all key values will be requested. Example: "Zone People Occupant Count, Zone People Total Heating Energy"')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
@@ -839,6 +839,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @output_variables = {}
     @output_variables_requests.each do |output_variable_name, output_variable|
       key_values = get_report_variable_data_timeseries_key_values(timeseries_frequency, output_variable_name)
+      runner.registerWarning("Request for output variable '#{output_variable_name}' returned no key values.") if key_values.empty?
       key_values.each do |key_value|
         @output_variables[[output_variable_name, key_value]] = OutputVariable.new
         @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value.split.map(&:capitalize).join(' ')}"
@@ -1582,8 +1583,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       weather_data = []
     end
+
+    # EnergyPlus output variables
     if !@output_variables.empty?
-      output_variables_data = @output_variables.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
+      output_variables_data = @output_variables.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
     else
       output_variables_data = []
     end

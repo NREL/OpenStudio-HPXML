@@ -1038,8 +1038,8 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy' }
-    annual_csv, timeseries_csv = _test_measure(args_hash)
+                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy, Foo' }
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsStandardOutputVariables
@@ -1050,6 +1050,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsStandardOutputVariables)
+    assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
   end
 
   def test_timeseries_user_defined_advanced_output_variables
@@ -1147,11 +1148,13 @@ class ReportSimulationOutputTest < MiniTest::Test
       hpxml_name = File.basename(args_hash['hpxml_path']).gsub('.xml', '')
       annual_csv = File.join(output_dir, "#{hpxml_name}.csv")
       timeseries_csv = File.join(output_dir, "#{hpxml_name}_Hourly.csv")
+      run_log = File.join(output_dir, 'run.log')
     else
       annual_csv = File.join(File.dirname(template_osw), 'run', 'results_annual.csv')
       timeseries_csv = File.join(File.dirname(template_osw), 'run', 'results_timeseries.csv')
+      run_log = File.join(File.dirname(template_osw), 'run', 'run.log')
     end
-    return annual_csv, timeseries_csv
+    return annual_csv, timeseries_csv, run_log
   end
 
   def _parse_time(ts)
