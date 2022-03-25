@@ -223,8 +223,9 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
+    validate_emissions_files()
     @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
-    Location.apply(model, runner, weather, epw_file, @hpxml)
+    Location.apply(model, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
     # Conditioned space/zone
@@ -316,15 +317,22 @@ class OSModel
       scenario.elec_schedule_filepath = FilePath.check_path(scenario.elec_schedule_filepath,
                                                             File.dirname(hpxml_path),
                                                             'Emissions File')
+    end
+  end
+
+  def self.validate_emissions_files()
+    @hpxml.header.emissions_scenarios.each do |scenario|
+      next if scenario.elec_schedule_filepath.nil?
+
       data = File.readlines(scenario.elec_schedule_filepath)
-      if data.size != 8760
-        fail "Emissions File has invalid number of rows (#{data.size}). Must be 8760."
+      num_header_rows = scenario.elec_schedule_number_of_header_rows
+      col_index = scenario.elec_schedule_column_number - 1
+
+      if data.size != 8760 + num_header_rows
+        fail "Emissions File has invalid number of rows (#{data.size}). Expected 8760 plus #{num_header_rows} header row(s)."
       end
-      if data.select { |x| x.include? ',' }.size > 0
-        fail 'Emissions File has multiple columns. Must be a single column of data.'
-      end
-      if data.map(&:strip).map { |x| Float(x) rescue nil }.any? nil
-        fail 'Emissions File has non-numeric values.'
+      if col_index > data[num_header_rows, 8760].map { |x| x.count(',') }.min
+        fail "Emissions File has too few columns. Cannot find column number (#{scenario.elec_schedule_column_number})."
       end
     end
   end
@@ -1368,6 +1376,8 @@ class OSModel
       window_length = window.area / window_height
       z_origin = @foundation_top
 
+      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
+
       if window.is_exterior
 
         # Create parent surface slightly bigger than window
@@ -1397,7 +1407,7 @@ class OSModel
         end
 
         # Apply construction
-        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', window.ufactor, window.shgc)
+        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', ufactor, shgc)
 
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
@@ -1432,7 +1442,7 @@ class OSModel
         # Apply construction
         inside_film = Material.AirFilmVertical
         outside_film = Material.AirFilmVertical
-        Constructions.apply_door(runner, model, [sub_surface], 'Window', window.ufactor, inside_film, outside_film)
+        Constructions.apply_door(runner, model, [sub_surface], 'Window', ufactor, inside_film, outside_film)
       end
     end
 
@@ -1451,6 +1461,8 @@ class OSModel
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
+
+      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
 
       # Create parent surface slightly bigger than skylight
       vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt, add_buffer: true)
@@ -1473,7 +1485,7 @@ class OSModel
       sub_surface.setSubSurfaceType('Skylight')
 
       # Apply construction
-      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction', skylight.ufactor, skylight.shgc)
+      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction', ufactor, shgc)
 
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
@@ -1695,12 +1707,6 @@ class OSModel
 
       sys_id = heating_system.id
       if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
-
-        if heating_system.is_heat_pump_backup_system
-          # If we ever want to support this in the future, we have to address HVAC
-          # sizing related to 1) distribution losses and 2) calculating the airflow rate.
-          fail "Heat pump backup system cannot be of type '#{heating_system.heating_system_type}'."
-        end
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,

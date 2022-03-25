@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -305,8 +306,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
           next if hpxml_file.start_with?('error')
 
-          puts "\nError: Did not successfully generate #{hpxml_file}."
-          exit!
+          flunk "Error: Did not successfully generate #{hpxml_file}."
         end
 
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
@@ -316,23 +316,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         hpxml_doc = hpxml.to_oga()
         XMLHelper.write_file(hpxml_doc, hpxml_path)
-
-        # Validate file against HPXML schema
-        schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../HPXMLtoOpenStudio/resources/hpxml_schema'))
-        errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-        if errors.size > 0
-          fail "ERRORS: #{errors}"
-        end
-
-        # Check for errors
-        errors = hpxml.check_for_errors()
-        if errors.size > 0
-          fail "ERRORS: #{errors}"
-        end
       rescue Exception => e
-        puts "\n#{e}\n#{e.backtrace.join('\n')}"
-        puts "\nError: Did not successfully generate #{hpxml_file}."
-        exit!
+        flunk "Error: Did not successfully generate #{hpxml_file}.\n#{e}\n#{e.backtrace.join('\n')}"
       end
     end
   end
@@ -342,6 +327,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   def _set_measure_argument_values(hpxml_file, args)
     args['hpxml_path'] = "tests/extra_files/#{hpxml_file}"
     args['apply_defaults'] = true
+    args['apply_validation'] = true
 
     # Base
     if ['base-sfd.xml'].include? hpxml_file
@@ -566,6 +552,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['battery_location'] = 'none'
       args['battery_power'] = Constants.Auto
       args['battery_capacity'] = Constants.Auto
+      args['battery_usable_capacity'] = Constants.Auto
       args['lighting_interior_fraction_cfl'] = 0.4
       args['lighting_interior_fraction_lfl'] = 0.1
       args['lighting_interior_fraction_led'] = 0.25
@@ -855,7 +842,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['site_time_zone_utc_offset'] = '-6'
     elsif ['extra-emissions-fossil-fuel-factors.xml'].include? hpxml_file
       args['emissions_scenario_names'] = 'Scenario1, Scenario2'
-      args['emissions_types'] = 'CO2, SO2'
+      args['emissions_types'] = 'CO2e, SO2'
       args['emissions_electricity_units'] = "#{HPXML::EmissionsScenario::UnitsKgPerMWh}, #{HPXML::EmissionsScenario::UnitsLbPerMWh}"
       args['emissions_electricity_values_or_filepaths'] = '392.6, 0.384'
       args['emissions_fossil_fuel_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
@@ -1116,9 +1103,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['emissions_scenario_names'] = 'Scenario1'
     elsif ['error-emissions-args-not-all-same-size.xml'].include? hpxml_file
       args['emissions_scenario_names'] = 'Scenario1'
-      args['emissions_types'] = 'CO2,CO2'
+      args['emissions_types'] = 'CO2e,CO2e'
       args['emissions_electricity_units'] = HPXML::EmissionsScenario::UnitsLbPerMWh
-      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv'
+      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv'
     elsif ['error-emissions-natural-gas-args-not-all-specified.xml'].include? hpxml_file
       args['emissions_natural_gas_values'] = '117.6'
     elsif ['error-invalid-aspect-ratio.xml'].include? hpxml_file
