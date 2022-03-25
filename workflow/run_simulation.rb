@@ -189,6 +189,10 @@ if not options[:timestep_outputs].empty?
   timeseries_outputs = options[:timestep_outputs]
 end
 
+if not options[:timeseries_output_variables].empty?
+  timeseries_output_freq = 'hourly' if timeseries_output_freq == 'none'
+end
+
 if n_freq > 1
   fail 'Multiple timeseries frequencies (hourly, daily, monthly, timestep) are not supported.'
 end
