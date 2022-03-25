@@ -15,6 +15,11 @@
         <foo>1</foo>
         <bar/>
         <description>test</description>
+        <comma>,</comma>
+        <special>&lt;</special>
+        <special2>&gt;</special2>
+        <special3>/</special3>
+        <special4>'\'</special4>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>
