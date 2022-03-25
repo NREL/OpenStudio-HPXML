@@ -8,9 +8,9 @@ class Version
   def self.check_openstudio_version
     if not OpenStudio.openStudioVersion.start_with? OS_Version
       if OS_Version.count('.') == 2
-        fail "OpenStudio version #{OS_Version} is required."
+        fail "OpenStudio version #{OS_Version} is required. Found version: #{OpenStudio.openStudioVersion}"
       else
-        fail "OpenStudio version #{OS_Version}.X is required."
+        fail "OpenStudio version #{OS_Version}.X is required. Found version: #{OpenStudio.openStudioVersion}"
       end
     end
   end
