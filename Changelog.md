@@ -30,6 +30,7 @@ __Bugfixes__
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
+- Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
 
 ## OpenStudio-HPXML v1.3.0
 
