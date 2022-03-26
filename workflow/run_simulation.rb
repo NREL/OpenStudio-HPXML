@@ -190,7 +190,7 @@ if not options[:timestep_outputs].empty?
 end
 
 if not options[:timeseries_output_variables].empty?
-  timeseries_output_freq = 'hourly' if timeseries_output_freq == 'none'
+  timeseries_output_freq = 'timestep' if timeseries_output_freq == 'none'
 end
 
 if n_freq > 1
