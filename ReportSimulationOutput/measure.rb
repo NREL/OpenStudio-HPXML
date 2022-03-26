@@ -888,27 +888,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Electricity Produced
-    outputs[:total_elec_produced] = get_report_meter_data_annual(['ElectricityProduced:Facility'])
-    outputs[:total_elec_produced_timeseries] = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', get_timeseries_units_from_fuel_type(FT::Elec)), 0, timeseries_frequency)
-    outputs[:total_elec_net_timeseries] = @fuels[FT::Elec].timeseries_output.zip(outputs[:total_elec_produced_timeseries]).map { |c, p| c - p }
-
-    # Total/Net Energy
-    @totals[TE::Total].annual_output = 0.0
-    @fuels.each do |fuel_type, fuel|
-      @totals[TE::Total].annual_output += fuel.annual_output
-      next unless include_timeseries_total_consumptions && fuel.timeseries_output.sum != 0.0
-
-      @totals[TE::Total].timeseries_output = [0.0] * @timestamps.size if @totals[TE::Total].timeseries_output.empty?
-      unit_conv = UnitConversions.convert(1.0, fuel.timeseries_units, @totals[TE::Total].timeseries_units)
-      @totals[TE::Total].timeseries_output = @totals[TE::Total].timeseries_output.zip(fuel.timeseries_output).map { |x, y| x + y * unit_conv }
-    end
-    @totals[TE::Net].annual_output = @totals[TE::Total].annual_output - outputs[:total_elec_produced]
-    if include_timeseries_total_consumptions
-      unit_conv = UnitConversions.convert(1.0, get_timeseries_units_from_fuel_type(FT::Elec), @totals[TE::Total].timeseries_units)
-      @totals[TE::Net].timeseries_output = @totals[TE::Total].timeseries_output.zip(outputs[:total_elec_produced_timeseries]).map { |x, y| x - y * unit_conv }
-    end
-
     # Emissions
     if not @emissions.empty?
       kwh_to_mwh = UnitConversions.convert(1.0, 'kWh', 'MWh')
