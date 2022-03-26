@@ -820,10 +820,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       unit_conv = UnitConversions.convert(1.0, fuel.timeseries_units, @totals[TE::Total].timeseries_units)
       @totals[TE::Total].timeseries_output = @totals[TE::Total].timeseries_output.zip(fuel.timeseries_output).map { |x, y| x + y * unit_conv }
     end
-    @totals[TE::Net].annual_output = @totals[TE::Total].annual_output - outputs[:elec_prod_annual]
+    @totals[TE::Net].annual_output = @totals[TE::Total].annual_output + outputs[:elec_prod_annual]
     if include_timeseries_total_consumptions
       unit_conv = UnitConversions.convert(1.0, get_timeseries_units_from_fuel_type(FT::Elec), @totals[TE::Total].timeseries_units)
-      @totals[TE::Net].timeseries_output = @totals[TE::Total].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x - y * unit_conv }
+      @totals[TE::Net].timeseries_output = @totals[TE::Total].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x + y * unit_conv }
     end
 
     # Zone temperatures
