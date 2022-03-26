@@ -2926,7 +2926,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('additional_properties', false)
     arg.setDisplayName('Additional Properties')
-    arg.setDescription('foo=1|bar|description=test.')
+    arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'foo=1|bar|description=test'.")
     args << arg
 
     return args
