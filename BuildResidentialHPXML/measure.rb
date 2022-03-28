@@ -2912,6 +2912,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('additional_properties', false)
+    arg.setDisplayName('Additional Properties')
+    arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply Default Values?')
     arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file.')
@@ -2922,11 +2927,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Apply Validation?')
     arg.setDescription('If true, validates the HPXML output file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).')
     arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('additional_properties', false)
-    arg.setDisplayName('Additional Properties')
-    arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'foo=1|bar|description=test'.")
     args << arg
 
     return args

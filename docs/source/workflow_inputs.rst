@@ -281,12 +281,6 @@ If no default value is available, a warning will be issued.
   wood pellets  --              --             --
   ============  ==============  =============  =============
 
-HPXML Additional Properties
-***************************
-
-One or more additional properties can be entered in ``/HPXML/SoftwareInfo/extension/AdditionalProperties``.
-This is helpful for storing additional information, but without affecting simulations.
-
 .. _buildingsite:
 
 HPXML Building Site

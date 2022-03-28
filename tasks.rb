@@ -2176,7 +2176,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
 
   # Misc
   if ['base-misc-additional-properties.xml'].include? hpxml_file
-    args['additional_properties'] = 'foo=1|bar|description=test|comma=,|special=<|special2=>|special3=/|special4="\"'
+    args['additional_properties'] = 'LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
