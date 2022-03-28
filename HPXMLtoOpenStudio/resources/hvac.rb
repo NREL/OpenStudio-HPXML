@@ -1496,7 +1496,7 @@ class HVAC
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName(program.name.to_s + 'calling manager')
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(program)
   end
 
@@ -3836,7 +3836,7 @@ class HVAC
     end
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(fault_program)
   end
 
