@@ -1581,7 +1581,7 @@ class Waterheater
     end
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
-    new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
+    new_heater.setHeaterThermalEfficiency(2.0) unless eta_c.nil?
     new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
     configure_setpoint_schedule(new_heater, t_set_c, model)
     new_heater.setMaximumTemperatureLimit(99.0)
