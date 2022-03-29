@@ -49,10 +49,7 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                           # noqa: E501
                           )
 
-    def get_wall_assembly_rvalue(self, v2_wall, wall):
-        return convert_to_type(float, self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
-
-    def every_wall_layer_has_nominal_rvalue(self, v2_wall, wall):
+    def every_wall_layer_has_nominal_rvalue(self, wall):
         # This variable will be true if every wall layer has a NominalRValue *or*
         # if there are no insulation layers
         wall_layers = self.xpath(wall, 'h:Insulation/h:Layer', aslist=True)
@@ -88,8 +85,9 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
         return every_layer_has_nominal_rvalue
 
-    def get_attic_knee_walls(self, attic, b):
+    def get_attic_knee_walls(self, attic):
         knee_walls = []
+        b = self.xpath(attic, 'ancestor::h:Building')
         for kneewall_idref in self.xpath(attic, 'h:AttachedToWall/@idref', aslist=True):
             wall = self.xpath(
                 b,
@@ -104,11 +102,9 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
     def get_attic_type(self, attic, atticid):
         if self.xpath(attic,
-                      'h:AtticType/h:Attic/h:CapeCod or boolean(h:AtticType/h:FlatRoof) or boolean('
-                      'h:AtticType/h:CathedralCeiling)'):  # noqa: E501
+                      'h:AtticType/h:Attic/h:CapeCod or boolean(h:AtticType/h:FlatRoof) or '
+                      'boolean(h:AtticType/h:CathedralCeiling) or boolean(h:AtticType/h:Attic/h:Conditioned)'):
             return 'cath_ceiling'
-        elif self.xpath(attic, 'boolean(h:AtticType/h:Attic/h:Conditioned)'):
-            return 'cond_attic'
         elif self.xpath(attic, 'boolean(h:AtticType/h:Attic)'):
             return 'vented_attic'
         else:
@@ -116,7 +112,7 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                 'Attic {}: Cannot translate HPXML AtticType to HEScore rooftype.'.format(atticid))
 
     def get_attic_floor_rvalue(self, attic, b):
-        frame_floors = self.get_attic_floors(attic, b)
+        frame_floors = self.get_attic_floors(attic)
         if len(frame_floors) == 0:
             return 0
         if len(frame_floors) == 1:
@@ -138,7 +134,7 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
         return floor_r
 
     def get_attic_floor_assembly_rvalue(self, attic, b):
-        frame_floors = self.get_attic_floors(attic, b)
+        frame_floors = self.get_attic_floors(attic)
         if len(frame_floors) == 0:
             return None
 
@@ -160,7 +156,7 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
         return convert_to_type(float, floor_r)
 
     def every_attic_floor_layer_has_nominal_rvalue(self, attic, b):
-        frame_floors = self.get_attic_floors(attic, b)
+        frame_floors = self.get_attic_floors(attic)
         every_layer_has_nominal_rvalue = True  # Considered to have nominal R-value unless assembly R-value is used
         for frame_floor in frame_floors:
             for layer in self.xpath(frame_floor, 'h:Insulation/h:Layer', aslist=True):
@@ -173,56 +169,26 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
 
         return every_layer_has_nominal_rvalue
 
-    def get_attic_floors(self, attic, b):
-        floor_idref = self.xpath(attic, 'h:AttachedToFrameFloor/@idref')
+    def get_attic_floors(self, attic):
+        floor_idref = self.xpath(attic, 'h:AttachedToFrameFloor/@idref', aslist=True)
         # No frame floor attached
-        if floor_idref is None:
+        if not floor_idref:
             return []
+        b = self.xpath(attic, 'ancestor::h:Building')
         frame_floors = self.xpath(b, '//h:FrameFloor[contains("{}",h:SystemIdentifier/@id)]'.format(floor_idref),
                                   aslist=True, raise_err=True)
 
         return frame_floors
 
-    def get_attic_area(self, attic, is_one_roof, footprint_area, roofs, b):
-        # If frame floor specified, look at frame floor for areas, otherwise, roofs. If frame floor is referred
-        # without area, will error out no matter if roof is there if there's more than one attics(area for each
-        # required).
-        # (Should we do in this way?)
-        frame_floors = self.get_attic_floors(attic, b)
-        if len(frame_floors) > 1:
-            # sum frame floor areas if there're more than one frame floors attached
-            try:
-                return sum(map(lambda x: convert_to_type(float, self.xpath(x, 'h:Area/text()')), frame_floors))
-            except TypeError:
-                raise TranslationError('If there are more than one FrameFloor elements attached to attic, '
-                                       'each needs an area.')
-        elif len(frame_floors) == 1:
-            # return frame floor area if there's only one frame floor area
-            area = convert_to_type(float, self.xpath(frame_floors[0], 'h:Area/text()'))
-
-        # no frame floor attached
+    def get_ceiling_area(self, attic):
+        frame_floors = self.get_attic_floors(attic)
+        if len(frame_floors) >= 1:
+            return sum(float(self.xpath(x, 'h:Area/text()', raise_err=True)) for x in frame_floors)
         else:
-            # Otherwise, get area from roof element
-            if len(roofs) > 1:
-                try:
-                    return sum(map(lambda x: convert_to_type(float, self.xpath(x, 'h:Area/text()')), roofs))
-                except TypeError:
-                    raise TranslationError('If there are more than one Roof elements attached to attic, '
-                                           'each needs an area.')
-            else:
-                area = convert_to_type(float, self.xpath(roofs[0], 'h:Area/text()'))
-
-        if area is None:
-            if is_one_roof:
-                return footprint_area
-            else:
-                raise TranslationError('If there are more than one Attic elements, each needs an area. Please '
-                                       'specify under its attached FrameFloor/Roof element.')
-        else:
-            return area
+            raise TranslationError('For vented attics, a FrameFloor needs to be referenced to determine ceiling_area.')
 
     def get_attic_roof_area(self, roof):
-        return self.xpath(roof, 'h:Area/text()')
+        return float(self.xpath(roof, 'h:Area/text()', raise_err=True))
 
     def get_framefloor_assembly_rvalue(self, v2_framefloor, framefloor):
         return convert_to_type(float, self.xpath(framefloor, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))

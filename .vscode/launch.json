@@ -6,14 +6,13 @@
     "configurations": [
 
         {
-            "name": "Debug Open HPXML File",
+            "name": "Debug Open JSON File",
             "type": "Ruby",
             "request": "launch",
-            "program": "/usr/local/openstudio-3.0.0/Ruby/openstudio_cli.rb",
+            "program": "/usr/local/openstudio-3.3.0/Ruby/openstudio_cli.rb",
             "args": [
-                "--no-ssl",
                 "${workspaceRoot}/workflow/run_simulation.rb",
-                "-x", "${file}"
+                "-j", "${file}"
             ]
         },
         {
@@ -22,8 +21,14 @@
             "request": "launch",
             "program": "${workspaceRoot}/measures/HEScoreRuleset/tests/test_hescore_ruleset.rb",
             "args": [
-                "-n", "test_foundation_area_lookup"
+                "-n", "test_regression_files"
             ]
+        },
+        {
+            "name": "Run Python File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
         }
     ]
 }

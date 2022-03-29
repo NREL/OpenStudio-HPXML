@@ -24,7 +24,7 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "roof_area": 1859.0,
+          "ceiling_area": 1859.0,
           "roof_assembly_code": "rfrb00co",
           "roof_color": "medium_dark",
           "roof_type": "vented_attic",
