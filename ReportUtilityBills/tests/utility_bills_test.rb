@@ -21,6 +21,12 @@ class ReportUtilityBillsTest < MiniTest::Test
   # - Cooking Range: Propane
   # - Water Heater: Oil Standard
   # - PV System: None, 1.0 kW, 10.0 kW
+  # - Timestep: 10 min
+  # - User-Specified rates (calculated using Constants.Auto):
+  #   - Electricity: 0.1313 $/kWh
+  #   - Natural Gas: 0.8596819457436857 $/therm
+  #   - Oil: 3.495346153846154 $/gal
+  #   - Propane: 2.4532692307692305 $/gal
   # - All other options left at default values
   # Then retrieve 1.csv from output folder, copy it, rename it
 
@@ -42,19 +48,20 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_grid_connection_fee_units'] = '$/kW'
     @args_hash['pv_monthly_grid_connection_fee'] = 0.0
 
+    # From BEopt Output screen (Utility Bills $/yr)
     @expected_bills = {
-      'Electricity: Fixed ($)' => 96.0,
-      'Electricity: Marginal ($)' => 684.54,
-      'Electricity: PV Credit ($)' => 0.0,
-      'Electricity: Total ($)' => 780.54,
-      'Natural Gas: Fixed ($)' => 96.0,
-      'Natural Gas: Marginal ($)' => 171.54,
-      'Natural Gas: Total ($)' => 267.54,
-      'Fuel Oil: Total ($)' => 462.48,
-      'Propane: Total ($)' => 76.3,
-      'Wood Cord: Total ($)' => 0.0,
-      'Wood Pellets: Total ($)' => 0.0,
-      'Coal: Total ($)' => 0.0
+      'Electricity: Fixed ($)' => 96,
+      'Electricity: Marginal ($)' => 691,
+      'Electricity: PV Credit ($)' => 0,
+      'Electricity: Total ($)' => 787,
+      'Natural Gas: Fixed ($)' => 96,
+      'Natural Gas: Marginal ($)' => 171,
+      'Natural Gas: Total ($)' => 267,
+      'Fuel Oil: Total ($)' => 462,
+      'Propane: Total ($)' => 76,
+      'Wood Cord: Total ($)' => 0,
+      'Wood Pellets: Total ($)' => 0,
+      'Coal: Total ($)' => 0
     }
 
     @measure = ReportUtilityBills.new
@@ -66,8 +73,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     _load_timeseries(fuels, '../tests/PV_None.csv')
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, [], 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW
@@ -76,10 +83,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -192.85
-    @expected_bills['Electricity: Total ($)'] = 587.68
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -195
+    @expected_bills['Electricity: Total ($)'] = 592
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW
@@ -88,10 +95,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -973.09
-    @expected_bills['Electricity: Total ($)'] = -192.55
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -980
+    @expected_bills['Electricity: Total ($)'] = -193
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW_retail
@@ -101,10 +108,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -1934.93
-    @expected_bills['Electricity: Total ($)'] = -1154.4
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -1954
+    @expected_bills['Electricity: Total ($)'] = -1167
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_feed_in_tariff
@@ -114,10 +121,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -178.02
-    @expected_bills['Electricity: Total ($)'] = 602.52
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -178
+    @expected_bills['Electricity: Total ($)'] = 609
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW_feed_in_tariff
@@ -127,10 +134,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -1786.09
-    @expected_bills['Electricity: Total ($)'] = -1005.56
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: PV Credit ($)'] = -1786
+    @expected_bills['Electricity: Total ($)'] = -999
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars_per_kW
@@ -140,11 +147,11 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 126.0
-    @expected_bills['Electricity: PV Credit ($)'] = -192.85
-    @expected_bills['Electricity: Total ($)'] = 617.68
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 126
+    @expected_bills['Electricity: PV Credit ($)'] = -195
+    @expected_bills['Electricity: Total ($)'] = 622
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars
@@ -155,81 +162,85 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header.state_code, @hpxml.pv_systems, 2007)
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 186.0
-    @expected_bills['Electricity: PV Credit ($)'] = -192.85
-    @expected_bills['Electricity: Total ($)'] = 677.68
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 186
+    @expected_bills['Electricity: PV Credit ($)'] = -195
+    @expected_bills['Electricity: Total ($)'] = 682
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_workflow_wood_cord
+    # expected values not from BEopt
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-wood-only.xml'
     @args_hash['wood_cord_marginal_rate'] = '0.0500'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1174.03
-    @expected_bills['Electricity: Total ($)'] = 1270.03
-    @expected_bills['Natural Gas: Fixed ($)'] = 0.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 0.0
-    @expected_bills['Natural Gas: Total ($)'] = 0.0
-    @expected_bills['Fuel Oil: Total ($)'] = 0.0
-    @expected_bills['Propane: Total ($)'] = 0.0
-    @expected_bills['Wood Cord: Total ($)'] = 752.9
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 96
+    @expected_bills['Electricity: Marginal ($)'] = 1186
+    @expected_bills['Electricity: Total ($)'] = 1282
+    @expected_bills['Natural Gas: Fixed ($)'] = 0
+    @expected_bills['Natural Gas: Marginal ($)'] = 0
+    @expected_bills['Natural Gas: Total ($)'] = 0
+    @expected_bills['Fuel Oil: Total ($)'] = 0
+    @expected_bills['Propane: Total ($)'] = 0
+    @expected_bills['Wood Cord: Total ($)'] = 753
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_workflow_wood_pellets
+    # expected values not from BEopt
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-stove-wood-pellets-only.xml'
     @args_hash['wood_pellets_marginal_rate'] = '0.0500'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1160.78
-    @expected_bills['Electricity: Total ($)'] = 1256.78
-    @expected_bills['Natural Gas: Fixed ($)'] = 0.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 0.0
-    @expected_bills['Natural Gas: Total ($)'] = 0.0
-    @expected_bills['Fuel Oil: Total ($)'] = 0.0
-    @expected_bills['Propane: Total ($)'] = 0.0
-    @expected_bills['Wood Pellets: Total ($)'] = 713.45
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 96
+    @expected_bills['Electricity: Marginal ($)'] = 1172
+    @expected_bills['Electricity: Total ($)'] = 1268
+    @expected_bills['Natural Gas: Fixed ($)'] = 0
+    @expected_bills['Natural Gas: Marginal ($)'] = 0
+    @expected_bills['Natural Gas: Total ($)'] = 0
+    @expected_bills['Fuel Oil: Total ($)'] = 0
+    @expected_bills['Propane: Total ($)'] = 0
+    @expected_bills['Wood Pellets: Total ($)'] = 713
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_workflow_coal
+    # expected values not from BEopt
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-coal-only.xml'
     @args_hash['coal_marginal_rate'] = '0.0500'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1174.03
-    @expected_bills['Electricity: Total ($)'] = 1270.03
-    @expected_bills['Natural Gas: Fixed ($)'] = 0.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 0.0
-    @expected_bills['Natural Gas: Total ($)'] = 0.0
-    @expected_bills['Fuel Oil: Total ($)'] = 0.0
-    @expected_bills['Propane: Total ($)'] = 0.0
-    @expected_bills['Coal: Total ($)'] = 752.9
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 96
+    @expected_bills['Electricity: Marginal ($)'] = 1186
+    @expected_bills['Electricity: Total ($)'] = 1282
+    @expected_bills['Natural Gas: Fixed ($)'] = 0
+    @expected_bills['Natural Gas: Marginal ($)'] = 0
+    @expected_bills['Natural Gas: Total ($)'] = 0
+    @expected_bills['Fuel Oil: Total ($)'] = 0
+    @expected_bills['Propane: Total ($)'] = 0
+    @expected_bills['Coal: Total ($)'] = 753
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_workflow_leap_year
+    # expected values not from BEopt
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-location-AMY-2012.xml'
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
-    actual_bills = get_actual_bills(bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 96.0
-    @expected_bills['Electricity: Marginal ($)'] = 1325.62
-    @expected_bills['Electricity: Total ($)'] = 1421.62
-    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
-    @expected_bills['Natural Gas: Marginal ($)'] = 182.63
-    @expected_bills['Natural Gas: Total ($)'] = 278.63
-    @expected_bills['Fuel Oil: Total ($)'] = 0.0
-    @expected_bills['Propane: Total ($)'] = 0.0
-    assert_equal(@expected_bills, actual_bills)
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 96
+    @expected_bills['Electricity: Marginal ($)'] = 1325
+    @expected_bills['Electricity: Total ($)'] = 1421
+    @expected_bills['Natural Gas: Fixed ($)'] = 96
+    @expected_bills['Natural Gas: Marginal ($)'] = 182
+    @expected_bills['Natural Gas: Total ($)'] = 278
+    @expected_bills['Fuel Oil: Total ($)'] = 0
+    @expected_bills['Propane: Total ($)'] = 0
+    _check_bills(@expected_bills, actual_bills)
   end
 
   def test_warning_region
@@ -269,7 +280,16 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(!File.exist?(bills_csv))
   end
 
-  def get_actual_bills(bills_csv)
+  def _check_bills(expected_bills, actual_bills)
+    bills = expected_bills.keys | actual_bills.keys
+    bills.each do |bill|
+      assert(expected_bills.keys.include?(bill))
+      assert(actual_bills.keys.include?(bill))
+      assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
+    end
+  end
+
+  def _get_actual_bills(bills_csv)
     actual_bills = {}
     File.readlines(bills_csv).each do |line|
       next if line.strip.empty?
