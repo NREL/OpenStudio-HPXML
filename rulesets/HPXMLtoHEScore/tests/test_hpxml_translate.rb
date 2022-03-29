@@ -8,7 +8,7 @@ require 'openstudio/measure/ShowRunnerOutput'
 require_relative '../measure.rb'
 require 'fileutils'
 
-class HEScoreRulesetTest < MiniTest::Test
+class HPXMLtoHEScoreTest < MiniTest::Test
   def test_translation
     this_dir = File.dirname(__FILE__)
 
