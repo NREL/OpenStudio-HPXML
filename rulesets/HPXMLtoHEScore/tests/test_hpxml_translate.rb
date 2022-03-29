@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/minitest_helper'
+require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper.rb'
+require 'oga'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require_relative '../measure.rb'
@@ -13,10 +15,17 @@ class HEScoreRulesetTest < MiniTest::Test
     args_hash = {}
 
     Dir["#{this_dir}/../../../hescore-hpxml/examples/*.xml"].sort.each do |hpxml|
-      puts "Testing #{File.absolute_path(hpxml)}..."
-      
       args_hash['hpxml_path'] = File.absolute_path(hpxml)
       args_hash['output_path'] = File.absolute_path(hpxml).gsub('.xml', '.json.out')
+      
+      hpxml_doc = XMLHelper.get_element(XMLHelper.parse_file(args_hash['hpxml_path']), '/HPXML')
+      software_program = XMLHelper.get_element(XMLHelper.get_element(hpxml_doc, 'SoftwareInfo'), 'SoftwareProgramUsed')
+      if not software_program.nil?
+        software_program = software_program.inner_text
+      end
+      next unless software_program == 'ResStock'  # only test resstock-generated xmls
+
+      puts "Testing #{File.absolute_path(hpxml)}..."
 
       _test_measure(args_hash)
       FileUtils.rm_f(args_hash['output_path']) # Cleanup

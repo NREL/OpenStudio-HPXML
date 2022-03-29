@@ -16,7 +16,7 @@ class HPXMLtoHEScore < OpenStudio::Measure::ModelMeasure
 
   # human readable description
   def description
-    return 'Translates HPXML files to a Home Energy Score input json file'
+    return 'Translates ResStock-generated HPXML files to a Home Energy Score input json file'
   end
 
   # human readable description of modeling approach
