@@ -37,9 +37,9 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Houston, TX</Name>
+          <Name>Dallas, TX</Name>
           <extension>
-            <EPWFilePath>USA_TX_Houston-Bush.Intercontinental.AP.722430_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>

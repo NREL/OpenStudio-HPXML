@@ -48,7 +48,7 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Cape May Co</Name>
+          <Name>Cape May, NJ</Name>
           <WMO>745966</WMO>
           <extension>
             <EPWFilePath>USA_NJ_Cape.May.County.AP.745966_TMY3.epw</EPWFilePath>
@@ -116,13 +116,13 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>239.002092</Area>
+            <Area>239.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>12.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
-              <AssemblyEffectiveRValue>20.30034851</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>20.3</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>25.65</NominalRValue>
@@ -138,7 +138,7 @@
             <Area>232.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>15.4170089</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>15.4</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>11.4</NominalRValue>
@@ -156,11 +156,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>1863.210133</Area>
+            <Area>1863.2</Area>
             <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>10.08530272</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>10.1</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>6.3</NominalRValue>
@@ -178,7 +178,7 @@
             <Area>39.0</Area>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>8.846163668</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>8.8</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>11.4</NominalRValue>
@@ -209,7 +209,7 @@
             <Area>2455.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>18.30316878</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.3</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>32.4</NominalRValue>
@@ -534,12 +534,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>586.8016</RatedAnnualkWh>
+          <RatedAnnualkWh>587.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
-          <RatedAnnualkWh>577.30288</RatedAnnualkWh>
+          <RatedAnnualkWh>577.3</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

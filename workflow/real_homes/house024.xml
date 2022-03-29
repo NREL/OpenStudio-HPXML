@@ -48,7 +48,7 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Wilmington Newcastle Co AP</Name>
+          <Name>Wilmington, DE</Name>
           <WMO>724089</WMO>
           <extension>
             <EPWFilePath>USA_DE_Wilmington-New.Castle.County.AP.724089_TMY3.epw</EPWFilePath>
@@ -150,7 +150,7 @@
             <Area>140.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>3.844142857</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.8</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -166,11 +166,11 @@
             <WallType>
               <ConcreteMasonryUnit/>
             </WallType>
-            <Area>828.8353601</Area>
+            <Area>828.8</Area>
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>4.824</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.8</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -184,11 +184,11 @@
             <WallType>
               <ConcreteMasonryUnit/>
             </WallType>
-            <Area>828.8353601</Area>
+            <Area>828.8</Area>
             <Siding>brick veneer</Siding>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>5.99958472</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>6.0</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -219,9 +219,9 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Length>69.17018785</Length>
+            <Length>69.2</Length>
             <Height>6.83</Height>
-            <Area>472.432383</Area>
+            <Area>472.4</Area>
             <DepthBelowGrade>5.83</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
@@ -249,7 +249,7 @@
             <Area>800.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>13.72193052</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>13.7</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>20.0</NominalRValue>
@@ -263,7 +263,7 @@
             <Area>150.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>7.170389327</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>7.2</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>6.0</NominalRValue>
@@ -277,7 +277,7 @@
             <Area>552.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
-              <AssemblyEffectiveRValue>4.877132617</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.9</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -291,7 +291,7 @@
             <Area>390.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor4Insulation'/>
-              <AssemblyEffectiveRValue>4.83956016</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.8</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -304,7 +304,7 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>552.0</Area>
-            <ExposedPerimeter>69.17018785</ExposedPerimeter>
+            <ExposedPerimeter>69.2</ExposedPerimeter>
             <DepthBelowGrade>5.83</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -346,7 +346,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>61.23816254</Area>
+            <Area>61.2</Area>
             <Azimuth>0</Azimuth>
             <Orientation>north</Orientation>
             <FrameType>
@@ -466,13 +466,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>7.142857143</RValue>
+            <RValue>7.1</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>7.142857143</RValue>
+            <RValue>7.1</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -513,7 +513,7 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetbackTempHeatingSeason>68.0</SetbackTempHeatingSeason>
             <TotalSetbackHoursperWeekHeating>0</TotalSetbackHoursperWeekHeating>
-            <SetupTempCoolingSeason>77.27272727</SetupTempCoolingSeason>
+            <SetupTempCoolingSeason>77.3</SetupTempCoolingSeason>
             <SetpointTempCoolingSeason>77.0</SetpointTempCoolingSeason>
             <TotalSetupHoursperWeekCooling>0</TotalSetupHoursperWeekCooling>
           </HVACControl>
@@ -605,7 +605,7 @@
                 <JacketRValue>0.0</JacketRValue>
               </Jacket>
             </WaterHeaterInsulation>
-            <HotWaterTemperature>133.3333333</HotWaterTemperature>
+            <HotWaterTemperature>133.3</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
@@ -643,7 +643,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>586.8016</RatedAnnualkWh>
+          <RatedAnnualkWh>587.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

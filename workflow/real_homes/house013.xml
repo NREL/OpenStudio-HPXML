@@ -37,9 +37,9 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Asheville, NC</Name>
+          <Name>Charlotte, NC</Name>
           <extension>
-            <EPWFilePath>USA_NC_Asheville.Rgnl.AP.723150_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_NC_Charlotte-Douglas.Intl.AP.723140_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>

@@ -48,7 +48,7 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Wilmington Newcastle Co AP</Name>
+          <Name>Wilmington, DE</Name>
           <WMO>724089</WMO>
           <extension>
             <EPWFilePath>USA_DE_Wilmington-New.Castle.County.AP.724089_TMY3.epw</EPWFilePath>
@@ -135,10 +135,10 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>145.2675692</Area>
+            <Area>145.3</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>12.89207716</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>12.9</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>8.0</NominalRValue>
@@ -156,11 +156,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>1647.73001</Area>
+            <Area>1647.7</Area>
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>10.86646224</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>10.9</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>10.5</NominalRValue>
@@ -176,11 +176,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>706.1700044</Area>
+            <Area>706.2</Area>
             <Siding>brick veneer</Siding>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>12.73616993</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>12.7</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>10.5</NominalRValue>
@@ -198,7 +198,7 @@
             <Area>100.0</Area>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
-              <AssemblyEffectiveRValue>9.313598738</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>9.3</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>8.0</NominalRValue>
@@ -211,13 +211,13 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Length>145.2675692</Length>
+            <Length>145.3</Length>
             <Height>9.0</Height>
-            <Area>1307.408123</Area>
+            <Area>1307.4</Area>
             <DepthBelowGrade>8.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
-              <AssemblyEffectiveRValue>3.594367174</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.6</AssemblyEffectiveRValue>
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
@@ -229,7 +229,7 @@
             <Area>1092.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>14.18240747</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>14.2</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>20.0</NominalRValue>
@@ -243,7 +243,7 @@
             <Area>200.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>14.18240747</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>14.2</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>20.0</NominalRValue>
@@ -256,7 +256,7 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1292.0</Area>
-            <ExposedPerimeter>145.2675692</ExposedPerimeter>
+            <ExposedPerimeter>145.3</ExposedPerimeter>
             <DepthBelowGrade>8.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -335,7 +335,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>101.4318215</Area>
+            <Area>101.4</Area>
             <Azimuth>270</Azimuth>
             <Orientation>west</Orientation>
             <FrameType>
@@ -536,12 +536,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>717.0548</RatedAnnualkWh>
+          <RatedAnnualkWh>717.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
-          <RatedAnnualkWh>516.3004</RatedAnnualkWh>
+          <RatedAnnualkWh>516.0</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

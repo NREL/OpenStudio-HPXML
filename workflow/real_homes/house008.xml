@@ -38,9 +38,9 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Minneapolis, MN</Name>
+          <Name>Duluth, MN</Name>
           <extension>
-            <EPWFilePath>USA_MN_Minneapolis-St.Paul.Intl.AP.726580_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_MN_Duluth.Intl.AP.727450_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>

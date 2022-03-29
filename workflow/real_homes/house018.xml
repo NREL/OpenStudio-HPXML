@@ -48,7 +48,7 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Cape May Co</Name>
+          <Name>Cape May, NJ</Name>
           <WMO>745966</WMO>
           <extension>
             <EPWFilePath>USA_NJ_Cape.May.County.AP.745966_TMY3.epw</EPWFilePath>
@@ -117,11 +117,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>1233.695803</Area>
+            <Area>1233.7</Area>
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>18.5929037</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.6</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>20.24</NominalRValue>
@@ -151,7 +151,7 @@
             <Area>1456.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>26.87973989</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>26.9</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>27.0</NominalRValue>
@@ -165,7 +165,7 @@
             <Area>1456.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>35.15955207</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>35.2</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>16.2</NominalRValue>
@@ -290,7 +290,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>7.142857143</RValue>
+            <RValue>7.1</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -329,7 +329,7 @@
             <SetpointTempHeatingSeason>66.0</SetpointTempHeatingSeason>
             <SetbackTempHeatingSeason>66.0</SetbackTempHeatingSeason>
             <TotalSetbackHoursperWeekHeating>0</TotalSetbackHoursperWeekHeating>
-            <SetupTempCoolingSeason>79.09090909</SetupTempCoolingSeason>
+            <SetupTempCoolingSeason>79.0</SetupTempCoolingSeason>
             <SetpointTempCoolingSeason>79.0</SetpointTempCoolingSeason>
             <TotalSetupHoursperWeekCooling>0</TotalSetupHoursperWeekCooling>
           </HVACControl>
@@ -462,12 +462,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>717.0548</RatedAnnualkWh>
+          <RatedAnnualkWh>717.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
-          <RatedAnnualkWh>516.3004</RatedAnnualkWh>
+          <RatedAnnualkWh>516.0</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

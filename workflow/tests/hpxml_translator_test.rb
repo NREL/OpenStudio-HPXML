@@ -665,6 +665,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
+      next if err_line.include? 'do not define an enclosure'
       next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
       next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
       next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
@@ -848,6 +849,8 @@ class HPXMLTest < MiniTest::Test
 
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
+    elsif hpxml_path.include? 'real_homes'
+      # nop
     elsif hpxml_path.include? 'base-bldgtype-multifamily'
       assert_equal(0, num_kiva_instances)                                                # no foundation, above dwelling unit
     else
@@ -976,7 +979,7 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Solar absorptance
-      if wall.respond_to? :solar_absorptance
+      if wall.respond_to?(:solar_absorptance) && (not wall.solar_absorptance.nil?)
         hpxml_value = wall.solar_absorptance
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Reflectance'"
         sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
@@ -1314,8 +1317,8 @@ class HPXMLTest < MiniTest::Test
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
     else
-      assert_operator(unmet_hours_htg, :<, 150)
-      assert_operator(unmet_hours_clg, :<, 150)
+      assert_operator(unmet_hours_htg, :<, 350)
+      assert_operator(unmet_hours_clg, :<, 350)
     end
 
     sqlFile.close

@@ -48,10 +48,10 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Dover AFB</Name>
-          <WMO>724088</WMO>
+          <Name>Wilmington, DE</Name>
+          <WMO>724089</WMO>
           <extension>
-            <EPWFilePath>USA_DE_Dover.AFB.724088_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_DE_Wilmington-New.Castle.County.AP.724089_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
@@ -114,7 +114,7 @@
             <Area>150.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>22.62254261</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.6</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>19.0</NominalRValue>
@@ -136,7 +136,7 @@
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>5.200835678</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>5.2</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -167,7 +167,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>12.5741654</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>12.6</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>10.8</NominalRValue>
@@ -201,7 +201,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>120.6204757</Area>
+            <Area>120.6</Area>
             <Azimuth>45</Azimuth>
             <Orientation>northeast</Orientation>
             <FrameType>
@@ -230,7 +230,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>80.41365047</Area>
+            <Area>80.4</Area>
             <Azimuth>135</Azimuth>
             <Orientation>southeast</Orientation>
             <FrameType>
@@ -259,7 +259,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>120.6204757</Area>
+            <Area>120.6</Area>
             <Azimuth>225</Azimuth>
             <Orientation>southwest</Orientation>
             <FrameType>
@@ -288,7 +288,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>80.41365047</Area>
+            <Area>80.4</Area>
             <Azimuth>315</Azimuth>
             <Orientation>northwest</Orientation>
             <FrameType>
@@ -321,13 +321,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -498,12 +498,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>586.8016</RatedAnnualkWh>
+          <RatedAnnualkWh>587.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <Freezer>
           <SystemIdentifier id='Freezer1'/>
-          <RatedAnnualkWh>372.3027</RatedAnnualkWh>
+          <RatedAnnualkWh>372.0</RatedAnnualkWh>
         </Freezer>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>

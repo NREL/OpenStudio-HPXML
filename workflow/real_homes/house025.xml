@@ -48,10 +48,10 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Eliz City Coast Guard AP</Name>
-          <WMO>746943</WMO>
+          <Name>Charlotte, NC</Name>
+          <WMO>723140</WMO>
           <extension>
-            <EPWFilePath>USA_NC_Elizabeth.City.CGAS.746943_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_NC_Charlotte-Douglas.Intl.AP.723140_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
@@ -117,11 +117,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>2474.322601</Area>
+            <Area>2474.3</Area>
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>10.06112449</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>10.1</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>9.45</NominalRValue>
@@ -135,7 +135,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Height>3.0</Height>
-            <Area>611.1899999999999</Area>
+            <Area>611.2</Area>
             <DepthBelowGrade>2.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
@@ -151,7 +151,7 @@
             <Area>1297.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>31.57487735</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>31.6</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>34.2</NominalRValue>
@@ -165,7 +165,7 @@
             <Area>1297.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>4.139457836</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.1</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -199,7 +199,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>80.33514938</Area>
+            <Area>80.3</Area>
             <Azimuth>45</Azimuth>
             <Orientation>northeast</Orientation>
             <FrameType>
@@ -209,7 +209,7 @@
             <GlassType>low-e</GlassType>
             <GasFill>air</GasFill>
             <UFactor>0.37</UFactor>
-            <SHGC>0.477454545</SHGC>
+            <SHGC>0.48</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window1ExteriorShading'/>
               <Type>none</Type>
@@ -228,7 +228,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>60.25136203</Area>
+            <Area>60.3</Area>
             <Azimuth>135</Azimuth>
             <Orientation>southeast</Orientation>
             <FrameType>
@@ -238,7 +238,7 @@
             <GlassType>low-e</GlassType>
             <GasFill>air</GasFill>
             <UFactor>0.37</UFactor>
-            <SHGC>0.477454545</SHGC>
+            <SHGC>0.48</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window2ExteriorShading'/>
               <Type>none</Type>
@@ -257,7 +257,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>80.33514938</Area>
+            <Area>80.3</Area>
             <Azimuth>225</Azimuth>
             <Orientation>southwest</Orientation>
             <FrameType>
@@ -267,7 +267,7 @@
             <GlassType>low-e</GlassType>
             <GasFill>air</GasFill>
             <UFactor>0.37</UFactor>
-            <SHGC>0.477454545</SHGC>
+            <SHGC>0.48</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window3ExteriorShading'/>
               <Type>none</Type>
@@ -286,7 +286,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>60.25136203</Area>
+            <Area>60.3</Area>
             <Azimuth>315</Azimuth>
             <Orientation>northwest</Orientation>
             <FrameType>
@@ -296,7 +296,7 @@
             <GlassType>low-e</GlassType>
             <GasFill>air</GasFill>
             <UFactor>0.37</UFactor>
-            <SHGC>0.477454545</SHGC>
+            <SHGC>0.48</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window4ExteriorShading'/>
               <Type>none</Type>
@@ -319,19 +319,19 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>20.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>20.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door3'/>
             <AttachedToWall idref='Wall1'/>
             <Area>20.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -564,12 +564,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>586.094432</RatedAnnualkWh>
+          <RatedAnnualkWh>586.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
-          <RatedAnnualkWh>615.4764</RatedAnnualkWh>
+          <RatedAnnualkWh>616.0</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
