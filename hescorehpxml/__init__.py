@@ -7,7 +7,7 @@ from hescorehpxml.base import HPXMLtoHEScoreTranslatorBase
 from hescorehpxml.hpxml2 import HPXML2toHEScoreTranslator
 from hescorehpxml.hpxml3 import HPXML3toHEScoreTranslator
 from hescorehpxml.hpxml4 import HPXML4toHEScoreTranslator
-from .exceptions import HPXMLtoHEScoreError
+from hescorehpxml.exceptions import HPXMLtoHEScoreError
 
 
 def HPXMLtoHEScoreTranslator(hpxmlfilename):
