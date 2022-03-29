@@ -346,6 +346,7 @@ Depending on the outputs requested, the file may include:
    ===================================  ==================================================================================================================================
    Type                                 Notes
    ===================================  ==================================================================================================================================
+   Total Consumptions                   Energy use for building total.
    Fuel Consumptions                    Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
    End Use Consumptions                 Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
    Emissions                            Emissions (e.g., CO2) for each scenario defined in the HPXML file.
@@ -355,11 +356,13 @@ Depending on the outputs requested, the file may include:
    Zone Temperatures                    Average temperatures (in deg-F) for each space modeled (e.g., living space, attic, garage, basement, crawlspace, etc.).
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
+   EnergyPlus Output Variables          These are optional and can be requested with the ReportSimulationOutput ``user_output_variables`` argument.
    ===================================  ==================================================================================================================================
 
 Timeseries outputs can be one of the following frequencies: hourly, daily, monthly, or timestep (i.e., equal to the simulation timestep, which defaults to an hour but can be sub-hourly).
 
 Timestamps in the output use the end-of-hour (or end-of-day for daily frequency, etc.) convention.
+Additional timestamp columns can be optionally requested that reflect daylight saving time (DST) and/or coordinated universal time (UTC).
 Most outputs will be summed over the hour (e.g., energy) but some will be averaged over the hour (e.g., temperatures, airflows).
 
 .. _hpxml_outputs:

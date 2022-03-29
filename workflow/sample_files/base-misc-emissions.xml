@@ -13,26 +13,30 @@
       </SimulationControl>
       <EmissionsScenarios>
         <EmissionsScenario>
-          <Name>Cambium 2022 Hourly MidCase AER Using RMPA Region</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <Name>Cambium Hourly MidCase LRMER RMPA</Name>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv</ScheduleFilePath>
+            <NumberofHeaderRows>1</NumberofHeaderRows>
+            <ColumnNumber>17</ColumnNumber>
           </EmissionsFactor>
         </EmissionsScenario>
         <EmissionsScenario>
-          <Name>Cambium 2022 Hourly MidCase AER Using National</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <Name>Cambium Hourly LowRECosts LRMER RMPA</Name>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv</ScheduleFilePath>
+            <NumberofHeaderRows>1</NumberofHeaderRows>
+            <ColumnNumber>17</ColumnNumber>
           </EmissionsFactor>
         </EmissionsScenario>
         <EmissionsScenario>
-          <Name>Cambium 2022 Annual MidCase AER Using National</Name>
-          <EmissionsType>CO2</EmissionsType>
+          <Name>Cambium Annual MidCase AER National</Name>
+          <EmissionsType>CO2e</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
@@ -40,7 +44,7 @@
           </EmissionsFactor>
         </EmissionsScenario>
         <EmissionsScenario>
-          <Name>eGRID 2019 Total Emissions Rate Using RMPA Region</Name>
+          <Name>eGRID RMPA</Name>
           <EmissionsType>SO2</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
@@ -49,7 +53,7 @@
           </EmissionsFactor>
         </EmissionsScenario>
         <EmissionsScenario>
-          <Name>eGRID 2019 Total Emissions Rate Using RMPA Region</Name>
+          <Name>eGRID RMPA</Name>
           <EmissionsType>NOx</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
@@ -67,6 +71,9 @@
       <Address>
         <StateCode>CO</StateCode>
       </Address>
+      <eGridRegion>Western</eGridRegion>
+      <eGridSubregion>RMPA</eGridSubregion>
+      <CambiumRegionGEA>RMPAc</CambiumRegionGEA>
     </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
@@ -500,6 +507,10 @@
               <Units>kWh</Units>
               <Value>20.0</Value>
             </NominalCapacity>
+            <UsableCapacity>
+              <Units>kWh</Units>
+              <Value>18.0</Value>
+            </UsableCapacity>
             <RatedPowerOutput>15000.0</RatedPowerOutput>
           </Battery>
         </Batteries>

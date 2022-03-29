@@ -865,10 +865,12 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code, :zip_code,
+             :egrid_region, :egrid_subregion, :cambium_region_gea, :time_zone_utc_offset,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths,
+             :extension_properties]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
 
@@ -954,8 +956,7 @@ class HPXML < Object
         end
       end
       if (not @use_max_load_for_heat_pumps.nil?) || (not @allow_increased_fixed_capacities.nil?)
-        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        hvac_sizing_control = XMLHelper.add_element(extension, 'HVACSizingControl')
+        hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'HVACSizingControl'])
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
@@ -965,18 +966,39 @@ class HPXML < Object
           XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
         end
       end
+      if (not @extension_properties.nil?) && (not @extension_properties.empty?)
+        properties = XMLHelper.create_elements_as_needed(software_info, ['extension', 'AdditionalProperties'])
+        @extension_properties.each do |key, value|
+          XMLHelper.add_element(properties, key, value, :string)
+        end
+      end
       @emissions_scenarios.to_oga(software_info)
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
-      if (not @state_code.nil?) || (not @zip_code.nil?)
+      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?)
         site = XMLHelper.add_element(building, 'Site')
         site_id = XMLHelper.add_element(site, 'SiteID')
         XMLHelper.add_attribute(site_id, 'id', 'SiteID')
-        address = XMLHelper.add_element(site, 'Address')
-        XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
-        XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
+        if (not @state_code.nil?) || (not @zip_code.nil?)
+          address = XMLHelper.add_element(site, 'Address')
+          XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
+          XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
+        end
+        if not @egrid_region.nil?
+          XMLHelper.add_element(site, 'eGridRegion', @egrid_region, :string, @egrid_region_isdefaulted)
+        end
+        if not @egrid_subregion.nil?
+          XMLHelper.add_element(site, 'eGridSubregion', @egrid_subregion, :string, @egrid_subregion_isdefaulted)
+        end
+        if not @cambium_region_gea.nil?
+          XMLHelper.add_element(site, 'CambiumRegionGEA', @cambium_region_gea, :string, @cambium_region_gea_isdefaulted)
+        end
+        if not @time_zone_utc_offset.nil?
+          time_zone = XMLHelper.add_element(site, 'TimeZone')
+          XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted)
+        end
       end
       project_status = XMLHelper.add_element(building, 'ProjectStatus')
       XMLHelper.add_element(project_status, 'EventType', @event_type, :string)
@@ -1009,11 +1031,24 @@ class HPXML < Object
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
       @schedules_filepaths = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @extension_properties = {}
+      XMLHelper.get_elements(hpxml, 'SoftwareInfo/extension/AdditionalProperties').each do |property|
+        property.children.each do |child|
+          next unless child.is_a? Oga::XML::Element
+
+          @extension_properties[child.name] = child.text
+          @extension_properties[child.name] = nil if @extension_properties[child.name].empty?
+        end
+      end
       @emissions_scenarios.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
       @zip_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/ZipCode', :string)
+      @egrid_region = XMLHelper.get_value(hpxml, 'Building/Site/eGridRegion', :string)
+      @egrid_subregion = XMLHelper.get_value(hpxml, 'Building/Site/eGridSubregion', :string)
+      @cambium_region_gea = XMLHelper.get_value(hpxml, 'Building/Site/CambiumRegionGEA', :string)
+      @time_zone_utc_offset = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/UTCOffset', :float)
     end
   end
 
@@ -1038,6 +1073,7 @@ class HPXML < Object
     UnitsLbPerMBtu = 'lb/MBtu'
 
     ATTRS = [:name, :emissions_type, :elec_units, :elec_value, :elec_schedule_filepath,
+             :elec_schedule_number_of_header_rows, :elec_schedule_column_number,
              :natural_gas_units, :natural_gas_value, :propane_units, :propane_value,
              :fuel_oil_units, :fuel_oil_value, :coal_units, :coal_value,
              :wood_units, :wood_value, :wood_pellets_units, :wood_pellets_value]
@@ -1062,6 +1098,8 @@ class HPXML < Object
         XMLHelper.add_element(emissions_factor, 'FuelType', HPXML::FuelTypeElectricity, :string)
         XMLHelper.add_element(emissions_factor, 'Units', @elec_units, :string)
         XMLHelper.add_element(emissions_factor, 'ScheduleFilePath', @elec_schedule_filepath, :string)
+        XMLHelper.add_element(emissions_factor, 'NumberofHeaderRows', @elec_schedule_number_of_header_rows, :integer, @elec_schedule_number_of_header_rows_isdefaulted) unless @elec_schedule_number_of_header_rows.nil?
+        XMLHelper.add_element(emissions_factor, 'ColumnNumber', @elec_schedule_column_number, :integer, @elec_schedule_column_number_isdefaulted) unless @elec_schedule_column_number.nil?
       end
       { HPXML::FuelTypeElectricity => [@elec_units, @elec_units_isdefaulted,
                                        @elec_value, @elec_value_isdefaulted],
@@ -1095,6 +1133,8 @@ class HPXML < Object
       @elec_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Units", :string)
       @elec_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Value", :float)
       @elec_schedule_filepath = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/ScheduleFilePath", :string)
+      @elec_schedule_number_of_header_rows = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/NumberofHeaderRows", :integer)
+      @elec_schedule_column_number = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/ColumnNumber", :integer)
       @natural_gas_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Units", :string)
       @natural_gas_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Value", :float)
       @propane_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypePropane}']/Units", :string)
@@ -2705,7 +2745,7 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :overhangs_depth,
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
              :fraction_operable, :performance_class, :wall_idref]
     attr_accessor(*ATTRS)
@@ -2789,6 +2829,12 @@ class HPXML < Object
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
+      if not @storm_type.nil?
+        storm_window = XMLHelper.add_element(window, 'StormWindow')
+        sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
+        XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
+        XMLHelper.add_element(storm_window, 'GlassType', @storm_type, :string) unless @storm_type.nil?
+      end
       if (not @overhangs_depth.nil?) || (not @overhangs_distance_to_top_of_window.nil?) || (not @overhangs_distance_to_bottom_of_window.nil?)
         overhangs = XMLHelper.add_element(window, 'Overhangs')
         XMLHelper.add_element(overhangs, 'Depth', @overhangs_depth, :float) unless @overhangs_depth.nil?
@@ -2833,6 +2879,7 @@ class HPXML < Object
       @fraction_operable = XMLHelper.get_value(window, 'FractionOperable', :float)
       @performance_class = XMLHelper.get_value(window, 'PerformanceClass', :string)
       @wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
+      @storm_type = XMLHelper.get_value(window, 'StormWindow/GlassType', :string)
     end
   end
 
@@ -2854,7 +2901,7 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :roof_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :roof_idref]
     attr_accessor(*ATTRS)
 
     def roof
@@ -2936,6 +2983,12 @@ class HPXML < Object
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
+      if not @storm_type.nil?
+        storm_window = XMLHelper.add_element(skylight, 'StormWindow')
+        sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
+        XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
+        XMLHelper.add_element(storm_window, 'GlassType', @storm_type, :string) unless @storm_type.nil?
+      end
       if not @roof_idref.nil?
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
         XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
@@ -2967,6 +3020,7 @@ class HPXML < Object
       @interior_shading_factor_summer = XMLHelper.get_value(skylight, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(skylight, 'InteriorShading/WinterShadingCoefficient', :float)
       @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
+      @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
     end
   end
 
@@ -4887,7 +4941,8 @@ class HPXML < Object
 
   class Battery < BaseElement
     ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output,
-             :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage]
+             :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
+             :usable_capacity_kwh, :usable_capacity_ah]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4918,6 +4973,16 @@ class HPXML < Object
         XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
         XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
       end
+      if not @usable_capacity_kwh.nil?
+        nominal_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+      end
+      if not @usable_capacity_ah.nil?
+        nominal_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+      end
       XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
@@ -4931,6 +4996,8 @@ class HPXML < Object
       @type = XMLHelper.get_value(battery, 'BatteryType', :string)
       @nominal_capacity_kwh = XMLHelper.get_value(battery, "NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
       @nominal_capacity_ah = XMLHelper.get_value(battery, "NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+      @usable_capacity_kwh = XMLHelper.get_value(battery, "UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @usable_capacity_ah = XMLHelper.get_value(battery, "UsableCapacity[Units='#{UnitsAh}']/Value", :float)
       @rated_power_output = XMLHelper.get_value(battery, 'RatedPowerOutput', :float)
       @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)

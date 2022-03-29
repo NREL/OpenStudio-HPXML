@@ -56,7 +56,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
-    'base-battery-outside.xml' => 'base.xml',
+    'base-battery.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -160,6 +160,7 @@ def create_hpxmls
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-skylights-storms.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
@@ -167,6 +168,7 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-windows-storms.xml' => 'base.xml',
     'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
@@ -190,6 +192,7 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -200,6 +203,7 @@ def create_hpxmls
     'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
     'base-hvac-autosize-boiler-elec-only.xml' => 'base-hvac-boiler-elec-only.xml',
     'base-hvac-autosize-boiler-gas-central-ac-1-speed.xml' => 'base-hvac-boiler-gas-central-ac-1-speed.xml',
     'base-hvac-autosize-boiler-gas-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -336,8 +340,9 @@ def create_hpxmls
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
+    'base-misc-additional-properties.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
-    'base-misc-emissions.xml' => 'base-pv-battery-outside.xml',
+    'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
@@ -347,19 +352,20 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-pv-battery-ah.xml' => 'base-pv-battery-outside.xml',
-    'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
-    'base-pv-battery-outside-degrades.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery.xml' => 'base-battery.xml',
+    'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
+    'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
-    'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
+    'base-simcontrol-timestep-10-mins.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -399,7 +405,7 @@ def create_hpxmls
       # Apply measure
       success = apply_measures(measures_dir, measures, runner, model)
 
-      # Report warnings/errors
+      # Report errors
       runner.result.stepErrors.each do |s|
         puts "Error: #{s}"
       end
@@ -442,19 +448,6 @@ def create_hpxmls
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
       hpxml_docs[File.basename(hpxml_file)] = deep_copy_object(hpxml_doc)
-
-      # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/hpxml_schema'))
-      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-      if errors.size > 0
-        fail "ERRORS: #{errors}"
-      end
-
-      # Check for errors
-      errors = hpxml.check_for_errors()
-      if errors.size > 0
-        fail "ERRORS: #{errors}"
-      end
     rescue Exception => e
       puts "\n#{e}\n#{e.backtrace.join('\n')}"
       puts "\nError: Did not successfully generate #{hpxml_file}."
@@ -494,6 +487,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   else
     args['hpxml_path'] = "../workflow/sample_files/#{hpxml_file}"
   end
+  args['apply_validation'] = true
 
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
@@ -718,6 +712,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1041,6 +1036,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -1629,9 +1625,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['window_area_back'] = 0
     args['window_area_left'] = 0
     args['window_area_right'] = 0
+  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
+    args['window_ufactor'] = 0.6
+    args['window_storm_type'] = HPXML::WindowGlassTypeLowE
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
+  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+    args['skylight_ufactor'] = 0.6
+    args['skylight_storm_type'] = HPXML::WindowGlassTypeClear
   end
 
   # Foundation
@@ -2173,7 +2175,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   end
 
   # Misc
-  if ['base-misc-defaults.xml'].include? hpxml_file
+  if ['base-misc-additional-properties.xml'].include? hpxml_file
+    args['additional_properties'] = 'LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
     args['geometry_unit_num_bathrooms'] = Constants.Auto
@@ -2250,10 +2254,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['whole_house_fan_flow_rate'] = Constants.Auto
     args['whole_house_fan_power'] = Constants.Auto
   elsif ['base-misc-emissions.xml'].include? hpxml_file
-    args['emissions_scenario_names'] = 'Cambium 2022 Hourly MidCase AER Using RMPA Region, Cambium 2022 Hourly MidCase AER Using National, Cambium 2022 Annual MidCase AER Using National, eGRID 2019 Total Emissions Rate Using RMPA Region, eGRID 2019 Total Emissions Rate Using RMPA Region'
-    args['emissions_types'] = 'CO2, CO2, CO2, SO2, NOx'
+    args['emissions_scenario_names'] = 'Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA'
+    args['emissions_types'] = 'CO2e, CO2e, CO2e, SO2, NOx'
     args['emissions_electricity_units'] = 'kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh'
-    args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv, 392.6, 0.384, 0.67'
+    args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67'
+    args['emissions_electricity_number_of_header_rows'] = '1, 1, , , '
+    args['emissions_electricity_column_numbers'] = '17, 17, , , '
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     args['extra_refrigerator_location'] = Constants.Auto
     args['extra_refrigerator_rated_annual_kwh'] = 700.0
@@ -2356,11 +2362,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   end
 
   # Battery
-  if ['base-battery-outside.xml'].include? hpxml_file
+  if ['base-battery.xml'].include? hpxml_file
     args['battery_location'] = HPXML::LocationOutside
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
-  elsif ['base-pv-battery-outside.xml'].include? hpxml_file
+    args['battery_usable_capacity'] = '18'
+  elsif ['base-pv-battery.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
     args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
@@ -2381,11 +2388,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationGarage
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   end
 
   # Simulation Control
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
-    args['simulation_control_run_period_calendar_year'] = 2008
+    args['simulation_control_run_period_calendar_year'] = 2010
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     args['simulation_control_daylight_saving_enabled'] = true
     args['simulation_control_daylight_saving_period'] = 'Mar 10 - Nov 6'
@@ -2413,6 +2421,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-stochastic-10-mins.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end
@@ -2541,6 +2554,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
+  elsif ['base-misc-emissions.xml'].include? hpxml_file
+    hpxml.header.egrid_region = 'Western'
+    hpxml.header.egrid_subregion = 'RMPA'
+    hpxml.header.cambium_region_gea = 'RMPAc'
   end
 
   # --------------------- #
@@ -4006,6 +4023,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                             fraction_served: 0.25,
                             location: HPXML::LocationLivingSpace)
   end
+  if ['base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
+      'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml'].include? hpxml_file
+    # Switch backup boiler with hydronic distribution to backup furnace with air distribution
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
+    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
+    hpxml.hvac_distributions[0].air_type = HPXML::AirTypeRegularVelocity
+    hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[1].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
+  end
 
   # ------------------ #
   # HPXML WaterHeating #
@@ -4293,13 +4321,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # HPXML Battery #
   # ------------- #
 
-  if ['base-pv-battery-outside-degrades.xml'].include? hpxml_file
+  if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   elsif ['base-pv-battery-ah.xml'].include? hpxml_file
-    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    default_values = Battery.get_battery_default_values()
     hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
-                                                                     default_voltage)
+                                                                     default_values[:nominal_voltage])
+    hpxml.batteries[0].usable_capacity_ah = hpxml.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
     hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
   end
 
   # ---------------- #
@@ -4574,8 +4604,8 @@ def create_schematron_hpxml_validator(hpxml_docs)
   puts 'Generating HPXMLvalidator.xml...'
   elements_in_sample_files = get_elements_from_sample_files(hpxml_docs)
 
-  base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'BaseElements.xsd'))
-  base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
+  hpxml_base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLBaseElements.xsd'))
+  hpxml_base_elements_xsd_doc = Oga.parse_xml(hpxml_base_elements_xsd)
 
   # construct dictionary for enumerations and min/max values of HPXML data types
   hpxml_data_types_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLDataTypes.xsd'))
@@ -4617,7 +4647,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   # construct complexType and group elements dictionary
   complex_type_or_group_dict = {}
   ['//xs:complexType', '//xs:group', '//xs:element'].each do |param|
-    base_elements_xsd_doc.xpath(param).each do |param_type|
+    hpxml_base_elements_xsd_doc.xpath(param).each do |param_type|
       next if param_type.name == 'element' && (not ['XMLTransactionHeaderInformation', 'ProjectStatus', 'SoftwareInfo'].include?(param_type.get('name')))
       next if param_type.get('name').nil?
 
@@ -4632,7 +4662,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
         next unless element.name == 'extension'
 
         base_element_name = element.get('base').to_s
-        base_elements_xsd_doc.xpath("#{param}[@name='#{base_element_name}']").each do |base_element|
+        hpxml_base_elements_xsd_doc.xpath("#{param}[@name='#{base_element_name}']").each do |base_element|
           base_element.each_node do |element|
             elements['base'] << element
           end
