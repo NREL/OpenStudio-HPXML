@@ -233,8 +233,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96
-    @expected_bills['Electricity: Marginal ($)'] = 1325
-    @expected_bills['Electricity: Total ($)'] = 1421
+    @expected_bills['Electricity: Marginal ($)'] = 1339
+    @expected_bills['Electricity: Total ($)'] = 1435
     @expected_bills['Natural Gas: Fixed ($)'] = 96
     @expected_bills['Natural Gas: Marginal ($)'] = 182
     @expected_bills['Natural Gas: Total ($)'] = 278
