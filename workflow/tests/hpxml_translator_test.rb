@@ -24,11 +24,15 @@ class HPXMLTest < MiniTest::Test
     File.delete(sizing_out) if File.exist? sizing_out
 
     xmls = []
-    sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
-      next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
+    sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
+                         File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
+    sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
+    sample_files_dirs.each do |sample_files_dir|
+      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+        next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
-      xmls << File.absolute_path(xml)
+        xmls << File.absolute_path(xml)
+      end
     end
 
     # Test simulations
