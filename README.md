@@ -1,31 +1,39 @@
-OpenStudio-HEScore
-===============
+HPXML to Home Energy Score Translator
+=====================================
 
-An OpenStudio/EnergyPlus simulation workflow that operates on a JSON file produced by DOE's Home Energy Score (HEScore).
+[![CircleCI](https://circleci.com/gh/NREL/hescore-hpxml.svg?style=svg)](https://circleci.com/gh/NREL/hescore-hpxml)
 
-[![ci](https://github.com/NREL/OpenStudio-HEScore/workflows/ci/badge.svg)](https://github.com/NREL/OpenStudio-HEScore/actions)
+This translator script takes an HPXML file or directory of files as an
+input and generates HEScore inputs from it. The HEScore inputs are
+exported as json.
 
-## Setup
+Details of the translation assumptions as well instructions for use can
+be found in [the
+documentation](http://hescore-hpxml.readthedocs.org/en/latest/).
 
-1. Either download [OpenStudio 3.3.0](https://github.com/NREL/OpenStudio/releases/tag/v3.3.0) (at a minimum, install the Command Line Interface and EnergyPlus components) or use the [nrel/openstudio docker image](https://hub.docker.com/r/nrel/openstudio).
-2. Clone or download this repository's source code. 
-3. To obtain all available weather files, run:  
-```openstudio workflow/run_simulation.rb --download-weather``` 
+Installation
+------------
 
-## Running
+Use a
+[virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
+(Good idea, but not strictly required.)
 
-Run the HEScore simulation on a provided JSON file:  
-```openstudio workflow/run_simulation.rb -j workflow/regression_files/Base.json```  
+Install using pip:
 
-To additionally request hourly output CSV:
-```openstudio workflow/run_simulation.rb -j workflow/regression_files/Base.json --hourly```  
+    pip install hescore-hpxml
 
-Run `openstudio workflow/run_simulation.rb -h` to see all available commands/arguments.
+To get the latest and greatest, clone this repository, cd into the
+directory and install as follows:
 
-## Outputs
+    pip install -e .
 
-Upon completion, simulation results disaggregated by end use and month are available in the `workflow/results/results.json` file. 
+How to use
+----------
 
-There is also a `workflow/results/HEScoreDesign.xml`, which is the result of applying the HEScore ruleset (e.g., geometry assumptions, etc.) and is the input to the EnergyPlus simulation.
+Use the command line script:
 
-Finally, there is a `workflow/HEScoreDesign` directory that contains the EnergyPlus input and output files.
+    hpxml2hescore examples/house1.xml
+
+To get some guidance on how to use the script:
+
+    hpxml2hescore -h

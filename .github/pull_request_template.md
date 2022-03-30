@@ -1,13 +1,16 @@
+Fixes #
+
 ## Pull Request Description
 
-[description here]
+description here
 
 ## Checklist
 
-Not all may apply:
+PR Author: Check these when they're done. Not all may apply. ~~strikethrough~~ and check any that do not apply. 
 
-- [ ] OS-HPXML git subtree has been pulled to `hpxml-measures` (if needed)
-- [ ] hescore-hpxml git subtree has been pulled to `hescore-hpxml` (if needed)
-- [ ] HEScore ruleset and unit tests have been updated
-- [ ] `openstudio tasks.rb update_measures` has been run
-- [ ] No unexpected regression test changes on CI
+PR Reviewer: Verify each has been completed.
+
+- [ ] Code changes (must work)
+- [ ] Test exercising your feature or bug fix. Check the coverage report in the build artifacts.
+- [ ] All other unit tests passing
+- [ ] Update translation docs

@@ -1,0 +1,244 @@
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0">
+    <XMLTransactionHeaderInformation>
+        <XMLType/>
+        <XMLGeneratedBy/>
+        <CreatedDateAndTime>2014-10-20T16:02:04</CreatedDateAndTime>
+        <Transaction>create</Transaction>
+    </XMLTransactionHeaderInformation>
+    <SoftwareInfo/>
+    <Building>
+        <BuildingID id="bldg1"/>
+        <Site>
+            <SiteID id="address"/>
+            <Address>
+                <AddressType>street</AddressType>
+                <Address1>1 API House</Address1>
+                <CityMunicipality>Minden</CityMunicipality>
+                <StateCode>NE</StateCode>
+                <ZipCode>68959</ZipCode>
+            </Address>
+        </Site>
+        <ProjectStatus>
+            <EventType>audit</EventType>
+            <Date>2014-10-23</Date>
+        </ProjectStatus>
+        <BuildingDetails>
+            <BuildingSummary>
+                <Site>
+                    <OrientationOfFrontOfHome>east</OrientationOfFrontOfHome>
+                </Site>
+                <BuildingConstruction>
+                    <YearBuilt>1953</YearBuilt>
+                    <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+                    <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
+                    <AverageCeilingHeight>10.5</AverageCeilingHeight>
+                    <NumberofBedrooms>3</NumberofBedrooms>
+                    <ConditionedFloorArea>1620</ConditionedFloorArea>
+                </BuildingConstruction>
+            </BuildingSummary>
+            <Enclosure>
+                <AtticAndRoof>
+                    <Roofs>
+                        <Roof>
+                            <SystemIdentifier id="roof1"/>
+                            <RoofColor>dark</RoofColor>
+                            <RoofType>asphalt or fiberglass shingles</RoofType>
+                            <RadiantBarrier>true</RadiantBarrier>
+                        </Roof>
+                    </Roofs>
+                    <Attics>
+                        <Attic>
+                            <SystemIdentifier id="attic1"/>
+                            <AttachedToRoof idref="roof1"/>
+                            <AtticType>vented attic</AtticType>
+                            <AtticFloorInsulation>
+                                <SystemIdentifier id="attic1ins"/>
+                                <Layer>
+                                    <NominalRValue>13</NominalRValue>
+                                </Layer>
+                            </AtticFloorInsulation>
+                            <Area>810</Area>
+                        </Attic>
+                    </Attics>
+                </AtticAndRoof>
+                <Foundations>
+                    <Foundation>
+                        <SystemIdentifier id="crawl1"/>
+                        <FoundationType>
+                            <Crawlspace>
+                                <Vented>true</Vented>
+                            </Crawlspace>
+                        </FoundationType>
+                        <FrameFloor>
+                            <SystemIdentifier id="crawl1flr1"/>
+                            <Area>405</Area>
+                            <Insulation>
+                                <SystemIdentifier id="crawl1flr1ins1"/>
+                                <Layer>
+                                    <NominalRValue>30</NominalRValue>
+                                </Layer>
+                            </Insulation>
+                        </FrameFloor>
+                        <FrameFloor>
+                            <SystemIdentifier id="crawl1flr2"/>
+                            <Area>405</Area>
+                            <Insulation>
+                                <SystemIdentifier id="crawl1flr2ins1"/>
+                                <Layer>
+                                    <NominalRValue>0</NominalRValue>
+                                </Layer>
+                            </Insulation>
+                        </FrameFloor>
+                    </Foundation>
+                </Foundations>
+                <Walls>
+                    <Wall>
+                        <SystemIdentifier id="wall1"/>
+                        <WallType>
+                            <WoodStud/>
+                        </WallType>
+                        <Siding>brick veneer</Siding>
+                        <Insulation>
+                            <SystemIdentifier id="wall1ins"/>
+                            <Layer>
+                                <NominalRValue>0</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </Wall>
+                </Walls>
+                <Windows>
+                    <Window>
+                        <SystemIdentifier id="frontwindows"/>
+                        <Area>108.0</Area><!-- 3x6 -->
+                        <Quantity>6</Quantity>
+                        <Orientation>east</Orientation>
+                        <FrameType>
+                            <Aluminum/>
+                        </FrameType>
+                        <GlassLayers>single-paned with storms</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="rightwindows"/>
+                        <Area>60.0</Area><!-- 3x5 -->
+                        <Quantity>4</Quantity>
+                        <Orientation>south</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>single-paned with storms</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows1"/>
+                        <Area>54.0</Area><!-- 3x6 -->
+                        <Quantity>3</Quantity>
+                        <Orientation>west</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>single-pane</GlassLayers>
+                        <GlassType>tinted</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows2"/>
+                        <Area>48.0</Area><!-- 3x4 -->
+                        <Quantity>4</Quantity>
+                        <Orientation>west</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>single-pane</GlassLayers>
+                        <GlassType>tinted</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows3"/>
+                        <Area>33.3333333</Area><!-- 60"x80" -->
+                        <Quantity>1</Quantity>
+                        <Orientation>west</Orientation>
+                        <FrameType>
+                            <Aluminum/>
+                        </FrameType>
+                        <GlassLayers>single-pane</GlassLayers>
+                        <GlassType>tinted</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="leftwindows"/>
+                        <Area>45.0</Area><!-- 3x5 -->
+                        <Quantity>3</Quantity>
+                        <Orientation>north</Orientation>
+                        <FrameType>
+                            <Aluminum/>
+                        </FrameType>
+                        <GlassLayers>single-paned with storms</GlassLayers>
+                    </Window>
+                </Windows>
+            </Enclosure>
+            <Systems>
+                <HVAC>
+                    <HVACPlant>
+                        <HeatingSystem>
+                            <SystemIdentifier id="furnace1"/>
+                            <YearInstalled>2000</YearInstalled>
+                            <DistributionSystem idref="ductsys1"/>
+                            <HeatingSystemType>
+                                <Furnace/>
+                            </HeatingSystemType>
+                            <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                            <AnnualHeatingEfficiency>
+                                <Units>AFUE</Units>
+                                <Value>0.92</Value>
+                            </AnnualHeatingEfficiency>
+                        </HeatingSystem>
+                        <CoolingSystem>
+                            <SystemIdentifier id="centralair1"/>
+                            <YearInstalled>2000</YearInstalled>
+                            <DistributionSystem idref="ductsys1"/>
+                            <CoolingSystemType>central air conditioning</CoolingSystemType>
+                            <AnnualCoolingEfficiency>
+                                <Units>SEER</Units>
+                                <Value>13</Value>
+                            </AnnualCoolingEfficiency>
+                        </CoolingSystem>
+                    </HVACPlant>
+                    <HVACDistribution>
+                        <SystemIdentifier id="ductsys1"/>
+                        <DistributionSystemType>
+                            <AirDistribution>
+                                <DuctLeakageMeasurement>
+                                    <!-- indicate that it is sealed because the majority of the ducts in unconditioned spaces are unsealed -->
+                                    <LeakinessObservedVisualInspection>some observable leaks</LeakinessObservedVisualInspection>
+                                </DuctLeakageMeasurement>
+                                <Ducts>
+                                    <DuctInsulationRValue>4</DuctInsulationRValue>
+                                    <DuctLocation>vented crawlspace</DuctLocation>
+                                    <FractionDuctArea>0.5</FractionDuctArea>
+                                    <!-- unsealed -->
+                                </Ducts>
+                                <Ducts>
+                                    <DuctInsulationRValue>0</DuctInsulationRValue>
+                                    <DuctLocation>conditioned space</DuctLocation>
+                                    <FractionDuctArea>0.15</FractionDuctArea>
+                                    <!-- unsealed -->
+                                </Ducts>
+                                <Ducts>
+                                    <DuctInsulationThickness>1</DuctInsulationThickness>
+                                    <DuctLocation>unconditioned attic</DuctLocation>
+                                    <FractionDuctArea>0.35</FractionDuctArea>
+                                    <!-- sealed -->
+                                </Ducts>
+                            </AirDistribution>
+                        </DistributionSystemType>
+                    </HVACDistribution>
+                </HVAC>
+                <WaterHeating>
+                    <WaterHeatingSystem>
+                        <SystemIdentifier id="dhw1"/>
+                        <FuelType>electricity</FuelType>
+                        <WaterHeaterType>storage water heater</WaterHeaterType>
+                        <YearInstalled>1995</YearInstalled>
+                        <EnergyFactor>0.8</EnergyFactor>
+                    </WaterHeatingSystem>
+                </WaterHeating>
+            </Systems>
+        </BuildingDetails>
+    </Building>
+</HPXML>

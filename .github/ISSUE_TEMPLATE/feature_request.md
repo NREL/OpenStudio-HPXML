@@ -1,27 +1,20 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[Feature]"
-labels: enhancement
+title: ''
+labels: ''
 assignees: ''
 
 ---
 
-## Description
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-[description here]
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-## Implementation Checklist
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-- [ ]  NREL: Update JSON Schema
-- [ ]  LBL/NREL: Add JSON regression test file, update regression test set
-- [ ]  LBL: Update API inputs / XSD
-- [ ]  LBL: Update database / data model
-- [ ]  LBL: Update JSON translation
-- [ ]  NREL: Update HES ruleset, pull in latest OS-HPXML if needed, verify expected modeling results
-- [ ]  NREL: Update HEScore-HPXML for new feature
-- [ ]  LBL/PNNL: Update validation rules
-- [ ]  PNNL: Update API documentation / Change log
-- [ ]  PNNL: Update API inputs / XSD (if needed)
-- [ ]  PNNL: Update API version number
-- [ ]  DOE/NREL: Update API test houses
+**Additional context**
+Add any other context or screenshots about the feature request here.

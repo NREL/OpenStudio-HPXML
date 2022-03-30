@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]"
+title: ''
 labels: bug
 assignees: ''
 
@@ -10,22 +10,21 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Error Message**
+
+```
+paste error message here
+```
+
 **To Reproduce**
-Steps or input file to reproduce the behavior:
-1. ...
+Please provide an HPXML file that hits the error with any personally identifiable information removed.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Output Logs**
-
-```
-Paste output logs here
-```
-
-**Environment**
- - OS: [e.g. Windows/Mac/Linux/Docker Container]
-- OpenStudio Version: 
+**Environment (please complete the following information):**
+ - OS: [e.g. Windows, Mac, Linux]
+ - Python Version: [e.g. 3.9]
 
 **Additional context**
 Add any other context about the problem here.

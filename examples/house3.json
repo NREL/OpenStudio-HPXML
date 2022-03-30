@@ -1,0 +1,127 @@
+{
+  "building_address": {
+    "address": "3 API House",
+    "city": "Hunstville",
+    "state": "AL",
+    "zip_code": "35801",
+    "assessment_type": "qa"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2014-10-29",
+      "shape": "rectangle",
+      "year_built": 1980,
+      "number_bedrooms": 5,
+      "num_floor_above_grade": 3,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 2039,
+      "orientation": "south_west",
+      "blower_door_test": true,
+      "envelope_leakage": 2500
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 679.0,
+          "roof_assembly_code": "rfwf15rc",
+          "roof_color": "medium",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 679,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 5
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewps13al",
+          "zone_window": {
+            "window_area": 120.0,
+            "window_method": "code",
+            "window_code": "dseab",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewps13al",
+          "zone_window": {
+            "window_area": 36.0,
+            "window_method": "code",
+            "window_code": "dseab",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewps13al",
+          "zone_window": {
+            "window_area": 72.0,
+            "window_method": "code",
+            "window_code": "dseab",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewps13al",
+          "zone_window": {
+            "window_area": 75.0,
+            "window_method": "code",
+            "window_code": "dseab",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "heat_pump",
+            "efficiency_method": "shipment_weighted",
+            "year": 2000
+          },
+          "cooling": {
+            "type": "heat_pump",
+            "efficiency_method": "shipment_weighted",
+            "year": 2000
+          },
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": true,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "cond_space",
+                "fraction": 1.0,
+                "insulated": false
+              }
+            ]
+          }
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "lpg",
+        "efficiency_method": "user",
+        "energy_factor": 0.56
+      }
+    }
+  }
+}

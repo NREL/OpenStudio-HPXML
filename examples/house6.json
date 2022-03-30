@@ -1,0 +1,159 @@
+{
+  "building_address": {
+    "address": "6 API House",
+    "city": "Bakersfield",
+    "state": "CA",
+    "zip_code": "93301",
+    "assessment_type": "corrected"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2014-12-18",
+      "shape": "rectangle",
+      "year_built": 1950,
+      "number_bedrooms": 10,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 2600,
+      "orientation": "south",
+      "blower_door_test": true,
+      "envelope_leakage": 6100
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "ceiling_area": 1000.0,
+          "roof_assembly_code": "rfwf00tg",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf49",
+          "zone_skylight": {
+            "skylight_area": 24.0,
+            "skylight_method": "code",
+            "skylight_code": "stnw",
+            "solar_screen": false
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 843.0,
+          "roof_assembly_code": "rfwf25wo",
+          "roof_color": "medium",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1200.0,
+          "foundation_type": "uncond_basement",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf21ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 600.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 5
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewbr00nn",
+          "zone_window": {
+            "window_area": 180.0,
+            "window_method": "code",
+            "window_code": "dpeaaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 70.0,
+            "window_method": "code",
+            "window_code": "dpeaaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 220.0,
+            "window_method": "code",
+            "window_code": "dpeaaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewbr00nn",
+          "zone_window": {
+            "window_area": 40.0,
+            "window_method": "code",
+            "window_code": "dpeaaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 0.846154,
+          "heating": {
+            "fuel_primary": "lpg",
+            "type": "central_furnace",
+            "efficiency_method": "shipment_weighted",
+            "year": 1990
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 12.0
+          },
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": false,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "uncond_basement",
+                "fraction": 1.0,
+                "insulated": true
+              }
+            ]
+          }
+        },
+        {
+          "hvac_name": "hvac2",
+          "hvac_fraction": 0.153846,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "baseboard"
+          },
+          "cooling": {
+            "type": "none"
+          }
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "lpg",
+        "efficiency_method": "user",
+        "energy_factor": 0.58
+      }
+    }
+  }
+}
