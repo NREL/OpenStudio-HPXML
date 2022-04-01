@@ -104,14 +104,7 @@ class ReportHPXMLOutputTest < MiniTest::Test
       'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0
     }
 
-    actual_multipliers = {}
-    File.readlines(hpxml_csv).each do |line|
-      next if line.strip.empty?
-
-      key, value = line.split(',').map { |x| x.strip }
-      actual_multipliers[key] = Float(value)
-    end
-
+    actual_multipliers = _get_actual_multipliers(hpxml_csv)
     assert_equal(expected_multipliers, actual_multipliers)
   end
 
@@ -182,14 +175,7 @@ class ReportHPXMLOutputTest < MiniTest::Test
         'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0
       }
 
-      actual_multipliers = {}
-      File.readlines(hpxml_csv).each do |line|
-        next if line.strip.empty?
-
-        key, value = line.split(',').map { |x| x.strip }
-        actual_multipliers[key] = Float(value)
-      end
-
+      actual_multipliers = _get_actual_multipliers(hpxml_csv)
       assert_equal(expected_multipliers, actual_multipliers)
     end
   end
