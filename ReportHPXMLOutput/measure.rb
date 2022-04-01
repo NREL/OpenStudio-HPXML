@@ -234,8 +234,6 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     elsif cost_mult_type == 'Enclosure: Floor Area Foundation'
       hpxml.foundations.each do |foundation|
         foundation.attached_slabs.each do |attached_slab|
-          next if attached_slab.depth_below_grade == 0
-
           cost_mult += attached_slab.area
         end
       end
