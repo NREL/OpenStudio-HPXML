@@ -33,7 +33,7 @@ __Bugfixes__
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
-- Fixes range/dryer ventilation interaction with infiltration to take into account the appliance's location.
+- Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
 
 ## OpenStudio-HPXML v1.3.0
 
