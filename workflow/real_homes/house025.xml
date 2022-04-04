@@ -9,12 +9,6 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
-    <Site>
-      <SiteID id='SiteID'/>
-      <Address>
-        <ZipCode>27957</ZipCode>
-      </Address>
-    </Site>
     <ProjectStatus>
       <EventType>audit</EventType>
     </ProjectStatus>
@@ -42,10 +36,6 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
-        <ClimateZoneIECC>
-          <Year>2006</Year>
-          <ClimateZone>4A</ClimateZone>
-        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Charlotte, NC</Name>
@@ -451,9 +441,6 @@
               </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>1815.8</ConditionedFloorAreaServed>
-            <HVACDistributionImprovement>
-              <DuctSystemSealed>false</DuctSystemSealed>
-            </HVACDistributionImprovement>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -505,9 +492,6 @@
               </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>778.2</ConditionedFloorAreaServed>
-            <HVACDistributionImprovement>
-              <DuctSystemSealed>false</DuctSystemSealed>
-            </HVACDistributionImprovement>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

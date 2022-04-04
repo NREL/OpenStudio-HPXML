@@ -26,7 +26,6 @@ class HPXMLTest < MiniTest::Test
     xmls = []
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
-    sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
@@ -494,10 +493,12 @@ class HPXMLTest < MiniTest::Test
     if not xml.include? 'ASHRAE_Standard_140'
       sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
-      residual_htg_load = results['Load: Heating: Delivered (MBtu)'] - sum_component_htg_loads
-      residual_clg_load = results['Load: Cooling: Delivered (MBtu)'] - sum_component_clg_loads
-      assert_operator(residual_htg_load.abs, :<, 0.5)
-      assert_operator(residual_clg_load.abs, :<, 0.5)
+      if results['Load: Heating: Delivered (MBtu)'] > 1.0
+        assert_in_epsilon(results['Load: Heating: Delivered (MBtu)'], sum_component_htg_loads, 0.1) # 10%
+      end
+      if results['Load: Cooling: Delivered (MBtu)'] > 1.0
+        assert_in_epsilon(results['Load: Cooling: Delivered (MBtu)'], sum_component_clg_loads, 0.1) # 10%
+      end
     end
 
     return results
@@ -686,13 +687,13 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
       next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
-      next if err_line.include? 'Coil control failed to converge for AirLoopHVAC:UnitarySystem'
-      next if err_line.include? 'Coil control failed for AirLoopHVAC:UnitarySystem'
+      next if err_line.include? 'Coil control failed'
       next if err_line.include? 'sensible part-load ratio out of range error continues'
       next if err_line.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues'
       next if err_line.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && err_line.include?('are not available.')
       next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
+      next if err_line.include? 'View factors not complete'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -911,7 +912,7 @@ class HPXMLTest < MiniTest::Test
       end
 
       # R-value
-      if (not wall.insulation_assembly_r_value.nil?) && (not hpxml_path.include? 'base-foundation-unconditioned-basement-assembly-r.xml') # This file uses Foundation:Kiva for insulation, so skip it
+      if (not wall.insulation_assembly_r_value.nil?) && (not wall.is_a? HPXML::FoundationWall) # FoundationWalls use Foundation:Kiva for insulation
         hpxml_value = wall.insulation_assembly_r_value
         if hpxml_path.include? 'ASHRAE_Standard_140'
           # Compare R-value w/o film
