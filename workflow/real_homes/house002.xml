@@ -48,12 +48,14 @@
         <Attics>
           <Attic>
             <SystemIdentifier id='Attic1'/>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
             <AttachedToRoof idref='Roof1'/>
-            <AttachedToFrameFloor idref='FrameFloor1'/>
-          </Attic>
-          <Attic>
-            <SystemIdentifier id='Attic2'/>
             <AttachedToRoof idref='Roof2'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
             <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
         </Attics>

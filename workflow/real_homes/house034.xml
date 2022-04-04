@@ -71,10 +71,6 @@
         <Foundations>
           <Foundation>
             <SystemIdentifier id='Foundation1'/>
-            <AttachedToFrameFloor idref='FrameFloor2'/>
-          </Foundation>
-          <Foundation>
-            <SystemIdentifier id='Foundation2'/>
             <FoundationType>
               <Basement>
                 <Conditioned>true</Conditioned>
@@ -84,7 +80,7 @@
             <AttachedToSlab idref='Slab1'/>
           </Foundation>
           <Foundation>
-            <SystemIdentifier id='Foundation3'/>
+            <SystemIdentifier id='Foundation2'/>
             <FoundationType>
               <Crawlspace>
                 <Vented>false</Vented>

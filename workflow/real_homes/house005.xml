@@ -48,6 +48,11 @@
         <Attics>
           <Attic>
             <SystemIdentifier id='Attic1'/>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
@@ -59,10 +64,6 @@
               <SlabOnGrade/>
             </FoundationType>
             <AttachedToSlab idref='Slab1'/>
-          </Foundation>
-          <Foundation>
-            <SystemIdentifier id='Foundation2'/>
-            <AttachedToFrameFloor idref='FrameFloor2'/>
           </Foundation>
         </Foundations>
         <Roofs>

@@ -693,6 +693,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && err_line.include?('are not available.')
       next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
+      next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
 
       # HPWHs

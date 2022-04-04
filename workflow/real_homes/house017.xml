@@ -72,10 +72,6 @@
         </Attics>
         <Foundations>
           <Foundation>
-            <SystemIdentifier id='Foundation1'/>
-            <AttachedToFrameFloor idref='FrameFloor2'/>
-          </Foundation>
-          <Foundation>
             <SystemIdentifier id='Foundation2'/>
             <FoundationType>
               <Basement>
