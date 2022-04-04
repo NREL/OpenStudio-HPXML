@@ -23,6 +23,8 @@ __New Features__
   - Add ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
   - Timestamps in results_timeseries.csv are output in ISO 8601 standard format.
   - Allows user-specified annual/timeseries output file names.
+- ReportHPXMLOutput measure:
+  - Adds "Enclosure: Floor Area Foundation" output row in results_hpxml.csv.
 
 __Bugfixes__
 - Adds more stringent limits for `AirflowDefectRatio` and `ChargeDefectRatio` (now allows values from 1/10th to 10x the design value).
@@ -31,7 +33,7 @@ __Bugfixes__
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
-- Fixes range/dryer ventilation interaction with infiltration to take into account the appliance's location.
+- Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
 
 ## OpenStudio-HPXML v1.3.0
 
