@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>72100faf-537e-4c59-9c62-71340a2f4f09</version_id>
-  <version_modified>20220404T190301Z</version_modified>
+  <version_id>3937290d-2af5-4a75-ad74-cebf3e13f541</version_id>
+  <version_modified>20220404T203856Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -242,12 +242,6 @@
       <checksum>04E10882</checksum>
     </file>
     <file>
-      <filename>version.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>916D733E</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -344,12 +338,6 @@
       <checksum>35DA8C7E</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2C04E2BE</checksum>
-    </file>
-    <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -404,17 +392,6 @@
       <checksum>A0172033</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>37771F73</checksum>
-    </file>
-    <file>
       <filename>schedule_files/stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -443,12 +420,6 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>8ABCD77B</checksum>
-    </file>
-    <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>967A4807</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
@@ -505,6 +476,35 @@
       <checksum>F45F8526</checksum>
     </file>
     <file>
+      <filename>version.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>73DD12E7</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DC7B1678</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>5EEC7F58</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4D0DEF4F</checksum>
+    </file>
+    <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -520,7 +520,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>539FD2CE</checksum>
+      <checksum>76E39760</checksum>
     </file>
   </files>
 </measure>

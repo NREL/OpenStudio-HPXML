@@ -1085,8 +1085,7 @@ class Constructions
     # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-skylight-construction-types
     key = [is_metal_frame, window_or_skylight.thermal_break, n_panes, glass_type, gas_fill]
     if type.downcase == 'window'
-      # FIXME: TEMPORARY CHANGE TO 1.23; REVERT WITH E+ 22.1
-      vals = { [true, false, 1, 'clear', 'none'] => [1.23, 0.75], # Single-pane, clear, aluminum frame
+      vals = { [true, false, 1, 'clear', 'none'] => [1.27, 0.75], # Single-pane, clear, aluminum frame
                [false, nil, 1, 'clear', 'none'] => [0.89, 0.64], # Single-pane, clear, wood or vinyl frame
                [true, false, 1, 'tinted', 'none'] => [1.27, 0.64], # Single-pane, tinted, aluminum frame
                [false, nil, 1, 'tinted', 'none'] => [0.89, 0.54], # Single-pane, tinted, wood or vinyl frame
@@ -2130,12 +2129,6 @@ class Construction
     name = material.name
     tolerance = 0.0001
     if material.is_a? GlazingMaterial
-      max_ufactor = UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)') # Max value EnergyPlus allows
-      if material.ufactor > max_ufactor
-        runner.registerWarning("Glazing U-factor (#{material.ufactor}) for '#{material.name}' above maximum expected value. U-factor decreased to #{max_ufactor.round(2)}.")
-        material.ufactor = max_ufactor.round(2)
-      end
-
       # Material already exists?
       model.getSimpleGlazings.each do |mat|
         next if !mat.name.to_s.start_with?(material.name)

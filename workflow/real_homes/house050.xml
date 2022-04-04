@@ -428,6 +428,7 @@
               <FanType>heat recovery ventilator</FanType>
               <TestedFlowRate>68.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>false</IsSharedSystem>
               <AdjustedTotalRecoveryEfficiency>0.0</AdjustedTotalRecoveryEfficiency>
               <AdjustedSensibleRecoveryEfficiency>0.68</AdjustedSensibleRecoveryEfficiency>
