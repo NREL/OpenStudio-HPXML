@@ -1213,74 +1213,65 @@ class Airflow
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
   end
 
-  def self.apply_local_ventilation(model, vent_object_array, obj_type_name)
-    obj_sch_sensors = {}
-    vent_object_array.each_with_index do |vent_object, index|
-      daily_sch = [0.0] * 24
-      obj_name = "#{obj_type_name} #{index}"
-      remaining_hrs = vent_object.hours_in_operation
-      for hr in 1..(vent_object.hours_in_operation.ceil)
-        if remaining_hrs >= 1
-          daily_sch[(vent_object.start_hour + hr - 1) % 24] = 1.0
-        else
-          daily_sch[(vent_object.start_hour + hr - 1) % 24] = remaining_hrs
-        end
-        remaining_hrs -= 1
+  def self.apply_local_ventilation(model, vent_object, obj_type_name, index)
+    daily_sch = [0.0] * 24
+    obj_name = "#{obj_type_name} #{index}"
+    remaining_hrs = vent_object.hours_in_operation
+    for hr in 1..(vent_object.hours_in_operation.ceil)
+      if remaining_hrs >= 1
+        daily_sch[(vent_object.start_hour + hr - 1) % 24] = 1.0
+      else
+        daily_sch[(vent_object.start_hour + hr - 1) % 24] = remaining_hrs
       end
-      obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false)
-      obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      obj_sch_sensor.setName("#{obj_name} sch s")
-      obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
-      obj_sch_sensors[vent_object.id] = obj_sch_sensor
-
-      equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      equip_def.setName(obj_name)
-      equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-      equip.setName(obj_name)
-      equip.setSpace(@living_space)
-      equip_def.setDesignLevel(vent_object.fan_power * vent_object.quantity)
-      equip_def.setFractionRadiant(0)
-      equip_def.setFractionLatent(0)
-      equip_def.setFractionLost(1)
-      equip.setSchedule(obj_sch.schedule)
-      equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
+      remaining_hrs -= 1
     end
+    obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false)
+    obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    obj_sch_sensor.setName("#{obj_name} sch s")
+    obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
 
-    return obj_sch_sensors
+    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    equip_def.setName(obj_name)
+    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
+    equip.setName(obj_name)
+    equip.setSpace(@living_space)
+    equip_def.setDesignLevel(vent_object.fan_power * vent_object.quantity)
+    equip_def.setFractionRadiant(0)
+    equip_def.setFractionLatent(0)
+    equip_def.setFractionLost(1)
+    equip.setSchedule(obj_sch.schedule)
+    equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
+
+    return obj_sch_sensor
   end
 
-  def self.apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
-    obj_sch_sensors = {}
-    obj_type_name = Constants.ObjectNameClothesDryerExhaust
-    vented_dryers.each_with_index do |vented_dryer, index|
-      obj_name = "#{obj_type_name} #{index}"
+  def self.apply_dryer_exhaust(model, runner, vented_dryer, schedules_file, index)
+    obj_name = "#{Constants.ObjectNameClothesDryerExhaust} #{index}"
 
-      # Create schedule
-      obj_sch = nil
-      if not schedules_file.nil?
-        obj_sch_name = SchedulesFile::ColumnClothesDryer
-        obj_sch = schedules_file.create_schedule_file(col_name: obj_sch_name)
-        full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: obj_sch_name)
-      end
-      if obj_sch.nil?
-        cd_weekday_sch = vented_dryer.weekday_fractions
-        cd_weekend_sch = vented_dryer.weekend_fractions
-        cd_monthly_sch = vented_dryer.monthly_multipliers
-        obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction)
-        obj_sch = obj_sch.schedule
-        obj_sch_name = obj_sch.name.to_s
-        full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
-      end
-      # Assume standard dryer exhaust runs 1 hr/day per BA HSP
-      cfm_mult = Constants.NumDaysInYear(@year) * vented_dryer.usage_multiplier / full_load_hrs
-
-      obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      obj_sch_sensor.setName("#{obj_name} sch s")
-      obj_sch_sensor.setKeyName(obj_sch_name)
-      obj_sch_sensors[vented_dryer.id] = [obj_sch_sensor, cfm_mult]
+    # Create schedule
+    obj_sch = nil
+    if not schedules_file.nil?
+      obj_sch_name = SchedulesFile::ColumnClothesDryer
+      obj_sch = schedules_file.create_schedule_file(col_name: obj_sch_name)
+      full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: obj_sch_name)
     end
+    if obj_sch.nil?
+      cd_weekday_sch = vented_dryer.weekday_fractions
+      cd_weekend_sch = vented_dryer.weekend_fractions
+      cd_monthly_sch = vented_dryer.monthly_multipliers
+      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction)
+      obj_sch = obj_sch.schedule
+      obj_sch_name = obj_sch.name.to_s
+      full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
+    end
+    # Assume standard dryer exhaust runs 1 hr/day per BA HSP
+    cfm_mult = Constants.NumDaysInYear(@year) * vented_dryer.usage_multiplier / full_load_hrs
 
-    return obj_sch_sensors
+    obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    obj_sch_sensor.setName("#{obj_name} sch s")
+    obj_sch_sensor.setKeyName(obj_sch_name)
+
+    return obj_sch_sensor, cfm_mult
   end
 
   def self.calc_hrv_erv_effectiveness(vent_mech_fans)
@@ -1475,25 +1466,28 @@ class Airflow
     return fan_sens_load_actuator, fan_lat_load_actuator
   end
 
-  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                         infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+  def self.apply_infiltration_adjustment_to_conditioned(model, runner, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+                                                        sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator, schedules_file)
     infil_program.addLine('Set Qrange = 0')
-    vent_fans_kitchen.each do |vent_kitchen|
+    vent_fans_kitchen.each_with_index do |vent_kitchen, index|
       next unless @cooking_range_in_cond_space
 
-      infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
+      obj_sch_sensor = apply_local_ventilation(model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, index)
+      infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{obj_sch_sensor.name}")
     end
 
     infil_program.addLine('Set Qbath = 0')
-    vent_fans_bath.each do |vent_bath|
-      infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
+    vent_fans_bath.each_with_index do |vent_bath, index|
+      obj_sch_sensor = apply_local_ventilation(model, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan, index)
+      infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{obj_sch_sensor.name}")
     end
 
     infil_program.addLine('Set Qdryer = 0')
-    vented_dryers.each do |vented_dryer|
+    vented_dryers.each_with_index do |vented_dryer, index|
       next unless @clothes_dryer_in_cond_space
 
-      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * dryer_exhaust_sch_sensors_map[vented_dryer.id][1], 'cfm', 'm^3/s').round(5)} * #{dryer_exhaust_sch_sensors_map[vented_dryer.id][0].name}")
+      obj_sch_sensor, cfm_mult = apply_dryer_exhaust(model, runner, vented_dryer, schedules_file, index)
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * cfm_mult, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
 
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot, 'cfm', 'm^3/s').round(4)}")
@@ -1634,8 +1628,8 @@ class Airflow
     end
   end
 
-  def self.apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                         range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, clg_ssn_sensor)
+  def self.apply_infiltration_ventilation_to_conditioned(model, runner, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+                                                         has_flue_chimney, clg_ssn_sensor, schedules_file)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -1686,7 +1680,7 @@ class Airflow
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
-    apply_infiltration_to_living(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
+    apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -1697,8 +1691,8 @@ class Airflow
 
     # Calculate Qfan, Qinf_adj
     # Calculate adjusted infiltration based on mechanical ventilation system
-    apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                  infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+    apply_infiltration_adjustment_to_conditioned(model, runner, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+                                                 sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator, schedules_file)
 
     # Address load of Qfan (Qload)
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
@@ -1748,21 +1742,12 @@ class Airflow
     apply_infiltration_to_vented_attic(model, weather, site, vented_attic)
     apply_infiltration_to_unvented_attic(model, weather, site)
 
-    # Local ventilation
-    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
-    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
-
-    # Clothes dryer exhaust
-    if HPXML::conditioned_locations_this_unit.include?(@clothes_dryer_location)
-      dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
-    end
-
-    # Get mechanical ventilation
-    apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                  range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, clg_ssn_sensor)
+    # Infiltration/ventilation for conditioned space
+    apply_infiltration_ventilation_to_conditioned(model, runner, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+                                                  has_flue_chimney, clg_ssn_sensor, schedules_file)
   end
 
-  def self.apply_infiltration_to_living(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
+  def self.apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
     site_ap = site.additional_properties
 
     if living_ach50.to_f > 0
