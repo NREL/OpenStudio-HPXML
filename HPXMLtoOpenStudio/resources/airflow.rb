@@ -19,6 +19,8 @@ class Airflow
     @eri_version = eri_version
     @apply_ashrae140_assumptions = apply_ashrae140_assumptions
     @cfa = cfa
+    @cooking_range_in_cond_space = hpxml.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.cooking_ranges[0].location)
+    @clothes_dryer_in_cond_space = hpxml.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.clothes_dryers[0].location)
 
     # Global sensors
 
@@ -59,8 +61,7 @@ class Airflow
       elsif vent_fan.used_for_seasonal_cooling_load_reduction
         vent_fans_whf << vent_fan
       elsif vent_fan.used_for_local_ventilation
-        cr_location = hpxml.cooking_ranges.empty? ? HPXML::LocationLivingSpace : hpxml.cooking_ranges[0].location
-        if vent_fan.fan_location == HPXML::LocationKitchen && HPXML::conditioned_locations_this_unit.include?(cr_location)
+        if vent_fan.fan_location == HPXML::LocationKitchen
           vent_fans_kitchen << vent_fan
         elsif vent_fan.fan_location == HPXML::LocationBath
           vent_fans_bath << vent_fan
@@ -68,8 +69,8 @@ class Airflow
       end
     end
 
-    # Vented clothes dryers in conditioned space
-    vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && HPXML::conditioned_locations_this_unit.include?(cd.location) }
+    # Vented clothes dryers
+    vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
 
     # Initialization
     initialize_cfis(model, vent_fans_mech, airloop_map)
@@ -1478,6 +1479,8 @@ class Airflow
                                          infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
+      next unless @cooking_range_in_cond_space
+
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
     end
 
@@ -1488,6 +1491,8 @@ class Airflow
 
     infil_program.addLine('Set Qdryer = 0')
     vented_dryers.each do |vented_dryer|
+      next unless @clothes_dryer_in_cond_space
+
       infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * dryer_exhaust_sch_sensors_map[vented_dryer.id][1], 'cfm', 'm^3/s').round(5)} * #{dryer_exhaust_sch_sensors_map[vented_dryer.id][0].name}")
     end
 
@@ -1748,7 +1753,9 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Clothes dryer exhaust
-    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
+    if HPXML::conditioned_locations_this_unit.include?(@clothes_dryer_location)
+      dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
+    end
 
     # Get mechanical ventilation
     apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
