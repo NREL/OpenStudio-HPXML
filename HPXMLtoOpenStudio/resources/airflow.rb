@@ -1470,15 +1470,19 @@ class Airflow
                                                         sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator, schedules_file)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each_with_index do |vent_kitchen, index|
+      # Electricity impact
+      obj_sch_sensor = apply_local_ventilation(model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, index)
       next unless @cooking_range_in_cond_space
 
-      obj_sch_sensor = apply_local_ventilation(model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, index)
+      # Infiltration impact
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{obj_sch_sensor.name}")
     end
 
     infil_program.addLine('Set Qbath = 0')
     vent_fans_bath.each_with_index do |vent_bath, index|
+      # Electricity impact
       obj_sch_sensor = apply_local_ventilation(model, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan, index)
+      # Infiltration impact
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{obj_sch_sensor.name}")
     end
 
@@ -1486,6 +1490,7 @@ class Airflow
     vented_dryers.each_with_index do |vented_dryer, index|
       next unless @clothes_dryer_in_cond_space
 
+      # Infiltration impact
       obj_sch_sensor, cfm_mult = apply_dryer_exhaust(model, runner, vented_dryer, schedules_file, index)
       infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * cfm_mult, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
