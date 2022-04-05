@@ -10,7 +10,6 @@ require_relative 'resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
-require_relative '../HPXMLtoOpenStudio/resources/hpxml_defaults'
 require_relative '../HPXMLtoOpenStudio/resources/hvac'
 require_relative '../HPXMLtoOpenStudio/resources/location'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
@@ -153,7 +152,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
 
-    if args[:setpoint_output_csv_path].is_initialized
+    if !args[:setpoint_output_csv_path].nil?
       if !schedules_filepaths.include?(args[:setpoint_output_csv_path].get)
         XMLHelper.add_element(extension, 'SchedulesFilePath', args[:setpoint_output_csv_path].get, :string)
         runner.registerInfo("Created #{args[:setpoint_output_csv_path].get}")
@@ -246,7 +245,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     # Setpoints
     if args[:setpoint_output_csv_path].is_initialized
-      return if hpxml.hvac_controls.size == 0
+      if hpxml.hvac_controls.size == 0
+        args[:setpoint_output_csv_path] = nil
+        return
+      end
+      args[:setpoint_output_csv_path] = args[:setpoint_output_csv_path].get
 
       HPXMLDefaults.apply_hvac_control(hpxml)
 
@@ -261,8 +264,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       clg_end_month = hvac_control.seasons_cooling_end_month
       clg_end_day = hvac_control.seasons_cooling_end_day
 
-      heating_days = Schedule.get_daily_season(args[:sim_year], htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-      cooling_days = Schedule.get_daily_season(args[:sim_year], clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+      heating_days = Schedule.get_daily_season(hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+      cooling_days = Schedule.get_daily_season(hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
       has_ceiling_fan = (hpxml.ceiling_fans.size > 0)
 
       htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, args[:sim_year])
