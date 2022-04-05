@@ -6,7 +6,7 @@
 require_relative 'resources/util.rb'
 require_relative '../HPXMLtoOpenStudio/resources/location.rb'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
-require_relative '../ReportSimulationOutput/resources/constants.rb'
+require_relative '../HPXMLtoOpenStudio/resources/output.rb'
 
 # start the measure
 class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
@@ -315,7 +315,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, utility_rates, utility_bills = setup_outputs()
 
     # Get timestamps
-    @timestamps = get_timestamps()
+    @timestamps = get_timestamps(timeseries_frequency)
 
     # Get outputs
     get_outputs(fuels)
@@ -822,42 +822,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
     end
     runner.registerInfo("Wrote bills output to #{output_path}.")
-  end
-
-  def teardown
-    @sqlFile.close()
-
-    # Ensure sql file is immediately freed; otherwise we can get
-    # errors on Windows when trying to delete this file.
-    GC.start()
-  end
-
-  def get_timestamps()
-    if timeseries_frequency == 'hourly'
-      interval_type = 1
-    elsif timeseries_frequency == 'daily'
-      interval_type = 2
-    elsif timeseries_frequency == 'monthly'
-      interval_type = 3
-    elsif timeseries_frequency == 'timestep'
-      interval_type = -1
-    end
-
-    query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
-    values = @sqlFile.execAndReturnVectorOfString(query)
-    fail "Query error: #{query}" unless values.is_initialized
-
-    timestamps = []
-    values.get.each do |value|
-      year, month, day, hour, minute = value.split(' ')
-      ts = Time.utc(year, month, day, hour, minute)
-
-      ts_iso8601 = ts.iso8601
-      ts_iso8601 = ts_iso8601.delete('Z')
-      timestamps << ts_iso8601
-    end
-
-    return timestamps
   end
 end
 
