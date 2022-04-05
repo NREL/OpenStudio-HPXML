@@ -186,11 +186,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return 'hourly'
   end
 
-  def check_for_errors(hpxml, args)
+  def check_for_errors(args)
     errors = []
 
     # Require full annual simulation
-    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
+    if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
       errors << 'A full annual simulation is required for calculating utility bills.'
     end
 
@@ -200,7 +200,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Require not DSE
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_system|
+    (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
       next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
       next if htg_system.distribution_system_idref.nil?
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
@@ -208,7 +208,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       errors << 'DSE is not currently supported when calculating utility bills.'
     end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_system|
+    (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
       next unless clg_system.fraction_cool_load_served > 0
       next if clg_system.distribution_system_idref.nil?
       next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
@@ -246,9 +246,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    errors = check_for_errors(hpxml, args)
+    errors = check_for_errors(args)
     return result if !errors.empty?
 
     fuels, _, _ = setup_outputs()
@@ -299,9 +299,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    errors = check_for_errors(hpxml, args)
+    errors = check_for_errors(args)
     if !errors.empty?
       runner.registerError(errors.join(' '))
       return false
@@ -315,7 +315,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, utility_rates, utility_bills = setup_outputs()
 
     # Get timestamps
-    @timestamps = get_timestamps(timeseries_frequency)
+    @timestamps = get_timestamps(timeseries_frequency, @sqlFile, @hpxml)
 
     # Get outputs
     get_outputs(fuels)
@@ -324,10 +324,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     preprocess_utility_rates(runner, fuels, utility_rates, args)
 
     # Get utility rates
-    get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems, runner)
+    get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
 
     # Calculate utility bills
-    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, hpxml.header.sim_calendar_year)
+    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year)
 
     # Annual true up
     annual_true_up(utility_rates, utility_bills, net_elec)
@@ -371,7 +371,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Write results
     write_output(runner, utility_bills, output_format, output_path)
 
-    teardown()
+    teardown(@sqlFile)
 
     return true
   end
@@ -588,6 +588,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return 'kBtu'
     end
 
+    # End Uses
+
+    # NOTE: Some end uses are obtained from meters, others are rolled up from
+    # output variables so that we can have more control.
+
+    create_all_object_variables_by_key()
+
+    end_uses = get_end_uses()
+
     fuels = {}
     fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
     fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
@@ -600,6 +609,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.units = get_timeseries_units_from_fuel_type(fuel_type)
+      if end_uses.select { |key, end_use| key[0] == fuel_type && end_use.variables.size > 0 }.size == 0
+        fuel.meters = []
+      end
+      next unless is_production
+
+      if end_uses.select { |key, end_use| end_use.is_negative && end_use.variables.size > 0 }.size == 0
+        fuel.meters = []
+      end
     end
 
     utility_rates = {}
