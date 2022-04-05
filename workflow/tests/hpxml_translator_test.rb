@@ -493,12 +493,15 @@ class HPXMLTest < MiniTest::Test
     if not xml.include? 'ASHRAE_Standard_140'
       sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
-      if results['Load: Heating: Delivered (MBtu)'] > 1.0
-        assert_in_epsilon(results['Load: Heating: Delivered (MBtu)'], sum_component_htg_loads, 0.1) # 10%
-      end
-      if results['Load: Cooling: Delivered (MBtu)'] > 1.0
-        assert_in_epsilon(results['Load: Cooling: Delivered (MBtu)'], sum_component_clg_loads, 0.1) # 10%
-      end
+      total_htg_load = results['Load: Heating: Delivered (MBtu)']
+      total_clg_load = results['Load: Cooling: Delivered (MBtu)']
+      abs_htg_load_delta = (total_htg_load - sum_component_htg_loads).abs
+      abs_clg_load_delta = (total_clg_load - sum_component_clg_loads).abs
+      abs_htg_load_frac = abs_htg_load_delta / total_htg_load
+      abs_clg_load_frac = abs_clg_load_delta / total_clg_load
+      # Check that the difference is less than 0.5MBtu or less than 10%
+      assert((abs_htg_load_delta < 0.5) || (abs_htg_load_frac < 0.1))
+      assert((abs_clg_load_delta < 0.5) || (abs_clg_load_frac < 0.1))
     end
 
     return results
@@ -1101,7 +1104,6 @@ class HPXMLTest < MiniTest::Test
       if subsurface.is_a? HPXML::Skylight
         hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
       end
-      hpxml_value = [hpxml_value, UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')].min # FUTURE: Remove when U-factor restriction is lifted in EnergyPlus
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
