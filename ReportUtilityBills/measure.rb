@@ -186,6 +186,40 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return 'hourly'
   end
 
+  def check_for_errors(hpxml, args)
+    errors = []
+
+    # Require full annual simulation
+    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
+      errors << 'A full annual simulation is required for calculating utility bills.'
+    end
+
+    # Require user-specified utility rate if 'User-Specified'
+    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
+      errors << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
+    end
+
+    # Require not DSE
+    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_system|
+      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
+      next if htg_system.distribution_system_idref.nil?
+      next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+      next if htg_system.distribution_system.annual_heating_dse.nil?
+
+      errors << 'DSE is not currently supported when calculating utility bills.'
+    end
+    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_system|
+      next unless clg_system.fraction_cool_load_served > 0
+      next if clg_system.distribution_system_idref.nil?
+      next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+      next if clg_system.distribution_system.annual_cooling_dse.nil?
+
+      errors << 'DSE is not currently supported when calculating utility bills.'
+    end
+
+    return errors
+  end
+
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
@@ -214,33 +248,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    # Require full annual simulation
-    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
-      return result
-    end
-
-    # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      return result
-    end
-
-    # Require not DSE
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_system|
-      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
-      next if htg_system.distribution_system_idref.nil?
-      next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if htg_system.distribution_system.annual_heating_dse.nil?
-
-      return result
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
-      next if clg_system.distribution_system_idref.nil?
-      next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if clg_system.distribution_system.annual_cooling_dse.nil?
-
-      return result
-    end
+    errors = check_for_errors(hpxml, args)
+    return result if !errors.empty?
 
     fuels, _, _ = setup_outputs()
 
@@ -292,35 +301,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    # Require full annual simulation
-    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
-      runner.registerError('A full annual simulation is required for calculating utility bills.')
-      return false
-    end
-
-    # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      runner.registerError('Must specify a utility rate json path when choosing User-Specified utility rate type.')
-      return false
-    end
-
-    # Require not DSE
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_system|
-      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
-      next if htg_system.distribution_system_idref.nil?
-      next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if htg_system.distribution_system.annual_heating_dse.nil?
-
-      runner.registerError('DSE is not currently supported when calculating utility bills.')
-      return false
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
-      next if clg_system.distribution_system_idref.nil?
-      next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if clg_system.distribution_system.annual_cooling_dse.nil?
-
-      runner.registerError('DSE is not currently supported when calculating utility bills.')
+    errors = check_for_errors(hpxml, args)
+    if !errors.empty?
+      runner.registerError(errors.join(' '))
       return false
     end
 
@@ -354,21 +337,21 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Report results
     utility_bills.each do |fuel_type, utility_bill|
-      if !bill.annual_fixed_charge.nil?
+      if !utility_bill.annual_fixed_charge.nil?
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Fixed USD")
         utility_bill_type_val = utility_bill.annual_fixed_charge.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
         runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
       end
 
-      if !bill.annual_energy_charge.nil?
+      if !utility_bill.annual_energy_charge.nil?
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Marginal USD")
         utility_bill_type_val = utility_bill.annual_energy_charge.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
         runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
       end
 
-      if !bill.annual_production_credit.nil?
+      if !utility_bill.annual_production_credit.nil?
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} PV Credit USD")
         utility_bill_type_val = utility_bill.annual_production_credit.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
@@ -381,7 +364,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
     end
     utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
-    utility_bill_type_val = utility_bills.sum { |key, bill| bill.annual_total }.round(2)
+    utility_bill_type_val = utility_bills.sum { |fuel_type, utility_bill| utility_bill.annual_total }.round(2)
     runner.registerValue(utility_bill_type_str, utility_bill_type_val)
     runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
 
