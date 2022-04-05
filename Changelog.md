@@ -10,6 +10,7 @@ __New Features__
 - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
+- **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
   - Adds support for ambient foundations for single-family attached and apartment units.
@@ -22,6 +23,8 @@ __New Features__
   - Add ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
   - Timestamps in results_timeseries.csv are output in ISO 8601 standard format.
   - Allows user-specified annual/timeseries output file names.
+- ReportHPXMLOutput measure:
+  - Adds "Enclosure: Floor Area Foundation" output row in results_hpxml.csv.
 - New ReportUtilityBills measure:
   - Adds a new results_bills.csv output file to summarize calculated utility bills.
 
@@ -32,6 +35,7 @@ __Bugfixes__
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
+- Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
 
 ## OpenStudio-HPXML v1.3.0
 
