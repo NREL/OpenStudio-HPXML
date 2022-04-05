@@ -61,7 +61,8 @@ class ReportUtilityBillsTest < MiniTest::Test
       'Propane: Total ($)' => 76,
       'Wood Cord: Total ($)' => 0,
       'Wood Pellets: Total ($)' => 0,
-      'Coal: Total ($)' => 0
+      'Coal: Total ($)' => 0,
+      'Total ($)' => 1593,
     }
 
     @measure = ReportUtilityBills.new

@@ -481,7 +481,7 @@ The file includes:
    =============================================  ====================
    Electricity: Fixed ($)                         Annual fixed charges for electricity.
    Electricity: Marginal ($)                      Annual energy charges for electricity.
-   Electricity: PV Credit ($)                     Annual production credit for PV.
+   Electricity: PV Credit ($)                     Annual production credit (negative value) for PV.
    Electricity: Total ($)                         Annual total charges for electricity.
    Natural Gas: Fixed ($)                         Annual fixed charges for natural gas.
    Natural Gas: Marginal ($)                      Annual energy charges for natural gas.
@@ -491,4 +491,5 @@ The file includes:
    Wood Cord: Total ($)                           Annual total charges for wood cord.
    Wood Pellets: Total ($)                        Annual total charges for wood pellets.
    Coal: Total ($)                                Annual total charges for coal.
+   Total ($)                                      Annual total charges across all fuels.
    =============================================  ====================

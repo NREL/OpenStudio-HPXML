@@ -22,10 +22,12 @@ class HPXMLTest < MiniTest::Test
     File.delete(results_out) if File.exist? results_out
     sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
     File.delete(sizing_out) if File.exist? sizing_out
+    bills_out = File.join(@results_dir, 'results_bills.csv')
+    File.delete(bills_out) if File.exist? bills_out
 
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/base.xml"].sort.each do |xml|
       next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
       xmls << File.absolute_path(xml)
@@ -35,14 +37,16 @@ class HPXMLTest < MiniTest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     all_sizing_results = {}
+    all_bill_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       _test_schema_validation(xml)
       xml_name = File.basename(xml)
-      all_results[xml_name], all_sizing_results[xml_name] = _run_xml(xml, Parallel.worker_number)
+      all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
     _write_summary_results(all_results.sort_by { |k, v| k.downcase }.to_h, results_out)
     _write_hvac_sizing_results(all_sizing_results.sort_by { |k, v| k.downcase }.to_h, sizing_out)
+    _write_bill_results(all_bill_results.sort_by { |k, v| k.downcase }.to_h, bills_out)
   end
 
   def test_ashrae_140
@@ -61,7 +65,7 @@ class HPXMLTest < MiniTest::Test
     all_sizing_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
-      all_results[xml_name], all_sizing_results[xml_name] = _run_xml(xml, Parallel.worker_number)
+      all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
     _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_out)
@@ -457,7 +461,7 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL --add-utility-bills"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start
@@ -471,9 +475,11 @@ class HPXMLTest < MiniTest::Test
     annual_csv_path = File.join(rundir, 'results_annual.csv')
     timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
     hpxml_csv_path = File.join(rundir, 'results_hpxml.csv')
+    bills_csv_path = File.join(rundir, 'results_bills.csv')
     assert(File.exist? annual_csv_path)
     assert(File.exist? timeseries_csv_path)
     assert(File.exist? hpxml_csv_path)
+    assert(File.exist? bills_csv_path)
 
     # Get results
     results = _get_simulation_results(annual_csv_path, xml)
@@ -490,9 +496,10 @@ class HPXMLTest < MiniTest::Test
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
     sizing_results = _get_hvac_sizing_results(hpxml, xml)
+    bill_results = _get_bill_results(bills_csv_path, xml)
     _verify_outputs(rundir, xml, results, hpxml)
 
-    return results, sizing_results
+    return results, sizing_results, bill_results
   end
 
   def _get_simulation_results(annual_csv_path, xml)
@@ -581,6 +588,18 @@ class HPXMLTest < MiniTest::Test
       assert_equal(0.0, results['heating_load_ducts [Btuh]'])
       assert_equal(0.0, results['cooling_load_sens_ducts [Btuh]'])
       assert_equal(0.0, results['cooling_load_lat_ducts [Btuh]'])
+    end
+
+    return results
+  end
+
+  def _get_bill_results(bill_csv_path, xml)
+    # Grab all outputs from reporting measure CSV bill results
+    results = {}
+    CSV.foreach(bill_csv_path) do |row|
+      next if row.nil? || (row.size < 2)
+
+      results[row[0]] = Float(row[1])
     end
 
     return results
@@ -1392,6 +1411,30 @@ class HPXMLTest < MiniTest::Test
     end
 
     puts "Wrote HVAC sizing results to #{csv_out}."
+  end
+
+  def _write_bill_results(all_bill_results, csv_out)
+    require 'csv'
+
+    output_keys = nil
+    all_bill_results.each do |xml, xml_results|
+      output_keys = xml_results.keys
+      break
+    end
+    return if output_keys.nil?
+
+    CSV.open(csv_out, 'w') do |csv|
+      csv << ['HPXML'] + output_keys
+      all_bill_results.sort.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          csv_row << xml_results[key]
+        end
+        csv << csv_row
+      end
+    end
+
+    puts "Wrote utility bill results to #{csv_out}."
   end
 
   def _write_ashrae_140_results(all_results, csv_out)

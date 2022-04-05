@@ -68,59 +68,61 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
     # args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', false)
     arg.setDisplayName('Electricity: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for electricity.')
     arg.setDefaultValue(12.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', false)
     arg.setDisplayName('Electricity: Marginal Rate')
     arg.setUnits('$/kWh')
     arg.setDescription('Price per kilowatt-hour for electricity.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natural_gas_fixed_charge', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natural_gas_fixed_charge', false)
     arg.setDisplayName('Natural Gas: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for natural gas.')
     arg.setDefaultValue(8.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', false)
     arg.setDisplayName('Natural Gas: Marginal Rate')
     arg.setUnits('$/therm')
     arg.setDescription('Price per therm for natural gas.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', false)
     arg.setDisplayName('Fuel Oil: Marginal Rate')
     arg.setUnits('$/gal')
     arg.setDescription('Price per gallon for fuel oil.')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('propane_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('propane_marginal_rate', false)
     arg.setDisplayName('Propane: Marginal Rate')
     arg.setUnits('$/gal')
     arg.setDescription('Price per gallon for propane.')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_cord_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_cord_marginal_rate', false)
     arg.setDisplayName('Wood Cord: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood cord.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_pellets_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_pellets_marginal_rate', false)
     arg.setDisplayName('Wood Pellets: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood pellets.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('coal_marginal_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('coal_marginal_rate', false)
     arg.setDisplayName('Coal: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for coal.')
@@ -130,7 +132,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     pv_compensation_type_choices << 'Net Metering'
     pv_compensation_type_choices << 'Feed-In Tariff'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_compensation_type', pv_compensation_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_compensation_type', pv_compensation_type_choices, false)
     arg.setDisplayName('PV: Compensation Type')
     arg.setDescription('The type of compensation for PV.')
     arg.setDefaultValue('Net Metering')
@@ -140,20 +142,20 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     pv_annual_excess_sellback_rate_type_choices << 'User-Specified'
     pv_annual_excess_sellback_rate_type_choices << 'Retail Electricity Cost'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_annual_excess_sellback_rate_type', pv_annual_excess_sellback_rate_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_annual_excess_sellback_rate_type', pv_annual_excess_sellback_rate_type_choices, false)
     arg.setDisplayName('PV: Net Metering Annual Excess Sellback Rate Type')
     arg.setDescription("The type of annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering'.")
     arg.setDefaultValue('User-Specified')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_net_metering_annual_excess_sellback_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_net_metering_annual_excess_sellback_rate', false)
     arg.setDisplayName('PV: Net Metering Annual Excess Sellback Rate')
     arg.setUnits('$/kWh')
     arg.setDescription("The annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'.")
     arg.setDefaultValue(0.03)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_feed_in_tariff_rate', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_feed_in_tariff_rate', false)
     arg.setDisplayName('PV: Feed-In Tariff Rate')
     arg.setUnits('$/kWh')
     arg.setDescription("The annual full/gross tariff rate for PV. Only applies if the PV compensation type is 'Feed-In Tariff'.")
@@ -164,13 +166,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     pv_grid_connection_fee_units_choices << '$/kW'
     pv_grid_connection_fee_units_choices << '$'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_grid_connection_fee_units', pv_grid_connection_fee_units_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_grid_connection_fee_units', pv_grid_connection_fee_units_choices, false)
     arg.setDisplayName('PV: Grid Connection Fee Units')
     arg.setDescription('Units for PV grid connection fee. Only applies when there is PV.')
     arg.setDefaultValue('$/kW')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_monthly_grid_connection_fee', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_monthly_grid_connection_fee', false)
     arg.setDisplayName('PV: Monthly Grid Connection Fee')
     arg.setUnits('$')
     arg.setDescription('Monthly fee for PV grid connection. Only applies when there is PV.')
@@ -335,6 +337,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Get outputs
     get_outputs(fuels)
 
+    # Preprocess utility rates
+    preprocess_utility_rates(runner, fuels, utility_rates, args)
+
     # Get utility rates
     get_utility_rates(fuels, utility_rates, args, hpxml.header.state_code, hpxml.pv_systems, runner)
 
@@ -349,9 +354,36 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Report results
     utility_bills.each do |fuel_type, utility_bill|
-      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} $")
-      runner.registerValue(utility_bill_type_str, utility_bill.annual_total.round(2))
+      if !bill.annual_fixed_charge.nil?
+        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Fixed USD")
+        utility_bill_type_val = utility_bill.annual_fixed_charge.round(2)
+        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+      end
+
+      if !bill.annual_energy_charge.nil?
+        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Marginal USD")
+        utility_bill_type_val = utility_bill.annual_energy_charge.round(2)
+        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+      end
+
+      if !bill.annual_production_credit.nil?
+        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} PV Credit USD")
+        utility_bill_type_val = utility_bill.annual_production_credit.round(2)
+        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+      end
+
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Total USD")
+      utility_bill_type_val = utility_bill.annual_total.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+      runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
     end
+    utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
+    utility_bill_type_val = utility_bills.sum { |key, bill| bill.annual_total }.round(2)
+    runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+    runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
 
     # Write results
     write_output(runner, utility_bills, output_format, output_path)
@@ -359,6 +391,69 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     teardown()
 
     return true
+  end
+
+  def preprocess_utility_rates(runner, fuels, utility_rates, args)
+    utility_rates.each do |fuel_type, rate|
+      next if fuels[[fuel_type, false]].timeseries.sum == 0
+
+      if fuel_type == FT::Elec
+        if args[:electricity_bill_type] == 'Simple'
+          if !args[:electricity_fixed_charge].is_initialized || !args[:electricity_marginal_rate].is_initialized
+            runner.registerWarning('TODO')
+            args[:electricity_fixed_charge] = 0.0
+            args[:electricity_marginal_rate] = 0.0
+          else
+            args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
+            args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
+          end
+        end
+      elsif fuel_type == FT::Gas
+        if !args[:natural_gas_fixed_charge].is_initialized || !args[:natural_gas_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:natural_gas_fixed_charge] = 0.0
+          args[:natural_gas_marginal_rate] = 0.0
+        else
+          args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
+          args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
+        end
+      elsif fuel_type == FT::Oil
+        if !args[:fuel_oil_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:fuel_oil_marginal_rate] = 0.0
+        else
+          args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
+        end
+      elsif fuel_type == FT::Propane
+        if !args[:propane_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:propane_marginal_rate] = 0.0
+        else
+          args[:propane_marginal_rate] = args[:propane_marginal_rate].get
+        end
+      elsif fuel_type == FT::WoodCord
+        if !args[:wood_cord_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:wood_cord_marginal_rate] = 0.0
+        else
+          args[:wood_cord_marginal_rate] = args[:wood_cord_marginal_rate].get
+        end
+      elsif fuel_type == FT::WoodPellets
+        if !args[:wood_pellets_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:wood_pellets_marginal_rate] = 0.0
+        else
+          args[:wood_pellets_marginal_rate] = args[:wood_pellets_marginal_rate].get
+        end
+      elsif fuel_type == FT::Coal
+        if !args[:coal_marginal_rate].is_initialized
+          runner.registerWarning('TODO')
+          args[:coal_marginal_rate] = 0.0
+        else
+          args[:coal_marginal_rate] = args[:coal_marginal_rate].get
+        end
+      end
+    end
   end
 
   def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems, runner = nil)
@@ -725,6 +820,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
       results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
+    results_out << [line_break]
+    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total }.round(2)]
 
     if output_format == 'csv'
       CSV.open(output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
