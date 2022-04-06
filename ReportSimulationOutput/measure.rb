@@ -389,11 +389,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       runner.registerError('Cannot find OpenStudio model.')
       return false
     end
-    model = model.get
-    @model = model
+    @model = model.get
 
     # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
+    if !runner.validateUserArguments(arguments(@model), user_arguments)
       return false
     end
 
@@ -440,11 +439,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       runner.registerError('EnergyPlus simulation failed.')
       return false
     end
-    model.setSqlFile(@sqlFile)
+    @model.setSqlFile(@sqlFile)
 
-    hpxml_path = model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-    hpxml_defaults_path = model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
-    building_id = model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
+    building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
@@ -2281,6 +2280,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     }
   end
 
+  def is_supplemental_coil(sys_id)
+    return false if @hpxml.nil?
+
+    supplemental_coil = false
+    @hpxml.heating_systems.each do |heating_system|
+      next if sys_id != heating_system.id
+      next unless heating_system.is_heat_pump_backup_system
+
+      supplemental_coil = true
+    end
+    return supplemental_coil
+  end
+
   def get_object_output_variables_by_key(model, object, class_name)
     to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
               EPlus::FuelTypeNaturalGas => FT::Gas,
@@ -2293,6 +2305,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # For a given object, returns the output variables to be requested and associates
     # them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
 
+    sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
+    if sys_id.is_initialized
+      sys_id = sys_id.get
+    else
+      sys_id = nil
+    end
+
     if class_name == EUT
 
       # End uses
@@ -2301,11 +2320,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_CoilHeatingElectric.is_initialized
-        is_supplemental_coil = false
-        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-        end
-        if not is_supplemental_coil
+        if not is_supplemental_coil(sys_id)
           return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         else
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
@@ -2313,33 +2328,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
-        is_supplemental_coil = false
-        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-        end
-        if not is_supplemental_coil
+        if not is_supplemental_coil(sys_id)
           return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
         else
           return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy"] }
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-        is_supplemental_coil = false
-        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-        end
-        if not is_supplemental_coil
+        if not is_supplemental_coil(sys_id)
           return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         else
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-        is_supplemental_coil = false
-        if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-          is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-        end
-        if not is_supplemental_coil
+        if not is_supplemental_coil(sys_id)
           return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
         else
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
@@ -2352,11 +2355,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
-          is_supplemental_coil = false
-          if object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').is_initialized
-            is_supplemental_coil = object.additionalProperties.getFeatureAsBoolean('IsSupplementalCoil').get
-          end
-          if not is_supplemental_coil
+          if not is_supplemental_coil(sys_id)
             return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
           else
             return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }

@@ -97,7 +97,6 @@ class HVAC
         htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-        htg_coil.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
         fan_cfms << htg_cfm
       end
     end
@@ -501,7 +500,6 @@ class HVAC
     boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-    boiler.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
     if is_condensing && oat_reset_enabled
@@ -614,7 +612,6 @@ class HVAC
     zone_hvac.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
     zone_hvac.addToThermalZone(control_zone)
     zone_hvac.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-    zone_hvac.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
 
     control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
     control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0]))
@@ -643,7 +640,6 @@ class HVAC
     htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-    htg_coil.additionalProperties.setFeature('IsSupplementalCoil', heating_system.is_heat_pump_backup_system) # Used by reporting measure
 
     # Fan
     htg_cfm = heating_system.heating_airflow_cfm
@@ -1529,7 +1525,6 @@ class HVAC
     else
       htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
-    htg_supp_coil.additionalProperties.setFeature('IsSupplementalCoil', true) # Used by reporting measure
 
     return htg_supp_coil
   end
