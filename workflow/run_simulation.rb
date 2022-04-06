@@ -72,7 +72,7 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
     args['output_format'] = output_format
     args['wood_cord_marginal_rate'] = 0.015
     args['wood_pellets_marginal_rate'] = 0.015
-    args['coal_marginal_rate'] = 0.0500
+    args['coal_marginal_rate'] = 0.015
     update_args_hash(measures, measure_subdir, args)
   end
 
