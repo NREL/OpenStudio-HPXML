@@ -2280,17 +2280,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     }
   end
 
-  def is_supplemental_coil(sys_id)
+  def is_heat_pump_backup(sys_id)
     return false if @hpxml.nil?
 
-    supplemental_coil = false
+    heat_pump_backup = false
+
+    # Integrated backup?
+    @hpxml.heat_pumps.each do |heat_pump|
+      next if sys_id != heat_pump.id
+
+      heat_pump_backup = true
+    end
+
+    # Separate backup system?
     @hpxml.heating_systems.each do |heating_system|
       next if sys_id != heating_system.id
       next unless heating_system.is_heat_pump_backup_system
 
-      supplemental_coil = true
+      heat_pump_backup = true
     end
-    return supplemental_coil
+    return heat_pump_backup
   end
 
   def get_object_output_variables_by_key(model, object, class_name)
@@ -2320,7 +2329,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_CoilHeatingElectric.is_initialized
-        if not is_supplemental_coil(sys_id)
+        if not is_heat_pump_backup(sys_id)
           return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         else
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
@@ -2328,21 +2337,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
-        if not is_supplemental_coil(sys_id)
+        if not is_heat_pump_backup(sys_id)
           return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
         else
           return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy"] }
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-        if not is_supplemental_coil(sys_id)
-          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
-        else
-          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
-        end
+        return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-        if not is_supplemental_coil(sys_id)
+        if not is_heat_pump_backup(sys_id)
           return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
         else
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
@@ -2355,7 +2360,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
-          if not is_supplemental_coil(sys_id)
+          if not is_heat_pump_backup(sys_id)
             return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
           else
             return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
