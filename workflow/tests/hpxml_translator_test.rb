@@ -635,6 +635,7 @@ class HPXMLTest < MiniTest::Test
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include? 'Could not find state average'
 
       if hpxml_path.include? 'base-atticroof-conditioned.xml'
         next if log_line.include?('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
@@ -683,16 +684,6 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include?('OS Message: Minutes field (60) on line 9 of EPW file')
-      end
-      if hpxml_path.include? 'base-appliances-oil-location-miami-fl.xml'
-        next if log_line.include?('Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.')
-      elsif hpxml_path.include? 'oil'
-        next if log_line.include?('Could not find state average Fuel Oil rate based on Colorado; using national average.')
-      end
-      if hpxml_path.include? 'base-appliances-propane-location-portland-or.xml'
-        next if log_line.include?('Could not find state average Propane rate based on Oregon; using national average.')
-      elsif hpxml_path.include? 'propane'
-        next if log_line.include?('Could not find state average Propane rate based on Colorado; using region (PADD 4) average.')
       end
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if log_line.include?('DSE is not currently supported when calculating utility bills.')
