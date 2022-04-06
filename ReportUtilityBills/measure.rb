@@ -186,12 +186,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return 'hourly'
   end
 
-  def check_for_errors(args)
+  def check_for_warnings_and_errors(args)
+    warnings = []
     errors = []
 
     # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      errors << 'A full annual simulation is required for calculating utility bills.'
+      warnings << 'A full annual simulation is required for calculating utility bills.'
     end
 
     # Require user-specified utility rate if 'User-Specified'
@@ -217,7 +218,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       errors << 'DSE is not currently supported when calculating utility bills.'
     end
 
-    return errors
+    return warnings, errors
   end
 
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
@@ -248,8 +249,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    errors = check_for_errors(args)
-    return result if !errors.empty?
+    warnings, errors = check_for_warnings_and_errors(args)
+    return result if !warnings.empty? || !errors.empty?
 
     fuels, _, _ = setup_outputs()
 
@@ -301,9 +302,17 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    errors = check_for_errors(args)
+    warnings, errors = check_for_warnings_and_errors(args)
+    if !warnings.empty?
+      warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+      return true
+    end
     if !errors.empty?
-      runner.registerError(errors.join(' '))
+      errors.each do |error|
+        runner.registerError(error)
+      end
       return false
     end
 

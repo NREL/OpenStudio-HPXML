@@ -685,6 +685,8 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'base-appliances-oil-location-miami-fl.xml'
         next if log_line.include?('Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.')
+      elsif hpxml_path.include? 'oil'
+        next if log_line.include?('Could not find state average Fuel Oil rate based on Colorado; using national average.')
       end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
