@@ -689,7 +689,9 @@ class HPXMLTest < MiniTest::Test
       elsif hpxml_path.include? 'oil'
         next if log_line.include?('Could not find state average Fuel Oil rate based on Colorado; using national average.')
       end
-      if hpxml_path.include? 'propane'
+      if hpxml_path.include? 'base-appliances-propane-location-portland-or.xml'
+        next if log_line.include?('Could not find state average Propane rate based on Oregon; using national average.')
+      elsif hpxml_path.include? 'propane'
         next if log_line.include?('Could not find state average Propane rate based on Colorado; using region (PADD 4) average.')
       end
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?

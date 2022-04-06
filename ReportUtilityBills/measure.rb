@@ -196,7 +196,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
       if args[:electricity_bill_type] != 'Simple' || pv_systems.size > 0
-        errors << 'A full annual simulation is required for calculating utility bills.'
+        errors << 'A full annual simulation is required for calculating detailed utility bills.'
       end
     end
 
