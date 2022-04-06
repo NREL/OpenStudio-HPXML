@@ -257,6 +257,24 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
+  def test_workflow_semi_annual_run_period
+    # expected values not from BEopt
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    actual_bills = _get_actual_bills(bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 8
+    @expected_bills['Electricity: Marginal ($)'] = 122
+    @expected_bills['Electricity: Total ($)'] = 130
+    @expected_bills['Natural Gas: Fixed ($)'] = 8
+    @expected_bills['Natural Gas: Marginal ($)'] = 28
+    @expected_bills['Natural Gas: Total ($)'] = 36
+    @expected_bills['Fuel Oil: Total ($)'] = 0
+    @expected_bills['Propane: Total ($)'] = 0
+    @expected_bills['Total ($)'] = 167
+    _check_bills(@expected_bills, actual_bills)
+  end
+
   def test_warning_region
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-oil-location-miami-fl.xml'
     expected_warning = 'Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.'
@@ -271,18 +289,25 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
   end
 
+  def test_warning_dse
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-dse.xml'
+    expected_warning = 'DSE is not currently supported when calculating utility bills.'
+    bills_csv = _test_measure(expected_warning: expected_warning)
+    assert(!File.exist?(bills_csv))
+  end
+
+  def test_error_no_rates
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-location-capetown-zaf.xml'
+    expected_error = 'Could not find a marginal Electricity rate.'
+    bills_csv = _test_measure(expected_error: expected_error)
+    assert(!File.exist?(bills_csv))
+  end
+
   def test_error_user_specified_but_no_rates
     skip
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     expected_error = 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
-    bills_csv = _test_measure(expected_error: expected_error)
-    assert(!File.exist?(bills_csv))
-  end
-
-  def test_error_dse
-    @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-dse.xml'
-    expected_error = 'DSE is not currently supported when calculating utility bills.'
     bills_csv = _test_measure(expected_error: expected_error)
     assert(!File.exist?(bills_csv))
   end
@@ -400,10 +425,10 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     # check warnings/errors
     if not expected_error.nil?
-      assert(cli_output.include?(expected_error))
+      assert(cli_output.include?("ERROR] #{expected_error}"))
     end
     if not expected_warning.nil?
-      assert(cli_output.include?(expected_warning))
+      assert(cli_output.include?("WARN] #{expected_warning}"))
     end
 
     return bills_csv

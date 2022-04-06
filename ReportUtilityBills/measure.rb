@@ -223,7 +223,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       warnings << 'DSE is not currently supported when calculating utility bills.'
     end
 
-    return warnings, errors
+    return warnings.uniq, errors.uniq
   end
 
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
