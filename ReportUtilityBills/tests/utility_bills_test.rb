@@ -38,9 +38,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['natural_gas_marginal_rate'] = Constants.Auto
     @args_hash['fuel_oil_marginal_rate'] = Constants.Auto
     @args_hash['propane_marginal_rate'] = Constants.Auto
-    # @args_hash['wood_cord_marginal_rate'] = ''
-    # @args_hash['wood_pellets_marginal_rate'] = ''
-    # @args_hash['coal_marginal_rate'] = ''
+    @args_hash['wood_cord_marginal_rate'] = 0.015
+    @args_hash['wood_pellets_marginal_rate'] = 0.015
+    @args_hash['coal_marginal_rate'] = 0.015
     @args_hash['pv_compensation_type'] = 'Net Metering'
     @args_hash['pv_annual_excess_sellback_rate_type'] = 'User-Specified'
     @args_hash['pv_net_metering_annual_excess_sellback_rate'] = 0.03

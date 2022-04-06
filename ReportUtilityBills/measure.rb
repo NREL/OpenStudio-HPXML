@@ -114,18 +114,21 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Wood Cord: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood cord.')
+    arg.setDefaultValue(0.015)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wood_pellets_marginal_rate', false)
     arg.setDisplayName('Wood Pellets: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood pellets.')
+    arg.setDefaultValue(0.015)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('coal_marginal_rate', false)
     arg.setDisplayName('Coal: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for coal.')
+    arg.setDefaultValue(0.015)
     args << arg
 
     pv_compensation_type_choices = OpenStudio::StringVector.new
@@ -329,8 +332,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Get outputs
     get_outputs(fuels)
 
-    # Preprocess utility rates
-    preprocess_utility_rates(runner, fuels, utility_rates, args)
+    # Preprocess arguments
+    preprocess_arguments(args)
 
     # Get utility rates
     get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
@@ -385,43 +388,29 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def preprocess_utility_rates(runner, fuels, utility_rates, args)
-    utility_rates.each do |fuel_type, rate|
-      next if fuels[[fuel_type, false]].timeseries.sum == 0
+  def preprocess_arguments(args)
+    args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
+    args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
 
-      if fuel_type == FT::Elec
-        args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
-        args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
-      elsif fuel_type == FT::Gas
-        args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
-        args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
-      elsif fuel_type == FT::Oil
-        args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
-      elsif fuel_type == FT::Propane
-        args[:propane_marginal_rate] = args[:propane_marginal_rate].get
-      elsif fuel_type == FT::WoodCord
-        if !args[:wood_cord_marginal_rate].is_initialized
-          runner.registerWarning('Did not specify a marginal rate for wood cord.')
-          args[:wood_cord_marginal_rate] = 0.0
-        else
-          args[:wood_cord_marginal_rate] = args[:wood_cord_marginal_rate].get
-        end
-      elsif fuel_type == FT::WoodPellets
-        if !args[:wood_pellets_marginal_rate].is_initialized
-          runner.registerWarning('Did not specify a marginal rate for wood pellets.')
-          args[:wood_pellets_marginal_rate] = 0.0
-        else
-          args[:wood_pellets_marginal_rate] = args[:wood_pellets_marginal_rate].get
-        end
-      elsif fuel_type == FT::Coal
-        if !args[:coal_marginal_rate].is_initialized
-          runner.registerWarning('Did not specify a marginal rate for coal.')
-          args[:coal_marginal_rate] = 0.0
-        else
-          args[:coal_marginal_rate] = args[:coal_marginal_rate].get
-        end
-      end
-    end
+    args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
+    args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
+
+    args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
+
+    args[:propane_marginal_rate] = args[:propane_marginal_rate].get
+
+    args[:wood_cord_marginal_rate] = args[:wood_cord_marginal_rate].get
+
+    args[:wood_pellets_marginal_rate] = args[:wood_pellets_marginal_rate].get
+
+    args[:coal_marginal_rate] = args[:coal_marginal_rate].get
+
+    args[:pv_compensation_type] = args[:pv_compensation_type].get
+    args[:pv_annual_excess_sellback_rate_type] = args[:pv_annual_excess_sellback_rate_type].get
+    args[:pv_net_metering_annual_excess_sellback_rate] = args[:pv_net_metering_annual_excess_sellback_rate].get
+    args[:pv_feed_in_tariff_rate] = args[:pv_feed_in_tariff_rate].get
+    args[:pv_grid_connection_fee_units] = args[:pv_grid_connection_fee_units].get
+    args[:pv_monthly_grid_connection_fee] = args[:pv_monthly_grid_connection_fee].get
   end
 
   def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems, runner = nil)
