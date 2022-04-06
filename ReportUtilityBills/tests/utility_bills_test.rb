@@ -277,29 +277,29 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_warning_region
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-oil-location-miami-fl.xml'
-    expected_warning = 'Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.'
-    bills_csv = _test_measure(expected_warning: expected_warning)
+    expected_warnings = ['Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
     assert(File.exist?(bills_csv))
   end
 
   def test_warning_national
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-propane-location-portland-or.xml'
-    expected_warning = 'Could not find state average Propane rate based on Oregon; using national average.'
-    bills_csv = _test_measure(expected_warning: expected_warning)
+    expected_warnings = ['Could not find state average Propane rate based on Oregon; using national average.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
     assert(File.exist?(bills_csv))
   end
 
   def test_warning_dse
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-dse.xml'
-    expected_warning = 'DSE is not currently supported when calculating utility bills.'
-    bills_csv = _test_measure(expected_warning: expected_warning)
+    expected_warnings = ['DSE is not currently supported when calculating utility bills.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
     assert(!File.exist?(bills_csv))
   end
 
-  def test_error_no_rates
+  def test_warning_no_rates
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-location-capetown-zaf.xml'
-    expected_error = 'Could not find a marginal Electricity rate.'
-    bills_csv = _test_measure(expected_error: expected_error)
+    expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
     assert(!File.exist?(bills_csv))
   end
 
@@ -307,8 +307,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     skip
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    expected_error = 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
-    bills_csv = _test_measure(expected_error: expected_error)
+    expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
+    bills_csv = _test_measure(expected_errors: expected_errors)
     assert(!File.exist?(bills_csv))
   end
 
@@ -387,7 +387,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return bills_csv
   end
 
-  def _test_measure(expected_error: nil, expected_warning: nil)
+  def _test_measure(expected_errors: [], expected_warnings: [])
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template.osw')
@@ -424,11 +424,15 @@ class ReportUtilityBillsTest < MiniTest::Test
     bills_csv = File.join(File.dirname(template_osw), 'run', 'results_bills.csv')
 
     # check warnings/errors
-    if not expected_error.nil?
-      assert(cli_output.include?("ERROR] #{expected_error}"))
+    if not expected_errors.empty?
+      expected_errors.each do |expected_error|
+        assert(cli_output.include?("ERROR] #{expected_error}"))
+      end
     end
-    if not expected_warning.nil?
-      assert(cli_output.include?("WARN] #{expected_warning}"))
+    if not expected_warnings.empty?
+      expected_warnings.each do |expected_warning|
+        assert(cli_output.include?("WARN] #{expected_warning}"))
+      end
     end
 
     return bills_csv

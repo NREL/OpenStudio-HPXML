@@ -189,20 +189,19 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return 'hourly'
   end
 
-  def check_for_warnings_and_errors(args, pv_systems)
+  def check_for_warnings(args, pv_systems)
     warnings = []
-    errors = []
 
     # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
       if args[:electricity_bill_type] != 'Simple' || pv_systems.size > 0
-        errors << 'A full annual simulation is required for calculating detailed utility bills.'
+        warnings << 'A full annual simulation is required for calculating detailed utility bills.'
       end
     end
 
     # Require user-specified utility rate if 'User-Specified'
     if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      errors << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
+      warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
     end
 
     # Require not DSE
@@ -211,6 +210,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next if htg_system.distribution_system_idref.nil?
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if htg_system.distribution_system.annual_heating_dse.nil?
+      next if htg_system.distribution_system.annual_heating_dse == 1
 
       warnings << 'DSE is not currently supported when calculating utility bills.'
     end
@@ -219,11 +219,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next if clg_system.distribution_system_idref.nil?
       next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if clg_system.distribution_system.annual_cooling_dse.nil?
+      next if clg_system.distribution_system.annual_cooling_dse == 1
 
       warnings << 'DSE is not currently supported when calculating utility bills.'
     end
 
-    return warnings.uniq, errors.uniq
+    return warnings.uniq
   end
 
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
@@ -254,8 +255,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings, errors = check_for_warnings_and_errors(args, @hpxml.pv_systems)
-    return result if !warnings.empty? || !errors.empty?
+    warnings = check_for_warnings(args, @hpxml.pv_systems)
+    return result if !warnings.empty?
 
     fuels, _, _ = setup_outputs()
 
@@ -267,6 +268,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     return result.uniq
+  end
+
+  def register_warnings(runner, warnings)
+    return false if warnings.empty?
+
+    warnings.each do |warning|
+      runner.registerWarning(warning)
+    end
+    return true
   end
 
   # define what happens when the measure is run
@@ -307,19 +317,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings, errors = check_for_warnings_and_errors(args, @hpxml.pv_systems)
-    if !warnings.empty?
-      warnings.each do |warning|
-        runner.registerWarning(warning)
-      end
-      return true
-    end
-    if !errors.empty?
-      errors.each do |error|
-        runner.registerError(error)
-      end
-      return false
-    end
+    warnings = check_for_warnings(args, @hpxml.pv_systems)
+    return true if register_warnings(runner, warnings)
 
     # Set paths
     output_dir = File.dirname(@sqlFile.path.to_s)
@@ -338,7 +337,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     preprocess_arguments(args)
 
     # Get utility rates
-    get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
+    warnings = get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
+    return true if register_warnings(runner, warnings)
 
     # Calculate utility bills
     net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
@@ -350,6 +350,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_annual_bills(utility_bills)
 
     # Report results
+    utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
+    utility_bill_type_val = utility_bills.sum { |fuel_type, utility_bill| utility_bill.annual_total.round(2) }.round(2)
+    runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+    runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+
     utility_bills.each do |fuel_type, utility_bill|
       if !utility_bill.annual_fixed_charge.nil?
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Fixed USD")
@@ -377,10 +382,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       runner.registerValue(utility_bill_type_str, utility_bill_type_val)
       runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
     end
-    utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
-    utility_bill_type_val = utility_bills.sum { |fuel_type, utility_bill| utility_bill.annual_total.round(2) }
-    runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-    runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
 
     # Write results
     write_output(runner, utility_bills, output_format, output_path)
@@ -416,6 +417,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems, runner = nil)
+    warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
@@ -504,11 +506,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
           rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type)
+          warnings << "Could not find a marginal #{fuel_type} rate." if rate.flatratebuy.nil?
         end
       else
         rate.flatratebuy = Float(rate.flatratebuy)
       end
     end
+    return warnings
   end
 
   def get_utility_bills(fuels, utility_rates, utility_bills, args, header)
@@ -650,6 +654,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   def get_auto_marginal_rate(runner, state_code, fuel_type)
     state_name = get_state_code_to_state_name[state_code]
+    return if state_name.nil?
 
     marginal_rate = nil
     if fuel_type == FT::Elec
@@ -710,10 +715,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         runner.registerWarning("Could not find state average #{FT::Propane} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
       marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
-
     end
-
-    fail "Could not find a marginal #{fuel_type} rate." if marginal_rate.nil?
 
     return marginal_rate
   end
@@ -783,6 +785,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     segment, _ = utility_bills.keys[0].split(':', 2)
     segment = segment.strip
     results_out = []
+    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }]
+    results_out << [line_break]
     utility_bills.each do |key, bill|
       new_segment, _ = key.split(':', 2)
       new_segment = new_segment.strip
@@ -796,8 +800,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
       results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
-    results_out << [line_break]
-    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }]
 
     if output_format == 'csv'
       CSV.open(output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
