@@ -19,6 +19,7 @@ __New Features__
   - Adds an optional argument for whether the HPXML file is written with default values applied; defaults to false.
   - Adds an optional argument for whether the HPXML file is validated; defaults to false.
 - ReportSimulationOutput measure:
+  - Separate heat pump backup heating from total heating in new "End Use: <Fuel Type>: Heating Heat Pump Backup" output.
   - Add optional argument for requesting timeseries EnergyPlus output variables.
   - Add ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
   - Timestamps in results_timeseries.csv are output in ISO 8601 standard format.
