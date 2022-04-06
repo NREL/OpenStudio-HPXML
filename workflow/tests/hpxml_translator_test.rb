@@ -62,10 +62,9 @@ class HPXMLTest < MiniTest::Test
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
-    all_sizing_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
-      all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
+      all_results[xml_name], _, _ = _run_xml(xml, Parallel.worker_number)
     end
 
     _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_out)
@@ -683,6 +682,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include?('OS Message: Minutes field (60) on line 9 of EPW file')
+      end
+      if hpxml_path.include? 'base-appliances-oil-location-miami-fl.xml'
+        next if log_line.include?('Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.')
       end
 
       flunk "Unexpected warning found in run.log: #{log_line}"

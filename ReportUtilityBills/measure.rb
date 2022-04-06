@@ -110,19 +110,19 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_cord_marginal_rate', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wood_cord_marginal_rate', false)
     arg.setDisplayName('Wood Cord: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood cord.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_pellets_marginal_rate', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wood_pellets_marginal_rate', false)
     arg.setDisplayName('Wood Pellets: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for wood pellets.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('coal_marginal_rate', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('coal_marginal_rate', false)
     arg.setDisplayName('Coal: Marginal Rate')
     arg.setUnits('$/kBtu')
     arg.setDescription('Price per kBtu for coal.')
@@ -364,7 +364,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
     end
     utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
-    utility_bill_type_val = utility_bills.sum { |fuel_type, utility_bill| utility_bill.annual_total }.round(2)
+    utility_bill_type_val = utility_bills.sum { |fuel_type, utility_bill| utility_bill.annual_total.round(2) }
     runner.registerValue(utility_bill_type_str, utility_bill_type_val)
     runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
 
@@ -381,56 +381,32 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
-        if args[:electricity_bill_type] == 'Simple'
-          if !args[:electricity_fixed_charge].is_initialized || !args[:electricity_marginal_rate].is_initialized
-            runner.registerWarning('TODO')
-            args[:electricity_fixed_charge] = 0.0
-            args[:electricity_marginal_rate] = 0.0
-          else
-            args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
-            args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
-          end
-        end
+        args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
+        args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
       elsif fuel_type == FT::Gas
-        if !args[:natural_gas_fixed_charge].is_initialized || !args[:natural_gas_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
-          args[:natural_gas_fixed_charge] = 0.0
-          args[:natural_gas_marginal_rate] = 0.0
-        else
-          args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
-          args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
-        end
+        args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
+        args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
       elsif fuel_type == FT::Oil
-        if !args[:fuel_oil_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
-          args[:fuel_oil_marginal_rate] = 0.0
-        else
-          args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
-        end
+        args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
       elsif fuel_type == FT::Propane
-        if !args[:propane_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
-          args[:propane_marginal_rate] = 0.0
-        else
-          args[:propane_marginal_rate] = args[:propane_marginal_rate].get
-        end
+        args[:propane_marginal_rate] = args[:propane_marginal_rate].get
       elsif fuel_type == FT::WoodCord
         if !args[:wood_cord_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
+          runner.registerWarning('Did not specify a marginal rate for wood cord.')
           args[:wood_cord_marginal_rate] = 0.0
         else
           args[:wood_cord_marginal_rate] = args[:wood_cord_marginal_rate].get
         end
       elsif fuel_type == FT::WoodPellets
         if !args[:wood_pellets_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
+          runner.registerWarning('Did not specify a marginal rate for wood pellets.')
           args[:wood_pellets_marginal_rate] = 0.0
         else
           args[:wood_pellets_marginal_rate] = args[:wood_pellets_marginal_rate].get
         end
       elsif fuel_type == FT::Coal
         if !args[:coal_marginal_rate].is_initialized
-          runner.registerWarning('TODO')
+          runner.registerWarning('Did not specify a marginal rate for coal.')
           args[:coal_marginal_rate] = 0.0
         else
           args[:coal_marginal_rate] = args[:coal_marginal_rate].get
@@ -821,7 +797,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
     results_out << [line_break]
-    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total }.round(2)]
+    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }]
 
     if output_format == 'csv'
       CSV.open(output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
