@@ -2299,6 +2299,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       heat_pump_backup = true
     end
+
+    # Dual-fuel heat pump backup?
+    if sys_id.end_with? '_DFHPBackup'
+      heat_pump_backup = true
+    end
+
     return heat_pump_backup
   end
 
@@ -2344,7 +2350,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-        return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
         if not is_heat_pump_backup(sys_id)
