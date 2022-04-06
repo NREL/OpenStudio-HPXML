@@ -478,7 +478,6 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? annual_csv_path)
     assert(File.exist? timeseries_csv_path)
     assert(File.exist? hpxml_csv_path)
-    assert(File.exist? bills_csv_path)
 
     # Get results
     results = _get_simulation_results(annual_csv_path, xml)
@@ -595,10 +594,12 @@ class HPXMLTest < MiniTest::Test
   def _get_bill_results(bill_csv_path, xml)
     # Grab all outputs from reporting measure CSV bill results
     results = {}
-    CSV.foreach(bill_csv_path) do |row|
-      next if row.nil? || (row.size < 2)
+    if File.exist? bill_csv_path
+      CSV.foreach(bill_csv_path) do |row|
+        next if row.nil? || (row.size < 2)
 
-      results[row[0]] = Float(row[1])
+        results[row[0]] = Float(row[1])
+      end
     end
 
     return results
@@ -690,6 +691,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'propane'
         next if log_line.include?('Could not find state average Propane rate based on Colorado; using region (PADD 4) average.')
+      end
+      if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
+        next if log_line.include?('DSE is not currently supported when calculating utility bills.')
       end
 
       flunk "Unexpected warning found in run.log: #{log_line}"

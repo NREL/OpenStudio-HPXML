@@ -55,9 +55,16 @@ class UtilityBill
 end
 
 class CalculateUtilityBill
-  def self.simple(fuel_type, year, fuel_time_series, is_production, rate, bill, net_elec)
-    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, 12, 31)
-    num_hrs = sim_end_day_of_year * 24
+  def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
+    begin_month = header.sim_begin_month
+    begin_day = header.sim_begin_day
+    end_month = header.sim_end_month
+    end_day = header.sim_end_day
+    year = header.sim_calendar_year
+
+    sim_begin_day_of_year = Schedule.get_day_num_from_month_day(year, begin_month, begin_day)
+    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, end_month, end_day)
+    num_hrs = (sim_end_day_of_year - sim_begin_day_of_year + 1) * 24
     day_end_months = Schedule.day_end_months(year)
 
     if !rate.realtimeprice.empty? && rate.realtimeprice.size != num_hrs

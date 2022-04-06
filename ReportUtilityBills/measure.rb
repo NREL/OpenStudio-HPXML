@@ -189,13 +189,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return 'hourly'
   end
 
-  def check_for_warnings_and_errors(args)
+  def check_for_warnings_and_errors(args, pv_systems)
     warnings = []
     errors = []
 
     # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      warnings << 'A full annual simulation is required for calculating utility bills.'
+      if args[:electricity_bill_type] != 'Simple' || pv_systems.size > 0
+        errors << 'A full annual simulation is required for calculating utility bills.'
+      end
     end
 
     # Require user-specified utility rate if 'User-Specified'
@@ -210,7 +212,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if htg_system.distribution_system.annual_heating_dse.nil?
 
-      errors << 'DSE is not currently supported when calculating utility bills.'
+      warnings << 'DSE is not currently supported when calculating utility bills.'
     end
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
       next unless clg_system.fraction_cool_load_served > 0
@@ -218,7 +220,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if clg_system.distribution_system.annual_cooling_dse.nil?
 
-      errors << 'DSE is not currently supported when calculating utility bills.'
+      warnings << 'DSE is not currently supported when calculating utility bills.'
     end
 
     return warnings, errors
@@ -252,7 +254,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings, errors = check_for_warnings_and_errors(args)
+    warnings, errors = check_for_warnings_and_errors(args, @hpxml.pv_systems)
     return result if !warnings.empty? || !errors.empty?
 
     fuels, _, _ = setup_outputs()
@@ -305,7 +307,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings, errors = check_for_warnings_and_errors(args)
+    warnings, errors = check_for_warnings_and_errors(args, @hpxml.pv_systems)
     if !warnings.empty?
       warnings.each do |warning|
         runner.registerWarning(warning)
@@ -339,7 +341,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
 
     # Calculate utility bills
-    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header.sim_calendar_year)
+    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
 
     # Annual true up
     annual_true_up(utility_rates, utility_bills, net_elec)
@@ -509,7 +511,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def get_utility_bills(fuels, utility_rates, utility_bills, args, sim_calendar_year)
+  def get_utility_bills(fuels, utility_rates, utility_bills, args, header)
     net_elec = 0
     fuels.each do |(fuel_type, is_production), fuel|
       rate = utility_rates[fuel_type]
@@ -519,10 +521,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
           net_elec = CalculateUtilityBill.detailed_electric(fuels, rate, bill, net_elec)
         else
-          net_elec = CalculateUtilityBill.simple(fuel_type, sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
+          net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end
       else
-        net_elec = CalculateUtilityBill.simple(fuel_type, sim_calendar_year, fuel.timeseries, is_production, rate, bill, net_elec)
+        net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
     return net_elec
