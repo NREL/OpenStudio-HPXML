@@ -1291,14 +1291,14 @@ class HPXMLTest < MiniTest::Test
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
-      if htg_fuels.include?(fuel) &&
-         if (not hpxml_path.include? 'autosize')
-           assert_operator(energy_htg, :>, 0)
-         end
+      if htg_fuels.include? fuel
+        if (not hpxml_path.include? 'autosize') && (not is_warm_climate)
+          assert_operator(energy_htg, :>, 0)
+        end
       else
         assert_equal(0, energy_htg)
       end
-      if htg_backup_fuels.include?(fuel)
+      if htg_backup_fuels.include? fuel
         if (not hpxml_path.include? 'autosize') && (not is_warm_climate)
           assert_operator(energy_hp_backup, :>, 0)
         end
