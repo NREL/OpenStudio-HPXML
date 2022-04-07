@@ -683,10 +683,12 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? "Due to an OpenStudio bug, the battery's rated power output will not be honored; the simulation will proceed without a maximum charge/discharge limit."
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
-        next if log_line.include?('OS Message: Minutes field (60) on line 9 of EPW file')
+        next if log_line.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
+        next if log_line.include? 'Could not find a marginal Electricity rate.'
+        next if log_line.include? 'Could not find a marginal Natural Gas rate.'
       end
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
-        next if log_line.include?('DSE is not currently supported when calculating utility bills.')
+        next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
