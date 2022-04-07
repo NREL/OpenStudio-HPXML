@@ -356,21 +356,21 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
 
     utility_bills.each do |fuel_type, utility_bill|
-      if !utility_bill.annual_fixed_charge.nil?
+      if [FT::Elec, FT::Gas].include? fuel_type
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Fixed USD")
         utility_bill_type_val = utility_bill.annual_fixed_charge.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
         runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
       end
 
-      if !utility_bill.annual_energy_charge.nil?
+      if [FT::Elec, FT::Gas].include? fuel_type
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} Marginal USD")
         utility_bill_type_val = utility_bill.annual_energy_charge.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
         runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
       end
 
-      if !utility_bill.annual_production_credit.nil?
+      if [FT::Elec].include? fuel_type
         utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} PV Credit USD")
         utility_bill_type_val = utility_bill.annual_production_credit.round(2)
         runner.registerValue(utility_bill_type_str, utility_bill_type_val)
@@ -785,7 +785,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     segment, _ = utility_bills.keys[0].split(':', 2)
     segment = segment.strip
     results_out = []
-    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }]
+    results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }.round(2)]
     results_out << [line_break]
     utility_bills.each do |key, bill|
       new_segment, _ = key.split(':', 2)
