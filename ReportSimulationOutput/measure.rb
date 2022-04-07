@@ -1373,7 +1373,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @object_variables_by_key[[LT, LT::Heating]].each do |vals|
         sys_id, key_name, var_name = vals
         if sys_id == heat_pump.id
-          if key_name.include? Constants.ObjectNameBackupHeatingCoil
+          if key_name.include? Constants.ObjectNameBackupHeatingCoil.upcase
             backup_load = get_report_variable_data_annual([key_name], [var_name])
           else
             primary_load = get_report_variable_data_annual([key_name], [var_name])
