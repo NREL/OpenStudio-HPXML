@@ -1418,6 +1418,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if ec_obj.nil?
 
       end_use.annual_output_by_system.each do |sys_id, val|
+        sys_id += '_DFHPBackup' if end_use_type == EUT::HeatingHeatPumpBackup && is_dual_fuel_heat_pump(sys_id)
         ec_obj[sys_id] = 0.0 if ec_obj[sys_id].nil?
         ec_obj[sys_id] += val
       end
@@ -2285,13 +2286,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def is_heat_pump_backup(sys_id)
     return false if @hpxml.nil?
 
-    heat_pump_backup = false
-
     # Integrated backup?
     @hpxml.heat_pumps.each do |heat_pump|
       next if sys_id != heat_pump.id
 
-      heat_pump_backup = true
+      return true
     end
 
     # Separate backup system?
@@ -2299,10 +2298,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if sys_id != heating_system.id
       next unless heating_system.is_heat_pump_backup_system
 
-      heat_pump_backup = true
+      return true
     end
 
-    return heat_pump_backup
+    return false
+  end
+
+  def is_dual_fuel_heat_pump(sys_id)
+    @hpxml.heat_pumps.each do |heat_pump|
+      next if sys_id != heat_pump.id
+      next unless heat_pump.is_dual_fuel
+
+      return true
+    end
+    return false
   end
 
   def get_object_output_variables_by_key(model, object, class_name)

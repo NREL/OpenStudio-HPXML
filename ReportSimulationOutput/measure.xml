@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>78cb3424-1321-4193-aeb5-43e20eaaf90a</version_id>
-  <version_modified>20220407T191224Z</version_modified>
+  <version_id>b9390290-9295-4573-9881-be33ef1691ce</version_id>
+  <version_modified>20220407T224319Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -1594,7 +1594,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3D4726FD</checksum>
+      <checksum>1A347D2C</checksum>
     </file>
   </files>
 </measure>
