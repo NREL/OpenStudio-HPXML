@@ -1373,9 +1373,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @object_variables_by_key[[LT, LT::Heating]].each do |vals|
         sys_id, key_name, var_name = vals
         if sys_id == heat_pump.id
-          primary_load = get_report_variable_data_annual([key_name], [var_name])
-        elsif sys_id == dfhp_backup_id
-          backup_load = get_report_variable_data_annual([key_name], [var_name])
+          if key_name.include? Constants.ObjectNameBackupHeatingCoil
+            backup_load = get_report_variable_data_annual([key_name], [var_name])
+          else
+            primary_load = get_report_variable_data_annual([key_name], [var_name])
+          end
         end
       end
       fail 'Could not obtain DFHP loads.' if primary_load.nil? || backup_load.nil?
@@ -2297,11 +2299,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if sys_id != heating_system.id
       next unless heating_system.is_heat_pump_backup_system
 
-      heat_pump_backup = true
-    end
-
-    # Dual-fuel heat pump backup?
-    if sys_id.end_with? '_DFHPBackup'
       heat_pump_backup = true
     end
 
