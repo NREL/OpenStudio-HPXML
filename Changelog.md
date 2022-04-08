@@ -17,7 +17,7 @@ __New Features__
   - Adds an optional argument for whether the HPXML file is written with default values applied; defaults to false.
   - Adds an optional argument for whether the HPXML file is validated; defaults to false.
 - ReportSimulationOutput measure:
-  **Breaking change**: New "End Use: <Fuel>: Heating Heat Pump Backup" output, disaggregated from "End Use: <Fuel>: Heating".
+  **Breaking change**: New "End Use: \<Fuel\>: Heating Heat Pump Backup" output, disaggregated from "End Use: \<Fuel\>: Heating".
   - Adds "Energy Use: Total" and "Energy Use: Net" columns to the annual results output file; allows timeseries outputs.
   - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
   - Adds optional argument for requesting timeseries EnergyPlus output variables.
