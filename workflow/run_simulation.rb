@@ -141,7 +141,7 @@ OptionParser.new do |opts|
   end
 
   options[:add_utility_bills] = false
-  opts.on('--add-utility-bills', 'Add utility bill calculations. Requests monthly output.') do |t|
+  opts.on('--add-utility-bills', 'Add utility bill calculations (using default rates).') do |t|
     options[:add_utility_bills] = true
   end
 
