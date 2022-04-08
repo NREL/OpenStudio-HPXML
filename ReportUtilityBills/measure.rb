@@ -645,7 +645,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/Average_retail_price_of_electricity.csv'))
       rows.each do |row|
         year_ix = row.index('2021') if row[0] == 'description'
-        next if row[0] != "Residential : #{state_name}"
+        next if row[0].upcase != "Residential : #{state_name}".upcase
 
         marginal_rate = Float(row[year_ix]) / 100.0
       end
@@ -704,9 +704,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_state_code_to_padd
-    # https://www.eia.gov/todayinenergy/detail.php?id=4890
+    # https://www.eia.gov/tools/glossary/index.php?id=petroleum%20administration%20for%20defense%20district
     padd_to_state_codes = { 'PADD 1A' => ['CT', 'MA', 'ME', 'NH', 'RI', 'VT'],
-                            'PADD 1B' => ['DE', 'MD', 'NJ', 'NY', 'PA'],
+                            'PADD 1B' => ['DE', 'DC', 'MD', 'NJ', 'NY', 'PA'],
                             'PADD 1C' => ['FL', 'GA', 'NC', 'SC', 'WV', 'VA'],
                             'PADD 2' => ['IA', 'IL', 'IN', 'KS', 'KY', 'MI', 'MN', 'MO', 'ND', 'NE', 'OH', 'OK', 'SD', 'TN', 'WI'],
                             'PADD 3' => ['AL', 'AR', 'LA', 'MS', 'NM', 'TX'],

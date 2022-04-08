@@ -275,6 +275,25 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
+  def test_auto_marginal_rate
+    fuel_types = [FT::Elec, FT::Gas, FT::Oil, FT::Propane]
+
+    # Check that we can successfully look up "auto" rates for every state
+    # and every fuel type.
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    Constants.StateCodesMap.keys.each do |state_code|
+      fuel_types.each do |fuel_type|
+        flatratebuy = @measure.get_auto_marginal_rate(runner, state_code, fuel_type)
+        refute_nil(flatratebuy)
+      end
+    end
+
+    # Check that any other state code is gracefully handled (no error)
+    fuel_types.each do |fuel_type|
+      flatratebuy = @measure.get_auto_marginal_rate(runner, 'XX', fuel_type)
+    end
+  end
+
   def test_warning_region
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-oil-location-miami-fl.xml'
     expected_warnings = ['Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.']
