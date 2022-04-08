@@ -4,6 +4,7 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require_relative 'resources/util.rb'
+require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/location.rb'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
 require_relative '../HPXMLtoOpenStudio/resources/output.rb'
@@ -318,7 +319,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     warnings = check_for_warnings(args, @hpxml.pv_systems)
-    return true if register_warnings(runner, warnings)
+    if register_warnings(runner, warnings)
+      OutputMethods.teardown(@sqlFile)
+      return true
+    end
 
     # Set paths
     output_dir = File.dirname(@sqlFile.path.to_s)
@@ -328,7 +332,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, utility_rates, utility_bills = setup_outputs()
 
     # Get timestamps
-    @timestamps = get_timestamps(timeseries_frequency, @sqlFile, @hpxml)
+    @timestamps = OutputMethods.get_timestamps(timeseries_frequency, @sqlFile, @hpxml)
 
     # Get outputs
     get_outputs(fuels)
@@ -338,7 +342,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Get utility rates
     warnings = get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
-    return true if register_warnings(runner, warnings)
+    if register_warnings(runner, warnings)
+      OutputMethods.teardown(@sqlFile)
+      return true
+    end
 
     # Calculate utility bills
     net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
@@ -386,7 +393,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Write results
     write_output(runner, utility_bills, output_format, output_path)
 
-    teardown(@sqlFile)
+    OutputMethods.teardown(@sqlFile)
 
     return true
   end
@@ -394,20 +401,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def preprocess_arguments(args)
     args[:electricity_fixed_charge] = args[:electricity_fixed_charge].get
     args[:electricity_marginal_rate] = args[:electricity_marginal_rate].get
-
     args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].get
     args[:natural_gas_marginal_rate] = args[:natural_gas_marginal_rate].get
-
     args[:fuel_oil_marginal_rate] = args[:fuel_oil_marginal_rate].get
-
     args[:propane_marginal_rate] = args[:propane_marginal_rate].get
-
     args[:wood_cord_marginal_rate] = args[:wood_cord_marginal_rate].get
-
     args[:wood_pellets_marginal_rate] = args[:wood_pellets_marginal_rate].get
-
     args[:coal_marginal_rate] = args[:coal_marginal_rate].get
-
     args[:pv_compensation_type] = args[:pv_compensation_type].get
     args[:pv_annual_excess_sellback_rate_type] = args[:pv_annual_excess_sellback_rate_type].get
     args[:pv_net_metering_annual_excess_sellback_rate] = args[:pv_net_metering_annual_excess_sellback_rate].get
@@ -548,7 +548,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_annual_bills(utility_bills)
-    utility_bills.each do |_, bill|
+    utility_bills.values.each do |bill|
       if bill.annual_production_credit > 0
         bill.annual_production_credit *= -1
       end
@@ -568,15 +568,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return 'kBtu'
     end
 
-    # End Uses
-
-    # NOTE: Some end uses are obtained from meters, others are rolled up from
-    # output variables so that we can have more control.
-
-    create_all_object_variables_by_key()
-
-    end_uses = get_end_uses()
-
     fuels = {}
     fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
     fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
@@ -589,14 +580,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.units = get_timeseries_units_from_fuel_type(fuel_type)
-      if end_uses.select { |key, end_use| key[0] == fuel_type && end_use.variables.size > 0 }.size == 0
-        fuel.meters = []
-      end
-      next unless is_production
-
-      if end_uses.select { |key, end_use| end_use.is_negative && end_use.variables.size > 0 }.size == 0
-        fuel.meters = []
-      end
     end
 
     utility_rates = {}
@@ -653,7 +636,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_auto_marginal_rate(runner, state_code, fuel_type)
-    state_name = get_state_code_to_state_name[state_code]
+    state_name = Constants.StateCodesMap[state_code]
     return if state_name.nil?
 
     marginal_rate = nil
@@ -720,21 +703,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return marginal_rate
   end
 
-  def get_state_code_to_state_name
-    zones_csv = Location.get_climate_zones
-
-    state_code_to_state_name = {}
-    Constants.StateCodes.each do |state_code|
-      CSV.foreach(zones_csv) do |row|
-        next if state_code != row[3]
-        next if state_code_to_state_name.keys.include?(state_code)
-
-        state_code_to_state_name[state_code] = row[4]
-      end
-    end
-    return state_code_to_state_name
-  end
-
   def get_state_code_to_padd
     # https://www.eia.gov/todayinenergy/detail.php?id=4890
     padd_to_state_codes = { 'PADD 1A' => ['CT', 'MA', 'ME', 'NH', 'RI', 'VT'],
@@ -782,13 +750,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def write_output(runner, utility_bills, output_format, output_path)
     line_break = nil
 
-    segment, _ = utility_bills.keys[0].split(':', 2)
+    segment = utility_bills.keys[0].split(':', 2)[0]
     segment = segment.strip
     results_out = []
     results_out << ['Total ($)', utility_bills.sum { |key, bill| bill.annual_total.round(2) }.round(2)]
     results_out << [line_break]
     utility_bills.each do |key, bill|
-      new_segment, _ = key.split(':', 2)
+      new_segment = key.split(':', 2)[0]
       new_segment = new_segment.strip
       if new_segment != segment
         results_out << [line_break]

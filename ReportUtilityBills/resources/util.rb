@@ -74,6 +74,7 @@ class CalculateUtilityBill
       rate.realtimeprice.insert(feb_29_hr, feb_28_prices).flatten!
     end
 
+    sum_fuel_time_series = fuel_time_series.sum
     hourly_fuel_cost = []
     monthly_fuel_cost = [0] * 12
     month = 0
@@ -88,7 +89,7 @@ class CalculateUtilityBill
       end
       monthly_fuel_cost[month] += hourly_fuel_cost[hour]
 
-      if fuel_type == FT::Elec && fuel_time_series.sum != 0 # has PV
+      if fuel_type == FT::Elec && sum_fuel_time_series != 0 # has PV
         if is_production
           net_elec -= fuel_time_series[hour]
           if !rate.realtimeprice.empty?

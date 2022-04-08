@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>7d9677ae-2adb-4348-83d6-08b6391fbf5a</version_id>
-  <version_modified>20220407T152907Z</version_modified>
+  <version_id>2d62fe8b-606f-43ea-8d85-e78859d56458</version_id>
+  <version_modified>20220408T155841Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -16,7 +16,6 @@
       <display_name>Output Format</display_name>
       <description>The file format of the annual (and timeseries, if requested) outputs.</description>
       <type>Choice</type>
-      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>csv</default_value>
@@ -30,8 +29,6 @@
           <display_name>json</display_name>
         </choice>
       </choices>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>electricity_fixed_charge</name>
@@ -39,11 +36,9 @@
       <description>Monthly fixed charge for electricity.</description>
       <type>Double</type>
       <units>$/month</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>12</default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>electricity_marginal_rate</name>
@@ -51,11 +46,9 @@
       <description>Price per kilowatt-hour for electricity.</description>
       <type>String</type>
       <units>$/kWh</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>natural_gas_fixed_charge</name>
@@ -63,11 +56,9 @@
       <description>Monthly fixed charge for natural gas.</description>
       <type>Double</type>
       <units>$/month</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>8</default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>natural_gas_marginal_rate</name>
@@ -75,11 +66,9 @@
       <description>Price per therm for natural gas.</description>
       <type>String</type>
       <units>$/therm</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>fuel_oil_marginal_rate</name>
@@ -87,11 +76,9 @@
       <description>Price per gallon for fuel oil.</description>
       <type>String</type>
       <units>$/gal</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>propane_marginal_rate</name>
@@ -99,55 +86,46 @@
       <description>Price per gallon for propane.</description>
       <type>String</type>
       <units>$/gal</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>wood_cord_marginal_rate</name>
       <display_name>Wood Cord: Marginal Rate</display_name>
       <description>Price per kBtu for wood cord.</description>
-      <type>String</type>
+      <type>Double</type>
       <units>$/kBtu</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>0.015</default_value>
     </argument>
     <argument>
       <name>wood_pellets_marginal_rate</name>
       <display_name>Wood Pellets: Marginal Rate</display_name>
       <description>Price per kBtu for wood pellets.</description>
-      <type>String</type>
+      <type>Double</type>
       <units>$/kBtu</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>0.015</default_value>
     </argument>
     <argument>
       <name>coal_marginal_rate</name>
       <display_name>Coal: Marginal Rate</display_name>
       <description>Price per kBtu for coal.</description>
-      <type>String</type>
+      <type>Double</type>
       <units>$/kBtu</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
+      <default_value>0.015</default_value>
     </argument>
     <argument>
       <name>pv_compensation_type</name>
       <display_name>PV: Compensation Type</display_name>
       <description>The type of compensation for PV.</description>
       <type>Choice</type>
-      <units></units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>Net Metering</default_value>
       <choices>
@@ -160,16 +138,13 @@
           <display_name>Feed-In Tariff</display_name>
         </choice>
       </choices>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_annual_excess_sellback_rate_type</name>
       <display_name>PV: Net Metering Annual Excess Sellback Rate Type</display_name>
       <description>The type of annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering'.</description>
       <type>Choice</type>
-      <units></units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>User-Specified</default_value>
       <choices>
@@ -182,8 +157,6 @@
           <display_name>Retail Electricity Cost</display_name>
         </choice>
       </choices>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_net_metering_annual_excess_sellback_rate</name>
@@ -191,11 +164,9 @@
       <description>The annual excess sellback rate for PV. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'.</description>
       <type>Double</type>
       <units>$/kWh</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>0.03</default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_feed_in_tariff_rate</name>
@@ -203,19 +174,16 @@
       <description>The annual full/gross tariff rate for PV. Only applies if the PV compensation type is 'Feed-In Tariff'.</description>
       <type>Double</type>
       <units>$/kWh</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>0.12</default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_grid_connection_fee_units</name>
       <display_name>PV: Grid Connection Fee Units</display_name>
       <description>Units for PV grid connection fee. Only applies when there is PV.</description>
       <type>Choice</type>
-      <units></units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>$/kW</default_value>
       <choices>
@@ -228,8 +196,6 @@
           <display_name>$</display_name>
         </choice>
       </choices>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_monthly_grid_connection_fee</name>
@@ -237,11 +203,9 @@
       <description>Monthly fee for PV grid connection. Only applies when there is PV.</description>
       <type>Double</type>
       <units>$</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -306,16 +270,16 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>19B1C0CB</checksum>
-    </file>
-    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>328F8EE3</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>279106C6</checksum>
     </file>
     <file>
       <version>
@@ -326,7 +290,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8D536832</checksum>
+      <checksum>0184198D</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EB155C5C</checksum>
     </file>
   </files>
 </measure>
