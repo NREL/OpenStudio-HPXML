@@ -629,6 +629,21 @@ class HPXMLTest < MiniTest::Test
     hpxml.collapse_enclosure_surfaces()
 
     # Check run.log warnings
+    def skip_utility_bill_warning(err_line)
+      utility_bill_warnings = ["#{EPlus::FuelTypeElectricity}:Facility".upcase,
+                               "#{EPlus::FuelTypeElectricity}Produced:Facility".upcase,
+                               "#{EPlus::FuelTypeNaturalGas}:Facility".upcase,
+                               "#{EPlus::FuelTypeOil}:Facility".upcase,
+                               "#{EPlus::FuelTypePropane}:Facility".upcase,
+                               "#{EPlus::FuelTypeWoodCord}:Facility".upcase,
+                               "#{EPlus::FuelTypeWoodPellets}:Facility".upcase,
+                               "#{EPlus::FuelTypeCoal}:Facility".upcase]
+      skip_warning = false
+      utility_bill_warnings.each do |utility_bill_warning|
+        skip_warning = true if err_line.include? utility_bill_warning
+      end
+      return skip_warning
+    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
@@ -732,6 +747,10 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
 
+      if err_line.include? 'Output:Meter: invalid Key Name'
+        next if skip_utility_bill_warning(err_line)
+      end
+
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
@@ -794,6 +813,8 @@ class HPXMLTest < MiniTest::Test
     num_invalid_output_variables = 0
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
+        next if skip_utility_bill_warning(err_line)
+
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
         num_invalid_output_variables += 1
