@@ -2,14 +2,12 @@
 __New Features__
 - Expanded capabilities for scheduling:
   - Allows modeling detailed HVAC setpoints via a schedule CSV file.
-- Adds "Energy Use: Total" and "Energy Use: Net" columns to the annual results output file; allows timeseries outputs.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - Allows specifying a `StormWindow` element for windows/skylights; U-factors and SHGCs are automatically adjusted.
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Allows an optional `Battery/UsableCapacity` input; now defaults to 0.9 x NominalCapacity (previously 0.8).
 - Adds support for shared hot water recirculation systems controlled by temperature.
-- Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
@@ -23,8 +21,11 @@ __New Features__
 - BuildResidentialScheduleFile:
   - Adds optional arguments for offsetting heating/cooling setpoint schedules during nighttime and daytime unoccupied hours.
 - ReportSimulationOutput measure:
-  - Add optional argument for requesting timeseries EnergyPlus output variables.
-  - Add ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
+  - **Breaking change**: New "End Use: \<Fuel\>: Heating Heat Pump Backup" output, disaggregated from "End Use: \<Fuel\>: Heating".
+  - Adds "Energy Use: Total" and "Energy Use: Net" columns to the annual results output file; allows timeseries outputs.
+  - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
+  - Adds optional argument for requesting timeseries EnergyPlus output variables.
+  - Adds ability to include `TimeDST` and/or `TimeUTC` timestamp column(s) in results_timeseries.csv.
   - Timestamps in results_timeseries.csv are output in ISO 8601 standard format.
   - Allows user-specified annual/timeseries output file names.
 - ReportHPXMLOutput measure:
