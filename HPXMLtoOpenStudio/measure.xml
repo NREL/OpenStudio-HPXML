@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a957531c-31ed-4876-b500-47ed6fecc0d5</version_id>
-  <version_modified>20220330T194942Z</version_modified>
+  <version_id>e513f17f-595a-4f59-a3b3-9ad304b5e16c</version_id>
+  <version_modified>20220411T170001Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -434,12 +434,6 @@
       <checksum>967A4807</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>39CACBFE</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -468,6 +462,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4A1F88CF</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F45F8526</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
@@ -508,19 +508,19 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0FE05582</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F4691FC6</checksum>
+      <checksum>848581D4</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ED1261AA</checksum>
+      <checksum>D60F3FDB</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E79C44DF</checksum>
     </file>
   </files>
 </measure>
