@@ -19,12 +19,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # human readable description
   def description
-    return 'TODO'
+    return 'Calculates and reports utility bills for residential HPXML-based models.'
   end
 
   # human readable description of modeling approach
   def modeler_description
-    return 'TODO'
+    return "Calculate electric/gas utility bills based on monthly fixed charges and marginal rates. Calculate other utility bills based on marginal rates for oil, propane, wood cord, wood pellets, and coal. User can specify PV compensation types of 'Net-Metering' or 'Feed-In Tariff', along with corresponding rates and connection fees."
   end
 
   # define the arguments that the user will input
@@ -87,7 +87,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Natural Gas: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for natural gas.')
-    arg.setDefaultValue(8.0)
+    arg.setDefaultValue(12.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', false)
@@ -506,7 +506,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
           rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type)
-          warnings << "Could not find a marginal #{fuel_type} rate." if rate.flatratebuy.nil?
+
+          if !rate.flatratebuy.nil?
+            runner.registerInfo("Found a marginal rate of '#{rate.flatratebuy}' for #{fuel_type}.") if !runner.nil?
+          else
+            warnings << "Could not find a marginal #{fuel_type} rate." if rate.flatratebuy.nil?
+          end
         end
       else
         rate.flatratebuy = Float(rate.flatratebuy)
@@ -659,30 +664,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
       end
 
-    elsif fuel_type == FT::Oil
-      marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
-
-      header = "Weekly #{state_name} Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)"
-      if marginal_rates[header].nil?
-        padd = get_state_code_to_padd[state_code]
-        marginal_rates.each do |k, v|
-          header = k if k.include?(padd)
-        end
-        average = "region (#{padd})"
-
-        if marginal_rates[header].nil?
-          header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
-          average = 'national'
-        end
-
-        runner.registerWarning("Could not find state average #{FT::Oil} rate based on #{state_name}; using #{average} average.") if !runner.nil?
+    elsif [FT::Oil, FT::Propane].include? fuel_type
+      if fuel_type == FT::Oil
+        marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
+        header = "Weekly #{state_name} Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)"
+      elsif fuel_type == FT::Propane
+        marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
+        header = "Weekly #{state_name} Propane Residential Price  (Dollars per Gallon)"
       end
-      marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
 
-    elsif fuel_type == FT::Propane
-      marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
-
-      header = "Weekly #{state_name} Propane Residential Price  (Dollars per Gallon)"
       if marginal_rates[header].nil?
         padd = get_state_code_to_padd[state_code]
         marginal_rates.each do |k, v|
@@ -691,11 +681,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         average = "region (#{padd})"
 
         if marginal_rates[header].nil?
-          header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+          if fuel_type == FT::Oil
+            header = 'Weekly U.S. Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)'
+          elsif fuel_type == FT::Propane
+            header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
+          end
           average = 'national'
         end
 
-        runner.registerWarning("Could not find state average #{FT::Propane} rate based on #{state_name}; using #{average} average.") if !runner.nil?
+        runner.registerWarning("Could not find state average #{fuel_type} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
       marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
     end

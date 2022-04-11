@@ -83,7 +83,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_pv_1kW
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_1kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -96,7 +96,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_pv_10kW
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_10kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -110,7 +110,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_10kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -124,7 +124,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_1kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -138,7 +138,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_10kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 5000 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -152,7 +152,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_monthly_grid_connection_fee'] = 2.50
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_1kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
@@ -168,7 +168,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['pv_monthly_grid_connection_fee'] = 7.50
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_1kW.csv')
-    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 500 }
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     bills_csv = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)

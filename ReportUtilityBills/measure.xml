@@ -3,13 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>dc063014-16bf-449f-9b75-736acb933918</version_id>
-  <version_modified>20220408T173831Z</version_modified>
+  <version_id>90658890-8e9e-47b9-abcd-7d865b84eef1</version_id>
+  <version_modified>20220411T154735Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
-  <description>TODO</description>
-  <modeler_description>TODO</modeler_description>
+  <description>Calculates and reports utility bills for residential HPXML-based models.</description>
+  <modeler_description>Calculate electric/gas utility bills based on monthly fixed charges and marginal rates. Calculate other utility bills based on marginal rates for oil, propane, wood cord, wood pellets, and coal. User can specify PV compensation types of 'Net-Metering' or 'Feed-In Tariff', along with corresponding rates and connection fees.</modeler_description>
   <arguments>
     <argument>
       <name>output_format</name>
@@ -58,7 +58,7 @@
       <units>$/month</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>8</default_value>
+      <default_value>12</default_value>
     </argument>
     <argument>
       <name>natural_gas_marginal_rate</name>
@@ -279,7 +279,7 @@
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C7E2FC7E</checksum>
+      <checksum>21077BCB</checksum>
     </file>
     <file>
       <version>
@@ -290,7 +290,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F374D843</checksum>
+      <checksum>4C3B9551</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31AA50C4</checksum>
     </file>
   </files>
 </measure>
