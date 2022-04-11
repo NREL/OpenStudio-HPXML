@@ -515,8 +515,8 @@ class HPXMLTest < MiniTest::Test
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
       residual_htg_load = results['Load: Heating: Delivered (MBtu)'] - sum_component_htg_loads
       residual_clg_load = results['Load: Cooling: Delivered (MBtu)'] - sum_component_clg_loads
-      assert_operator(residual_htg_load.abs, :<, 0.5)
-      assert_operator(residual_clg_load.abs, :<, 0.5)
+      assert_operator(residual_htg_load.abs, :<, 0.6)
+      assert_operator(residual_clg_load.abs, :<, 0.6)
     end
 
     return results
@@ -693,9 +693,6 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
         next if log_line.include? 'Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'
-      end
-      if !hpxml.pv_systems.empty? && !hpxml.batteries.empty?
-        next if log_line.include? "Due to an OpenStudio bug, the battery's rated power output will not be honored; the simulation will proceed without a maximum charge/discharge limit."
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
@@ -1393,8 +1390,8 @@ class HPXMLTest < MiniTest::Test
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
     else
-      assert_operator(unmet_hours_htg, :<, 150)
-      assert_operator(unmet_hours_clg, :<, 150)
+      assert_operator(unmet_hours_htg, :<, 350)
+      assert_operator(unmet_hours_clg, :<, 350)
     end
 
     sqlFile.close
