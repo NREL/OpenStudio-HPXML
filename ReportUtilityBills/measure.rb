@@ -424,6 +424,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Simple'
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
+          fixedmonthlycharge = rate.fixedmonthlycharge
           rate.flatratebuy = args[:electricity_marginal_rate]
 
           # Grid connection fee
@@ -490,6 +491,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         rate.feed_in_tariff_rate = args[:pv_feed_in_tariff_rate] if args[:pv_compensation_type] == 'Feed-In Tariff'
       elsif fuel_type == FT::Gas
         rate.fixedmonthlycharge = args[:natural_gas_fixed_charge]
+        fixedmonthlycharge = rate.fixedmonthlycharge
         rate.flatratebuy = args[:natural_gas_marginal_rate]
       elsif fuel_type == FT::Oil
         rate.flatratebuy = args[:fuel_oil_marginal_rate]
@@ -505,7 +507,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type)
+          rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type, fixedmonthlycharge)
 
           if !rate.flatratebuy.nil?
             runner.registerInfo("Found a marginal rate of '#{rate.flatratebuy}' for #{fuel_type}.") if !runner.nil?
@@ -640,10 +642,28 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return values
   end
 
-  def get_auto_marginal_rate(runner, state_code, fuel_type)
+  def average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
+    return average_rate - 12.0 * fixed_rate / household_consumption
+  end
+
+  def get_household_consumption(state_code, fuel_type)
+    rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/HouseholdConsumption.csv'))
+    rows.each do |row|
+      next if row[0] != state_code
+
+      if fuel_type == FT::Elec
+        return Float(row[1])
+      elsif fuel_type == FT::Gas
+        return Float(row[2])
+      end
+    end
+  end
+
+  def get_auto_marginal_rate(runner, state_code, fuel_type, fixed_rate)
     state_name = Constants.StateCodesMap[state_code]
     return if state_name.nil?
 
+    average_rate = nil
     marginal_rate = nil
     if fuel_type == FT::Elec
       year_ix = nil
@@ -652,8 +672,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         year_ix = row.index('2021') if row[0] == 'description'
         next if row[0].upcase != "Residential : #{state_name}".upcase
 
-        marginal_rate = Float(row[year_ix]) / 100.0
+        average_rate = Float(row[year_ix]) / 100.0
       end
+
+      household_consumption = get_household_consumption(state_code, fuel_type)
+      marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
 
     elsif fuel_type == FT::Gas
       rows = CSV.read(File.join(File.dirname(__FILE__), 'resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
@@ -661,8 +684,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       state_ix = rows[0].index("#{state_name} Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)")
       rows[1..-1].each do |row|
-        marginal_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
+        average_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
       end
+
+      household_consumption = get_household_consumption(state_code, fuel_type)
+      marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
 
     elsif [FT::Oil, FT::Propane].include? fuel_type
       if fuel_type == FT::Oil
