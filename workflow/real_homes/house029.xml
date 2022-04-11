@@ -117,52 +117,36 @@
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>20.2</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Area>46.200001</Area>
+            <Area>46.2</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>20.2</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist3'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>89.199997</Area>
+            <Area>89.2</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist3Insulation'/>
               <AssemblyEffectiveRValue>20.2</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist4'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>64.699997</Area>
+            <Area>64.7</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist4Insulation'/>
               <AssemblyEffectiveRValue>20.2</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -179,10 +163,6 @@
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -197,10 +177,6 @@
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -215,10 +191,6 @@
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -228,15 +200,11 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>559.099976</Area>
+            <Area>559.1</Area>
             <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -280,7 +248,7 @@
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Type>solid concrete</Type>
-            <Length>46.200001</Length>
+            <Length>46.2</Length>
             <Height>7.7</Height>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.2</DepthBelowGrade>
@@ -306,10 +274,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>37.59</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -320,10 +284,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>37.59</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -334,10 +294,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
               <AssemblyEffectiveRValue>3.34</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -388,7 +344,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>85.099998</Area>
+            <Area>85.1</Area>
             <Orientation>south</Orientation>
             <UFactor>0.29</UFactor>
             <SHGC>0.3</SHGC>
@@ -430,7 +386,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window5'/>
-            <Area>35.700001</Area>
+            <Area>35.7</Area>
             <Orientation>north</Orientation>
             <UFactor>0.3</UFactor>
             <SHGC>0.32</SHGC>
@@ -557,13 +513,13 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <FractionDuctArea>0.7000000000000001</FractionDuctArea>
+                  <FractionDuctArea>0.7</FractionDuctArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <FractionDuctArea>0.7000000000000001</FractionDuctArea>
+                  <FractionDuctArea>0.7</FractionDuctArea>
                 </Ducts>
                 <NumberofReturnRegisters>5</NumberofReturnRegisters>
               </AirDistribution>

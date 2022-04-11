@@ -114,25 +114,17 @@
             <Area>112.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>5.164142857</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>5.2</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
-            <Area>62.16985071</Area>
+            <Area>62.2</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
-              <AssemblyEffectiveRValue>17.69731721</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13.3</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>17.7</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -151,10 +143,6 @@
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>12.96</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>11.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -176,20 +164,20 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Length>62.16985071</Length>
+            <Length>62.2</Length>
             <Height>8.0</Height>
             <Area>497.3588056</Area>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
-              <AssemblyEffectiveRValue>12.60835951</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>12.6</AssemblyEffectiveRValue>
             </Insulation>
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall2'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
-            <Length>97.28309206</Length>
+            <Length>97.3</Length>
             <Height>3.0</Height>
             <Area>588.0</Area>
             <DepthBelowGrade>1.0</DepthBelowGrade>
@@ -208,10 +196,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>23.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -221,11 +205,7 @@
             <Area>792.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>12.93792587</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>6.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.9</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -235,11 +215,7 @@
             <Area>560.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
-              <AssemblyEffectiveRValue>4.83956016</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>4.8</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -247,8 +223,8 @@
           <Slab>
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>596.9032258</Area>
-            <ExposedPerimeter>62.16985071</ExposedPerimeter>
+            <Area>596.9</Area>
+            <ExposedPerimeter>62.2</ExposedPerimeter>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -431,13 +407,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
         </Doors>
       </Enclosure>

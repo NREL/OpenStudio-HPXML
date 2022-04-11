@@ -103,11 +103,7 @@
             <Area>106.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>5.164142857</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>5.2</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -125,11 +121,7 @@
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>9.995585744</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>7.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>10.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -156,11 +148,7 @@
             <Area>1311.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>12.46017552</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>12.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -190,7 +178,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>64.37946429</Area>
+            <Area>64.4</Area>
             <Azimuth>0</Azimuth>
             <Orientation>north</Orientation>
             <FrameType>
@@ -219,7 +207,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>64.37946429</Area>
+            <Area>64.4</Area>
             <Azimuth>90</Azimuth>
             <Orientation>east</Orientation>
             <FrameType>
@@ -248,7 +236,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>64.37946429</Area>
+            <Area>64.4</Area>
             <Azimuth>180</Azimuth>
             <Orientation>south</Orientation>
             <FrameType>
@@ -277,7 +265,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>64.37946429</Area>
+            <Area>64.4</Area>
             <Azimuth>270</Azimuth>
             <Orientation>west</Orientation>
             <FrameType>
@@ -316,7 +304,7 @@
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.222222222</RValue>
+            <RValue>2.22</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -444,7 +432,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>469.44128</RatedAnnualkWh>
+          <RatedAnnualkWh>470.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

@@ -32,7 +32,7 @@
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>6</NumberofBedrooms>
           <ConditionedFloorArea>4158.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>35869.33333</ConditionedBuildingVolume>
+          <ConditionedBuildingVolume>35869.3</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -84,7 +84,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>1552.666667</Area>
+            <Area>1552.7</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
@@ -100,14 +100,10 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>133.3794087</Area>
+            <Area>133.4</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>14.10035431</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>9.45</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>14.1</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -125,11 +121,7 @@
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>7.09594004</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>3.15</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>7.1</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -151,13 +143,13 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Length>133.3794087</Length>
+            <Length>133.4</Length>
             <Height>8.0</Height>
-            <Area>1067.03527</Area>
+            <Area>1067.0</Area>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
-              <AssemblyEffectiveRValue>10.47293499</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>10.5</AssemblyEffectiveRValue>
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
@@ -166,14 +158,10 @@
             <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1552.666667</Area>
+            <Area>1552.7</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>11.35535135</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>10.8</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>11.4</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -183,11 +171,7 @@
             <Area>500.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>23.51961454</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>23.5</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -195,8 +179,8 @@
           <Slab>
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>1052.666667</Area>
-            <ExposedPerimeter>133.3794087</ExposedPerimeter>
+            <Area>1052.7</Area>
+            <ExposedPerimeter>133.4</ExposedPerimeter>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -358,13 +342,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>8.333333333</RValue>
+            <RValue>8.3</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -577,7 +561,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>469.44128</RatedAnnualkWh>
+          <RatedAnnualkWh>470.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

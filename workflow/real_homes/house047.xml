@@ -238,13 +238,13 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <DuctSurfaceArea>145.395004</DuctSurfaceArea>
+                  <DuctSurfaceArea>145.4</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <DuctSurfaceArea>26.924999</DuctSurfaceArea>
+                  <DuctSurfaceArea>26.9</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>

@@ -32,7 +32,7 @@
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>1468.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>12163.42857</ConditionedBuildingVolume>
+          <ConditionedBuildingVolume>12163.4</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -52,7 +52,7 @@
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>CFM</UnitofMeasure>
-              <AirLeakage>2157.272727</AirLeakage>
+              <AirLeakage>2157.3</AirLeakage>
             </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
@@ -92,7 +92,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>943.7142857</Area>
+            <Area>943.7</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
@@ -105,17 +105,13 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>113.5952381</Area>
+            <Area>113.6</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>5.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
-              <AssemblyEffectiveRValue>24.63407524</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>23.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>24.6</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
         </Roofs>
@@ -127,11 +123,7 @@
             <Area>128.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>12.61414286</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>7.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.6</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -145,15 +137,11 @@
                 <OptimumValueEngineering>false</OptimumValueEngineering>
               </WoodStud>
             </WallType>
-            <Area>1856.507143</Area>
+            <Area>1856.5</Area>
             <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>12.13259527</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>10.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.1</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -168,7 +156,7 @@
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
-              <AssemblyEffectiveRValue>8.852786021</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>8.9</AssemblyEffectiveRValue>
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
@@ -177,14 +165,10 @@
             <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>943.7142857</Area>
+            <Area>943.7</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>12.46017552</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>12.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -224,7 +208,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>46.41267857</Area>
+            <Area>46.4</Area>
             <Azimuth>45</Azimuth>
             <Orientation>northeast</Orientation>
             <FrameType>
@@ -253,7 +237,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>46.41267857</Area>
+            <Area>46.4</Area>
             <Azimuth>135</Azimuth>
             <Orientation>southeast</Orientation>
             <FrameType>
@@ -282,7 +266,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>46.41267857</Area>
+            <Area>46.4</Area>
             <Azimuth>225</Azimuth>
             <Orientation>southwest</Orientation>
             <FrameType>
@@ -311,7 +295,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>46.41267857</Area>
+            <Area>46.4</Area>
             <Azimuth>315</Azimuth>
             <Orientation>northwest</Orientation>
             <FrameType>
@@ -344,13 +328,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>7.142857143</RValue>
+            <RValue>7.1</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>7.142857143</RValue>
+            <RValue>7.1</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -502,7 +486,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>660.797984</RatedAnnualkWh>
+          <RatedAnnualkWh>660.8</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

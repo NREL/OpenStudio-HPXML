@@ -112,10 +112,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>11.24</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
@@ -126,10 +122,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>11.24</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
@@ -140,10 +132,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist3Insulation'/>
               <AssemblyEffectiveRValue>11.24</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
@@ -154,10 +142,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist4Insulation'/>
               <AssemblyEffectiveRValue>11.24</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -174,10 +158,6 @@
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>16.26</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -192,10 +172,6 @@
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>16.26</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -210,10 +186,6 @@
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>16.26</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -283,10 +255,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>45.02</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>11.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -297,10 +265,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>36.98</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>38.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -311,10 +275,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
               <AssemblyEffectiveRValue>36.98</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>38.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
         </FrameFloors>

@@ -102,10 +102,6 @@
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
               <AssemblyEffectiveRValue>20.64</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>37.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Roof>
         </Roofs>
@@ -114,28 +110,20 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>159.600006</Area>
+            <Area>159.6</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>19.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>28.799999</Area>
+            <Area>28.8</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>19.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -152,10 +140,6 @@
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>13.14</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -170,10 +154,6 @@
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>13.14</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -188,10 +168,6 @@
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>13.14</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -206,10 +182,6 @@
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>13.14</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -224,10 +196,6 @@
             <Insulation>
               <SystemIdentifier id='Wall5Insulation'/>
               <AssemblyEffectiveRValue>16.28</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>24.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -253,10 +221,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>37.59</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -267,10 +231,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>43.74</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>49.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -281,10 +241,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
               <AssemblyEffectiveRValue>43.74</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>49.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -440,7 +396,7 @@
               <HeatingCapacity>75000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.9209999799999999</Value>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>

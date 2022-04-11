@@ -104,11 +104,7 @@
             <Area>146.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>4.764142857</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>4.8</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -126,11 +122,7 @@
             <Siding>asbestos siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>8.186928948</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>5.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>8.2</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -157,11 +149,7 @@
             <Area>1100.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>6.976880245</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>5.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>7.0</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -171,11 +159,7 @@
             <Area>1100.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>4.877132617</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>4.9</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -205,7 +189,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>28.93150685</Area>
+            <Area>28.9</Area>
             <Azimuth>0</Azimuth>
             <Orientation>north</Orientation>
             <FrameType>
@@ -234,7 +218,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>33.90410959</Area>
+            <Area>33.9</Area>
             <Azimuth>90</Azimuth>
             <Orientation>east</Orientation>
             <FrameType>
@@ -263,7 +247,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>47.01369863</Area>
+            <Area>47.0</Area>
             <Azimuth>180</Azimuth>
             <Orientation>south</Orientation>
             <FrameType>
@@ -292,7 +276,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>30.1369863</Area>
+            <Area>30.1</Area>
             <Azimuth>270</Azimuth>
             <Orientation>west</Orientation>
             <FrameType>
@@ -424,7 +408,7 @@
         </ClothesDryer>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>378.74144</RatedAnnualkWh>
+          <RatedAnnualkWh>379.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

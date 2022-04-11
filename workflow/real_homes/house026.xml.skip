@@ -97,42 +97,30 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>83.099998</Area>
+            <Area>83.1</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>19.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Area>88.199997</Area>
+            <Area>88.2</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>19.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='RimJoist3'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Area>43.700001</Area>
+            <Area>43.7</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist3Insulation'/>
               <AssemblyEffectiveRValue>19.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
@@ -143,10 +131,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist4Insulation'/>
               <AssemblyEffectiveRValue>13.28</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>11.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -163,10 +147,6 @@
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>13.62</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -181,10 +161,6 @@
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>13.62</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -194,15 +170,11 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>349.600006</Area>
+            <Area>349.6</Area>
             <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>13.62</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -217,10 +189,6 @@
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>13.62</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -230,7 +198,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>349.600006</Area>
+            <Area>349.6</Area>
             <Insulation>
               <SystemIdentifier id='Wall5Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -285,7 +253,7 @@
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Type>solid concrete</Type>
-            <Length>43.700001</Length>
+            <Length>43.7</Length>
             <Height>8.0</Height>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.5</DepthBelowGrade>
@@ -331,7 +299,7 @@
             <SystemIdentifier id='FrameFloor3'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>327.200012</Area>
+            <Area>327.2</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor3Insulation'/>
               <AssemblyEffectiveRValue>30.3</AssemblyEffectiveRValue>
@@ -381,7 +349,7 @@
           <Slab>
             <SystemIdentifier id='Slab2'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <Area>327.200012</Area>
+            <Area>327.2</Area>
             <ExposedPerimeter>72.35</ExposedPerimeter>
             <DepthBelowGrade>0.0</DepthBelowGrade>
             <PerimeterInsulation>
@@ -479,7 +447,7 @@
               <HeatingCapacity>84000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.87599998</Value>
+                <Value>0.88</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>

@@ -112,10 +112,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>24.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
           <RimJoist>
@@ -126,10 +122,6 @@
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>24.87</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>19.0</NominalRValue>
-              </Layer>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -141,15 +133,11 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1560.859985</Area>
+            <Area>1560.9</Area>
             <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -164,10 +152,6 @@
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>13.47</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>18.0</NominalRValue>
-              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -279,10 +263,6 @@
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>59.88</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13.0</NominalRValue>
-              </Layer>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
@@ -354,7 +334,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>22.200001</Area>
+            <Area>22.2</Area>
             <Orientation>south</Orientation>
             <UFactor>0.3</UFactor>
             <SHGC>0.32</SHGC>
@@ -362,7 +342,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>22.200001</Area>
+            <Area>22.2</Area>
             <Orientation>south</Orientation>
             <UFactor>0.3</UFactor>
             <SHGC>0.32</SHGC>
@@ -375,7 +355,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>22.200001</Area>
+            <Area>22.2</Area>
             <Orientation>south</Orientation>
             <UFactor>0.46</UFactor>
             <SHGC>0.57</SHGC>
@@ -388,7 +368,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>44.700001</Area>
+            <Area>44.7</Area>
             <Orientation>north</Orientation>
             <UFactor>0.46</UFactor>
             <SHGC>0.57</SHGC>
@@ -423,7 +403,7 @@
           <Door>
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
-            <Area>37.299999</Area>
+            <Area>37.3</Area>
             <RValue>5.33</RValue>
           </Door>
           <Door>

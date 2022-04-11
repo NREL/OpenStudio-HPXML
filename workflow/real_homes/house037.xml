@@ -127,11 +127,7 @@
             <Area>114.0</Area>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>15.11056049</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>10.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>15.1</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -149,11 +145,7 @@
             <Siding>asbestos siding</Siding>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>11.70198011</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>10.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>11.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -168,7 +160,7 @@
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
-              <AssemblyEffectiveRValue>11.10028225</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>11.1</AssemblyEffectiveRValue>
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
@@ -180,11 +172,7 @@
             <Area>500.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>12.46017552</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>12.5</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -194,11 +182,7 @@
             <Area>500.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>2.218047546</AssemblyEffectiveRValue>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
+              <AssemblyEffectiveRValue>2.2</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -238,7 +222,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>90.54736842</Area>
+            <Area>90.5</Area>
             <Azimuth>0</Azimuth>
             <Orientation>north</Orientation>
             <FrameType>
@@ -267,7 +251,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>70.74013158</Area>
+            <Area>70.7</Area>
             <Azimuth>90</Azimuth>
             <Orientation>east</Orientation>
             <FrameType>
@@ -296,7 +280,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>90.54736842</Area>
+            <Area>90.5</Area>
             <Azimuth>180</Azimuth>
             <Orientation>south</Orientation>
             <FrameType>
@@ -325,7 +309,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>70.74013158</Area>
+            <Area>70.7</Area>
             <Azimuth>270</Azimuth>
             <Orientation>west</Orientation>
             <FrameType>
@@ -358,13 +342,13 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='Wall1'/>
             <Area>21.0</Area>
-            <RValue>2.173913043</RValue>
+            <RValue>2.2</RValue>
           </Door>
         </Doors>
       </Enclosure>
@@ -460,7 +444,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <RatedAnnualkWh>586.8016</RatedAnnualkWh>
+          <RatedAnnualkWh>586.8</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>

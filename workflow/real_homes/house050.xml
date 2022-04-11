@@ -396,25 +396,25 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <DuctSurfaceArea>518.940002</DuctSurfaceArea>
+                  <DuctSurfaceArea>518.9</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
-                  <DuctSurfaceArea>76.8799984</DuctSurfaceArea>
+                  <DuctSurfaceArea>76.9</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
-                  <DuctSurfaceArea>518.940002</DuctSurfaceArea>
+                  <DuctSurfaceArea>518.9</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
-                  <DuctSurfaceArea>19.2199996</DuctSurfaceArea>
+                  <DuctSurfaceArea>19.2</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
