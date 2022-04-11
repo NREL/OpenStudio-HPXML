@@ -157,6 +157,79 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, component_loads.size)
   end
 
+  def test_run_simulation_detailed_schedules
+    # Check that the simulation produces stochastic schedules if requested
+    sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
+    tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
+    hpxml = HPXML.new(hpxml_path: File.join(sample_files_path, 'base.xml'))
+    XMLHelper.write_file(hpxml.to_oga, tmp_hpxml_path)
+
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.absolute_path(tmp_hpxml_path)
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-detailed-schedule stochastic"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'stochastic.csv')
+    assert(File.exist? csv_output_path)
+
+    # Cleanup
+    File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
+  end
+
+  def test_run_simulation_timeseries_dst_and_utc
+    # Check that the simulation produces timeseries with TimeDST and TimeUTC columns if requested
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --hourly ALL --add-timeseries-time-column DST --add-timeseries-time-column UTC"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check TimeDST and TimeUTC exist
+    timeseries_rows = CSV.read(csv_output_path)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
+  end
+
+  def test_run_simulation_timeseries_output_variables
+    # Check that the simulation produces timeseries with request output variables
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-timeseries-output-variable 'Zone People Occupant Count' --add-timeseries-output-variable 'Zone People Total Heating Energy'"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check timeseries output variables exist
+    timeseries_rows = CSV.read(csv_output_path)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
+    assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
+  end
+
   def test_template_osw
     # Check that simulation works using template.osw
     require 'json'
@@ -180,7 +253,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path_test}"
+    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -224,7 +297,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path_test}"
+    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -270,7 +343,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path_test}"
+    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -1023,13 +1096,13 @@ class HPXMLTest < MiniTest::Test
       else
         col_name = 'U-Factor no Film'
       end
-      hpxml_value = subsurface.ufactor
+      hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[0]
       if subsurface.is_interior
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       end
       if subsurface.is_a? HPXML::Skylight
-        hpxml_value /= 1.2 # Convert from NFRC 20-degree slope to vertical position
+        hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
       end
       hpxml_value = [hpxml_value, UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')].min # FUTURE: Remove when U-factor restriction is lifted in EnergyPlus
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
@@ -1039,7 +1112,7 @@ class HPXMLTest < MiniTest::Test
       next unless subsurface.is_exterior
 
       # SHGC
-      hpxml_value = subsurface.shgc
+      hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[1]
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_delta(hpxml_value, sql_value, 0.01)
@@ -1182,13 +1255,20 @@ class HPXMLTest < MiniTest::Test
 
     # Get fuels
     htg_fuels = []
+    htg_backup_fuels = []
+    wh_fuels = []
     hpxml.heating_systems.each do |heating_system|
-      htg_fuels << heating_system.heating_system_fuel
+      if heating_system.is_heat_pump_backup_system
+        htg_backup_fuels << heating_system.heating_system_fuel
+      else
+        htg_fuels << heating_system.heating_system_fuel
+      end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      htg_fuels << heat_pump.backup_heating_fuel
+      if heat_pump.fraction_heat_load_served > 0
+        htg_backup_fuels << heat_pump.backup_heating_fuel
+      end
     end
-    wh_fuels = []
     hpxml.water_heating_systems.each do |water_heating_system|
       related_hvac = water_heating_system.related_hvac_system
       if related_hvac.nil?
@@ -1196,6 +1276,13 @@ class HPXMLTest < MiniTest::Test
       elsif related_hvac.respond_to? :heating_system_fuel
         wh_fuels << related_hvac.heating_system_fuel
       end
+    end
+
+    is_warm_climate = false
+    if ['USA_FL_Miami.Intl.AP.722020_TMY3.epw',
+        'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw',
+        'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'].include? hpxml.climate_and_risk_zones.weather_station_epw_filepath
+      is_warm_climate = true
     end
 
     # Fuel consumption checks
@@ -1209,18 +1296,23 @@ class HPXMLTest < MiniTest::Test
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
       energy_htg = results.fetch("End Use: #{fuel_name}: Heating (MBtu)", 0)
+      energy_hp_backup = results.fetch("End Use: #{fuel_name}: Heating Heat Pump Backup (MBtu)", 0)
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
       if htg_fuels.include? fuel
-        if (not hpxml_path.include? 'location-miami') && \
-           (not hpxml_path.include? 'location-honolulu') && \
-           (not hpxml_path.include? 'location-phoenix') && \
-           (not (hpxml_path.include?('autosize') && hpxml_path.include?('backup')))
+        if (not hpxml_path.include? 'autosize') && (not is_warm_climate)
           assert_operator(energy_htg, :>, 0)
         end
       else
         assert_equal(0, energy_htg)
+      end
+      if htg_backup_fuels.include? fuel
+        if (not hpxml_path.include? 'autosize') && (not is_warm_climate)
+          assert_operator(energy_hp_backup, :>, 0)
+        end
+      else
+        assert_equal(0, energy_hp_backup)
       end
       if wh_fuels.include? fuel
         assert_operator(energy_dhw, :>, 0)

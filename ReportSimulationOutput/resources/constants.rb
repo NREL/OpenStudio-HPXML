@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+class TE
+  # Total Energy
+  Total = 'Total'
+  Net = 'Net'
+end
+
 class FT
   # Fuel Types
   Elec = 'Electricity'
@@ -14,6 +20,7 @@ end
 class EUT
   # End Use Types
   Heating = 'Heating'
+  HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
   HeatingFanPump = 'Heating Fans/Pumps'
   Cooling = 'Cooling'
   CoolingFanPump = 'Cooling Fans/Pumps'

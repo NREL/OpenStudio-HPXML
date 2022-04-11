@@ -399,7 +399,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
-  def test_10_min_timestep_vacancy
+  def test_10_min_timestep
     hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 

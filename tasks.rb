@@ -164,6 +164,7 @@ def create_hpxmls
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-skylights-storms.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
@@ -171,6 +172,7 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-windows-storms.xml' => 'base.xml',
     'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
@@ -342,6 +344,7 @@ def create_hpxmls
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
+    'base-misc-additional-properties.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -362,11 +365,12 @@ def create_hpxmls
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-dhw-tank-model-type-stratified.xml' => 'base-dhw-tank-model-type-stratified.xml',
+    'base-schedules-detailed-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
-    'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
+    'base-simcontrol-timestep-10-mins.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -715,6 +719,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1040,6 +1045,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -1632,9 +1638,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['window_area_back'] = 0
     args['window_area_left'] = 0
     args['window_area_right'] = 0
+  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
+    args['window_ufactor'] = 0.6
+    args['window_storm_type'] = HPXML::WindowGlassTypeLowE
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
+  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+    args['skylight_ufactor'] = 0.6
+    args['skylight_storm_type'] = HPXML::WindowGlassTypeClear
   end
 
   # Foundation
@@ -2176,7 +2188,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   end
 
   # Misc
-  if ['base-misc-defaults.xml'].include? hpxml_file
+  if ['base-misc-additional-properties.xml'].include? hpxml_file
+    args['additional_properties'] = 'LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
     args['geometry_unit_num_bathrooms'] = Constants.Auto
@@ -2365,6 +2379,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationOutside
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   elsif ['base-pv-battery.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
@@ -2386,6 +2401,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationGarage
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   end
 
   # Simulation Control
@@ -2438,6 +2454,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
     sch_args['water_heater_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank.csv'
+  elsif ['base-schedules-detailed-stochastic-10-mins.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end
@@ -4336,10 +4356,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   elsif ['base-pv-battery-ah.xml'].include? hpxml_file
-    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    default_values = Battery.get_battery_default_values()
     hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
-                                                                     default_voltage)
+                                                                     default_values[:nominal_voltage])
+    hpxml.batteries[0].usable_capacity_ah = hpxml.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
     hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
   end
 
   # ---------------- #
