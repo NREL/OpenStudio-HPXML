@@ -424,23 +424,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Simple'
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
-          fixedmonthlycharge = rate.fixedmonthlycharge
           rate.flatratebuy = args[:electricity_marginal_rate]
-
-          # Grid connection fee
-          if pv_systems.size > 0
-            monthly_fee = 0.0
-            if args[:pv_grid_connection_fee_units] == '$/kW'
-              pv_systems.each do |pv_system|
-                max_power_output_kW = UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
-                monthly_fee += args[:pv_monthly_grid_connection_fee] * max_power_output_kW
-              end
-            elsif args[:pv_grid_connection_fee_units] == '$'
-              monthly_fee = args[:pv_monthly_grid_connection_fee]
-            end
-            rate.fixedmonthlycharge += monthly_fee
-          end
-
         elsif args[:electricity_bill_type] == 'Detailed'
           if args[:electricity_utility_rate_type].get != 'Autoselect OpenEI'
             if args[:electricity_utility_rate_type].get == 'User-Specified'
@@ -491,7 +475,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         rate.feed_in_tariff_rate = args[:pv_feed_in_tariff_rate] if args[:pv_compensation_type] == 'Feed-In Tariff'
       elsif fuel_type == FT::Gas
         rate.fixedmonthlycharge = args[:natural_gas_fixed_charge]
-        fixedmonthlycharge = rate.fixedmonthlycharge
         rate.flatratebuy = args[:natural_gas_marginal_rate]
       elsif fuel_type == FT::Oil
         rate.flatratebuy = args[:fuel_oil_marginal_rate]
@@ -507,7 +490,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if rate.flatratebuy == Constants.Auto
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
-          rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type, fixedmonthlycharge)
+          rate.flatratebuy = get_auto_marginal_rate(runner, state_code, fuel_type, rate.fixedmonthlycharge)
 
           if !rate.flatratebuy.nil?
             runner.registerInfo("Found a marginal rate of '#{rate.flatratebuy}' for #{fuel_type}.") if !runner.nil?
@@ -518,6 +501,24 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       else
         rate.flatratebuy = Float(rate.flatratebuy)
       end
+
+      # Grid connection fee
+      next unless fuel_type == FT::Elec
+
+      next unless args[:electricity_bill_type] == 'Simple'
+
+      next unless pv_systems.size > 0
+
+      monthly_fee = 0.0
+      if args[:pv_grid_connection_fee_units] == '$/kW'
+        pv_systems.each do |pv_system|
+          max_power_output_kW = UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
+          monthly_fee += args[:pv_monthly_grid_connection_fee] * max_power_output_kW
+        end
+      elsif args[:pv_grid_connection_fee_units] == '$'
+        monthly_fee = args[:pv_monthly_grid_connection_fee]
+      end
+      rate.fixedmonthlycharge += monthly_fee
     end
     return warnings
   end
