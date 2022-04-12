@@ -797,9 +797,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out.each do |out|
         next if out == [line_break]
 
-        grp, name = out[0].split(':', 2)
-        h[grp] = {} if h[grp].nil?
-        h[grp][name.strip] = out[1]
+        if out[0].include? ':'
+          grp, name = out[0].split(':', 2)
+          h[grp] = {} if h[grp].nil?
+          h[grp][name.strip] = out[1]
+        else
+          h[out[0]] = out[1]
+        end
       end
 
       require 'json'

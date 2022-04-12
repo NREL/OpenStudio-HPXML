@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>e34f110b-3c31-45c6-822e-0d8f9b711b96</version_id>
-  <version_modified>20220412T002509Z</version_modified>
+  <version_id>c298487b-d04d-416a-ac87-1e9807049741</version_id>
+  <version_modified>20220412T231626Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -276,12 +276,6 @@
       <checksum>279106C6</checksum>
     </file>
     <file>
-      <filename>Data/UtilityRates/HouseholdConsumption.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0BEECB93</checksum>
-    </file>
-    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -296,13 +290,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>959238B9</checksum>
+      <checksum>E78299FF</checksum>
     </file>
     <file>
-      <filename>results_bills.csv</filename>
+      <filename>Data/UtilityRates/HouseholdConsumption.csv</filename>
       <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B612D38D</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>0BEECB93</checksum>
     </file>
   </files>
 </measure>
