@@ -124,11 +124,18 @@ class Airflow
     return (1.0 / 300.0).round(6) # Table 4.2.2(1) - Attics
   end
 
+  def self.get_default_unvented_attic_sla()
+    # Based on Walker, Iain & Forest, T.. (1995). Field measurements of ventilation rates in attics.
+    # Building and Environment. 30. 333-347. 10.1016/0360-1323(94)00053-U.
+    # "... attic 6 has approximately four times the leakage area of attic 5."
+    return get_default_vented_attic_sla() / 4.0
+  end
+
   def self.get_default_vented_crawl_sla()
     return (1.0 / 150.0).round(6) # Table 4.2.2(1) - Crawlspaces
   end
 
-  def self.get_default_unvented_space_ach()
+  def self.get_default_unvented_foundation_ach()
     return 0.1 # Assumption
   end
 
@@ -242,14 +249,14 @@ class Airflow
     end
   end
 
-  def self.apply_infiltration_to_unconditioned_space(model, space, ach = nil, ela = nil, c_w_SG = nil, c_s_SG = nil)
-    if ach.to_f > 0
+  def self.apply_infiltration_to_unconditioned_space(model, space, constant_ach = nil, ela = nil, c_w_SG = nil, c_s_SG = nil)
+    if constant_ach.to_f > 0
       # Model ACH as constant infiltration/ventilation
       # This is typically used for below-grade spaces where wind is zero
       flow_rate = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
       flow_rate.setName("#{Constants.ObjectNameInfiltration}|#{space.name}")
       flow_rate.setSchedule(model.alwaysOnDiscreteSchedule)
-      flow_rate.setAirChangesperHour(ach)
+      flow_rate.setAirChangesperHour(constant_ach)
       flow_rate.setSpace(space)
       flow_rate.setConstantTermCoefficient(1)
       flow_rate.setTemperatureTermCoefficient(0)
@@ -1129,8 +1136,6 @@ class Airflow
     neutral_level = 0.5
     sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, area, volume)
     ela = sla * area
-    ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
-    cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     c_w_SG, c_s_SG = calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
   end
@@ -1140,9 +1145,8 @@ class Airflow
 
     space = @spaces[HPXML::LocationBasementUnconditioned]
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = get_default_unvented_space_ach()
-    cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-    apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
+    constant_ach = get_default_unvented_foundation_ach()
+    apply_infiltration_to_unconditioned_space(model, space, constant_ach, nil, nil, nil)
   end
 
   def self.apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
@@ -1152,9 +1156,8 @@ class Airflow
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     height = Geometry.get_height_of_spaces([space])
     sla = vented_crawl.vented_crawlspace_sla
-    ach = get_infiltration_ACH_from_SLA(sla, height, weather)
-    cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-    apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
+    constant_ach = get_infiltration_ACH_from_SLA(sla, height, weather)
+    apply_infiltration_to_unconditioned_space(model, space, constant_ach, nil, nil, nil)
   end
 
   def self.apply_infiltration_to_unvented_crawlspace(model, weather)
@@ -1162,9 +1165,8 @@ class Airflow
 
     space = @spaces[HPXML::LocationCrawlspaceUnvented]
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = get_default_unvented_space_ach()
-    cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-    apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
+    constant_ach = get_default_unvented_foundation_ach()
+    apply_infiltration_to_unconditioned_space(model, space, constant_ach, nil, nil, nil)
   end
 
   def self.apply_infiltration_to_vented_attic(model, weather, site, vented_attic)
@@ -1193,13 +1195,11 @@ class Airflow
       sla = vented_attic_sla
       ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
       ela = sla * vented_attic_area
-      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
       c_w_SG, c_s_SG = calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space)
       apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
     elsif not vented_attic_const_ach.nil?
-      ach = vented_attic_const_ach
-      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-      apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
+      constant_ach = vented_attic_const_ach
+      apply_infiltration_to_unconditioned_space(model, space, constant_ach, nil, nil, nil)
     end
   end
 
@@ -1207,10 +1207,15 @@ class Airflow
     return if @spaces[HPXML::LocationAtticUnvented].nil?
 
     space = @spaces[HPXML::LocationAtticUnvented]
+    unvented_attic_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
+    hor_lk_frac = 0.75
+    neutral_level = 0.5
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = get_default_unvented_space_ach()
-    cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-    apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
+    sla = get_default_unvented_attic_sla()
+    ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
+    ela = sla * unvented_attic_area
+    c_w_SG, c_s_SG = calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space)
+    apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
   end
 
   def self.apply_local_ventilation(model, vent_object, obj_type_name, index)

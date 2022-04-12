@@ -176,13 +176,13 @@ class HVACSizing
   end
 
   def self.process_design_temp_heating(weather, location)
-    if location == HPXML::LocationLivingSpace
+    if [HPXML::LocationLivingSpace].include? location
       heat_temp = @heat_setpoint
 
-    elsif location == HPXML::LocationGarage
+    elsif [HPXML::LocationGarage].include? location
       heat_temp = weather.design.HeatingDrybulb + 13.0
 
-    elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
+    elsif [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? location
 
       attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(location) }
       avg_floor_rvalue = calculate_average_r_value(attic_floors)
@@ -213,10 +213,10 @@ class HVACSizing
   end
 
   def self.process_design_temp_cooling(weather, location)
-    if location == HPXML::LocationLivingSpace
+    if [HPXML::LocationLivingSpace].include? location
       cool_temp = @cool_setpoint
 
-    elsif location == HPXML::LocationGarage
+    elsif [HPXML::LocationGarage].include? location
       # Calculate fraction of garage under conditioned space
       area_total = 0.0
       area_conditioned = 0.0
@@ -253,7 +253,7 @@ class HVACSizing
                      (12.0 * (1.0 - garage_frac_under_conditioned)))
       end
 
-    elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
+    elsif [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? location
 
       attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(location) }
       avg_floor_rvalue = calculate_average_r_value(attic_floors)
@@ -2626,8 +2626,11 @@ class HVACSizing
         end
       end
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather) if ach.nil?
-    else # Unvented space
-      ach = Airflow.get_default_unvented_space_ach()
+    elsif [HPXML::LocationAtticUnvented].include? location
+      sla = Airflow.get_default_unvented_attic_sla()
+      ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
+    elsif [HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include? location
+      ach = Airflow.get_default_unvented_foundation_ach()
     end
     volume = Geometry.calculate_zone_volume(@hpxml, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
