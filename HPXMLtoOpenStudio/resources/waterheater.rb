@@ -140,8 +140,6 @@ class Waterheater
     boiler.additionalProperties.setFeature('IsCombiBoiler', true) # Used by reporting measure
 
     obj_name_combi = Constants.ObjectNameWaterHeater
-    convlim = model.getConvergenceLimits
-    convlim.setMinimumPlantIterations(3) # add one more minimum plant iteration to achieve better energy balance across plant loops.
 
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage
       if water_heating_system.standby_loss <= 0
