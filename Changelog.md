@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.4.0
 
 __New Features__
+- Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
 - **Breaking change**: Allows performing an operational, instead of an asset, calculation through a new required `OccupancyCalculationType` input field.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
@@ -28,6 +29,8 @@ __New Features__
   - Allows user-specified annual/timeseries output file names.
 - ReportHPXMLOutput measure:
   - Adds "Enclosure: Floor Area Foundation" output row in results_hpxml.csv.
+- New ReportUtilityBills measure:
+  - Adds a new results_bills.csv output file to summarize calculated utility bills.
 
 __Bugfixes__
 - Adds more stringent limits for `AirflowDefectRatio` and `ChargeDefectRatio` (now allows values from 1/10th to 10x the design value).
