@@ -385,6 +385,18 @@ class ReportUtilityBillsTest < MiniTest::Test
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.timeseries = [0] * fuels[[FT::Elec, false]].timeseries.size if fuel.timeseries.empty?
     end
+
+    # Convert hourly data to monthly data
+    num_days_in_month = Constants.NumDaysInMonths(2002) # Arbitrary non-leap year
+    fuels.each do |(fuel_type, is_production), fuel|
+      ts_data = fuel.timeseries.dup
+      fuel.timeseries = []
+      start_day = 0
+      num_days_in_month.each do |num_days|
+        fuel.timeseries << ts_data[start_day * 24..(start_day + num_days) * 24 - 1].sum
+        start_day += num_days
+      end
+    end
   end
 
   def _bill_calcs(fuels, utility_rates, utility_bills, header, pv_systems)
