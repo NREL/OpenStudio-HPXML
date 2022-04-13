@@ -79,7 +79,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', false)
     arg.setDisplayName('Electricity: Marginal Rate')
     arg.setUnits('$/kWh')
-    arg.setDescription('Price per kilowatt-hour for electricity.')
+    arg.setDescription("Price per kilowatt-hour for electricity. Use '#{Constants.Auto}' to obtain a state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -93,21 +93,21 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', false)
     arg.setDisplayName('Natural Gas: Marginal Rate')
     arg.setUnits('$/therm')
-    arg.setDescription('Price per therm for natural gas.')
+    arg.setDescription("Price per therm for natural gas. Use '#{Constants.Auto}' to obtain a state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', false)
     arg.setDisplayName('Fuel Oil: Marginal Rate')
     arg.setUnits('$/gal')
-    arg.setDescription('Price per gallon for fuel oil.')
+    arg.setDescription("Price per gallon for fuel oil. Use '#{Constants.Auto}' to obtain a state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('propane_marginal_rate', false)
     arg.setDisplayName('Propane: Marginal Rate')
     arg.setUnits('$/gal')
-    arg.setDescription('Price per gallon for propane.')
+    arg.setDescription("Price per gallon for propane. Use '#{Constants.Auto}' to obtain a state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
 

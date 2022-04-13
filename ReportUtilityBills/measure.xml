@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>2f3e05e7-dce2-411b-baad-771a9bce1c5e</version_id>
-  <version_modified>20220412T235932Z</version_modified>
+  <version_id>2bfd4b06-1e70-4e9f-86c9-84ba4f4e80d2</version_id>
+  <version_modified>20220413T000613Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -43,7 +43,7 @@
     <argument>
       <name>electricity_marginal_rate</name>
       <display_name>Electricity: Marginal Rate</display_name>
-      <description>Price per kilowatt-hour for electricity.</description>
+      <description>Price per kilowatt-hour for electricity. Use 'auto' to obtain a state-average value from EIA.</description>
       <type>String</type>
       <units>$/kWh</units>
       <required>false</required>
@@ -63,7 +63,7 @@
     <argument>
       <name>natural_gas_marginal_rate</name>
       <display_name>Natural Gas: Marginal Rate</display_name>
-      <description>Price per therm for natural gas.</description>
+      <description>Price per therm for natural gas. Use 'auto' to obtain a state-average value from EIA.</description>
       <type>String</type>
       <units>$/therm</units>
       <required>false</required>
@@ -73,7 +73,7 @@
     <argument>
       <name>fuel_oil_marginal_rate</name>
       <display_name>Fuel Oil: Marginal Rate</display_name>
-      <description>Price per gallon for fuel oil.</description>
+      <description>Price per gallon for fuel oil. Use 'auto' to obtain a state-average value from EIA.</description>
       <type>String</type>
       <units>$/gal</units>
       <required>false</required>
@@ -83,7 +83,7 @@
     <argument>
       <name>propane_marginal_rate</name>
       <display_name>Propane: Marginal Rate</display_name>
-      <description>Price per gallon for propane.</description>
+      <description>Price per gallon for propane. Use 'auto' to obtain a state-average value from EIA.</description>
       <type>String</type>
       <units>$/gal</units>
       <required>false</required>
@@ -288,6 +288,12 @@
       <checksum>1B22936A</checksum>
     </file>
     <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7EED3A91</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -296,13 +302,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>992B8C2F</checksum>
-    </file>
-    <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7EED3A91</checksum>
+      <checksum>41CBCE62</checksum>
     </file>
   </files>
 </measure>
