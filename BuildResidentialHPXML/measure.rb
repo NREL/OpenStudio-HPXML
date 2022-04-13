@@ -4232,7 +4232,7 @@ class HPXMLFile
     living_space = HPXML::LocationLivingSpace
     surf_ids['roofs']['surfaces'].each do |surface|
       next if (living_space != surface.interior_adjacent_to) &&
-      (living_space != surface.exterior_adjacent_to)
+              (living_space != surface.exterior_adjacent_to)
 
       surf_ids['roofs']['ids'] << surface.id
     end
