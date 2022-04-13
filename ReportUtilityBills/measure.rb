@@ -187,7 +187,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def timeseries_frequency
-    return 'hourly'
+    # Use monthly for fossil fuels and simple electric rates
+    # Use hourly for detailed electric rates (URDB tariff or real time pricing)
+    return 'monthly'
   end
 
   def check_for_warnings(args, pv_systems)

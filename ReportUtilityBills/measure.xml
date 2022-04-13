@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>2bfd4b06-1e70-4e9f-86c9-84ba4f4e80d2</version_id>
-  <version_modified>20220413T000613Z</version_modified>
+  <version_id>c83799a9-89a2-4971-9ea5-62f3824c354b</version_id>
+  <version_modified>20220413T175013Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -270,12 +270,6 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>279106C6</checksum>
-    </file>
-    <file>
       <filename>Data/UtilityRates/HouseholdConsumption.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -288,12 +282,6 @@
       <checksum>1B22936A</checksum>
     </file>
     <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7EED3A91</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -302,7 +290,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>41CBCE62</checksum>
+      <checksum>5DBFE7B9</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>351C2629</checksum>
     </file>
   </files>
 </measure>

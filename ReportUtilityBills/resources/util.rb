@@ -56,58 +56,26 @@ end
 
 class CalculateUtilityBill
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
-    begin_month = header.sim_begin_month
-    begin_day = header.sim_begin_day
-    end_month = header.sim_end_month
-    end_day = header.sim_end_day
-    year = header.sim_calendar_year
-
-    sim_begin_day_of_year = Schedule.get_day_num_from_month_day(year, begin_month, begin_day)
-    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, end_month, end_day)
-    num_hrs = (sim_end_day_of_year - sim_begin_day_of_year + 1) * 24
-    day_end_months = Schedule.day_end_months(year)
-
-    if !rate.realtimeprice.empty? && rate.realtimeprice.size != num_hrs
-      feb_28_hr = Schedule.get_day_num_from_month_day(year, 2, 28) * 24 - 1
-      feb_29_hr = feb_28_hr + 24
-      feb_28_prices = rate.realtimeprice[feb_28_hr...feb_29_hr]
-      rate.realtimeprice.insert(feb_29_hr, feb_28_prices).flatten!
-    end
-
     sum_fuel_time_series = fuel_time_series.sum
-    hourly_fuel_cost = []
     monthly_fuel_cost = [0] * 12
-    month = 0
     net_elec_cost = 0
-    (0...num_hrs).to_a.each do |hour|
+    (0...fuel_time_series.size).to_a.each do |month|
       if is_production && fuel_type == FT::Elec && rate.feed_in_tariff_rate
-        hourly_fuel_cost[hour] = fuel_time_series[hour] * rate.feed_in_tariff_rate
-      elsif !is_production && fuel_type == FT::Elec && !rate.realtimeprice.empty?
-        hourly_fuel_cost[hour] = fuel_time_series[hour] * rate.realtimeprice[hour]
+        monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff_rate
       else
-        hourly_fuel_cost[hour] = fuel_time_series[hour] * rate.flatratebuy
+        monthly_fuel_cost[month] = fuel_time_series[month] * rate.flatratebuy
       end
-      monthly_fuel_cost[month] += hourly_fuel_cost[hour]
 
       if fuel_type == FT::Elec && sum_fuel_time_series != 0 # has PV
         if is_production
-          net_elec -= fuel_time_series[hour]
-          if !rate.realtimeprice.empty?
-            net_elec_cost += fuel_time_series[hour] * rate.realtimeprice[hour]
-          end
+          net_elec -= fuel_time_series[month]
         else
-          net_elec += fuel_time_series[hour]
+          net_elec += fuel_time_series[month]
         end
       end
 
-      next unless hour == day_end_months[month] * 24 - 1
-
       if is_production
-        if !rate.realtimeprice.empty?
-          bill.monthly_production_credit[month] = net_elec_cost
-        else
-          bill.monthly_production_credit[month] = monthly_fuel_cost[month]
-        end
+        bill.monthly_production_credit[month] = monthly_fuel_cost[month]
         bill.annual_production_credit += bill.monthly_production_credit[month]
       else
         bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
@@ -118,7 +86,6 @@ class CalculateUtilityBill
       end
 
       net_elec_cost = 0
-      month += 1
     end
     return net_elec
   end
