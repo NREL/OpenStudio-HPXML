@@ -51,6 +51,8 @@ base-bldgtype-multifamily-shared-water-heater.xml,906.74,144.0,522.48,0.0,666.48
 base-bldgtype-multifamily.xml,1140.87,144.0,847.67,0.0,991.67,144.0,5.2,149.2,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-single-family-attached-2stories.xml,1536.27,144.0,1143.51,0.0,1287.51,144.0,104.76,248.76,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-single-family-attached.xml,1356.76,144.0,1002.65,0.0,1146.65,144.0,66.11,210.11,0.0,0.0,0.0,0.0,0.0
+base-calctype-operational-misc-loads-large-uncommon.xml,3340.21,144.0,2330.63,0.0,2474.63,144.0,546.33,690.33,0.0,78.52,96.73,0.0,0.0
+base-calctype-operational.xml,1711.94,144.0,1298.91,0.0,1442.91,144.0,125.03,269.03,0.0,0.0,0.0,0.0,0.0
 base-dhw-combi-tankless-outside.xml,1199.44,144.0,715.7,0.0,859.7,144.0,195.74,339.74,0.0,0.0,0.0,0.0,0.0
 base-dhw-combi-tankless.xml,1199.44,144.0,715.7,0.0,859.7,144.0,195.74,339.74,0.0,0.0,0.0,0.0,0.0
 base-dhw-desuperheater-2-speed.xml,1248.25,144.0,1104.25,0.0,1248.25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
