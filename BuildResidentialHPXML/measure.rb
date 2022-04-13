@@ -4228,6 +4228,15 @@ class HPXMLFile
       end
     end
 
+    # Add attached roofs for cathedral ceiling
+    living_space = HPXML::LocationLivingSpace
+    surf_ids['roofs']['surfaces'].each do |surface|
+      next if (living_space != surface.interior_adjacent_to) &&
+      (living_space != surface.exterior_adjacent_to)
+
+      surf_ids['roofs']['ids'] << surface.id
+    end
+
     hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: args[:geometry_attic_type],
                      attached_to_roof_idrefs: surf_ids['roofs']['ids'],
