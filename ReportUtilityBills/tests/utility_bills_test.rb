@@ -56,14 +56,14 @@ class ReportUtilityBillsTest < MiniTest::Test
       'Electricity: PV Credit ($)' => 0,
       'Electricity: Total ($)' => 725,
       'Natural Gas: Fixed ($)' => 96,
-      'Natural Gas: Marginal ($)' => 149,
-      'Natural Gas: Total ($)' => 245,
+      'Natural Gas: Marginal ($)' => 154,
+      'Natural Gas: Total ($)' => 250,
       'Fuel Oil: Total ($)' => 462,
       'Propane: Total ($)' => 76,
       'Wood Cord: Total ($)' => 0,
       'Wood Pellets: Total ($)' => 0,
       'Coal: Total ($)' => 0,
-      'Total ($)' => 1509,
+      'Total ($)' => 1514,
     }
 
     @measure = ReportUtilityBills.new
@@ -89,7 +89,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -177
     @expected_bills['Electricity: Total ($)'] = 548
-    @expected_bills['Total ($)'] = 1331
+    @expected_bills['Total ($)'] = 1337
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -102,7 +102,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -918
     @expected_bills['Electricity: Total ($)'] = -193
-    @expected_bills['Total ($)'] = 591
+    @expected_bills['Total ($)'] = 596
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -116,7 +116,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -1779
     @expected_bills['Electricity: Total ($)'] = -1054
-    @expected_bills['Total ($)'] = -271
+    @expected_bills['Total ($)'] = -265
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -130,7 +130,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -178
     @expected_bills['Electricity: Total ($)'] = 547
-    @expected_bills['Total ($)'] = 1331
+    @expected_bills['Total ($)'] = 1336
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -144,7 +144,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -1787
     @expected_bills['Electricity: Total ($)'] = -1061
-    @expected_bills['Total ($)'] = -278
+    @expected_bills['Total ($)'] = -272
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -159,7 +159,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 126
     @expected_bills['Electricity: PV Credit ($)'] = -177
     @expected_bills['Electricity: Total ($)'] = 578
-    @expected_bills['Total ($)'] = 1361
+    @expected_bills['Total ($)'] = 1367
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -175,7 +175,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 186
     @expected_bills['Electricity: PV Credit ($)'] = -177
     @expected_bills['Electricity: Total ($)'] = 638
-    @expected_bills['Total ($)'] = 1421
+    @expected_bills['Total ($)'] = 1427
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -249,11 +249,11 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Marginal ($)'] = 1251
     @expected_bills['Electricity: Total ($)'] = 1347
     @expected_bills['Natural Gas: Fixed ($)'] = 96
-    @expected_bills['Natural Gas: Marginal ($)'] = 208
-    @expected_bills['Natural Gas: Total ($)'] = 304
+    @expected_bills['Natural Gas: Marginal ($)'] = 215
+    @expected_bills['Natural Gas: Total ($)'] = 311
     @expected_bills['Fuel Oil: Total ($)'] = 0
     @expected_bills['Propane: Total ($)'] = 0
-    @expected_bills['Total ($)'] = 1651
+    @expected_bills['Total ($)'] = 1658
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -267,11 +267,11 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Marginal ($)'] = 112
     @expected_bills['Electricity: Total ($)'] = 120
     @expected_bills['Natural Gas: Fixed ($)'] = 8
-    @expected_bills['Natural Gas: Marginal ($)'] = 31
-    @expected_bills['Natural Gas: Total ($)'] = 39
+    @expected_bills['Natural Gas: Marginal ($)'] = 33
+    @expected_bills['Natural Gas: Total ($)'] = 41
     @expected_bills['Fuel Oil: Total ($)'] = 0
     @expected_bills['Propane: Total ($)'] = 0
-    @expected_bills['Total ($)'] = 160
+    @expected_bills['Total ($)'] = 161
     _check_bills(@expected_bills, actual_bills)
   end
 

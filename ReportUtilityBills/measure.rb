@@ -73,7 +73,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Electricity: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for electricity.')
-    arg.setDefaultValue(12.0)
+    arg.setDefaultValue(12.0) # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', false)
@@ -87,7 +87,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Natural Gas: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for natural gas.')
-    arg.setDefaultValue(12.0)
+    arg.setDefaultValue(12.0) # https://www.aga.org/sites/default/files/aga_energy_analysis_-_natural_gas_utility_rate_structure.pdf says $11.25/month in 2015
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', false)
@@ -673,7 +673,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         year_ix = row.index('2021') if row[0] == 'description'
         next if row[0].upcase != "Residential : #{state_name}".upcase
 
-        average_rate = Float(row[year_ix]) / 100.0
+        average_rate = Float(row[year_ix]) / 100.0 # Convert cents/kWh to $/kWh
       end
 
       household_consumption = get_household_consumption(state_code, fuel_type)
@@ -685,7 +685,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       state_ix = rows[0].index("#{state_name} Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)")
       rows[1..-1].each do |row|
-        average_rate = Float(row[state_ix]) / 10.69 if !row[state_ix].nil?
+        average_rate = Float(row[state_ix]) / 10.37 if !row[state_ix].nil? # Convert Mcf to therms, from https://www.eia.gov/tools/faqs/faq.php?id=45&t=7
       end
 
       household_consumption = get_household_consumption(state_code, fuel_type)
