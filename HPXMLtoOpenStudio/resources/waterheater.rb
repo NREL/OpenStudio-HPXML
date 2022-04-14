@@ -136,7 +136,10 @@ class Waterheater
 
   def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
+
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(model, water_heating_system.related_hvac_idref)
+    boiler.setName('combi boiler')
+    boiler.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
     boiler.additionalProperties.setFeature('IsCombiBoiler', true) # Used by reporting measure
 
     obj_name_combi = Constants.ObjectNameWaterHeater
