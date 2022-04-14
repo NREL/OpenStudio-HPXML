@@ -191,8 +191,8 @@ class Waterheater
     source_stp_sch.setName("#{obj_name_combi} Source Spt")
     boiler_spt_mngr = model.getSetpointManagerScheduleds.select { |spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode }[0]
     boiler_heating_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
-    source_temp = (UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + deadband(water_heating_system.water_heater_type) / 2.0 + boiler_heating_spt) / 2.0 # tank source side inlet temperature, degree C
-    source_stp_sch.setValue(source_temp)
+    # tank source side inlet temperature, degree C
+    source_stp_sch.setValue(boiler_heating_spt)
     # reset dhw boiler setpoint
     boiler_spt_mngr.to_SetpointManagerScheduled.get.setSchedule(source_stp_sch)
     boiler_plant_loop.autosizeMaximumLoopFlowRate()
