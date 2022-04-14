@@ -10,14 +10,14 @@ end
 
 class UtilityRate
   def initialize()
-    @fixedmonthlycharge = false
+    @fixedmonthlycharge = nil
     @flatratebuy = 0.0
     @realtimeprice = []
 
-    @net_metering_excess_sellback_type = false
-    @net_metering_user_excess_sellback_rate = false
+    @net_metering_excess_sellback_type = nil
+    @net_metering_user_excess_sellback_rate = nil
 
-    @feed_in_tariff_rate = false
+    @feed_in_tariff_rate = nil
 
     @energyratestructure = []
     @energyweekdayschedule = []
@@ -79,7 +79,11 @@ class CalculateUtilityBill
         bill.annual_production_credit += bill.monthly_production_credit[month]
       else
         bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
-        bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge if rate.fixedmonthlycharge
+        if not rate.fixedmonthlycharge.nil?
+          # If the run period doesn't span the entire month, prorate the fixed charges
+          prorate_fraction = calculate_monthly_prorate(header, month + 1)
+          bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
+        end
 
         bill.annual_energy_charge += bill.monthly_energy_charge[month]
         bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
@@ -93,5 +97,31 @@ class CalculateUtilityBill
   def self.detailed_electric(fuels, rate, bill, net_elec)
     # TODO
     return net_elec
+  end
+
+  def self.calculate_monthly_prorate(header, month)
+    begin_month = header.sim_begin_month
+    begin_day = header.sim_begin_day
+    end_month = header.sim_end_month
+    end_day = header.sim_end_day
+    year = header.sim_calendar_year
+
+    if month < begin_month || month > end_month
+      num_days_in_month = 0
+    else
+      if month == begin_month
+        day_begin = begin_day
+      else
+        day_begin = 1
+      end
+      if month == end_month
+        day_end = end_day
+      else
+        day_end = Constants.NumDaysInMonths(year)[month - 1]
+      end
+      num_days_in_month = day_end - day_begin + 1
+    end
+
+    return num_days_in_month.to_f / Constants.NumDaysInMonths(year)[month - 1]
   end
 end

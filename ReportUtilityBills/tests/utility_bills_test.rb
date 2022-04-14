@@ -9,6 +9,7 @@ require_relative '../../HPXMLtoOpenStudio/resources/hpxml_defaults'
 require_relative '../../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
+require_relative '../resources/util.rb'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require_relative '../measure.rb'
@@ -329,6 +330,32 @@ class ReportUtilityBillsTest < MiniTest::Test
     expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
     bills_csv = _test_measure(expected_errors: expected_errors)
     assert(!File.exist?(bills_csv))
+  end
+
+  def test_monthly_prorate
+    # Test begin_month == end_month
+    header = HPXML::Header.new(nil)
+    header.sim_begin_month = 3
+    header.sim_begin_day = 5
+    header.sim_end_month = 3
+    header.sim_end_day = 20
+    header.sim_calendar_year = 2002
+    assert_equal(0.0, CalculateUtilityBill.calculate_monthly_prorate(header, 2))
+    assert_equal((20 - 5 + 1) / 31.0, CalculateUtilityBill.calculate_monthly_prorate(header, 3))
+    assert_equal(0.0, CalculateUtilityBill.calculate_monthly_prorate(header, 4))
+
+    # Test begin_month != end_month
+    header = HPXML::Header.new(nil)
+    header.sim_begin_month = 2
+    header.sim_begin_day = 10
+    header.sim_end_month = 4
+    header.sim_end_day = 10
+    header.sim_calendar_year = 2002
+    assert_equal(0.0, CalculateUtilityBill.calculate_monthly_prorate(header, 1))
+    assert_equal((28 - 10 + 1) / 28.0, CalculateUtilityBill.calculate_monthly_prorate(header, 2))
+    assert_equal(1.0, CalculateUtilityBill.calculate_monthly_prorate(header, 3))
+    assert_equal(10 / 30.0, CalculateUtilityBill.calculate_monthly_prorate(header, 4))
+    assert_equal(0.0, CalculateUtilityBill.calculate_monthly_prorate(header, 5))
   end
 
   def _check_bills(expected_bills, actual_bills)
