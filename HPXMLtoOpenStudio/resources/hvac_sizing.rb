@@ -1950,21 +1950,19 @@ class HVACSizing
       capacity_ratio = 1.0
     end
 
-    size_hp_to_switchover_temperature = false
     if (not hvac.SwitchoverTemperature.nil?) && (hvac.SwitchoverTemperature > weather.design.HeatingDrybulb)
-      size_hp_to_switchover_temperature = true
-    end
-
-    if not size_hp_to_switchover_temperature
-      heat_cap_rated = (hvac_sizing_values.Heat_Load / MathTools.biquadratic(@heat_setpoint, weather.design.HeatingDrybulb, coefficients)) / capacity_ratio
-    else
       # Calculate the heating load at the switchover temperature to limit unitilized capacity
       switchover_weather = weather.dup
       switchover_weather.design.HeatingDrybulb = hvac.SwitchoverTemperature
       switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
-      switchover_hvac_sizing_values = switchover_all_hvac_sizing_values[hvac.hvac_system]
-      heat_cap_rated = (switchover_hvac_sizing_values.Heat_Load / MathTools.biquadratic(@heat_setpoint, switchover_weather.design.HeatingDrybulb, coefficients)) / capacity_ratio
+      heating_load = switchover_all_hvac_sizing_values[hvac.hvac_system].Heat_Load
+      heating_db = switchover_weather.design.HeatingDrybulb
+    else
+      heating_load = hvac_sizing_values.Heat_Load
+      heating_db = weather.design.HeatingDrybulb
     end
+
+    heat_cap_rated = (heating_load / MathTools.biquadratic(@heat_setpoint, heating_db, coefficients)) / capacity_ratio
 
     if totalCap_CurveValue.nil?
       # Heat pump has no cooling, size based on heating
