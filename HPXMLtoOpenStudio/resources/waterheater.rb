@@ -970,7 +970,8 @@ class Waterheater
 
       plant_loop = bhw.plantLoop.get
       plant_loop_hw = plant_loop.clone(model).to_PlantLoop.get
-      # pump power is zero, fixme: is this expected? what about no heating scenarios when only water heating boiler is running but no power consumption is calculated?
+
+      # set pump power for water heating to zero
       plant_loop_hw.supplyComponents.each do |comp|
         if comp.to_BoilerHotWater.is_initialized
           boiler_hw = comp.to_BoilerHotWater.get
