@@ -130,8 +130,8 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
   ``UseMaxLoadForHeatPumps``         boolean                       No        true     Logic for autosized heat pumps [#]_
   =================================  ========  =====  ===========  ========  =======  ============================================
 
-  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
-  .. [#] If UseMaxLoadForHeatPumps is true, autosized heat pumps are sized based on the maximum of heating/cooling design loads; otherwise sized per ACCA Manual J/S based on cooling design loads with some oversizing allowances for heating design loads.
+  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise the user-specified fixed capacity is used directly.
+  .. [#] If UseMaxLoadForHeatPumps is true, autosized heat pumps are based on the maximum of heating/cooling design loads; otherwise heat pumps are autosized per ACCA Manual J/S based on cooling design loads with some oversizing allowances for heating design loads.
 
 HPXML Schedules
 ***************

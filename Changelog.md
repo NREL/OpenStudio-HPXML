@@ -7,6 +7,7 @@ __New Features__
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Allows an optional `Battery/UsableCapacity` input; now defaults to 0.9 x NominalCapacity (previously 0.8).
 - Adds support for shared hot water recirculation systems controlled by temperature.
+- Heat pumps with switchover temperatures are now autosized based on the switchover temperature, if higher than the heating design temperature.
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
