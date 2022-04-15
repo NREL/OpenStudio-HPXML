@@ -1957,6 +1957,7 @@ class HVACSizing
       # Size based on cooling
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
     else
+      cfm_per_btuh = hvac_sizing_values.Cool_Airflow / hvac_sizing_values.Cool_Capacity
       if @hpxml.header.use_max_load_for_heat_pumps
         # Size based on heating
         hvac_sizing_values.Cool_Capacity = heat_cap_rated
@@ -1973,7 +1974,6 @@ class HVACSizing
       end
       if [HPXML::HVACTypeHeatPumpAirToAir].include? hvac.HeatType
         # Use cfm/ton to calculate new airflow; easier than calculating sensible cooling capacity and calling calc_airflow_rate_manual_s()
-        cfm_per_btuh = hvac_sizing_values.Cool_Airflow / hvac_sizing_values.Cool_Capacity
         hvac_sizing_values.Cool_Airflow = cfm_per_btuh * hvac_sizing_values.Cool_Capacity
       elsif [HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
         hvac_sizing_values.Cool_Airflow = calc_airflow_rate_user(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[-1], hvac.CapacityRatioCooling[-1])
