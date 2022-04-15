@@ -963,7 +963,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
   end
 
-  def test_operational_calculation_type
+  def test_operational
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-calctype-operational.xml'))
     model, hpxml = _test_measure(args_hash)

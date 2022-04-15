@@ -1902,11 +1902,12 @@ class OSModel
         obj_name = Constants.ObjectNameMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         obj_name = Constants.ObjectNameMiscTelevision
+        plug_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if plug_load.kWh_per_year_isdefaulted
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
         obj_name = Constants.ObjectNameMiscElectricVehicleCharging
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         obj_name = Constants.ObjectNameMiscWellPump
-        plug_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+        plug_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if plug_load.kWh_per_year_isdefaulted
       end
       if obj_name.nil?
         runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
@@ -1927,7 +1928,7 @@ class OSModel
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         obj_name = Constants.ObjectNameMiscFireplace
       end
-      fuel_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+      fuel_load.usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if fuel_load.therm_per_year_isdefaulted
       if obj_name.nil?
         runner.registerWarning("Unexpected fuel load type '#{fuel_load.fuel_load_type}'. The fuel load will not be modeled.")
         next
@@ -1946,22 +1947,22 @@ class OSModel
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      pool.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if pool.heater_type != HPXML::TypeNone
+      pool.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if pool.heater_type != HPXML::TypeNone && pool.heater_load_value_isdefaulted
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if pool.pump_type == HPXML::TypeNone
 
-      pool.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+      pool.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if pool.pump_kwh_per_year_isdefaulted
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
-      hot_tub.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if hot_tub.heater_type != HPXML::TypeNone
+      hot_tub.heater_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if hot_tub.heater_type != HPXML::TypeNone && hot_tub.heater_load_value_isdefaulted
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
       next if hot_tub.pump_type == HPXML::TypeNone
 
-      hot_tub.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor
+      hot_tub.pump_usage_multiplier *= @hpxml.header.additional_properties.misc_loads_adj_factor if hot_tub.pump_kwh_per_year_isdefaulted
       MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
