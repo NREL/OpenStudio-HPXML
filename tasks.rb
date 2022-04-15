@@ -375,8 +375,6 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, parent), i|
-    next unless hpxml_file.include? 'base-bldgtype-single-family-attached-atticroof-cathedral'
-
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
