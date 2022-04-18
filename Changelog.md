@@ -1,5 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - Allows specifying a `StormWindow` element for windows/skylights; U-factors and SHGCs are automatically adjusted.
@@ -9,6 +10,7 @@ __New Features__
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
+- Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
   - Adds support for ambient foundations for single-family attached and apartment units.
@@ -26,6 +28,8 @@ __New Features__
   - Allows user-specified annual/timeseries output file names.
 - ReportHPXMLOutput measure:
   - Adds "Enclosure: Floor Area Foundation" output row in results_hpxml.csv.
+- New ReportUtilityBills measure:
+  - Adds a new results_bills.csv output file to summarize calculated utility bills.
 
 __Bugfixes__
 - Adds more stringent limits for `AirflowDefectRatio` and `ChargeDefectRatio` (now allows values from 1/10th to 10x the design value).
@@ -35,6 +39,7 @@ __Bugfixes__
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
 - Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
+- BuildResidentialHPXML measure: Fixes incorrect outside boundary condition for shared gable walls of cathedral ceilings, now set to adiabatic.
 
 ## OpenStudio-HPXML v1.3.0
 
