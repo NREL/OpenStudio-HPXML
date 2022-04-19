@@ -1134,12 +1134,12 @@ class HVACSizing
   end
 
   def self.apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
-    # If true, uses the larger of heating and cooling loads for heat pump capacity sizing (required for ERI).
-    # Otherwise, uses standard Manual S oversize allowances.
+    # If HeatPumpSizingHERS methodology, uses the larger of heating and cooling loads for heat pump sizing (required for ERI).
     if [HPXML::HVACTypeHeatPumpAirToAir,
         HPXML::HVACTypeHeatPumpMiniSplit,
         HPXML::HVACTypeHeatPumpGroundToAir,
-        HPXML::HVACTypeHeatPumpWaterLoopToAir].include? hvac.CoolType
+        HPXML::HVACTypeHeatPumpWaterLoopToAir,
+        HPXML::HVACTypeHeatPumpPTHP].include? hvac.CoolType
       if (@hpxml.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS) && (hvac.CoolingLoadFraction > 0) && (hvac.HeatingLoadFraction > 0)
         max_load = [hvac_sizing_values.Heat_Load, hvac_sizing_values.Cool_Load_Tot].max
         hvac_sizing_values.Heat_Load = max_load
