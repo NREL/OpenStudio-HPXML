@@ -200,7 +200,7 @@ base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-maxload.xml,14
 base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml,1386.53,144.0,1232.42,0.0,1376.42,0.0,0.0,0.0,10.11,0.0,0.0,0.0,0.0
 base-hvac-autosize-ptac-with-heating.xml,1737.36,144.0,1593.36,0.0,1737.36,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-ptac.xml,1294.41,144.0,1150.41,0.0,1294.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-autosize-pthp.xml,1493.41,144.0,1349.41,0.0,1493.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-pthp.xml,1497.75,144.0,1353.75,0.0,1497.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-ac-only.xml,1329.49,144.0,1185.49,0.0,1329.49,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-stove-oil-only.xml,1603.41,144.0,1015.72,0.0,1159.72,0.0,0.0,0.0,443.69,0.0,0.0,0.0,0.0
 base-hvac-autosize-wall-furnace-elec-only.xml,1606.2,144.0,1462.2,0.0,1606.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
