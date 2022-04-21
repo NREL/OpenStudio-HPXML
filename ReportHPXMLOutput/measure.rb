@@ -3,6 +3,7 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
+require 'msgpack'
 require_relative 'resources/constants.rb'
 
 # start the measure
@@ -56,31 +57,15 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     output_format = runner.getStringArgumentValue('output_format', user_arguments)
+    output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
 
-    sqlFile = runner.lastEnergyPlusSqlFile
-    if sqlFile.empty?
-      runner.registerError('Cannot find EnergyPlus sql file.')
-      return false
-    end
-    sqlFile = sqlFile.get
-    if not sqlFile.connectionOpen
-      runner.registerError('EnergyPlus simulation failed.')
-      return false
-    end
-    model.setSqlFile(sqlFile)
+    @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack')))
 
     hpxml_defaults_path = model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
     # Set paths
-    output_dir = File.dirname(sqlFile.path.to_s)
     output_path = File.join(output_dir, "results_hpxml.#{output_format}")
-
-    sqlFile.close()
-
-    # Ensure sql file is immediately freed; otherwise we can get
-    # errors on Windows when trying to delete this file.
-    GC.start()
 
     # Initialize
     cost_multipliers = {}

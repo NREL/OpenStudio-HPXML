@@ -3,6 +3,7 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
+require 'msgpack'
 require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/energyplus.rb'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml.rb'
@@ -42,9 +43,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     timeseries_frequency_chs = OpenStudio::StringVector.new
     timeseries_frequency_chs << 'none'
-    reporting_frequency_map.keys.each do |freq|
-      timeseries_frequency_chs << freq
-    end
+    timeseries_frequency_chs << 'timestep'
+    timeseries_frequency_chs << 'hourly'
+    timeseries_frequency_chs << 'daily'
+    timeseries_frequency_chs << 'monthly'
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_frequency', timeseries_frequency_chs, false)
     arg.setDisplayName('Timeseries Reporting Frequency')
     arg.setDescription("The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.")
@@ -429,17 +431,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
 
-    sqlFile = runner.lastEnergyPlusSqlFile
-    if sqlFile.empty?
-      runner.registerError('Cannot find EnergyPlus sql file.')
-      return false
+    output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
+
+    setup_outputs()
+
+    @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack')))
+    @msgpackDataRunPeriod = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout_runperiod.msgpack')))
+    msgpack_timeseries_path = File.join(output_dir, "eplusout_#{timeseries_frequency}.msgpack")
+    if File.exist? msgpack_timeseries_path
+      @msgpackDataTimeseries = MessagePack.unpack(File.read(msgpack_timeseries_path))
     end
-    @sqlFile = sqlFile.get
-    if not @sqlFile.connectionOpen
-      runner.registerError('EnergyPlus simulation failed.')
-      return false
+    if not @emissions.empty?
+      @msgpackDataHourly = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout_hourly.msgpack')))
     end
-    @model.setSqlFile(@sqlFile)
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
@@ -447,8 +451,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
-
-    setup_outputs()
 
     # Set paths
     if not @eri_design.nil?
@@ -458,7 +460,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       annual_output_path = File.join(output_dir, "#{hpxml_name}.#{output_format}")
       timeseries_output_path = File.join(output_dir, "#{hpxml_name}_#{timeseries_frequency.capitalize}.#{output_format}")
     else
-      output_dir = File.dirname(@sqlFile.path.to_s)
       if annual_output_file_name.is_initialized
         annual_output_path = File.join(output_dir, annual_output_file_name.get)
       else
@@ -471,13 +472,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    @timestamps = OutputMethods.get_timestamps(timeseries_frequency, @sqlFile, @hpxml)
+    @timestamps = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml)
     if timeseries_frequency != 'none'
       if add_timeseries_dst_column.is_initialized
-        timestamps_dst = OutputMethods.get_timestamps(timeseries_frequency, @sqlFile, @hpxml, 'DST') if add_timeseries_dst_column.get
+        timestamps_dst = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, 'DST') if add_timeseries_dst_column.get
       end
       if add_timeseries_utc_column.is_initialized
-        timestamps_utc = OutputMethods.get_timestamps(timeseries_frequency, @sqlFile, @hpxml, 'UTC') if add_timeseries_utc_column.get
+        timestamps_utc = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, 'UTC') if add_timeseries_utc_column.get
       end
     end
 
@@ -495,7 +496,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                           include_timeseries_weather)
 
     if not check_for_errors(runner, outputs)
-      OutputMethods.teardown(@sqlFile)
       return false
     end
 
@@ -529,7 +529,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                     timestamps_dst,
                                     timestamps_utc)
 
-    OutputMethods.teardown(@sqlFile)
     return true
   end
 
@@ -825,12 +824,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @output_variables = {}
     @output_variables_requests.each do |output_variable_name, output_variable|
-      key_values = get_report_variable_data_timeseries_key_values(timeseries_frequency, output_variable_name)
+      key_values, units = get_report_variable_data_timeseries_key_values_and_units(timeseries_frequency, output_variable_name)
       runner.registerWarning("Request for output variable '#{output_variable_name}' returned no key values.") if key_values.empty?
       key_values.each do |key_value|
         @output_variables[[output_variable_name, key_value]] = OutputVariable.new
         @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value.split.map(&:capitalize).join(' ')}"
-        @output_variables[[output_variable_name, key_value]].timeseries_units = get_report_variable_data_timeseries_units(timeseries_frequency, output_variable_name, key_value)
+        @output_variables[[output_variable_name, key_value]].timeseries_units = units
         @output_variables[[output_variable_name, key_value]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], 1, 0, timeseries_frequency)
       end
     end
@@ -1428,7 +1427,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_weather,
                                       timestamps_dst,
                                       timestamps_utc)
-    return if timeseries_frequency == 'none'
+    return if @timestamps.nil?
 
     # Set rounding precision for timeseries (e.g., hourly) outputs.
     # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
@@ -1540,7 +1539,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # EnergyPlus output variables
-    if !@output_variables.empty?
+    if not @output_variables.empty?
       output_variables_data = @output_variables.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
     else
       output_variables_data = []
@@ -1596,41 +1595,49 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_report_meter_data_annual(meter_names, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'))
     return 0.0 if meter_names.empty?
 
-    vars = "'" + meter_names.uniq.join("','") + "'"
-    query = "SELECT SUM(VariableValue*#{unit_conv}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    value = @sqlFile.execAndReturnFirstDouble(query)
-    fail "Query error: #{query}" unless value.is_initialized
+    cols = @msgpackData['MeterData']['RunPeriod']['Cols']
+    timestamp = @msgpackData['MeterData']['RunPeriod']['Rows'][0].keys[0]
+    row = @msgpackData['MeterData']['RunPeriod']['Rows'][0][timestamp]
+    indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
+    val = row.each_index.select { |i| indexes.include? i }.map { |i| row[i] }.sum(0.0) * unit_conv
 
-    return value.get
+    return val
   end
 
   def get_report_variable_data_annual(key_values, variables, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'), is_negative: false)
     return 0.0 if variables.empty?
 
-    keys = "'" + key_values.uniq.join("','") + "'"
-    vars = "'" + variables.uniq.join("','") + "'"
-    neg = is_negative ? ' * -1' : ''
-    query = "SELECT SUM(VariableValue*#{unit_conv})#{neg} FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='Run Period')"
-    value = @sqlFile.execAndReturnFirstDouble(query)
-    fail "Query error: #{query}" unless value.is_initialized
+    neg = is_negative ? -1.0 : 1.0
+    keys_vars = key_values.zip(variables).map { |k, v| "#{k}:#{v}" }
+    cols = @msgpackDataRunPeriod['Cols']
+    timestamp = @msgpackDataRunPeriod['Rows'][0].keys[0]
+    row = @msgpackDataRunPeriod['Rows'][0][timestamp]
+    indexes = cols.each_index.select { |i| keys_vars.include? cols[i]['Variable'] }
+    val = row.each_index.select { |i| indexes.include? i }.map { |i| row[i] }.sum(0.0) * unit_conv * neg
 
-    return value.get
+    return val
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
-    vars = "'" + meter_names.uniq.join("','") + "'"
-    query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
-    values = @sqlFile.execAndReturnVectorOfDouble(query)
-    fail "Query error: #{query}" unless values.is_initialized
-
-    values = values.get
-    values += [0.0] * @timestamps.size if values.size == 0
-    return values
+    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_frequency]
+    cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
+    rows = @msgpackData['MeterData'][msgpack_timeseries_name]['Rows']
+    indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
+    vals = []
+    rows.each_with_index do |row, idx|
+      row = row[row.keys[0]]
+      val = 0.0
+      indexes.each do |i|
+        val += row[i] * unit_conv + unit_adder
+      end
+      vals << val
+    end
+    return vals
   end
 
-  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, ems_shift: false)
+  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, ems_shift: false, hourly: false)
     return [0.0] * @timestamps.size if variables.empty?
 
     if key_values.uniq.size > 1 && key_values.include?('EMS') && ems_shift
@@ -1641,54 +1648,70 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return sum_values
     end
 
-    keys = "'" + key_values.uniq.join("','") + "'"
-    vars = "'" + variables.uniq.join("','") + "'"
-    neg = is_negative ? ' * -1' : ''
-    query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder})#{neg} FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}') GROUP BY TimeIndex ORDER BY TimeIndex"
-    values = @sqlFile.execAndReturnVectorOfDouble(query)
-    fail "Query error: #{query}" unless values.is_initialized
+    if (timeseries_frequency == 'hourly') && (not @msgpackDataHourly.nil?)
+      msgpack_data = @msgpackDataHourly
+    else
+      msgpack_data = @msgpackDataTimeseries
+    end
+    neg = is_negative ? -1.0 : 1.0
+    keys_vars = key_values.zip(variables).map { |k, v| "#{k}:#{v}" }
+    cols = msgpack_data['Cols']
+    rows = msgpack_data['Rows']
+    indexes = cols.each_index.select { |i| keys_vars.include? cols[i]['Variable'] }
+    vals = []
+    rows.each_with_index do |row, idx|
+      row = row[row.keys[0]]
+      val = 0.0
+      indexes.each do |i|
+        val += (row[i] * unit_conv + unit_adder) * neg
+      end
+      vals << val
+    end
 
-    values = values.get
-    values += [0.0] * @timestamps.size if values.size == 0
-
-    return values unless ems_shift
+    return vals unless ems_shift
 
     # Remove this code if we ever figure out a better way to handle when EMS output should shift
     if (key_values.size == 1) && (key_values[0] == 'EMS') && (@timestamps.size > 0)
-      if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
+      if (timeseries_frequency == 'timestep' || (timeseries_frequency == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
         # Shift all values by 1 timestep due to EMS reporting lag
-        return values[1..-1] + [values[0]]
+        return vals[1..-1] + [vals[0]]
       end
     end
 
-    return values
+    return vals
   end
 
-  def get_report_variable_data_timeseries_key_values(timeseries_frequency, var)
-    query = "SELECT KeyValue FROM ReportVariableDataDictionary WHERE VariableName='#{var}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}'"
-    values = @sqlFile.execAndReturnVectorOfString(query)
-    fail "Query error: #{query}" unless values.is_initialized
+  def get_report_variable_data_timeseries_key_values_and_units(timeseries_frequency, var)
+    keys = []
+    units = ''
+    @msgpackDataTimeseries['Cols'].each do |col|
+      next unless col['Variable'].end_with? ":#{var}"
 
-    values = values.get
+      keys << col['Variable'].split(':')[0..-2].join(':')
+      units = col['Units']
+    end
 
-    return values
-  end
-
-  def get_report_variable_data_timeseries_units(timeseries_frequency, var, kv)
-    query = "SELECT VariableUnits FROM ReportVariableDataDictionary WHERE KeyValue='#{kv}' AND VariableName='#{var}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}'"
-    value = @sqlFile.execAndReturnFirstString(query)
-    fail "Query error: #{query}" unless value.is_initialized
-
-    value = value.get
-
-    return value
+    return keys, units
   end
 
   def get_tabular_data_value(report_name, report_for_string, table_name, row_names, col_name, units)
-    rows = "'" + row_names.uniq.join("','") + "'"
-    query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND ReportForString='#{report_for_string}' AND TableName='#{table_name}' AND RowName IN (#{rows}) AND ColumnName='#{col_name}' AND Units='#{units}'"
-    result = @sqlFile.execAndReturnFirstDouble(query)
-    return result.get
+    vals = []
+    @msgpackData['TabularReports'].each do |tabular_report|
+      next if tabular_report['ReportName'] != report_name
+      next if tabular_report['For'] != report_for_string
+
+      tabular_report['Tables'].each do |table|
+        next if table['TableName'] != table_name
+
+        cols = table['Cols']
+        index = cols.each_index.select { |i| cols[i] == "#{col_name} [#{units}]" }[0]
+        row_names.each do |row_name|
+          vals << table['Rows'][row_name][index].to_f
+        end
+      end
+    end
+
+    return vals.sum(0.0)
   end
 
   def apply_multiplier_to_output(obj, sync_obj, sys_id, mult)
@@ -2216,15 +2239,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @output_variables_requests[output_variable] = OutputVariable.new
       end
     end
-  end
-
-  def reporting_frequency_map
-    return {
-      'timestep' => 'Zone Timestep',
-      'hourly' => 'Hourly',
-      'daily' => 'Daily',
-      'monthly' => 'Monthly',
-    }
   end
 
   def is_heat_pump_backup(sys_id)
