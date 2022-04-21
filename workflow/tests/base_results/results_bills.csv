@@ -190,7 +190,7 @@ base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml,1308.21,144.0,1164.2
 base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml,1324.07,144.0,1180.07,0.0,1324.07,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-acca.xml,1441.29,144.0,1297.29,0.0,1441.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-hers.xml,1445.33,144.0,1301.33,0.0,1445.33,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-maxload.xml,1441.29,144.0,1297.29,0.0,1441.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-maxload.xml,1445.33,144.0,1301.33,0.0,1445.33,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml,1279.2,144.0,1135.2,0.0,1279.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml,1279.2,144.0,1135.2,0.0,1279.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml,1331.43,144.0,1187.43,0.0,1331.43,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -200,7 +200,9 @@ base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-maxload.xml,14
 base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml,1386.53,144.0,1232.42,0.0,1376.42,0.0,0.0,0.0,10.11,0.0,0.0,0.0,0.0
 base-hvac-autosize-ptac-with-heating.xml,1737.36,144.0,1593.36,0.0,1737.36,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-ptac.xml,1294.41,144.0,1150.41,0.0,1294.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-autosize-pthp.xml,1497.75,144.0,1353.75,0.0,1497.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-pthp-sizing-methodology-acca.xml,1493.41,144.0,1349.41,0.0,1493.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-pthp-sizing-methodology-hers.xml,1497.75,144.0,1353.75,0.0,1497.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-pthp-sizing-methodology-maxload.xml,1515.55,144.0,1371.55,0.0,1515.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-ac-only.xml,1329.49,144.0,1185.49,0.0,1329.49,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-stove-oil-only.xml,1603.41,144.0,1015.72,0.0,1159.72,0.0,0.0,0.0,443.69,0.0,0.0,0.0,0.0
 base-hvac-autosize-wall-furnace-elec-only.xml,1606.2,144.0,1462.2,0.0,1606.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
