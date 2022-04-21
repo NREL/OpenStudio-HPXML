@@ -325,7 +325,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, utility_rates, utility_bills = setup_outputs()
 
     # Get timestamps
-    @timestamps = OutputMethods.get_timestamps(timeseries_frequency, @msgpackData, @hpxml)
+    @timestamps, _, _ = OutputMethods.get_timestamps(timeseries_frequency, @msgpackData, @hpxml)
 
     # Get outputs
     get_outputs(fuels)

@@ -472,14 +472,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    @timestamps = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml)
     if timeseries_frequency != 'none'
-      if add_timeseries_dst_column.is_initialized
-        timestamps_dst = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, 'DST') if add_timeseries_dst_column.get
-      end
-      if add_timeseries_utc_column.is_initialized
-        timestamps_utc = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, 'UTC') if add_timeseries_utc_column.get
-      end
+      add_dst_column = (add_timeseries_dst_column.is_initialized ? add_timeseries_dst_column.get : false)
+      add_utc_column = (add_timeseries_utc_column.is_initialized ? add_timeseries_utc_column.get : false)
+      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, add_dst_column, add_utc_column)
     end
 
     # Retrieve outputs

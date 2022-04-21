@@ -133,12 +133,10 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   print "#{print_prefix}Processing output...\n"
 
   # Apply reporting measures
-  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
   runner.setLastEpwFilePath(File.join(rundir, 'in.epw'))
   success = apply_measures(measures_dir, measures, runner, model, false, 'OpenStudio::Measure::ReportingMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
-  runner.resetLastEnergyPlusSqlFilePath
   runner.resetLastEpwFilePath
 
   Dir[File.join(rundir, 'results_*.csv')].each do |csv_path|
@@ -365,7 +363,6 @@ def run_measure(model, measure, argument_map, runner)
     end
     if measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
       runner_child.setLastOpenStudioModel(model)
-      runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
       runner_child.setLastEpwFilePath(runner.lastEpwFilePath.get)
       measure.run(runner_child, argument_map)
     else
