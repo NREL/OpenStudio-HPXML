@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>8355007a-0bce-489a-972a-923ea0f72e65</version_id>
-  <version_modified>20220415T165337Z</version_modified>
+  <version_id>a8798a9c-e1a9-47dd-835e-13b4c2799093</version_id>
+  <version_modified>20220419T201710Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>

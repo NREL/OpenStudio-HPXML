@@ -1541,7 +1541,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # EnergyPlus output variables
     if !@output_variables.empty?
-      output_variables_data = @output_variables.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
+      output_variables_data = @output_variables.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
     else
       output_variables_data = []
     end
