@@ -139,12 +139,8 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   report_os_warnings(os_log, rundir)
   runner.resetLastEpwFilePath
 
-  Dir[File.join(rundir, 'results_*.csv')].each do |csv_path|
-    print "#{print_prefix}Wrote output file: #{csv_path}.\n"
-  end
-
-  Dir[File.join(rundir, 'results_*.json')].each do |json_path|
-    print "#{print_prefix}Wrote output file: #{json_path}.\n"
+  Dir[File.join(rundir, 'results_*.*')].each do |results_path|
+    print "#{print_prefix}Wrote output file: #{results_path}.\n"
   end
 
   if not success

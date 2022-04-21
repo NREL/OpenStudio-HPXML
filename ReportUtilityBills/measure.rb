@@ -35,6 +35,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     format_chs = OpenStudio::StringVector.new
     format_chs << 'csv'
     format_chs << 'json'
+    format_chs << 'msgpack'
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('output_format', format_chs, false)
     arg.setDisplayName('Output Format')
     arg.setDescription('The file format of the annual (and timeseries, if requested) outputs.')
@@ -786,9 +787,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{key}: Total ($)", bill.annual_total.round(2)]
     end
 
-    if output_format == 'csv'
+    if ['csv'].include? output_format
       CSV.open(output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
-    elsif output_format == 'json'
+    elsif ['json', 'msgpack'].include? output_format
       h = {}
       results_out.each do |out|
         next if out == [line_break]
@@ -802,8 +803,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         end
       end
 
-      require 'json'
-      File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      if output_format == 'json'
+        require 'json'
+        File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif output_format == 'msgpack'
+        File.open(output_path, 'w') { |json| h.to_msgpack(json) }
+      end
     end
     runner.registerInfo("Wrote bills output to #{output_path}.")
   end

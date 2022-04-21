@@ -13,6 +13,7 @@ __New Features__
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
 - Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - Switches from EnergyPlus SQL output to MessagePack output for faster performance and reduced file sizes when requesting timeseries outputs.
+- Allows MessagePack annual/timeseries output files to be generated instead of CSV/JSON.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
   - Adds support for ambient foundations for single-family attached and apartment units.

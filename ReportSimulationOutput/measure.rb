@@ -35,6 +35,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     format_chs = OpenStudio::StringVector.new
     format_chs << 'csv'
     format_chs << 'json'
+    format_chs << 'msgpack'
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('output_format', format_chs, false)
     arg.setDisplayName('Output Format')
     arg.setDescription('The file format of the annual (and timeseries, if requested) outputs.')
@@ -132,12 +133,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
     arg.setDisplayName('Annual Output File Name')
-    arg.setDescription("If not provided, defaults to 'results_annual.csv' (or 'results_annual.json').")
+    arg.setDescription("If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('timeseries_output_file_name', false)
     arg.setDisplayName('Timeseries Output File Name')
-    arg.setDescription("If not provided, defaults to 'results_timeseries.csv' (or 'results_timeseries.json').")
+    arg.setDescription("If not provided, defaults to 'results_timeseries.csv' (or 'results_timeseries.json' or 'results_timeseries.msgpack').")
     args << arg
 
     return args
@@ -1092,9 +1093,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out = append_eri_results(outputs, results_out, line_break)
     end
 
-    if output_format == 'csv'
+    if ['csv'].include? output_format
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
-    elsif output_format == 'json'
+    elsif ['json', 'msgpack'].include? output_format
       h = {}
       results_out.each do |out|
         next if out == [line_break]
@@ -1104,8 +1105,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         h[grp][name.strip] = out[1]
       end
 
-      require 'json'
-      File.open(annual_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      if output_format == 'json'
+        require 'json'
+        File.open(annual_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif output_format == 'msgpack'
+        File.open(annual_output_path, 'w') { |json| h.to_msgpack(json) }
+      end
     end
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
   end
@@ -1547,7 +1552,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
-    if output_format == 'csv'
+    if ['csv'].include? output_format
       # Assemble data
       data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *end_use_data,
                       *emissions_data, *hot_water_use_data, *total_loads_data, *comp_loads_data,
@@ -1564,7 +1569,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       # Write file
       CSV.open(timeseries_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << elem } }
-    elsif output_format == 'json'
+    elsif ['json', 'msgpack'].include? output_format
       # Assemble data
       h = {}
       h['Time'] = data[2..-1]
@@ -1582,8 +1587,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Write file
-      require 'json'
-      File.open(timeseries_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      if output_format == 'json'
+        require 'json'
+        File.open(timeseries_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif output_format == 'msgpack'
+        File.open(timeseries_output_path, 'w') { |json| h.to_msgpack(json) }
+      end
     end
     runner.registerInfo("Wrote timeseries output results to #{timeseries_output_path}.")
   end
