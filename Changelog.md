@@ -3,9 +3,14 @@ __New Features__
 - Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
+- **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:
+  - `ACCA`: nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
+  - `HERS` (default): nominal capacity sized equal to the larger of heating/cooling design loads.
+  - `MaxLoad`: nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's capacity retention at the design temperature.
 - Allows specifying a `StormWindow` element for windows/skylights; U-factors and SHGCs are automatically adjusted.
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Allows an optional `Battery/UsableCapacity` input; now defaults to 0.9 x NominalCapacity (previously 0.8).
+- For CFIS systems, allows an optional `extension/VentilationOnlyModeAirflowFraction` input to address duct losses during ventilation only mode.
 - Adds support for shared hot water recirculation systems controlled by temperature.
 - Heat pumps with switchover temperatures are now autosized based on the switchover temperature, if higher than the heating design temperature.
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
@@ -33,7 +38,6 @@ __New Features__
   - Adds a new results_bills.csv output file to summarize calculated utility bills.
 
 __Bugfixes__
-- Fixes `UseMaxLoadForHeatPumps` option to take into account the reduced heat pump capacity at the heating design temperature.
 - Adds more stringent limits for `AirflowDefectRatio` and `ChargeDefectRatio` (now allows values from 1/10th to 10x the design value).
 - Catches case where leap year is specified but weather file does not contain 8784 hours.
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
