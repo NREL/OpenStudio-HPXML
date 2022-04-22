@@ -8,39 +8,31 @@ require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
-  def setup
-    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
-    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
-    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
-    @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
-    FileUtils.mkdir_p(@tmp_output_path)
+  def sample_files_dir
+    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
-  def teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    FileUtils.rm_rf(@tmp_output_path)
-  end
-
-  def test_heat_pump
+  def test_heat_pumps
     ['base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology',
      'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology',
      'base-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology',
      'base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology',
      'base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology',
-     'base-hvac-autosize-pthp-sizing-methodology'].each do |hpxml_file|
+     'base-hvac-autosize-pthp-sizing-methodology',
+     'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed-sizing-methodology'].each do |hpxml_file|
       # Run w/ ACCA sizing
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-acca.xml"))
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-acca.xml"))
       model_acca, hpxml_acca = _test_measure(args_hash)
 
       # Run w/ HERS sizing
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-hers.xml"))
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-hers.xml"))
       model_hers, hpxml_hers = _test_measure(args_hash)
 
       # Run w/ MaxLoad sizing
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-maxload.xml"))
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-maxload.xml"))
       model_maxload, hpxml_maxload = _test_measure(args_hash)
 
       # Check that MaxLoad >= HERS > ACCA for heat pump heating capacity
@@ -50,30 +42,6 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
       assert_operator(hp_capacity_maxload, :>=, hp_capacity_hers)
       assert_operator(hp_capacity_hers, :>, hp_capacity_acca)
     end
-  end
-
-  def test_dual_fuel_heat_pump
-    # Run DFHP
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml = _create_hpxml('base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.xml')
-    hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingMaxLoad
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    model_dfhp, hpxml_dfhp = _test_measure(args_hash)
-
-    # Run same model but w/o switchover temperature
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml = _create_hpxml('base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.xml')
-    hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingMaxLoad
-    hpxml.heat_pumps[0].backup_heating_switchover_temp = nil
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    model_non_dfhp, hpxml_non_dfhp = _test_measure(args_hash)
-
-    # Check that DFHP capacity < non-DFHP capacity
-    hp_capacity_dfhp = hpxml_dfhp.heat_pumps[0].heating_capacity
-    hp_capacity_non_dfhp = hpxml_non_dfhp.heat_pumps[0].heating_capacity
-    assert_operator(hp_capacity_dfhp, :<, hp_capacity_non_dfhp)
   end
 
   def test_slab_f_factor
@@ -151,9 +119,5 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
     return model, hpxml
-  end
-
-  def _create_hpxml(hpxml_name)
-    return HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
   end
 end
