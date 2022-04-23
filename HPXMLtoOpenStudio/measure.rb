@@ -2592,22 +2592,19 @@ class OSModel
     oj.setOutputJSON(false)
     oj.setOutputMessagePack(true)
 
-    return if @debug
-
-    # Disable various output files
     ocf = model.getOutputControlFiles
-    ocf.setOutputAUDIT(false)
-    ocf.setOutputBND(false)
-    ocf.setOutputEIO(false)
-    ocf.setOutputESO(false)
-    ocf.setOutputMDD(false)
-    ocf.setOutputMTD(false)
-    ocf.setOutputMTR(false)
-    ocf.setOutputRDD(false)
-    ocf.setOutputSHD(false)
-    ocf.setOutputSQLite(false)
+    ocf.setOutputSQLite(@debug)
+    ocf.setOutputAUDIT(@debug)
+    ocf.setOutputBND(@debug)
+    ocf.setOutputEIO(@debug)
+    ocf.setOutputESO(@debug)
+    ocf.setOutputMDD(@debug)
+    ocf.setOutputMTD(@debug)
+    ocf.setOutputMTR(@debug)
+    ocf.setOutputRDD(@debug)
+    ocf.setOutputSHD(@debug)
     # FIXME: Can't set to false because of https://github.com/NREL/EnergyPlus/issues/9393
-    # ocf.setOutputTabular(false)
+    # ocf.setOutputTabular(@debug)
   end
 
   def self.add_ems_debug_output(runner, model)
