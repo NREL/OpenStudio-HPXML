@@ -338,6 +338,30 @@ class Geometry
     end
   end
 
+  def self.calculate_zone_volume(hpxml, location)
+    if [HPXML::LocationBasementUnconditioned,
+        HPXML::LocationCrawlspaceUnvented,
+        HPXML::LocationCrawlspaceVented,
+        HPXML::LocationGarage].include? location
+      floor_area = hpxml.slabs.select { |s| s.interior_adjacent_to == location }.map { |s| s.area }.sum(0.0)
+      if location == HPXML::LocationGarage
+        height = 8.0
+      else
+        height = hpxml.foundation_walls.select { |w| w.interior_adjacent_to == location }.map { |w| w.height }.max
+      end
+      return floor_area * height
+    elsif [HPXML::LocationAtticUnvented,
+           HPXML::LocationAtticVented].include? location
+      floor_area = hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
+      roofs = hpxml.roofs.select { |r| r.interior_adjacent_to == location }
+      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
+      # Assume square hip roof for volume calculation
+      length = floor_area**0.5
+      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+      return [floor_area * height / 3.0, 0.01].max
+    end
+  end
+
   def self.get_temperature_scheduled_space_values(location)
     if location == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of heating setpoint
