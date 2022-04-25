@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class Geometry
-  def self.create_space_and_zone(model, spaces, location)
+  def self.create_space_and_zone(model, spaces, location, volume = nil)
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
+      if not volume.nil?
+        thermal_zone.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
+      end
 
       space = OpenStudio::Model::Space.new(model)
       space.setName(location)
@@ -332,56 +335,6 @@ class Geometry
       shading_surfaces.each do |shading_surface|
         shading_surface.setShadingSurfaceGroup(shading_surface_group)
       end
-    end
-  end
-
-  def self.calculate_zone_volume(hpxml, location)
-    if [HPXML::LocationBasementUnconditioned,
-        HPXML::LocationCrawlspaceUnvented,
-        HPXML::LocationCrawlspaceVented,
-        HPXML::LocationGarage].include? location
-      floor_area = hpxml.slabs.select { |s| s.interior_adjacent_to == location }.map { |s| s.area }.sum(0.0)
-      if location == HPXML::LocationGarage
-        height = 8.0
-      else
-        height = hpxml.foundation_walls.select { |w| w.interior_adjacent_to == location }.map { |w| w.height }.max
-      end
-      return floor_area * height
-    elsif [HPXML::LocationAtticUnvented,
-           HPXML::LocationAtticVented].include? location
-      floor_area = hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
-      roofs = hpxml.roofs.select { |r| r.interior_adjacent_to == location }
-      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
-      # Assume square hip roof for volume calculation
-      length = floor_area**0.5
-      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      return [floor_area * height / 3.0, 0.01].max
-    end
-  end
-
-  def self.set_zone_volumes(runner, model, spaces, hpxml, apply_ashrae140_assumptions)
-    # Living space
-    spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
-
-    # Basement, crawlspace, garage
-    spaces.keys.each do |location|
-      next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented, HPXML::LocationGarage].include? location
-
-      volume = calculate_zone_volume(hpxml, location)
-      spaces[location].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
-    end
-
-    # Attic
-    spaces.keys.each do |location|
-      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? location
-
-      if apply_ashrae140_assumptions
-        volume = 3463 # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
-      else
-        volume = calculate_zone_volume(hpxml, location)
-      end
-
-      spaces[location].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
     end
   end
 
