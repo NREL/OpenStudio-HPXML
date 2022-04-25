@@ -195,8 +195,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Natural Gas: Total ($)'] = 0
     @expected_bills['Fuel Oil: Total ($)'] = 0
     @expected_bills['Propane: Total ($)'] = 0
-    @expected_bills['Wood Cord: Total ($)'] = 940
-    @expected_bills['Total ($)'] = 2118
+    @expected_bills['Wood Cord: Total ($)'] = 938
+    @expected_bills['Total ($)'] = 2116
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -235,8 +235,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Natural Gas: Total ($)'] = 0
     @expected_bills['Fuel Oil: Total ($)'] = 0
     @expected_bills['Propane: Total ($)'] = 0
-    @expected_bills['Coal: Total ($)'] = 940
-    @expected_bills['Total ($)'] = 2119
+    @expected_bills['Coal: Total ($)'] = 938
+    @expected_bills['Total ($)'] = 2117
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -247,14 +247,14 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 96
-    @expected_bills['Electricity: Marginal ($)'] = 1251
-    @expected_bills['Electricity: Total ($)'] = 1347
+    @expected_bills['Electricity: Marginal ($)'] = 1250
+    @expected_bills['Electricity: Total ($)'] = 1346
     @expected_bills['Natural Gas: Fixed ($)'] = 96
     @expected_bills['Natural Gas: Marginal ($)'] = 215
     @expected_bills['Natural Gas: Total ($)'] = 311
     @expected_bills['Fuel Oil: Total ($)'] = 0
     @expected_bills['Propane: Total ($)'] = 0
-    @expected_bills['Total ($)'] = 1658
+    @expected_bills['Total ($)'] = 1656
     _check_bills(@expected_bills, actual_bills)
   end
 

@@ -26,10 +26,10 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    # Open cavity, asphalt shingles roof
-    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles'] },
-                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] },
-                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] }]
+    # Unconditioned attic, asphalt shingles roof
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'roof stud and cavity'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity'] }]
 
     hpxml = _create_hpxml('base.xml')
     roofs_values.each do |roof_values|
@@ -42,7 +42,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       _check_surface(hpxml.roofs[0], os_surface, roof_values[:layer_names])
     end
 
-    # Closed cavity, asphalt shingles roof
+    # Cathedral attic, asphalt shingles roof
     roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'roof stud and cavity', 'gypsum board'] },
                     { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
                     { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }]
@@ -58,7 +58,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       _check_surface(hpxml.roofs[0], os_surface, roof_values[:layer_names])
     end
 
-    # Closed cavity, Miscellaneous
+    # Cathedral attic, Miscellaneous
     roofs_values = [
       # Slate or tile
       [{ assembly_r: 0.1, layer_names: ['slate or tile shingles', 'roof stud and cavity', 'gypsum board'] },
@@ -113,9 +113,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
     # Open cavity, asphalt shingles roof
-    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'radiant barrier'] },
-                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] },
-                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] }]
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'roof stud and cavity', 'radiant barrier'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'radiant barrier'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'radiant barrier'] }]
 
     hpxml = _create_hpxml('base-atticroof-radiant-barrier.xml')
     roofs_values.each do |roof_values|
