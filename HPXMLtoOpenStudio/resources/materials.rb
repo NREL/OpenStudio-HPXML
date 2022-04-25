@@ -317,7 +317,7 @@ class Material
       thick_in = 0.02 if thick_in.nil?
       return new(name: type, thick_in: thick_in, k_in: 346.9, rho: 487.0, cp: 0.11)
     elsif [HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeShingles, HPXML::RoofTypeCool].include? type
-      thick_in = 0.25 if thick_in.nil?
+      thick_in = 0.375 if thick_in.nil?
       return new(name: type, thick_in: thick_in, k_in: 1.128, rho: 70.0, cp: 0.35)
     elsif [HPXML::RoofTypeConcrete].include? type
       thick_in = 0.75 if thick_in.nil?
@@ -329,7 +329,7 @@ class Material
       thick_in = 1.0 if thick_in.nil?
       return new(name: type, thick_in: thick_in, mat_base: BaseMaterial.InsulationRigid)
     elsif [HPXML::RoofTypePlasticRubber].include? type
-      thick_in = 0.25 if thick_in.nil?
+      thick_in = 0.375 if thick_in.nil?
       return new(name: type, thick_in: thick_in, k_in: 2.78, rho: 110.8, cp: 0.36)
     end
 
