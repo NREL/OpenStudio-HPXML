@@ -239,8 +239,7 @@ class OSModel
     # Conditioned space/zone
 
     spaces = {}
-    create_or_get_space(model, spaces, HPXML::LocationLivingSpace,
-                        hpxml.building_construction.conditioned_building_volume)
+    create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
     set_heating_and_cooling_seasons()
     add_setpoints(runner, model, weather, spaces)
@@ -258,6 +257,7 @@ class OSModel
     add_conditioned_floor_area(runner, model, spaces)
     add_thermal_mass(runner, model, spaces)
     update_conditioned_below_grade_spaces(runner, model, spaces)
+    Geometry.set_zone_volumes(runner, model, spaces, @hpxml, @apply_ashrae140_assumptions)
     Geometry.explode_surfaces(runner, model, @hpxml, @walls_top)
     add_num_occupants(model, runner, spaces)
 
@@ -594,9 +594,9 @@ class OSModel
     Geometry.apply_occupants(model, runner, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
-  def self.create_or_get_space(model, spaces, location, volume = nil)
+  def self.create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, volume)
+      Geometry.create_space_and_zone(model, spaces, location)
     end
     return spaces[location]
   end
@@ -664,7 +664,7 @@ class OSModel
       end
 
       install_grade = 1
-      assembly_r = roof.insulation_assembly_r_value
+      assembly_r = [roof.insulation_assembly_r_value, 2.3].max # Very low assembly R-values can produce E+ attic temperature out of bounds error
 
       constr_sets = [
         WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
