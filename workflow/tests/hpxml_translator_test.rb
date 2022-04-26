@@ -482,8 +482,10 @@ class HPXMLTest < MiniTest::Test
       total_clg_load = results['Load: Cooling: Delivered (MBtu)']
       abs_htg_load_delta = (total_htg_load - sum_component_htg_loads).abs
       abs_clg_load_delta = (total_clg_load - sum_component_clg_loads).abs
-      abs_htg_load_frac = abs_htg_load_delta / total_htg_load
-      abs_clg_load_frac = abs_clg_load_delta / total_clg_load
+      avg_htg_load = ([total_htg_load, abs_htg_load_delta].sum / 2.0)
+      avg_clg_load = ([total_htg_load, abs_htg_load_delta].sum / 2.0)
+      abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
+      abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
       # Check that the difference is less than 0.5MBtu or less than 10%
       assert((abs_htg_load_delta < 0.5) || (abs_htg_load_frac < 0.1))
       assert((abs_clg_load_delta < 0.5) || (abs_clg_load_frac < 0.1))
