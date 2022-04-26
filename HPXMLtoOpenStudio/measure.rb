@@ -685,6 +685,8 @@ class OSModel
                                              constr_set.mat_ext_finish, has_radiant_barrier,
                                              inside_film, outside_film, radiant_barrier_grade,
                                              roof.solar_absorptance, roof.emittance)
+
+      Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
   end
 
