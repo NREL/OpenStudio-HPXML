@@ -12,7 +12,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <HVACSizingControl>
-        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
+        <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
       </HVACSizingControl>
     </extension>
   </SoftwareInfo>
@@ -321,28 +321,27 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
               <DistributionSystem idref='HVACDistribution1'/>
-              <HeatPumpType>ground-to-air</HeatPumpType>
+              <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupSystemFuel>natural gas</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Units>AFUE</Units>
+                <Value>0.95</Value>
               </BackupAnnualHeatingEfficiency>
+              <BackupHeatingSwitchoverTemperature>25.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>16.6</Value>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>COP</Units>
-                <Value>3.6</Value>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
-              <extension>
-                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
-              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
