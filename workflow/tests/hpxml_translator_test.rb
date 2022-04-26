@@ -684,8 +684,8 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
+      next if err_line.include? 'PerformancePrecisionTradeoffs: Carroll MRT radiant exchange method is selected.'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
-      next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
       next if err_line.include? 'do not define an enclosure'
       next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
       next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
@@ -714,7 +714,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
-      next if err_line.include? 'View factors not complete'
 
       if err_line.include? 'Output:Meter: invalid Key Name'
         next if skip_utility_bill_warning(err_line)
@@ -817,7 +816,7 @@ class HPXMLTest < MiniTest::Test
       roof_id = roof.id.upcase
 
       # R-value
-      hpxml_value = [roof.insulation_assembly_r_value, 2.3].max
+      hpxml_value = roof.insulation_assembly_r_value
       if hpxml_path.include? 'ASHRAE_Standard_140'
         # Compare R-value w/o film
         hpxml_value -= Material.AirFilmRoofASHRAE140.rvalue

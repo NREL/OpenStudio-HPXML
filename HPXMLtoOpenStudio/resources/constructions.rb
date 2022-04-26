@@ -872,7 +872,7 @@ class Constructions
   end
 
   def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area,
-                                 basement_frac_of_cfa, cond_base_surfaces, living_space)
+                                 basement_frac_of_cfa, living_space)
 
     imdefs = []
 
@@ -893,7 +893,6 @@ class Constructions
       # as internal mass object.
       obj_name = 'partition wall mass below grade'
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_base)
-      cond_base_surfaces << imdef
       imdefs << imdef
     end
 
@@ -905,7 +904,7 @@ class Constructions
   end
 
   def self.apply_furniture(runner, model, furniture_mass, cfa, ubfa, gfa,
-                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+                           basement_frac_of_cfa, living_space)
 
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
@@ -971,7 +970,6 @@ class Constructions
         if base_surface_area > 0
           base_obj_name = mass_obj_name_space + ' below grade'
           imdef = create_os_int_mass_and_def(model, base_obj_name, space, base_surface_area)
-          cond_base_surfaces << imdef
           imdefs << imdef
         end
       else

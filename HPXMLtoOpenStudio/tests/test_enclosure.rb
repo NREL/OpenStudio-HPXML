@@ -26,9 +26,10 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    # Unconditioned attic, asphalt shingles roof
-    roofs_values = [{ assembly_r: 2.3, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity'] },
-                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity'] }]
+    # Open cavity, asphalt shingles roof
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] }]
 
     hpxml = _create_hpxml('base.xml')
     roofs_values.each do |roof_values|
@@ -41,8 +42,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       _check_surface(hpxml.roofs[0], os_surface, roof_values[:layer_names])
     end
 
-    # Cathedral attic, asphalt shingles roof
-    roofs_values = [{ assembly_r: 2.8, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+    # Closed cavity, asphalt shingles roof
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'roof stud and cavity', 'gypsum board'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
                     { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }]
 
     hpxml = _create_hpxml('base-atticroof-cathedral.xml')
@@ -56,31 +58,39 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       _check_surface(hpxml.roofs[0], os_surface, roof_values[:layer_names])
     end
 
-    # Cathedral attic, Miscellaneous
+    # Closed cavity, Miscellaneous
     roofs_values = [
       # Slate or tile
-      [{ assembly_r: 2.8, layer_names: ['slate or tile shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+      [{ assembly_r: 0.1, layer_names: ['slate or tile shingles', 'roof stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['slate or tile shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
        { assembly_r: 20.0, layer_names: ['slate or tile shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }],
       # Metal
-      [{ assembly_r: 2.8, layer_names: ['metal surfacing', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
+      [{ assembly_r: 0.1, layer_names: ['metal surfacing', 'roof stud and cavity', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['metal surfacing', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
        { assembly_r: 20.0, layer_names: ['metal surfacing', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'plaster'] }],
       # Wood shingles
-      [{ assembly_r: 2.8, layer_names: ['wood shingles or shakes', 'osb sheathing', 'roof stud and cavity', 'wood'] },
+      [{ assembly_r: 0.1, layer_names: ['wood shingles or shakes', 'roof stud and cavity', 'wood'] },
+       { assembly_r: 5.0, layer_names: ['wood shingles or shakes', 'osb sheathing', 'roof stud and cavity', 'wood'] },
        { assembly_r: 20.0, layer_names: ['wood shingles or shakes', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'wood'] }],
       # Shingles
-      [{ assembly_r: 2.8, layer_names: ['shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+      [{ assembly_r: 0.1, layer_names: ['shingles', 'roof stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
        { assembly_r: 20.0, layer_names: ['shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }],
       # Plastic/rubber
-      [{ assembly_r: 2.8, layer_names: ['plastic/rubber/synthetic sheeting', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
+      [{ assembly_r: 0.1, layer_names: ['plastic/rubber/synthetic sheeting', 'roof stud and cavity', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['plastic/rubber/synthetic sheeting', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
        { assembly_r: 20.0, layer_names: ['plastic/rubber/synthetic sheeting', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'plaster'] }],
       # EPS
-      [{ assembly_r: 2.8, layer_names: ['expanded polystyrene sheathing', 'roof stud and cavity', 'wood'] },
+      [{ assembly_r: 0.1, layer_names: ['expanded polystyrene sheathing', 'roof stud and cavity', 'wood'] },
+       { assembly_r: 5.0, layer_names: ['expanded polystyrene sheathing', 'roof stud and cavity', 'wood'] },
        { assembly_r: 20.0, layer_names: ['expanded polystyrene sheathing', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'wood'] }],
       # Concrete
-      [{ assembly_r: 2.8, layer_names: ['concrete', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+      [{ assembly_r: 0.1, layer_names: ['concrete', 'roof stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['concrete', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
        { assembly_r: 20.0, layer_names: ['concrete', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }],
       # Cool
-      [{ assembly_r: 2.8, layer_names: ['cool roof', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
+      [{ assembly_r: 0.1, layer_names: ['cool roof', 'roof stud and cavity', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['cool roof', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
        { assembly_r: 20.0, layer_names: ['cool roof', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'plaster'] }],
 
     ]
@@ -103,8 +113,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
     # Open cavity, asphalt shingles roof
-    roofs_values = [{ assembly_r: 2.3, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'radiant barrier'] },
-                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'radiant barrier'] }]
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'radiant barrier'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] }]
 
     hpxml = _create_hpxml('base-atticroof-radiant-barrier.xml')
     roofs_values.each do |roof_values|
