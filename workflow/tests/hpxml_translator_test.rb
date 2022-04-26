@@ -817,7 +817,7 @@ class HPXMLTest < MiniTest::Test
       roof_id = roof.id.upcase
 
       # R-value
-      hpxml_value = roof.insulation_assembly_r_value
+      hpxml_value = [roof.insulation_assembly_r_value, 2.3].max
       if hpxml_path.include? 'ASHRAE_Standard_140'
         # Compare R-value w/o film
         hpxml_value -= Material.AirFilmRoofASHRAE140.rvalue
