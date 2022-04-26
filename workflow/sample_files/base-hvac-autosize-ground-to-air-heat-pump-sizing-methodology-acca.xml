@@ -13,7 +13,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <HVACSizingControl>
-        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
+        <HeatPumpSizingMethodology>ACCA</HeatPumpSizingMethodology>
       </HVACSizingControl>
     </extension>
   </SoftwareInfo>
