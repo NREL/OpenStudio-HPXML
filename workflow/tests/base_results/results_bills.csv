@@ -206,6 +206,12 @@ base-hvac-autosize-pthp-sizing-methodology-acca.xml,1493.41,144.0,1349.41,0.0,14
 base-hvac-autosize-pthp-sizing-methodology-hers.xml,1497.75,144.0,1353.75,0.0,1497.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-pthp-sizing-methodology-maxload.xml,1515.55,144.0,1371.55,0.0,1515.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-ac-only.xml,1329.49,144.0,1185.49,0.0,1329.49,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-cop-sizing-methodology-acca.xml,1509.3,144.0,1365.3,0.0,1509.3,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-cop-sizing-methodology-hers.xml,1515.88,144.0,1371.88,0.0,1515.88,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-cop-sizing-methodology-maxload.xml,1535.92,144.0,1391.92,0.0,1535.92,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-acca.xml,1526.31,144.0,1382.31,0.0,1526.31,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-hers.xml,1535.36,144.0,1391.36,0.0,1535.36,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-maxload.xml,1556.92,144.0,1412.92,0.0,1556.92,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-stove-oil-only.xml,1603.41,144.0,1015.72,0.0,1159.72,0.0,0.0,0.0,443.69,0.0,0.0,0.0,0.0
 base-hvac-autosize-wall-furnace-elec-only.xml,1606.2,144.0,1462.2,0.0,1606.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize.xml,1635.54,144.0,1209.75,0.0,1353.75,144.0,137.79,281.79,0.0,0.0,0.0,0.0,0.0
@@ -276,6 +282,8 @@ base-hvac-pthp.xml,1509.01,144.0,1365.01,0.0,1509.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only-33percent.xml,1222.96,144.0,1078.96,0.0,1222.96,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only-ceer.xml,1347.79,144.0,1203.79,0.0,1347.79,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only.xml,1347.43,144.0,1203.43,0.0,1347.43,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-room-heat-pump-cop.xml,1528.66,144.0,1384.66,0.0,1528.66,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-room-heat-pump-hspf.xml,1549.23,144.0,1405.23,0.0,1549.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-seasons.xml,1617.01,144.0,1199.51,0.0,1343.51,144.0,129.5,273.5,0.0,0.0,0.0,0.0,0.0
 base-hvac-setpoints-daily-schedules.xml,1601.0,144.0,1188.83,0.0,1332.83,144.0,124.17,268.17,0.0,0.0,0.0,0.0,0.0
 base-hvac-setpoints-daily-setbacks.xml,1599.2,144.0,1190.39,0.0,1334.39,144.0,120.81,264.81,0.0,0.0,0.0,0.0,0.0
