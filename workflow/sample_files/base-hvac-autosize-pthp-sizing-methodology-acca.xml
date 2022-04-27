@@ -12,7 +12,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <HVACSizingControl>
-        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
+        <HeatPumpSizingMethodology>ACCA</HeatPumpSizingMethodology>
       </HVACSizingControl>
     </extension>
   </SoftwareInfo>
@@ -320,7 +320,7 @@
             </PrimarySystems>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
-              <HeatPumpType>room heat pump</HeatPumpType>
+              <HeatPumpType>packaged terminal heat pump</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
@@ -336,8 +336,8 @@
                 <Value>11.4</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Units>COP</Units>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>

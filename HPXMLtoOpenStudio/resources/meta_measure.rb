@@ -139,14 +139,12 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   report_os_warnings(os_log, rundir)
   runner.resetLastEnergyPlusSqlFilePath
 
-  annual_csv_path = File.join(rundir, 'results_annual.csv')
-  if File.exist? annual_csv_path
-    print "#{print_prefix}Wrote output file: #{annual_csv_path}.\n"
+  Dir[File.join(rundir, 'results_*.csv')].each do |csv_path|
+    print "#{print_prefix}Wrote output file: #{csv_path}.\n"
   end
 
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  if File.exist? timeseries_csv_path
-    print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
+  Dir[File.join(rundir, 'results_*.json')].each do |json_path|
+    print "#{print_prefix}Wrote output file: #{json_path}.\n"
   end
 
   if not success
@@ -339,6 +337,20 @@ def get_value_from_workflow_step_value(step_value)
     return step_value.valueAsInteger
   elsif variant_type == 'String'.to_VariantType
     return step_value.valueAsString
+  end
+end
+
+def get_value_from_additional_properties(obj, feature_name)
+  additional_properties = obj.additionalProperties
+  feature_data_type = additional_properties.getFeatureDataType(feature_name).get if additional_properties.getFeatureDataType(feature_name).is_initialized
+  if feature_data_type == 'Boolean'
+    return additional_properties.getFeatureAsBoolean(feature_name).get if additional_properties.getFeatureAsBoolean(feature_name).is_initialized
+  elsif feature_data_type == 'Double'
+    return additional_properties.getFeatureAsDouble(feature_name).get if additional_properties.getFeatureAsDouble(feature_name).is_initialized
+  elsif feature_data_type == 'Integer'
+    return additional_properties.getFeatureAsInteger(feature_name).get if additional_properties.getFeatureAsInteger(feature_name).is_initialized
+  elsif feature_data_type == 'String'
+    return additional_properties.getFeatureAsString(feature_name).get if additional_properties.getFeatureAsString(feature_name).is_initialized
   end
 end
 
