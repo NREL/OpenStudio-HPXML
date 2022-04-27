@@ -47,6 +47,7 @@ __Bugfixes__
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
 - Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
 - BuildResidentialHPXML measure: Fixes incorrect outside boundary condition for shared gable walls of cathedral ceilings, now set to adiabatic.
+- Fixes possible EMS error for ventilation systems with low (but non-zero) flow rates.
 
 ## OpenStudio-HPXML v1.3.0
 
