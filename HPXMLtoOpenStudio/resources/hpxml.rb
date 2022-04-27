@@ -169,6 +169,7 @@ class HPXML < Object
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
   HVACTypePTACHeating = 'PackagedTerminalAirConditionerHeating'
+  HVACTypeRoomACHeating = 'RoomAirConditionerHeating'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
   HVACTypeHeatPumpMiniSplit = 'mini-split'

@@ -1699,6 +1699,9 @@ class OSModel
       if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
         fail 'Unhandled ducted PTAC/PTHP system.'
       end
+      if (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating) && (not cooling_system.nil?)
+        fail 'Unhandled ducted Room AC with heating.'
+      end
 
       # Calculate heating sequential load fractions
       if heating_system.is_heat_pump_backup_system
@@ -1714,7 +1717,7 @@ class OSModel
       end
 
       sys_id = heating_system.id
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,

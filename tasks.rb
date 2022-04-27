@@ -252,6 +252,7 @@ def create_hpxmls
     'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-acca.xml' => 'base-hvac-room-heat-pump-hspf.xml',
     'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-hers.xml' => 'base-hvac-room-heat-pump-hspf.xml',
     'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-maxload.xml' => 'base-hvac-room-heat-pump-hspf.xml',
+    'base-hvac-autosize-room-ac-with-heating.xml' => 'base-hvac-room-ac-with-heating.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -322,6 +323,7 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-heating.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-heat-pump-cop.xml' => 'base-hvac-pthp.xml',
     'base-hvac-room-heat-pump-hspf.xml' => 'base-hvac-pthp.xml',
     'base-hvac-seasons.xml' => 'base.xml',
@@ -2051,6 +2053,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     args['cooling_system_fraction_cool_load_served'] = 0.33
     args['cooling_system_cooling_capacity'] = 8000.0
+  elsif ['base-hvac-room-ac-with-heating.xml'].include? hpxml_file
+    args['heating_system_type'] = HPXML::HVACTypeRoomACHeating
+    args['heating_system_heating_efficiency'] = 1.0
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60

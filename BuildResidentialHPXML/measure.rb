@@ -946,6 +946,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypeFireplace
     heating_system_type_choices << HPXML::HVACTypeFixedHeater
     heating_system_type_choices << HPXML::HVACTypePTACHeating
+    heating_system_type_choices << HPXML::HVACTypeRoomACHeating
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
 
@@ -984,7 +985,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System: Fuel Type')
-    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance} and #{HPXML::HVACTypePTACHeating}.")
+    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}, #{HPXML::HVACTypePTACHeating} and #{HPXML::HVACTypeRoomACHeating}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
@@ -4287,7 +4288,7 @@ class HPXMLFile
       heating_capacity = Float(args[:heating_system_heating_capacity])
     end
 
-    if [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating].include? heating_system_type
+    if [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? heating_system_type
       heating_system_fuel = HPXML::FuelTypeElectricity
     else
       heating_system_fuel = args[:heating_system_fuel]
@@ -4302,7 +4303,8 @@ class HPXMLFile
            HPXML::HVACTypePortableHeater,
            HPXML::HVACTypeFireplace,
            HPXML::HVACTypeFixedHeater,
-           HPXML::HVACTypePTACHeating].include?(heating_system_type)
+           HPXML::HVACTypePTACHeating,
+           HPXML::HVACTypeRoomACHeating].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 

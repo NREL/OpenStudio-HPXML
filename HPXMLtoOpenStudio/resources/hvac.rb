@@ -53,6 +53,10 @@ class HVAC
       obj_name = Constants.ObjectNamePTACHeating
       fan_watts_per_cfm = 0.0
       num_speeds = 1
+    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating)
+      obj_name = Constants.ObjectNameRoomACHeating
+      fan_watts_per_cfm = 0.0
+      num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
@@ -85,7 +89,7 @@ class HVAC
         # Heating Coil
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
-          if heating_system.heating_system_type == HPXML::HVACTypePTACHeating
+          if [HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? heating_system.heating_system_type
             htg_coil.setEfficiency(heating_system.heating_efficiency_percent)
           else
             htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
@@ -4043,14 +4047,16 @@ class HVAC
   end
 
   def self.is_attached_heating_and_cooling_systems(hpxml, heating_system, cooling_system)
-    # Now only allows furnace+AC and PTAC
-    if not (hpxml.heating_systems.include?(heating_system) && ([HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type))
+    # Now only allows furnace+AC, PTAC and Room AC with heating
+    if not ((hpxml.heating_systems.include? heating_system) && (hpxml.cooling_systems.include? cooling_system))
       return false
     end
-    if not (hpxml.cooling_systems.include?(cooling_system) && ([HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type))
+    if not ((heating_system.heating_system_type == HPXML::HVACTypeFurnace && cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner) ||
+            (heating_system.heating_system_type == HPXML::HVACTypePTACHeating && cooling_system.cooling_system_type == HPXML::HVACTypePTAC) ||
+            (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating && cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner))
       return false
     end
-
+    
     return true
   end
 
@@ -4063,6 +4069,8 @@ class HVAC
     hpxml.cooling_systems.each do |cooling_system|
       heating_system = nil
       if is_attached_heating_and_cooling_systems(hpxml, cooling_system.attached_heating_system, cooling_system)
+        # For PTAC with heating and Room AC with heating, the heating and cooling systems are not grouped together currently,
+        # because their distribution systems are not yet allowed
         heating_system = cooling_system.attached_heating_system
       end
       hvac_systems << { cooling: cooling_system,
