@@ -4056,7 +4056,7 @@ class HVAC
             (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating && cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner))
       return false
     end
-    
+
     return true
   end
 
