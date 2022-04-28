@@ -18,6 +18,7 @@ __New Features__
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
 - Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - Switches from ScriptF to CarrollMRT radiant exchange algorithm.
+- Updates HVAC rated fan power assumption per ASHRAE 1449-RP.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
   - Adds support for ambient foundations for single-family attached and apartment units.
