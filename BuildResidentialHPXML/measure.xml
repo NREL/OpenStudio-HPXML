@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>75d96e5f-c9e0-4e7c-b924-d28a75de16bf</version_id>
-  <version_modified>20220426T180640Z</version_modified>
+  <version_id>fd80ba40-4c3d-47fe-8745-88cf6d138ea2</version_id>
+  <version_modified>20220428T212151Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
