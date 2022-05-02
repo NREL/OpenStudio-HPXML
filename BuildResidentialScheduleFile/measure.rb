@@ -209,6 +209,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_vacancy_end_month] = end_month
       args[:schedules_vacancy_end_day] = end_day
     end
+
+    if args[:geometry_num_occupants] == 0
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml.building_construction.number_of_bedrooms)
+      args[:schedules_vacancy_begin_month] = 1
+      args[:schedules_vacancy_begin_day] = 1
+      args[:schedules_vacancy_end_month] = 12
+      args[:schedules_vacancy_end_day] = 31
+    end
   end
 end
 
