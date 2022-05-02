@@ -12,8 +12,11 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <HVACSizingControl>
-        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
+        <HeatPumpSizingMethodology>ACCA</HeatPumpSizingMethodology>
       </HVACSizingControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -323,23 +326,24 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
+              <CompressorType>single stage</CompressorType>
+              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupSystemFuel>natural gas</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Units>AFUE</Units>
+                <Value>0.95</Value>
               </BackupAnnualHeatingEfficiency>
+              <BackupHeatingSwitchoverTemperature>25.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>22.0</Value>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
