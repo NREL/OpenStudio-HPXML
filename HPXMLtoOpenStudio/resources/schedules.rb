@@ -1135,6 +1135,8 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnVacancy = 'vacancy'
+  ColumnHeatingSetpoint = 'heating_setpoint'
+  ColumnCoolingSetpoint = 'cooling_setpoint'
 
   def initialize(runner: nil,
                  model: nil,
@@ -1393,7 +1395,7 @@ class SchedulesFile
   end
 
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.SetpointColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1428,6 +1430,13 @@ class SchedulesFile
     ]
   end
 
+  def self.SetpointColumnNames
+    return [
+      ColumnHeatingSetpoint,
+      ColumnCoolingSetpoint
+    ]
+  end
+
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
@@ -1439,7 +1448,9 @@ class SchedulesFile
                    ColumnPoolPump,
                    ColumnPoolHeater,
                    ColumnHotTubPump,
-                   ColumnHotTubHeater].include? column_name
+                   ColumnHotTubHeater,
+                   ColumnHeatingSetpoint,
+                   ColumnCoolingSetpoint].include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1451,6 +1462,9 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
+      if [ColumnHeatingSetpoint, ColumnCoolingSetpoint].include? column_name
+        max_value_one[column_name] = false
+      end
     end
     return max_value_one
   end
@@ -1460,6 +1474,9 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
+      if [ColumnHeatingSetpoint, ColumnCoolingSetpoint].include? column_name
+        min_value_zero[column_name] = false
+      end
     end
     return min_value_zero
   end
