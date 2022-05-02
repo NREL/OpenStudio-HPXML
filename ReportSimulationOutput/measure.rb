@@ -1191,7 +1191,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    def get_ids(ids, seed_id_map)
+    def get_ids(ids, seed_id_map = {})
       new_ids = ids.map { |id| seed_id_map[id].nil? ? id : seed_id_map[id] }
       return if new_ids.empty?
 
@@ -1202,12 +1202,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     htg_ids, clg_ids, dhw_ids, prehtg_ids, preclg_ids = [], [], [], [], []
     htg_eecs, clg_eecs, dhw_eecs, prehtg_eecs, preclg_eecs = {}, {}, {}, {}, {}
     htg_fuels, clg_fuels, dhw_fuels, prehtg_fuels, preclg_fuels = {}, {}, {}, {}, {}
-    seed_id_map = {}
+    htg_seed_id_map, clg_seed_id_map = {}, {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
 
       htg_ids << htg_system.id
-      seed_id_map[htg_system.id] = htg_system.seed_id
+      htg_seed_id_map[htg_system.id] = htg_system.htg_seed_id
       htg_fuels[htg_system.id] = htg_system.heating_system_fuel
       if not htg_system.heating_efficiency_afue.nil?
         htg_eecs[htg_system.id] = get_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
@@ -1219,7 +1219,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless clg_system.fraction_cool_load_served > 0
 
       clg_ids << clg_system.id
-      seed_id_map[clg_system.id] = clg_system.seed_id
+      clg_seed_id_map[clg_system.id] = clg_system.clg_seed_id
       clg_fuels[clg_system.id] = clg_system.cooling_system_fuel
       if not clg_system.cooling_efficiency_seer.nil?
         clg_eecs[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
@@ -1235,7 +1235,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @hpxml.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
         htg_ids << heat_pump.id
-        seed_id_map[heat_pump.id] = heat_pump.seed_id
+        htg_seed_id_map[heat_pump.id] = heat_pump.htg_seed_id
         htg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
         if not heat_pump.heating_efficiency_hspf.nil?
           htg_eecs[heat_pump.id] = get_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
@@ -1246,7 +1246,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless heat_pump.fraction_cool_load_served > 0
 
       clg_ids << heat_pump.id
-      seed_id_map[heat_pump.id] = heat_pump.seed_id
+      clg_seed_id_map[heat_pump.id] = heat_pump.clg_seed_id
       if not heat_pump.cooling_efficiency_seer.nil?
         clg_eecs[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
       elsif not heat_pump.cooling_efficiency_eer.nil?
@@ -1312,7 +1312,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Create separate dual fuel heat pump backup system
       dfhp_backup_id = heat_pump.id + '_DFHPBackup'
       htg_ids << dfhp_backup_id
-      seed_id_map[dfhp_backup_id] = heat_pump.seed_id + '_DFHPBackup'
+      htg_seed_id_map[dfhp_backup_id] = heat_pump.htg_seed_id + '_DFHPBackup'
       htg_fuels[dfhp_backup_id] = heat_pump.backup_heating_fuel
       if not heat_pump.backup_heating_efficiency_afue.nil?
         htg_eecs[dfhp_backup_id] = get_eec_value_numerator('AFUE') / heat_pump.backup_heating_efficiency_afue
@@ -1382,34 +1382,34 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     results_out << ['ERI: Building: Type', @hpxml.building_construction.residential_facility_type]
 
     # Heating
-    results_out << ['ERI: Heating: ID', get_ids(htg_ids, seed_id_map)]
+    results_out << ['ERI: Heating: ID', get_ids(htg_ids, htg_seed_id_map)]
     results_out << ['ERI: Heating: FuelType', ordered_values(htg_fuels, htg_ids)]
     results_out << ['ERI: Heating: EC', ordered_values(htg_ecs, htg_ids)]
     results_out << ['ERI: Heating: EEC', ordered_values(htg_eecs, htg_ids)]
     results_out << ['ERI: Heating: Load', ordered_values(htg_loads, htg_ids)]
 
     # Cooling
-    results_out << ['ERI: Cooling: ID', get_ids(clg_ids, seed_id_map)]
+    results_out << ['ERI: Cooling: ID', get_ids(clg_ids, clg_seed_id_map)]
     results_out << ['ERI: Cooling: FuelType', ordered_values(clg_fuels, clg_ids)]
     results_out << ['ERI: Cooling: EC', ordered_values(clg_ecs, clg_ids)]
     results_out << ['ERI: Cooling: EEC', ordered_values(clg_eecs, clg_ids)]
     results_out << ['ERI: Cooling: Load', ordered_values(clg_loads, clg_ids)]
 
     # Hot Water
-    results_out << ['ERI: Hot Water: ID', get_ids(dhw_ids, seed_id_map)]
+    results_out << ['ERI: Hot Water: ID', get_ids(dhw_ids)]
     results_out << ['ERI: Hot Water: FuelType', ordered_values(dhw_fuels, dhw_ids)]
     results_out << ['ERI: Hot Water: EC', ordered_values(dhw_ecs, dhw_ids)]
     results_out << ['ERI: Hot Water: EEC', ordered_values(dhw_eecs, dhw_ids)]
     results_out << ['ERI: Hot Water: Load', ordered_values(dhw_loads, dhw_ids)]
 
     # Mech Vent Preheat
-    results_out << ['ERI: Mech Vent Preheating: ID', get_ids(prehtg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Preheating: ID', get_ids(prehtg_ids)]
     results_out << ['ERI: Mech Vent Preheating: FuelType', ordered_values(prehtg_fuels, prehtg_ids)]
     results_out << ['ERI: Mech Vent Preheating: EC', ordered_values(prehtg_ecs, prehtg_ids)]
     results_out << ['ERI: Mech Vent Preheating: EEC', ordered_values(prehtg_eecs, prehtg_ids)]
 
     # Mech Vent Precool
-    results_out << ['ERI: Mech Vent Precooling: ID', get_ids(preclg_ids, seed_id_map)]
+    results_out << ['ERI: Mech Vent Precooling: ID', get_ids(preclg_ids)]
     results_out << ['ERI: Mech Vent Precooling: FuelType', ordered_values(preclg_fuels, preclg_ids)]
     results_out << ['ERI: Mech Vent Precooling: EC', ordered_values(preclg_ecs, preclg_ids)]
     results_out << ['ERI: Mech Vent Precooling: EEC', ordered_values(preclg_eecs, preclg_ids)]
