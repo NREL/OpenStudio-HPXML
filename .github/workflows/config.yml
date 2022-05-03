@@ -83,12 +83,16 @@ jobs:
 
   run-windows-tests:
     runs-on: windows-latest
-    container:
-      image: docker://nrel/openstudio:3.4.0-rc2
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
+      - name: Install software
+        run: |
+          set "OS_VERSION=3.4.0-rc2"
+          set "OS_SHA=b449d8b1b4"
+          curl "https://github.com/NREL/OpenStudio/releases/download/v%OS_VERSION%/OpenStudio-%OS_VERSION%+%OS_SHA%-Windows.tar.gz"
+          dir
       - name: Run test
         run: |
           openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --hourly ALL --add-component-loads --add-utility-bills
