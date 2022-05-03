@@ -3393,11 +3393,7 @@ class HPXMLFile
     hpxml.header.transaction = 'create'
 
     if args[:schedules_filepaths].is_initialized
-      hpxml.header.schedules_filepaths = []
-      schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
-      schedules_filepaths.each do |schedules_filepath|
-        hpxml.header.schedules_filepaths << schedules_filepath
-      end
+      hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
 
     if args[:software_info_program_used].is_initialized
