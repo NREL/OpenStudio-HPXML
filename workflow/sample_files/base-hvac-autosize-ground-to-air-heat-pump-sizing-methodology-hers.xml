@@ -15,6 +15,9 @@
       <HVACSizingControl>
         <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
       </HVACSizingControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-hvac-ground-to-air-heat-pump.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>

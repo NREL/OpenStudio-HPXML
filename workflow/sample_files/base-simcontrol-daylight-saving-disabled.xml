@@ -15,6 +15,9 @@
           <Enabled>false</Enabled>
         </DaylightSaving>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>

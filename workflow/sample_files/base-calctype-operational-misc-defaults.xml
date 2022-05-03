@@ -9,6 +9,9 @@
   <SoftwareInfo>
     <extension>
       <OccupancyCalculationType>operational</OccupancyCalculationType>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-misc-defaults.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
