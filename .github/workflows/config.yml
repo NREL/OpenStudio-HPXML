@@ -88,15 +88,15 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: Install software
+        shell: pwsh
         run: |
-          set "OS_VERSION=3.4.0-rc2"
-          set "OS_SHA=b449d8b1b4"
-          curl --progress-bar --insecure -o Windows.tar.gz "https://github.com/NREL/OpenStudio/releases/download/v%OS_VERSION%/OpenStudio-%OS_VERSION%+%OS_SHA%-Windows.tar.gz"
-          tar -xvzf Windows.tar.gz
-          dir
+          $env:OS_VERSION="3.4.0-rc2"
+          $env:OS_SHA="b449d8b1b4"
+          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+          tar -xzf Windows.tar.gz
       - name: Run test
         run: |
-          openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --hourly ALL --add-component-loads --add-utility-bills
+          & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-utility-bills
 
   # compare-results:
     # if: github.event_name == 'pull_request'
