@@ -370,6 +370,7 @@ def create_hpxmls
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
+    'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
@@ -2437,7 +2438,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Schedules
-  if ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
+  if ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
+  elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
