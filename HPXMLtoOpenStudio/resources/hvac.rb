@@ -115,13 +115,13 @@ class HVAC
       set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
-      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
+        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
       end
       if not heating_system.nil?
-        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system.id)
+        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
       end
     end
 
@@ -176,7 +176,7 @@ class HVAC
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
     fan.addToNode(air_loop.supplyInletNode)
-    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system.id)
+    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -321,7 +321,7 @@ class HVAC
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
-    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Pipes
     chiller_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
@@ -337,7 +337,7 @@ class HVAC
 
     # Fan
     fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
@@ -361,7 +361,7 @@ class HVAC
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(equip_def.name.to_s)
-      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump)
     end
 
     # Air Loop
@@ -408,7 +408,7 @@ class HVAC
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil, hp_ap.supp_max_temp)
@@ -575,7 +575,7 @@ class HVAC
       zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
       zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system.id)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
@@ -591,7 +591,7 @@ class HVAC
       zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
       zone_hvac.setName(obj_name + ' baseboard')
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system.id)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     end
 
     control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
@@ -645,7 +645,7 @@ class HVAC
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system)
 
     # Unitary System
     unitary_system = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil, htg_cfm, nil)
@@ -1331,8 +1331,10 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, sys_id)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
+
+    sys_id = hpxml_object.id
 
     if fan_or_pump.is_a? OpenStudio::Model::FanSystemModel
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
@@ -1447,7 +1449,7 @@ class HVAC
       fan_or_pump_ems_output_var.setUpdateFrequency('SystemTimestep')
       fan_or_pump_ems_output_var.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var.setUnits('J')
-      if mode == 'backup_htg' && (not htg_fuel.nil?) && (not backup_htg_fuel.nil?) && (htg_fuel != backup_htg_fuel)
+      if (mode == 'backup_htg') && (hpxml_object.is_a? HPXML::HeatPump) && hpxml_object.is_dual_fuel
         fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id + '_DFHPBackup') # Used by reporting measure
       else
         fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id) # Used by reporting measure
@@ -1492,7 +1494,7 @@ class HVAC
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName(program.name.to_s + 'calling manager')
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(program)
   end
 
@@ -1533,9 +1535,9 @@ class HVAC
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
     fan = OpenStudio::Model::FanSystemModel.new(model)
     fan.setSpeedControlMethod('Discrete')
-    fan.setDesignPowerSizingMethod('PowerPerFlow')
-    fan.setElectricPowerPerUnitFlowRate([fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.00001].max)
+    fan.setDesignPowerSizingMethod('TotalEfficiencyAndPressure')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
@@ -1543,19 +1545,25 @@ class HVAC
     max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
     fan.setDesignMaximumAirFlowRate(UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
 
-    # For each fan speed, we preserve the W/cfm instead of using the fan power law. This
-    # ensures that, e.g., a standalone furnace has the same fan power as a furnace attached
-    # to a central air conditioner. For multi-speed systems or systems with different
-    # heating and cooling airflow rates, this essentially means that the W/cfm is treated
-    # as an average value over the range of airflow rates, as opposed to the value at maximum
-    # airflow rate.
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = fan_ratio
+      power_fraction = fan_ratio**3 # fan power curve
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
     return fan
+  end
+
+  def self.set_fan_power(fan, fan_watts_per_cfm)
+    if fan_watts_per_cfm > 0
+      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+      pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
+    else
+      fan_eff = 1
+      pressure_rise = 0.000001
+    end
+    fan.setFanTotalEfficiency(fan_eff)
+    fan.setDesignPressureRise(pressure_rise)
   end
 
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp = nil)
@@ -2982,13 +2990,16 @@ class HVAC
     if hvac_system.distribution_system.nil?
       # Ductless, installed and rated value should be equal
       hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
-    elsif (hvac_system.is_a?(HPXML::CoolingSystem) && (hvac_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner)) ||
-          (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit))
-      hvac_ap.fan_power_rated = 0.18 # W/cfm
-    elsif hvac_system.cooling_efficiency_seer <= 15
-      hvac_ap.fan_power_rated = 0.365 # W/cfm
     else
-      hvac_ap.fan_power_rated = 0.14 # W/cfm
+      # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
+      seer = hvac_system.cooling_efficiency_seer
+      if seer <= 14
+        hvac_ap.fan_power_rated = 0.25 # W/cfm
+      elsif seer >= 16
+        hvac_ap.fan_power_rated = 0.18 # W/cfm
+      else
+        hvac_ap.fan_power_rated = 0.25 + (0.18 - 0.25) * (seer - 14.0) / 2.0 # W/cfm
+      end
     end
   end
 
@@ -3831,7 +3842,7 @@ class HVAC
     end
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(fault_program)
   end
 

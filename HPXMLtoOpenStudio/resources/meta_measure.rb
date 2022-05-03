@@ -133,20 +133,14 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   print "#{print_prefix}Processing output...\n"
 
   # Apply reporting measures
-  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
+  runner.setLastEpwFilePath(File.join(rundir, 'in.epw'))
   success = apply_measures(measures_dir, measures, runner, model, false, 'OpenStudio::Measure::ReportingMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
-  runner.resetLastEnergyPlusSqlFilePath
+  runner.resetLastEpwFilePath
 
-  annual_csv_path = File.join(rundir, 'results_annual.csv')
-  if File.exist? annual_csv_path
-    print "#{print_prefix}Wrote output file: #{annual_csv_path}.\n"
-  end
-
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  if File.exist? timeseries_csv_path
-    print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
+  Dir[File.join(rundir, 'results_*.*')].each do |results_path|
+    print "#{print_prefix}Wrote output file: #{results_path}.\n"
   end
 
   if not success
@@ -342,6 +336,20 @@ def get_value_from_workflow_step_value(step_value)
   end
 end
 
+def get_value_from_additional_properties(obj, feature_name)
+  additional_properties = obj.additionalProperties
+  feature_data_type = additional_properties.getFeatureDataType(feature_name).get if additional_properties.getFeatureDataType(feature_name).is_initialized
+  if feature_data_type == 'Boolean'
+    return additional_properties.getFeatureAsBoolean(feature_name).get if additional_properties.getFeatureAsBoolean(feature_name).is_initialized
+  elsif feature_data_type == 'Double'
+    return additional_properties.getFeatureAsDouble(feature_name).get if additional_properties.getFeatureAsDouble(feature_name).is_initialized
+  elsif feature_data_type == 'Integer'
+    return additional_properties.getFeatureAsInteger(feature_name).get if additional_properties.getFeatureAsInteger(feature_name).is_initialized
+  elsif feature_data_type == 'String'
+    return additional_properties.getFeatureAsString(feature_name).get if additional_properties.getFeatureAsString(feature_name).is_initialized
+  end
+end
+
 def run_measure(model, measure, argument_map, runner)
   begin
     # run the measure
@@ -351,7 +359,7 @@ def run_measure(model, measure, argument_map, runner)
     end
     if measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
       runner_child.setLastOpenStudioModel(model)
-      runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
+      runner_child.setLastEpwFilePath(runner.lastEpwFilePath.get)
       measure.run(runner_child, argument_map)
     else
       measure.run(model, runner_child, argument_map)

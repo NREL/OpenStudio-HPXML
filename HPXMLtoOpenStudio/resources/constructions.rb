@@ -848,7 +848,7 @@ class Constructions
     return if subsurfaces.empty?
 
     # Define materials
-    door_Rvalue = 1.0 / ufactor - inside_film.rvalue - outside_film.rvalue
+    door_Rvalue = [1.0 / ufactor - inside_film.rvalue - outside_film.rvalue, 0.1].max
     door_thickness = 1.75 # in
     fin_door_mat = Material.new(name: 'door material', thick_in: door_thickness, mat_base: BaseMaterial.Wood, k_in: 1.0 / door_Rvalue * door_thickness)
 
@@ -872,7 +872,7 @@ class Constructions
   end
 
   def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area,
-                                 basement_frac_of_cfa, cond_base_surfaces, living_space)
+                                 basement_frac_of_cfa, living_space)
 
     imdefs = []
 
@@ -893,7 +893,6 @@ class Constructions
       # as internal mass object.
       obj_name = 'partition wall mass below grade'
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_base)
-      cond_base_surfaces << imdef
       imdefs << imdef
     end
 
@@ -905,7 +904,7 @@ class Constructions
   end
 
   def self.apply_furniture(runner, model, furniture_mass, cfa, ubfa, gfa,
-                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+                           basement_frac_of_cfa, living_space)
 
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
@@ -971,7 +970,6 @@ class Constructions
         if base_surface_area > 0
           base_obj_name = mass_obj_name_space + ' below grade'
           imdef = create_os_int_mass_and_def(model, base_obj_name, space, base_surface_area)
-          cond_base_surfaces << imdef
           imdefs << imdef
         end
       else
@@ -1054,7 +1052,7 @@ class Constructions
       fail "Unexpected #{type.downcase} frame type."
     end
 
-    if window_or_skylight.glass_type.nil?
+    if [HPXML::WindowGlassTypeClear].include? window_or_skylight.glass_type
       glass_type = 'clear'
     elsif [HPXML::WindowGlassTypeTinted,
            HPXML::WindowGlassTypeTintedReflective].include? window_or_skylight.glass_type
@@ -1370,10 +1368,17 @@ class Constructions
       # Create transmittance schedule for heating/cooling seasons
       trans_values = cooling_season.map { |c| c == 1 ? sf_summer : sf_winter }
       if shading_schedules[trans_values].nil?
-        trans_sch = MonthWeekdayWeekendSchedule.new(model, "trans schedule winter=#{sf_winter} summer=#{sf_summer}", Array.new(24, 1), Array.new(24, 1), trans_values, Constants.ScheduleTypeLimitsFraction, false)
+        sch_name = "trans schedule winter=#{sf_winter} summer=#{sf_summer}"
+        if trans_values.uniq.size == 1
+          trans_sch = OpenStudio::Model::ScheduleConstant.new(model)
+          trans_sch.setValue(trans_values[0])
+          trans_sch.setName(sch_name)
+        else
+          trans_sch = MonthWeekdayWeekendSchedule.new(model, sch_name, Array.new(24, 1), Array.new(24, 1), trans_values, Constants.ScheduleTypeLimitsFraction, false).schedule
+        end
         shading_schedules[trans_values] = trans_sch
       end
-      shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
+      shading_surface.setTransmittanceSchedule(shading_schedules[trans_values])
 
       # EMS to actuate view factor to ground
       sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
@@ -1381,7 +1386,7 @@ class Constructions
       actuator.setName("#{sub_surface_type}#{index}_actuator")
 
       if shading_ems[:sensors][trans_values].nil?
-        shading_schedule_name = shading_schedules[trans_values].schedule.name.to_s
+        shading_schedule_name = shading_schedules[trans_values].name.to_s
         shading_coeff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         shading_coeff_sensor.setName("#{sub_surface_type}_shading_coefficient")
         shading_coeff_sensor.setKeyName(shading_schedule_name)
@@ -1813,6 +1818,31 @@ class Constructions
       end
     end
   end
+
+  def self.get_ufactor_shgc_adjusted_by_storms(storm_type, base_ufactor, base_shgc)
+    return base_ufactor, base_shgc if storm_type.nil?
+
+    # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+    # U-factor and SHGC adjustment based on the data obtained from the above reference
+    if base_ufactor < 0.45
+      fail "Unexpected base window U-Factor (#{base_ufactor}) for a storm window."
+    end
+
+    if storm_type == HPXML::WindowGlassTypeClear
+      ufactor_abs_reduction = 0.6435 * base_ufactor - 0.1533
+      shgc_corr = 0.9
+    elsif storm_type == HPXML::WindowGlassTypeLowE
+      ufactor_abs_reduction = 0.766 * base_ufactor - 0.1532
+      shgc_corr = 0.8
+    else
+      fail "Could not find adjustment factors for storm type '#{storm_type}'"
+    end
+
+    ufactor = base_ufactor - ufactor_abs_reduction
+    shgc = base_shgc * shgc_corr
+
+    return ufactor, shgc
+  end
 end
 
 class Construction
@@ -2097,12 +2127,6 @@ class Construction
     name = material.name
     tolerance = 0.0001
     if material.is_a? GlazingMaterial
-      max_ufactor = UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)') # Max value EnergyPlus allows
-      if material.ufactor > max_ufactor
-        runner.registerWarning("Glazing U-factor (#{material.ufactor}) for '#{material.name}' above maximum expected value. U-factor decreased to #{max_ufactor.round(2)}.")
-        material.ufactor = max_ufactor.round(2)
-      end
-
       # Material already exists?
       model.getSimpleGlazings.each do |mat|
         next if !mat.name.to_s.start_with?(material.name)

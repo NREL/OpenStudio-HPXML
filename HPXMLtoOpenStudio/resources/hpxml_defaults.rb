@@ -185,9 +185,9 @@ class HPXMLDefaults
       hpxml.header.allow_increased_fixed_capacities = false
       hpxml.header.allow_increased_fixed_capacities_isdefaulted = true
     end
-    if hpxml.header.use_max_load_for_heat_pumps.nil?
-      hpxml.header.use_max_load_for_heat_pumps = true
-      hpxml.header.use_max_load_for_heat_pumps_isdefaulted = true
+    if hpxml.header.heat_pump_sizing_methodology.nil? && (hpxml.heat_pumps.size > 0)
+      hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingHERS
+      hpxml.header.heat_pump_sizing_methodology_isdefaulted = true
     end
 
     if (not epw_file.nil?) && hpxml.header.state_code.nil?
@@ -220,8 +220,8 @@ class HPXMLDefaults
 
       # Fossil fuels
       default_units = HPXML::EmissionsScenario::UnitsLbPerMBtu
-      if scenario.emissions_type.downcase == 'co2'
-        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 117.6, 136.6, 161.0, 211.1, nil, nil
+      if scenario.emissions_type.downcase == 'co2e'
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 147.3, 177.8, 195.9, nil, nil, nil
       elsif scenario.emissions_type.downcase == 'nox'
         natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 0.0922, 0.1421, 0.1300, nil, nil, nil
       elsif scenario.emissions_type.downcase == 'so2'
@@ -405,60 +405,36 @@ class HPXMLDefaults
   def self.apply_attics(hpxml)
     return unless hpxml.has_location(HPXML::LocationAtticVented)
 
-    vented_attics = []
-    default_sla = Airflow.get_default_vented_attic_sla()
-    default_ach = nil
-    hpxml.attics.each do |attic|
-      next unless attic.attic_type == HPXML::AtticTypeVented
-
-      # check existing sla and ach
-      default_sla = attic.vented_attic_sla unless attic.vented_attic_sla.nil?
-      default_ach = attic.vented_attic_ach unless attic.vented_attic_ach.nil?
-
-      vented_attics << attic
-    end
+    vented_attics = hpxml.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
     if vented_attics.empty?
       hpxml.attics.add(id: 'VentedAttic',
-                       attic_type: HPXML::AtticTypeVented,
-                       vented_attic_sla: default_sla)
-      hpxml.attics[-1].vented_attic_sla_isdefaulted = true
+                       attic_type: HPXML::AtticTypeVented)
+      vented_attics << hpxml.attics[-1]
     end
     vented_attics.each do |vented_attic|
       next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
 
-      if not default_ach.nil? # ACH specified
-        vented_attic.vented_attic_ach = default_ach
-      else # Use SLA
-        vented_attic.vented_attic_sla = default_sla
-      end
+      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       vented_attic.vented_attic_sla_isdefaulted = true
+      break # EPvalidator.xml only allows a single ventilation rate
     end
   end
 
   def self.apply_foundations(hpxml)
     return unless hpxml.has_location(HPXML::LocationCrawlspaceVented)
 
-    vented_crawls = []
-    default_sla = Airflow.get_default_vented_crawl_sla()
-    hpxml.foundations.each do |foundation|
-      next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-
-      # check existing sla
-      default_sla = foundation.vented_crawlspace_sla unless foundation.vented_crawlspace_sla.nil?
-
-      vented_crawls << foundation
-    end
+    vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
     if vented_crawls.empty?
       hpxml.foundations.add(id: 'VentedCrawlspace',
-                            foundation_type: HPXML::FoundationTypeCrawlspaceVented,
-                            vented_crawlspace_sla: default_sla)
-      hpxml.foundations[-1].vented_crawlspace_sla_isdefaulted = true
+                            foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+      vented_crawls << hpxml.foundations[-1]
     end
     vented_crawls.each do |vented_crawl|
       next unless vented_crawl.vented_crawlspace_sla.nil?
 
-      vented_crawl.vented_crawlspace_sla = default_sla
+      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       vented_crawl.vented_crawlspace_sla_isdefaulted = true
+      break # EPvalidator.xml only allows a single ventilation rate
     end
   end
 
@@ -729,6 +705,10 @@ class HPXMLDefaults
       next unless window.ufactor.nil? || window.shgc.nil?
 
       # Frame/Glass provided instead, fill in more defaults as needed
+      if window.glass_type.nil?
+        window.glass_type = HPXML::WindowGlassTypeClear
+        window.glass_type_isdefaulted = true
+      end
       if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
         if window.glass_layers == HPXML::WindowLayersSinglePane
           window.thermal_break = false
@@ -789,6 +769,10 @@ class HPXMLDefaults
       next unless skylight.ufactor.nil? || skylight.shgc.nil?
 
       # Frame/Glass provided instead, fill in more defaults as needed
+      if skylight.glass_type.nil?
+        skylight.glass_type = HPXML::WindowGlassTypeClear
+        skylight.glass_type_isdefaulted = true
+      end
       if skylight.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(skylight.frame_type)
         if skylight.glass_layers == HPXML::WindowLayersSinglePane
           skylight.thermal_break = false
@@ -872,6 +856,23 @@ class HPXMLDefaults
   def self.apply_hvac(hpxml, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml)
+    end
+
+    # Convert negative values (e.g., -1) to nil as appropriate
+    # This is needed to support autosizing in OS-ERI, where the capacities are required inputs
+    hpxml.hvac_systems.each do |hvac_system|
+      if hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.to_f < 0
+        hvac_system.heating_capacity = nil
+      end
+      if hvac_system.respond_to?(:cooling_capacity) && hvac_system.cooling_capacity.to_f < 0
+        hvac_system.cooling_capacity = nil
+      end
+      if hvac_system.respond_to?(:heating_capacity_17F) && hvac_system.heating_capacity_17F.to_f < 0
+        hvac_system.heating_capacity_17F = nil
+      end
+      if hvac_system.respond_to?(:backup_heating_capacity) && hvac_system.backup_heating_capacity.to_f < 0
+        hvac_system.backup_heating_capacity = nil
+      end
     end
 
     # HVAC efficiencies (based on HEScore assumption)
@@ -1415,6 +1416,10 @@ class HPXMLDefaults
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)).round(1)
         vent_fan.fan_power_isdefaulted = true
       end
+      if vent_fan.cfis_vent_mode_airflow_fraction.nil? && (vent_fan.fan_type == HPXML::MechVentTypeCFIS)
+        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
+        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
+      end
     end
 
     # Default kitchen fan
@@ -1678,22 +1683,41 @@ class HPXMLDefaults
         battery.nominal_voltage = default_values[:nominal_voltage] # V
         battery.nominal_voltage_isdefaulted = true
       end
-      if battery.rated_power_output.nil? && battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
-        battery.rated_power_output = default_values[:rated_power_output] # W
-        battery.rated_power_output_isdefaulted = true
-        battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
-        battery.nominal_capacity_kwh_isdefaulted = true
-      elsif battery.rated_power_output.nil?
-        nominal_capacity_kwh = battery.nominal_capacity_kwh
-        if nominal_capacity_kwh.nil?
-          nominal_capacity_kwh = Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage)
+      if battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
+        # Calculate nominal capacity from usable capacity or rated power output if available
+        if not battery.usable_capacity_kwh.nil?
+          battery.nominal_capacity_kwh = (battery.usable_capacity_kwh / default_values[:usable_fraction]).round(2)
+          battery.nominal_capacity_kwh_isdefaulted = true
+        elsif not battery.usable_capacity_ah.nil?
+          battery.nominal_capacity_ah = (battery.usable_capacity_ah / default_values[:usable_fraction]).round(2)
+          battery.nominal_capacity_ah_isdefaulted = true
+        elsif not battery.rated_power_output.nil?
+          battery.nominal_capacity_kwh = (UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5).round(2)
+          battery.nominal_capacity_kwh_isdefaulted = true
+        else
+          battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
+          battery.nominal_capacity_kwh_isdefaulted = true
         end
-        battery.rated_power_output = UnitConversions.convert(nominal_capacity_kwh, 'kWh', 'Wh') * 0.5 # W
-        battery.rated_power_output_isdefaulted = true
-      elsif battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
-        battery.nominal_capacity_kwh = UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5 # kWh
-        battery.nominal_capacity_kwh_isdefaulted = true
       end
+      if battery.usable_capacity_kwh.nil? && battery.usable_capacity_ah.nil?
+        # Calculate usable capacity from nominal capacity
+        if not battery.nominal_capacity_kwh.nil?
+          battery.usable_capacity_kwh = (battery.nominal_capacity_kwh * default_values[:usable_fraction]).round(2)
+          battery.usable_capacity_kwh_isdefaulted = true
+        elsif not battery.nominal_capacity_ah.nil?
+          battery.usable_capacity_ah = (battery.nominal_capacity_ah * default_values[:usable_fraction]).round(2)
+          battery.usable_capacity_ah_isdefaulted = true
+        end
+      end
+      next unless battery.rated_power_output.nil?
+
+      # Calculate rated power from nominal capacity
+      if not battery.nominal_capacity_kwh.nil?
+        battery.rated_power_output = (UnitConversions.convert(battery.nominal_capacity_kwh, 'kWh', 'Wh') * 0.5).round(0)
+      elsif not battery.nominal_capacity_ah.nil?
+        battery.rated_power_output = (UnitConversions.convert(Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage), 'kWh', 'Wh') * 0.5).round(0)
+      end
+      battery.rated_power_output_isdefaulted = true
     end
   end
 
@@ -2399,22 +2423,6 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_sizing(hpxml, weather, cfa, nbeds)
-    # Convert negative values (e.g., -1) to nil as appropriate
-    hpxml.hvac_systems.each do |hvac_system|
-      if hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.to_f < 0
-        hvac_system.heating_capacity = nil
-      end
-      if hvac_system.respond_to?(:cooling_capacity) && hvac_system.cooling_capacity.to_f < 0
-        hvac_system.cooling_capacity = nil
-      end
-      if hvac_system.respond_to?(:heating_capacity_17F) && hvac_system.heating_capacity_17F.to_f < 0
-        hvac_system.heating_capacity_17F = nil
-      end
-      if hvac_system.respond_to?(:backup_heating_capacity) && hvac_system.backup_heating_capacity.to_f < 0
-        hvac_system.backup_heating_capacity = nil
-      end
-    end
-
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml)
 
     # Calculate building design loads and equipment capacities/airflows

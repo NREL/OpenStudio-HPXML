@@ -48,7 +48,9 @@ def create_hpxmls
     'base-appliances-modified.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
     'base-appliances-oil.xml' => 'base.xml',
+    'base-appliances-oil-location-miami-fl.xml' => 'base-appliances-oil.xml',
     'base-appliances-propane.xml' => 'base.xml',
+    'base-appliances-propane-location-portland-or.xml' => 'base-appliances-propane.xml',
     'base-appliances-wood.xml' => 'base.xml',
     'base-atticroof-cathedral.xml' => 'base.xml',
     'base-atticroof-conditioned.xml' => 'base.xml',
@@ -89,6 +91,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
     'base-bldgtype-single-family-attached.xml' => 'base.xml',
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
+    'base-bldgtype-single-family-attached-atticroof-cathedral.xml' => 'base-bldgtype-single-family-attached-2stories.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -160,6 +163,7 @@ def create_hpxmls
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-skylights-storms.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
@@ -167,6 +171,7 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-windows-storms.xml' => 'base.xml',
     'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
@@ -192,14 +197,17 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize.xml' => 'base.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-1-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-acca.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-hers.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-acca.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-hers.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-maxload.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-acca.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-hers.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-maxload.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
     'base-hvac-autosize-boiler-elec-only.xml' => 'base-hvac-boiler-elec-only.xml',
@@ -209,7 +217,9 @@ def create_hpxmls
     'base-hvac-autosize-central-ac-only-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'base-hvac-autosize-central-ac-only-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'base-hvac-autosize-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
-    'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed-sizing-methodology-acca.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed-sizing-methodology-hers.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed-sizing-methodology-maxload.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml',
     'base-hvac-autosize-elec-resistance-only.xml' => 'base-hvac-elec-resistance-only.xml',
     'base-hvac-autosize-evap-cooler-furnace-gas.xml' => 'base-hvac-evap-cooler-furnace-gas.xml',
@@ -219,19 +229,23 @@ def create_hpxmls
     'base-hvac-autosize-furnace-gas-central-ac-var-speed.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
     'base-hvac-autosize-furnace-gas-only.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-autosize-furnace-gas-room-ac.xml' => 'base-hvac-furnace-gas-room-ac.xml',
-    'base-hvac-autosize-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
     'base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump-heating-only.xml',
-    'base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-ground-to-air-heat-pump.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-acca.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-hers.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology-maxload.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-acca.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-hers.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-maxload.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
     'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
-    'base-hvac-autosize-pthp.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-pthp-sizing-methodology-acca.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-pthp-sizing-methodology-hers.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-pthp-sizing-methodology-maxload.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -327,6 +341,7 @@ def create_hpxmls
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
+    'base-mechvent-cfis-airflow-fraction-zero.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
     'base-mechvent-erv.xml' => 'base.xml',
@@ -338,6 +353,7 @@ def create_hpxmls
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
+    'base-misc-additional-properties.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -357,21 +373,23 @@ def create_hpxmls
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
-    'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
+    'base-simcontrol-timestep-10-mins.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
 
   hpxml_docs = {}
-  hpxmls_files.each_with_index do |(hpxml_file, parent), i|
+  hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
       all_hpxml_files = [hpxml_file]
+      parent = orig_parent
       unless parent.nil?
         all_hpxml_files.unshift(parent)
       end
@@ -387,7 +405,7 @@ def create_hpxmls
       args = {}
       sch_args = {}
       all_hpxml_files.each do |f|
-        set_measure_argument_values(f, args, sch_args)
+        set_measure_argument_values(f, args, sch_args, orig_parent)
       end
 
       measures = {}
@@ -477,7 +495,7 @@ def create_hpxmls
   return hpxml_docs
 end
 
-def set_measure_argument_values(hpxml_file, args, sch_args)
+def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if hpxml_file.include? 'ASHRAE_Standard_140'
     args['hpxml_path'] = "../workflow/tests/#{hpxml_file}"
   else
@@ -708,6 +726,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1031,6 +1050,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = 'none'
     args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
+    args['battery_usable_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -1241,12 +1261,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['dishwasher_location'] = 'none'
     args['refrigerator_location'] = 'none'
     args['cooking_range_oven_location'] = 'none'
-  elsif ['base-appliances-oil.xml'].include? hpxml_file
+  elsif ['base-appliances-oil.xml',
+         'base-appliances-oil-location-miami-fl.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeOil
     args['clothes_dryer_efficiency'] = 3.3
     args['clothes_dryer_vented_flow_rate'] = Constants.Auto
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeOil
-  elsif ['base-appliances-propane.xml'].include? hpxml_file
+  elsif ['base-appliances-propane.xml',
+         'base-appliances-propane-location-portland-or.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypePropane
     args['clothes_dryer_efficiency'] = 3.3
     args['clothes_dryer_vented_flow_rate'] = Constants.Auto
@@ -1333,6 +1355,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['ducts_supply_surface_area'] = 112.5
     args['ducts_return_surface_area'] = 37.5
     args['misc_plug_loads_other_annual_kwh'] = 2457.0
+  elsif ['base-bldgtype-single-family-attached-atticroof-cathedral.xml'].include? hpxml_file
+    args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+    args['ducts_supply_location'] = HPXML::LocationLivingSpace
+    args['ducts_return_location'] = HPXML::LocationLivingSpace
+    args['ducts_supply_leakage_to_outside_value'] = 0
+    args['ducts_return_leakage_to_outside_value'] = 0
   end
 
   # Multifamily
@@ -1619,9 +1647,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['window_area_back'] = 0
     args['window_area_left'] = 0
     args['window_area_right'] = 0
+  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
+    args['window_ufactor'] = 0.6
+    args['window_storm_type'] = HPXML::WindowGlassTypeLowE
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
+  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+    args['skylight_ufactor'] = 0.6
+    args['skylight_storm_type'] = HPXML::WindowGlassTypeClear
   end
 
   # Foundation
@@ -1767,10 +1801,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['heating_system_heating_capacity'] = Constants.Auto
     args['heating_system_2_heating_capacity'] = Constants.Auto
     args['cooling_system_cooling_capacity'] = Constants.Auto
-    if hpxml_file.include? 'manual-s-oversize-allowances'
+    if hpxml_file.include? 'sizing-methodology-hers'
+      args['heat_pump_heating_capacity'] = Constants.AutoHERSForHP
+    elsif hpxml_file.include? 'sizing-methodology-maxload'
+      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoadForHP
+    elsif hpxml_file.include? 'sizing-methodology-acca'
       args['heat_pump_heating_capacity'] = Constants.Auto
     else
-      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+      args['heat_pump_heating_capacity'] = Constants.AutoHERSForHP
     end
     args['heat_pump_heating_capacity_17_f'] = Constants.Auto
     args['heat_pump_backup_heating_capacity'] = Constants.Auto
@@ -2084,7 +2122,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['site_state_code'] = 'HI'
     args['weather_station_epw_filepath'] = 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
     args['heating_system_heating_capacity'] = 12000.0
-  elsif ['base-location-miami-fl.xml'].include? hpxml_file
+  elsif ['base-location-miami-fl.xml',
+         'base-appliances-oil-location-miami-fl.xml'].include? hpxml_file
     args['site_iecc_zone'] = '1A'
     args['site_state_code'] = 'FL'
     args['weather_station_epw_filepath'] = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
@@ -2094,7 +2133,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['site_state_code'] = 'AZ'
     args['weather_station_epw_filepath'] = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
-  elsif ['base-location-portland-or.xml'].include? hpxml_file
+  elsif ['base-location-portland-or.xml',
+         'base-appliances-propane-location-portland-or.xml'].include? hpxml_file
     args['site_iecc_zone'] = '4C'
     args['site_state_code'] = 'OR'
     args['weather_station_epw_filepath'] = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
@@ -2163,7 +2203,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   end
 
   # Misc
-  if ['base-misc-defaults.xml'].include? hpxml_file
+  if not orig_parent.nil?
+    args['additional_properties'] = "ParentHPXMLFile=#{File.basename(orig_parent)}"
+  end
+  if ['base-misc-additional-properties.xml'].include? hpxml_file
+    args['additional_properties'] += '|LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
     args['geometry_unit_num_bathrooms'] = Constants.Auto
@@ -2241,7 +2286,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['whole_house_fan_power'] = Constants.Auto
   elsif ['base-misc-emissions.xml'].include? hpxml_file
     args['emissions_scenario_names'] = 'Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA'
-    args['emissions_types'] = 'CO2, CO2, CO2, SO2, NOx'
+    args['emissions_types'] = 'CO2e, CO2e, CO2e, SO2, NOx'
     args['emissions_electricity_units'] = 'kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh'
     args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67'
     args['emissions_electricity_number_of_header_rows'] = '1, 1, , , '
@@ -2352,6 +2397,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationOutside
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   elsif ['base-pv-battery.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
@@ -2373,11 +2419,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['battery_location'] = HPXML::LocationGarage
     args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
+    args['battery_usable_capacity'] = '18'
   end
 
   # Simulation Control
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
-    args['simulation_control_run_period_calendar_year'] = 2008
+    args['simulation_control_run_period_calendar_year'] = 2010
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     args['simulation_control_daylight_saving_enabled'] = true
     args['simulation_control_daylight_saving_period'] = 'Mar 10 - Nov 6'
@@ -2405,6 +2452,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-stochastic-10-mins.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end
@@ -4269,6 +4321,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
+  elsif ['base-mechvent-cfis-airflow-fraction-zero.xml'].include? hpxml_file
+    hpxml.ventilation_fans[0].cfis_vent_mode_airflow_fraction = 0.0
   end
 
   # ---------------- #
@@ -4303,10 +4357,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   elsif ['base-pv-battery-ah.xml'].include? hpxml_file
-    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    default_values = Battery.get_battery_default_values()
     hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
-                                                                     default_voltage)
+                                                                     default_values[:nominal_voltage])
+    hpxml.batteries[0].usable_capacity_ah = hpxml.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
     hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
   end
 
   # ---------------- #

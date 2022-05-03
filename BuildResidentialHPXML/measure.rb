@@ -38,7 +38,7 @@ require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return 'HPXML Builder (Beta)'
+    return 'HPXML Builder'
   end
 
   # human readable description
@@ -140,7 +140,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_state_code_choices = OpenStudio::StringVector.new
-    Constants.StateCodes.each do |sc|
+    Constants.StateCodesMap.keys.each do |sc|
       site_state_code_choices << sc
     end
 
@@ -778,6 +778,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Exterior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.')
     args << arg
 
+    storm_window_type_choices = OpenStudio::StringVector.new
+    storm_window_type_choices << HPXML::WindowGlassTypeClear
+    storm_window_type_choices << HPXML::WindowGlassTypeLowE
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
+    arg.setDisplayName('Windows: Storm Type')
+    arg.setDescription('The type of storm, if present.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_depth', true)
     arg.setDisplayName('Overhangs: Front Depth')
     arg.setDescription('The depth of overhangs for windows for the front facade.')
@@ -886,6 +895,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     skylight_shgc.setDescription('Full-assembly NFRC solar heat gain coefficient.')
     skylight_shgc.setDefaultValue(0.45)
     args << skylight_shgc
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('skylight_storm_type', storm_window_type_choices, false)
+    arg.setDisplayName('Skylights: Storm Type')
+    arg.setDescription('The type of storm, if present.')
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)
     arg.setDisplayName('Doors: Area')
@@ -1138,7 +1152,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heat_pump_heating_capacity', true)
     arg.setDisplayName('Heat Pump: Heating Capacity')
-    arg.setDescription("The output heating capacity of the heat pump. Enter '#{Constants.Auto}' to size the capacity based on ACCA Manual J/S (i.e., based on cooling design loads with some oversizing allowances for heating design loads). Enter '#{Constants.AutoMaxLoad}' to size the capacity based on the maximum of heating/cooling design loads.")
+    arg.setDescription("The output heating capacity of the heat pump. Enter '#{Constants.Auto}' to size the capacity based on ACCA Manual J/S (i.e., based on cooling design loads with some oversizing allowances for heating design loads). Enter '#{Constants.AutoMaxLoadForHP}' to size the capacity based on the maximum of heating/cooling design loads, taking into account the heat pump's heating capacity retention at cold temperature. Enter '#{Constants.AutoHERSForHP}' to size the capacity equal to the maximum of heating/cooling design loads.")
     arg.setUnits('Btu/hr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -2107,6 +2121,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_usable_capacity', true)
+    arg.setDisplayName('Battery: Usable Capacity')
+    arg.setDescription('The usable capacity of the lithium ion battery.')
+    arg.setUnits('kWh')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', false)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -2857,7 +2878,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_types', false)
     arg.setDisplayName('Emissions: Types')
-    arg.setDescription('Types of emissions (e.g., CO2, NOx, etc.). If multiple scenarios, use a comma-separated list.')
+    arg.setDescription('Types of emissions (e.g., CO2e, NOx, etc.). If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_units', false)
@@ -2895,6 +2916,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       arg.setDescription("#{cap_case} emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list.")
       args << arg
     end
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('additional_properties', false)
+    arg.setDisplayName('Additional Properties')
+    arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties.")
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply Default Values?')
@@ -3500,6 +3526,16 @@ class HPXMLFile
                                              wood_pellets_units: fuel_units,
                                              wood_pellets_value: wood_pellets_value)
       end
+    end
+
+    if args[:additional_properties].is_initialized
+      extension_properties = {}
+      additional_properties = args[:additional_properties].get.split('|').map(&:strip)
+      additional_properties.each do |additional_property|
+        key, value = additional_property.split('=').map(&:strip)
+        extension_properties[key] = value
+      end
+      hpxml.header.extension_properties = extension_properties
     end
   end
 
@@ -4108,6 +4144,10 @@ class HPXMLFile
         fraction_operable = args[:window_fraction_operable].get
       end
 
+      if args[:window_storm_type].is_initialized
+        window_storm_type = args[:window_storm_type].get
+      end
+
       wall_idref = @surface_ids[surface.name.to_s]
       next if wall_idref.nil?
 
@@ -4116,6 +4156,7 @@ class HPXMLFile
                         azimuth: azimuth,
                         ufactor: args[:window_ufactor],
                         shgc: args[:window_shgc],
+                        storm_type: window_storm_type,
                         overhangs_depth: overhangs_depth,
                         overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
                         overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
@@ -4137,6 +4178,10 @@ class HPXMLFile
       sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
       azimuth = Geometry.get_azimuth_from_facade(facade: sub_surface_facade, orientation: args[:geometry_unit_orientation])
 
+      if args[:skylight_storm_type].is_initialized
+        skylight_storm_type = args[:skylight_storm_type].get
+      end
+
       roof_idref = @surface_ids[surface.name.to_s]
       next if roof_idref.nil?
 
@@ -4145,6 +4190,7 @@ class HPXMLFile
                           azimuth: azimuth,
                           ufactor: args[:skylight_ufactor],
                           shgc: args[:skylight_shgc],
+                          storm_type: skylight_storm_type,
                           roof_idref: roof_idref)
     end
   end
@@ -4189,6 +4235,15 @@ class HPXMLFile
 
         surf_hash['ids'] << surface.id
       end
+    end
+
+    # Add attached roofs for cathedral ceiling
+    living_space = HPXML::LocationLivingSpace
+    surf_ids['roofs']['surfaces'].each do |surface|
+      next if (living_space != surface.interior_adjacent_to) &&
+              (living_space != surface.exterior_adjacent_to)
+
+      surf_ids['roofs']['ids'] << surface.id
     end
 
     hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
@@ -4353,10 +4408,12 @@ class HPXMLFile
 
     return if heat_pump_type == 'none'
 
-    if args[:heat_pump_heating_capacity] == Constants.AutoMaxLoad
-      hpxml.header.use_max_load_for_heat_pumps = true
-    elsif args[:heat_pump_heating_capacity] == Constants.Auto
-      hpxml.header.use_max_load_for_heat_pumps = false
+    if args[:heat_pump_heating_capacity] == Constants.Auto
+      hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingACCA
+    elsif args[:heat_pump_heating_capacity] == Constants.AutoHERSForHP
+      hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingHERS
+    elsif args[:heat_pump_heating_capacity] == Constants.AutoMaxLoadForHP
+      hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingMaxLoad
     else
       heating_capacity = Float(args[:heat_pump_heating_capacity])
     end
@@ -5205,11 +5262,16 @@ class HPXMLFile
       nominal_capacity_kwh = Float(args[:battery_capacity])
     end
 
+    if args[:battery_usable_capacity] != Constants.Auto
+      usable_capacity_kwh = Float(args[:battery_usable_capacity])
+    end
+
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         location: location,
                         rated_power_output: rated_power_output,
-                        nominal_capacity_kwh: nominal_capacity_kwh)
+                        nominal_capacity_kwh: nominal_capacity_kwh,
+                        usable_capacity_kwh: usable_capacity_kwh)
   end
 
   def self.set_lighting(hpxml, runner, args)
