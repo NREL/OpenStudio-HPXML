@@ -91,7 +91,8 @@ jobs:
         run: |
           set "OS_VERSION=3.4.0-rc2"
           set "OS_SHA=b449d8b1b4"
-          curl "https://github.com/NREL/OpenStudio/releases/download/v%OS_VERSION%/OpenStudio-%OS_VERSION%+%OS_SHA%-Windows.tar.gz"
+          curl --silent -o Windows.tar.gz "https://github.com/NREL/OpenStudio/releases/download/v%OS_VERSION%/OpenStudio-%OS_VERSION%+%OS_SHA%-Windows.tar.gz"
+          tar -xvzf Windows.tar.gz
           dir
       - name: Run test
         run: |
