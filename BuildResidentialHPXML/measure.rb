@@ -800,84 +800,84 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_depth', true)
     arg.setDisplayName('Overhangs: Front Depth')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The depth of overhangs for windows for the front facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_distance_to_top_of_window', true)
     arg.setDisplayName('Overhangs: Front Distance to Top of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the top of window for the front facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_distance_to_bottom_of_window', true)
     arg.setDisplayName('Overhangs: Front Distance to Bottom of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the bottom of window for the front facade.')
     arg.setDefaultValue(4)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_depth', true)
     arg.setDisplayName('Overhangs: Back Depth')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The depth of overhangs for windows for the back facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_distance_to_top_of_window', true)
     arg.setDisplayName('Overhangs: Back Distance to Top of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the top of window for the back facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_distance_to_bottom_of_window', true)
     arg.setDisplayName('Overhangs: Back Distance to Bottom of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the bottom of window for the back facade.')
     arg.setDefaultValue(4)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_depth', true)
     arg.setDisplayName('Overhangs: Left Depth')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The depth of overhangs for windows for the left facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_distance_to_top_of_window', true)
     arg.setDisplayName('Overhangs: Left Distance to Top of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the top of window for the left facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_distance_to_bottom_of_window', true)
     arg.setDisplayName('Overhangs: Left Distance to Bottom of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the bottom of window for the left facade.')
     arg.setDefaultValue(4)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_depth', true)
     arg.setDisplayName('Overhangs: Right Depth')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The depth of overhangs for windows for the right facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_distance_to_top_of_window', true)
     arg.setDisplayName('Overhangs: Right Distance to Top of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the top of window for the right facade.')
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_distance_to_bottom_of_window', true)
     arg.setDisplayName('Overhangs: Right Distance to Bottom of Window')
-    args.setUnits('ft')
+    arg.setUnits('ft')
     arg.setDescription('The overhangs distance to the bottom of window for the right facade.')
     arg.setDefaultValue(4)
     args << arg
