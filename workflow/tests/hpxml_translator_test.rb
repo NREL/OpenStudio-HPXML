@@ -195,9 +195,6 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
       if not invalid_variable_only
         assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
-      end
-
-      if not invalid_variable_only
         # Check timeseries columns exist
         timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
@@ -205,6 +202,8 @@ class HPXMLTest < MiniTest::Test
         assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
+      else
+        refute(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
       end
 
       # Check run.log has warning about missing Foobar Variable
