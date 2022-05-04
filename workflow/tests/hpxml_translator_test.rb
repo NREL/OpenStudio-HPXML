@@ -197,10 +197,10 @@ class HPXMLTest < MiniTest::Test
         assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
       end
 
-      # Check TimeDST and TimeUTC exist
-      timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
-      assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
       if not invalid_variable_only
+        # Check timeseries columns exist
+        timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
