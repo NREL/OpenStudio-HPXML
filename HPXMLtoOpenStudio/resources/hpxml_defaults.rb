@@ -2624,7 +2624,7 @@ class HPXMLDefaults
     elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
       if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
         nbeds_adjusted = -0.68 + 1.09 * noccs
-      elsif [HPXML::ResidentialTypeSFD, ResidentialTypeManufactured].include? unit_type
+      elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
         nbeds_adjusted = -1.47 + 1.69 * noccs
       end
     end

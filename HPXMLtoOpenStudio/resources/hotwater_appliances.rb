@@ -15,7 +15,7 @@ class HotWaterAndAppliances
     occ_calc_type = hpxml.header.occupancy_calculation_type
     unit_type = hpxml.building_construction.residential_facility_type
     noccs = hpxml.building_occupancy.number_of_residents # only used if operational calc type
-    nbeds_adjusted = get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
+    nbeds_adjusted = HPXMLDefaults.get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
