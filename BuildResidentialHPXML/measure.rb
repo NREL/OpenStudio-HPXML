@@ -60,11 +60,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('hpxml_path_relative_to_run_directory', false)
-    arg.setDisplayName('HPXML File Path Relative to Run Directory')
-    arg.setDescription('Whether the relative path of the HPXML file is relative to the run directory.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -2988,11 +2983,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
-      if args[:hpxml_path_relative_to_run_directory].is_initialized && args[:hpxml_path_relative_to_run_directory].get
-        hpxml_path = File.expand_path(hpxml_path)
-      else
-        hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
-      end
+      hpxml_path = File.expand_path(hpxml_path)
     end
 
     # Check for invalid HPXML file
