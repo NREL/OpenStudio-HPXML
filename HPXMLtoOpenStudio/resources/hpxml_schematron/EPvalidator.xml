@@ -216,7 +216,7 @@
 
   <sch:pattern>
     <sch:title>[OccupancyCalculationType=Operational]</sch:title>
-    <sch:rule context='/h:/HPXML/h:SoftwareInfo/h:extension/h:OccupancyCalculationType[text()="operational"]'>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:OccupancyCalculationType[text()="operational"]'>
       <sch:assert role='ERROR' test='count(../../../h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingOccupancy/h:NumberofResidents) = 1'>Expected 1 element(s) for xpath: NumberofResidents</sch:assert>
     </sch:rule>
   </sch:pattern>
