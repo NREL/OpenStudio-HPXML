@@ -371,6 +371,9 @@ def create_hpxmls
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
+    'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
+    'base-schedules-detailed-setpoints-daily-setbacks.xml' => 'base.xml',
+    'base-schedules-detailed-setpoints-10-mins.xml' => 'base-schedules-detailed-stochastic-10-mins.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
@@ -2437,9 +2440,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['simulation_control_timestep'] = 10
   end
 
-  # Schedules
-  if ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
+  # Occupancy Schedules
+  if ['base-schedules-detailed-smooth.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'smooth'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
@@ -2451,15 +2457,23 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
-  elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['schedules_type'] = 'smooth'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-stochastic-10-mins.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  end
+
+  # Setpoint Schedules
+  if ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
+  elsif ['base-schedules-detailed-setpoints-daily-schedules.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-schedules.csv'
+  elsif ['base-schedules-detailed-setpoints-daily-setbacks.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv'
+  elsif ['base-schedules-detailed-setpoints-10-mins.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv'
+    sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end

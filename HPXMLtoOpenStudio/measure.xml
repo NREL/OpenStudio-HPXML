@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a3516238-59c9-4642-a7db-27c7126484e5</version_id>
-  <version_modified>20220503T042557Z</version_modified>
+  <version_id>f1b48b9b-7d1f-4197-bfd6-a62fc7f155ce</version_id>
+  <version_modified>20220504T035136Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -344,12 +344,6 @@
       <checksum>4C7D519B</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8E16E971</checksum>
-    </file>
-    <file>
       <filename>schedule_files/stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -446,12 +440,6 @@
       <checksum>95A8F796</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2C089620</checksum>
-    </file>
-    <file>
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -529,10 +517,40 @@
       <checksum>98A0D687</checksum>
     </file>
     <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D1087FB0</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9CFBCA73</checksum>
+    </file>
+    <file>
       <filename>schedule_files/setpoints.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>44053898</checksum>
+      <checksum>31B57B24</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B304818B</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-daily-schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>032B0479</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-daily-setbacks.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>50E7CBCF</checksum>
     </file>
   </files>
 </measure>
