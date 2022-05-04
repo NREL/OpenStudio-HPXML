@@ -215,7 +215,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = runner.getOptionalBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
       include_timeseries_airflows = runner.getOptionalBoolArgumentValue('include_timeseries_airflows', user_arguments)
       include_timeseries_weather = runner.getOptionalBoolArgumentValue('include_timeseries_weather', user_arguments)
-      @user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
+      user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
 
       include_timeseries_total_consumptions = include_timeseries_total_consumptions.is_initialized ? include_timeseries_total_consumptions.get : false
       include_timeseries_fuel_consumptions = include_timeseries_fuel_consumptions.is_initialized ? include_timeseries_fuel_consumptions.get : false
@@ -227,10 +227,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = include_timeseries_zone_temperatures.is_initialized ? include_timeseries_zone_temperatures.get : false
       include_timeseries_airflows = include_timeseries_airflows.is_initialized ? include_timeseries_airflows.get : false
       include_timeseries_weather = include_timeseries_weather.is_initialized ? include_timeseries_weather.get : false
-      @user_output_variables = @user_output_variables.is_initialized ? @user_output_variables.get : false
+      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : false
     end
 
-    setup_outputs()
+    setup_outputs(user_output_variables)
 
     # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries
     # end use consumption because EnergyPlus results may be post-processed due to HVAC DSE.
@@ -415,7 +415,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_weather = runner.getOptionalBoolArgumentValue('include_timeseries_weather', user_arguments)
       add_timeseries_dst_column = runner.getOptionalBoolArgumentValue('add_timeseries_dst_column', user_arguments)
       add_timeseries_utc_column = runner.getOptionalBoolArgumentValue('add_timeseries_utc_column', user_arguments)
-      @user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
+      user_output_variables = runner.getOptionalStringArgumentValue('user_output_variables', user_arguments)
 
       include_timeseries_total_consumptions = include_timeseries_total_consumptions.is_initialized ? include_timeseries_total_consumptions.get : false
       include_timeseries_fuel_consumptions = include_timeseries_fuel_consumptions.is_initialized ? include_timeseries_fuel_consumptions.get : false
@@ -427,7 +427,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = include_timeseries_zone_temperatures.is_initialized ? include_timeseries_zone_temperatures.get : false
       include_timeseries_airflows = include_timeseries_airflows.is_initialized ? include_timeseries_airflows.get : false
       include_timeseries_weather = include_timeseries_weather.is_initialized ? include_timeseries_weather.get : false
-      @user_output_variables = @user_output_variables.is_initialized ? @user_output_variables.get : false
+      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : false
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
@@ -441,7 +441,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
 
-    setup_outputs()
+    setup_outputs(user_output_variables)
 
     if not File.exist? File.join(output_dir, 'eplusout.msgpack')
       runner.registerError('Cannot find eplusout.msgpack.')
@@ -1693,11 +1693,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_report_variable_data_timeseries_key_values_and_units(timeseries_frequency, var)
     keys = []
     units = ''
-    @msgpackDataTimeseries['Cols'].each do |col|
-      next unless col['Variable'].end_with? ":#{var}"
+    if not @msgpackDataTimeseries.nil?
+      @msgpackDataTimeseries['Cols'].each do |col|
+        next unless col['Variable'].end_with? ":#{var}"
 
-      keys << col['Variable'].split(':')[0..-2].join(':')
-      units = col['Units']
+        keys << col['Variable'].split(':')[0..-2].join(':')
+        units = col['Units']
+      end
     end
 
     return keys, units
@@ -1932,7 +1934,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
-  def setup_outputs()
+  def setup_outputs(user_output_variables = nil)
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
         return 'kWh'
@@ -2242,8 +2244,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Output Variables
     @output_variables_requests = {}
-    if @user_output_variables
-      output_variables = @user_output_variables.split(',').map(&:strip)
+    if not user_output_variables.nil?
+      output_variables = user_output_variables.split(',').map(&:strip)
       output_variables.each do |output_variable|
         @output_variables_requests[output_variable] = OutputVariable.new
       end
