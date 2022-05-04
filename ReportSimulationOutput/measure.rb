@@ -227,7 +227,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = include_timeseries_zone_temperatures.is_initialized ? include_timeseries_zone_temperatures.get : false
       include_timeseries_airflows = include_timeseries_airflows.is_initialized ? include_timeseries_airflows.get : false
       include_timeseries_weather = include_timeseries_weather.is_initialized ? include_timeseries_weather.get : false
-      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : false
+      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : nil
     end
 
     setup_outputs(user_output_variables)
@@ -427,7 +427,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = include_timeseries_zone_temperatures.is_initialized ? include_timeseries_zone_temperatures.get : false
       include_timeseries_airflows = include_timeseries_airflows.is_initialized ? include_timeseries_airflows.get : false
       include_timeseries_weather = include_timeseries_weather.is_initialized ? include_timeseries_weather.get : false
-      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : false
+      user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : nil
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
