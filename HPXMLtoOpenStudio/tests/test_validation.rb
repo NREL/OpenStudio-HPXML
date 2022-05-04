@@ -648,7 +648,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-overhangs.xml'))
         hpxml.slabs[0].thickness = 0.5
         hpxml.foundation_walls[0].thickness = 72.0
-        hpxml.windows[0].overhangs_depth = 24.0
+        hpxml.windows[0].overhangs_depth = 120.0
         hpxml.windows[0].overhangs_distance_to_top_of_window = 24.0
         hpxml.windows[0].overhangs_distance_to_bottom_of_window = 48.0
       else
