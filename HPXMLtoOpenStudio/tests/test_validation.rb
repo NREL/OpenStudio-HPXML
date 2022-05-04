@@ -553,7 +553,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
-                                                'Depth is greater than 12 feet; this may indicate incorrect units.',
+                                                'Depth is greater than 72 feet; this may indicate incorrect units.',
                                                 'DistanceToTopOfWindow is greater than 12 feet; this may indicate incorrect units.',
                                                 'DistanceToBottomOfWindow is greater than 12 feet; this may indicate incorrect units.'] }
 
