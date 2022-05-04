@@ -798,15 +798,28 @@ class HVAC
       heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
       cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
-    if heating_sch.nil? || cooling_sch.nil? # TODO: support one or the other?
+
+    # permit mixing detailed schedules with simple schedules
+    if heating_sch.nil?
       htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, year)
+    end
+
+    if cooling_sch.nil?
       clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+    end
+
+    # only deal with deadband issue if both schedules are simple
+    if heating_sch.nil? && cooling_sch.nil?
       htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
+    end
 
+    if heating_sch.nil?
       heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
-      cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
-
       heating_sch = heating_setpoint.schedule
+    end
+
+    if cooling_sch.nil?
+      cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
       cooling_sch = cooling_setpoint.schedule
     end
 
@@ -845,10 +858,6 @@ class HVAC
       clg_weekday_setpoints[i] = clg_wkdy
       clg_weekend_setpoints[i] = clg_wked
     end
-    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
     return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
   end
@@ -879,6 +888,9 @@ class HVAC
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
       htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
+
+    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
     return htg_weekday_setpoints, htg_weekend_setpoints
   end
@@ -922,6 +934,9 @@ class HVAC
         end
       end
     end
+
+    clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
     return clg_weekday_setpoints, clg_weekend_setpoints
   end
