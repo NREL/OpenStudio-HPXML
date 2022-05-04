@@ -10,8 +10,12 @@ class HotWaterAndAppliances
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
-    fixtures_usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor if !fixtures_usage_multiplier.nil?
     living_space = spaces[HPXML::LocationLivingSpace]
+
+    occ_calc_type = hpxml.header.occupancy_calculation_type
+    unit_type = hpxml.building_construction.residential_facility_type
+    noccs = hpxml.building_occupancy.number_of_residents # only used if operational calc type
+    nbeds_adjusted = get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -42,8 +46,7 @@ class HotWaterAndAppliances
 
     # Clothes washer energy
     if not clothes_washer.nil?
-      clothes_washer.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
-      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds_adjusted, clothes_washer, clothes_washer.additional_properties.space.nil?)
 
       # Create schedule
       power_cw_schedule = nil
@@ -71,8 +74,7 @@ class HotWaterAndAppliances
 
     # Clothes dryer energy
     if not clothes_dryer.nil?
-      clothes_dryer.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds_adjusted, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
 
       # Create schedule
       cd_schedule = nil
@@ -103,8 +105,7 @@ class HotWaterAndAppliances
 
     # Dishwasher energy
     if not dishwasher.nil?
-      dishwasher.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds_adjusted, dishwasher, dishwasher.additional_properties.space.nil?)
 
       # Create schedule
       power_dw_schedule = nil
@@ -189,8 +190,7 @@ class HotWaterAndAppliances
 
     # Cooking Range energy
     if not cooking_range.nil?
-      cooking_range.usage_multiplier *= hpxml.header.additional_properties.hotwater_appliances_adj_factor
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds_adjusted, cooking_range, oven, cooking_range.additional_properties.space.nil?)
 
       # Create schedule
       cook_schedule = nil

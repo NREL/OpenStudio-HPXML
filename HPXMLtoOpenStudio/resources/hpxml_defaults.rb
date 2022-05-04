@@ -13,6 +13,11 @@ class HPXMLDefaults
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
 
+    occ_calc_type = hpxml.header.occupancy_calculation_type
+    unit_type = hpxml.building_construction.residential_facility_type
+    noccs = hpxml.building_occupancy.number_of_residents # only used if operational calc type
+    nbeds_adjusted = get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
+
     infil_volume = nil
     infil_height = nil
     infil_measurements = []
@@ -63,32 +68,15 @@ class HPXMLDefaults
     apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
-    apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
-    apply_plug_loads(hpxml, cfa, nbeds, schedules_file)
-    apply_fuel_loads(hpxml, cfa, nbeds, schedules_file)
+    apply_pools_and_hot_tubs(hpxml, cfa, nbeds_adjusted, schedules_file)
+    apply_plug_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
+    apply_fuel_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
     apply_batteries(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
-
-    # Set operational adjustment factors after all other defaults have been applied
-    set_operational_adjustment_factors(hpxml, cfa, nbeds)
-  end
-
-  def self.set_operational_adjustment_factors(hpxml, cfa, nbeds)
-    if hpxml.header.occupancy_calculation_type == HPXML::OccupancyCalculationTypeAsset
-      hpxml.header.additional_properties.hotwater_appliances_adj_factor = 1.0
-      hpxml.header.additional_properties.misc_loads_adj_factor = 1.0
-
-    elsif hpxml.header.occupancy_calculation_type == HPXML::OccupancyCalculationTypeOperational
-      unit_type = hpxml.building_construction.residential_facility_type
-      noccs = hpxml.building_occupancy.number_of_residents
-
-      hpxml.header.additional_properties.hotwater_appliances_adj_factor = get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
-      hpxml.header.additional_properties.misc_loads_adj_factor = get_misc_loads_adj_factor(unit_type, nbeds, noccs, cfa)
-    end
   end
 
   def self.get_default_azimuths(hpxml)
@@ -2630,24 +2618,16 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
-    occ_to_nbr_ratio = noccs / nbeds
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      occ_factor = occ_to_nbr_ratio**0.51
-    elsif [HPXML::ResidentialTypeSFD].include? unit_type
-      occ_factor = occ_to_nbr_ratio**0.70
+  def self.get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
+    if occ_calc_type == HPXML::OccupancyCalculationTypeAsset
+      nbeds_adjusted = nbeds
+    elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+        nbeds_adjusted = -0.68 + 1.09 * noccs
+      elsif [HPXML::ResidentialTypeSFD, ResidentialTypeManufactured].include? unit_type
+        nbeds_adjusted = -1.47 + 1.69 * noccs
+      end
     end
-    return occ_factor
-  end
-
-  def self.get_misc_loads_adj_factor(unit_type, nbeds, noccs, cfa)
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      c = [-0.68, 1.09]
-    elsif [HPXML::ResidentialTypeSFD].include? unit_type
-      c = [-1.47, 1.69]
-    end
-    adj_factor = (0.5 + 0.25 * (c[0] + c[1] * noccs) / 3.0 + 0.25 * cfa / 1920.0) /
-                 (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
-    return adj_factor
+    return nbeds_adjusted
   end
 end
