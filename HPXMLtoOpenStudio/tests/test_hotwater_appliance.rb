@@ -971,29 +971,29 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     # water use equipment peak flows
     fixture_gpd = 44.60
     dist_gpd = 10.2343
-    cw_gpd = 3.7116
-    dw_gpd = 2.7342
+    cw_gpd = 4.053
+    dw_gpd = 3.0296
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
     assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
     assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
 
     # electric equipment
-    cw_ee_kwh_yr = 107.059
+    cw_ee_kwh_yr = 116.9087
     cw_sens_frac = 0.27
     cw_lat_frac = 0.03
     assert_in_epsilon(cw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(cw_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[0], 0.001)
     assert_in_epsilon(cw_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[1], 0.001)
 
-    dw_ee_kwh_yr = 93.392
+    dw_ee_kwh_yr = 103.479
     dw_sens_frac = 0.3
     dw_lat_frac = 0.300
     assert_in_epsilon(dw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher), 0.001)
     assert_in_epsilon(dw_sens_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[0], 0.001)
     assert_in_epsilon(dw_lat_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[1], 0.001)
 
-    cd_ee_kwh_yr = 443.317
+    cd_ee_kwh_yr = 484.0704
     cd_sens_frac = 0.135
     cd_lat_frac = 0.015
     assert_in_epsilon(cd_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -1007,7 +1007,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(rf_sens_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[0], 0.001)
     assert_in_epsilon(rf_lat_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[1], 0.001)
 
-    cook_ee_kwh_yr = 448.0
+    cook_ee_kwh_yr = 471.2169
     cook_sens_frac = 0.72
     cook_lat_frac = 0.080
     assert_in_epsilon(cook_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameCookingRange), 0.001)
