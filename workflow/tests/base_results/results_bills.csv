@@ -334,8 +334,8 @@ base-schedules-detailed-all-10-mins.xml,1615.35,144.0,1174.01,0.0,1318.01,144.0,
 base-schedules-detailed-occupancy-smooth.xml,1598.71,144.0,1165.86,0.0,1309.86,144.0,144.85,288.85,0.0,0.0,0.0,0.0,0.0
 base-schedules-detailed-occupancy-stochastic-vacancy.xml,1461.36,144.0,995.64,0.0,1139.64,144.0,177.72,321.72,0.0,0.0,0.0,0.0,0.0
 base-schedules-detailed-occupancy-stochastic.xml,1607.14,144.0,1169.59,0.0,1313.59,144.0,149.55,293.55,0.0,0.0,0.0,0.0,0.0
-base-schedules-detailed-setpoints-daily-schedules.xml,1570.04,144.0,1150.32,0.0,1294.32,144.0,131.72,275.72,0.0,0.0,0.0,0.0,0.0
-base-schedules-detailed-setpoints-daily-setbacks.xml,1573.92,144.0,1153.35,0.0,1297.35,144.0,132.57,276.57,0.0,0.0,0.0,0.0,0.0
+base-schedules-detailed-setpoints-daily-schedules.xml,1568.36,144.0,1149.03,0.0,1293.03,144.0,131.33,275.33,0.0,0.0,0.0,0.0,0.0
+base-schedules-detailed-setpoints-daily-setbacks.xml,1569.05,144.0,1149.15,0.0,1293.15,144.0,131.9,275.9,0.0,0.0,0.0,0.0,0.0
 base-schedules-detailed-setpoints.xml,1414.68,144.0,1098.07,0.0,1242.07,144.0,28.61,172.61,0.0,0.0,0.0,0.0,0.0
 base-schedules-simple.xml,1600.41,144.0,1166.56,0.0,1310.56,144.0,145.85,289.85,0.0,0.0,0.0,0.0,0.0
 base-simcontrol-calendar-year-custom.xml,1598.35,144.0,1165.48,0.0,1309.48,144.0,144.87,288.87,0.0,0.0,0.0,0.0,0.0
