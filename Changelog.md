@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
 - Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
+- Expanded capabilities for scheduling:
+  - Allows modeling detailed HVAC setpoints via a schedule CSV file.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:
@@ -50,8 +52,11 @@ __Bugfixes__
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 - Timeseries output fixes: some outputs off by 1 hour; possible negative combi boiler values.
 - Fixes range hood ventilation interaction with infiltration to take into account the location of the cooking range.
-- BuildResidentialHPXML measure: Fixes incorrect outside boundary condition for shared gable walls of cathedral ceilings, now set to adiabatic.
 - Fixes possible EMS error for ventilation systems with low (but non-zero) flow rates.
+- Fixes documentation for `Overhangs/Depth` inputs; units should be ft and not inches.
+- BuildResidentialHPXML measure:
+  - Fixes units for "Cooling System: Cooling Capacity" argument (Btu/hr, not tons).
+  - Fixes incorrect outside boundary condition for shared gable walls of cathedral ceilings, now set to adiabatic.
 
 ## OpenStudio-HPXML v1.3.0
 

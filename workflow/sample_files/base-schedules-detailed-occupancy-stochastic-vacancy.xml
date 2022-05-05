@@ -9,11 +9,11 @@
   <SoftwareInfo>
     <extension>
       <SimulationControl>
-        <Timestep>10</Timestep>
+        <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-10-mins.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-vacancy.csv</SchedulesFilePath>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-simcontrol-timestep-10-mins.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>

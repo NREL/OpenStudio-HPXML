@@ -1135,6 +1135,8 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnVacancy = 'vacancy'
+  ColumnHeatingSetpoint = 'heating_setpoint'
+  ColumnCoolingSetpoint = 'cooling_setpoint'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
 
@@ -1152,6 +1154,7 @@ class SchedulesFile
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
+    convert_setpoints
 
     tmpfile = Tempfile.new(['schedules', '.csv'])
     @tmp_schedules_path = tmpfile.path.to_s
@@ -1395,8 +1398,22 @@ class SchedulesFile
     end
   end
 
+  def convert_setpoints
+    return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
+
+    col_names = @tmp_schedules.keys
+
+    @tmp_schedules[col_names[0]].each_with_index do |ts, i|
+      SchedulesFile.SetpointColumnNames.each do |setpoint_col_name|
+        next unless col_names.include?(setpoint_col_name)
+
+        @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
+      end
+    end
+  end
+
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.WaterHeaterColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.SetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1431,6 +1448,13 @@ class SchedulesFile
     ]
   end
 
+  def self.SetpointColumnNames
+    return [
+      ColumnHeatingSetpoint,
+      ColumnCoolingSetpoint
+    ]
+  end
+
   def self.WaterHeaterColumnNames
     return [
       ColumnWaterHeaterSetpoint,
@@ -1443,15 +1467,13 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       affected_by_vacancy[column_name] = true
-      next unless [ColumnRefrigerator,
-                   ColumnExtraRefrigerator,
-                   ColumnFreezer,
-                   ColumnPoolPump,
-                   ColumnPoolHeater,
-                   ColumnHotTubPump,
-                   ColumnHotTubHeater,
-                   ColumnWaterHeaterSetpoint,
-                   ColumnWaterHeaterOperatingMode].include? column_name
+      next unless ([ColumnRefrigerator,
+                    ColumnExtraRefrigerator,
+                    ColumnFreezer,
+                    ColumnPoolPump,
+                    ColumnPoolHeater,
+                    ColumnHotTubPump,
+                    ColumnHotTubHeater] + SchedulesFile.SetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1463,7 +1485,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
-      if [ColumnWaterHeaterSetpoint].include? column_name
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.WaterHeaterColumnNames.include?(col_name)
         max_value_one[column_name] = false
       end
     end
@@ -1475,7 +1497,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if [ColumnWaterHeaterSetpoint].include? column_name
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.WaterHeaterColumnNames.include?(col_name)
         min_value_zero[column_name] = false
       end
     end
