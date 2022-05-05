@@ -1442,15 +1442,13 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       affected_by_vacancy[column_name] = true
-      next unless [ColumnRefrigerator,
-                   ColumnExtraRefrigerator,
-                   ColumnFreezer,
-                   ColumnPoolPump,
-                   ColumnPoolHeater,
-                   ColumnHotTubPump,
-                   ColumnHotTubHeater,
-                   ColumnHeatingSetpoint,
-                   ColumnCoolingSetpoint].include? column_name
+      next unless ([ColumnRefrigerator,
+                    ColumnExtraRefrigerator,
+                    ColumnFreezer,
+                    ColumnPoolPump,
+                    ColumnPoolHeater,
+                    ColumnHotTubPump,
+                    ColumnHotTubHeater] + SchedulesFile.SetpointColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1462,7 +1460,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
-      if [ColumnHeatingSetpoint, ColumnCoolingSetpoint].include? column_name
+      if SchedulesFile.SetpointColumnNames.include? column_name
         max_value_one[column_name] = false
       end
     end
@@ -1474,7 +1472,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if [ColumnHeatingSetpoint, ColumnCoolingSetpoint].include? column_name
+      if SchedulesFile.SetpointColumnNames.include? column_name
         min_value_zero[column_name] = false
       end
     end
