@@ -968,37 +968,32 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-calctype-operational.xml'))
     model, hpxml = _test_measure(args_hash)
 
-    unit_type = hpxml.building_construction.residential_facility_type
-    nbeds = hpxml.building_construction.number_of_bedrooms
-    noccs = hpxml.building_occupancy.number_of_residents
-    occ_factor = HPXMLDefaults.get_hotwater_appliances_adj_factor(unit_type, nbeds, noccs)
-
     # water use equipment peak flows
-    fixture_gpd = 44.60 * occ_factor
-    dist_gpd = 10.2343 * occ_factor
-    cw_gpd = 3.7116 * occ_factor
-    dw_gpd = 2.7342 * occ_factor
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
     assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
     assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
 
     # electric equipment
-    cw_ee_kwh_yr = 107.059 * occ_factor
+    cw_ee_kwh_yr = 107.059
     cw_sens_frac = 0.27
     cw_lat_frac = 0.03
     assert_in_epsilon(cw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(cw_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[0], 0.001)
     assert_in_epsilon(cw_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[1], 0.001)
 
-    dw_ee_kwh_yr = 93.392 * occ_factor
+    dw_ee_kwh_yr = 93.392
     dw_sens_frac = 0.3
     dw_lat_frac = 0.300
     assert_in_epsilon(dw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher), 0.001)
     assert_in_epsilon(dw_sens_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[0], 0.001)
     assert_in_epsilon(dw_lat_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[1], 0.001)
 
-    cd_ee_kwh_yr = 443.317 * occ_factor
+    cd_ee_kwh_yr = 443.317
     cd_sens_frac = 0.135
     cd_lat_frac = 0.015
     assert_in_epsilon(cd_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -1012,7 +1007,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(rf_sens_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[0], 0.001)
     assert_in_epsilon(rf_lat_frac, get_ee_fractions(model, Constants.ObjectNameRefrigerator)[1], 0.001)
 
-    cook_ee_kwh_yr = 448.0 * occ_factor
+    cook_ee_kwh_yr = 448.0
     cook_sens_frac = 0.72
     cook_lat_frac = 0.080
     assert_in_epsilon(cook_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameCookingRange), 0.001)
@@ -1020,8 +1015,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(cook_lat_frac, get_ee_fractions(model, Constants.ObjectNameCookingRange)[1], 0.001)
 
     # other equipment
-    water_sens = -262.507 * occ_factor
-    water_lat = 266.358 * occ_factor
+    water_sens = -262.507
+    water_lat = 266.358
     assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
     assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
     assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)

@@ -195,12 +195,6 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-calctype-operational-misc-defaults.xml'))
     model, hpxml = _test_measure(args_hash)
 
-    unit_type = hpxml.building_construction.residential_facility_type
-    nbeds = hpxml.building_construction.number_of_bedrooms
-    noccs = hpxml.building_occupancy.number_of_residents
-    cfa = hpxml.building_construction.conditioned_floor_area
-    adj_factor = HPXMLDefaults.get_misc_loads_adj_factor(unit_type, nbeds, noccs, cfa)
-
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
     assert_in_delta(2454, kwh_yr, 1.0)
@@ -208,7 +202,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscTelevision)
-    assert_in_delta(619 * adj_factor, kwh_yr, 1.0)
+    assert_in_delta(661, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check vehicle
