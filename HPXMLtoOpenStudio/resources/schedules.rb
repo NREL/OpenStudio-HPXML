@@ -1152,6 +1152,7 @@ class SchedulesFile
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
+    convert_setpoints
 
     tmpfile = Tempfile.new(['schedules', '.csv'])
     @tmp_schedules_path = tmpfile.path.to_s
@@ -1390,6 +1391,20 @@ class SchedulesFile
         next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
+      end
+    end
+  end
+
+  def convert_setpoints
+    return unless (SchedulesFile.SetpointColumnNames - @tmp_schedules.keys).empty?
+
+    col_names = @tmp_schedules.keys
+
+    @tmp_schedules[col_names[0]].each_with_index do |ts, i|
+      SchedulesFile.SetpointColumnNames.each do |setpoint_col_name|
+        next unless col_names.include?(setpoint_col_name)
+
+        @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
       end
     end
   end

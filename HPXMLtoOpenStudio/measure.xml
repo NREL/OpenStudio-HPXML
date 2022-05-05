@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>62d9f452-814f-42db-8aae-bd96a8882e1b</version_id>
-  <version_modified>20220505T171641Z</version_modified>
+  <version_id>76f326e0-03d0-4527-aaa7-24b11140671e</version_id>
+  <version_modified>20220505T174730Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -475,46 +475,10 @@
       <checksum>9CFBCA73</checksum>
     </file>
     <file>
-      <filename>schedule_files/setpoints.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>31B57B24</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B304818B</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-daily-schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>032B0479</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-daily-setbacks.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>50E7CBCF</checksum>
-    </file>
-    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E0D428FD</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-cooling-only.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F312D225</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/setpoints-heating-only.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C19F1F83</checksum>
     </file>
     <file>
       <filename>test_schedules.rb</filename>
@@ -553,16 +517,52 @@
       <checksum>B60F333D</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D848876C</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>F1C7946F</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AD73BF35</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>996E7059</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-daily-schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5D964E3C</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-daily-setbacks.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6C5BAF66</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-cooling-only.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>824CBA46</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/setpoints-heating-only.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>157CCD35</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7EB70C51</checksum>
     </file>
   </files>
 </measure>
