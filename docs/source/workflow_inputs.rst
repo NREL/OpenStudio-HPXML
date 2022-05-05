@@ -100,7 +100,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                        integer            1 - 12         No        12 (December)                Run period end date
   ``EndDayOfMonth``                   integer            1 - 31         No        31                           Run period end date
   ``CalendarYear``                    integer            > 1600 [#]_    No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight savings enabled?
+  ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight saving enabled?
   ==================================  ========  =======  =============  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
@@ -116,7 +116,7 @@ If daylight saving is enabled, additional information is specified in ``Daylight
   ``EndMonth`` and ``EndDayOfMonth``      integer          1 - 12 and 1 - 31  No        EPW else 11/5 (November 5)     End date
   ======================================  ========  =====  =================  ========  =============================  ===========
 
-  .. [#] Daylight savings dates will be defined according to the EPW weather file header; if not available, fallback default values listed above will be used.
+  .. [#] Daylight saving dates will be defined according to the EPW weather file header; if not available, fallback default values listed above will be used.
 
 HPXML HVAC Sizing Control
 *************************
@@ -200,6 +200,10 @@ Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/sch
 A detailed stochastic or smooth occupancy schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 Inputs for the schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
 See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
+
+.. warning::
+
+  For simulations with daylight saving enabled (which is the default), EnergyPlus will skip forward an hour in the CSV on the "spring forward" day and repeat an hour on the "fall back" day.
 
 Default Schedules
 ~~~~~~~~~~~~~~~~~
