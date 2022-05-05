@@ -8,7 +8,7 @@
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
-      <OccupancyCalculationType>operational</OccupancyCalculationType>
+      <OccupancyCalculationType>asset</OccupancyCalculationType>
     </extension>
   </SoftwareInfo>
   <Building>
