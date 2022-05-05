@@ -1396,7 +1396,7 @@ class SchedulesFile
   end
 
   def convert_setpoints
-    return unless (SchedulesFile.SetpointColumnNames - @tmp_schedules.keys).empty?
+    return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
 
     col_names = @tmp_schedules.keys
 
