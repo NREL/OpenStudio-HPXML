@@ -73,8 +73,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_smooth_vacancy
@@ -129,8 +127,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(vacancy_hrs, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnVacancy, schedules: sf.tmp_schedules), 0.1)
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_stochastic
@@ -182,8 +178,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(325, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_stochastic_vacancy
@@ -239,8 +233,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(325 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(887 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(vacancy_hrs, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnVacancy, schedules: sf.tmp_schedules), 0.1)
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_random_seed
@@ -293,8 +285,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(325, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(898, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
 
     @args_hash['schedules_random_seed'] = 2
     model, hpxml, result = _test_measure()
@@ -340,8 +330,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(244, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(1077, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_AMY_2012_vacancy
@@ -395,8 +383,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(vacancy_hrs, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnVacancy, schedules: sf.tmp_schedules), 0.1)
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
   def test_10_min_timestep
@@ -447,66 +433,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
-  end
-
-  def test_water_heater_tank_scheduled
-    hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
-    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank.csv'
-    @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
-    model, hpxml, result = _test_measure()
-
-    info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
-    assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('water_heater') })
-
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
-    sf.validate_schedules(year: 2007)
-
-    assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint][0], UnitConversions.convert(125, 'F', 'C'))
-  end
-
-  def test_water_heater_heat_pump_scheduled
-    hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
-    @args_hash['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heat-pump.csv'
-    @args_hash['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heat-pump.csv'
-    @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
-    model, hpxml, result = _test_measure()
-
-    info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
-    assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('water_heater') })
-
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
-    sf.validate_schedules(year: 2007)
-
-    assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
-    assert_in_epsilon(sf.schedules[SchedulesFile::ColumnWaterHeaterSetpoint][0], UnitConversions.convert(125, 'F', 'C'))
-    assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterOperatingMode].include?(0))
-    assert(sf.schedules[SchedulesFile::ColumnWaterHeaterOperatingMode].include?(1))
   end
 
   def _test_measure()

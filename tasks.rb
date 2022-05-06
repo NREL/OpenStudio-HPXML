@@ -135,10 +135,14 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-uef.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
+
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-schedules-detailed.xml' => 'base-dhw-tank-heat-pump-uef.xml',
+    'base-dhw-tank-heat-pump-detailed-schedules.xml' => 'base-dhw-tank-heat-pump-uef.xml',
+
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
-    'base-dhw-tank-schedules-detailed.xml' => 'base.xml',
+    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
+    'base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml' => 'base-dhw-tank-model-type-stratified.xml',
+
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
@@ -383,7 +387,6 @@ def create_hpxmls
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-setbacks.xml' => 'base.xml',
-    'base-schedules-detailed-stochastic-dhw-tank-model-type-stratified.xml' => 'base-dhw-tank-model-type-stratified.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -2487,34 +2490,26 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv'
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv'
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+    # sch_args['hpxml_path'] = args['hpxml_path']
+    # sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-hvac-furnace-gas-only-detailed-setpoints.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv'
   elsif ['base-hvac-room-ac-only-detailed-setpoints.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-cooling-only.csv'
   end
 
-  # Water Heater Setpoints
-  if ['base-dhw-tank-heat-pump-schedules-detailed.xml'].include? hpxml_file
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['schedules_type'] = 'smooth'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
-    sch_args['water_heater_scheduled_setpoint_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv'
-    sch_args['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv'
-    sch_args['water_heater_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/heat-pump.csv'
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
-  elsif ['base-dhw-tank-schedules-detailed.xml'].include? hpxml_file
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['schedules_type'] = 'smooth'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
-    sch_args['water_heater_scheduled_operating_mode_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
-    sch_args['water_heater_output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/tank.csv'
-  elsif ['base-schedules-detailed-stochastic-dhw-tank-model-type-stratified.xml'].include? hpxml_file
+  # Water Heater Schedules
+  if ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
+  elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
+  elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
+    args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv'
   end
 end
 
