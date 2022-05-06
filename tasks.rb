@@ -135,14 +135,11 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-uef.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
-
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-heat-pump-detailed-schedules.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
     'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml' => 'base-dhw-tank-model-type-stratified.xml',
-
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
@@ -2490,8 +2487,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv'
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv'
-    # sch_args['hpxml_path'] = args['hpxml_path']
-    # sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-hvac-furnace-gas-only-detailed-setpoints.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv'
   elsif ['base-hvac-room-ac-only-detailed-setpoints.xml'].include? hpxml_file

@@ -669,7 +669,6 @@ class HPXMLTest < MiniTest::Test
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include?('Schedule:File=') && err_line.include?('Blank Schedule Type Limits Name input')
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include? 'PerformancePrecisionTradeoffs: Carroll MRT radiant exchange method is selected.'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
@@ -714,7 +713,10 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
         next if err_line.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
         next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
-        next if err_line.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
+      end
+      # Stratified tank WHs
+      if hpxml.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
+        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       end
       # HP defrost curves
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type }.size > 0
@@ -740,14 +742,6 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
-      end
-      if hpxml_path.include?('schedules-detailed')
-        next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
-      end
-
-      # FIXME: are these warnings expected?
-      if hpxml.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
-        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       end
 
       flunk "Unexpected warning found: #{err_line}"
