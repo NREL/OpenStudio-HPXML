@@ -12,11 +12,7 @@ class HPXMLDefaults
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-
-    occ_calc_type = hpxml.header.occupancy_calculation_type
-    unit_type = hpxml.building_construction.residential_facility_type
-    noccs = hpxml.building_occupancy.number_of_residents # only used if operational calc type
-    nbeds_adjusted = get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
+    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml)
 
     infil_volume = nil
     infil_height = nil
@@ -2620,16 +2616,19 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_nbeds_adjusted(occ_calc_type, unit_type, nbeds, noccs)
+  def self.get_nbeds_adjusted_for_operational_calculation(hpxml)
+    occ_calc_type = hpxml.header.occupancy_calculation_type
+    unit_type = hpxml.building_construction.residential_facility_type
+    nbeds = hpxml.building_construction.number_of_bedrooms
     if occ_calc_type == HPXML::OccupancyCalculationTypeAsset
-      nbeds_adjusted = nbeds
+      return nbeds
     elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
+      noccs = hpxml.building_occupancy.number_of_residents
       if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-        nbeds_adjusted = -0.68 + 1.09 * noccs
+        return -0.68 + 1.09 * noccs
       elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
-        nbeds_adjusted = -1.47 + 1.69 * noccs
+        return -1.47 + 1.69 * noccs
       end
     end
-    return nbeds_adjusted
   end
 end

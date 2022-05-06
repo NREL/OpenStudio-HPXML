@@ -969,8 +969,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
+    fixture_gpd = 50.60
+    dist_gpd = 11.0690
     cw_gpd = 4.053
     dw_gpd = 3.0296
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
@@ -1015,8 +1015,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(cook_lat_frac, get_ee_fractions(model, Constants.ObjectNameCookingRange)[1], 0.001)
 
     # other equipment
-    water_sens = -262.507
-    water_lat = 266.358
+    water_sens = -288.757
+    water_lat = 292.993
     assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
     assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
     assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
