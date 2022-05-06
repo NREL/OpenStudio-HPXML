@@ -4489,10 +4489,10 @@ class HPXMLFile
         if args[:heat_pump_backup_heating_switchover_temp].is_initialized
           backup_heating_switchover_temp = args[:heat_pump_backup_heating_switchover_temp].get
         end
+      end
 
-        if args[:heat_pump_backup_heating_lockout_temp].is_initialized
-          backup_heating_lockout_temp = args[:heat_pump_backup_heating_lockout_temp].get
-        end
+      if args[:heat_pump_backup_heating_lockout_temp].is_initialized
+        backup_heating_lockout_temp = args[:heat_pump_backup_heating_lockout_temp].get
       end
     end
 
