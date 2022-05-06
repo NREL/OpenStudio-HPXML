@@ -60,6 +60,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
+    arg.setDisplayName('Software Info: Program Used')
+    arg.setDescription('The name of the software program used.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_version', false)
+    arg.setDisplayName('Software Info: Program Version')
+    arg.setDescription('The version of the software program used.')
+    args << arg
+
     occupancy_calculation_type_choices = OpenStudio::StringVector.new
     occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeAsset
     occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeOperational
@@ -69,14 +79,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, usages of plug loads, appliances, hot water, etc. are based on number of bedrooms or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, these usages are adjusted based on the number of occupants.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
-    arg.setDisplayName('Software Info: Program Used')
-    arg.setDescription('The name of the software program used.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_version', false)
-    arg.setDisplayName('Software Info: Program Version')
-    arg.setDescription('The version of the software program used.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
+    arg.setDisplayName('Schedules: CSV File Paths')
+    arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
@@ -3429,6 +3434,10 @@ class HPXMLFile
     hpxml.header.transaction = 'create'
 
     hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type]
+    if args[:schedules_filepaths].is_initialized
+      hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
+    end
+
     if args[:software_info_program_used].is_initialized
       hpxml.header.software_program_used = args[:software_info_program_used].get
     end

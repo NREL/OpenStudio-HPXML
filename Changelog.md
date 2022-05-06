@@ -3,6 +3,8 @@
 __New Features__
 - Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
 - **Breaking change**: Allows performing an operational, instead of an asset, calculation through a new required `OccupancyCalculationType` input field.
+- Expanded capabilities for scheduling:
+  - Allows modeling detailed HVAC setpoints via a schedule CSV file.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:
