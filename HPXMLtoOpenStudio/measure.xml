@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>76c7620c-bd1c-4baf-8880-2764a1dc9a70</version_id>
-  <version_modified>20220506T000233Z</version_modified>
+  <version_id>ddab8d6f-0074-4fa1-9e1d-b24baa80e1cd</version_id>
+  <version_modified>20220506T040055Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -512,12 +512,6 @@
       <checksum>74292B8C</checksum>
     </file>
     <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6A6E0F93</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -559,22 +553,34 @@
       <checksum>CBF1587D</checksum>
     </file>
     <file>
-      <filename>schedule_files/heat-pump.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2BE4F85F</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/tank.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F100272A</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3E09D74D</checksum>
+    </file>
+    <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6B2AD259</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/water-heater-operating-modes.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>86F45903</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/water-heater-setpoints-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F9C90051</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/water-heater-setpoints.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2DFF87CD</checksum>
     </file>
   </files>
 </measure>
