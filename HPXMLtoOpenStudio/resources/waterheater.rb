@@ -97,6 +97,7 @@ class Waterheater
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
       # Sensed schedule
       setpoint_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
       if not setpoint_schedule.nil?
         # Actuated schedule
         control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -990,6 +991,7 @@ class Waterheater
     op_mode_schedule = nil
     if not schedules_file.nil?
       op_mode_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterOperatingMode)
+      Schedule.set_schedule_type_limits(model, op_mode_schedule, Constants.ScheduleTypeLimitsFraction)
     end
 
     # Sensor on op_mode_schedule
