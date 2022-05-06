@@ -140,6 +140,7 @@ HPXML Schedules
 ***************
 
 Schedules for a variety of building features can be 1) specified via simple inputs, 2) specified via detailed inputs, or 3) defaulted.
+It is allowed to use simple, detailed, and defaulted values in the same HPXML run.
 
 Simple Schedule Inputs
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -156,9 +157,7 @@ Detailed schedule inputs allow schedule values for every hour or timestep of the
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/SoftwareInfo/extension/SchedulesFilePath`` elements.
-
-Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
-The schedule columns available in the schedule CSV files are:
+The column names available in the schedule CSV files are:
 
   ==============================  =====  ========================================================  ===================
   Column Name                     Units  Description                                               Affected by Vacancy
@@ -195,6 +194,7 @@ The schedule columns available in the schedule CSV files are:
   ``vacancy``                     0/1    1=Home is vacant. Automatically overrides other columns.  N/A
   ==============================  =====  ========================================================  ===================
 
+Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 A detailed stochastic or smooth occupancy schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
@@ -215,39 +215,14 @@ These default schedules are described elsewhere in the documentation (e.g., see 
 HPXML Occupancy Calculation Type
 ********************************
 
-Occupancy-based loads can be calculated through 1) an asset calculation or 2) an operational calculation.
-Calculation types are entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational".
+The occupancy calculation type is entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational".
 
-Asset Calculation
-~~~~~~~~~~~~~~~~~
+If OccupancyCalculationType is "asset", various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
 
-Asset calculations are performed using NumberofBedrooms and ConditionedFloorArea.
+If OccupancyCalculationType is "operational", end uses based on number of bedrooms are adjusted for the number of occupants using the relationship from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
 
-Operational Calculation
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Operational calculations are performed using NumberofBedrooms, ConditionedFloorArea, and NumberofResidents.
-Adjustments are made to usage multipliers to account for the extra NumberofResidents term.
-TODO: list the adjustment factors here? down below in appliances and misc LULs?
-
-Hot Water and Appliances:
-
-    occ_to_nbr_ratio = noccs / nbeds
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      occ_factor = occ_to_nbr_ratio**0.51
-    elsif [HPXML::ResidentialTypeSFD].include? unit_type
-      occ_factor = occ_to_nbr_ratio**0.70
-    end
-
-Misc Loads:
-
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      c = [-0.68, 1.09]
-    elsif [HPXML::ResidentialTypeSFD].include? unit_type
-      c = [-1.47, 1.69]
-    end
-    adj_factor = (0.5 + 0.25 * (c[0] + c[1] * noccs) / 3.0 + 0.25 * cfa / 1920.0) /
-                 (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+- single-family detached or manufactured home: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
+- single-family attached or apartment unit: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
 
 HPXML Emissions Scenarios
 *************************
@@ -393,19 +368,17 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ========================================  ========  =====  ===========  ========  ====================  ========================
   Element                                   Type      Units  Constraints  Required  Default               Notes
   ========================================  ========  =====  ===========  ========  ====================  ========================
-  ``NumberofResidents``                     integer          >= 0         No        <number of bedrooms>  Number of occupants
+  ``NumberofResidents``                     integer          >= 0         See [#]_  <number of bedrooms>  Number of occupants [#]_
   ``extension/WeekdayScheduleFractions``    array                         No        See [#]_              24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``    array                         No                              24 comma-separated weekend fractions
   ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_              12 comma-separated monthly multipliers
   ========================================  ========  =====  ===========  ========  ====================  ========================
 
+  .. [#] NumberofResidents is required if OccupancyCalculationType is "operational", .
+  .. [#] If OccupancyCalculationType is "asset", NumberofResidents is only used to define the heat gain from occupants; various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
+         If OccupancyCalculationType is "operational", end uses based on number of bedrooms are adjusted for the number of occupants.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
-
-.. note::
-
-  The above inputs are only used to define heat gain from occupants.
-  Usages of plug loads, appliances, hot water, etc. are driven by number of bedrooms, not number of occupants.
 
 HPXML Building Construction
 ***************************
