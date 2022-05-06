@@ -3,6 +3,8 @@ __New Features__
 - Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed HVAC setpoints via a schedule CSV file.
+  - Allows modeling detailed tank and heat pump water heater setpoints via a schedule CSV file.
+  - Allows modeling detailed heat pump water heater operating modes via a schedule CSV file.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Allows a heat pump separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
 - **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:
@@ -26,6 +28,8 @@ __New Features__
 - Updates HVAC rated fan power assumption per ASHRAE 1449-RP.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
+  - Adds support for modeling stratified tank water heaters.
+  - Adds support for specifying heat pump water heater operating modes (i.e., standard or heat pump only).
   - Adds support for ambient foundations for single-family attached and apartment units.
   - Adds support for unconditioned attics for apartment units.
   - Adds an optional argument to store additional custom properties in the HPXML file.
