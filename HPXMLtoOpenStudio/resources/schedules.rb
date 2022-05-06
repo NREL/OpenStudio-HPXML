@@ -1413,7 +1413,7 @@ class SchedulesFile
   end
 
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.SetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1448,7 +1448,7 @@ class SchedulesFile
     ]
   end
 
-  def self.SetpointColumnNames
+  def self.HVACSetpointColumnNames
     return [
       ColumnHeatingSetpoint,
       ColumnCoolingSetpoint
@@ -1459,6 +1459,14 @@ class SchedulesFile
     return [
       ColumnWaterHeaterSetpoint,
       ColumnWaterHeaterOperatingMode
+    ]
+  end
+
+  def self.SetpointColumnNames
+    return [
+      ColumnHeatingSetpoint,
+      ColumnCoolingSetpoint,
+      ColumnWaterHeaterSetpoint
     ]
   end
 
@@ -1473,7 +1481,7 @@ class SchedulesFile
                     ColumnPoolPump,
                     ColumnPoolHeater,
                     ColumnHotTubPump,
-                    ColumnHotTubHeater] + SchedulesFile.SetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+                    ColumnHotTubHeater] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1485,7 +1493,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.WaterHeaterColumnNames.include?(col_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name)
         max_value_one[column_name] = false
       end
     end
@@ -1497,7 +1505,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.WaterHeaterColumnNames.include?(col_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name)
         min_value_zero[column_name] = false
       end
     end
