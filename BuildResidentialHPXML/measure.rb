@@ -1244,7 +1244,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_switchover_temp', false)
     arg.setDisplayName('Heat Pump: Backup Heating Switchover Temperature')
-    arg.setDescription("The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either '#{HPXML::HeatPumpBackupTypeIntegrated}' or '#{HPXML::HeatPumpBackupTypeSeparate}'.")
+    arg.setDescription("The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either '#{HPXML::HeatPumpBackupTypeIntegrated}' or '#{HPXML::HeatPumpBackupTypeSeparate}'. Both Switchover Temperature and Lockout Temperature cannot be specified.")
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_lockout_temp', false)
+    arg.setDisplayName('Heat Pump: Backup Heating Lockout Temperature')
+    arg.setDescription("The temperature above which the backup system is disabled in order to prevent backup heating operation during, e.g., a thermostat heating setback recovery event. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either '#{HPXML::HeatPumpBackupTypeIntegrated}' or '#{HPXML::HeatPumpBackupTypeSeparate}'. Both Switchover Temperature and Lockout Temperature cannot be specified.")
     arg.setUnits('deg-F')
     args << arg
 
@@ -4479,9 +4485,13 @@ class HPXMLFile
     end
 
     if args[:heat_pump_backup_type] != 'none'
-      if args[:heat_pump_backup_heating_switchover_temp].is_initialized
-        if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+        if args[:heat_pump_backup_heating_switchover_temp].is_initialized
           backup_heating_switchover_temp = args[:heat_pump_backup_heating_switchover_temp].get
+        end
+
+        if args[:heat_pump_backup_heating_lockout_temp].is_initialized
+          backup_heating_lockout_temp = args[:heat_pump_backup_heating_lockout_temp].get
         end
       end
     end
@@ -4550,6 +4560,7 @@ class HPXMLFile
                          backup_heating_efficiency_afue: backup_heating_efficiency_afue,
                          backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                          backup_heating_switchover_temp: backup_heating_switchover_temp,
+                         backup_heating_lockout_temp: backup_heating_lockout_temp,
                          heating_efficiency_hspf: heating_efficiency_hspf,
                          cooling_efficiency_seer: cooling_efficiency_seer,
                          heating_efficiency_cop: heating_efficiency_cop,

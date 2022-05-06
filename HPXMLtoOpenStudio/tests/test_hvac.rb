@@ -381,6 +381,21 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
+  def test_air_to_air_heat_pump_1_speed_backup_lockout_temperature
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-1-speed-backup-lockout-temperature.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    lockout_temperature = UnitConversions.convert(heat_pump.backup_heating_lockout_temp, 'F', 'C')
+
+    # Check unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_in_delta(lockout_temperature, unitary_system.maximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation, 0.01)
+  end
+
   def test_air_to_air_heat_pump_2_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-2-speed.xml'))
