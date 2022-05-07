@@ -65,6 +65,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-calctype-operational.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml',
@@ -92,6 +93,10 @@ def create_hpxmls
     'base-bldgtype-single-family-attached.xml' => 'base.xml',
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
     'base-bldgtype-single-family-attached-atticroof-cathedral.xml' => 'base-bldgtype-single-family-attached-2stories.xml',
+    'base-calctype-operational.xml' => 'base.xml',
+    'base-calctype-operational-misc-defaults.xml' => 'base-misc-defaults.xml',
+    'base-calctype-operational-misc-loads-large-uncommon.xml' => 'base-misc-loads-large-uncommon.xml',
+    'base-calctype-operational-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon2.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -510,6 +515,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   args['apply_validation'] = true
 
   if ['base.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeAsset
     args['simulation_control_timestep'] = 60
     args['site_iecc_zone'] = '5B'
     args['site_state_code'] = 'CO'
@@ -838,6 +844,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['hot_tub_heater_annual_therm'] = Constants.Auto
     args['hot_tub_heater_usage_multiplier'] = 1.0
   elsif ['ASHRAE_Standard_140/L100AC.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeAsset
     args['weather_station_epw_filepath'] = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
     args['geometry_unit_cfa'] = 1539.0
@@ -1437,6 +1444,31 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.59
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 40000
+  end
+
+  # Occ Calc Type
+  if ['base-calctype-operational.xml',
+      'base-calctype-operational-misc-loads-large-uncommon.xml',
+      'base-calctype-operational-misc-loads-large-uncommon2.xml',
+      'base-bldgtype-multifamily-calctype-operational.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
+    args['geometry_unit_num_occupants'] = 1
+    args['misc_plug_loads_television_annual_kwh'] = Constants.Auto
+    args['misc_plug_loads_other_annual_kwh'] = Constants.Auto
+    args['pool_pump_annual_kwh'] = Constants.Auto
+    args['pool_heater_annual_therm'] = Constants.Auto
+    args['pool_heater_annual_kwh'] = Constants.Auto
+    args['hot_tub_pump_annual_kwh'] = Constants.Auto
+    args['hot_tub_heater_annual_therm'] = Constants.Auto
+    args['hot_tub_heater_annual_kwh'] = Constants.Auto
+    args['misc_plug_loads_well_pump_annual_kwh'] = Constants.Auto
+    args['misc_plug_loads_vehicle_annual_kwh'] = Constants.Auto
+    args['misc_fuel_loads_grill_annual_therm'] = Constants.Auto
+    args['misc_fuel_loads_lighting_annual_therm'] = Constants.Auto
+    args['misc_fuel_loads_fireplace_annual_therm'] = Constants.Auto
+  elsif ['base-calctype-operational-misc-defaults.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
+    args['geometry_unit_num_occupants'] = 5
   end
 
   # DHW

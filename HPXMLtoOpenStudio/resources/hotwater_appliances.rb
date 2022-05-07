@@ -6,11 +6,11 @@ class HotWaterAndAppliances
 
     @runner = runner
     cfa = hpxml.building_construction.conditioned_floor_area
-    nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
+    nbeds = HPXMLDefaults.get_nbeds_adjusted_for_operational_calculation(hpxml)
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?

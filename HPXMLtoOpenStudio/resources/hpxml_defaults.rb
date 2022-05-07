@@ -12,6 +12,7 @@ class HPXMLDefaults
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
+    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml)
 
     infil_volume = nil
     infil_height = nil
@@ -63,9 +64,9 @@ class HPXMLDefaults
     apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
-    apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
-    apply_plug_loads(hpxml, cfa, nbeds, schedules_file)
-    apply_fuel_loads(hpxml, cfa, nbeds, schedules_file)
+    apply_pools_and_hot_tubs(hpxml, cfa, nbeds_adjusted, schedules_file)
+    apply_plug_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
+    apply_fuel_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
     apply_batteries(hpxml)
@@ -2622,6 +2623,22 @@ class HPXMLDefaults
       return HPXML::OrientationWest
     elsif (azimuth >= 315.0 - 22.5) && (azimuth < 315.0 + 22.5)
       return HPXML::OrientationNorthwest
+    end
+  end
+
+  def self.get_nbeds_adjusted_for_operational_calculation(hpxml)
+    occ_calc_type = hpxml.header.occupancy_calculation_type
+    unit_type = hpxml.building_construction.residential_facility_type
+    nbeds = hpxml.building_construction.number_of_bedrooms
+    if occ_calc_type == HPXML::OccupancyCalculationTypeAsset
+      return nbeds
+    elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
+      noccs = hpxml.building_occupancy.number_of_residents
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+        return -0.68 + 1.09 * noccs
+      elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
+        return -1.47 + 1.69 * noccs
+      end
     end
   end
 end
