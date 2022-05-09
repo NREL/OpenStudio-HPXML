@@ -1547,9 +1547,7 @@ class HVAC
     efficiency = heat_pump.backup_heating_efficiency_afue if efficiency.nil?
 
     if fuel.nil?
-      fuel = HPXML::FuelTypeElectricity
-      capacity = 0.0
-      efficiency = 1.0
+      return
     end
 
     if fuel == HPXML::FuelTypeElectricity

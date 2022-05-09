@@ -134,7 +134,7 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
   .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
   .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
-         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's capacity retention at the design temperature.
+         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
 
 HPXML Schedules
 ***************
@@ -1409,14 +1409,12 @@ If a backup type of "separate" is provided, additional information is entered in
   Element                                                                        Type      Units   Constraints  Required  Default    Notes
   =============================================================================  ========  ======  ===========  ========  =========  ==========================================
   ``BackupSystem``                                                               idref             See [#]_     Yes                  ID of separate backup heating system 
-  ``BackupHeatingSwitchoverTemperature`` or ``BackupHeatingLockoutTemperature``  double    F                    No        See [#]_   Separate backup heating system switchover/lockout temperature [#]_
+  ``BackupHeatingSwitchoverTemperature``                                         double    F                    No        <none>     Separate backup heating system switchover temperature [#]_
   =============================================================================  ========  ======  ===========  ========  =========  ==========================================
   
   .. [#] BackupSystem must reference a ``HeatingSystem``.
-  .. [#] BackupHeatingLockoutTemperature defaults to 40 deg-F if neither BackupHeatingSwitchoverTemperature nor BackupHeatingLockoutTemperature are provided.
   .. [#] Provide BackupHeatingSwitchoverTemperature for a situation where there is a discrete outdoor temperature when the heat pump stops operating and the backup heating system starts operating.
-         Alternatively, provide BackupHeatingLockoutTemperature for a situation where the backup heating is disabled above a certain temperature in order to prevent backup heating operation during, e.g., a thermostat heating setback recovery event.
-         If neither provided, the backup heating system will operate as needed for hours when the heat pump has insufficient capacity.
+         If not provided, the backup heating system will operate as needed for hours when the heat pump has insufficient capacity.
 
   .. note::
 
