@@ -57,7 +57,7 @@ class HPXMLDefaults
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
-    apply_water_heaters(hpxml, nbeds, eri_version)
+    apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml, schedules_file)
     apply_solar_thermal_systems(hpxml)
@@ -1502,13 +1502,14 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_water_heaters(hpxml, nbeds, eri_version)
+  def self.apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
     hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.is_shared_system.nil?
         water_heating_system.is_shared_system = false
         water_heating_system.is_shared_system_isdefaulted = true
       end
-      if water_heating_system.temperature.nil?
+      schedules_file_includes_water_heater_setpoint_temp = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnWaterHeaterSetpoint)
+      if water_heating_system.temperature.nil? && !schedules_file_includes_water_heater_setpoint_temp
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
         water_heating_system.temperature_isdefaulted = true
       end
@@ -1548,7 +1549,8 @@ class HPXMLDefaults
         end
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump)
-        if water_heating_system.operating_mode.nil?
+        schedules_file_includes_water_heater_operating_mode = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnWaterHeaterOperatingMode)
+        if water_heating_system.operating_mode.nil? && !schedules_file_includes_water_heater_operating_mode
           water_heating_system.operating_mode = HPXML::WaterHeaterOperatingModeStandard
           water_heating_system.operating_mode_isdefaulted = true
         end

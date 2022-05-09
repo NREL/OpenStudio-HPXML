@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Waterheater
-  def self.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
+  def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
@@ -21,6 +21,7 @@ class Waterheater
                                    loc_space: loc_space,
                                    loc_schedule: loc_schedule,
                                    model: model,
+                                   runner: runner,
                                    u: u,
                                    ua: ua,
                                    eta_c: eta_c,
@@ -28,12 +29,12 @@ class Waterheater
     loop.addSupplyBranchForComponent(new_heater)
 
     add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
-    add_desuperheater(model, water_heating_system, new_heater, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
 
     return loop
   end
 
-  def self.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system, schedules_file)
+  def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system, schedules_file)
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -54,6 +55,7 @@ class Waterheater
                                    loc_space: loc_space,
                                    loc_schedule: loc_schedule,
                                    model: model,
+                                   runner: runner,
                                    ua: ua,
                                    eta_c: eta_c,
                                    schedules_file: schedules_file)
@@ -61,7 +63,7 @@ class Waterheater
     loop.addSupplyBranchForComponent(new_heater)
 
     add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
-    add_desuperheater(model, water_heating_system, new_heater, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
 
     return loop
   end
@@ -139,7 +141,7 @@ class Waterheater
     tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule)
     loop.addSupplyBranchForComponent(tank)
 
-    add_desuperheater(model, water_heating_system, tank, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop)
 
     # Fan:SystemModel
     fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate)
@@ -153,7 +155,7 @@ class Waterheater
 
     # EMS for the HPWH control logic
     op_mode = water_heating_system.operating_mode
-    hpwh_ctrl_program = add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, top_element_setpoint_schedule, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
+    hpwh_ctrl_program = add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, top_element_setpoint_schedule, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -207,6 +209,7 @@ class Waterheater
                                    loc_space: loc_space,
                                    loc_schedule: loc_schedule,
                                    model: model,
+                                   runner: runner,
                                    ua: ua,
                                    is_combi: true,
                                    schedules_file: schedules_file)
@@ -975,7 +978,7 @@ class Waterheater
     return hpwh_inlet_air_program
   end
 
-  def self.add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_top_element_sp, hpwh_bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
+  def self.add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, hpwh_top_element_sp, hpwh_bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
     # Lower element is enabled if the ambient air temperature prevents the HP from running
     leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
     leschedoverride_actuator.setName("#{obj_name_hpwh} LESchedOverride")
@@ -1078,7 +1081,7 @@ class Waterheater
     fail "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
   end
 
-  def self.add_desuperheater(model, water_heating_system, tank, loc_space, loc_schedule, loop)
+  def self.add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop)
     return unless water_heating_system.uses_desuperheater
 
     desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, model)
@@ -1098,6 +1101,7 @@ class Waterheater
                                      loc_space: loc_space,
                                      loc_schedule: loc_schedule,
                                      model: model,
+                                     runner: runner,
                                      ua: assumed_ua,
                                      is_dsh_storage: true)
 
@@ -1603,7 +1607,7 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil)
+  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, runner:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil)
     # storage tank doesn't require water_heating_system class argument being passed
     if is_dsh_storage || is_combi
       fuel = nil
@@ -1634,7 +1638,7 @@ class Waterheater
       new_heater.setTankHeight(h_tank)
       new_heater.setMaximumTemperatureLimit(90)
       new_heater.setHeaterPriorityControl('MasterSlave')
-      configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model)
+      configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner)
       new_heater.setHeater1Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeater1Height(h_UE)
       new_heater.setHeater1DeadbandTemperatureDifference(5.556)
@@ -1673,7 +1677,7 @@ class Waterheater
       new_heater.setName(name)
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
       new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
-      configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model)
+      configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner)
       new_heater.setMaximumTemperatureLimit(99.0)
       if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
         new_heater.setHeaterControlType('Modulate')
@@ -1752,7 +1756,7 @@ class Waterheater
     end
   end
 
-  def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, set_temp_c, model)
+  def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, set_temp_c, model, runner)
     new_schedule = nil
     if not schedules_file.nil?
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
@@ -1770,7 +1774,7 @@ class Waterheater
     new_heater.setSetpointTemperatureSchedule(new_schedule)
   end
 
-  def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, set_temp_c, model)
+  def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, set_temp_c, model, runner)
     new_schedule = nil
     if not schedules_file.nil?
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
