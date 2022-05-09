@@ -158,6 +158,7 @@ base-foundation-unconditioned-basement.xml,1336.22,144.0,960.85,0.0,1104.85,144.
 base-foundation-unvented-crawlspace.xml,1321.55,144.0,963.8,0.0,1107.8,144.0,69.75,213.75,0.0,0.0,0.0,0.0,0.0
 base-foundation-vented-crawlspace.xml,1337.46,144.0,962.58,0.0,1106.58,144.0,86.88,230.88,0.0,0.0,0.0,0.0,0.0
 base-foundation-walkout-basement.xml,1630.13,144.0,1174.1,0.0,1318.1,144.0,168.03,312.03,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-1-speed-backup-lockout-temperature.xml,1583.29,144.0,1439.29,0.0,1583.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml,1272.5,144.0,1128.5,0.0,1272.5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml,1491.29,144.0,1347.29,0.0,1491.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-1-speed.xml,1601.81,144.0,1457.81,0.0,1601.81,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
