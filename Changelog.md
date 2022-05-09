@@ -5,7 +5,7 @@ __New Features__
 - **Breaking change**: New required `OccupancyCalculationType` input to specify operational vs asset calculation. If operational, `NumberofResidents` is required.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed HVAC setpoints via a schedule CSV file.
-  - Allows modeling detailed tank and heat pump water heater setpoints via a schedule CSV file.
+  - Allows modeling detailed water heater setpoints via a schedule CSV file.
   - Allows modeling detailed heat pump water heater operating modes via a schedule CSV file.
 - New heat pump capabilities:
   - **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:

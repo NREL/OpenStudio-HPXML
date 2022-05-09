@@ -1222,6 +1222,12 @@ class SchedulesFile
           end
         end
 
+        if only_zeros_and_ones[col_name]
+          if values.any? { |v| v > 0 || v < 1 }
+            fail "Schedule value for column '#{col_name}' must be either 0 or 1. [context: #{schedules_path}]"
+          end
+        end
+
         valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
         valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
         unless valid_num_rows.include? schedule_length
@@ -1470,6 +1476,12 @@ class SchedulesFile
     ]
   end
 
+  def self.OperatingModeColumnNames
+    return [
+      ColumnWaterHeaterOperatingMode
+    ]
+  end
+
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
@@ -1510,5 +1522,17 @@ class SchedulesFile
       end
     end
     return min_value_zero
+  end
+
+  def only_zeros_and_ones
+    only_zeros_and_ones = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      only_zeros_and_ones[column_name] = false
+      if SchedulesFile.OperatingModeColumnNames.include?(column_name)
+        only_zeros_and_ones[column_name] = true
+      end
+    end
+    return only_zeros_and_ones
   end
 end
