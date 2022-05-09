@@ -402,8 +402,6 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
-    next if hpxml_file != 'base-dhw-tankless-detailed-setpoints.xml'
-
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
