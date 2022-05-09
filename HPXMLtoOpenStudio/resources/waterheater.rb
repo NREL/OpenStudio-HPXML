@@ -124,6 +124,8 @@ class Waterheater
       top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
       top_element_setpoint_schedule.setValue((tset_C - 9.0001).round(4))
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !tset_C.nil?
     end
 
     airflow_rate = 181.0 # cfm
@@ -1002,6 +1004,8 @@ class Waterheater
       op_mode_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       op_mode_sensor.setName("#{obj_name_hpwh} op_mode")
       op_mode_sensor.setKeyName(op_mode_schedule.name.to_s)
+
+      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterOperatingMode}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
     end
 
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1757,6 +1761,8 @@ class Waterheater
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')
       new_schedule.setValue(set_temp_c)
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !set_temp_c.nil?
     end
     if new_heater.setpointTemperatureSchedule.is_initialized
       new_heater.setpointTemperatureSchedule.get.remove
@@ -1773,6 +1779,8 @@ class Waterheater
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')
       new_schedule.setValue(set_temp_c)
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !set_temp_c.nil?
     end
     new_heater.heater1SetpointTemperatureSchedule.remove
     new_heater.heater2SetpointTemperatureSchedule.remove

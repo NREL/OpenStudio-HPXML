@@ -1093,7 +1093,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                                                   "Both 'lighting_interior' schedule file and monthly multipliers provided; the latter will be ignored.",
                                                                                   "Both 'lighting_exterior' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'lighting_exterior' schedule file and weekend fractions provided; the latter will be ignored.",
-                                                                                  "Both 'lighting_exterior' schedule file and monthly multipliers provided; the latter will be ignored."] }
+                                                                                  "Both 'lighting_exterior' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'heating_setpoint' schedule file and heating setpoint temperature provided; the latter will be ignored.",
+                                                                                  "Both 'cooling_setpoint' schedule file and cooling setpoint temperature provided; the latter will be ignored.",
+                                                                                  "Both 'water_heater_setpoint' schedule file and setpoint temperature provided; the latter will be ignored.",
+                                                                                  "Both 'water_heater_operating_mode' schedule file and provided; the latter will be ignored."] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -1101,6 +1105,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       if ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple.xml'))
         hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/occupancy-smooth.csv'
+        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
+        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
+        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
       else
         fail "Unhandled case: #{warning_case}."
       end
