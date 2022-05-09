@@ -1831,25 +1831,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     water_heater_tank_model_type_choices = OpenStudio::StringVector.new
-    water_heater_tank_model_type_choices << Constants.Auto
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeMixed
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeStratified
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_tank_model_type', water_heater_tank_model_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_tank_model_type', water_heater_tank_model_type_choices, false)
     arg.setDisplayName('Water Heater: Tank Type')
     arg.setDescription("Type of tank model to use. The '#{HPXML::WaterHeaterTankModelTypeStratified}' tank generally provide more accurate results, but may significantly increase run time. Applies only to #{HPXML::WaterHeaterTypeStorage}.")
-    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     water_heater_operating_mode_choices = OpenStudio::StringVector.new
-    water_heater_operating_mode_choices << Constants.Auto
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeStandard
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeHeatPumpOnly
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_operating_mode', water_heater_operating_mode_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_operating_mode', water_heater_operating_mode_choices, false)
     arg.setDisplayName('Water Heater: Operating Mode')
     arg.setDescription("The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeStandard}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
-    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -5144,12 +5140,12 @@ class HPXMLFile
         heating_capacity = Float(args[:water_heater_heating_capacity])
       end
 
-      if args[:water_heater_tank_model_type] != Constants.Auto
-        tank_model_type = args[:water_heater_tank_model_type]
+      if args[:water_heater_tank_model_type].is_initialized
+        tank_model_type = args[:water_heater_tank_model_type].get
       end
     elsif [HPXML::WaterHeaterTypeHeatPump].include? water_heater_type
-      if args[:water_heater_operating_mode] != Constants.Auto
-        operating_mode = args[:water_heater_operating_mode]
+      if args[:water_heater_operating_mode].is_initialized
+        operating_mode = args[:water_heater_operating_mode].get
       end
     end
 

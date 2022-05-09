@@ -97,8 +97,9 @@ class Waterheater
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
       # Sensed schedule
       setpoint_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
-      Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
       if not setpoint_schedule.nil?
+        Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
+
         # Actuated schedule
         control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
@@ -1005,7 +1006,7 @@ class Waterheater
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
     hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
     # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
-    if op_mode == 'heat pump only'
+    if op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
       hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, 'F', 'C').round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, 'F', 'C').round(2)})")
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")

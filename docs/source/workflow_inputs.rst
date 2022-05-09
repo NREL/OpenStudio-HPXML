@@ -196,7 +196,7 @@ The column names available in the schedule CSV files are:
   ``vacancy``                     0/1    Vacancy schedule. See [#]_. Automatically overrides other columns.    N/A
   ==============================  =====  ====================================================================  ===================
 
-  .. [#] 0=standard, 1=heat pump.
+  .. [#] 0=standard, 1=heat pump only.
   .. [#] 1=vacant, 0=occupied.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
@@ -2078,7 +2078,7 @@ If a heat pump water heater is specified, additional information is entered in `
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1              Yes                 EnergyGuide label rated efficiency
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
-  ``extension/OperatingMode``                    string            See [#]_                        No        standard  Operating mode
+  ``extension/OperatingMode``                    string                           See [#]_         No        standard  Operating mode
   =============================================  ================  =============  ===============  ========  ========  =============================================
 
   .. [#] FuelType only choice is "electricity".

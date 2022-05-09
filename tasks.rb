@@ -701,8 +701,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
-    args['water_heater_tank_model_type'] = Constants.Auto
-    args['water_heater_operating_mode'] = Constants.Auto
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 50
     args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeNone
@@ -1028,8 +1026,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0
-    args['water_heater_tank_model_type'] = Constants.Auto
-    args['water_heater_operating_mode'] = Constants.Auto
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 0
     args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeNone
