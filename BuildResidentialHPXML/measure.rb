@@ -60,11 +60,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
-    arg.setDisplayName('Schedules: CSV File Paths')
-    arg.setDescription('Absolute/relative paths of csv files containing user-specified schedules. If multiple files, use a comma-separated list.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -73,6 +68,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_version', false)
     arg.setDisplayName('Software Info: Program Version')
     arg.setDescription('The version of the software program used.')
+    args << arg
+
+    occupancy_calculation_type_choices = OpenStudio::StringVector.new
+    occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeAsset
+    occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeOperational
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('occupancy_calculation_type', occupancy_calculation_type_choices, true)
+    arg.setDisplayName('Occupancy Calculation Type')
+    arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, end uses based on number of bedrooms are adjusted for the number of occupants.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
+    arg.setDisplayName('Schedules: CSV File Paths')
+    arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
@@ -3424,6 +3433,7 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
 
+    hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type]
     if args[:schedules_filepaths].is_initialized
       hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
@@ -5665,9 +5675,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_television_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_television_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_television_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_television_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5689,9 +5698,8 @@ class HPXMLFile
       frac_latent = Float(args[:misc_plug_loads_other_frac_latent])
     end
 
-    usage_multiplier = args[:misc_plug_loads_other_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_other_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_other_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5709,9 +5717,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_well_pump_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_well_pump_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_well_pump_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_well_pump_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
@@ -5727,9 +5734,8 @@ class HPXMLFile
       kWh_per_year = Float(args[:misc_plug_loads_vehicle_annual_kwh])
     end
 
-    usage_multiplier = args[:misc_plug_loads_vehicle_usage_multiplier]
-    if usage_multiplier == 1.0
-      usage_multiplier = nil
+    if args[:misc_plug_loads_vehicle_usage_multiplier] != 1.0
+      usage_multiplier = args[:misc_plug_loads_vehicle_usage_multiplier]
     end
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
