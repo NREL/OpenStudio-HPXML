@@ -1055,6 +1055,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_is_condensing', false)
+    arg.setDisplayName('Heating System: Is Condensing')
+    arg.setDescription("Whether the heating system is condensing or not. Only used for a non-electric #{HPXML::HVACTypeBoiler}.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_airflow_defect_ratio', false)
     arg.setDisplayName('Heating System: Airflow Defect Ratio')
     arg.setDescription("The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}.")
@@ -4362,6 +4367,12 @@ class HPXMLFile
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 
+    if heating_system_type == HPXML::HVACTypeBoiler && heating_system_fuel != HPXML::FuelTypeElectricity
+      if args[:heating_system_is_condensing].is_initialized
+        heating_system_is_condensing = args[:heating_system_is_condensing].get
+      end
+    end
+
     if args[:heating_system_airflow_defect_ratio].is_initialized
       if [HPXML::HVACTypeFurnace].include? heating_system_type
         airflow_defect_ratio = args[:heating_system_airflow_defect_ratio].get
@@ -4387,6 +4398,7 @@ class HPXMLFile
                               fraction_heat_load_served: fraction_heat_load_served,
                               heating_efficiency_afue: heating_efficiency_afue,
                               heating_efficiency_percent: heating_efficiency_percent,
+                              condensing_system: heating_system_is_condensing,
                               airflow_defect_ratio: airflow_defect_ratio,
                               is_shared_system: is_shared_system,
                               number_of_units_served: number_of_units_served,

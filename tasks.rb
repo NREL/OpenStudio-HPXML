@@ -259,6 +259,7 @@ def create_hpxmls
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-boiler-gas-only.xml' => 'base.xml',
+    'base-hvac-boiler-gas-only-non-condensing.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-oil-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-propane-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-wood-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -1868,6 +1869,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-boiler-gas-only.xml'].include? hpxml_file
     args['heating_system_type'] = HPXML::HVACTypeBoiler
     args['cooling_system_type'] = 'none'
+  elsif ['base-hvac-boiler-gas-only-non-condensing.xml'].include? hpxml_file
+    args['heating_system_is_condensing'] = false
+    args['heating_system_heating_efficiency'] = 0.86
   elsif ['base-hvac-boiler-oil-only.xml',
          'base-hvac-furnace-oil-only.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeOil

@@ -3210,7 +3210,8 @@ class HPXML < Object
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
-             :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system]
+             :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
+             :condensing_system]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3290,7 +3291,10 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       if not @heating_system_type.nil?
         heating_system_type_el = XMLHelper.add_element(heating_system, 'HeatingSystemType')
-        XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        heating_type_child = XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        if @heating_system_type == HPXML::HVACTypeBoiler
+          XMLHelper.add_element(heating_type_child, 'CondensingSystem', @condensing_system, :boolean, @condensing_system_isdefaulted) unless @condensing_system.nil?
+        end
       end
       XMLHelper.add_element(heating_system, 'HeatingSystemFuel', @heating_system_fuel, :string) unless @heating_system_fuel.nil?
       XMLHelper.add_element(heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
@@ -3331,6 +3335,7 @@ class HPXML < Object
       @is_shared_system = XMLHelper.get_value(heating_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
+      @condensing_system = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/CondensingSystem', :boolean)
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
       @heating_capacity = XMLHelper.get_value(heating_system, 'HeatingCapacity', :float)
       @heating_efficiency_afue = XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='#{UnitsAFUE}']/Value", :float)

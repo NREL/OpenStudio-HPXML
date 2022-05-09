@@ -982,6 +982,19 @@ class HPXMLDefaults
       heating_system.fan_coil_watts = nil
     end
 
+    # Default boiler type
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.condensing_system.nil?
+
+      if heating_system.heating_efficiency_afue >= 0.883 && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
+        heating_system.condensing_system = true
+      else
+        heating_system.condensing_system = false
+      end
+      heating_system.condensing_system_isdefaulted = true
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?

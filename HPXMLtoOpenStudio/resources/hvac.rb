@@ -423,7 +423,6 @@ class HVAC
   def self.apply_boiler(model, runner, heating_system,
                         sequential_heat_load_fracs, control_zone)
     obj_name = Constants.ObjectNameBoiler
-    is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
     oat_high = nil
     oat_low = nil
@@ -473,7 +472,7 @@ class HVAC
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
-    if is_condensing
+    if heating_system.condensing_system
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
       boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
       plr_Rated = 1.0
@@ -503,7 +502,7 @@ class HVAC
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
-    if is_condensing && oat_reset_enabled
+    if oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
       setpoint_manager_oar.setName(obj_name + ' outdoor reset')
       setpoint_manager_oar.setControlVariable('Temperature')

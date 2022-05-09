@@ -673,6 +673,7 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=Boiler]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler]'>
+      <sch:assert role='ERROR' test='count(h:HeatingSystemType/h:Boiler/h:CondensingSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingSystemType/Boiler/CondensingSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [HeatingSystemType=InUnitBoiler] or [HeatingSystemType=SharedBoiler] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel</sch:assert>

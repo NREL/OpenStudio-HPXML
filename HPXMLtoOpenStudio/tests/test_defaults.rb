@@ -1159,18 +1159,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
     hpxml.heating_systems[0].year_installed = 2010
+    hpxml.heating_systems[0].condensing_system = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, 12345, 0.85)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, 12345, 0.85, true)
 
     # Test defaults w/ in-unit boiler
     hpxml.heating_systems[0].electric_auxiliary_energy = nil
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].year_installed = 2010
+    hpxml.heating_systems[0].condensing_system = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 170.0, nil, 0.797)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 170.0, nil, 0.797, false)
 
     # Test inputs not overridden by defaults (shared boiler)
     hpxml = _create_hpxml('base-bldgtype-multifamily-shared-boiler-only-baseboard.xml')
@@ -1178,17 +1180,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
     hpxml.heating_systems[0].year_installed = 1980
+    hpxml.heating_systems[0].condensing_system = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, nil, 0.85)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, nil, 0.85, true)
 
     # Test defaults w/ shared boiler
     hpxml.heating_systems[0].electric_auxiliary_energy = nil
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].year_installed = 1980
+    hpxml.heating_systems[0].condensing_system = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 220.0, nil, 0.723)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 220.0, nil, 0.723, false)
   end
 
   def test_stoves
@@ -3443,7 +3447,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_boiler_values(heating_system, eae, heating_capacity, heating_efficiency_afue)
+  def _test_default_boiler_values(heating_system, eae, heating_capacity, heating_efficiency_afue, condensing_system)
     assert_equal(eae, heating_system.electric_auxiliary_energy)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
@@ -3455,6 +3459,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heating_system.heating_efficiency_afue, heating_efficiency_afue)
     end
+    assert_equal(heating_system.condensing_system, condensing_system)
   end
 
   def _test_default_stove_values(heating_system, fan_watts, heating_capacity, heating_efficiency_percent)

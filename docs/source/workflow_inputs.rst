@@ -1075,7 +1075,7 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   ====================================================================  =================  =========  ===============  ========  ========  ================================================
   Element                                                               Type               Units      Constraints      Required  Default   Notes
   ====================================================================  =================  =========  ===============  ========  ========  ================================================
-  ``DistributionSystem``                                                idref              See [#]_                    Yes                 ID of attached distribution system
+  ``DistributionSystem``                                                idref                         See [#]_         Yes                 ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
   ``extension/FanPowerWattsPerCFM``                                     double             W/cfm      >= 0             No        See [#]_  Blower fan efficiency at maximum fan speed [#]_
   ``extension/AirflowDefectRatio``                                      double             frac       -0.9 - 9         No        0.0       Deviation between design/installed airflows [#]_
@@ -1112,11 +1112,13 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   ====================================================================  =================  =========  ===============  ========  ========  =========================================
   Element                                                               Type               Units      Constraints      Required  Default   Notes
   ====================================================================  =================  =========  ===============  ========  ========  =========================================
-  ``IsSharedSystem``                                                    boolean                       No               false               Whether it serves multiple dwelling units
-  ``DistributionSystem``                                                idref              See [#]_   Yes                                  ID of attached distribution system
+  ``HeatingSystemType/Boiler/CondensingSystem``                         boolean                                        No        See [#]_  Whether it is a condensing boiler
+  ``IsSharedSystem``                                                    boolean                                        No        false     Whether it serves multiple dwelling units
+  ``DistributionSystem``                                                idref                         See [#]_         Yes                 ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
   ====================================================================  =================  =========  ===============  ========  ========  =========================================
 
+  .. [#] If CondensingSystem not provided, defaults to true if non-electric and AFUE > 0.883 (based on the AHRI directory of certified boilers), otherwise false.
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
@@ -1224,7 +1226,7 @@ If a central air conditioner is specified, additional information is entered in 
   ====================================================================  =================  ===========  ===============  ========  =========  ================================================
   Element                                                               Type               Units        Constraints      Required  Default    Notes
   ====================================================================  =================  ===========  ===============  ========  =========  ================================================
-  ``DistributionSystem``                                                idref              See [#]_     Yes                                   ID of attached distribution system
+  ``DistributionSystem``                                                idref                           See [#]_         Yes                  ID of attached distribution system
   ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
   ``CoolingCapacity``                                                   double             Btu/hr       >= 0             No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                                              double             frac         0 - 1            No                   Sensible heat fraction
@@ -1282,7 +1284,7 @@ If an evaporative cooler is specified, additional information is entered in ``Co
   =================================  ========  ======  ===========  ========  =========  ==================================
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ==================================
-  ``DistributionSystem``             idref             See [#]_     No                   ID of attached distribution system
+  ``DistributionSystem``             idref             See [#]_     No        <none>     ID of attached distribution system
   ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized  Cooling output capacity
   =================================  ========  ======  ===========  ========  =========  ==================================
 
@@ -1296,7 +1298,7 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   ===============================================  ========  ======  ===========  ========  =========  ===============================================
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ===============================================
-  ``DistributionSystem``                           idref             See [#]_     No                   ID of attached distribution system
+  ``DistributionSystem``                           idref             See [#]_     No        <none>     ID of attached distribution system
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
@@ -1468,7 +1470,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ===============================================  ========  ======  ========================  ========  =========  ==============================================
   Element                                          Type      Units   Constraints               Required  Default    Notes
   ===============================================  ========  ======  ========================  ========  =========  ==============================================
-  ``DistributionSystem``                           idref             See [#]_                  No                   ID of attached distribution system, if present
+  ``DistributionSystem``                           idref             See [#]_                  No        <none>     ID of attached distribution system, if present
   ``HeatingCapacity``                              double    Btu/hr  >= 0                      No        autosized  Heating output capacity (excluding any backup heating)
   ``HeatingCapacity17F``                           double    Btu/hr  >= 0, <= HeatingCapacity  No                   Heating output capacity at 17F, if available
   ``CoolingCapacity``                              double    Btu/hr  >= 0                      No        autosized  Cooling output capacity
@@ -1683,7 +1685,7 @@ Each separate HVAC distribution system is entered as a ``/HPXML/Building/Buildin
   Element                         Type     Units    Constraints  Required  Default    Notes
   ==============================  =======  =======  ===========  ========  =========  =============================
   ``SystemIdentifier``            id                             Yes                  Unique identifier
-  ``DistributionSystemType``      element           1 [#]_       Yes                  Type of distribution system
+  ``DistributionSystemType``      element           See [#]_     Yes                  Type of distribution system
   ``ConditionedFloorAreaServed``  double   ft2      > 0          See [#]_             Conditioned floor area served
   ==============================  =======  =======  ===========  ========  =========  =============================
 

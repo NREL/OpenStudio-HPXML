@@ -13,6 +13,9 @@ __New Features__
   - Allows the separate backup system to be a central system (e.g., central furnace w/ ducts). Previously only non-central system types were allowed.
   - Heat pumps with switchover temperatures are now autosized by taking into account the switchover temperature, if higher than the heating design temperature.
   - Allows `BackupHeatingLockoutTemperature` as an optional input to control integrated backup heating availability during, e.g., a thermostat heating setback recovery event; defaults to 40F.
+- New boiler capabilities:
+  - Allows an optional `CondensingSystem` boolean input; defaults based on AFUE.
+  - Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Updates HVAC fans to use fan power law (cubic relationship between fan speed and power).
 - Allows specifying a `StormWindow` element for windows/skylights; U-factors and SHGCs are automatically adjusted.
@@ -23,7 +26,6 @@ __New Features__
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
-- Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - Switches from EnergyPlus SQL output to MessagePack output for faster performance and reduced file sizes when requesting timeseries outputs.
 - Allows MessagePack annual/timeseries output files to be generated instead of CSV/JSON.
 - Switches from ScriptF to CarrollMRT radiant exchange algorithm.
