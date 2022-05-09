@@ -155,6 +155,7 @@ def create_hpxmls
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base-dhw-tankless-gas.xml',
+    'base-dhw-tankless-detailed-setpoints.xml' => 'base-dhw-tankless-gas.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-beds-1.xml' => 'base.xml',
@@ -401,6 +402,8 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
+    next if hpxml_file != 'base-dhw-tankless-detailed-setpoints.xml'
+
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
@@ -2530,6 +2533,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
   elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
+  elsif ['base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']

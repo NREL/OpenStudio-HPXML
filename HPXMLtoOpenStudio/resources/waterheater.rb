@@ -33,7 +33,7 @@ class Waterheater
     return loop
   end
 
-  def self.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system)
+  def self.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system, schedules_file)
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -55,7 +55,8 @@ class Waterheater
                                    loc_schedule: loc_schedule,
                                    model: model,
                                    ua: ua,
-                                   eta_c: eta_c)
+                                   eta_c: eta_c,
+                                   schedules_file: schedules_file)
 
     loop.addSupplyBranchForComponent(new_heater)
 
@@ -164,7 +165,7 @@ class Waterheater
     return loop
   end
 
-  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
+  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(model, water_heating_system.related_hvac_idref)
@@ -205,7 +206,8 @@ class Waterheater
                                    loc_schedule: loc_schedule,
                                    model: model,
                                    ua: ua,
-                                   is_combi: true)
+                                   is_combi: true,
+                                   schedules_file: schedules_file)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
 
     # Store combi assumed EF for ERI calculation
