@@ -420,23 +420,9 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_boiler(model, runner, heating_system,
-                        sequential_heat_load_fracs, control_zone)
+  def self.apply_boiler(model, runner, heating_system, hvac_control, sequential_heat_load_fracs, control_zone)
     obj_name = Constants.ObjectNameBoiler
-    is_condensing = false # FUTURE: Expose as input; default based on AFUE
-    oat_reset_enabled = false
-    oat_high = nil
-    oat_low = nil
-    oat_hwst_high = nil
-    oat_hwst_low = nil
     design_temp = 180.0 # deg-F
-
-    if oat_reset_enabled
-      if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
-        runner.registerWarning('Boiler outdoor air temperature (OAT) reset is enabled but no setpoints were specified so OAT reset is being disabled.')
-        oat_reset_enabled = false
-      end
-    end
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
@@ -473,19 +459,17 @@ class HVAC
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
-    if is_condensing
+    if heating_system.condensing_system
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
-      boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
-      plr_Rated = 1.0
-      plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'R', 'K')
-      # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
-      condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
-      boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
-      boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
-      boiler.setNominalThermalEfficiency(boilerEff_Design)
+      boiler_rated_HWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
+      boiler_design_HWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'R', 'K')
+      cond_boiler_te_coeff = [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723]
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-      boiler_eff_curve = create_curve_biquadratic(model, [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723], 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+      boiler_eff_curve = create_curve_biquadratic(model, cond_boiler_te_coeff, 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+
+      curve_rated_value = MathTools.biquadratic(1.0, boiler_rated_HWRT, cond_boiler_te_coeff)
+      curve_design_value = MathTools.biquadratic(1.0, boiler_design_HWRT, cond_boiler_te_coeff)
+      boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue / curve_rated_value * curve_design_value)
     else
       boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
@@ -503,25 +487,25 @@ class HVAC
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
-    if is_condensing && oat_reset_enabled
+    if hvac_control.hot_water_reset_control == HPXML::HotWaterResetControlSeasonal
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
       setpoint_manager_oar.setName(obj_name + ' outdoor reset')
       setpoint_manager_oar.setControlVariable('Temperature')
-      setpoint_manager_oar.setSetpointatOutdoorLowTemperature(UnitConversions.convert(oat_hwst_low, 'F', 'C'))
-      setpoint_manager_oar.setOutdoorLowTemperature(UnitConversions.convert(oat_low, 'F', 'C'))
-      setpoint_manager_oar.setSetpointatOutdoorHighTemperature(UnitConversions.convert(oat_hwst_high, 'F', 'C'))
-      setpoint_manager_oar.setOutdoorHighTemperature(UnitConversions.convert(oat_high, 'F', 'C'))
+      setpoint_manager_oar.setSetpointatOutdoorLowTemperature(UnitConversions.convert(hvac_control.hot_water_reset_setpoint_at_low_oat, 'F', 'C'))
+      setpoint_manager_oar.setOutdoorLowTemperature(UnitConversions.convert(hvac_control.hot_water_reset_low_oat, 'F', 'C'))
+      setpoint_manager_oar.setSetpointatOutdoorHighTemperature(UnitConversions.convert(hvac_control.hot_water_reset_setpoint_at_high_oat, 'F', 'C'))
+      setpoint_manager_oar.setOutdoorHighTemperature(UnitConversions.convert(hvac_control.hot_water_reset_high_oat, 'F', 'C'))
       setpoint_manager_oar.addToNode(plant_loop.supplyOutletNode)
+    else
+      hydronic_heat_supply_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
+      hydronic_heat_supply_setpoint.setName(obj_name + ' hydronic heat supply setpoint')
+      hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(design_temp, 'F', 'C'))
+
+      setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, hydronic_heat_supply_setpoint)
+      setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
+      setpoint_manager_scheduled.setControlVariable('Temperature')
+      setpoint_manager_scheduled.addToNode(plant_loop.supplyOutletNode)
     end
-
-    hydronic_heat_supply_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-    hydronic_heat_supply_setpoint.setName(obj_name + ' hydronic heat supply setpoint')
-    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(design_temp, 'F', 'C'))
-
-    setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, hydronic_heat_supply_setpoint)
-    setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
-    setpoint_manager_scheduled.setControlVariable('Temperature')
-    setpoint_manager_scheduled.addToNode(plant_loop.supplyOutletNode)
 
     pipe_supply_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
     plant_loop.addSupplyBranchForComponent(pipe_supply_bypass)

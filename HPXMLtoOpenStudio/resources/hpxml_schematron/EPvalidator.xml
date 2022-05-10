@@ -673,6 +673,7 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=Boiler]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler]'>
+      <sch:assert role='ERROR' test='count(h:HeatingSystemType/h:Boiler/h:CondensingSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingSystemType/Boiler/CondensingSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [HeatingSystemType=InUnitBoiler] or [HeatingSystemType=SharedBoiler] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel</sch:assert>
@@ -1113,6 +1114,7 @@
       <sch:assert role='ERROR' test='count(h:SetpointTempHeatingSeason) + count(h:extension/h:WeekendSetpointTempsHeatingSeason) = 1'>Expected 1 element(s) for xpath: SetpointTempHeatingSeason | extension/WeekendSetpointTempsHeatingSeason</sch:assert>
       <sch:assert role='ERROR' test='count(h:SetbackTempHeatingSeason) + count(h:extension/h:WeekdaySetpointTempsHeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetbackTempHeatingSeason | extension/WeekdaySetpointTempsHeatingSeason</sch:assert> <!-- See [HVACControl=HeatingSetback] -->
       <sch:assert role='ERROR' test='count(h:SetbackTempHeatingSeason) + count(h:extension/h:WeekendSetpointTempsHeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetbackTempHeatingSeason | extension/WeekendSetpointTempsHeatingSeason</sch:assert> <!-- See [HVACControl=HeatingSetback] -->
+      <sch:assert role='ERROR' test='count(h:HotWaterResetControl[text()="seasonal"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterResetControl[text()="seasonal"]</sch:assert> <!-- See [HVACControl=HotWaterResetControl] -->
       <sch:assert role='ERROR' test='count(h:HeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heating</sch:assert> <!-- See [HVACControl=HeatingSeason] -->
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:SetpointTempHeatingSeason) &lt; 58'>Heating setpoint should typically be greater than or equal to 58 deg-F.</sch:report>
@@ -1127,6 +1129,18 @@
       <sch:assert role='ERROR' test='count(h:extension/h:SetbackStartHourHeating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetbackStartHourHeating</sch:assert> <!-- 0 = midnight. 12 = noon -->
       <sch:assert role='ERROR' test='number(h:extension/h:SetbackStartHourHeating) &gt;= 0 or not(h:extension/h:SetbackStartHourHeating)'>Expected extension/SetbackStartHourHeating to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:SetbackStartHourHeating) &lt;= 23 or not(h:extension/h:SetbackStartHourHeating)'>Expected extension/SetbackStartHourHeating to be less than or equal to 23</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HVACControl=HotWaterResetControl]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:HotWaterResetControl="seasonal"]'>
+      <sch:assert role='ERROR' test='count(h:extension/h:HotWaterResetSetpointAtLowOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HotWaterResetSetpointAtLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HotWaterResetLowOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HotWaterResetLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HotWaterResetSetpointAtHighOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HotWaterResetSetpointAtHighOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:HotWaterResetSetpointAtHighOutdoorTemperature) &lt; number(h:extension/h:HotWaterResetSetpointAtLowOutdoorTemperature) or not(h:extension/h:HotWaterResetSetpointAtHighOutdoorTemperature) or not(h:extension/h:HotWaterResetSetpointAtLowOutdoorTemperature)'>Expected extension/HotWaterResetSetpointAtHighOutdoorTemperature to be less than extension/HotWaterResetSetpointAtLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HotWaterResetHighOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HotWaterResetHighOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:HotWaterResetHighOutdoorTemperature) &gt; number(h:extension/h:HotWaterResetLowOutdoorTemperature) or not(h:extension/h:HotWaterResetHighOutdoorTemperature) or not(h:extension/h:HotWaterResetLowOutdoorTemperature)'>Expected extension/HotWaterResetHighOutdoorTemperature to be greater than extension/HotWaterResetLowOutdoorTemperature</sch:assert>
     </sch:rule>
   </sch:pattern>
 

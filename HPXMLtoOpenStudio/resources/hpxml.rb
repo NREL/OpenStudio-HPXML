@@ -150,6 +150,8 @@ class HPXML < Object
   HeatPumpSizingACCA = 'ACCA'
   HeatPumpSizingHERS = 'HERS'
   HeatPumpSizingMaxLoad = 'MaxLoad'
+  HotWaterResetControlOther = 'other'
+  HotWaterResetControlSeasonal = 'seasonal'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
   HVACCompressorTypeVariableSpeed = 'variable speed'
@@ -3210,7 +3212,8 @@ class HPXML < Object
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
-             :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system]
+             :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
+             :condensing_system]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3290,7 +3293,10 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       if not @heating_system_type.nil?
         heating_system_type_el = XMLHelper.add_element(heating_system, 'HeatingSystemType')
-        XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        heating_type_child = XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        if @heating_system_type == HPXML::HVACTypeBoiler
+          XMLHelper.add_element(heating_type_child, 'CondensingSystem', @condensing_system, :boolean, @condensing_system_isdefaulted) unless @condensing_system.nil?
+        end
       end
       XMLHelper.add_element(heating_system, 'HeatingSystemFuel', @heating_system_fuel, :string) unless @heating_system_fuel.nil?
       XMLHelper.add_element(heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
@@ -3331,6 +3337,7 @@ class HPXML < Object
       @is_shared_system = XMLHelper.get_value(heating_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
+      @condensing_system = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/CondensingSystem', :boolean)
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
       @heating_capacity = XMLHelper.get_value(heating_system, 'HeatingCapacity', :float)
       @heating_efficiency_afue = XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='#{UnitsAFUE}']/Value", :float)
@@ -3842,11 +3849,13 @@ class HPXML < Object
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
-             :ceiling_fan_cooling_setpoint_temp_offset,
-             :weekday_heating_setpoints, :weekend_heating_setpoints,
-             :weekday_cooling_setpoints, :weekend_cooling_setpoints,
-             :seasons_heating_begin_month, :seasons_heating_begin_day, :seasons_heating_end_month, :seasons_heating_end_day,
-             :seasons_cooling_begin_month, :seasons_cooling_begin_day, :seasons_cooling_end_month, :seasons_cooling_end_day]
+             :ceiling_fan_cooling_setpoint_temp_offset, :weekday_heating_setpoints,
+             :weekend_heating_setpoints, :weekday_cooling_setpoints, :weekend_cooling_setpoints,
+             :seasons_heating_begin_month, :seasons_heating_begin_day, :seasons_heating_end_month,
+             :seasons_heating_end_day, :seasons_cooling_begin_month, :seasons_cooling_begin_day,
+             :seasons_cooling_end_month, :seasons_cooling_end_day, :hot_water_reset_control,
+             :hot_water_reset_low_oat, :hot_water_reset_high_oat, :hot_water_reset_setpoint_at_low_oat,
+             :hot_water_reset_setpoint_at_high_oat]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3876,6 +3885,7 @@ class HPXML < Object
       XMLHelper.add_element(hvac_control, 'SetupTempCoolingSeason', @cooling_setup_temp, :float) unless @cooling_setup_temp.nil?
       XMLHelper.add_element(hvac_control, 'SetpointTempCoolingSeason', @cooling_setpoint_temp, :float, @cooling_setpoint_temp_isdefaulted) unless @cooling_setpoint_temp.nil?
       XMLHelper.add_element(hvac_control, 'TotalSetupHoursperWeekCooling', @cooling_setup_hours_per_week, :integer) unless @cooling_setup_hours_per_week.nil?
+      XMLHelper.add_element(hvac_control, 'HotWaterResetControl', @hot_water_reset_control, :string) unless @hot_water_reset_control.nil?
       if (not @seasons_heating_begin_month.nil?) || (not @seasons_heating_begin_day.nil?) || (not @seasons_heating_end_month.nil?) || (not @seasons_heating_end_day.nil?)
         heating_season = XMLHelper.add_element(hvac_control, 'HeatingSeason')
         XMLHelper.add_element(heating_season, 'BeginMonth', @seasons_heating_begin_month, :integer, @seasons_heating_begin_month_isdefaulted) unless @seasons_heating_begin_month.nil?
@@ -3897,6 +3907,10 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
+      XMLHelper.add_extension(hvac_control, 'HotWaterResetLowOutdoorTemperature', @hot_water_reset_low_oat, :float, @hot_water_reset_low_oat_isdefaulted) unless @hot_water_reset_low_oat.nil?
+      XMLHelper.add_extension(hvac_control, 'HotWaterResetSetpointAtLowOutdoorTemperature', @hot_water_reset_setpoint_at_low_oat, :float, @hot_water_reset_setpoint_at_low_oat_isdefaulted) unless @hot_water_reset_setpoint_at_low_oat.nil?
+      XMLHelper.add_extension(hvac_control, 'HotWaterResetHighOutdoorTemperature', @hot_water_reset_high_oat, :float, @hot_water_reset_high_oat_isdefaulted) unless @hot_water_reset_high_oat.nil?
+      XMLHelper.add_extension(hvac_control, 'HotWaterResetSetpointAtHighOutdoorTemperature', @hot_water_reset_setpoint_at_high_oat, :float, @hot_water_reset_setpoint_at_high_oat_isdefaulted) unless @hot_water_reset_setpoint_at_high_oat.nil?
     end
 
     def from_oga(hvac_control)
@@ -3918,6 +3932,7 @@ class HPXML < Object
       @seasons_cooling_begin_day = XMLHelper.get_value(hvac_control, 'CoolingSeason/BeginDayOfMonth', :integer)
       @seasons_cooling_end_month = XMLHelper.get_value(hvac_control, 'CoolingSeason/EndMonth', :integer)
       @seasons_cooling_end_day = XMLHelper.get_value(hvac_control, 'CoolingSeason/EndDayOfMonth', :integer)
+      @hot_water_reset_control = XMLHelper.get_value(hvac_control, 'HotWaterResetControl', :string)
       @heating_setback_start_hour = XMLHelper.get_value(hvac_control, 'extension/SetbackStartHourHeating', :integer)
       @cooling_setup_start_hour = XMLHelper.get_value(hvac_control, 'extension/SetupStartHourCooling', :integer)
       @ceiling_fan_cooling_setpoint_temp_offset = XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset', :float)
@@ -3925,6 +3940,10 @@ class HPXML < Object
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
+      @hot_water_reset_low_oat = XMLHelper.get_value(hvac_control, 'extension/HotWaterResetLowOutdoorTemperature', :float)
+      @hot_water_reset_setpoint_at_low_oat = XMLHelper.get_value(hvac_control, 'extension/HotWaterResetSetpointAtLowOutdoorTemperature', :float)
+      @hot_water_reset_high_oat = XMLHelper.get_value(hvac_control, 'extension/HotWaterResetHighOutdoorTemperature', :float)
+      @hot_water_reset_setpoint_at_high_oat = XMLHelper.get_value(hvac_control, 'extension/HotWaterResetSetpointAtHighOutdoorTemperature', :float)
     end
   end
 

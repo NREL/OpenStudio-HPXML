@@ -971,15 +971,31 @@ class HPXMLDefaults
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 
-    # Default boiler EAE
+    # Default boiler properties
     hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.electric_auxiliary_energy.nil?
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
-      heating_system.electric_auxiliary_energy_isdefaulted = true
-      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
-      heating_system.shared_loop_watts = nil
-      heating_system.shared_loop_motor_efficiency = nil
-      heating_system.fan_coil_watts = nil
+      if heating_system.electric_auxiliary_energy.nil?
+        heating_system.electric_auxiliary_energy_isdefaulted = true
+        heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+        heating_system.shared_loop_watts = nil
+        heating_system.shared_loop_motor_efficiency = nil
+        heating_system.fan_coil_watts = nil
+      end
+      next unless heating_system.condensing_system.nil?
+
+      if heating_system.heating_efficiency_afue >= 0.883 && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
+        heating_system.condensing_system = true
+      else
+        heating_system.condensing_system = false
+      end
+      heating_system.condensing_system_isdefaulted = true
+    end
+
+    # Default boiler type
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.condensing_system.nil?
     end
 
     # Default AC/HP sensible heat ratio
@@ -1300,6 +1316,25 @@ class HPXMLDefaults
         hvac_control.cooling_setup_start_hour_isdefaulted = true
       end
 
+      if hvac_control.hot_water_reset_control == HPXML::HotWaterResetControlSeasonal
+        if hvac_control.hot_water_reset_setpoint_at_low_oat.nil?
+          hvac_control.hot_water_reset_setpoint_at_low_oat = 180.0
+          hvac_control.hot_water_reset_setpoint_at_low_oat_isdefaulted = true
+        end
+        if hvac_control.hot_water_reset_low_oat.nil?
+          hvac_control.hot_water_reset_low_oat = 0.0
+          hvac_control.hot_water_reset_low_oat_isdefaulted = true
+        end
+        if hvac_control.hot_water_reset_setpoint_at_high_oat.nil?
+          hvac_control.hot_water_reset_setpoint_at_high_oat = 95.0
+          hvac_control.hot_water_reset_setpoint_at_high_oat_isdefaulted = true
+        end
+        if hvac_control.hot_water_reset_high_oat.nil?
+          hvac_control.hot_water_reset_high_oat = 68.0
+          hvac_control.hot_water_reset_high_oat_isdefaulted = true
+        end
+      end
+
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
          hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
         hvac_control.seasons_heating_begin_month = 1
@@ -1327,6 +1362,7 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
+    # Air distribution defaults
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
       next if hvac_distribution.ducts.empty?

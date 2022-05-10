@@ -259,6 +259,8 @@ def create_hpxmls
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-boiler-gas-only.xml' => 'base.xml',
+    'base-hvac-boiler-gas-only-non-condensing.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-hvac-boiler-gas-only-outdoor-reset-control.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-oil-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-propane-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-wood-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -1868,6 +1870,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-boiler-gas-only.xml'].include? hpxml_file
     args['heating_system_type'] = HPXML::HVACTypeBoiler
     args['cooling_system_type'] = 'none'
+  elsif ['base-hvac-boiler-gas-only-non-condensing.xml'].include? hpxml_file
+    args['heating_system_is_condensing'] = false
+    args['heating_system_heating_efficiency'] = 0.86
+  elsif ['base-hvac-boiler-gas-only-outdoor-reset-control.xml'].include? hpxml_file
+    args['hvac_control_hot_water_reset_control'] = HPXML::HotWaterResetControlSeasonal
   elsif ['base-hvac-boiler-oil-only.xml',
          'base-hvac-furnace-oil-only.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeOil
@@ -4123,6 +4130,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[1].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
+  end
+  if ['base-hvac-boiler-gas-only-outdoor-reset-control.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_low_oat = 190.0
+    hpxml.hvac_controls[0].hot_water_reset_low_oat = 5.0
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_high_oat = 100.0
+    hpxml.hvac_controls[0].hot_water_reset_high_oat = 70.0
   end
 
   # ------------------ #
