@@ -95,6 +95,9 @@ class Waterheater
     bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
     bottom_element_setpoint_schedule.setValue(-60)
 
+    water_heater_setpoint = 125 # deg-F
+    water_heater_offset = 48.2 # deg-F
+
     setpoint_schedule = nil
     if not schedules_file.nil?
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
@@ -106,16 +109,16 @@ class Waterheater
         # Actuated schedule
         control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
-        control_setpoint_schedule.setValue(51.67)
+        control_setpoint_schedule.setValue(UnitConversions.convert(water_heater_setpoint, 'F', 'C'))
 
         # Note: This gets overwritten by EMS later, see HPWH Control program
         top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-        top_element_setpoint_schedule.setValue(51.67 - 9.00)
+        top_element_setpoint_schedule.setValue(UnitConversions.convert(water_heater_setpoint, 'F', 'C') - UnitConversions.convert(water_heater_offset, 'F', 'C'))
       end
     end
     if setpoint_schedule.nil?
-      tset_C = UnitConversions.convert(water_heating_system.temperature, 'F', 'C').to_f.round(2)
+      tset_C = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
 
       setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       setpoint_schedule.setName("#{obj_name_hpwh} Setpoint")
@@ -125,7 +128,7 @@ class Waterheater
 
       top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-      top_element_setpoint_schedule.setValue((tset_C - 9.0001).round(4))
+      top_element_setpoint_schedule.setValue((tset_C - UnitConversions.convert(water_heater_offset, 'F', 'C')))
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !tset_C.nil?
     end
