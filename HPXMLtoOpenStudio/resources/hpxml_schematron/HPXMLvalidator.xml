@@ -315,6 +315,7 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl'>
       <sch:assert role='ERROR' test='h:ControlType[text()="programmable thermostat" or text()="manual thermostat" or text()="digital thermostat" or text()="timer" or text()="EMCS" or text()="other"] or not(h:ControlType)'>Expected ControlType to be 'programmable thermostat' or 'manual thermostat' or 'digital thermostat' or 'timer' or 'EMCS' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:HotWaterResetControl[text()="seasonal" or text()="other"] or not(h:HotWaterResetControl)'>Expected HotWaterResetControl to be 'seasonal' or 'other'</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1'>Expected SystemIdentifier with id attribute</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:HeatingSeason'>

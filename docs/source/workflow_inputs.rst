@@ -1113,7 +1113,6 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   Element                                                               Type               Units      Constraints      Required  Default   Notes
   ====================================================================  =================  =========  ===============  ========  ========  =========================================
   ``HeatingSystemType/Boiler/CondensingSystem``                         boolean                                        No        See [#]_  Whether it is a condensing boiler
-  ``HeatingSystemType/Boiler/OutdoorResetControl``                      boolean                                        No        false     Whether it is has outdoor reset controls
   ``IsSharedSystem``                                                    boolean                                        No        false     Whether it serves multiple dwelling units
   ``DistributionSystem``                                                idref                         See [#]_         Yes                 ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
@@ -1124,17 +1123,6 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
   .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
-
-If the boiler has outdoor reset control, additional information is entered in ``HeatingSystem``.
-
-  ===================================================================================  ======  =====  ==============================================  ========  ========  =========================================
-  Element                                                                              Type    Units  Constraints                                     Required  Default   Notes
-  ===================================================================================  ======  =====  ==============================================  ========  ========  =========================================
-  ``HeatingSystemType/Boiler/extension/OutdoorResetLowOutdoorTemperature``             double  F                                                      No        0.0       Low outdoor air temperature
-  ``HeatingSystemType/Boiler/extension/OutdoorResetSetpointAtLowOutdoorTemperature``   double  F                                                      No        180.0     Hot water setpoint at low outdoor air temperature
-  ``HeatingSystemType/Boiler/extension/OutdoorResetHighOutdoorTemperature``            double  F      > OutdoorResetLowOutdoorTemperature             No        68.0      High outdoor air temperature
-  ``HeatingSystemType/Boiler/extension/OutdoorResetSetpointAtHighOutdoorTemperature``  double  F      < OutdoorResetSetpointAtHighOutdoorTemperature  No        95.0      Hot water setpoint at high outdoor air temperature
-  ===================================================================================  ======  =====  ==============================================  ========  ========  =========================================
 
 If an in-unit boiler if specified, additional information is entered in ``HeatingSystem``.
 
@@ -1605,14 +1593,27 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   Element                                                  Type      Units  Constraints  Required  Default    Notes
   =======================================================  ========  =====  ===========  ========  =========  ========================================
   ``SystemIdentifier``                                     id                            Yes                  Unique identifier
+  ``HotWaterResetControl``                                 string           See [#]_     No        <none>     Whether there is a boiler with hot water outdoor reset control
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
   ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
   =======================================================  ========  =====  ===========  ========  =========  ========================================
 
+  .. [#] HotWaterResetControl choices are "seasonal" and "other"; only the "seasonal" choice will have an effect on the boiler energy use.
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
+
+If boiler hot water reset control is defined, additional information is entered in ``HVACControl``.
+
+  ===========================================================  ======  =====  ==============================================  ========  ========  =========================================
+  Element                                                      Type    Units  Constraints                                     Required  Default   Notes
+  ===========================================================  ======  =====  ==============================================  ========  ========  =========================================
+  ``extension/HotWaterResetSetpointAtLowOutdoorTemperature``   double  F                                                      No        180.0     Hot water setpoint at low outdoor air temperature
+  ``extension/HotWaterResetLowOutdoorTemperature``             double  F                                                      No        0.0       Low outdoor air temperature
+  ``extension/HotWaterResetSetpointAtHighOutdoorTemperature``  double  F      < OutdoorResetSetpointAtHighOutdoorTemperature  No        95.0      Hot water setpoint at high outdoor air temperature
+  ``extension/HotWaterResetHighOutdoorTemperature``            double  F      > OutdoorResetLowOutdoorTemperature             No        68.0      High outdoor air temperature
+  ===========================================================  ======  =====  ==============================================  ========  ========  =========================================
 
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 

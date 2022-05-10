@@ -3681,11 +3681,6 @@
 						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
-						<xs:element minOccurs="0" name="OutdoorResetControl" type="HPXMLBoolean">
-							<xs:annotation>
-								<xs:documentation>Outdoor Reset controls respond to changes in weather by changing the boiler water temperature circulating throughout the building, in order to save fuel.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>

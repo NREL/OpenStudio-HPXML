@@ -322,15 +322,7 @@
               <SystemIdentifier id='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
-                <Boiler>
-                  <OutdoorResetControl>true</OutdoorResetControl>
-                  <extension>
-                    <OutdoorResetLowOutdoorTemperature>5.0</OutdoorResetLowOutdoorTemperature>
-                    <OutdoorResetSetpointAtLowOutdoorTemperature>190.0</OutdoorResetSetpointAtLowOutdoorTemperature>
-                    <OutdoorResetHighOutdoorTemperature>70.0</OutdoorResetHighOutdoorTemperature>
-                    <OutdoorResetSetpointAtHighOutdoorTemperature>100.0</OutdoorResetSetpointAtHighOutdoorTemperature>
-                  </extension>
-                </Boiler>
+                <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
@@ -345,6 +337,13 @@
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <HotWaterResetControl>seasonal</HotWaterResetControl>
+            <extension>
+              <HotWaterResetLowOutdoorTemperature>5.0</HotWaterResetLowOutdoorTemperature>
+              <HotWaterResetSetpointAtLowOutdoorTemperature>190.0</HotWaterResetSetpointAtLowOutdoorTemperature>
+              <HotWaterResetHighOutdoorTemperature>70.0</HotWaterResetHighOutdoorTemperature>
+              <HotWaterResetSetpointAtHighOutdoorTemperature>100.0</HotWaterResetSetpointAtHighOutdoorTemperature>
+            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

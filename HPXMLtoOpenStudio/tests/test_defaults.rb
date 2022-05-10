@@ -1160,14 +1160,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
     hpxml.heating_systems[0].year_installed = 2010
     hpxml.heating_systems[0].condensing_system = true
-    hpxml.heating_systems[0].boiler_reset_control = true
-    hpxml.heating_systems[0].boiler_reset_low_oat = 1.0
-    hpxml.heating_systems[0].boiler_reset_setpoint_at_low_oat = 199.0
-    hpxml.heating_systems[0].boiler_reset_high_oat = 69.0
-    hpxml.heating_systems[0].boiler_reset_setpoint_at_high_oat = 99.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, 12345, 0.85, true, true, 1.0, 199.0, 69.0, 99.0)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, 12345, 0.85, true)
 
     # Test defaults w/ in-unit boiler
     hpxml.heating_systems[0].electric_auxiliary_energy = nil
@@ -1175,16 +1170,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].year_installed = 2010
     hpxml.heating_systems[0].condensing_system = nil
-    hpxml.heating_systems[0].boiler_reset_control = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 170.0, nil, 0.797, false, false)
-
-    # Test defaults w/ in-unit boiler and outdoor reset
-    hpxml.heating_systems[0].boiler_reset_control = true
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 170.0, nil, 0.797, false, false, 0.0, 180.0, 68.0, 95.0)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 170.0, nil, 0.797, false)
 
     # Test inputs not overridden by defaults (shared boiler)
     hpxml = _create_hpxml('base-bldgtype-multifamily-shared-boiler-only-baseboard.xml')
@@ -1193,20 +1181,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
     hpxml.heating_systems[0].year_installed = 1980
     hpxml.heating_systems[0].condensing_system = true
-    hpxml.heating_systems[0].boiler_reset_control = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, nil, 0.85, true, true)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 99.9, nil, 0.85, true)
 
     # Test defaults w/ shared boiler
     hpxml.heating_systems[0].electric_auxiliary_energy = nil
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].year_installed = 1980
     hpxml.heating_systems[0].condensing_system = nil
-    hpxml.heating_systems[0].boiler_reset_control = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_boiler_values(hpxml_default.heating_systems[0], 220.0, nil, 0.723, false, false)
+    _test_default_boiler_values(hpxml_default.heating_systems[0], 220.0, nil, 0.723, false)
   end
 
   def test_stoves
@@ -1493,6 +1479,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_hvac_control_values(hpxml_default.hvac_controls[0], 23, 9, 1, 1, 12, 31, 1, 1, 12, 31)
+
+    # Test inputs not overridden by defaults (hot water reset control)
+    hpxml = _create_hpxml('base-hvac-boiler-gas-only-outdoor-reset-control.xml')
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_low_oat = 200.0
+    hpxml.hvac_controls[0].hot_water_reset_low_oat = 10.0
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_high_oat = 100.0
+    hpxml.hvac_controls[0].hot_water_reset_high_oat = 70.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_reset_values(hpxml_default.hvac_controls[0], 200.0, 10.0, 100.0, 70.0)
+
+    # Test defaults w/ hot water reset control
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_low_oat = nil
+    hpxml.hvac_controls[0].hot_water_reset_low_oat = nil
+    hpxml.hvac_controls[0].hot_water_reset_setpoint_at_high_oat = nil
+    hpxml.hvac_controls[0].hot_water_reset_high_oat = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_reset_values(hpxml_default.hvac_controls[0], 180.0, 0.0, 95.0, 68.0)
   end
 
   def test_hvac_distribution
@@ -3464,9 +3469,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_boiler_values(heating_system, eae, heating_capacity, heating_efficiency_afue, condensing_system,
-                                  reset_control, reset_low_oat = nil, reset_setpoint_at_low_oat = nil,
-                                  reset_hight_oat = nil, reset_setpoint_at_high_oat = nil)
+  def _test_default_boiler_values(heating_system, eae, heating_capacity, heating_efficiency_afue, condensing_system)
     assert_equal(eae, heating_system.electric_auxiliary_energy)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
@@ -3479,27 +3482,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_equal(heating_system.heating_efficiency_afue, heating_efficiency_afue)
     end
     assert_equal(heating_system.condensing_system, condensing_system)
-    assert_equal(heating_system.reset_control, reset_control)
-    if reset_low_oat.nil?
-      assert_nil(heating_system.boiler_reset_low_oat)
-    else
-      assert_equal(heating_system.boiler_reset_low_oat, reset_low_oat)
-    end
-    if reset_setpoint_at_low_oat.nil?
-      assert_nil(heating_system.boiler_setpoint_at_reset_low_oat)
-    else
-      assert_equal(heating_system.boiler_setpoint_at_reset_low_oat, reset_setpoint_at_low_oat)
-    end
-    if reset_high_oat.nil?
-      assert_nil(heating_system.boiler_reset_high_oat)
-    else
-      assert_equal(heating_system.boiler_reset_high_oat, reset_high_oat)
-    end
-    if reset_setpoint_at_high_oat.nil?
-      assert_nil(heating_system.boiler_reset_setpoint_at_high_oat)
-    else
-      assert_equal(heating_system.boiler_reset_setpoint_at_high_oat, reset_setpoint_at_high_oat)
-    end
   end
 
   def _test_default_stove_values(heating_system, fan_watts, heating_capacity, heating_efficiency_percent)
@@ -3682,6 +3664,30 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(clg_season_begin_day, hvac_control.seasons_cooling_begin_day)
     assert_equal(clg_season_end_month, hvac_control.seasons_cooling_end_month)
     assert_equal(clg_season_end_day, hvac_control.seasons_cooling_end_day)
+  end
+
+  def _test_default_hvac_control_reset_values(hvac_control, hot_water_reset_setpoint_at_low_oat, hot_water_reset_low_oat,
+                                              hot_water_reset_setpoint_at_high_oat, hot_water_reset_high_oat)
+    if hot_water_reset_setpoint_at_low_oat.nil?
+      assert_nil(hvac_control.hot_water_reset_setpoint_at_low_oat)
+    else
+      assert_equal(hvac_control.hot_water_reset_setpoint_at_low_oat, hot_water_reset_setpoint_at_low_oat)
+    end
+    if hot_water_reset_low_oat.nil?
+      assert_nil(hvac_control.hot_water_reset_low_oat)
+    else
+      assert_equal(hvac_control.hot_water_reset_low_oat, hot_water_reset_low_oat)
+    end
+    if hot_water_reset_setpoint_at_high_oat.nil?
+      assert_nil(hvac_control.hot_water_reset_setpoint_at_high_oat)
+    else
+      assert_equal(hvac_control.hot_water_reset_setpoint_at_high_oat, hot_water_reset_setpoint_at_high_oat)
+    end
+    if hot_water_reset_high_oat.nil?
+      assert_nil(hvac_control.hot_water_reset_high_oat)
+    else
+      assert_equal(hvac_control.hot_water_reset_high_oat, hot_water_reset_high_oat)
+    end
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas,
