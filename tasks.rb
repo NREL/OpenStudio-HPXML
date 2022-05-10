@@ -2529,10 +2529,13 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Water Heater Schedules
   if ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
+    args['water_heater_setpoint_temperature'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
   elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
+    args['water_heater_setpoint_temperature'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
+    args['water_heater_setpoint_temperature'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
@@ -2540,6 +2543,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
+    args['water_heater_setpoint_temperature'] = Constants.Auto
     args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv'
   end
 end

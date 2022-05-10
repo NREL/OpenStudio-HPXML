@@ -402,7 +402,6 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>3.75</UniformEnergyFactor>
             <UsageBin>medium</UsageBin>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

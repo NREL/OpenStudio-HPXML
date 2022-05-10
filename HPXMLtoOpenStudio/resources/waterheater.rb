@@ -1793,6 +1793,8 @@ class Waterheater
   end
 
   def self.get_set_temp_c(t_set, wh_type)
+    return if t_set.nil?
+
     return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 # Half the deadband to account for E+ deadband
   end
 
