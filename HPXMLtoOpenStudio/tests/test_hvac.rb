@@ -257,13 +257,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
     assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
@@ -276,13 +277,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
     assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
@@ -295,13 +297,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
     assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
@@ -598,7 +601,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     cop = 3.85 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
-    refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
   def test_shared_chiller_fan_coil
@@ -615,7 +618,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     cop = 3.45 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
-    refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
   def test_shared_chiller_water_loop_heat_pump
@@ -632,7 +635,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     cop = 1.30 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
-    refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
   def test_shared_cooling_tower_water_loop_heat_pump
@@ -649,7 +652,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     cop = 3.68 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
-    refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
   def test_shared_boiler_baseboard
@@ -660,14 +663,15 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
-    refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
 
@@ -679,14 +683,15 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
-    refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
 
@@ -698,16 +703,18 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heating_system = hpxml.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
+    condensing_factor = heating_system.condensing_system ? 0.96 : 1.0
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
     heat_pump = hpxml.heat_pumps[0]
     wlhp_cop = heat_pump.heating_efficiency_cop
+    wlhp_capacity = UnitConversions.convert(heat_pump.heating_capacity.to_f, 'Btu/hr', 'W')
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
     boiler = model.getBoilerHotWaters[0]
-    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
-    refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(afue * condensing_factor, boiler.nominalThermalEfficiency, 0.01)
+    assert_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
 
     # Check cooling coil
@@ -717,7 +724,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     assert_in_epsilon(wlhp_cop, htg_coil.ratedCOP, 0.01)
-    refute_in_epsilon(capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(wlhp_capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
 
     # Check supp heating coil
     assert_equal(0, model.getCoilHeatingElectrics.size)
@@ -1042,11 +1049,12 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    hpxml_defaults = HPXML.new(hpxml_path: hpxml_defaults_path)
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    File.delete(hpxml_defaults_path)
 
-    return model, hpxml
+    return model, hpxml_defaults
   end
 
   def _check_install_quality_multispeed_ratio(hpxml_clg_sys, model, hpxml_htg_sys = nil)

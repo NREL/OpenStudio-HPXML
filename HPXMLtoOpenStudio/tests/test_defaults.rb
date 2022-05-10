@@ -3084,9 +3084,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml_default = HPXML.new(hpxml_path: File.join(@tmp_output_path, 'in.xml'))
+    hpxml_defaults_path = File.join(@tmp_output_path, 'in.xml')
+    hpxml_defaults = HPXML.new(hpxml_path: hpxml_defaults_path)
 
-    return hpxml_default
+    File.delete(hpxml_defaults_path)
+
+    return hpxml_defaults
   end
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,

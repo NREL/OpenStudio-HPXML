@@ -88,10 +88,11 @@ class HPXMLtoOpenStudioLocationTest < MiniTest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    hpxml_defaults = HPXML.new(hpxml_path: hpxml_defaults_path)
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    File.delete(hpxml_defaults_path)
 
-    return model, hpxml
+    return model, hpxml_defaults
   end
 end

@@ -474,17 +474,15 @@ class HVAC
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
     if heating_system.condensing_system
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
-      boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
-      plr_Rated = 1.0
-      plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'R', 'K')
-      # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
-      condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
-      boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
-      boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
-      boiler.setNominalThermalEfficiency(boilerEff_Design)
+      boiler_rated_HWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
+      boiler_design_HWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'R', 'K')
+      cond_boiler_te_coeff = [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723]
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-      boiler_eff_curve = create_curve_biquadratic(model, [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723], 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+      boiler_eff_curve = create_curve_biquadratic(model, cond_boiler_te_coeff, 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+
+      curve_rated_value = MathTools.biquadratic(1.0, boiler_rated_HWRT, cond_boiler_te_coeff)
+      curve_design_value = MathTools.biquadratic(1.0, boiler_design_HWRT, cond_boiler_te_coeff)
+      boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue / curve_rated_value * curve_design_value)
     else
       boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
