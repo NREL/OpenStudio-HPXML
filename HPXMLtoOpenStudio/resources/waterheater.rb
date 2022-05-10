@@ -1632,9 +1632,7 @@ class Waterheater
 
       # Add a WaterHeater:Stratified to the model
       new_heater = OpenStudio::Model::WaterHeaterStratified.new(model)
-      new_heater.setName(name)
       new_heater.setEndUseSubcategory('Domestic Hot Water')
-      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       new_heater.setTankHeight(h_tank)
       new_heater.setMaximumTemperatureLimit(90)
       new_heater.setHeaterPriorityControl('MasterSlave')
@@ -1645,13 +1643,9 @@ class Waterheater
       new_heater.setHeater2Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeater2Height(h_LE)
       new_heater.setHeater2DeadbandTemperatureDifference(5.556)
-      new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
       new_heater.setHeaterThermalEfficiency(1)
-      new_heater.setOffCycleParasiticFuelConsumptionRate(0)
-      new_heater.setOffCycleParasiticFuelType('Electricity')
-      new_heater.setOnCycleParasiticFuelConsumptionRate(0)
-      new_heater.setOnCycleParasiticFuelType('Electricity')
-      set_wh_ambient(loc_space, loc_schedule, model, new_heater)
+      new_heater.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
+      new_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
       new_heater.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u) unless u.nil?
       new_heater.setNumberofNodes(12)
       new_heater.setAdditionalDestratificationConductivity(0)
@@ -1674,9 +1668,7 @@ class Waterheater
       new_heater.setSourceSideOutletHeight(0)
     else
       new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
-      new_heater.setName(name)
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
-      new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
       configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner)
       new_heater.setMaximumTemperatureLimit(99.0)
       if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
@@ -1689,25 +1681,28 @@ class Waterheater
       # Capacity, storage tank to be 0
       new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeaterMinimumCapacity(0.0)
-      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       set_wh_parasitic_parameters(water_heating_system, new_heater, is_dsh_storage)
-      set_wh_ambient(loc_space, loc_schedule, model, new_heater)
 
       ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
       new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
       new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-
-      if not water_heating_system.nil?
-        new_heater.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
-      end
-      if is_combi
-        new_heater.additionalProperties.setFeature('IsCombiBoiler', true) # Used by reporting measure
-      end
-
-      # FUTURE: These are always zero right now; develop smart defaults.
-      new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
-      new_heater.setOffCycleParasiticFuelConsumptionRate(0.0)
     end
+
+    if not water_heating_system.nil?
+      new_heater.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+    end
+    if is_combi
+      new_heater.additionalProperties.setFeature('IsCombiBoiler', true) # Used by reporting measure
+    end
+
+    new_heater.setName(name)
+    new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
+    new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
+    set_wh_ambient(loc_space, loc_schedule, model, new_heater)
+
+    # FUTURE: These are always zero right now; develop smart defaults.
+    new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOffCycleParasiticFuelConsumptionRate(0.0)
 
     return new_heater
   end

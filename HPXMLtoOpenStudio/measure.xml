@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5d464b59-44ca-4136-b6ae-4e7028c06084</version_id>
-  <version_modified>20220510T010114Z</version_modified>
+  <version_id>62a52cfc-51d3-4854-b813-59aeaea3e8f9</version_id>
+  <version_modified>20220510T150841Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -580,7 +580,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5F500761</checksum>
+      <checksum>A5EF3281</checksum>
     </file>
   </files>
 </measure>
