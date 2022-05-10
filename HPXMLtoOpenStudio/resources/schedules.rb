@@ -1154,8 +1154,11 @@ class SchedulesFile
     set_vacancy
     convert_setpoints
 
-    tmpfile = Tempfile.new(['schedules', '.csv'])
+    tmpdir = Dir.tmpdir
+    tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
+    tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
     @tmp_schedules_path = tmpfile.path.to_s
+
     export
 
     get_external_file
