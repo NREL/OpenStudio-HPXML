@@ -33,6 +33,10 @@ class Constants
     return num_hours_in_year
   end
 
+  def self.WaterHeaterSetpointAverage
+    return 125.0
+  end
+
   # Strings --------------------
 
   def self.AirFilm

@@ -4,6 +4,7 @@ class Waterheater
   def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    puts "set_temp_c #{set_temp_c}"
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
@@ -95,8 +96,8 @@ class Waterheater
     bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
     bottom_element_setpoint_schedule.setValue(-60)
 
-    water_heater_setpoint = 125 # deg-F
-    water_heater_offset = 48.2 # deg-F
+    water_heater_setpoint = Constants.WaterHeaterSetpointAverage # deg-F
+    water_heater_offset = 9.0 # deg-C
 
     setpoint_schedule = nil
     if not schedules_file.nil?
@@ -114,7 +115,7 @@ class Waterheater
         # Note: This gets overwritten by EMS later, see HPWH Control program
         top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-        top_element_setpoint_schedule.setValue(UnitConversions.convert(water_heater_setpoint, 'F', 'C') - UnitConversions.convert(water_heater_offset, 'F', 'C'))
+        top_element_setpoint_schedule.setValue(UnitConversions.convert(water_heater_setpoint, 'F', 'C') - water_heater_offset)
       end
     end
     if setpoint_schedule.nil?
@@ -128,7 +129,7 @@ class Waterheater
 
       top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-      top_element_setpoint_schedule.setValue((tset_C - UnitConversions.convert(water_heater_offset, 'F', 'C')))
+      top_element_setpoint_schedule.setValue(tset_C - water_heater_offset)
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !tset_C.nil?
     end
@@ -1604,6 +1605,8 @@ class Waterheater
   end
 
   def self.create_new_schedule_manager(model, set_temp_c)
+    set_temp_c = Constants.WaterHeaterSetpointAverage if set_temp_c.nil? # using detailed schedules
+
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName('dhw temp')
     new_schedule.setValue(set_temp_c)
@@ -1797,6 +1800,8 @@ class Waterheater
   end
 
   def self.create_new_loop(model, name, t_set)
+    t_set = Constants.WaterHeaterSetpointAverage if t_set.nil? # using detailed schedules
+
     # Create a new plant loop for the water heater
     loop = OpenStudio::Model::PlantLoop.new(model)
     loop.setName(name)
