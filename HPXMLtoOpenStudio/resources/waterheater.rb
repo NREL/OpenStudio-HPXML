@@ -4,7 +4,6 @@ class Waterheater
   def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    puts "set_temp_c #{set_temp_c}"
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
