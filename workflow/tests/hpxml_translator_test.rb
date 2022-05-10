@@ -73,48 +73,28 @@ class HPXMLTest < MiniTest::Test
     _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_out)
   end
 
-  def test_run_simulation_csv_output
-    # Check that the simulation produces CSV outputs if requested
-    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --debug --hourly ALL --add-utility-bills --output-format csv"
-    system(command, err: File::NULL)
+  def test_run_simulation_output_formats
+    # Check that the simulation produces outputs in the appropriate format
+    ['csv', 'json', 'msgpack'].each do |output_format|
+      rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+      xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+      command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --debug --hourly ALL --add-utility-bills --output-format #{output_format}"
+      system(command, err: File::NULL)
 
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_bills.csv'))
+      # Check for output files
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', "results_annual.#{output_format}"))
+      assert(File.exist? File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"))
+      assert(File.exist? File.join(File.dirname(xml), 'run', "results_hpxml.#{output_format}"))
+      assert(File.exist? File.join(File.dirname(xml), 'run', "results_bills.#{output_format}"))
 
-    # Check for debug files
-    osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
-    assert(File.exist? osm_path)
-    hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-    _test_schema_validation(hpxml_defaults_path)
-  end
-
-  def test_run_simulation_json_output
-    # Check that the simulation produces JSON outputs (instead of CSV outputs) if requested
-    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --debug --hourly ALL --add-utility-bills --output-format json"
-    system(command, err: File::NULL)
-
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.json'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.json'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.json'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_bills.json'))
-
-    # Check for debug files
-    osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
-    assert(File.exist? osm_path)
-    hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-    _test_schema_validation(hpxml_defaults_path)
+      # Check for debug files
+      osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
+      assert(File.exist? osm_path)
+      hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
+      assert(File.exist? hpxml_defaults_path)
+      _test_schema_validation(hpxml_defaults_path)
+    end
   end
 
   def test_run_simulation_epjson_input
@@ -128,7 +108,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.epJSON'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
   end
@@ -144,7 +124,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.idf'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
   end
@@ -157,7 +137,7 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
 
@@ -171,7 +151,7 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, component_loads.size)
   end
 
-  def test_run_simulation_detailed_schedules
+  def test_run_simulation_detailed_occupancy_schedules
     # Check that the simulation produces stochastic schedules if requested
     sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
     tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
@@ -184,7 +164,7 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'stochastic.csv'))
@@ -194,33 +174,50 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_timeseries_outputs
-    # Check that the simulation produces timeseries with requested outputs
-    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --hourly ALL --add-timeseries-time-column DST --add-timeseries-time-column UTC"
-    command += " --add-timeseries-output-variable 'Zone People Occupant Count' --add-timeseries-output-variable 'Zone People Total Heating Energy'"
-    system(command, err: File::NULL)
+    [true, false].each do |invalid_variable_only|
+      # Check that the simulation produces timeseries with requested outputs
+      rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+      xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+      command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml}"
+      if not invalid_variable_only
+        command += ' --hourly ALL'
+        command += ' --add-timeseries-time-column DST'
+        command += ' --add-timeseries-time-column UTC'
+        command += " --add-timeseries-output-variable 'Zone People Occupant Count'"
+        command += " --add-timeseries-output-variable 'Zone People Total Heating Energy'"
+      end
+      command += " --add-timeseries-output-variable 'Foobar Variable'" # Test invalid output variable request
+      system(command, err: File::NULL)
 
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.sql'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
+      # Check for output files
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'results_hpxml.csv'))
+      if not invalid_variable_only
+        assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
+        # Check timeseries columns exist
+        timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
+      else
+        refute(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
+      end
 
-    # Check TimeDST and TimeUTC exist
-    timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
+      # Check run.log has warning about missing Foobar Variable
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'run.log'))
+      log_lines = File.readlines(File.join(File.dirname(xml), 'run', 'run.log')).map(&:strip)
+      assert(log_lines.include? "Warning: Request for output variable 'Foobar Variable' returned no key values.")
+    end
   end
 
   def test_template_osw
-    # Check that simulation works using template.osw
+    # Check that simulation works using template-run-hpxml.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-run-hpxml.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -243,16 +240,12 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
-    assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
-    assert(File.exist? csv_output_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv'))
 
     # Check for debug files
-    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
-    assert(File.exist? osm_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
     hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
 
@@ -261,10 +254,10 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_schedule
-    # Check that simulation works using template.osw
+    # Check that simulation works using template-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-stochastic-schedules.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-run-hpxml-with-stochastic-occupancy.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -287,16 +280,12 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
-    assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
-    assert(File.exist? csv_output_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv'))
 
     # Check for debug files
-    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
-    assert(File.exist? osm_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
     hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
 
@@ -307,10 +296,10 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_build_hpxml_and_schedule
-    # Check that simulation works using template2.osw
+    # Check that simulation works using template-build-and-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stochastic-schedules.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-and-run-hpxml-with-stochastic-occupancy.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -333,16 +322,12 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
-    assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
-    assert(File.exist? csv_output_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv'))
 
     # Check for debug files
-    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
-    assert(File.exist? osm_path)
+    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
     hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
 
@@ -589,10 +574,9 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _verify_outputs(rundir, hpxml_path, results, hpxml)
-    sql_path = File.join(rundir, 'eplusout.sql')
-    assert(File.exist? sql_path)
+    assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
-    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+    sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
     # Collapse windows further using same logic as measure.rb
     hpxml.windows.each do |window|
@@ -1370,6 +1354,10 @@ class HPXMLTest < MiniTest::Test
     end
 
     sqlFile.close
+
+    # Ensure sql file is immediately freed; otherwise we can get
+    # errors on Windows when trying to delete this file.
+    GC.start()
   end
 
   def _write_summary_results(results, csv_out)
