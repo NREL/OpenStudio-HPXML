@@ -2514,16 +2514,36 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Setpoint Schedules
   if ['base-schedules-detailed-setpoints.xml'].include? hpxml_file
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
   elsif ['base-schedules-detailed-setpoints-daily-schedules.xml'].include? hpxml_file
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-schedules.csv'
   elsif ['base-schedules-detailed-setpoints-daily-setbacks.xml'].include? hpxml_file
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv'
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv'
   elsif ['base-hvac-furnace-gas-only-detailed-setpoints.xml'].include? hpxml_file
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv'
   elsif ['base-hvac-room-ac-only-detailed-setpoints.xml'].include? hpxml_file
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-cooling-only.csv'
   end
 
