@@ -269,6 +269,28 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_equal(EPlus.fuel_type(fuel), boiler.fuelType)
   end
 
+  def test_boiler_gas_outdoor_reset_control
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-boiler-gas-only-outdoor-reset-control.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heating_system = hpxml.heating_systems[0]
+    reset_low_oat = heating_system.boiler_reset_low_oat
+    reset_setpoint_at_low_oat = heating_system.boiler_reset_setpoint_at_low_oat
+    reset_high_oat = heating_system.boiler_reset_high_oat
+    reset_setpoint_at_high_oat = heating_system.boiler_reset_setpoint_at_high_oat
+
+    # Check for outdoor air reset setpoint manager
+    File.write('foo.osm', model.to_s)
+    assert_equal(1, model.getSetpointManagerOutdoorAirResets.size)
+    setpoint_manager_oar = model.getSetpointManagerOutdoorAirResets[0]
+    assert_in_epsilon(setpoint_manager_oar.outdoorLowTemperature, UnitConversions.convert(reset_low_oat, 'F', 'C'), 0.001)
+    assert_in_epsilon(setpoint_manager_oar.setpointatOutdoorLowTemperature, UnitConversions.convert(reset_setpoint_at_low_oat, 'F', 'C'), 0.001)
+    assert_in_epsilon(setpoint_manager_oar.outdoorHighTemperature, UnitConversions.convert(reset_high_oat, 'F', 'C'), 0.001)
+    assert_in_epsilon(setpoint_manager_oar.setpointatOutdoorHighTemperature, UnitConversions.convert(reset_setpoint_at_high_oat, 'F', 'C'), 0.001)
+  end
+
   def test_boiler_coal
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-boiler-coal-only.xml'))

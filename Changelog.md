@@ -14,7 +14,8 @@ __New Features__
   - Heat pumps with switchover temperatures are now autosized by taking into account the switchover temperature, if higher than the heating design temperature.
   - Allows `BackupHeatingLockoutTemperature` as an optional input to control integrated backup heating availability during, e.g., a thermostat heating setback recovery event; defaults to 40F.
 - New boiler capabilities:
-  - Allows an optional `CondensingSystem` boolean input; defaults based on AFUE.
+  - Allows optionally specifying whether a boiler is condensing; defaults based on AFUE and fuel type.
+  - Allows defining an outdoor reset control for a boiler.
   - Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2e).
 - Updates HVAC fans to use fan power law (cubic relationship between fan speed and power).

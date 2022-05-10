@@ -971,28 +971,53 @@ class HPXMLDefaults
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 
-    # Default boiler EAE
+    # Default boiler properties
     hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.electric_auxiliary_energy.nil?
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
-      heating_system.electric_auxiliary_energy_isdefaulted = true
-      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
-      heating_system.shared_loop_watts = nil
-      heating_system.shared_loop_motor_efficiency = nil
-      heating_system.fan_coil_watts = nil
+      if heating_system.electric_auxiliary_energy.nil?
+        heating_system.electric_auxiliary_energy_isdefaulted = true
+        heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+        heating_system.shared_loop_watts = nil
+        heating_system.shared_loop_motor_efficiency = nil
+        heating_system.fan_coil_watts = nil
+      end
+      if heating_system.condensing_system.nil?
+        if heating_system.heating_efficiency_afue >= 0.883 && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
+          heating_system.condensing_system = true
+        else
+          heating_system.condensing_system = false
+        end
+        heating_system.condensing_system_isdefaulted = true
+      end
+      if heating_system.boiler_reset_control.nil?
+        heating_system.boiler_reset_control = false
+        heating_system.boiler_reset_control_isdefaulted = true
+      end
+      next unless heating_system.boiler_reset_control
+
+      if heating_system.boiler_reset_low_oat.nil?
+        heating_system.boiler_reset_low_oat = 0.0
+        heating_system.boiler_reset_low_oat_isdefaulted = true
+      end
+      if heating_system.boiler_reset_setpoint_at_low_oat.nil?
+        heating_system.boiler_reset_setpoint_at_low_oat = 180.0
+        heating_system.boiler_reset_setpoint_at_low_oat_isdefaulted = true
+      end
+      if heating_system.boiler_reset_high_oat.nil?
+        heating_system.boiler_reset_high_oat = 68.0
+        heating_system.boiler_reset_high_oat_isdefaulted = true
+      end
+      if heating_system.boiler_reset_setpoint_at_high_oat.nil?
+        heating_system.boiler_reset_setpoint_at_high_oat = 95.0
+        heating_system.boiler_reset_setpoint_at_high_oat_isdefaulted = true
+      end
     end
 
     # Default boiler type
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
       next unless heating_system.condensing_system.nil?
-
-      if heating_system.heating_efficiency_afue >= 0.883 && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
-        heating_system.condensing_system = true
-      else
-        heating_system.condensing_system = false
-      end
-      heating_system.condensing_system_isdefaulted = true
     end
 
     # Default AC/HP sensible heat ratio

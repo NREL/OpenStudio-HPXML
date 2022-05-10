@@ -674,6 +674,7 @@
     <sch:title>[HeatingSystemType=Boiler]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler]'>
       <sch:assert role='ERROR' test='count(h:HeatingSystemType/h:Boiler/h:CondensingSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingSystemType/Boiler/CondensingSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingSystemType/h:Boiler/h:OutdoorResetControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingSystemType/Boiler/OutdoorResetControl</sch:assert> <!-- See [HeatingSystemType=BoilerWithOutdoorResetControl] -->
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [HeatingSystemType=InUnitBoiler] or [HeatingSystemType=SharedBoiler] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel</sch:assert>
@@ -682,6 +683,18 @@
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt; 0.6'>AFUE should typically be greater than or equal to 0.6.</sch:report>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HeatingSystemType=BoilerWithOutdoorResetControl]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:HeatingSystemType/h:Boiler[h:OutdoorResetControl[text()="true"]]'>
+      <sch:assert role='ERROR' test='count(h:extension/h:OutdoorResetLowOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OutdoorResetLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:OutdoorResetSetpointAtLowOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OutdoorResetSetpointAtLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:OutdoorResetHighOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OutdoorResetHighOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:OutdoorResetHighOutdoorTemperature) &gt; number(h:extension/h:OutdoorResetLowOutdoorTemperature) or not(h:extension/h:OutdoorResetHighOutdoorTemperature) or not(h:extension/h:OutdoorResetLowOutdoorTemperature)'>Expected extension/OutdoorResetHighOutdoorTemperature to be greater than extension/OutdoorResetLowOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:OutdoorResetSetpointAtHighOutdoorTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OutdoorResetSetpointAtHighOutdoorTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:OutdoorResetSetpointAtHighOutdoorTemperature) &lt; number(h:extension/h:OutdoorResetSetpointAtLowOutdoorTemperature) or not(h:extension/h:OutdoorResetSetpointAtHighOutdoorTemperature) or not(h:extension/h:OutdoorResetSetpointAtLowOutdoorTemperature)'>Expected extension/OutdoorResetSetpointAtHighOutdoorTemperature to be less than extension/OutdoorResetSetpointAtLowOutdoorTemperature</sch:assert>
     </sch:rule>
   </sch:pattern>
 

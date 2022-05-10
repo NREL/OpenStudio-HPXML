@@ -3211,7 +3211,8 @@ class HPXML < Object
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
-             :condensing_system]
+             :condensing_system, :boiler_reset_control, :boiler_reset_low_oat,
+             :boiler_reset_high_oat, :boiler_reset_setpoint_at_low_oat, :boiler_reset_setpoint_at_high_oat]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3294,6 +3295,11 @@ class HPXML < Object
         heating_type_child = XMLHelper.add_element(heating_system_type_el, @heating_system_type)
         if @heating_system_type == HPXML::HVACTypeBoiler
           XMLHelper.add_element(heating_type_child, 'CondensingSystem', @condensing_system, :boolean, @condensing_system_isdefaulted) unless @condensing_system.nil?
+          XMLHelper.add_element(heating_type_child, 'OutdoorResetControl', @boiler_reset_control, :boolean, @boiler_reset_control_isdefaulted) unless @boiler_reset_control.nil?
+          XMLHelper.add_extension(heating_type_child, 'OutdoorResetLowOutdoorTemperature', @boiler_reset_low_oat, :float, @boiler_reset_low_oat_isdefaulted) unless @boiler_reset_low_oat.nil?
+          XMLHelper.add_extension(heating_type_child, 'OutdoorResetSetpointAtLowOutdoorTemperature', @boiler_reset_setpoint_at_low_oat, :float, @boiler_reset_setpoint_at_low_oat_isdefaulted) unless @boiler_reset_setpoint_at_low_oat.nil?
+          XMLHelper.add_extension(heating_type_child, 'OutdoorResetHighOutdoorTemperature', @boiler_reset_high_oat, :float, @boiler_reset_high_oat_isdefaulted) unless @boiler_reset_high_oat.nil?
+          XMLHelper.add_extension(heating_type_child, 'OutdoorResetSetpointAtHighOutdoorTemperature', @boiler_reset_setpoint_at_high_oat, :float, @boiler_reset_setpoint_at_high_oat_isdefaulted) unless @boiler_reset_setpoint_at_high_oat.nil?
         end
       end
       XMLHelper.add_element(heating_system, 'HeatingSystemFuel', @heating_system_fuel, :string) unless @heating_system_fuel.nil?
@@ -3336,6 +3342,11 @@ class HPXML < Object
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @condensing_system = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/CondensingSystem', :boolean)
+      @boiler_reset_control = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/OutdoorResetControl', :boolean)
+      @boiler_reset_low_oat = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/extension/OutdoorResetLowOutdoorTemperature', :float)
+      @boiler_reset_setpoint_at_low_oat = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/extension/OutdoorResetSetpointAtLowOutdoorTemperature', :float)
+      @boiler_reset_high_oat = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/extension/OutdoorResetHighOutdoorTemperature', :float)
+      @boiler_reset_setpoint_at_high_oat = XMLHelper.get_value(heating_system, 'HeatingSystemType/Boiler/extension/OutdoorResetSetpointAtHighOutdoorTemperature', :float)
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
       @heating_capacity = XMLHelper.get_value(heating_system, 'HeatingCapacity', :float)
       @heating_efficiency_afue = XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='#{UnitsAFUE}']/Value", :float)
