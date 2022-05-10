@@ -206,6 +206,7 @@ base-hvac-autosize-pthp-sizing-methodology-acca.xml,1472.86,144.0,1328.86,0.0,14
 base-hvac-autosize-pthp-sizing-methodology-hers.xml,1478.21,144.0,1334.21,0.0,1478.21,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-pthp-sizing-methodology-maxload.xml,1493.67,144.0,1349.67,0.0,1493.67,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-ac-only.xml,1288.23,144.0,1144.23,0.0,1288.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-ac-with-heating.xml,1778.45,144.0,1634.45,0.0,1778.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-acca.xml,1487.78,144.0,1343.78,0.0,1487.78,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-hers.xml,1495.84,144.0,1351.84,0.0,1495.84,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-maxload.xml,1513.8,144.0,1369.8,0.0,1513.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -282,6 +283,7 @@ base-hvac-pthp.xml,1488.46,144.0,1344.46,0.0,1488.46,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only-33percent.xml,1205.93,144.0,1061.93,0.0,1205.93,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only-ceer.xml,1297.88,144.0,1153.88,0.0,1297.88,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-ac-only.xml,1297.61,144.0,1153.61,0.0,1297.61,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-room-ac-with-heating.xml,1788.18,144.0,1644.18,0.0,1788.18,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-heat-pump-cop.xml,1507.8,144.0,1363.8,0.0,1507.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-room-heat-pump-hspf.xml,1530.29,144.0,1386.29,0.0,1530.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-seasons.xml,1595.23,144.0,1164.0,0.0,1308.0,144.0,143.23,287.23,0.0,0.0,0.0,0.0,0.0
