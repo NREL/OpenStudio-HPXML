@@ -2053,9 +2053,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     args['cooling_system_fraction_cool_load_served'] = 0.33
     args['cooling_system_cooling_capacity'] = 8000.0
-  elsif ['base-hvac-room-ac-with-heating.xml'].include? hpxml_file
-    args['heating_system_type'] = HPXML::HVACTypeRoomACHeating
-    args['heating_system_heating_efficiency'] = 1.0
+  elsif ['base-hvac-room-ac-with-heating.xml',
+         'base-hvac-ptac-with-heating.xml'].include? hpxml_file
+    args['cooling_system_attached_heating_system_efficiency'] = 1.0
+    args['cooling_system_attached_heating_system_fraction_heat_load_served'] = 1.0
+    args['cooling_system_attached_heating_system_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60
@@ -2094,9 +2096,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 10.7
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
-  elsif ['base-hvac-ptac-with-heating.xml'].include? hpxml_file
-    args['heating_system_type'] = HPXML::HVACTypePTACHeating
-    args['heating_system_heating_efficiency'] = 1.0
   end
 
   # Lighting

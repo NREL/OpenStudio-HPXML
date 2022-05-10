@@ -32,14 +32,15 @@ class HVAC
               fail "Fan powers for heating system '#{heating_system.id}' and cooling system '#{cooling_system.id}' are attached to a single distribution system and therefore must be the same."
             end
           end
-        elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
-          obj_name = Constants.ObjectNameRoomAirConditioner
+        elsif [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
           fan_watts_per_cfm = 0.0
+          if cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+            obj_name = Constants.ObjectNameRoomAirConditioner
+          else
+            obj_name = Constants.ObjectNamePTAC
+          end
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
-        elsif cooling_system.cooling_system_type == HPXML::HVACTypePTAC
-          obj_name = Constants.ObjectNamePTAC
-          fan_watts_per_cfm = 0.0
         else
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
@@ -48,14 +49,6 @@ class HVAC
       num_speeds = clg_ap.num_speeds
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
-      num_speeds = 1
-    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypePTACHeating)
-      obj_name = Constants.ObjectNamePTACHeating
-      fan_watts_per_cfm = 0.0
-      num_speeds = 1
-    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating)
-      obj_name = Constants.ObjectNameRoomACHeating
-      fan_watts_per_cfm = 0.0
       num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
@@ -69,6 +62,14 @@ class HVAC
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
+      end
+      if cooling_system.has_attached_heating
+        htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
+        htg_coil.setEfficiency(cooling_system.attached_heating_system_efficiency)
+        htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W'))
+        htg_coil.setName(obj_name + ' htg coil')
+        htg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
+        htg_cfm = cooling_system.attached_heating_system_airflow_cfm
       end
     end
 
@@ -89,11 +90,7 @@ class HVAC
         # Heating Coil
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
-          if [HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? heating_system.heating_system_type
-            htg_coil.setEfficiency(heating_system.heating_efficiency_percent)
-          else
-            htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
-          end
+          htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
         else
           htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
           htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
@@ -125,7 +122,7 @@ class HVAC
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
+        disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, nil, cooling_system)
       end
       if not heating_system.nil?
         disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
@@ -4069,8 +4066,6 @@ class HVAC
     hpxml.cooling_systems.each do |cooling_system|
       heating_system = nil
       if is_attached_heating_and_cooling_systems(hpxml, cooling_system.attached_heating_system, cooling_system)
-        # For PTAC with heating and Room AC with heating, the heating and cooling systems are not grouped together currently,
-        # because their distribution systems are not yet allowed
         heating_system = cooling_system.attached_heating_system
       end
       hvac_systems << { cooling: cooling_system,

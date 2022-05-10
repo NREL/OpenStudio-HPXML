@@ -1622,7 +1622,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
       hvac_sizing_values.Heat_Airflow_Supp = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity_Supp, (hvac.BackupSupplyAirTemp - @heat_setpoint))
 
-    elsif [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? hvac.HeatType
+    elsif [HPXML::HVACTypeFurnace, HPXML::HVACTypeAttachedHeating].include? hvac.HeatType
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
@@ -2354,6 +2354,13 @@ class HVACSizing
         elsif not hpxml_hvac.backup_system.nil?
           hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_system.heating_capacity
         end
+      end
+
+      # Attached heating systems
+      if hpxml_hvac.is_a?(HPXML::CoolingSystem) && hpxml_hvac.has_attached_heating
+        hvac.HeatType = HPXML::HVACTypeAttachedHeating
+        hvac.HeatingLoadFraction = hpxml_hvac.attached_heating_system_fraction_heat_load_served
+        hvac.FixedHeatingCapacity = hpxml_hvac.attached_heating_system_capacity
       end
 
       # HP Switchover Temperature

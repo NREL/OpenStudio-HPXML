@@ -289,6 +289,11 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       hpxml.heat_pumps.each do |heat_pump|
         cost_mult += heat_pump.heating_capacity
       end
+      hpxml.cooling_systems.each do |cooling_system|
+        next unless cooling_system.has_attached_heating
+
+        cost_mult += cooling_system.attached_heating_system_capacity
+      end
     elsif cost_mult_type == 'Systems: Cooling Capacity'
       hpxml.cooling_systems.each do |cooling_system|
         cost_mult += cooling_system.cooling_capacity

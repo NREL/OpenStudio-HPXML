@@ -312,21 +312,8 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1'/>
               <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem1'/>
-              <HeatingSystemType>
-                <PackagedTerminalAirConditionerHeating/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
               <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
@@ -337,11 +324,16 @@
                 <Value>10.7</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
+              <AttachedHeatingSystemFuel>electricity</AttachedHeatingSystemFuel>
+              <AttachedHeatingSystemAnnualEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </AttachedHeatingSystemAnnualEfficiency>
+              <AttachedHeatingSystemFractionHeatLoadServed>1.0</AttachedHeatingSystemFractionHeatLoadServed>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
         </HVAC>

@@ -945,8 +945,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypePortableHeater
     heating_system_type_choices << HPXML::HVACTypeFireplace
     heating_system_type_choices << HPXML::HVACTypeFixedHeater
-    heating_system_type_choices << HPXML::HVACTypePTACHeating
-    heating_system_type_choices << HPXML::HVACTypeRoomACHeating
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
 
@@ -977,6 +975,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
     compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
 
+    attached_heating_system_fuel_choices = OpenStudio::StringVector.new
+    attached_heating_system_fuel_choices << HPXML::FuelTypeElectricity
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_type', heating_system_type_choices, true)
     arg.setDisplayName('Heating System: Type')
     arg.setDescription("The type of heating system. Use 'none' if there is no heating system.")
@@ -985,7 +986,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System: Fuel Type')
-    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}, #{HPXML::HVACTypePTACHeating} and #{HPXML::HVACTypeRoomACHeating}.")
+    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
@@ -1075,6 +1076,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_charge_defect_ratio', false)
     arg.setDisplayName('Cooling System: Charge Defect Ratio')
     arg.setDescription("The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.")
+    arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_attached_heating_system_fuel', attached_heating_system_fuel_choices, false)
+    arg.setDisplayName('Cooling System: Attached Heating System Fuel Type')
+    arg.setDescription("The fuel type of the heating system attached to cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_attached_heating_system_efficiency', false)
+    arg.setDisplayName('Cooling System: Attached Heating System Efficiency')
+    arg.setUnits('Frac')
+    arg.setDescription("The rated heating efficiency value of the heating system attached to cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_attached_heating_system_capacity', false)
+    arg.setDisplayName('Cooling System: Attached Heating System Heating Capacity')
+    arg.setDescription("The output heating capacity of the heating system attached to cooling system. If not provided, size the capacity based on ACCA Manual J/S. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
+    arg.setUnits('Btu/hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_attached_heating_system_fraction_heat_load_served', false)
+    arg.setDisplayName('Cooling System: Attached Heating System Fraction Heat Load Served')
+    arg.setDescription("The heating load served by the heating system attached to cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
     arg.setUnits('Frac')
     args << arg
 
@@ -4288,7 +4312,7 @@ class HPXMLFile
       heating_capacity = Float(args[:heating_system_heating_capacity])
     end
 
-    if [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating, HPXML::HVACTypeRoomACHeating].include? heating_system_type
+    if [HPXML::HVACTypeElectricResistance].include? heating_system_type
       heating_system_fuel = HPXML::FuelTypeElectricity
     else
       heating_system_fuel = args[:heating_system_fuel]
@@ -4302,9 +4326,7 @@ class HPXMLFile
            HPXML::HVACTypeStove,
            HPXML::HVACTypePortableHeater,
            HPXML::HVACTypeFireplace,
-           HPXML::HVACTypeFixedHeater,
-           HPXML::HVACTypePTACHeating,
-           HPXML::HVACTypeRoomACHeating].include?(heating_system_type)
+           HPXML::HVACTypeFixedHeater].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 
@@ -4382,6 +4404,24 @@ class HPXMLFile
       end
     end
 
+    if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type)
+      if args[:cooling_system_attached_heating_system_fuel].is_initialized
+        attached_heating_system_fuel = args[:cooling_system_attached_heating_system_fuel].get
+      end
+
+      if args[:cooling_system_attached_heating_system_fraction_heat_load_served].is_initialized
+        attached_heating_system_fraction_heat_load_served = args[:cooling_system_attached_heating_system_fraction_heat_load_served].get
+      end
+
+      if args[:cooling_system_attached_heating_system_capacity].is_initialized
+        attached_heating_system_capacity = args[:cooling_system_attached_heating_system_capacity].get
+      end
+
+      if args[:cooling_system_attached_heating_system_efficiency].is_initialized
+        attached_heating_system_efficiency = args[:cooling_system_attached_heating_system_efficiency].get
+      end
+    end
+
     hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size + 1}",
                               cooling_system_type: cooling_system_type,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -4394,7 +4434,11 @@ class HPXMLFile
                               cooling_efficiency_ceer: cooling_efficiency_ceer,
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: charge_defect_ratio,
-                              primary_system: true)
+                              primary_system: true,
+                              attached_heating_system_fuel: attached_heating_system_fuel,
+                              attached_heating_system_capacity: attached_heating_system_capacity,
+                              attached_heating_system_efficiency: attached_heating_system_efficiency,
+                              attached_heating_system_fraction_heat_load_served: attached_heating_system_fraction_heat_load_served)
   end
 
   def self.set_heat_pumps(hpxml, runner, args)

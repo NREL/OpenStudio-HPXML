@@ -890,7 +890,7 @@ class HPXMLDefaults
           heating_system.heating_efficiency_afue = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating].include? heating_system_type
+      elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
         heating_system.heating_efficiency_percent = 1.0
@@ -916,6 +916,10 @@ class HPXMLDefaults
       cooling_system_type = cooling_system.cooling_system_type
       cooling_system_fuel = HPXML::FuelTypeElectricity
 
+      if cooling_system.has_attached_heating && cooling_system.attached_heating_system_efficiency.nil?
+        cooling_system.attached_heating_system_efficiency = 1.0
+        cooling_system.attached_heating_system_efficiency_isdefaulted = true
+      end
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         next unless cooling_system.cooling_efficiency_seer.nil?
 
@@ -2568,6 +2572,13 @@ class HPXMLDefaults
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)
         clg_sys.cooling_capacity = hvac_sizing_values.Cool_Capacity.round
         clg_sys.cooling_capacity_isdefaulted = true
+      end
+      # Attached heating system capacities
+      if clg_sys.has_attached_heating && (clg_sys.attached_heating_system_capacity.nil? || ((clg_sys.attached_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0))
+        clg_sys.attached_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
+        clg_sys.attached_heating_system_capacity_isdefaulted = true
+        clg_sys.attached_heating_system_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
+        clg_sys.attached_heating_system_airflow_cfm_isdefaulted = true
       end
       clg_sys.additional_properties.cooling_capacity_sensible = hvac_sizing_values.Cool_Capacity_Sens.round
 

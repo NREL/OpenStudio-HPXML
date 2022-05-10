@@ -3748,22 +3748,6 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="PackagedTerminalAirConditionerHeating">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" ref="extension"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
-			<xs:element name="RoomAirConditionerHeating">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" ref="extension"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
 			<xs:element name="SolarThermal">
 				<xs:complexType>
 					<xs:sequence>
@@ -3846,6 +3830,11 @@
 							<xs:documentation>[deg F] Temperature at which the backup heating is activated.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
+					<xs:element minOccurs="0" name="BackupHeatingLockoutTemperature" type="Temperature">
+						<xs:annotation>
+							<xs:documentation>[deg F] Temperature at which the backup heating is disabled, often to prevent backup heating usage during recovery from a thermostat heating setback.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="FractionHeatLoadServed" type="Fraction" minOccurs="0"/>
 					<xs:element name="FractionCoolLoadServed" type="Fraction" minOccurs="0"/>
 					<xs:element minOccurs="0" name="FloorAreaServed" type="SurfaceArea">
@@ -3880,6 +3869,14 @@
 					</xs:element>
 					<xs:element name="AnnualCoolingEfficiency" type="CoolingEfficiencyType" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element minOccurs="0" name="SensibleHeatFraction" type="Fraction"/>
+					<xs:element minOccurs="0" name="AttachedHeatingSystemFuel" type="FuelType"/>
+					<xs:element minOccurs="0" name="AttachedHeatingSystemCapacity" type="Capacity">
+						<xs:annotation>
+							<xs:documentation>[Btuh]</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="AttachedHeatingSystemAnnualEfficiency" type="HeatingEfficiencyType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="AttachedHeatingSystemFractionHeatLoadServed" type="Fraction" minOccurs="0"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
