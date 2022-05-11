@@ -2,7 +2,7 @@
 
 __New Features__
 - Updates to OpenStudio 3.4.0/EnergyPlus 22.1.
-- **Breaking change**: New required `OccupancyCalculationType` input to specify operational vs asset calculation. If operational, `NumberofResidents` is required.
+- High-level optional `OccupancyCalculationType` input to specify operational vs asset calculation. Defaults to asset. If operational, `NumberofResidents` is required.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed HVAC setpoints via a schedule CSV file.
 - New heat pump capabilities:
