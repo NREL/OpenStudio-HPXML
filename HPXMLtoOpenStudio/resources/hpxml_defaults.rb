@@ -12,7 +12,6 @@ class HPXMLDefaults
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml)
 
     infil_volume = nil
     infil_height = nil
@@ -64,6 +63,7 @@ class HPXMLDefaults
     apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
+    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml)
     apply_pools_and_hot_tubs(hpxml, cfa, nbeds_adjusted, schedules_file)
     apply_plug_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
     apply_fuel_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
@@ -114,6 +114,11 @@ class HPXMLDefaults
   private
 
   def self.apply_header(hpxml, epw_file)
+    if hpxml.header.occupancy_calculation_type.nil?
+      hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
+      hpxml.header.occupancy_calculation_type_isdefaulted = true
+    end
+
     if hpxml.header.timestep.nil?
       hpxml.header.timestep = 60
       hpxml.header.timestep_isdefaulted = true

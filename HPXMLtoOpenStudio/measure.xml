@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5404afde-cba6-44f9-a05c-0f342faa82b8</version_id>
-  <version_modified>20220511T165729Z</version_modified>
+  <version_id>63847e01-3073-483d-9187-3ebc7d56c488</version_id>
+  <version_modified>20220511T213248Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -488,10 +488,22 @@
       <checksum>25C171EE</checksum>
     </file>
     <file>
+      <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8ABCD77B</checksum>
+    </file>
+    <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>6B2AD259</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5ADA6A60</checksum>
     </file>
     <file>
       <version>
@@ -505,34 +517,10 @@
       <checksum>CA175072</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2FC9F485</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8ABCD77B</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3849FB33</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F6B8E119</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>332C2361</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
@@ -541,22 +529,40 @@
       <checksum>CDBF66E1</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BBA4AB3B</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B9FB5971</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>04BE16DC</checksum>
+    </file>
+    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F429779D</checksum>
+      <checksum>827F1D90</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0891CC91</checksum>
+      <checksum>446225BE</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
+      <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BBA4AB3B</checksum>
+      <usage_type>test</usage_type>
+      <checksum>F285D2B6</checksum>
     </file>
     <file>
       <filename>schedule_files/water-heater-operating-modes.csv</filename>
@@ -575,12 +581,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2DFF87CD</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5ADA6A60</checksum>
     </file>
   </files>
 </measure>
