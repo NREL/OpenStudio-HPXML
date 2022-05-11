@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class Waterheater
-  def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
+  def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type, eri_version)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
@@ -29,15 +29,15 @@ class Waterheater
     loop.addSupplyBranchForComponent(new_heater)
 
     add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
-    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop, eri_version)
 
     return loop
   end
 
-  def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system, schedules_file)
+  def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, solar_thermal_system, eri_version, schedules_file)
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type, eri_version)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
@@ -63,15 +63,15 @@ class Waterheater
     loop.addSupplyBranchForComponent(new_heater)
 
     add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
-    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop, eri_version)
 
     return loop
   end
 
-  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, schedules_file)
+  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, eri_version, schedules_file)
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type, eri_version)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
@@ -95,7 +95,7 @@ class Waterheater
     bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
     bottom_element_setpoint_schedule.setValue(-60)
 
-    water_heater_setpoint = Constants.WaterHeaterSetpointAverage # deg-F
+    water_heater_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) # deg-F
     water_heater_offset = 9.0 # deg-C
 
     setpoint_schedule = nil
@@ -144,7 +144,7 @@ class Waterheater
     tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule)
     loop.addSupplyBranchForComponent(tank)
 
-    add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop)
+    add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, eri_version)
 
     # Fan:SystemModel
     fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate)
@@ -172,7 +172,7 @@ class Waterheater
     return loop
   end
 
-  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, schedules_file)
+  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(model, water_heating_system.related_hvac_idref)
@@ -195,7 +195,7 @@ class Waterheater
       act_vol = 1.0
     end
 
-    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type, eri_version)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
@@ -225,7 +225,7 @@ class Waterheater
     # Create alternate setpoint schedule for source side flow request
     alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     alternate_stp_sch.setName("#{obj_name_combi} Alt Spt")
-    alt_temp = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    alt_temp = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type, eri_version)
     alternate_stp_sch.setValue(alt_temp)
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
@@ -1084,7 +1084,7 @@ class Waterheater
     fail "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
   end
 
-  def self.add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop)
+  def self.add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, eri_version)
     return unless water_heating_system.uses_desuperheater
 
     desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, model)
@@ -1097,7 +1097,7 @@ class Waterheater
     assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
     storage_tank_name = "#{tank.name} storage tank"
     # reduce tank setpoint to enable desuperheater setpoint at t_set
-    tank_setpoint = get_set_temp_c(water_heating_system.temperature - 5.0, HPXML::WaterHeaterTypeStorage)
+    tank_setpoint = get_set_temp_c(water_heating_system.temperature - 5.0, HPXML::WaterHeaterTypeStorage, eri_version)
     storage_tank = create_new_heater(name: storage_tank_name,
                                      act_vol: storage_vol_actual,
                                      t_set_c: tank_setpoint,
@@ -1115,7 +1115,7 @@ class Waterheater
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName("#{desuperheater_name} setpoint schedule")
     # Preheat tank desuperheater setpoint set to be the same as main water heater
-    dsh_setpoint = get_set_temp_c(water_heating_system.temperature, HPXML::WaterHeaterTypeStorage)
+    dsh_setpoint = get_set_temp_c(water_heating_system.temperature, HPXML::WaterHeaterTypeStorage, eri_version)
     new_schedule.setValue(dsh_setpoint)
 
     # create a desuperheater object
@@ -1604,8 +1604,6 @@ class Waterheater
   end
 
   def self.create_new_schedule_manager(model, set_temp_c)
-    set_temp_c = Constants.WaterHeaterSetpointAverage if set_temp_c.nil? # using detailed schedules
-
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName('dhw temp')
     new_schedule.setValue(set_temp_c)
@@ -1792,15 +1790,13 @@ class Waterheater
     new_heater.setHeater2SetpointTemperatureSchedule(new_schedule)
   end
 
-  def self.get_set_temp_c(t_set, wh_type)
-    return if t_set.nil?
+  def self.get_set_temp_c(t_set, wh_type, eri_version)
+    t_set = Waterheater.get_default_hot_water_temperature(eri_version) if t_set.nil? # using detailed schedules
 
     return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 # Half the deadband to account for E+ deadband
   end
 
   def self.create_new_loop(model, name, t_set)
-    t_set = Constants.WaterHeaterSetpointAverage if t_set.nil? # using detailed schedules
-
     # Create a new plant loop for the water heater
     loop = OpenStudio::Model::PlantLoop.new(model)
     loop.setName(name)

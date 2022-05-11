@@ -227,7 +227,7 @@ class HotWaterAndAppliances
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
       hpxml.water_heating_systems.each do |water_heating_system|
         wh_setpoint = water_heating_system.temperature
-        wh_setpoint = Constants.WaterHeaterSetpointAverage if wh_setpoint.nil? # using detailed schedules
+        wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
