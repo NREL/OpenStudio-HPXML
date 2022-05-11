@@ -1226,7 +1226,7 @@ class SchedulesFile
         end
 
         if only_zeros_and_ones[col_name]
-          if values.any? { |v| v != 0 || v != 1 }
+          if values.any? { |v| v != 0 && v != 1 }
             fail "Schedule value for column '#{col_name}' must be either 0 or 1. [context: #{schedules_path}]"
           end
         end
