@@ -74,9 +74,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeAsset
     occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeOperational
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('occupancy_calculation_type', occupancy_calculation_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('occupancy_calculation_type', occupancy_calculation_type_choices, false)
     arg.setDisplayName('Occupancy Calculation Type')
     arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, end uses based on number of bedrooms are adjusted for the number of occupants.")
+    arg.setDefaultValue(HPXML::OccupancyCalculationTypeAsset)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
@@ -3439,7 +3440,9 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
 
-    hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type]
+    if args[:occupancy_calculation_type].is_initialized
+      hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
+    end
     if args[:schedules_filepaths].is_initialized
       hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
