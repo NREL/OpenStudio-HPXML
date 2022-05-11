@@ -215,7 +215,7 @@ These default schedules are described elsewhere in the documentation (e.g., see 
 HPXML Occupancy Calculation Type
 ********************************
 
-The occupancy calculation type is entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational".
+The occupancy calculation type is entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational"; it defaults to "asset".
 
 If OccupancyCalculationType is "asset", various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
 
