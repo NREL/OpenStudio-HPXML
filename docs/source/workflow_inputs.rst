@@ -1629,12 +1629,9 @@ To define simple thermostat setpoints, additional information is entered in ``HV
   =============================  ========  =======  ===========  ========  =========  ============================
   Element                        Type      Units    Constraints  Required  Default    Notes
   =============================  ========  =======  ===========  ========  =========  ============================
-  ``SetpointTempHeatingSeason``  double    F                     See [#]_             Heating setpoint temperature
-  ``SetpointTempCoolingSeason``  double    F                     See [#]_             Cooling setpoint temperature
+  ``SetpointTempHeatingSeason``  double    F                     No        68         Heating setpoint temperature
+  ``SetpointTempCoolingSeason``  double    F                     No        78         Cooling setpoint temperature
   =============================  ========  =======  ===========  ========  =========  ============================
-
-  .. [#] SetpointTempHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
-  .. [#] SetpointTempCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
 
 If there is a heating temperature setback, additional information is entered in ``HVACControl``.
 
