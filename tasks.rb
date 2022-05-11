@@ -2334,6 +2334,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['whole_house_fan_present'] = true
     args['whole_house_fan_flow_rate'] = Constants.Auto
     args['whole_house_fan_power'] = Constants.Auto
+    args['hvac_control_heating_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_heating_weekend_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekday_setpoint'] = Constants.Auto
+    args['hvac_control_cooling_weekend_setpoint'] = Constants.Auto
   elsif ['base-misc-emissions.xml'].include? hpxml_file
     args['emissions_scenario_names'] = 'Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA'
     args['emissions_types'] = 'CO2e, CO2e, CO2e, SO2, NOx'

@@ -1455,6 +1455,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_hvac_controls
     # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.hvac_controls[0].heating_setpoint_temp = 71.5
+    hpxml.hvac_controls[0].cooling_setpoint_temp = 77.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 71.5, 77.5)
+
+    # Test defaults
+    hpxml.hvac_controls[0].heating_setpoint_temp = nil
+    hpxml.hvac_controls[0].cooling_setpoint_temp = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78)
+
+    # Test inputs not overridden by defaults (w/ setbacks)
     hpxml = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')
     hpxml.hvac_controls[0].heating_setback_start_hour = 12
     hpxml.hvac_controls[0].cooling_setup_start_hour = 12
@@ -1468,9 +1483,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_controls[0].seasons_cooling_end_day = 31
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_values(hpxml_default.hvac_controls[0], 12, 12, 1, 1, 6, 30, 7, 1, 12, 31)
+    _test_default_hvac_control_setback_values(hpxml_default.hvac_controls[0], 12, 12)
+    _test_default_hvac_control_season_values(hpxml_default.hvac_controls[0], 1, 1, 6, 30, 7, 1, 12, 31)
 
-    # Test defaults
+    # Test defaults w/ setbacks
     hpxml.hvac_controls[0].heating_setback_start_hour = nil
     hpxml.hvac_controls[0].cooling_setup_start_hour = nil
     hpxml.hvac_controls[0].seasons_heating_begin_month = nil
@@ -1483,7 +1499,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_controls[0].seasons_cooling_end_day = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_values(hpxml_default.hvac_controls[0], 23, 9, 1, 1, 12, 31, 1, 1, 12, 31)
+    _test_default_hvac_control_setback_values(hpxml_default.hvac_controls[0], 23, 9)
+    _test_default_hvac_control_season_values(hpxml_default.hvac_controls[0], 1, 1, 12, 31, 1, 1, 12, 31)
   end
 
   def test_hvac_distribution
@@ -3665,9 +3682,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_hvac_control_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr, htg_season_begin_month, htg_season_begin_day, htg_season_end_month, htg_season_end_day, clg_season_begin_month, clg_season_begin_day, clg_season_end_month, clg_season_end_day)
+  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp)
+    assert_equal(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
+    assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
+  end
+
+  def _test_default_hvac_control_setback_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr)
     assert_equal(htg_setback_start_hr, hvac_control.heating_setback_start_hour)
     assert_equal(clg_setup_start_hr, hvac_control.cooling_setup_start_hour)
+  end
+
+  def _test_default_hvac_control_season_values(hvac_control, htg_season_begin_month, htg_season_begin_day, htg_season_end_month, htg_season_end_day, clg_season_begin_month, clg_season_begin_day, clg_season_end_month, clg_season_end_day)
     assert_equal(htg_season_begin_month, hvac_control.seasons_heating_begin_month)
     assert_equal(htg_season_begin_day, hvac_control.seasons_heating_begin_day)
     assert_equal(htg_season_end_month, hvac_control.seasons_heating_end_month)
