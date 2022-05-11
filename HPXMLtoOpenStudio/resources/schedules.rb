@@ -1379,8 +1379,11 @@ class SchedulesFile
       @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
       if @external_file.is_initialized
         @external_file = @external_file.get
-        # ExternalFile creates a new file, so delete our temporary one
-        File.delete(tmp_schedules_path)
+        # ExternalFile creates a new file, so delete our temporary one immediately if we can
+        begin
+          File.delete(tmp_schedules_path)
+        rescue
+        end
       end
     end
   end
