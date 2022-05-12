@@ -5,6 +5,8 @@ __New Features__
 - High-level optional `OccupancyCalculationType` input to specify operational vs asset calculation. Defaults to asset. If operational, `NumberofResidents` is required.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed HVAC setpoints via a schedule CSV file.
+  - Allows modeling detailed water heater setpoints via a schedule CSV file.
+  - Allows modeling detailed heat pump water heater operating modes via a schedule CSV file.
 - New heat pump capabilities:
   - **Breaking change**: Replaces the `UseMaxLoadForHeatPumps` sizing option with `HeatPumpSizingMethodology`, which has three choices:
     - `ACCA`: nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
@@ -31,6 +33,8 @@ __New Features__
 - Updates HVAC rated fan power assumption per ASHRAE 1449-RP.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
+  - Adds support for modeling stratified tank water heaters.
+  - Adds support for specifying heat pump water heater operating modes (i.e., standard or heat pump only).
   - Adds support for ambient foundations for single-family attached and apartment units.
   - Adds support for unconditioned attics for apartment units.
   - Adds an optional argument to store additional custom properties in the HPXML file.

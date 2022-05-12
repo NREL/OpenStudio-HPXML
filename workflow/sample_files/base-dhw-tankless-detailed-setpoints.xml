@@ -11,9 +11,9 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv</SchedulesFilePath>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-furnace-gas-only.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-dhw-tankless-gas.xml</ParentHPXMLFile>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>
@@ -317,6 +317,7 @@
           <HVACPlant>
             <PrimarySystems>
               <PrimaryHeatingSystem idref='HeatingSystem1'/>
+              <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
@@ -332,9 +333,25 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem1'/>
+              <DistributionSystem idref='HVACDistribution1'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -376,14 +393,11 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <FuelType>natural gas</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
+            <EnergyFactor>0.82</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
