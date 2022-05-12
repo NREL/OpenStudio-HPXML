@@ -5145,10 +5145,11 @@ if ARGV[0].to_sym == :create_release_zips
            'ReportUtilityBills/resources/**/*.*',
            'weather/*.*',
            'workflow/*.*',
+           'workflow/real_homes/*.xml',
            'workflow/sample_files/*.xml',
            'workflow/tests/*test*.rb',
-           'workflow/tests/ASHRAE_Standard_140/*.xml',
-           'workflow/tests/base_results/*.csv',
+           'workflow/tests/**/*.xml',
+           'workflow/tests/**/*.csv',
            'documentation/index.html',
            'documentation/_static/**/*.*']
 
