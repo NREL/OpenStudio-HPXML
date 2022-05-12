@@ -5164,7 +5164,11 @@ if ARGV[0].to_sym == :create_release_zips
       puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
       exit!
     end
-    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
+
+    fonts_dir = File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts')
+    if Dir.exist? fonts_dir
+      FileUtils.rm_r(fonts_dir)
+    end
 
     # Check if we need to download weather files for the full release zip
     num_epws_expected = 1011
