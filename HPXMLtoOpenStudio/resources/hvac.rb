@@ -63,7 +63,7 @@ class HVAC
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
       end
-      if cooling_system.has_attached_heating
+      if (cooling_system.is_a? HPXML::CoolingSystem) && (cooling_system.has_attached_heating)
         htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
         htg_coil.setEfficiency(cooling_system.attached_heating_system_efficiency)
         htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W'))
