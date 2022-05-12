@@ -16,7 +16,7 @@ __New Features__
   - Allows `BackupHeatingLockoutTemperature` as an optional input to control integrated backup heating availability during, e.g., a thermostat heating setback recovery event; defaults to 40F.
 - New water heating capabilities:
   - Allows conventional storage tank water heaters to use a stratified (rather than mixed) tank model via `extension/TankModelType`; higher precision but runtime penalty. Defaults to mixed.
-  - Allows operating mode (standard vs heat pump only) for heat pump water heaters via `extension/OperatingMode`. Defaults to standard.
+  - Allows operating mode (standard vs heat pump only) for heat pump water heaters (HPWHs) via `extension/OperatingMode`. Defaults to standard.
   - Updates combi boiler model to be simpler, faster, and more robust by using separate space/water heating plant loops and boilers.
 - New capabilities for hourly/sub-hourly scheduling via schedule CSV files:
   - Detailed HVAC and water heater setpoints.
@@ -32,8 +32,7 @@ __New Features__
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
-  - **Breaking change**: Adds a `battery_usable_capacity` required argument.
-  - Adds optional arguments for schedule CSV files, heat pump water heater operating mode, water heater tank model, storm windows, heat pump lockout temperature, and emissions scenarios.
+  - Adds optional arguments for schedule CSV files, HPWH operating mode, water heater tank model, storm windows, heat pump lockout temperature, battery usable capacity, and emissions scenarios.
   - Adds support for ambient foundations for single-family attached and apartment units.
   - Adds support for unconditioned attics for apartment units.
   - Adds an optional argument to store additional custom properties in the HPXML file.

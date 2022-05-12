@@ -854,8 +854,8 @@ class HVAC
       elsif cooling_days[i] == 1 # cooling only seasons; heating has maximum of cooling
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : h }
         htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : h }
-        clg_wkdy = htg_weekday_setpoints[i]
-        clg_wked = htg_weekend_setpoints[i]
+        clg_wkdy = clg_weekday_setpoints[i]
+        clg_wked = clg_weekend_setpoints[i]
       else
         fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
       end
