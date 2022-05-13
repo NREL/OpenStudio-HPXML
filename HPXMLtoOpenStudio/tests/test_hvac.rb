@@ -241,7 +241,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   def test_room_heat_pump
     # Not completed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-heat-pump-hspf.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -252,7 +252,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     eer = heat_pump.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop_cool = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
-    cop_heat = 3.23 # Expected value
+    cop_heat = heat_pump.heating_efficiency_cop
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
