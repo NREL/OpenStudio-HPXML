@@ -214,13 +214,13 @@ base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-acca.xml,1415.
 base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-hers.xml,1388.81,144.0,1244.81,0.0,1388.81,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-maxload.xml,1375.43,144.0,1231.43,0.0,1375.43,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml,1365.96,144.0,1216.24,0.0,1360.24,0.0,0.0,0.0,5.72,0.0,0.0,0.0,0.0
-base-hvac-autosize-ptac-with-heating.xml,1751.23,144.0,1607.23,0.0,1751.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-ptac-with-heating.xml,1751.25,144.0,1607.25,0.0,1751.25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-ptac.xml,1261.67,144.0,1117.67,0.0,1261.67,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-pthp-sizing-methodology-acca.xml,1472.86,144.0,1328.86,0.0,1472.86,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-pthp-sizing-methodology-hers.xml,1478.21,144.0,1334.21,0.0,1478.21,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-pthp-sizing-methodology-maxload.xml,1493.67,144.0,1349.67,0.0,1493.67,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-ac-only.xml,1288.23,144.0,1144.23,0.0,1288.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-autosize-room-ac-with-heating.xml,1778.43,144.0,1634.43,0.0,1778.43,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-autosize-room-ac-with-heating.xml,1778.45,144.0,1634.45,0.0,1778.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-acca.xml,1487.78,144.0,1343.78,0.0,1487.78,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-hers.xml,1495.84,144.0,1351.84,0.0,1495.84,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-room-heat-pump-cop-sizing-methodology-maxload.xml,1513.8,144.0,1369.8,0.0,1513.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
