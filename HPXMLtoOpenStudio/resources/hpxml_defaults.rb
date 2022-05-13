@@ -2604,9 +2604,11 @@ class HPXMLDefaults
         clg_sys.cooling_capacity_isdefaulted = true
       end
       # Attached heating system capacities
-      if (clg_sys.is_a? HPXML::CoolingSystem) && (clg_sys.has_attached_heating && (clg_sys.attached_heating_system_capacity.nil? || ((clg_sys.attached_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)))
-        clg_sys.attached_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
-        clg_sys.attached_heating_system_capacity_isdefaulted = true
+      if (clg_sys.is_a? HPXML::CoolingSystem) && (clg_sys.has_attached_heating)
+        if (clg_sys.attached_heating_system_capacity.nil?) || ((clg_sys.attached_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
+          clg_sys.attached_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
+          clg_sys.attached_heating_system_capacity_isdefaulted = true
+        end
         clg_sys.attached_heating_system_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
         clg_sys.attached_heating_system_airflow_cfm_isdefaulted = true
       end

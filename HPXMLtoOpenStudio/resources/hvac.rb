@@ -70,6 +70,7 @@ class HVAC
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
         htg_cfm = cooling_system.attached_heating_system_airflow_cfm
+        fan_cfms << htg_cfm
       end
     end
 

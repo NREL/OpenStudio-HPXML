@@ -135,13 +135,12 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     cool_capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
-    heating_system = hpxml.heating_systems[0]
-    efficiency = heating_system.heating_efficiency_percent
-    efficiency = 1.0 if efficiency.nil?
-    heat_capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
+    heat_efficiency = cooling_system.attached_heating_system_efficiency
+    heat_efficiency = 1.0 if heat_efficiency.nil?
+    heat_capacity = UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
-    assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.001)
@@ -150,7 +149,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
     baseboard = model.getCoilHeatingElectrics[0]
-    assert_in_epsilon(efficiency, baseboard.efficiency, 0.01)
+    assert_in_epsilon(heat_efficiency, baseboard.efficiency, 0.01)
     assert_in_epsilon(heat_capacity, baseboard.nominalCapacity.get, 0.01)
   end
 
@@ -186,13 +185,12 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     cool_capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
-    heating_system = hpxml.heating_systems[0]
-    efficiency = heating_system.heating_efficiency_percent
-    efficiency = 1.0 if efficiency.nil?
-    heat_capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
+    heat_efficiency = cooling_system.attached_heating_system_efficiency
+    heat_efficiency = 1.0 if heat_efficiency.nil?
+    heat_capacity = UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
-    assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.001)
@@ -201,7 +199,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
     baseboard = model.getCoilHeatingElectrics[0]
-    assert_in_epsilon(efficiency, baseboard.efficiency, 0.01)
+    assert_in_epsilon(heat_efficiency, baseboard.efficiency, 0.01)
     assert_in_epsilon(heat_capacity, baseboard.nominalCapacity.get, 0.01)
   end
 

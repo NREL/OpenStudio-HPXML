@@ -329,6 +329,7 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
               <AttachedHeatingSystemFuel>electricity</AttachedHeatingSystemFuel>
+              <AttachedHeatingSystemCapacity>36000.0</AttachedHeatingSystemCapacity>
               <AttachedHeatingSystemAnnualEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -338,6 +339,7 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
         </HVAC>

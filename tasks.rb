@@ -1861,6 +1861,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heating_system_heating_capacity'] = Constants.Auto
     args['heating_system_2_heating_capacity'] = Constants.Auto
     args['cooling_system_cooling_capacity'] = Constants.Auto
+    args.delete('cooling_system_attached_heating_system_capacity')
     if hpxml_file.include? 'sizing-methodology-hers'
       args['heat_pump_heating_capacity'] = Constants.AutoHERSForHP
     elsif hpxml_file.include? 'sizing-methodology-maxload'
@@ -2107,6 +2108,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-room-ac-with-heating.xml',
          'base-hvac-ptac-with-heating.xml'].include? hpxml_file
     args['cooling_system_attached_heating_system_efficiency'] = 1.0
+    args['cooling_system_attached_heating_system_capacity'] = 36000.0
     args['cooling_system_attached_heating_system_fraction_heat_load_served'] = 1.0
     args['cooling_system_attached_heating_system_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
