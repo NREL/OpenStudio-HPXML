@@ -2906,7 +2906,7 @@ class HVAC
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
         if heating_system.heating_efficiency_cop.nil?
           htg_coil.setRatedCOP(1.0 / htg_ap.heat_rated_eirs[i])
-        else # PTHP
+        else # PTHP or room heat pump
           htg_coil.setRatedCOP(heating_system.heating_efficiency_cop)
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
@@ -4108,7 +4108,7 @@ class HVAC
   end
 
   def self.is_attached_heating_and_cooling_systems(hpxml, heating_system, cooling_system)
-    # Now only allows furnace+AC, PTAC and Room AC with heating
+    # Now only allows furnace+AC
     if not ((hpxml.heating_systems.include? heating_system) && (hpxml.cooling_systems.include? cooling_system))
       return false
     end

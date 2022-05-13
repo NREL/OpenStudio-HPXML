@@ -12,10 +12,10 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <HVACSizingControl>
-        <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
+        <HeatPumpSizingMethodology>ACCA</HeatPumpSizingMethodology>
       </HVACSizingControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-room-heat-pump-cop.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-heat-pump.xml</ParentHPXMLFile>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>

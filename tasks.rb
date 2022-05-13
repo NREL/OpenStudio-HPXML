@@ -260,12 +260,9 @@ def create_hpxmls
     'base-hvac-autosize-pthp-sizing-methodology-acca.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-hers.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-maxload.xml' => 'base-hvac-pthp.xml',
-    'base-hvac-autosize-room-heat-pump-cop-sizing-methodology-acca.xml' => 'base-hvac-room-heat-pump-cop.xml',
-    'base-hvac-autosize-room-heat-pump-cop-sizing-methodology-hers.xml' => 'base-hvac-room-heat-pump-cop.xml',
-    'base-hvac-autosize-room-heat-pump-cop-sizing-methodology-maxload.xml' => 'base-hvac-room-heat-pump-cop.xml',
-    'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-acca.xml' => 'base-hvac-room-heat-pump-hspf.xml',
-    'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-hers.xml' => 'base-hvac-room-heat-pump-hspf.xml',
-    'base-hvac-autosize-room-heat-pump-hspf-sizing-methodology-maxload.xml' => 'base-hvac-room-heat-pump-hspf.xml',
+    'base-hvac-autosize-room-heat-pump-sizing-methodology-acca.xml' => 'base-hvac-room-heat-pump.xml',
+    'base-hvac-autosize-room-heat-pump-sizing-methodology-hers.xml' => 'base-hvac-room-heat-pump.xml',
+    'base-hvac-autosize-room-heat-pump-sizing-methodology-maxload.xml' => 'base-hvac-room-heat-pump.xml',
     'base-hvac-autosize-room-ac-with-heating.xml' => 'base-hvac-room-ac-with-heating.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
@@ -339,8 +336,7 @@ def create_hpxmls
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-with-heating.xml' => 'base-hvac-room-ac-only.xml',
-    'base-hvac-room-heat-pump-cop.xml' => 'base-hvac-pthp.xml',
-    'base-hvac-room-heat-pump-hspf.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-room-heat-pump.xml' => 'base-hvac-pthp.xml',
     'base-hvac-room-ac-only-detailed-setpoints.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -2137,11 +2133,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpPTHP
     args['heat_pump_cooling_efficiency'] = 11.4
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.65
-  elsif ['base-hvac-room-heat-pump-hspf.xml'].include? hpxml_file
-    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRoom
-    args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF
-    args['heat_pump_heating_efficiency'] = 7.7
-  elsif ['base-hvac-room-heat-pump-cop.xml'].include? hpxml_file
+  elsif ['base-hvac-room-heat-pump.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRoom
   elsif ['base-hvac-ptac.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'

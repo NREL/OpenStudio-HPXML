@@ -11,8 +11,11 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <HVACSizingControl>
+        <HeatPumpSizingMethodology>MaxLoad</HeatPumpSizingMethodology>
+      </HVACSizingControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-pthp.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-heat-pump.xml</ParentHPXMLFile>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>
@@ -322,8 +325,6 @@
               <SystemIdentifier id='HeatPump1'/>
               <HeatPumpType>room heat pump</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
-              <CoolingCapacity>36000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -331,7 +332,6 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -339,8 +339,8 @@
                 <Value>11.4</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Units>COP</Units>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>

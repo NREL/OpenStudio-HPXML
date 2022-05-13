@@ -15,7 +15,7 @@
         <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
       </HVACSizingControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-room-heat-pump-hspf.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-heat-pump.xml</ParentHPXMLFile>
       </AdditionalProperties>
     </extension>
   </SoftwareInfo>
@@ -339,8 +339,8 @@
                 <Value>11.4</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Units>COP</Units>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
