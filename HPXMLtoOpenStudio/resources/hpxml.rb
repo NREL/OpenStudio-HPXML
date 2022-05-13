@@ -504,7 +504,7 @@ class HPXML < Object
   end
 
   def total_fraction_heat_load_served()
-    return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served
+    return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served + @cooling_systems.total_fraction_heat_load_served
   end
 
   def has_walkout_basement()
@@ -3374,6 +3374,10 @@ class HPXML < Object
 
     def total_fraction_cool_load_served
       map { |clg_sys| clg_sys.fraction_cool_load_served.to_f }.sum(0.0)
+    end
+
+    def total_fraction_heat_load_served
+      map { |clg_sys| clg_sys.attached_heating_system_fraction_heat_load_served.to_f }.sum(0.0)
     end
   end
 
