@@ -1587,8 +1587,7 @@ class OSModel
   def self.add_ideal_system(runner, model, spaces, epw_path)
     # Adds an ideal air system as needed to meet the load under certain circumstances:
     # 1. the sum of fractions load served is less than 1, or
-    # 2. there are non-year-round HVAC seasons, or
-    # 3. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
+    # 2. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
@@ -1623,16 +1622,8 @@ class OSModel
       sequential_cool_load_frac = 0.0
     end
 
-    return if @heating_days.nil?
-
-    # For periods of the year outside the HVAC season, operate this ideal air system to meet
-    # 100% of the load; for all other periods, operate to meet the fraction of the load not
-    # met by the HVAC system(s).
-    sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
-    sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
-
-    if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
+    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
                                  living_zone)
     end
   end

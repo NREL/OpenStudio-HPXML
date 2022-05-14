@@ -1,3 +1,11 @@
+## OpenStudio-HPXML v1.5.0
+
+__New Features__
+- Allow heating/cooling seasons that don't span the entire year.
+
+__Bugfixes__
+- Fixes heating (or cooling) setpoints from affecting the conditioned space temperature outside the heating (or cooling) season.
+
 ## OpenStudio-HPXML v1.4.0
 
 __New Features__

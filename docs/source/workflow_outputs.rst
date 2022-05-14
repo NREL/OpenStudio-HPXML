@@ -266,7 +266,9 @@ Annual unmet hours are listed below.
    Unmet Hours: Cooling (hr)  Number of hours where the cooling setpoint is not maintained.
    =========================  =====
 
-These numbers reflect the number of hours of the year when the conditioned space temperature is more than 0.2 deg-C (0.36 deg-F) from the setpoint during heating/cooling.
+These numbers reflect the number of hours of the year when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
+
+Note: If heating/cooling seasons are used that are not year-round, they will contribute to these unmet hours.
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
