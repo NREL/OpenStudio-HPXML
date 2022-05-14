@@ -1898,12 +1898,13 @@ class OSModel
     # We do our own unmet hours calculation via EMS so that we can incorporate,
     # e.g., heating/cooling seasons into the logic.
     hvac_control = @hpxml.hvac_controls[0]
-    sim_year = @hpxml.header.sim_calendar_year
-
-    htg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
-    htg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
-    clg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
-    clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+    if not hvac_control.nil?
+      sim_year = @hpxml.header.sim_calendar_year
+      htg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
+      htg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
+      clg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
+      clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+    end
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 

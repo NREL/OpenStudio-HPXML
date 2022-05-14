@@ -1551,7 +1551,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       comp_loads_data = []
     end
     if include_timeseries_unmet_hours
-      unmet_hours_data = @unmet_hours.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
+      unmet_hours_data = @unmet_hours.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
     else
       unmet_hours_data = []
     end
