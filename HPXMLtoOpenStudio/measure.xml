@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>28c8fe48-aa10-4701-8e2b-f0216aa7c1b8</version_id>
-  <version_modified>20220514T004320Z</version_modified>
+  <version_id>7b3f98f6-e005-489d-8d80-5176e2557be0</version_id>
+  <version_modified>20220514T133227Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -338,12 +338,6 @@
       <checksum>02777977</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E6727945</checksum>
-    </file>
-    <file>
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -560,17 +554,6 @@
       <checksum>C9BF52CD</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>3D74DFA5</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -581,6 +564,23 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F97BEFBA</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9E20FB28</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>8C2712D4</checksum>
     </file>
   </files>
 </measure>
