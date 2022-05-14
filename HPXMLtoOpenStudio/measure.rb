@@ -1922,7 +1922,7 @@ class OSModel
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName(Constants.ObjectNameUnmetHoursProgram)
     program.addLine("Set #{htg_hrs} = 0")
-    if htg_end_day > htg_start_day
+    if htg_end_day >= htg_start_day
       program.addLine("If (DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day})")
     else
       program.addLine("If (DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day})")
@@ -1930,7 +1930,7 @@ class OSModel
     program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
     program.addLine('EndIf')
     program.addLine("Set #{clg_hrs} = 0")
-    if clg_end_day > clg_start_day
+    if clg_end_day >= clg_start_day
       program.addLine("If (DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day})")
     else
       program.addLine("If (DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day})")
