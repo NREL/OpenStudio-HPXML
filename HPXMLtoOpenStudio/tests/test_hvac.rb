@@ -239,7 +239,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   end
 
   def test_room_heat_pump
-    # Not completed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)

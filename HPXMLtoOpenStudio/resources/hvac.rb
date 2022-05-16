@@ -2622,7 +2622,7 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     if (heating_system.is_a? HPXML::HeatingSystem) ||
-       ((heating_system.is_a? HPXML::HeatPump) && (heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP))
+       ((heating_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heating_system.heat_pump_type))
       htg_ap.heat_rated_cfm_per_ton = [350.0]
     else
       htg_ap.heat_rated_cfm_per_ton = []
