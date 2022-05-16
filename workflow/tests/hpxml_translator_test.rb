@@ -513,9 +513,10 @@ class HPXMLTest < MiniTest::Test
       end
       results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm.to_f
     end
-    
-    (hpxml.cooling_systems).each do |clg_sys|
+
+    hpxml.cooling_systems.each do |clg_sys|
       next unless clg_sys.has_attached_heating
+
       results['heating_capacity [Btuh]'] += clg_sys.attached_heating_system_capacity
       results['heating_airflow [cfm]'] += clg_sys.attached_heating_system_airflow_cfm.to_f
     end
@@ -530,7 +531,7 @@ class HPXMLTest < MiniTest::Test
 
     assert(!results.empty?)
 
-    if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty? && hpxml.cooling_systems.select { |h| (h.has_attached_heating) && (h.attached_heating_system_fraction_heat_load_served.to_f > 0) }.empty?
+    if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty? && hpxml.cooling_systems.select { |h| h.has_attached_heating && (h.attached_heating_system_fraction_heat_load_served.to_f > 0) }.empty?
       # No heating equipment; check for zero heating capacities/airflows/duct loads
       assert_equal(0.0, results['heating_capacity [Btuh]'])
       assert_equal(0.0, results['heating_backup_capacity [Btuh]'])

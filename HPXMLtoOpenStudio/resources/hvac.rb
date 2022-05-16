@@ -5,6 +5,7 @@ class HVAC
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          control_zone)
     is_heatpump = false
+    has_attached_heating = false # only for ptac and room ac where electric heater info can be attached to cooling system
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -39,6 +40,9 @@ class HVAC
           else
             obj_name = Constants.ObjectNamePTAC
           end
+          if cooling_system.has_attached_heating
+            has_attached_heating = true
+          end
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
         else
@@ -63,7 +67,7 @@ class HVAC
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
       end
-      if (cooling_system.is_a? HPXML::CoolingSystem) && (cooling_system.has_attached_heating)
+      if has_attached_heating
         htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
         htg_coil.setEfficiency(cooling_system.attached_heating_system_efficiency)
         htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W'))
@@ -124,7 +128,11 @@ class HVAC
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, nil, cooling_system)
+        if has_attached_heating
+          disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, nil, cooling_system)
+        else
+          disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
+        end
       end
       if not heating_system.nil?
         disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
@@ -3047,10 +3055,7 @@ class HVAC
   def self.set_fan_power_rated(hvac_system)
     hvac_ap = hvac_system.additional_properties
 
-    if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpRoom)
-      # FIXME: only the hspf + eer/ceer efficiency inputs will go here, is it reasonable to assume a fan included COP for heating?
-      hvac_ap.fan_power_rated = 0.0
-    elsif hvac_system.distribution_system.nil?
+    if hvac_system.distribution_system.nil?
       # Ductless, installed and rated value should be equal
       hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
     else
@@ -4112,9 +4117,7 @@ class HVAC
     if not ((hpxml.heating_systems.include? heating_system) && (hpxml.cooling_systems.include? cooling_system))
       return false
     end
-    if not ((heating_system.heating_system_type == HPXML::HVACTypeFurnace && cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner) ||
-            (heating_system.heating_system_type == HPXML::HVACTypePTACHeating && cooling_system.cooling_system_type == HPXML::HVACTypePTAC) ||
-            (heating_system.heating_system_type == HPXML::HVACTypeRoomACHeating && cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner))
+    if not (heating_system.heating_system_type == HPXML::HVACTypeFurnace && cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner)
       return false
     end
 
