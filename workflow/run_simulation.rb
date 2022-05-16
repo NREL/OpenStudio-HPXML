@@ -172,6 +172,8 @@ end.parse!
 
 if options[:version]
   puts "OpenStudio-HPXML v#{Version::OS_HPXML_Version}"
+  puts "OpenStudio v#{OpenStudio.openStudioLongVersion}"
+  puts "EnergyPlus v#{OpenStudio.energyPlusVersion}.#{OpenStudio.energyPlusBuildSHA}"
   exit!
 end
 
