@@ -1,3 +1,8 @@
+## OpenStudio-HPXML v1.5.0
+
+__New Features__
+- Allows modeling room/window heat pump and room air conditioner with heating.
+
 ## OpenStudio-HPXML v1.4.0
 
 __New Features__
@@ -29,7 +34,6 @@ __New Features__
 - Allows an optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Allows an optional `Battery/UsableCapacity` input; now defaults to 0.9 x NominalCapacity (previously 0.8).
 - For CFIS systems, allows an optional `extension/VentilationOnlyModeAirflowFraction` input to address duct losses during ventilation only mode.
-- Allows modeling room/window heat pump and room air conditioner with heating.
 - **Breaking change**: Each `VentilationFan` must have one (and only one) `UsedFor...` element set to true.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Changes the zip code argument name to `site_zip_code`.
