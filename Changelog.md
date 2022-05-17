@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.5.0
+
+__New Features__
+- Allows CSV timeseries output to be formatted for use with the DView application.
+
+__Bugfixes__
+
 ## OpenStudio-HPXML v1.4.0
 
 __New Features__
