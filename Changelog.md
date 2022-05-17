@@ -3,6 +3,7 @@
 __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows generating timeseries unmet hours for heating and cooling.
+- Allows CSV timeseries output to be formatted for use with the DView application.
 
 __Bugfixes__
 - Fixes heating (or cooling) setpoints from affecting the conditioned space temperature outside the heating (or cooling) season.
