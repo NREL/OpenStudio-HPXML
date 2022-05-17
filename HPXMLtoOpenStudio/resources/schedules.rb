@@ -1503,7 +1503,8 @@ class SchedulesFile
                     ColumnPoolPump,
                     ColumnPoolHeater,
                     ColumnHotTubPump,
-                    ColumnHotTubHeater] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+                    ColumnHotTubHeater,
+                    ColumnSleep] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end
