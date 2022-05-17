@@ -2,6 +2,9 @@
 
 __New Features__
 - Allows modeling room/window heat pump and room air conditioner with heating.
+- Allows CSV timeseries output to be formatted for use with the DView application.
+
+__Bugfixes__
 
 ## OpenStudio-HPXML v1.4.0
 
