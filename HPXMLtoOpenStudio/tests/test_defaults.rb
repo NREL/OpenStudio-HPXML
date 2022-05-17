@@ -3412,7 +3412,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity, cooling_efficiency_eer, attached_heating_efficiency = nil)
+  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity, cooling_efficiency_eer, attached_heating_system_efficiency = nil)
     assert_equal(shr, cooling_system.cooling_shr)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
@@ -3424,10 +3424,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(cooling_system.cooling_efficiency_eer, cooling_efficiency_eer)
     end
-    if attached_heating_efficiency.nil?
-      assert_nil(cooling_system.attached_heating_efficiency)
+    if attached_heating_system_efficiency.nil?
+      assert_nil(cooling_system.attached_heating_system_efficiency)
     else
-      assert_equal(cooling_system.attached_heating_system_efficiency, attached_heating_efficiency)
+      assert_equal(cooling_system.attached_heating_system_efficiency, attached_heating_system_efficiency)
     end
   end
 
