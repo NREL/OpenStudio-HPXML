@@ -4,6 +4,8 @@ __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows generating timeseries unmet hours for heating and cooling.
 - Allows CSV timeseries output to be formatted for use with the DView application.
+- EnergyPlus modeling changes:
+  - Switches Kiva foundation simulation timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 
 __Bugfixes__
 - Fixes heating (or cooling) setpoints from affecting the conditioned space temperature outside the heating (or cooling) season.
