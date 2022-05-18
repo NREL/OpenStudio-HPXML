@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7a29cb07-94b7-4cd8-bb97-f3aa65c33354</version_id>
-  <version_modified>20220516T192835Z</version_modified>
+  <version_id>ba7b2297-0ab1-4dea-aaf9-f490f3648603</version_id>
+  <version_modified>20220518T001212Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -314,12 +314,6 @@
       <checksum>4A1F88CF</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DC7B1678</checksum>
-    </file>
-    <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -384,30 +378,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>7A5FC44E</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-smooth.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3659E63B</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FAB83EF4</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F46D463C</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1C142FA2</checksum>
     </file>
     <file>
       <filename>schedule_files/setpoints.csv</filename>
@@ -488,17 +458,6 @@
       <checksum>6B2AD259</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>CA175072</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -577,10 +536,51 @@
       <checksum>C9BF52CD</checksum>
     </file>
     <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF267A10</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-smooth.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7FB7162A</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0DF1232B</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AC5B73D2</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E415983B</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>4A0A77B5</checksum>
+    </file>
+    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>16E18C1B</checksum>
+      <checksum>CACBC8A4</checksum>
     </file>
   </files>
 </measure>
