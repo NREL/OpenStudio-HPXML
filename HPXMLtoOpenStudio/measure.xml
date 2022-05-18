@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1229b8b7-8267-4456-8b7e-47b5ff4ffa0f</version_id>
-  <version_modified>20220518T145907Z</version_modified>
+  <version_id>2e278dee-73eb-4493-8de5-6c25d9c491b6</version_id>
+  <version_modified>20220518T171706Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -536,34 +536,40 @@
       <checksum>9E20FB28</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D433096E</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A46A0BAC</checksum>
+    </file>
+    <file>
       <filename>schedule_files/occupancy-smooth.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7FB7162A</checksum>
+      <checksum>3659E63B</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0DF1232B</checksum>
+      <checksum>FAB83EF4</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AC5B73D2</checksum>
+      <checksum>F46D463C</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E415983B</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CACBC8A4</checksum>
+      <checksum>1C142FA2</checksum>
     </file>
     <file>
       <version>
@@ -574,13 +580,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>ACA601C6</checksum>
-    </file>
-    <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BED6A5D7</checksum>
+      <checksum>C7F96812</checksum>
     </file>
   </files>
 </measure>
