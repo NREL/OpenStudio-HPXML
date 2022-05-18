@@ -73,6 +73,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
+    arg.setDisplayName('Debug Mode?')
+    arg.setDescription('Applicable when schedules type is stochastic. If true: Write extra state column(s).')
+    arg.setDefaultValue(false)
+    args << arg
+
     return args
   end
 
@@ -203,6 +209,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_vacancy_end_month] = end_month
       args[:schedules_vacancy_end_day] = end_day
     end
+
+    debug = false
+    if args[:schedules_type] == 'stochastic' && args[:debug].is_initialized
+      debug = args[:debug].get
+    end
+    args[:debug] = debug
   end
 end
 
