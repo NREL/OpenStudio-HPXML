@@ -4724,6 +4724,34 @@ def download_epws
   exit!
 end
 
+def download_utility_rates
+  require_relative 'HPXMLtoOpenStudio/resources/util'
+  require_relative 'ReportUtilityBills/resources/util'
+
+  require 'tempfile'
+  tmpfile = Tempfile.new('rates')
+
+  UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.json.gz', tmpfile)
+
+  puts 'Extracting utility rates...'
+  require 'zlib'
+  rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/rates')
+  FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
+  filepath = File.join(rates_dir, 'usurdb.json')
+  Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
+    File.open(filepath, 'w') do |output_stream|
+      IO.copy_stream(input_stream, output_stream)
+    end
+  end
+
+  process_usurdb(filepath)
+
+  num_rates_actual = Dir[File.join(rates_dir, '*.json')].count
+  puts "#{num_rates_actual} rates files are available in the rates directory."
+  puts 'Completed.'
+  exit!
+end
+
 def get_elements_from_sample_files(hpxml_docs)
   elements_being_used = []
   hpxml_docs.each do |xml, hpxml_doc|
@@ -4984,7 +5012,7 @@ def deep_copy_object(obj)
   return Marshal.load(Marshal.dump(obj))
 end
 
-command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather]
+command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather, :download_utility_rates]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -5103,6 +5131,10 @@ end
 
 if ARGV[0].to_sym == :download_weather
   download_epws
+end
+
+if ARGV[0].to_sym == :download_utility_rates
+  download_utility_rates
 end
 
 if ARGV[0].to_sym == :create_release_zips
