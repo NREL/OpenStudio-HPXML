@@ -125,3 +125,11 @@ class CalculateUtilityBill
     return num_days_in_month.to_f / Constants.NumDaysInMonths(year)[month - 1]
   end
 end
+
+def process_usurdb(filepath)
+  require 'json'
+
+  json = JSON.parse(filepath)
+
+  FileUtils.rm(filepath)
+end

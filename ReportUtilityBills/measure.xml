@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>71d08e06-cabc-4bcf-9ae0-36f6db81e7f4</version_id>
-  <version_modified>20220517T233233Z</version_modified>
+  <version_id>d92c99bb-5124-4dea-9a82-4f1fe11d47ab</version_id>
+  <version_modified>20220518T221118Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -280,12 +280,6 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C671FE99</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -303,10 +297,16 @@
       <checksum>E3796204</checksum>
     </file>
     <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CD34E831</checksum>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B1A79934</checksum>
+    </file>
+    <file>
+      <filename>rates/usurdb.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9C8F9D5B</checksum>
     </file>
   </files>
 </measure>
