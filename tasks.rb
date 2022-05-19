@@ -4583,26 +4583,29 @@ def download_utility_rates
   require_relative 'HPXMLtoOpenStudio/resources/util'
   require_relative 'ReportUtilityBills/resources/util'
 
-  require 'tempfile'
-  tmpfile = Tempfile.new('rates')
-
-  UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.json.gz', tmpfile)
-
-  puts 'Extracting utility rates...'
-  require 'zlib'
   rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/rates')
   FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
   filepath = File.join(rates_dir, 'usurdb.json')
-  Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
-    File.open(filepath, 'w') do |output_stream|
-      IO.copy_stream(input_stream, output_stream)
+
+  if !File.exist?(filepath)
+    require 'tempfile'
+    tmpfile = Tempfile.new('rates')
+
+    UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.json.gz', tmpfile)
+
+    puts 'Extracting utility rates...'
+    require 'zlib'
+    Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
+      File.open(filepath, 'w') do |output_stream|
+        IO.copy_stream(input_stream, output_stream)
+      end
     end
   end
 
   process_usurdb(filepath)
 
   num_rates_actual = Dir[File.join(rates_dir, '*.json')].count
-  puts "#{num_rates_actual} rates files are available in the rates directory."
+  puts "#{num_rates_actual} rate files are available in the rates directory."
   puts 'Completed.'
   exit!
 end

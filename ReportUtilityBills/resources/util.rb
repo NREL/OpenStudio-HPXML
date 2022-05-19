@@ -129,7 +129,31 @@ end
 def process_usurdb(filepath)
   require 'json'
 
-  json = JSON.parse(filepath)
+  puts 'Parsing JSON...'
+  rates = JSON.parse(File.read(filepath))
+
+  puts 'Selecting residential rates...'
+  residential_rates = []
+  rates.each do |rate|
+    next if !rate.keys.include?('_id')
+    next if !rate['_id'].keys.include?('$oid')
+    next if !rate.keys.include?('sector')
+    next if rate['sector'] != 'Residential'
+
+    residential_rates << rate
+  end
+
+  puts 'Exporting residential rates...'
+  rates_dir = File.dirname(filepath)
+  residential_rates.each do |residential_rate|
+    id = residential_rate['_id']['$oid']
+    ratepath = File.join(rates_dir, "#{id}.json")
+
+    File.open(ratepath, 'w') do |f|
+      json = JSON.pretty_generate(residential_rate)
+      f.write(json)
+    end
+  end
 
   FileUtils.rm(filepath)
 end
