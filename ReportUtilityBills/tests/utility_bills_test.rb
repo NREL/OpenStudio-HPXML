@@ -176,6 +176,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
+  def test_detailed
+    @args_hash['electricity_bill_type'] = 'Detailed'
+  end
+
   def test_workflow_wood_cord
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-wood-only.xml'
     @args_hash['wood_cord_marginal_rate'] = 0.0500

@@ -42,15 +42,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('csv')
     args << arg
 
-    # electricity_bill_type_choices = OpenStudio::StringVector.new
-    # electricity_bill_type_choices << 'Simple'
-    # electricity_bill_type_choices << 'Detailed'
+    electricity_bill_type_choices = OpenStudio::StringVector.new
+    electricity_bill_type_choices << 'Simple'
+    electricity_bill_type_choices << 'Detailed'
 
-    # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_bill_type', electricity_bill_type_choices, true)
-    # arg.setDisplayName('Electricity: Simple or Detailed')
-    # arg.setDescription("Choose either 'Simple' or 'Detailed'. If 'Simple' is selected, electric utility bills are calculated based on user-defined fixed charge and marginal rate. If 'Detailed' is selected, electric utility bills are calculated based on either: a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.")
-    # arg.setDefaultValue('Simple')
-    # args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_bill_type', electricity_bill_type_choices, false)
+    arg.setDisplayName('Electricity: Simple or Detailed')
+    arg.setDescription("Choose either 'Simple' or 'Detailed'. If 'Simple' is selected, electric utility bills are calculated based on user-defined fixed charge and marginal rate. If 'Detailed' is selected, electric utility bills are calculated based on either: a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.")
+    arg.setDefaultValue('Simple')
+    args << arg
 
     # utility_rate_type_choices = OpenStudio::StringVector.new
     # utility_rate_type_choices << 'Autoselect OpenEI'
@@ -195,7 +195,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Require full annual simulation
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      if args[:electricity_bill_type] != 'Simple' || pv_systems.size > 0
+      if args[:electricity_bill_type] == 'Detailed' || pv_systems.size > 0
         warnings << 'A full annual simulation is required for calculating detailed utility bills.'
       end
     end
@@ -250,7 +250,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(@model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
@@ -299,7 +298,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
     output_format = args[:output_format].get
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
@@ -390,6 +388,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def preprocess_arguments(args)
+    args[:electricity_bill_type] = args[:electricity_bill_type].is_initialized ? args[:electricity_bill_type].get : nil
     args[:electricity_fixed_charge] = args[:electricity_fixed_charge].is_initialized ? args[:electricity_fixed_charge].get : nil
     args[:electricity_marginal_rate] = args[:electricity_marginal_rate].is_initialized ? args[:electricity_marginal_rate].get : nil
     args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].is_initialized ? args[:natural_gas_fixed_charge].get : nil

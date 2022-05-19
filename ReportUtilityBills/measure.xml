@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>6f495709-7a18-41f8-8a45-eb759d082c0b</version_id>
-  <version_modified>20220519T230038Z</version_modified>
+  <version_id>4d2d10a0-d86c-472b-bfb6-f8a5bde662bf</version_id>
+  <version_modified>20220519T232123Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -31,6 +31,25 @@
         <choice>
           <value>msgpack</value>
           <display_name>msgpack</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>electricity_bill_type</name>
+      <display_name>Electricity: Simple or Detailed</display_name>
+      <description>Choose either 'Simple' or 'Detailed'. If 'Simple' is selected, electric utility bills are calculated based on user-defined fixed charge and marginal rate. If 'Detailed' is selected, electric utility bills are calculated based on either: a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Simple</default_value>
+      <choices>
+        <choice>
+          <value>Simple</value>
+          <display_name>Simple</display_name>
+        </choice>
+        <choice>
+          <value>Detailed</value>
+          <display_name>Detailed</display_name>
         </choice>
       </choices>
     </argument>
@@ -276,6 +295,12 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FE6A7811</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -284,19 +309,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4B8F8EC1</checksum>
+      <checksum>0CD75B19</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1ACE88AD</checksum>
+      <checksum>B9796CCD</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FE6A7811</checksum>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8C632692</checksum>
     </file>
   </files>
 </measure>
