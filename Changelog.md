@@ -10,7 +10,8 @@ __New Features__
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type.
 
 __Bugfixes__
-- Fixes heating (or cooling) setpoints from affecting the conditioned space temperature outside the heating (or cooling) season.
+- Fixes heating (or cooling) setpoints affecting the conditioned space temperature outside the heating (or cooling) season.
+- Fixes handling non-integer number of occupants when using the stochastic occupancy schedule generator.
 
 ## OpenStudio-HPXML v1.4.0
 
