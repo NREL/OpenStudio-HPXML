@@ -52,22 +52,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('Simple')
     args << arg
 
-    # utility_rate_type_choices = OpenStudio::StringVector.new
-    # utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
-    # utility_rate_type_choices << 'Sample Tiered Rate'
-    # utility_rate_type_choices << 'Sample Time-of-Use Rate'
-    # utility_rate_type_choices << 'Sample Tiered Time-of-Use Rate'
-    # utility_rate_type_choices << 'User-Specified'
+    utility_rate_type_choices = OpenStudio::StringVector.new
+    utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
+    utility_rate_type_choices << 'Sample Tiered Rate'
+    utility_rate_type_choices << 'Sample Time-of-Use Rate'
+    utility_rate_type_choices << 'Sample Tiered Time-of-Use Rate'
+    utility_rate_type_choices << 'User-Specified'
 
-    # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
-    # arg.setDisplayName('Electricity: Utility Rate Type')
-    # arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
-    # args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
+    arg.setDisplayName('Electricity: Utility Rate Type')
+    arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
+    args << arg
 
-    # arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
-    # arg.setDisplayName('Electricity: User-Specified Utility Rate')
-    # arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
-    # args << arg
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
+    arg.setDisplayName('Electricity: User-Specified Utility Rate')
+    arg.setDescription("Absolute/relative path of the json/csv. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', false)
     arg.setDisplayName('Electricity: Fixed Charge')
@@ -191,16 +191,21 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def check_for_warnings(args, pv_systems)
     warnings = []
 
-    # Require full annual simulation
+    # Require full annual simulation if 'Detailed' or has PV
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      if args[:electricity_bill_type] == 'Detailed' || pv_systems.size > 0
+      if args[:electricity_bill_type].get == 'Detailed' || pv_systems.size > 0
         warnings << 'A full annual simulation is required for calculating detailed utility bills.'
       end
     end
 
-    # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
+    # Require utility rate type if 'Detailed'
+    if args[:electricity_bill_type].get == 'Detailed' && !args[:electricity_utility_rate_type].is_initialized
+      warnings << 'Must specify a utility rate type when calculating detailed utility bills.'
+    end
+
+    # Require user-specified utility rate if 'Detailed' and 'User-Specified'
+    if args[:electricity_bill_type].get == 'Detailed' && args[:electricity_utility_rate_type].is_initialized && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
+      warnings << 'Must specify a utility rate json/csv path when choosing User-Specified utility rate type.'
     end
 
     # Require not DSE

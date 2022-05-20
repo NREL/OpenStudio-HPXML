@@ -284,12 +284,26 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(!File.exist?(@workflow_bills_csv))
   end
 
-  def test_error_user_specified_but_no_rates
-    skip
+  def test_warning_detailed_semi_annual_simulation
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml'
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    expected_warnings = ['Must specify a utility rate type when calculating detailed utility bills.']
+    _test_workflow(expected_warnings: expected_warnings)
+    assert(!File.exist?(@workflow_bills_csv))
+  end
+
+  def test_warning_detailed_no_utility_rate_type
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    expected_warnings = ['Must specify a utility rate type when calculating detailed utility bills.']
+    _test_workflow(expected_warnings: expected_warnings)
+    assert(!File.exist?(@workflow_bills_csv))
+  end
+
+  def test_warning_user_specified_but_no_rates
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
-    _test_workflow(expected_errors: expected_errors)
+    expected_warnings = ['Must specify a utility rate json/csv path when choosing User-Specified utility rate type.']
+    _test_workflow(expected_warnings: expected_warnings)
     assert(!File.exist?(@workflow_bills_csv))
   end
 

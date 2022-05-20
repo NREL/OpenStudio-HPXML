@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>6731fbb0-b934-4c9b-8320-3a0fdf86a5cb</version_id>
-  <version_modified>20220520T001627Z</version_modified>
+  <version_id>1a031e45-efc3-4634-8229-11785e27dfd4</version_id>
+  <version_modified>20220520T160432Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -52,6 +52,44 @@
           <display_name>Detailed</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>electricity_utility_rate_type</name>
+      <display_name>Electricity: Utility Rate Type</display_name>
+      <description>Type of the utility rate. Required if electricity bill type is 'Detailed'.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>Sample Real-Time Pricing Rate</value>
+          <display_name>Sample Real-Time Pricing Rate</display_name>
+        </choice>
+        <choice>
+          <value>Sample Tiered Rate</value>
+          <display_name>Sample Tiered Rate</display_name>
+        </choice>
+        <choice>
+          <value>Sample Time-of-Use Rate</value>
+          <display_name>Sample Time-of-Use Rate</display_name>
+        </choice>
+        <choice>
+          <value>Sample Tiered Time-of-Use Rate</value>
+          <display_name>Sample Tiered Time-of-Use Rate</display_name>
+        </choice>
+        <choice>
+          <value>User-Specified</value>
+          <display_name>User-Specified</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>electricity_utility_rate_user_specified</name>
+      <display_name>Electricity: User-Specified Utility Rate</display_name>
+      <description>Absolute/relative path of the json/csv. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>electricity_fixed_charge</name>
@@ -309,13 +347,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D0BB3145</checksum>
+      <checksum>B417C1A8</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E5DCA5D7</checksum>
+      <checksum>2CE4837F</checksum>
     </file>
   </files>
 </measure>
