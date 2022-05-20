@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>94dd01bd-3cd4-44d9-8ebb-c916f849ae81</version_id>
-  <version_modified>20220520T215914Z</version_modified>
+  <version_id>970b6930-45db-4cad-91cb-a20702dac3c3</version_id>
+  <version_modified>20220520T224408Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -524,12 +524,6 @@
       <checksum>9331A023</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>517E79C1</checksum>
-    </file>
-    <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -560,10 +554,22 @@
       <checksum>01756468</checksum>
     </file>
     <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>63C1E7B1</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>089E760B</checksum>
+    </file>
+    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9CE85D66</checksum>
+      <checksum>4861DCAF</checksum>
     </file>
     <file>
       <version>
@@ -574,13 +580,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CB388DCB</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>63C1E7B1</checksum>
+      <checksum>10C5E21F</checksum>
     </file>
   </files>
 </measure>

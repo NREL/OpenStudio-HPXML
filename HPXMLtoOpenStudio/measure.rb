@@ -1058,6 +1058,8 @@ class OSModel
 
     return unless addtl_cfa > 1.0 # Allow some rounding
 
+    # FIXME: Need to differentiate ceiling of living space (i.e., 2 story building) from ceiling of conditioned basement/crawlspace
+
     floor_width = Math::sqrt(addtl_cfa)
     floor_length = addtl_cfa / floor_width
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
@@ -1083,7 +1085,6 @@ class OSModel
     ceiling_surface.setWindExposure('NoWind')
     ceiling_surface.setName('inferred conditioned ceiling')
     ceiling_surface.setSurfaceType('RoofCeiling')
-    # FIXME: Need to differentiate ceiling of living space (i.e., 2 story building) from ceiling of conditioned basement
     ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
     ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')

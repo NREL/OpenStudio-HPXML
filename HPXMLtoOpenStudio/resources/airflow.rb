@@ -623,7 +623,7 @@ class Airflow
     all_ducts_conditioned = true
     duct_locations.each do |duct_zone|
       if duct_locations.is_a? OpenStudio::Model::ThermalZone
-        next if Geometry.is_living(duct_zone)
+        next if duct_zone == @conditioned_zone
       end
 
       all_ducts_conditioned = false
