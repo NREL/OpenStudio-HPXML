@@ -1266,9 +1266,9 @@ class HPXMLTest < MiniTest::Test
     (hpxml.clothes_washers + hpxml.clothes_dryers + hpxml.refrigerators + hpxml.dishwashers + hpxml.cooking_ranges).each do |appliance|
       next unless hpxml.water_heating_systems.size > 0
 
-      # Location
+      # Location (thermal zone)
       hpxml_value = appliance.location
-      if hpxml_value.nil? || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
+      if hpxml_value.nil? || HPXML::conditioned_locations.include?(hpxml_value) || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       tabular_value = tabular_map[appliance.class]

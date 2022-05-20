@@ -1339,22 +1339,22 @@ class OSModel
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
-      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
+      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
     end
     @hpxml.clothes_dryers.each do |clothes_dryer|
-      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
+      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, spaces)
     end
     @hpxml.dishwashers.each do |dishwasher|
-      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
+      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
     end
     @hpxml.refrigerators.each do |refrigerator|
-      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, spaces)
     end
     @hpxml.freezers.each do |freezer|
-      freezer.additional_properties.space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
+      freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
     end
     @hpxml.cooking_ranges.each do |cooking_range|
-      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
+      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
     end
 
     # Distribution
@@ -1372,7 +1372,7 @@ class OSModel
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
-      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
 
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
@@ -1395,7 +1395,7 @@ class OSModel
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
       Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map)
     end
 
@@ -1772,7 +1772,7 @@ class OSModel
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, 'Duct', model, spaces)
+      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
 
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
@@ -1844,9 +1844,7 @@ class OSModel
 
     @hpxml.batteries.each do |battery|
       # Assign space
-      if battery.location != HPXML::LocationOutside
-        battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
-      end
+      battery.additional_properties.space = get_space_from_location(battery.location, spaces)
       Battery.apply(runner, model, battery)
     end
   end
@@ -2524,7 +2522,7 @@ class OSModel
   # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters and ducts).
-  def self.get_space_or_schedule_from_location(location, object_name, model, spaces)
+  def self.get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
                HPXML::LocationOutside,
                HPXML::LocationRoofDeck].include? location
@@ -2540,32 +2538,23 @@ class OSModel
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
       sch = get_space_temperature_schedule(model, location, spaces)
     else
-      space = get_space_from_location(location, object_name, model, spaces)
+      space = get_space_from_location(location, spaces)
     end
 
     return space, sch
   end
 
-  # Returns an OS:Space, or nil if a MF space
+  # Returns an OS:Space, or nil if a MF space or outside.
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
-  def self.get_space_from_location(location, object_name, model, spaces)
-    return if [HPXML::LocationOtherHeatedSpace,
+  def self.get_space_from_location(location, spaces)
+    return if [HPXML::LocationOutside,
+               HPXML::LocationOtherHeatedSpace,
                HPXML::LocationOtherHousingUnit,
                HPXML::LocationOtherMultifamilyBufferSpace,
                HPXML::LocationOtherNonFreezingSpace].include? location
 
-    num_orig_spaces = spaces.size
-
-    if HPXML::conditioned_locations.include? location
-      space = create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    else
-      space = create_or_get_space(model, spaces, location)
-    end
-
-    fail if spaces.size != num_orig_spaces # EPvalidator.xml should prevent this
-
-    return space
+    return spaces[location]
   end
 
   def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)

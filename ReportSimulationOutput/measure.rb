@@ -2165,6 +2165,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Peak Fuels
     # Using meters for energy transferred in conditioned space only (i.e., excluding ducts) to determine winter vs summer.
     @peak_fuels = {}
+    # FIXME: Need to update to conditioned zone
     @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(meters: ["Heating:EnergyTransfer:Zone:#{HPXML::LocationLivingSpace.upcase}"], report: 'Peak Electricity Winter Total')
     @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(meters: ["Cooling:EnergyTransfer:Zone:#{HPXML::LocationLivingSpace.upcase}"], report: 'Peak Electricity Summer Total')
 
