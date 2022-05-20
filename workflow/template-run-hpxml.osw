@@ -44,6 +44,7 @@
     {
       "arguments": {
         "output_format": "csv",
+        "electricity_bill_type": "Simple",
         "electricity_fixed_charge": 12.0,
         "natural_gas_fixed_charge": 12.0,
         "wood_cord_marginal_rate": 0.015,

@@ -53,7 +53,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     args << arg
 
     # utility_rate_type_choices = OpenStudio::StringVector.new
-    # utility_rate_type_choices << 'Autoselect OpenEI'
     # utility_rate_type_choices << 'Sample Real-Time Pricing Rate'
     # utility_rate_type_choices << 'Sample Tiered Rate'
     # utility_rate_type_choices << 'Sample Time-of-Use Rate'
@@ -63,7 +62,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electricity_utility_rate_type', utility_rate_type_choices, false)
     # arg.setDisplayName('Electricity: Utility Rate Type')
     # arg.setDescription("Type of the utility rate. Required if electricity bill type is 'Detailed'.")
-    # arg.setDefaultValue('Autoselect OpenEI')
     # args << arg
 
     # arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
@@ -416,44 +414,40 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
           rate.flatratebuy = args[:electricity_marginal_rate]
         elsif args[:electricity_bill_type] == 'Detailed'
-          if args[:electricity_utility_rate_type].get != 'Autoselect OpenEI'
-            if args[:electricity_utility_rate_type].get == 'User-Specified'
-              path = args[:electricity_utility_rate_user_specified].get
+          if args[:electricity_utility_rate_type].get == 'User-Specified'
+            path = args[:electricity_utility_rate_user_specified].get
 
-              hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-              filepath = FilePath.check_path(path,
-                                             File.dirname(hpxml_path),
-                                             'Tariff File')
-            else # sample rates
-              custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
-              custom_rate_file = "#{args[:electricity_utility_rate_type].get}.json"
-              filepath = File.join(custom_rates_folder, custom_rate_file)
-            end
+            hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+            filepath = FilePath.check_path(path,
+                                           File.dirname(hpxml_path),
+                                           'Tariff File')
+          else # sample rates
+            custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
+            custom_rate_file = "#{args[:electricity_utility_rate_type].get}.json"
+            filepath = File.join(custom_rates_folder, custom_rate_file)
+          end
 
-            fileread = File.read(filepath)
-            tariff = JSON.parse(fileread, symbolize_names: true)
-            tariff = tariff[:items][0]
+          fileread = File.read(filepath)
+          tariff = JSON.parse(fileread, symbolize_names: true)
+          tariff = tariff[:items][0]
 
-            if tariff.keys.include?(:realtimepricing)
-              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-              rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
+          if tariff.keys.include?(:realtimepricing)
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+            rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
 
-            else
-              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-              rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
-
-              rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
-              rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
-              rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
-
-              rate.demandratestructure = tariff[:demandratestructure] if tariff.keys.include?(:demandratestructure)
-              rate.demandweekdayschedule = tariff[:demandweekdayschedule] if tariff.keys.include?(:demandweekdayschedule)
-              rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
-
-              rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
-            end
           else
-            # TODO
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+            rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
+
+            rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
+            rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
+            rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
+
+            rate.demandratestructure = tariff[:demandratestructure] if tariff.keys.include?(:demandratestructure)
+            rate.demandweekdayschedule = tariff[:demandweekdayschedule] if tariff.keys.include?(:demandweekdayschedule)
+            rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
+
+            rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
           end
         end
 
