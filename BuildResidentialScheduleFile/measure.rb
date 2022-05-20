@@ -201,6 +201,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     else
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
     end
+    # Stochastic occupancy required integer number of occupants
+    if args[:schedules_type] == 'stochastic'
+      args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
+    end
 
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
