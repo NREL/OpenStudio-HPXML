@@ -4585,13 +4585,13 @@ def download_utility_rates
 
   rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/rates')
   FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
-  filepath = File.join(rates_dir, 'usurdb.json')
+  filepath = File.join(rates_dir, 'usurdb.csv')
 
   if !File.exist?(filepath)
     require 'tempfile'
     tmpfile = Tempfile.new('rates')
 
-    UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.json.gz', tmpfile)
+    UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.csv.gz', tmpfile)
 
     puts 'Extracting utility rates...'
     require 'zlib'

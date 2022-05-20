@@ -392,6 +392,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   def preprocess_arguments(args)
     args[:electricity_bill_type] = args[:electricity_bill_type].is_initialized ? args[:electricity_bill_type].get : nil
+    args[:electricity_utility_rate_type] = args[:electricity_utility_rate_type].is_initialized ? args[:electricity_utility_rate_type].get : nil
+    args[:electricity_utility_rate_user_specified] = args[:electricity_utility_rate_user_specified].is_initialized ? args[:electricity_utility_rate_user_specified].get : nil
     args[:electricity_fixed_charge] = args[:electricity_fixed_charge].is_initialized ? args[:electricity_fixed_charge].get : nil
     args[:electricity_marginal_rate] = args[:electricity_marginal_rate].is_initialized ? args[:electricity_marginal_rate].get : nil
     args[:natural_gas_fixed_charge] = args[:natural_gas_fixed_charge].is_initialized ? args[:natural_gas_fixed_charge].get : nil
@@ -419,8 +421,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
           rate.flatratebuy = args[:electricity_marginal_rate]
         elsif args[:electricity_bill_type] == 'Detailed'
-          if args[:electricity_utility_rate_type].get == 'User-Specified'
-            path = args[:electricity_utility_rate_user_specified].get
+          if args[:electricity_utility_rate_type] == 'User-Specified'
+            path = args[:electricity_utility_rate_user_specified]
 
             hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
             filepath = FilePath.check_path(path,
@@ -428,7 +430,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                                            'Tariff File')
           else # sample rates
             custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
-            custom_rate_file = "#{args[:electricity_utility_rate_type].get}.json"
+            custom_rate_file = "#{args[:electricity_utility_rate_type]}.json"
             filepath = File.join(custom_rates_folder, custom_rate_file)
           end
 

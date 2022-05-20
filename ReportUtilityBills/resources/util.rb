@@ -127,27 +127,42 @@ class CalculateUtilityBill
 end
 
 def process_usurdb(filepath)
+  require 'csv'
   require 'json'
 
-  puts 'Parsing JSON...'
-  rates = JSON.parse(File.read(filepath))
+  puts 'Parsing CSV...'
+  rates = CSV.read(filepath, headers: true)
+  rates = rates.map { |d| d.to_hash }
 
   puts 'Selecting residential rates...'
   residential_rates = []
   rates.each do |rate|
-    next if !rate.keys.include?('_id')
-    next if !rate['_id'].keys.include?('$oid')
-    next if !rate.keys.include?('sector')
     next if rate['sector'] != 'Residential'
 
-    residential_rates << rate
+    rate.each do |k, v|
+      rate.delete(k) if v.nil?
+    end
+
+    rate.each do |k, v|
+      begin
+        rate[k] = Float(v)
+      rescue
+        if v.include?('[') && v.include?(']')
+          if !['name', 'utility', 'description', 'source', 'sourceparent', 'energycomments'].include?(k)
+            rate[k] = eval(v) # arrays
+          end
+        end
+      end
+    end
+
+    residential_rates << { 'items' => [rate] }
   end
 
   puts 'Exporting residential rates...'
   rates_dir = File.dirname(filepath)
   residential_rates.each do |residential_rate|
-    id = residential_rate['_id']['$oid']
-    ratepath = File.join(rates_dir, "#{id}.json")
+    label = residential_rate['items'][0]['label']
+    ratepath = File.join(rates_dir, "#{label}.json")
 
     File.open(ratepath, 'w') do |f|
       json = JSON.pretty_generate(residential_rate)
