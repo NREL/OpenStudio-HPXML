@@ -13,7 +13,7 @@ class Airflow
     @infil_volume = hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     @infil_height = hpxml.air_infiltration_measurements.select { |i| !i.infiltration_height.nil? }[0].infiltration_height
     @living_space = spaces[HPXML::LocationLivingSpace]
-    @living_zone = @living_space.thermalZone.get
+    @conditioned_zone = @living_space.thermalZone.get
     @nbeds = nbeds
     @ncfl_ag = ncfl_ag
     @eri_version = eri_version
@@ -32,18 +32,18 @@ class Airflow
 
     @win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')
     @win_sensor.setName("#{Constants.ObjectNameAirflow} win s")
-    @win_sensor.setKeyName(@living_zone.name.to_s)
+    @win_sensor.setKeyName(@conditioned_zone.name.to_s)
 
     @vwind_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
     @vwind_sensor.setName('site vw s')
 
     @tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
     @tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
-    @tin_sensor.setKeyName(@living_zone.name.to_s)
+    @tin_sensor.setKeyName(@conditioned_zone.name.to_s)
 
     @tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
     @tout_sensor.setName("#{Constants.ObjectNameAirflow} tt s")
-    @tout_sensor.setKeyName(@living_zone.name.to_s)
+    @tout_sensor.setKeyName(@conditioned_zone.name.to_s)
 
     @adiabatic_const = nil
 
@@ -270,8 +270,8 @@ class Airflow
   end
 
   def self.apply_natural_ventilation_and_whole_house_fan(model, weather, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
-    if @living_zone.thermostatSetpointDualSetpoint.is_initialized
-      thermostat = @living_zone.thermostatSetpointDualSetpoint.get
+    if @conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
+      thermostat = @conditioned_zone.thermostatSetpointDualSetpoint.get
       htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
       clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
     end
@@ -331,7 +331,7 @@ class Airflow
     whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
     whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
     whf_equip.setName(Constants.ObjectNameWholeHouseFan)
-    whf_equip.setSpace(@living_space)
+    whf_equip.setSpace(@living_space) # no heat gain, so assign the equipment to an arbitrary space
     whf_equip_def.setFractionRadiant(0)
     whf_equip_def.setFractionLatent(0)
     whf_equip_def.setFractionLost(1)
@@ -351,7 +351,7 @@ class Airflow
       # Air from living to WHF zone (attic)
       zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
       zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
-      zone_mixing.setSourceZone(@living_zone)
+      zone_mixing.setSourceZone(@conditioned_zone)
       liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
       liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
     end
@@ -636,7 +636,7 @@ class Airflow
       # Set the return plenum
       ra_duct_zone = create_return_air_duct_zone(model, object.name.to_s)
       ra_duct_space = ra_duct_zone.spaces[0]
-      @living_zone.setReturnPlenum(ra_duct_zone, object)
+      @conditioned_zone.setReturnPlenum(ra_duct_zone, object)
 
       inlet_node = object.demandInletNode
     elsif object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
@@ -675,7 +675,7 @@ class Airflow
     ah_wout_sensor.setKeyName(inlet_node.name.to_s)
 
     living_zone_return_air_node = nil
-    @living_zone.returnAirModelObjects.each do |return_air_model_obj|
+    @conditioned_zone.returnAirModelObjects.each do |return_air_model_obj|
       next if return_air_model_obj.to_Node.get.airLoopHVAC.get != object
 
       living_zone_return_air_node = return_air_model_obj
@@ -700,12 +700,12 @@ class Airflow
     else
       ra_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
       ra_w_sensor.setName("#{ra_w_var.name} s")
-      ra_w_sensor.setKeyName(@living_zone.name.to_s)
+      ra_w_sensor.setKeyName(@conditioned_zone.name.to_s)
     end
 
     # Create one duct program for each duct location zone
     duct_locations.each_with_index do |duct_location, i|
-      next if (not duct_location.nil?) && (duct_location.name.to_s == @living_zone.name.to_s)
+      next if (not duct_location.nil?) && (duct_location.name.to_s == @conditioned_zone.name.to_s)
 
       object_name_idx = "#{object.name}_#{i}"
 
@@ -741,7 +741,7 @@ class Airflow
           dz_w = "#{dz_w_sensor.name}"
         elsif duct_location.name.to_s == HPXML::LocationOtherHousingUnit
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-          dz_w_sensor.setKeyName(@living_zone.name.to_s)
+          dz_w_sensor.setKeyName(@conditioned_zone.name.to_s)
           dz_w_sensor.setName("#{dz_w_var.name} s")
           dz_w = "#{dz_w_sensor.name}"
         else
@@ -749,7 +749,7 @@ class Airflow
           dz_w_sensor1.setName("#{dz_w_var.name} s 1")
           dz_w_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
           dz_w_sensor2.setName("#{dz_w_var.name} s 2")
-          dz_w_sensor2.setKeyName(@living_zone.name.to_s)
+          dz_w_sensor2.setKeyName(@conditioned_zone.name.to_s)
           dz_w = "(#{dz_w_sensor1.name} + #{dz_w_sensor2.name}) / 2"
         end
       else
@@ -852,9 +852,9 @@ class Airflow
 
       if duct_location.is_a? OpenStudio::Model::ThermalZone
         # Accounts for leaks from the duct zone to the living zone
-        mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', @living_zone, duct_location]
+        mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', @conditioned_zone, duct_location]
         # Accounts for leaks from the living zone to the duct zone
-        mix_act_infos << ['liv_to_dz_flow_rate', 'ZoneMixLvToDZ', duct_location, @living_zone]
+        mix_act_infos << ['liv_to_dz_flow_rate', 'ZoneMixLvToDZ', duct_location, @conditioned_zone]
       end
 
       [false, true].each do |is_cfis|
@@ -1237,7 +1237,7 @@ class Airflow
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
     equip.setName(obj_name)
-    equip.setSpace(@living_space)
+    equip.setSpace(@living_space) # no heat gain, so assign the equipment to an arbitrary space
     equip_def.setDesignLevel(vent_object.fan_power * vent_object.quantity)
     equip_def.setFractionRadiant(0)
     equip_def.setFractionLatent(0)
@@ -1577,13 +1577,13 @@ class Airflow
     if not vent_mech_preheat.empty?
       htg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
       htg_stp_sensor.setName("#{Constants.ObjectNameAirflow} htg stp s")
-      htg_stp_sensor.setKeyName(@living_zone.name.to_s)
+      htg_stp_sensor.setKeyName(@conditioned_zone.name.to_s)
       infil_program.addLine("Set HtgStp = #{htg_stp_sensor.name}") # heating thermostat setpoint
     end
     if not vent_mech_precool.empty?
       clg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Cooling Setpoint Temperature')
       clg_stp_sensor.setName("#{Constants.ObjectNameAirflow} clg stp s")
-      clg_stp_sensor.setKeyName(@living_zone.name.to_s)
+      clg_stp_sensor.setKeyName(@conditioned_zone.name.to_s)
       infil_program.addLine("Set ClgStp = #{clg_stp_sensor.name}") # cooling thermostat setpoint
     end
     vent_mech_preheat.each_with_index do |f_preheat, i|

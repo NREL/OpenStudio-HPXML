@@ -16,19 +16,19 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     kwh_yr = 0.0
     therm_yr = 0.0
     model.getElectricEquipments.each do |ee|
-      next unless ee.name.to_s.include?(name)
+      next unless ee.name.to_s.start_with? name
 
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, ee.schedule.get)
       kwh_yr += UnitConversions.convert(hrs * ee.designLevel.get * ee.multiplier * ee.space.get.multiplier, 'Wh', 'kWh')
     end
     model.getGasEquipments.each do |ge|
-      next unless ge.name.to_s.include?(name)
+      next unless ge.name.to_s.start_with? name
 
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, ge.schedule.get)
       therm_yr += UnitConversions.convert(hrs * ge.definition.to_GasEquipmentDefinition.get.designLevel.get * ge.multiplier * ge.space.get.multiplier, 'Wh', 'therm')
     end
     model.getOtherEquipments.each do |oe|
-      next unless oe.name.to_s.include?(name)
+      next unless oe.name.to_s.start_with? name
 
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, oe.schedule.get)
       therm_yr += UnitConversions.convert(hrs * oe.definition.to_OtherEquipmentDefinition.get.designLevel.get * oe.multiplier * oe.space.get.multiplier, 'Wh', 'therm')

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>beaebb6d-ad1b-43a0-bd60-160bea458d8f</version_id>
-  <version_modified>20220519T161447Z</version_modified>
+  <version_id>94dd01bd-3cd4-44d9-8ebb-c916f849ae81</version_id>
+  <version_modified>20220520T215914Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -152,12 +152,6 @@
       <checksum>BF53D293</checksum>
     </file>
     <file>
-      <filename>test_lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>852E38C5</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -230,18 +224,6 @@
       <checksum>9EC3B4D6</checksum>
     </file>
     <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AA7FE1A7</checksum>
-    </file>
-    <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>424F1127</checksum>
-    </file>
-    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -308,18 +290,6 @@
       <checksum>2CB59B38</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4A1F88CF</checksum>
-    </file>
-    <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4D0DEF4F</checksum>
-    </file>
-    <file>
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -336,12 +306,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>77EBBB23</checksum>
-    </file>
-    <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0619D8F5</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -408,18 +372,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>74292B8C</checksum>
-    </file>
-    <file>
-      <filename>test_miscloads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D214E11E</checksum>
-    </file>
-    <file>
-      <filename>test_hotwater_appliance.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>96E7469D</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXMLDataTypes.xsd</filename>
@@ -500,28 +452,10 @@
       <checksum>2DFF87CD</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0E02BF98</checksum>
-    </file>
-    <file>
       <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C2F66DD0</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C9BF52CD</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F97BEFBA</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
@@ -560,17 +494,6 @@
       <checksum>1C142FA2</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>C7F96812</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -581,6 +504,83 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>80AAF4AB</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AF366C96</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C8CDC906</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9331A023</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>517E79C1</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7B4E3D44</checksum>
+    </file>
+    <file>
+      <filename>test_lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1A0EB4A5</checksum>
+    </file>
+    <file>
+      <filename>test_miscloads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>524C0C2A</checksum>
+    </file>
+    <file>
+      <filename>test_hotwater_appliance.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3C0C8406</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>01756468</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9CE85D66</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>CB388DCB</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>63C1E7B1</checksum>
     </file>
   </files>
 </measure>

@@ -257,8 +257,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     elsif cost_mult_type == 'Enclosure: Duct Area Unconditioned'
       hpxml.hvac_distributions.each do |hvac_distribution|
         hvac_distribution.ducts.each do |duct|
-          next if [HPXML::LocationLivingSpace,
-                   HPXML::LocationBasementConditioned].include?(duct.duct_location)
+          next if HPXML::conditioned_locations_this_unit.include?(duct.duct_location)
 
           cost_mult += duct.duct_surface_area
         end

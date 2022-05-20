@@ -13,21 +13,20 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
   end
 
   def get_kwh_per_year(model, name)
+    kwh_yr = 0.0
     model.getLightss.each do |ltg|
-      next unless ltg.name.to_s == name
+      next unless ltg.name.to_s.start_with? name
 
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, ltg.schedule.get)
-      kwh_yr = UnitConversions.convert(hrs * ltg.lightingLevel.get * ltg.multiplier * ltg.space.get.multiplier, 'Wh', 'kWh')
-      return kwh_yr
+      kwh_yr += UnitConversions.convert(hrs * ltg.lightingLevel.get * ltg.multiplier * ltg.space.get.multiplier, 'Wh', 'kWh')
     end
     model.getExteriorLightss.each do |ltg|
-      next unless ltg.name.to_s == name
+      next unless ltg.name.to_s.start_with? name
 
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, ltg.schedule.get)
-      kwh_yr = UnitConversions.convert(hrs * ltg.exteriorLightsDefinition.designLevel * ltg.multiplier, 'Wh', 'kWh')
-      return kwh_yr
+      kwh_yr += UnitConversions.convert(hrs * ltg.exteriorLightsDefinition.designLevel * ltg.multiplier, 'Wh', 'kWh')
     end
-    return
+    return kwh_yr
   end
 
   def test_lighting

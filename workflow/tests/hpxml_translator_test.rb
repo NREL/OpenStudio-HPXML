@@ -1268,7 +1268,7 @@ class HPXMLTest < MiniTest::Test
 
       # Location
       hpxml_value = appliance.location
-      if hpxml_value.nil? || HPXML::conditioned_locations.include?(hpxml_value) || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
+      if hpxml_value.nil? || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       tabular_value = tabular_map[appliance.class]
