@@ -65,7 +65,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     }
 
     @measure = ReportUtilityBills.new
-    @hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-pv.xml'))
+    @hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-pv.xml')
+    @hpxml = HPXML.new(hpxml_path: @hpxml_path)
     HPXMLDefaults.apply_header(@hpxml, nil)
 
     @measure_bills_csv = File.join(File.dirname(__FILE__), 'results_bills.csv')
@@ -187,7 +188,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_detailed_calculations_user_specified_pv_none
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    @args_hash['electricity_utility_rate_user_specified'] = '../rates/5a0b28045457a3ea2aca608e.json'
+    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_None.csv')
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
@@ -423,7 +424,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     output_format = 'csv'
     output_path = File.join(File.dirname(__FILE__), "results_bills.#{output_format}")
 
-    @measure.get_utility_rates(fuels, utility_rates, args, header.state_code, pv_systems)
+    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, args, header.state_code, pv_systems)
     net_elec = @measure.get_utility_bills(fuels, utility_rates, utility_bills, args, header)
     @measure.annual_true_up(utility_rates, utility_bills, net_elec)
     @measure.get_annual_bills(utility_bills)

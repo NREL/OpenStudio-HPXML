@@ -9,6 +9,7 @@ require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/location.rb'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
 require_relative '../HPXMLtoOpenStudio/resources/output.rb'
+require_relative '../HPXMLtoOpenStudio/resources/util'
 
 # start the measure
 class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
@@ -336,7 +337,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     preprocess_arguments(args)
 
     # Get utility rates
-    warnings = get_utility_rates(fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
+    warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
     if register_warnings(runner, warnings)
       return true
     end
@@ -411,7 +412,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     args[:pv_monthly_grid_connection_fee] = args[:pv_monthly_grid_connection_fee].is_initialized ? args[:pv_monthly_grid_connection_fee].get : nil
   end
 
-  def get_utility_rates(fuels, utility_rates, args, state_code, pv_systems, runner = nil)
+  def get_utility_rates(hpxml_path, fuels, utility_rates, args, state_code, pv_systems, runner = nil)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
@@ -421,14 +422,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           rate.fixedmonthlycharge = args[:electricity_fixed_charge]
           rate.flatratebuy = args[:electricity_marginal_rate]
         elsif args[:electricity_bill_type] == 'Detailed'
+          require 'json'
+
           if args[:electricity_utility_rate_type] == 'User-Specified'
             path = args[:electricity_utility_rate_user_specified]
 
-            # hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-            # filepath = FilePath.check_path(path,
-            # File.dirname(hpxml_path),
-            # 'Tariff File')
-            filepath = path
+            filepath = FilePath.check_path(path,
+                                           File.dirname(hpxml_path),
+                                           'Tariff File')
           else # sample rates
             custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
             custom_rate_file = "#{args[:electricity_utility_rate_type]}.json"

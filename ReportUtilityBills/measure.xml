@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>a2bcea14-1fc2-4055-82be-2b9fd93cd665</version_id>
-  <version_modified>20220520T194857Z</version_modified>
+  <version_id>0f532ac4-56df-4f5f-b43e-73cee1a8f7f3</version_id>
+  <version_modified>20220520T220006Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -86,7 +86,7 @@
     <argument>
       <name>electricity_utility_rate_user_specified</name>
       <display_name>Electricity: User-Specified Utility Rate</display_name>
-      <description>Absolute/relative path of the json/csv. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.</description>
+      <description>Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -336,7 +336,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ECA4A5CB</checksum>
+      <checksum>45B1B532</checksum>
     </file>
     <file>
       <version>
@@ -347,13 +347,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>671382A5</checksum>
+      <checksum>669D83B9</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6E731282</checksum>
+      <checksum>5752263F</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FB8477BD</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1417452B</checksum>
+    </file>
+    <file>
+      <filename>rates/5a0b28045457a3ea2aca608e.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>535D428A</checksum>
     </file>
   </files>
 </measure>
