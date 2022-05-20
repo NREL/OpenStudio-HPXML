@@ -2008,5 +2008,6 @@
 /workflow/sample_files/run
 /files
 /BuildResidentialHPXML/tests/extra_files
-/ReportUtilityBills/resources/rates
+/ReportUtilityBills/resources/rates/*.json
+!/ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json
 /ReportUtilityBills/tests/results_bills.csv

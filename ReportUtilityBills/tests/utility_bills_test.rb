@@ -184,10 +184,21 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
-  def test_detailed_calculations_pv_none
+  def test_detailed_calculations_user_specified_pv_none
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    @args_hash['electricity_utility_rate_user_specified'] = '../rates/xxx.json'
+    @args_hash['electricity_utility_rate_user_specified'] = '../rates/5a0b28045457a3ea2aca608e.json'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    _check_bills(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_none
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_None.csv')
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
@@ -307,7 +318,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     # yet if we put it in the osw, we need to set it to a value. but then it can't be uninitialized...
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    expected_warnings = ['Must specify a utility rate json/csv path when choosing User-Specified utility rate type.']
+    expected_warnings = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
     _test_workflow(expected_warnings: expected_warnings)
     assert(!File.exist?(@workflow_bills_csv))
   end

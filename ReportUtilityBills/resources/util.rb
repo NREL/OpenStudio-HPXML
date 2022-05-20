@@ -143,17 +143,52 @@ def process_usurdb(filepath)
       rate.delete(k) if v.nil?
     end
 
+    structures = {}
     rate.each do |k, v|
-      begin
-        rate[k] = Float(v)
-      rescue
-        if v.include?('[') && v.include?(']')
-          if !['name', 'utility', 'description', 'source', 'sourceparent', 'energycomments'].include?(k)
-            rate[k] = eval(v) # arrays
+      if ['eiaid'].include?(k)
+        rate[k] = Integer(Float(v))
+      elsif k.include?('schedule')
+        rate[k] = eval(v) # arrays
+      elsif k.include?('structure')
+        rate.delete(k)
+
+        k, period, tier = k.split('/')
+        period_idx = Integer(period.gsub('period', ''))
+        tier_idx = nil
+        tier_name = nil
+        ['max', 'unit', 'rate', 'adj', 'sell'].each do |k2|
+          if tier.include?(k2)
+            tier_idx = Integer(tier.gsub('tier', '').gsub(k2, ''))
+            tier_name = k2
           end
+        end
+
+        # init
+        if !structures.keys.include?(k)
+          structures[k] = []
+        end
+        if structures[k].size == period_idx
+          structures[k] << []
+        end
+        if structures[k][period_idx].size == tier_idx
+          structures[k][period_idx] << {}
+        end
+
+        begin
+          v = Float(v)
+        rescue # string
+        end
+
+        structures[k][period_idx][tier_idx][tier_name] = v
+      else
+        begin
+          rate[k] = Float(v)
+        rescue # string
         end
       end
     end
+
+    rate.update(structures)
 
     residential_rates << { 'items' => [rate] }
   end

@@ -66,7 +66,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_utility_rate_user_specified', false)
     arg.setDisplayName('Electricity: User-Specified Utility Rate')
-    arg.setDescription("Absolute/relative path of the json/csv. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
+    arg.setDescription("Absolute/relative path of the json. Relative paths are relative to the HPXML file. Required if utility rate type is 'User-Specified'.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', false)
@@ -424,18 +424,18 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           if args[:electricity_utility_rate_type] == 'User-Specified'
             path = args[:electricity_utility_rate_user_specified]
 
-            hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-            filepath = FilePath.check_path(path,
-                                           File.dirname(hpxml_path),
-                                           'Tariff File')
+            # hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+            # filepath = FilePath.check_path(path,
+            # File.dirname(hpxml_path),
+            # 'Tariff File')
+            filepath = path
           else # sample rates
             custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
             custom_rate_file = "#{args[:electricity_utility_rate_type]}.json"
             filepath = File.join(custom_rates_folder, custom_rate_file)
           end
 
-          fileread = File.read(filepath)
-          tariff = JSON.parse(fileread, symbolize_names: true)
+          tariff = JSON.parse(File.read(filepath), symbolize_names: true)
           tariff = tariff[:items][0]
 
           if tariff.keys.include?(:realtimepricing)
