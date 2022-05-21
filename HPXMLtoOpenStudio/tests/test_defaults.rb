@@ -3318,6 +3318,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_nil(wall.interior_finish_thickness)
     end
+    assert_equal(azimuth, wall.azimuth)
   end
 
   def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness, azimuth, area,

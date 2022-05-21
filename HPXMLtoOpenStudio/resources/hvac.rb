@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HVAC
-  def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
+  def self.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          control_zone)
     is_heatpump = false
@@ -152,7 +152,7 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_evaporative_cooler(model, runner, cooling_system,
+  def self.apply_evaporative_cooler(model, cooling_system,
                                     sequential_cool_load_fracs, control_zone)
 
     obj_name = Constants.ObjectNameEvaporativeCooler
@@ -374,7 +374,7 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+  def self.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                              sequential_heat_load_fracs, sequential_cool_load_fracs,
                                              control_zone)
     if heat_pump.fraction_cool_load_served > 0
@@ -601,7 +601,7 @@ class HVAC
     return zone_hvac
   end
 
-  def self.apply_electric_baseboard(model, runner, heating_system,
+  def self.apply_electric_baseboard(model, heating_system,
                                     sequential_heat_load_fracs, control_zone)
 
     obj_name = Constants.ObjectNameElectricBaseboard
@@ -618,7 +618,7 @@ class HVAC
     control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0]))
   end
 
-  def self.apply_unit_heater(model, runner, heating_system,
+  def self.apply_unit_heater(model, heating_system,
                              sequential_heat_load_fracs, control_zone)
 
     obj_name = Constants.ObjectNameUnitHeater
@@ -657,7 +657,7 @@ class HVAC
     control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, [0]))
   end
 
-  def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs,
+  def self.apply_ideal_air_loads(model, obj_name, sequential_cool_load_fracs,
                                  sequential_heat_load_fracs, control_zone)
 
     # Ideal Air System
@@ -687,7 +687,7 @@ class HVAC
     control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_fracs))
   end
 
-  def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space)
+  def self.apply_dehumidifiers(model, dehumidifiers, living_space)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -3332,7 +3332,7 @@ class HVAC
 
     cop_max_speed_1 = cop_max_speed
     cop_max_speed_2 = cop_max_speed
-    error = heat_pump.heating_efficiency_hspf - calc_mshp_hspf(cops_rated, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, fan_powers_rated, hp_ap.hp_min_temp, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
+    error = heat_pump.heating_efficiency_hspf - calc_mshp_hspf(cops_rated, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, fan_powers_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
 
     error1 = error
     error2 = error
@@ -3347,7 +3347,7 @@ class HVAC
         cops_rated[i] = cop_max_speed * cops_norm[i]
       end
 
-      error = heat_pump.heating_efficiency_hspf - calc_mshp_hspf(cops_rated, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, fan_powers_rated, hp_ap.hp_min_temp, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
+      error = heat_pump.heating_efficiency_hspf - calc_mshp_hspf(cops_rated, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, fan_powers_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
 
       cop_max_speed, cvg, cop_max_speed_1, error1, cop_max_speed_2, error2 = MathTools.Iterate(cop_max_speed, error, cop_max_speed_1, error1, cop_max_speed_2, error2, n, cvg)
 
@@ -3411,7 +3411,7 @@ class HVAC
     hp_ap.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
   end
 
-  def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, hp_min_temp, heat_eir_ft_spec, heat_cap_ft_spec)
+  def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
     n_max = (cop_47.length - 1.0) #-3 # Don't use max speed; FIXME: this is different than calc_mshp_seer?
     n_min = 0
     n_int = (n_min + (n_max - n_min) / 3.0).ceil.to_i

@@ -30,12 +30,12 @@ class HVACSizing
     # Calculate loads for the conditioned thermal zone
     bldg_design_loads = DesignLoads.new
     process_load_windows_skylights(bldg_design_loads, weather)
-    process_load_doors(bldg_design_loads, weather)
+    process_load_doors(bldg_design_loads)
     process_load_walls(bldg_design_loads, weather)
     process_load_roofs(bldg_design_loads, weather)
-    process_load_ceilings(bldg_design_loads, weather)
-    process_load_floors(bldg_design_loads, weather)
-    process_load_slabs(bldg_design_loads, weather)
+    process_load_ceilings(bldg_design_loads)
+    process_load_floors(bldg_design_loads)
+    process_load_slabs(bldg_design_loads)
     process_load_infiltration_ventilation(bldg_design_loads, weather)
     process_load_internal_gains(bldg_design_loads)
 
@@ -58,7 +58,7 @@ class HVACSizing
       next if is_system_to_skip(hvac)
 
       apply_hvac_temperatures(hvac, bldg_design_loads)
-      ducts_heat_load = calculate_load_ducts_heating(bldg_design_loads, weather, hvac)
+      ducts_heat_load = calculate_load_ducts_heating(bldg_design_loads, hvac)
       ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(bldg_design_loads, weather, hvac)
 
       total_ducts_heat_load += ducts_heat_load.to_f
@@ -80,7 +80,7 @@ class HVACSizing
       apply_hvac_installation_quality(hvac_sizing_values, weather, hvac)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac)
       apply_hvac_ground_loop(hvac_sizing_values, weather, hvac)
-      apply_hvac_finalize_airflows(hvac_sizing_values, weather, hvac)
+      apply_hvac_finalize_airflows(hvac_sizing_values, hvac)
 
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
@@ -704,7 +704,7 @@ class HVACSizing
     bldg_design_loads.Cool_Skylights = alp_load + eal
   end
 
-  def self.process_load_doors(bldg_design_loads, weather)
+  def self.process_load_doors(bldg_design_loads)
     '''
     Heating and Cooling Loads: Doors
     '''
@@ -871,7 +871,7 @@ class HVACSizing
     end
   end
 
-  def self.process_load_ceilings(bldg_design_loads, weather)
+  def self.process_load_ceilings(bldg_design_loads)
     '''
     Heating and Cooling Loads: Ceilings
     '''
@@ -894,7 +894,7 @@ class HVACSizing
     end
   end
 
-  def self.process_load_floors(bldg_design_loads, weather)
+  def self.process_load_floors(bldg_design_loads)
     '''
     Heating and Cooling Loads: Floors
     '''
@@ -956,7 +956,7 @@ class HVACSizing
     end
   end
 
-  def self.process_load_slabs(bldg_design_loads, weather)
+  def self.process_load_slabs(bldg_design_loads)
     '''
     Heating and Cooling Loads: Floors
     '''
@@ -1227,7 +1227,7 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.calculate_load_ducts_heating(bldg_design_loads, weather, hvac)
+  def self.calculate_load_ducts_heating(bldg_design_loads, hvac)
     '''
     Heating Duct Loads
     '''
@@ -1947,7 +1947,7 @@ class HVACSizing
     hvac_sizing_values.GSHP_G_Functions = [lntts, gfnc_coeff]
   end
 
-  def self.apply_hvac_finalize_airflows(hvac_sizing_values, weather, hvac)
+  def self.apply_hvac_finalize_airflows(hvac_sizing_values, hvac)
     '''
     Finalize Sizing Calculations
     '''

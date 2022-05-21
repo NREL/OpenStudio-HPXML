@@ -451,7 +451,7 @@ def create_hpxmls
       if hpxml_file.include? 'ASHRAE_Standard_140'
         hpxml_path = File.absolute_path(File.join(tests_dir, '..', 'tests', hpxml_file))
         hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
-        apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
+        apply_hpxml_modification_ashrae_140(hpxml)
       else
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
         hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
@@ -2430,8 +2430,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv'
   end
 end
-
-def apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
+ 
+def apply_hpxml_modification_ashrae_140(hpxml)
   # Set detailed HPXML values for ASHRAE 140 test files
 
   renumber_hpxml_ids(hpxml)
@@ -4868,6 +4868,8 @@ if ARGV[0].to_sym == :update_measures
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
           'Lint/RedundantStringCoercion',
+          'Lint/FloatComparison',
+          'Lint/UnusedMethodArgument',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',

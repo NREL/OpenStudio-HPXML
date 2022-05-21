@@ -1463,7 +1463,7 @@ class Constructions
         WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_wood_stud_wall(runner, model, surfaces, "#{wall_id} construction",
                            cavity_r, install_grade, constr_set.stud.thick_in,
@@ -1484,7 +1484,7 @@ class Constructions
         SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),           # 2x4, 16" o.c.
         SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_steel_stud_wall(runner, model, surfaces, "#{wall_id} construction",
                             cavity_r, install_grade, constr_set.cavity_thick_in,
@@ -1501,7 +1501,7 @@ class Constructions
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 24" o.c.
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_double_stud_wall(runner, model, surfaces, "#{wall_id} construction",
                              cavity_r, install_grade, constr_set.stud.thick_in,
@@ -1521,7 +1521,7 @@ class Constructions
         CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, mat_int_finish, mat_ext_finish),                    # 8" perlite-filled CMU
         CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback (6" hollow CMU)
       ]
-      match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_cmu_wall(runner, model, surfaces, "#{wall_id} construction",
                      constr_set.thick_in, constr_set.cond_in, density,
@@ -1538,7 +1538,7 @@ class Constructions
         SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, mat_int_finish, mat_ext_finish),                   # 5" SIP core
         SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_sip_wall(runner, model, surfaces, "#{wall_id} construction",
                      cavity_r, constr_set.thick_in, constr_set.framing_factor,
@@ -1551,7 +1551,7 @@ class Constructions
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # ICF w/4" concrete and 2" rigid ins layers
         ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_icf_wall(runner, model, surfaces, "#{wall_id} construction",
                      icf_r, constr_set.ins_thick_in,
@@ -1566,7 +1566,7 @@ class Constructions
         GenericConstructionSet.new(0.0, 0.5, mat_int_finish, mat_ext_finish),                   # Standard
         GenericConstructionSet.new(0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
-      match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
+      match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       if wall_type == HPXML::WallTypeConcrete
         thick_in = 6.0
@@ -1609,7 +1609,7 @@ class Constructions
     check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
   end
 
-  def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1631,7 +1631,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1652,7 +1652,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1683,7 +1683,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1719,7 +1719,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1746,7 +1746,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -1772,7 +1772,7 @@ class Constructions
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
@@ -2023,10 +2023,10 @@ class Construction
       if layer_materials.size == 1
         next if layer_materials[0].name == Constants.AirFilm # Do not include air films in construction
 
-        mat = Construction.create_os_material(runner, model, layer_materials[0])
+        mat = Construction.create_os_material(model, layer_materials[0])
       else
         parallel_path_mat = get_parallel_material(layer_num, @layers_names[layer_num])
-        mat = Construction.create_os_material(runner, model, parallel_path_mat)
+        mat = Construction.create_os_material(model, parallel_path_mat)
       end
       materials << mat
     end
@@ -2123,7 +2123,7 @@ class Construction
   end
 
   # Creates (or returns an existing) OpenStudio Material from our own Material object
-  def self.create_os_material(runner, model, material)
+  def self.create_os_material(model, material)
     name = material.name
     tolerance = 0.0001
     if material.is_a? GlazingMaterial

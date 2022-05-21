@@ -1002,7 +1002,7 @@ class Geometry
           surface_avail_area[surface] = 0
         end
 
-        area = get_wall_area_for_windows(surface, min_average_ceiling_height_for_window, min_window_width, runner)
+        area = get_wall_area_for_windows(surface, min_average_ceiling_height_for_window, min_window_width)
         surface_avail_area[surface] += area
         facade_avail_area[facade] += area
       end
@@ -1242,7 +1242,7 @@ class Geometry
     return true
   end
 
-  def self.get_wall_area_for_windows(surface, min_average_ceiling_height_for_window, min_window_width, runner)
+  def self.get_wall_area_for_windows(surface, min_average_ceiling_height_for_window, min_window_width)
     # Skip surfaces with doors
     if surface.subSurfaces.size > 0
       return 0.0
@@ -1309,20 +1309,20 @@ class Geometry
       if not ((i == num_window_groups) && (num_windows % 2 == 1))
         # Two windows in group
         win_num += 1
-        add_window_to_wall(surface, window_width, window_height, group_cx - window_width / 2.0 - window_gap_x / 2.0, group_cy, win_num, facade, model, runner)
+        add_window_to_wall(surface, window_width, window_height, group_cx - window_width / 2.0 - window_gap_x / 2.0, group_cy, win_num, facade, model)
         win_num += 1
-        add_window_to_wall(surface, window_width, window_height, group_cx + window_width / 2.0 + window_gap_x / 2.0, group_cy, win_num, facade, model, runner)
+        add_window_to_wall(surface, window_width, window_height, group_cx + window_width / 2.0 + window_gap_x / 2.0, group_cy, win_num, facade, model)
       else
         # One window in group
         win_num += 1
-        add_window_to_wall(surface, window_width, window_height, group_cx, group_cy, win_num, facade, model, runner)
+        add_window_to_wall(surface, window_width, window_height, group_cx, group_cy, win_num, facade, model)
       end
     end
 
     return true
   end
 
-  def self.add_window_to_wall(surface, win_width, win_height, win_center_x, win_center_y, win_num, facade, model, runner)
+  def self.add_window_to_wall(surface, win_width, win_height, win_center_x, win_center_y, win_num, facade, model)
     # Create window vertices in relative coordinates, ft
     upperleft = [win_center_x - win_width / 2.0, win_center_y + win_height / 2.0]
     upperright = [win_center_x + win_width / 2.0, win_center_y + win_height / 2.0]

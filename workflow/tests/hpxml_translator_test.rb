@@ -457,7 +457,7 @@ class HPXMLTest < MiniTest::Test
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
     sizing_results = _get_hvac_sizing_results(hpxml, xml)
-    bill_results = _get_bill_results(bills_csv_path, xml)
+    bill_results = _get_bill_results(bills_csv_path)
     _verify_outputs(rundir, xml, results, hpxml)
 
     return results, sizing_results, bill_results
@@ -561,7 +561,7 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _get_bill_results(bill_csv_path, xml)
+  def _get_bill_results(bill_csv_path)
     # Grab all outputs from reporting measure CSV bill results
     results = {}
     if File.exist? bill_csv_path

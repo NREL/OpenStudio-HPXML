@@ -853,7 +853,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @output_variables = {}
     @output_variables_requests.each do |output_variable_name, output_variable|
-      key_values, units = get_report_variable_data_timeseries_key_values_and_units(timeseries_frequency, output_variable_name)
+      key_values, units = get_report_variable_data_timeseries_key_values_and_units(output_variable_name)
       runner.registerWarning("Request for output variable '#{output_variable_name}' returned no key values.") if key_values.empty?
       key_values.each do |key_value|
         @output_variables[[output_variable_name, key_value]] = OutputVariable.new
@@ -1122,7 +1122,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if not @eri_design.nil?
-      results_out = append_eri_results(outputs, results_out, line_break)
+      results_out = append_eri_results(results_out, line_break)
     end
 
     if ['csv'].include? output_format
@@ -1192,7 +1192,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return "#{obj.name} #{obj.annual_units}"
   end
 
-  def append_eri_results(outputs, results_out, line_break)
+  def append_eri_results(results_out, line_break)
     def ordered_values(hash, sys_ids)
       vals = []
       sys_ids.each do |sys_id|
@@ -1743,7 +1743,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return vals
   end
 
-  def get_report_variable_data_timeseries_key_values_and_units(timeseries_frequency, var)
+  def get_report_variable_data_timeseries_key_values_and_units(var)
     keys = []
     units = ''
     if not @msgpackDataTimeseries.nil?

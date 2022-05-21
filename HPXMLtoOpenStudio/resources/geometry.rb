@@ -207,7 +207,7 @@ class Geometry
     end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, 'deg', 'rad')))
 
-    add_neighbor_shading(runner, model, max_azimuth_length, hpxml, walls_top)
+    add_neighbor_shading(model, max_azimuth_length, hpxml, walls_top)
 
     # Initial distance of shifts at 90-degrees to horizontal outward
     azimuth_side_shifts = {}
@@ -310,7 +310,7 @@ class Geometry
     end
   end
 
-  def self.add_neighbor_shading(runner, model, length, hpxml, walls_top)
+  def self.add_neighbor_shading(model, length, hpxml, walls_top)
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -359,7 +359,7 @@ class Geometry
     end
   end
 
-  def self.set_zone_volumes(runner, model, spaces, hpxml, apply_ashrae140_assumptions)
+  def self.set_zone_volumes(spaces, hpxml, apply_ashrae140_assumptions)
     # Living space
     spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
 
@@ -514,7 +514,7 @@ class Geometry
     end
   end
 
-  def self.apply_occupants(model, runner, hpxml, num_occ, cfa, space, schedules_file)
+  def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file)
     occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
