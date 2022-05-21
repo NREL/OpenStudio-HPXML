@@ -4864,7 +4864,16 @@ if ARGV[0].to_sym == :update_measures
 
   # Apply rubocop
   cops = ['Layout',
+          'Lint/AmbiguousAssignment',
+          'Lint/AmbiguousBlockAssociation',
+          'Lint/AssignmentInCondition',
+          'Lint/BooleanSymbol',
+          'Lint/CircularArgumentReference',
           'Lint/DeprecatedClassMethods',
+          'Lint/DuplicateElsifCondition',
+          'Lint/DuplicateHashKey',
+          'Lint/DuplicateMethods',
+          'Lint/ElseLayout',
           'Lint/InterpolationCheck',
           'Lint/LiteralAsCondition',
           'Lint/MultipleComparison',
