@@ -4153,13 +4153,10 @@ class HPXMLFile
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
 
-      adjacent_surface = surface
       if [HPXML::LocationOtherHousingUnit].include?(interior_adjacent_to)
         adjacent_surface = Geometry.get_adiabatic_adjacent_surface(model: model, surface: surface)
         next if adjacent_surface.nil?
       end
-
-      sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
       wall_idref = @surface_ids[surface.name.to_s]
       next if wall_idref.nil?

@@ -291,7 +291,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
           next unless use.is_a?(EndUse)
 
-          fuel_type, end_use = key
+          fuel_type, _end_use = key
           if fuel_type == FT::Elec && include_hourly_electric_end_use_consumptions
             result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},hourly;").get
           end
@@ -395,7 +395,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Dual-fuel heat pump loads
     if not @object_variables_by_key[[LT, LT::Heating]].nil?
       @object_variables_by_key[[LT, LT::Heating]].each do |vals|
-        sys_id, key, var = vals
+        _sys_id, key, var = vals
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},#{var},runperiod;").get
       end
     end
@@ -506,7 +506,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if timeseries_frequency != 'none'
       add_dst_column = (add_timeseries_dst_column.is_initialized ? add_timeseries_dst_column.get : false)
       add_utc_column = (add_timeseries_utc_column.is_initialized ? add_timeseries_utc_column.get : false)
-      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(timeseries_frequency, @msgpackDataTimeseries, @hpxml, add_dst_column, add_utc_column)
+      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(@msgpackDataTimeseries, @hpxml, add_dst_column, add_utc_column)
     end
 
     # Retrieve outputs
@@ -660,7 +660,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # End Uses
     @end_uses.each do |key, end_use|
-      fuel_type, end_use_type = key
+      fuel_type, _end_use_type = key
 
       end_use.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
@@ -1391,7 +1391,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                 EUT::MechVentPreheat => prehtg_ecs,
                 EUT::MechVentPrecool => preclg_ecs }
     @end_uses.each do |key, end_use|
-      fuel_type, end_use_type = key
+      _fuel_type, end_use_type = key
       ec_obj = eut_map[end_use_type]
       next if ec_obj.nil?
 
@@ -1794,9 +1794,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Hourly Electricity (for Cambium)
     if obj.is_a?(EndUse) && (not obj.hourly_output_by_system.empty?)
-      orig_values = obj.hourly_output_by_system[sys_id]
       obj.hourly_output_by_system[sys_id] = obj.hourly_output_by_system[sys_id].map { |x| x * mult }
-      diffs = obj.hourly_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
     end
   end
 

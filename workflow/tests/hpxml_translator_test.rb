@@ -353,7 +353,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_multiple_building_ids
-    os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-buildings.xml')
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
@@ -424,9 +423,7 @@ class HPXMLTest < MiniTest::Test
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL --add-utility-bills"
-    workflow_start = Time.now
     success = system(command)
-    workflow_time = Time.now - workflow_start
 
     rundir = File.join(rundir, 'run')
 

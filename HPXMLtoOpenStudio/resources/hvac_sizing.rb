@@ -812,7 +812,7 @@ class HVACSizing
     @hpxml.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_exterior_thermal_boundary
 
-      u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
+      u_wall_with_soil, _u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
   end
@@ -919,7 +919,7 @@ class HVACSizing
           @hpxml.foundation_walls.each do |foundation_wall|
             next unless foundation_wall.is_exterior && foundation_wall.interior_adjacent_to == adjacent_space
 
-            u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
+            _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
 
             sum_a_wall += foundation_wall.net_area
             sum_ua_wall += (u_wall_without_soil * foundation_wall.net_area)
@@ -1314,7 +1314,7 @@ class HVACSizing
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
     cool_cfm = calc_airflow_rate_manual_s(init_cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
-    dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
+    _dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
 
     for _iter in 1..50
       break if delta.abs <= 0.001
@@ -1329,7 +1329,7 @@ class HVACSizing
 
       dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
 
-      dse_DE, dse_dTe_cooling, cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_cfm, cool_load_sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
+      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_cfm, cool_load_sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
       cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
@@ -1680,7 +1680,7 @@ class HVACSizing
     return if (hvac.ChargeDefectRatio.to_f.abs < 0.001) && (hvac.AirflowDefectRatioCooling.to_f.abs < 0.001) && (hvac.AirflowDefectRatioHeating.to_f.abs < 0.001)
 
     tin_cool = UnitConversions.convert(@cool_setpoint, 'F', 'C')
-    tin_heat = UnitConversions.convert(@heat_setpoint, 'F', 'C')
+    # tin_heat = UnitConversions.convert(@heat_setpoint, 'F', 'C')
 
     tout_cool = UnitConversions.convert(weather.design.CoolingDrybulb, 'F', 'C')
     tout_heat = UnitConversions.convert(weather.design.HeatingDrybulb, 'F', 'C')
@@ -1710,12 +1710,12 @@ class HVACSizing
         cap_clg_ratios = []
         for speed in 0..(hvac.NumSpeedsCooling - 1)
           # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-          clg_fff_cap_coeff, clg_fff_eir_coeff = HVAC.get_airflow_fault_cooling_coeff()
+          clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_airflow_fault_cooling_coeff()
           a1_AF_Qgr_c = clg_fff_cap_coeff[0]
           a2_AF_Qgr_c = clg_fff_cap_coeff[1]
           a3_AF_Qgr_c = clg_fff_cap_coeff[2]
 
-          p_values, qgr_values, ff_chg_values = HVAC.get_charge_fault_cooling_coeff(f_ch)
+          qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_cooling_coeff(f_ch)
 
           a1_CH_Qgr_c = qgr_values[0]
           a2_CH_Qgr_c = qgr_values[1]
@@ -1776,12 +1776,12 @@ class HVACSizing
       if not heat_airflow_rated_defect_ratio.empty?
         cap_htg_ratios = []
         for speed in 0..(hvac.NumSpeedsHeating - 1)
-          htg_fff_cap_coeff, htg_fff_eir_coeff = HVAC.get_airflow_fault_heating_coeff()
+          htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_airflow_fault_heating_coeff()
           a1_AF_Qgr_h = htg_fff_cap_coeff[0]
           a2_AF_Qgr_h = htg_fff_cap_coeff[1]
           a3_AF_Qgr_h = htg_fff_cap_coeff[2]
 
-          p_values, qgr_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
+          qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
 
           a1_CH_Qgr_h = qgr_values[0]
           a2_CH_Qgr_h = qgr_values[2]
@@ -1977,7 +1977,7 @@ class HVACSizing
       # Calculate the heating load at the switchover temperature to limit unitilized capacity
       switchover_weather = weather.dup
       switchover_weather.design.HeatingDrybulb = hvac.SwitchoverTemperature
-      switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
+      _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
       heating_load = switchover_all_hvac_sizing_values[hvac.hvac_system].Heat_Load
       heating_db = switchover_weather.design.HeatingDrybulb
     else
@@ -2148,7 +2148,7 @@ class HVACSizing
     '''
     Calculate the Delivery Effectiveness for cooling (using the method of ASHRAE Standard 152).
     '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, _dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     dse_dTe *= -1.0
     dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
@@ -2630,14 +2630,13 @@ class HVACSizing
         space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
         if surface.is_a? HPXML::FoundationWall
-          u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
+          _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
           space_UAs[HPXML::LocationGround] += u_wall_without_soil * surface.area
         end
       end
     end
 
     # Infiltration UA
-    infiltration_cfm = nil
     ach = nil
     if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? location
       # Vented space
@@ -3336,18 +3335,17 @@ class HVACSizing
     # in Appendix 12 (pg. 517-518).
     ins_rvalue = slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
     ins_rvalue_edge = slab.perimeter_insulation_r_value
-    edge_ins_rvalue =
-      if slab.under_slab_insulation_spans_entire_slab
-        ins_length = 1000.0
-      else
-        ins_length = 0
-        if slab.under_slab_insulation_r_value > 0
-          ins_length += slab.under_slab_insulation_width
-        end
-        if slab.perimeter_insulation_r_value > 0
-          ins_length += slab.perimeter_insulation_depth
-        end
+    if slab.under_slab_insulation_spans_entire_slab
+      ins_length = 1000.0
+    else
+      ins_length = 0
+      if slab.under_slab_insulation_r_value > 0
+        ins_length += slab.under_slab_insulation_width
       end
+      if slab.perimeter_insulation_r_value > 0
+        ins_length += slab.perimeter_insulation_depth
+      end
+    end
 
     soil_r_per_foot = Material.Soil(12.0).rvalue
     slab_r_gravel_per_inch = 0.65 # Based on calibration by Tony Fontanini

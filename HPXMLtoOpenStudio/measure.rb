@@ -819,8 +819,8 @@ class OSModel
         else
           z_origin = -1 * slab.depth_below_grade
         end
-        kiva_foundation = add_foundation_slab(model, spaces, slab, slab_exp_perim,
-                                              slab_area, z_origin, kiva_foundation)
+        add_foundation_slab(model, spaces, slab, slab_exp_perim,
+                            slab_area, z_origin, kiva_foundation)
       end
 
       # For each slab, create a no-wall Kiva slab instance if needed.
@@ -829,8 +829,8 @@ class OSModel
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        kiva_foundation = add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
-                                              slab_area, z_origin, nil)
+        add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
+                            slab_area, z_origin, nil)
       end
 
       # Interzonal foundation wall surfaces
@@ -1115,7 +1115,7 @@ class OSModel
 
   def self.add_shading_schedule(model, weather)
     # Use BAHSP cooling season, and not year-round or user-specified cooling season, to ensure windows use appropriate interior shading factors
-    default_heating_months, @default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+    _default_heating_months, @default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
 
     # Create cooling season schedule
     clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), @default_cooling_months, Constants.ScheduleTypeLimitsFraction)
@@ -1792,7 +1792,6 @@ class OSModel
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
 
-      duct_leakage_cfm = nil
       duct_leakage_frac = nil
       if duct_leakage_units == HPXML::UnitsCFM25
         duct_leakage_cfm25 = duct_leakage_value
@@ -1818,8 +1817,6 @@ class OSModel
       duct_leakage_value = leakage_to_outside[duct_side][0]
       duct_leakage_units = leakage_to_outside[duct_side][1]
 
-      duct_leakage_cfm = nil
-      duct_leakage_frac = nil
       if duct_leakage_units == HPXML::UnitsCFM25
         duct_leakage_cfm25 = duct_leakage_value
       elsif duct_leakage_units == HPXML::UnitsCFM50
@@ -2427,7 +2424,6 @@ class OSModel
 
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
-    interior_adjacent_to = hpxml_surface.interior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')

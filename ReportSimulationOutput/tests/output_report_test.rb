@@ -1175,7 +1175,6 @@ class ReportSimulationOutputTest < MiniTest::Test
       annual_csv, timeseries_csv = _test_measure(args_hash, eri_design)
       assert(File.exist?(annual_csv))
       assert(!File.exist?(timeseries_csv))
-      expected_annual_rows = AnnualRows
       actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
       assert(actual_annual_rows.include? 'ERI: Building: CFA')
 
@@ -1238,7 +1237,7 @@ class ReportSimulationOutputTest < MiniTest::Test
   def _parse_time(ts)
     date, time = ts.split('T')
     year, month, day = date.split('-')
-    hour, minute, second = time.split(':')
+    hour, minute, _second = time.split(':')
     return Time.utc(year, month, day, hour, minute)
   end
 

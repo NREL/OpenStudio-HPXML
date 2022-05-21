@@ -623,8 +623,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameUnitHeater
 
-    htg_ap = heating_system.additional_properties
-
     # Heating Coil
     efficiency = heating_system.heating_efficiency_afue
     efficiency = heating_system.heating_efficiency_percent if efficiency.nil?
@@ -1423,7 +1421,6 @@ class HVAC
     end
 
     if htg_object.nil?
-      htg_fuel = nil
       htg_object_sensor = nil
     else
       htg_fuel = EPlus::FuelTypeElectricity
@@ -1443,7 +1440,6 @@ class HVAC
     end
 
     if backup_htg_object.nil?
-      backup_htg_fuel = nil
       backup_htg_object_sensor = nil
     else
       backup_htg_fuel = EPlus::FuelTypeElectricity
@@ -1470,7 +1466,7 @@ class HVAC
     fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
     if htg_object.is_a?(OpenStudio::Model::ZoneHVACBaseboardConvectiveWater) || htg_object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
       # Pump may occasionally run when baseboard isn't, so just assign all pump energy here
-      mode, sensor = sensors.first
+      mode, _sensor = sensors.first
       if (sensors.size != 1) || (mode != 'primary_htg')
         fail 'Unexpected situation.'
       end
@@ -1847,7 +1843,7 @@ class HVAC
 
     eir_nom = calc_eir_from_eer(eer_nom, fan_power_rated)
 
-    if calc_type.include? 'seer'
+    if calc_type == 'seer'
       indices = [0, 1, 4]
     else
       indices = [0, 1, 2, 4]
@@ -1858,7 +1854,7 @@ class HVAC
     # Seer calculation is based on performance at three speeds
     cops = [cop_ratios[indices[0]], cop_ratios[indices[1]], cop_ratios[indices[2]]]
 
-    unless calc_type.include? 'seer'
+    if calc_type != 'seer'
       cops << cop_ratios[indices[3]]
     end
 
@@ -1887,7 +1883,7 @@ class HVAC
     return [calc_cop_from_eir(eir_1, fan_power_rated), cop_2]
   end
 
-  def self.calc_cops_from_eir_4speed(cop_nom, fan_power_rated, calc_type = 'hspf')
+  def self.calc_cops_from_eir_4speed(cop_nom, fan_power_rated, calc_type: 'hspf')
     # Returns rated cop at minimum, intermediate, and nominal speed given rated cop
 
     eir_nom = calc_eir_from_cop(cop_nom, fan_power_rated)
@@ -1983,10 +1979,10 @@ class HVAC
     err = 1
     eer_c = (eer_a + eer_b) / 2.0
     (1..iter_max).each do |n|
-      eers = calc_eers_from_eir_4speed(eer_a, fan_power_rated, calc_type = 'seer')
+      eers = calc_eers_from_eir_4speed(eer_a, fan_power_rated, 'seer')
       f_a = calc_seer_4speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
-      eers = calc_eers_from_eir_4speed(eer_c, fan_power_rated, calc_type = 'seer')
+      eers = calc_eers_from_eir_4speed(eer_c, fan_power_rated, 'seer')
       f_c = calc_seer_4speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
       if f_c == 0
@@ -2009,7 +2005,7 @@ class HVAC
       fail 'Variable-speed cooling eers iteration failed to converge.'
     end
 
-    return calc_eers_from_eir_4speed(eer_c, fan_power_rated, calc_type = 'model')
+    return calc_eers_from_eir_4speed(eer_c, fan_power_rated, 'model')
   end
 
   def self.calc_seer_2speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
@@ -2275,10 +2271,10 @@ class HVAC
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
     (1..iter_max).each do |n|
-      cops = calc_cops_from_eir_4speed(cop_a, fan_power_rated, calc_type = 'hspf')
+      cops = calc_cops_from_eir_4speed(cop_a, fan_power_rated, calc_type: 'hspf')
       f_a = calc_hspf_4speed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
-      cops = calc_cops_from_eir_4speed(cop_c, fan_power_rated, calc_type = 'hspf')
+      cops = calc_cops_from_eir_4speed(cop_c, fan_power_rated, calc_type: 'hspf')
       f_c = calc_hspf_4speed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
       if f_c == 0
@@ -2301,7 +2297,7 @@ class HVAC
       fail 'Variable-speed heating cops iteration failed to converge.'
     end
 
-    return calc_cops_from_eir_4speed(cop_c, fan_power_rated, calc_type = 'model')
+    return calc_cops_from_eir_4speed(cop_c, fan_power_rated, calc_type: 'model')
   end
 
   def self.calc_hspf_1speed(cop_47, c_d, fan_power_rated, coeff_eir, coeff_q)
@@ -2436,7 +2432,6 @@ class HVAC
         p_l = p_L17 + (((p_L47 - p_L17) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
       end
 
-      x_t_h = [bL / q_h, 1.0].min
       x_t_l = [bL / q_l, 1.0].min
       pLF = 1.0 - (c_d * (1.0 - x_t_l))
       if (t_bins[i] <= t_off) || (q_h / (p_h * 3.412) < 1.0)
@@ -2883,12 +2878,6 @@ class HVAC
   def self.create_dx_heating_coil(model, obj_name, heating_system)
     htg_ap = heating_system.additional_properties
 
-    if heating_system.is_a? HPXML::HeatingSystem
-      htg_type = heating_system.heating_system_type
-    elsif heating_system.is_a? HPXML::HeatPump
-      htg_type = heating_system.heat_pump_type
-    end
-
     if htg_ap.num_speeds > 1
       constant_biquadratic = create_curve_biquadratic_constant(model)
     end
@@ -3274,24 +3263,24 @@ class HVAC
     t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
     frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]
 
-    (0...8).each do |_i|
-      bL = ((t_bins[_i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
-      q_k1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_bins[_i] - 67.0)
-      p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[_i] - 67)
-      q_k2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_bins[_i] - 82.0)
-      p_k2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_bins[_i] - 82.0)
+    (0...8).each do |i|
+      bL = ((t_bins[i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
+      q_k1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_bins[i] - 67.0)
+      p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[i] - 67)
+      q_k2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_bins[i] - 82.0)
+      p_k2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_bins[i] - 82.0)
 
       if bL <= q_k1
         x_k1 = bL / q_k1
-        q_Tj_N = x_k1 * q_k1 * frac_hours[_i]
-        e_Tj_N = x_k1 * p_k1 * frac_hours[_i] / (1 - c_d * (1 - x_k1))
+        q_Tj_N = x_k1 * q_k1 * frac_hours[i]
+        e_Tj_N = x_k1 * p_k1 * frac_hours[i] / (1 - c_d * (1 - x_k1))
       elsif (q_k1 < bL) && (bL <= q_k2)
-        q_Tj_N = bL * frac_hours[_i]
-        eer_T_j = a + b * t_bins[_i] + c * t_bins[_i]**2
+        q_Tj_N = bL * frac_hours[i]
+        eer_T_j = a + b * t_bins[i] + c * t_bins[i]**2
         e_Tj_N = q_Tj_N / eer_T_j
       else
-        q_Tj_N = frac_hours[_i] * q_k2
-        e_Tj_N = frac_hours[_i] * p_k2
+        q_Tj_N = frac_hours[i] * q_k2
+        e_Tj_N = frac_hours[i] * p_k2
       end
 
       q_tot += q_Tj_N
@@ -3499,23 +3488,23 @@ class HVAC
     etot = 0
     bLtot = 0
 
-    (0...15).each do |_i|
-      bL = ((65.0 - t_bins[_i]) / (65.0 - t_OD)) * 0.77 * dHR
+    (0...15).each do |i|
+      bL = ((65.0 - t_bins[i]) / (65.0 - t_OD)) * 0.77 * dHR
 
-      q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[_i] - 47.0)
-      p_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_bins[_i] - 47.0)
+      q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[i] - 47.0)
+      p_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_bins[i] - 47.0)
 
-      if (t_bins[_i] <= 17.0) || (t_bins[_i] >= 45.0)
-        q_2 = q_H3_2_net + (q_H1_2_net - q_H3_2_net) * (t_bins[_i] - 17.0) / (47.0 - 17.0)
-        p_2 = p_H3_2 + (p_H1_2 - p_H3_2) * (t_bins[_i] - 17.0) / (47.0 - 17.0)
+      if (t_bins[i] <= 17.0) || (t_bins[i] >= 45.0)
+        q_2 = q_H3_2_net + (q_H1_2_net - q_H3_2_net) * (t_bins[i] - 17.0) / (47.0 - 17.0)
+        p_2 = p_H3_2 + (p_H1_2 - p_H3_2) * (t_bins[i] - 17.0) / (47.0 - 17.0)
       else
-        q_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) * (t_bins[_i] - 17) / (35.0 - 17.0)
-        p_2 = p_H3_2 + (p_H35_2 - p_H3_2) * (t_bins[_i] - 17.0) / (35.0 - 17.0)
+        q_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) * (t_bins[i] - 17) / (35.0 - 17.0)
+        p_2 = p_H3_2 + (p_H35_2 - p_H3_2) * (t_bins[i] - 17.0) / (35.0 - 17.0)
       end
 
-      if t_bins[_i] <= t_off
+      if t_bins[i] <= t_off
         delta = 0
-      elsif t_bins[_i] >= t_on
+      elsif t_bins[i] >= t_on
         delta = 1.0
       else
         delta = 0.5
@@ -3523,15 +3512,15 @@ class HVAC
 
       if bL <= q_1
         x_1 = bL / q_1
-        e_Tj_n = delta * x_1 * p_1 * frac_hours[_i] / (1.0 - c_d * (1.0 - x_1))
+        e_Tj_n = delta * x_1 * p_1 * frac_hours[i] / (1.0 - c_d * (1.0 - x_1))
       elsif (q_1 < bL) && (bL <= q_2)
-        cop_T_j = a + b * t_bins[_i] + c * t_bins[_i]**2
-        e_Tj_n = delta * frac_hours[_i] * bL / cop_T_j + (1.0 - delta) * bL * (frac_hours[_i])
+        cop_T_j = a + b * t_bins[i] + c * t_bins[i]**2
+        e_Tj_n = delta * frac_hours[i] * bL / cop_T_j + (1.0 - delta) * bL * (frac_hours[i])
       else
-        e_Tj_n = delta * frac_hours[_i] * p_2 + frac_hours[_i] * (bL - delta * q_2)
+        e_Tj_n = delta * frac_hours[i] * p_2 + frac_hours[i] * (bL - delta * q_2)
       end
 
-      bLtot += frac_hours[_i] * bL
+      bLtot += frac_hours[i] * bL
       etot += e_Tj_n
     end
 
@@ -4056,7 +4045,6 @@ class HVAC
 
       applied = true
       distribution_system = heating_system.distribution_system
-      distribution_type = distribution_system.distribution_system_type
       hydronic_type = distribution_system.hydronic_type
 
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_type.to_s == HPXML::HydronicTypeWaterLoop

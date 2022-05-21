@@ -229,7 +229,7 @@ def print_measure_call(measure_args, measure_dir, runner)
     return
   end
 
-  args_s = hash_to_string(measure_args, delim = ' -> ', separator = " \n")
+  args_s = hash_to_string(measure_args, ' -> ', " \n")
   if args_s.size > 0
     runner.registerInfo("Calling #{measure_dir} measure with arguments:\n#{args_s}")
   else

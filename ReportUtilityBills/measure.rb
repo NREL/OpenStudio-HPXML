@@ -326,7 +326,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, utility_rates, utility_bills = setup_outputs()
 
     # Get timestamps
-    @timestamps, _, _ = OutputMethods.get_timestamps(timeseries_frequency, @msgpackData, @hpxml)
+    @timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
 
     # Get outputs
     get_outputs(fuels)
@@ -693,7 +693,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv')
         header = "Weekly #{state_name} Weekly No. 2 Heating Oil Residential Price  (Dollars per Gallon)"
       elsif fuel_type == FT::Propane
-        marginal_rates = marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
+        marginal_rates = get_gallon_marginal_rates('PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv')
         header = "Weekly #{state_name} Propane Residential Price  (Dollars per Gallon)"
       end
 

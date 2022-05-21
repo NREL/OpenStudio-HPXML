@@ -515,15 +515,12 @@ class Geometry
   end
 
   def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file)
-    occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Geometry.get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
-    occ_lat = lat_frac
     occ_sens = sens_frac
-    occ_conv = 0.442 * occ_sens
     occ_rad = 0.558 * occ_sens
-    occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
     # Create schedule
     people_sch = nil

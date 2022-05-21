@@ -51,7 +51,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     act_vol = 1.0
-    u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
+    _u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
     new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater,
                                    water_heating_system: water_heating_system,
                                    act_vol: act_vol,
@@ -1323,6 +1323,7 @@ class Waterheater
   def self.get_default_num_bathrooms(num_beds)
     # From BA HSP
     num_baths = num_beds / 2.0 + 0.5
+    return num_baths
   end
 
   def self.add_ec_adj(model, heater, ec_adj, loc_space, water_heating_system, combi_boiler = nil)
@@ -1584,7 +1585,6 @@ class Waterheater
     if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? wh_type
       ef = eta_c
     else
-      pi = Math::PI
       volume_drawn = 64.3 # gal/day
       density = 8.2938 # lb/gal
       draw_mass = volume_drawn * density # lb

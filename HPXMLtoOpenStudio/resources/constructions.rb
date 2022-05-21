@@ -1440,7 +1440,6 @@ class Constructions
                                    mat_int_finish, inside_film, outside_film, mat_ext_finish,
                                    solar_absorptance, emittance)
 
-    film_r = inside_film.rvalue + outside_film.rvalue
     if mat_ext_finish.nil?
       fallback_mat_ext_finish = nil
     else
@@ -1667,7 +1666,6 @@ class Constructions
       # Solved in Wolfram Alpha: https://www.wolframalpha.com/input/?i=1%2FA+%3D+B%2F(2*C%2Bx%2BD)+%2B+E%2F(3*C%2BD)+%2B+(1-B-E)%2F(3*x%2BD)
       stud_frac = 1.5 / constr_set.framing_spacing
       misc_framing_factor = constr_set.framing_factor - stud_frac
-      cavity_frac = 1.0 - (2 * stud_frac + misc_framing_factor)
       a = assembly_r
       b = stud_frac
       c = constr_set.stud.rvalue
@@ -1701,7 +1699,6 @@ class Constructions
       framing_r = Material.new(thick_in: constr_set.thick_in, mat_base: BaseMaterial.Wood).rvalue
       spline_r = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.Wood).rvalue
       spline_frac = 4.0 / 48.0 # One 4" spline for every 48" wide panel
-      cavity_frac = 1.0 - (spline_frac + constr_set.framing_factor)
       a = assembly_r
       b = constr_set.framing_factor
       c = framing_r

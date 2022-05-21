@@ -3505,7 +3505,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.slabs << hpxml.slabs[-1].dup
     hpxml.slabs[-1].id += '_tiny'
     hpxml.slabs[-1].area = 0.05
-    area_adjustments = []
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area /= 9.0
       hpxml.windows[n - 1].fraction_operable = 0.0
@@ -3542,7 +3541,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.skylights << hpxml.skylights[-1].dup
     hpxml.skylights[-1].id += '_tiny'
     hpxml.skylights[-1].area = 0.05
-    area_adjustments = []
     for n in 1..hpxml.doors.size
       hpxml.doors[n - 1].area /= 9.0
       for i in 2..9
@@ -4638,7 +4636,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   end
 
   # construct HPXMLvalidator.xml
-  hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
+  hpxml_validator = XMLHelper.create_doc('1.0', 'UTF-8')
   root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
   XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
   XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd', :string)
@@ -4869,6 +4867,8 @@ if ARGV[0].to_sym == :update_measures
           'Lint/DeprecatedClassMethods',
           'Lint/RedundantStringCoercion',
           'Lint/UnusedMethodArgument',
+          'Lint/UselessAssignment',
+          'Lint/UnderscorePrefixedVariableName',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
@@ -5044,7 +5044,7 @@ if ARGV[0].to_sym == :create_release_zips
     if num_epws_local < num_epws_expected
       puts 'Fetching all weather files...'
       command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-      log = `#{command}`
+      `#{command}`
     end
   end
 

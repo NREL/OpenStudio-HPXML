@@ -234,7 +234,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     # Check that any other state code is gracefully handled (no error)
     fuel_types.each do |fuel_type|
-      flatratebuy = @measure.get_auto_marginal_rate(runner, 'XX', fuel_type, 0)
+      @measure.get_auto_marginal_rate(runner, 'XX', fuel_type, 0)
     end
   end
 
