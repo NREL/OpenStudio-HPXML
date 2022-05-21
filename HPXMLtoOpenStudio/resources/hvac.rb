@@ -3649,13 +3649,13 @@ class HVAC
 
   def self.get_charge_fault_heating_coeff(f_chg)
     if f_chg <= 0
-      qgr_values = [-0.0338595, 0.0, 0.0202827, -2.6226343] # Add a zero term to combine cooling and heating claculation
-      p_values = [0.0615649, 0.0, 0.0044554, -0.2598507] # Add a zero term to combine cooling and heating claculation
+      qgr_values = [-0.0338595, 0.0, 0.0202827, -2.6226343] # Add a zero term to combine cooling and heating calculation
+      p_values = [0.0615649, 0.0, 0.0044554, -0.2598507] # Add a zero term to combine cooling and heating calculation
     else
-      qgr_values = [-0.0029514, 0.0, 0.0007379, -0.0064112] # Add a zero term to combine cooling and heating claculation
-      p_values = [-0.0594134, 0.0, 0.0159205, 1.8872153] # Add a zero term to combine cooling and heating claculation
+      qgr_values = [-0.0029514, 0.0, 0.0007379, -0.0064112] # Add a zero term to combine cooling and heating calculation
+      p_values = [-0.0594134, 0.0, 0.0159205, 1.8872153] # Add a zero term to combine cooling and heating calculation
     end
-    ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating claculation
+    ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating calculation
     return qgr_values, p_values, ff_chg_values
   end
 

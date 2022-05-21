@@ -1972,7 +1972,7 @@ class HVACSizing
     end
 
     if (not hvac.SwitchoverTemperature.nil?) && (hvac.SwitchoverTemperature > weather.design.HeatingDrybulb)
-      # Calculate the heating load at the switchover temperature to limit unitilized capacity
+      # Calculate the heating load at the switchover temperature to limit uninitialized capacity
       switchover_weather = weather.dup
       switchover_weather.design.HeatingDrybulb = hvac.SwitchoverTemperature
       _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
