@@ -1010,7 +1010,7 @@ class Constructions
 
       color_map[key[0]] = value
     end
-    color = color_map.min_by { |k, v| (v - solar_absorptance).abs }[0]
+    color = color_map.min_by { |_k, v| (v - solar_absorptance).abs }[0]
     return color
   end
 
@@ -1021,7 +1021,7 @@ class Constructions
 
   def self.get_default_wall_color(solar_absorptance)
     map = get_wall_color_and_solar_absorptance_map
-    color = map.min_by { |k, v| (v - solar_absorptance).abs }[0]
+    color = map.min_by { |_k, v| (v - solar_absorptance).abs }[0]
     return color
   end
 

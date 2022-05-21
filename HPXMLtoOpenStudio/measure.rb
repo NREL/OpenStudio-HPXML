@@ -2018,7 +2018,7 @@ class OSModel
 
     area_tolerance = UnitConversions.convert(1.0, 'ft^2', 'm^2')
 
-    model.getSurfaces.sort.each_with_index do |s, idx|
+    model.getSurfaces.sort.each do |s|
       next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString('SurfaceType')

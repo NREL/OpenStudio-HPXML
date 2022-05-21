@@ -1874,7 +1874,7 @@ class HVACSizing
     bore_depth = (bore_length / num_bore_holes).floor # ft
     min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
 
-    (0..4).to_a.each do |tmp|
+    for _i in 0..4
       if (bore_depth < min_bore_depth) && (num_bore_holes > 1)
         num_bore_holes -= 1
         bore_depth = (bore_length / num_bore_holes).floor
@@ -1885,8 +1885,6 @@ class HVACSizing
     end
 
     bore_depth = (bore_length / num_bore_holes).floor + 5
-
-    bore_length = bore_depth * num_bore_holes
 
     if num_bore_holes == 1
       bore_config = 'single'
@@ -2662,7 +2660,7 @@ class HVACSizing
 
     # Total UA
     total_UA = 0.0
-    space_UAs.each do |ua_type, ua|
+    space_UAs.values.each do |ua|
       total_UA += ua
     end
     space_UAs['total'] = total_UA

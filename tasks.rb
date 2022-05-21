@@ -3290,7 +3290,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeVinyl, HPXML::ColorLight],
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
-    siding_types.each_with_index do |siding_type, i|
+    siding_types.each do |siding_type|
       hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationBasementConditioned,
@@ -4579,7 +4579,7 @@ end
 
 def get_elements_from_sample_files(hpxml_docs)
   elements_being_used = []
-  hpxml_docs.each do |xml, hpxml_doc|
+  hpxml_docs.values.each do |hpxml_doc|
     root = XMLHelper.get_element(hpxml_doc, '/HPXML')
     root.each_node do |node|
       next unless node.is_a?(Oga::XML::Element)
@@ -4867,8 +4867,13 @@ if ARGV[0].to_sym == :update_measures
           'Lint/DeprecatedClassMethods',
           'Lint/RedundantStringCoercion',
           'Lint/UnusedMethodArgument',
+          'Lint/UnusedBlockArgument',
           'Lint/UselessAssignment',
           'Lint/UnderscorePrefixedVariableName',
+          'Lint/UnreachableCode',
+          'Lint/SelfAssignment',
+          'Lint/ReturnInVoidContext',
+          'Lint/RequireParentheses',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',

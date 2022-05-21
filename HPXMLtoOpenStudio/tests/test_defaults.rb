@@ -3852,7 +3852,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system, location, tracking, module_type, azimuth)
-    hpxml.pv_systems.each_with_index do |pv, idx|
+    hpxml.pv_systems.each do |pv|
       assert_equal(is_shared_system, pv.is_shared_system)
       assert_equal(interver_efficiency, pv.inverter_efficiency)
       assert_in_epsilon(system_loss_frac, pv.system_losses_fraction, 0.01)
@@ -3891,7 +3891,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_generator_values(hpxml, is_shared_system)
-    hpxml.generators.each_with_index do |generator, idx|
+    hpxml.generators.each do |generator|
       assert_equal(is_shared_system, generator.is_shared_system)
     end
   end

@@ -103,7 +103,7 @@ class HPXMLDefaults
     if azimuth_areas.empty?
       primary_azimuth = 0
     else
-      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
+      primary_azimuth = azimuth_areas.max_by { |_k, v| v }[0]
     end
     return [primary_azimuth,
             sanitize_azimuth(primary_azimuth + 90),

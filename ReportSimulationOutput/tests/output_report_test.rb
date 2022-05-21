@@ -1243,7 +1243,7 @@ class ReportSimulationOutputTest < MiniTest::Test
 
   def _check_for_constant_timeseries_step(time_col)
     steps = []
-    time_col.each_with_index do |ts, i|
+    time_col.each_with_index do |_ts, i|
       next if i < 3
 
       t0 = _parse_time(time_col[i - 1])

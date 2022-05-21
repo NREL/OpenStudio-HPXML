@@ -1457,7 +1457,7 @@ class HVAC
     sensors = { 'clg' => clg_object_sensor,
                 'primary_htg' => htg_object_sensor,
                 'backup_htg' => backup_htg_object_sensor }
-    sensors = sensors.select { |m, s| !s.nil? }
+    sensors = sensors.select { |_m, s| !s.nil? }
 
     fan_or_pump_var = fan_or_pump.name.to_s.gsub(' ', '_')
 
@@ -1473,7 +1473,7 @@ class HVAC
 
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
     else
-      sensors.each do |mode, sensor|
+      sensors.keys.each do |mode|
         fan_or_pump_program.addLine("Set #{fan_or_pump_var}_#{mode} = 0")
       end
       sensors.each_with_index do |(mode, sensor), i|
@@ -1807,7 +1807,7 @@ class HVAC
     oat_intercept = y_A - (x_A * oat_slope)
 
     heat_cap_ft_spec = []
-    (1..num_speeds).to_a.each do |speed, i|
+    for _i in 1..num_speeds
       heat_cap_ft_spec << [oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]
     end
 
@@ -1935,7 +1935,7 @@ class HVAC
 
     err = 1
     eer_c = (eer_a + eer_b) / 2.0
-    (1..iter_max).each do |n|
+    for _n in 1..iter_max
       eers = calc_eers_from_eir_2speed(eer_a, fan_power_rated)
       f_a = calc_seer_2speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
@@ -1978,7 +1978,7 @@ class HVAC
 
     err = 1
     eer_c = (eer_a + eer_b) / 2.0
-    (1..iter_max).each do |n|
+    for _n in 1..iter_max
       eers = calc_eers_from_eir_4speed(eer_a, fan_power_rated, 'seer')
       f_a = calc_seer_4speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
@@ -2187,7 +2187,7 @@ class HVAC
 
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
-    (1..iter_max).each do |n|
+    for _n in 1..iter_max
       f_a = calc_hspf_1speed(cop_a, c_d, fan_power_rated, coeff_eir, coeff_q) - hspf
       f_c = calc_hspf_1speed(cop_c, c_d, fan_power_rated, coeff_eir, coeff_q) - hspf
 
@@ -2227,7 +2227,7 @@ class HVAC
 
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
-    (1..iter_max).each do |n|
+    for _n in 1..iter_max
       cops = calc_cops_from_eir_2speed(cop_a, fan_power_rated)
       f_a = calc_hspf_2speed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
@@ -2270,7 +2270,7 @@ class HVAC
 
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
-    (1..iter_max).each do |n|
+    for _n in 1..iter_max
       cops = calc_cops_from_eir_4speed(cop_a, fan_power_rated, calc_type: 'hspf')
       f_a = calc_hspf_4speed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
@@ -3154,15 +3154,15 @@ class HVAC
     # Down-select to speed indices
 
     # Cooling
-    hp_ap.cool_cap_ft_spec = hp_ap.cool_cap_ft_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_eir_ft_spec = hp_ap.cool_eir_ft_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_cap_fflow_spec = hp_ap.cool_cap_fflow_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_eir_fflow_spec = hp_ap.cool_eir_fflow_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_plf_fplr_spec = hp_ap.cool_plf_fplr_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_rated_cfm_per_ton = hp_ap.cool_rated_cfm_per_ton.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_capacity_ratios = hp_ap.cool_capacity_ratios.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_rated_shrs_gross = hp_ap.cool_rated_shrs_gross.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_rated_eirs = hp_ap.cool_rated_eirs.select.with_index { |x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_cap_ft_spec = hp_ap.cool_cap_ft_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_eir_ft_spec = hp_ap.cool_eir_ft_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_cap_fflow_spec = hp_ap.cool_cap_fflow_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_eir_fflow_spec = hp_ap.cool_eir_fflow_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_plf_fplr_spec = hp_ap.cool_plf_fplr_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_rated_cfm_per_ton = hp_ap.cool_rated_cfm_per_ton.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_capacity_ratios = hp_ap.cool_capacity_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_rated_shrs_gross = hp_ap.cool_rated_shrs_gross.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+    hp_ap.cool_rated_eirs = hp_ap.cool_rated_eirs.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
     hp_ap.cool_fan_speed_ratios = []
     for i in 0..(hp_ap.speed_indices.size - 1)
       hp_ap.cool_fan_speed_ratios << hp_ap.cool_rated_cfm_per_ton[i] * hp_ap.cool_capacity_ratios[i] / (hp_ap.cool_rated_cfm_per_ton[-1] * hp_ap.cool_capacity_ratios[-1])
@@ -3170,14 +3170,14 @@ class HVAC
 
     if heat_pump.is_a? HPXML::HeatPump # Skip for mini-split air conditioner
       # Heating
-      hp_ap.heat_eir_ft_spec = hp_ap.heat_eir_ft_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_cap_fflow_spec = hp_ap.heat_cap_fflow_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_eir_fflow_spec = hp_ap.heat_eir_fflow_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_cap_ft_spec = hp_ap.heat_cap_ft_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_plf_fplr_spec = hp_ap.heat_plf_fplr_spec.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_rated_cfm_per_ton = hp_ap.heat_rated_cfm_per_ton.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_capacity_ratios = hp_ap.heat_capacity_ratios.select.with_index { |x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_rated_eirs = hp_ap.heat_rated_eirs.select.with_index { |x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_eir_ft_spec = hp_ap.heat_eir_ft_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_cap_fflow_spec = hp_ap.heat_cap_fflow_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_eir_fflow_spec = hp_ap.heat_eir_fflow_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_cap_ft_spec = hp_ap.heat_cap_ft_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_plf_fplr_spec = hp_ap.heat_plf_fplr_spec.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_rated_cfm_per_ton = hp_ap.heat_rated_cfm_per_ton.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_capacity_ratios = hp_ap.heat_capacity_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
+      hp_ap.heat_rated_eirs = hp_ap.heat_rated_eirs.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
       hp_ap.heat_fan_speed_ratios = []
       for i in 0..(hp_ap.speed_indices.size - 1)
         hp_ap.heat_fan_speed_ratios << hp_ap.heat_rated_cfm_per_ton[i] * hp_ap.heat_capacity_ratios[i] / (hp_ap.heat_rated_cfm_per_ton[-1] * hp_ap.heat_capacity_ratios[-1])

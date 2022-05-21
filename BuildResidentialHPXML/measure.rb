@@ -4175,7 +4175,7 @@ class HPXMLFile
                  'frame_floors' => { 'surfaces' => hpxml.frame_floors, 'ids' => [] } }
 
     attic_locations = [HPXML::LocationAtticUnconditioned, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented]
-    surf_ids.each do |surf_type, surf_hash|
+    surf_ids.values.each do |surf_hash|
       surf_hash['surfaces'].each do |surface|
         next if (not attic_locations.include? surface.interior_adjacent_to) &&
                 (not attic_locations.include? surface.exterior_adjacent_to)
