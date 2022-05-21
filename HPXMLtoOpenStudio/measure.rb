@@ -52,7 +52,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   # define the arguments that the user will input
-  def arguments(model)
+  def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
     args = OpenStudio::Measure::OSArgumentVector.new
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
@@ -240,14 +240,14 @@ class OSModel
     add_conditioned_floor_area(runner, model, spaces)
     add_thermal_mass(runner, model, spaces)
     Geometry.set_zone_volumes(spaces, @hpxml, @apply_ashrae140_assumptions)
-    Geometry.explode_surfaces(runner, model, @hpxml, @walls_top)
+    Geometry.explode_surfaces(model, @hpxml, @walls_top)
     add_num_occupants(model, runner, spaces)
 
     # HVAC
 
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
-    add_ideal_system(runner, model, spaces, epw_path)
-    add_cooling_system(runner, model, spaces, airloop_map)
+    add_ideal_system(model, spaces, epw_path)
+    add_cooling_system(model, spaces, airloop_map)
     add_heating_system(runner, model, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(model, spaces)
@@ -271,13 +271,13 @@ class OSModel
     add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(model)
     add_generators(model)
-    add_batteries(runner, model, spaces)
+    add_batteries(model, spaces)
     add_additional_properties(model, hpxml_path, building_id)
 
     # Output
 
     add_unmet_hours_output(model, spaces)
-    add_loads_output(runner, model, spaces, add_component_loads)
+    add_loads_output(model, spaces, add_component_loads)
     set_output_files(model)
     # Uncomment to debug EMS
     # add_ems_debug_output(model)
@@ -468,7 +468,7 @@ class OSModel
           GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
           GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
         ]
-        match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, roof.id)
+        match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
         cavity_r = 0
         cavity_ins_thick_in = 0
@@ -1376,7 +1376,7 @@ class OSModel
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
-      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
 
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
@@ -1400,7 +1400,7 @@ class OSModel
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
       Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map)
     end
 
@@ -1408,7 +1408,7 @@ class OSModel
     Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
   end
 
-  def self.add_cooling_system(runner, model, spaces, airloop_map)
+  def self.add_cooling_system(model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1568,7 +1568,7 @@ class OSModel
     end
   end
 
-  def self.add_ideal_system(runner, model, spaces, epw_path)
+  def self.add_ideal_system(model, spaces, epw_path)
     # Adds an ideal air system as needed to meet the load under certain circumstances:
     # 1. the sum of fractions load served is less than 1, or
     # 2. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
@@ -1786,7 +1786,7 @@ class OSModel
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, 'Duct', model, spaces)
+      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
 
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
@@ -1853,7 +1853,7 @@ class OSModel
     end
   end
 
-  def self.add_batteries(runner, model, spaces)
+  def self.add_batteries(model, spaces)
     return if @hpxml.pv_systems.empty?
 
     @hpxml.batteries.each do |battery|
@@ -1933,7 +1933,7 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  def self.add_loads_output(runner, model, spaces, add_component_loads)
+  def self.add_loads_output(model, spaces, add_component_loads)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     liv_load_sensors, intgain_dehumidifier = add_total_loads_output(model, living_zone)
@@ -2548,7 +2548,7 @@ class OSModel
   # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters and ducts).
-  def self.get_space_or_schedule_from_location(location, object_name, model, spaces)
+  def self.get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
                HPXML::LocationOutside,
                HPXML::LocationRoofDeck].include? location

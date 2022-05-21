@@ -162,7 +162,7 @@ class Geometry
     return OpenStudio::reverse(create_floor_vertices(length, width, z_origin, default_azimuths))
   end
 
-  def self.explode_surfaces(runner, model, hpxml, walls_top)
+  def self.explode_surfaces(model, hpxml, walls_top)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
 
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth

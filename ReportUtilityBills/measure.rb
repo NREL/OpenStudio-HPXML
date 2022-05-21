@@ -29,7 +29,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   # define the arguments that the user will input
-  def arguments(model = nil)
+  def arguments(model = nil) # rubocop:disable Lint/UnusedMethodArgument
     args = OpenStudio::Measure::OSArgumentVector.new
 
     format_chs = OpenStudio::StringVector.new

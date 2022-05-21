@@ -52,7 +52,7 @@ class Geometry
   def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
                                           geometry_garage_width:,
                                           geometry_garage_depth:,
-                                          **remainder)
+                                          *)
     protrusion = geometry_garage_protrusion
     width = geometry_garage_width
     depth = geometry_garage_depth
@@ -223,7 +223,7 @@ class Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         **remainder)
+                                         *)
     cfa = geometry_unit_cfa
     average_ceiling_height = geometry_average_ceiling_height
     num_floors = geometry_unit_num_floors_above_grade
@@ -896,7 +896,7 @@ class Geometry
                                         skylight_area_back:,
                                         skylight_area_left:,
                                         skylight_area_right:,
-                                        **remainder)
+                                        *)
     facades = [Constants.FacadeBack, Constants.FacadeRight, Constants.FacadeFront, Constants.FacadeLeft]
 
     wwrs = {}
@@ -1423,7 +1423,7 @@ class Geometry
   def self.create_doors(runner:,
                         model:,
                         door_area:,
-                        **remainder)
+                        *)
     # error checking
     if door_area == 0
       runner.registerFinalCondition('No doors added because door area was set to 0.')
@@ -1578,7 +1578,7 @@ class Geometry
                                          geometry_unit_right_wall_is_adiabatic:,
                                          geometry_unit_front_wall_is_adiabatic:,
                                          geometry_unit_back_wall_is_adiabatic:,
-                                         **remainder)
+                                         *)
 
     cfa = geometry_unit_cfa
     average_ceiling_height = geometry_average_ceiling_height
@@ -1947,7 +1947,7 @@ class Geometry
                             geometry_unit_right_wall_is_adiabatic:,
                             geometry_unit_front_wall_is_adiabatic:,
                             geometry_unit_back_wall_is_adiabatic:,
-                            **remainder)
+                            *)
 
     cfa = geometry_unit_cfa
     average_ceiling_height = geometry_average_ceiling_height

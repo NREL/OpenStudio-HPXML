@@ -62,7 +62,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_double_stud_wall(runner, model, surfaces, constr_name,
@@ -135,7 +135,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_cmu_wall(runner, model, surfaces, constr_name,
@@ -206,7 +206,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_icf_wall(runner, model, surfaces, constr_name,
@@ -259,7 +259,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_sip_wall(runner, model, surfaces, constr_name, sip_r,
@@ -319,7 +319,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_steel_stud_wall(runner, model, surfaces, constr_name,
@@ -382,7 +382,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_generic_layered_wall(runner, model, surfaces, constr_name,
@@ -452,7 +452,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_rim_joist(runner, model, surfaces, constr_name,
@@ -512,7 +512,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_open_cavity_roof(runner, model, surfaces, constr_name,
@@ -585,7 +585,7 @@ class Constructions
     constr.set_interior_material_properties() unless has_radiant_barrier
 
     # Create and assign construction to roof surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
@@ -655,7 +655,7 @@ class Constructions
     constr.set_interior_material_properties() unless has_radiant_barrier
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_ceiling(runner, model, surfaces, constr_name,
@@ -702,7 +702,7 @@ class Constructions
     constr.set_interior_material_properties(debug: true)
 
     # Create and assign construction to ceiling surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_floor(runner, model, surfaces, constr_name,
@@ -752,7 +752,7 @@ class Constructions
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
   end
 
   def self.apply_foundation_wall(runner, model, surfaces, constr_name,
@@ -774,7 +774,7 @@ class Constructions
     end
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, surfaces, model)
+    constr.create_and_assign_constructions(surfaces, model)
 
     # Assign surfaces to Kiva foundation
     surfaces.each do |surface|
@@ -837,7 +837,7 @@ class Constructions
     end
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, [surface], model)
+    constr.create_and_assign_constructions([surface], model)
 
     # Assign surface to Kiva foundation
     surface.setAdjacentFoundation(foundation)
@@ -860,7 +860,7 @@ class Constructions
     constr.add_layer(fin_door_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(runner, subsurfaces, model)
+    constr.create_and_assign_constructions(subsurfaces, model)
   end
 
   def self.apply_window(runner, model, subsurface, constr_name, ufactor, shgc)
@@ -978,7 +978,7 @@ class Constructions
         imdefs << imdef
       end
       # Create and assign construction to surfaces
-      constr.create_and_assign_constructions(runner, imdefs, model)
+      constr.create_and_assign_constructions(imdefs, model)
     end
   end
 
@@ -1346,7 +1346,7 @@ class Constructions
     constr.add_layer(glaz_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(runner, [subsurface], model)
+    constr.create_and_assign_constructions([subsurface], model)
   end
 
   def self.apply_window_skylight_shading(model, window_or_skylight, index, shading_vertices, parent_surface, sub_surface, shading_group,
@@ -1910,11 +1910,11 @@ class Construction
 
   # Creates constructions as needed and assigns to surfaces.
   # Leave name as nil if the materials (e.g., exterior finish) apply to multiple constructions.
-  def create_and_assign_constructions(runner, surfaces, model)
+  def create_and_assign_constructions(surfaces, model)
     validate
 
     # Create list of OpenStudio materials
-    materials = construct_materials(runner, model)
+    materials = construct_materials(model)
 
     # Create OpenStudio construction and assign to surface
     constr = OpenStudio::Model::Construction.new(model)
@@ -2016,7 +2016,7 @@ class Construction
     return mat
   end
 
-  def construct_materials(runner, model)
+  def construct_materials(model)
     # Create materials
     materials = []
     @layers_materials.each_with_index do |layer_materials, layer_num|

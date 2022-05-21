@@ -2430,7 +2430,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv'
   end
 end
- 
+
 def apply_hpxml_modification_ashrae_140(hpxml)
   # Set detailed HPXML values for ASHRAE 140 test files
 
@@ -4868,7 +4868,6 @@ if ARGV[0].to_sym == :update_measures
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
           'Lint/RedundantStringCoercion',
-          'Lint/FloatComparison',
           'Lint/UnusedMethodArgument',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',

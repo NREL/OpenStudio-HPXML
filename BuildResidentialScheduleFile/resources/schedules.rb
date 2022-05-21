@@ -17,7 +17,7 @@ class ScheduleGenerator
                  sim_year:,
                  sim_start_day:,
                  debug:,
-                 **remainder)
+                 *)
     @runner = runner
     @epw_file = epw_file
     @state = state
