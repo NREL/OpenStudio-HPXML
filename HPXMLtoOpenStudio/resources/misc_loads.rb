@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, runner, plug_load, obj_name, spaces, cfa, apply_ashrae140_assumptions, schedules_file)
+  def self.apply_plug(model, runner, plug_load, obj_name, spaces, schedules_file, apply_ashrae140_assumptions)
     kwh = 0
     if not plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
@@ -44,31 +44,26 @@ class MiscLoads
       rad_frac = 0.6 * sens_frac
     end
 
-    sum_cfa = 0.0
-    spaces.each do |location, space|
-      next unless HPXML::conditioned_finished_locations.include? location
+    cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+    cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
 
-      # Add electric equipment for the mel
-      floor_area = UnitConversions.convert(spaces[location].floorArea, 'm^2', 'ft^2')
-      sum_cfa += floor_area
+    # Add electric equipment for the mel
+    cond_spaces.each do |space|
       mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
       mel.setSpace(space)
       mel_def.setName(obj_name)
-      mel_def.setDesignLevel(space_design_level * floor_area / cfa)
+      mel_def.setDesignLevel(space_design_level * space.floorArea / cond_floor_area)
       mel_def.setFractionRadiant(rad_frac)
       mel_def.setFractionLatent(lat_frac)
       mel_def.setFractionLost(1 - sens_frac - lat_frac)
       mel.setSchedule(sch)
     end
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'Plug loads not applied to all conditioned floor area. Aborting...'
-    end
   end
 
-  def self.apply_fuel(model, runner, fuel_load, obj_name, spaces, cfa, schedules_file)
+  def self.apply_fuel(model, runner, fuel_load, obj_name, spaces, schedules_file)
     therm = 0
 
     if not fuel_load.nil?
@@ -103,13 +98,11 @@ class MiscLoads
     sens_frac = fuel_load.frac_sensible
     lat_frac = fuel_load.frac_latent
 
-    sum_cfa = 0.0
-    spaces.each do |location, space|
-      next unless HPXML::conditioned_finished_locations.include? location
+    cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+    cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
 
-      # Add other equipment for the mfl
-      floor_area = UnitConversions.convert(spaces[location].floorArea, 'm^2', 'ft^2')
-      sum_cfa += floor_area
+    # Add other equipment for the mfl
+    cond_spaces.each do |space|
       mfl_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       mfl = OpenStudio::Model::OtherEquipment.new(mfl_def)
       mfl.setName(obj_name)
@@ -117,14 +110,11 @@ class MiscLoads
       mfl.setFuelType(EPlus.fuel_type(fuel_load.fuel_type))
       mfl.setSpace(space)
       mfl_def.setName(obj_name)
-      mfl_def.setDesignLevel(space_design_level * floor_area / cfa)
+      mfl_def.setDesignLevel(space_design_level * space.floorArea / cond_floor_area)
       mfl_def.setFractionRadiant(0.6 * sens_frac)
       mfl_def.setFractionLatent(lat_frac)
       mfl_def.setFractionLost(1 - sens_frac - lat_frac)
       mfl.setSchedule(sch)
-    end
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'Fuel loads not applied to all conditioned floor area. Aborting...'
     end
   end
 

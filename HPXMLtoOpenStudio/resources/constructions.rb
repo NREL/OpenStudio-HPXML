@@ -871,19 +871,14 @@ class Constructions
     apply_window_skylight(runner, model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area,
-                                 cfa, spaces)
-
+  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area, spaces)
     return if partition_wall_area <= 0
 
-    sum_cfa = 0.0
-    spaces.each do |location, space|
-      next unless HPXML::conditioned_finished_locations.include? location
-
+    cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+    cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
+    cond_spaces.each do |space|
       obj_name = "partition wall mass #{space.name}"
-      floor_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-      sum_cfa += floor_area
-      imdef = create_os_int_mass_and_def(model, obj_name, space, partition_wall_area * floor_area / cfa)
+      imdef = create_os_int_mass_and_def(model, obj_name, space, partition_wall_area * space.floorArea / cond_floor_area)
 
       apply_wood_stud_wall(runner, model, [imdef], constr_name,
                            0, 1, 3.5, false, 0.16,
@@ -891,13 +886,9 @@ class Constructions
                            Material.AirFilmVertical,
                            Material.AirFilmVertical)
     end
-
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'Partition wall mass not applied to all conditioned floor area. Aborting...'
-    end
   end
 
-  def self.apply_furniture(runner, model, furniture_mass, cfa, spaces)
+  def self.apply_furniture(runner, model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
       mat = BaseMaterial.FurnitureLightWeight
@@ -906,7 +897,6 @@ class Constructions
       mat = BaseMaterial.FurnitureHeavyWeight
     end
 
-    sum_cfa = 0.0
     spaces.each do |location, space|
       floor_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
       next if floor_area <= 0
@@ -919,7 +909,6 @@ class Constructions
       if HPXML::conditioned_finished_locations.include? location
         furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
-        sum_cfa += floor_area
       elsif [HPXML::LocationBasementUnconditioned].include? location
         furnAreaFraction = 0.4
         furnMass = mass_lb_per_sqft
@@ -952,10 +941,6 @@ class Constructions
 
       # Create and assign construction to surfaces
       constr.create_and_assign_constructions(runner, [imdef], model)
-    end
-
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'Furniture mass not applied to all conditioned floor area. Aborting...'
     end
   end
 

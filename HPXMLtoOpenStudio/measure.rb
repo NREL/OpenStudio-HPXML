@@ -364,7 +364,7 @@ class OSModel
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, runner, @hpxml, num_occ, @cfa, spaces, @schedules_file)
+    Geometry.apply_occupants(model, runner, @hpxml, num_occ, spaces, @schedules_file)
   end
 
   def self.create_or_get_space(model, spaces, location)
@@ -1099,13 +1099,13 @@ class OSModel
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, @cfa, spaces)
+      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
     else
       mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
       partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, @cfa, spaces)
+      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
 
-      Constructions.apply_furniture(runner, model, @hpxml.furniture_mass, @cfa, spaces)
+      Constructions.apply_furniture(runner, model, @hpxml.furniture_mass, spaces)
     end
   end
 
@@ -1613,7 +1613,7 @@ class OSModel
     return if @hpxml.ceiling_fans.size == 0
 
     ceiling_fan = @hpxml.ceiling_fans[0]
-    HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces, @cfa, @schedules_file)
+    HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces, @schedules_file)
   end
 
   def self.add_dehumidifiers(runner, model)
@@ -1659,7 +1659,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces, @cfa, @apply_ashrae140_assumptions, @schedules_file)
+      MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces, @schedules_file, @apply_ashrae140_assumptions)
     end
   end
 
@@ -1678,7 +1678,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_fuel(model, runner, fuel_load, obj_name, spaces, @cfa, @schedules_file)
+      MiscLoads.apply_fuel(model, runner, fuel_load, obj_name, spaces, @schedules_file)
     end
   end
 

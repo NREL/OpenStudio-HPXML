@@ -749,7 +749,7 @@ class HVAC
     end
   end
 
-  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces, cfa, schedules_file)
+  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces, schedules_file)
     obj_name = Constants.ObjectNameCeilingFan
     medium_cfm = 3000.0 # From ANSI 301-2019
     hrs_per_day = 10.5 # From ANSI 301-2019
@@ -778,27 +778,22 @@ class HVAC
       runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and monthly multipliers provided; the latter will be ignored.") if !ceiling_fan.monthly_multipliers.nil?
     end
 
-    sum_cfa = 0.0
-    spaces.each do |location, space|
-      next unless HPXML::conditioned_finished_locations.include? location
+    cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+    cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
 
-      # Add ceiling fan electricity usage
-      floor_area = UnitConversions.convert(spaces[location].floorArea, 'm^2', 'ft^2')
-      sum_cfa += floor_area
+    # Add ceiling fan electricity usage
+    cond_spaces.each do |space|
       equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
       equip_def.setName(obj_name)
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(equip_def.name.to_s)
       equip.setSpace(space)
-      equip_def.setDesignLevel(ceiling_fan_design_level * floor_area / cfa)
+      equip_def.setDesignLevel(ceiling_fan_design_level * space.floorArea / cond_floor_area)
       equip_def.setFractionRadiant(0.558)
       equip_def.setFractionLatent(0)
       equip_def.setFractionLost(0)
       equip.setEndUseSubcategory(obj_name)
       equip.setSchedule(ceiling_fan_sch)
-    end
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'Ceiling fans not applied to all conditioned floor area. Aborting...'
     end
   end
 

@@ -479,7 +479,7 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
-  def self.apply_occupants(model, runner, hpxml, num_occ, cfa, spaces, schedules_file)
+  def self.apply_occupants(model, runner, hpxml, num_occ, spaces, schedules_file)
     occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
@@ -514,19 +514,17 @@ class Geometry
     activity_sch.setValue(activity_per_person)
     activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
 
-    sum_cfa = 0.0
-    spaces.each do |location, space|
-      next unless HPXML::conditioned_finished_locations.include? location
+    cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+    cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
 
-      # Add people heat gain
-      floor_area = UnitConversions.convert(spaces[location].floorArea, 'm^2', 'ft^2')
-      sum_cfa += floor_area
+    # Add people heat gain
+    cond_spaces.each do |space|
       occ_def = OpenStudio::Model::PeopleDefinition.new(model)
       occ = OpenStudio::Model::People.new(occ_def)
       occ.setName(Constants.ObjectNameOccupants)
       occ.setSpace(space)
       occ_def.setName(Constants.ObjectNameOccupants)
-      occ_def.setNumberofPeople(num_occ * floor_area / cfa)
+      occ_def.setNumberofPeople(num_occ * space.floorArea / cond_floor_area)
       occ_def.setFractionRadiant(occ_rad)
       occ_def.setSensibleHeatFraction(occ_sens)
       occ_def.setMeanRadiantTemperatureCalculationType('ZoneAveraged')
@@ -534,9 +532,6 @@ class Geometry
       occ_def.setEnableASHRAE55ComfortWarnings(false)
       occ.setActivityLevelSchedule(activity_sch)
       occ.setNumberofPeopleSchedule(people_sch)
-    end
-    if (sum_cfa - cfa).abs > 1.0
-      fail 'People not applied to all conditioned floor area. Aborting...'
     end
   end
 

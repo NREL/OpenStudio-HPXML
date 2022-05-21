@@ -59,27 +59,22 @@ class Lighting
         runner.registerWarning("Both '#{SchedulesFile::ColumnLightingInterior}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.interior_monthly_multipliers.nil?
       end
 
-      sum_cfa = 0.0
-      spaces.each do |location, space|
-        next unless HPXML::conditioned_finished_locations.include? location
+      cond_spaces = spaces.select { |k, s| HPXML::conditioned_finished_locations.include?(k) && s.floorArea > 0 }.values
+      cond_floor_area = cond_spaces.map { |s| s.floorArea }.sum
 
-        # Add lighting
-        floor_area = UnitConversions.convert(spaces[location].floorArea, 'm^2', 'ft^2')
-        sum_cfa += floor_area
+      # Add lighting
+      cond_spaces.each do |space|
         ltg_def = OpenStudio::Model::LightsDefinition.new(model)
         ltg = OpenStudio::Model::Lights.new(ltg_def)
         ltg.setName("#{Constants.ObjectNameInteriorLighting} #{space.name}")
-        ltg.setSpace(spaces[location])
+        ltg.setSpace(space)
         ltg.setEndUseSubcategory(Constants.ObjectNameInteriorLighting)
         ltg_def.setName(Constants.ObjectNameInteriorLighting)
-        ltg_def.setLightingLevel(design_level * floor_area / cfa)
+        ltg_def.setLightingLevel(design_level * space.floorArea / cond_floor_area)
         ltg_def.setFractionRadiant(0.6)
         ltg_def.setFractionVisible(0.2)
         ltg_def.setReturnAirFraction(0.0)
         ltg.setSchedule(interior_sch)
-      end
-      if (sum_cfa - cfa).abs > 1.0
-        fail 'Lighting not applied to all conditioned floor area. Aborting...'
       end
     end
 
