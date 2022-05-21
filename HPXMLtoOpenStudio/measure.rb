@@ -2420,24 +2420,27 @@ class OSModel
   end
 
   def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    if spaces[exterior_adjacent_to].nil?
-      # Create E+ other side coefficient object
-      otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_object.setName(exterior_adjacent_to)
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
-      # Schedule of space temperature, can be shared with water heater/ducts
-      sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
-      otherside_object.setConstantTemperatureSchedule(sch)
-      surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
-      spaces[exterior_adjacent_to] = otherside_object
-    else
-      surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
+    otherside_coeffs = nil
+    model.getSurfacePropertyOtherSideCoefficientss.each do |c|
+      next unless c.name.to_s == exterior_adjacent_to
+
+      otherside_coeffs = c
     end
+    if otherside_coeffs.nil?
+      # Create E+ other side coefficient object
+      otherside_coeffs = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
+      otherside_coeffs.setName(exterior_adjacent_to)
+      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      # Schedule of space temperature, can be shared with water heater/ducts
+      sch = get_space_temperature_schedule(model, exterior_adjacent_to)
+      otherside_coeffs.setConstantTemperatureSchedule(sch)
+    end
+    surface.setSurfacePropertyOtherSideCoefficients(otherside_coeffs)
     surface.setSunExposure('NoSun')
     surface.setWindExposure('NoWind')
   end
 
-  def self.get_space_temperature_schedule(model, location, spaces)
+  def self.get_space_temperature_schedule(model, location)
     # Create outside boundary schedules to be actuated by EMS,
     # can be shared by any surface, duct adjacent to / located in those spaces
 
@@ -2536,7 +2539,7 @@ class OSModel
         HPXML::LocationExteriorWall,
         HPXML::LocationUnderSlab].include? location
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
-      sch = get_space_temperature_schedule(model, location, spaces)
+      sch = get_space_temperature_schedule(model, location)
     else
       space = get_space_from_location(location, spaces)
     end
