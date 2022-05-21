@@ -234,11 +234,11 @@ class OSModel
     add_frame_floors(runner, model, spaces)
     add_foundation_walls_slabs(runner, model, spaces)
     add_shading_schedule(model, weather)
-    add_windows(runner, model, spaces)
-    add_doors(runner, model, spaces)
-    add_skylights(runner, model, spaces)
-    add_conditioned_floor_area(runner, model, spaces)
-    add_thermal_mass(runner, model, spaces)
+    add_windows(model, spaces)
+    add_doors(model, spaces)
+    add_skylights(model, spaces)
+    add_conditioned_floor_area(model, spaces)
+    add_thermal_mass(model, spaces)
     Geometry.set_zone_volumes(spaces, @hpxml, @apply_ashrae140_assumptions)
     Geometry.explode_surfaces(model, @hpxml, @walls_top)
     add_num_occupants(model, runner, spaces)
@@ -268,7 +268,7 @@ class OSModel
 
     # Other
 
-    add_airflow(runner, model, weather, spaces, airloop_map)
+    add_airflow(model, weather, spaces, airloop_map)
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(model, spaces)
@@ -452,7 +452,7 @@ class OSModel
         ]
         match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-        Constructions.apply_closed_cavity_roof(runner, model, surfaces, "#{roof.id} construction",
+        Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
                                                cavity_r, install_grade,
                                                constr_set.stud.thick_in,
                                                true, constr_set.framing_factor,
@@ -475,7 +475,7 @@ class OSModel
         framing_factor = 0
         framing_thick_in = 0
 
-        Constructions.apply_open_cavity_roof(runner, model, surfaces, "#{roof.id} construction",
+        Constructions.apply_open_cavity_roof(model, surfaces, "#{roof.id} construction",
                                              cavity_r, install_grade, cavity_ins_thick_in,
                                              framing_factor, framing_thick_in,
                                              constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
@@ -617,7 +617,7 @@ class OSModel
       match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
       install_grade = 1
 
-      Constructions.apply_rim_joist(runner, model, surfaces, "#{rim_joist.id} construction",
+      Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction",
                                     cavity_r, install_grade, constr_set.framing_factor,
                                     constr_set.mat_int_finish, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.mat_ext_finish,
@@ -722,14 +722,14 @@ class OSModel
       install_grade = 1
       if frame_floor.is_ceiling
 
-        Constructions.apply_ceiling(runner, model, [surface], "#{frame_floor.id} construction",
+        Constructions.apply_ceiling(model, [surface], "#{frame_floor.id} construction",
                                     cavity_r, install_grade,
                                     constr_set.rigid_r, constr_set.framing_factor,
                                     constr_set.stud.thick_in, constr_set.mat_int_finish,
                                     inside_film, outside_film)
 
       else # Floor
-        Constructions.apply_floor(runner, model, [surface], "#{frame_floor.id} construction",
+        Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
                                   cavity_r, install_grade,
                                   constr_set.framing_factor, constr_set.stud.thick_in,
                                   constr_set.osb_thick_in, constr_set.rigid_r,
@@ -819,7 +819,7 @@ class OSModel
         else
           z_origin = -1 * slab.depth_below_grade
         end
-        kiva_foundation = add_foundation_slab(runner, model, spaces, slab, slab_exp_perim,
+        kiva_foundation = add_foundation_slab(model, spaces, slab, slab_exp_perim,
                                               slab_area, z_origin, kiva_foundation)
       end
 
@@ -829,7 +829,7 @@ class OSModel
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        kiva_foundation = add_foundation_slab(runner, model, spaces, slab, no_wall_slab_exp_perim[slab],
+        kiva_foundation = add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
                                               slab_area, z_origin, nil)
       end
 
@@ -960,7 +960,7 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
-    Constructions.apply_foundation_wall(runner, model, [surface], "#{foundation_wall.id} construction",
+    Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
                                         ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
 
@@ -971,7 +971,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(runner, model, spaces, slab, slab_exp_perim,
+  def self.add_foundation_slab(model, spaces, slab, slab_exp_perim,
                                slab_area, z_origin, kiva_foundation)
 
     slab_tot_perim = slab_exp_perim
@@ -1026,7 +1026,7 @@ class OSModel
                                          slab.carpet_r_value)
     end
 
-    Constructions.apply_foundation_slab(runner, model, surface, "#{slab.id} construction",
+    Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         slab_exp_perim, mat_carpet, kiva_foundation)
@@ -1034,7 +1034,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_conditioned_floor_area(runner, model, spaces)
+  def self.add_conditioned_floor_area(model, spaces)
     # Check if we need to add floors between conditioned spaces (e.g., between first
     # and second story or conditioned basement ceiling).
     # This ensures that the E+ reported Conditioned Floor Area is correct.
@@ -1090,25 +1090,25 @@ class OSModel
     ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     # Apply Construction
-    apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
+    apply_adiabatic_construction(model, [floor_surface, ceiling_surface], 'floor')
   end
 
-  def self.add_thermal_mass(runner, model, spaces)
+  def self.add_thermal_mass(model, spaces)
     cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
     basement_frac_of_cfa = cfa_basement / @cfa
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
     else
       mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
       partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
 
-      Constructions.apply_furniture(runner, model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
+      Constructions.apply_furniture(model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
                                     basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
     end
   end
@@ -1124,7 +1124,7 @@ class OSModel
     @clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
   end
 
-  def self.add_windows(runner, model, spaces)
+  def self.add_windows(model, spaces)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
     # so as to prevent potentially modeling multiple identical windows in E+,
@@ -1184,7 +1184,7 @@ class OSModel
         end
 
         # Apply construction
-        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', ufactor, shgc)
+        Constructions.apply_window(model, sub_surface, 'WindowConstruction', ufactor, shgc)
 
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
@@ -1219,14 +1219,14 @@ class OSModel
         # Apply construction
         inside_film = Material.AirFilmVertical
         outside_film = Material.AirFilmVertical
-        Constructions.apply_door(runner, model, [sub_surface], 'Window', ufactor, inside_film, outside_film)
+        Constructions.apply_door(model, [sub_surface], 'Window', ufactor, inside_film, outside_film)
       end
     end
 
-    apply_adiabatic_construction(runner, model, surfaces, 'wall')
+    apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def self.add_skylights(runner, model, spaces)
+  def self.add_skylights(model, spaces)
     surfaces = []
 
     shading_group = nil
@@ -1262,7 +1262,7 @@ class OSModel
       sub_surface.setSubSurfaceType('Skylight')
 
       # Apply construction
-      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction', ufactor, shgc)
+      Constructions.apply_skylight(model, sub_surface, 'SkylightConstruction', ufactor, shgc)
 
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
@@ -1270,10 +1270,10 @@ class OSModel
                                                                   shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @default_cooling_months)
     end
 
-    apply_adiabatic_construction(runner, model, surfaces, 'roof')
+    apply_adiabatic_construction(model, surfaces, 'roof')
   end
 
-  def self.add_doors(runner, model, spaces)
+  def self.add_doors(model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
       door_height = 6.67 # ft
@@ -1309,13 +1309,13 @@ class OSModel
       else
         outside_film = Material.AirFilmVertical
       end
-      Constructions.apply_door(runner, model, [sub_surface], 'Door', ufactor, inside_film, outside_film)
+      Constructions.apply_door(model, [sub_surface], 'Door', ufactor, inside_film, outside_film)
     end
 
-    apply_adiabatic_construction(runner, model, surfaces, 'wall')
+    apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def self.apply_adiabatic_construction(runner, model, surfaces, type)
+  def self.apply_adiabatic_construction(model, surfaces, type)
     # Arbitrary construction for heat capacitance.
     # Only applies to surfaces where outside boundary conditioned is
     # adiabatic or surface net area is near zero.
@@ -1324,15 +1324,15 @@ class OSModel
     if type == 'wall'
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
-      Constructions.apply_wood_stud_wall(runner, model, surfaces, 'AdiabaticWallConstruction',
+      Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
                                          0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
                                          Material.AirFilmVertical, Material.AirFilmVertical)
     elsif type == 'floor'
-      Constructions.apply_floor(runner, model, surfaces, 'AdiabaticFloorConstruction',
+      Constructions.apply_floor(model, surfaces, 'AdiabaticFloorConstruction',
                                 0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare,
                                 Material.AirFilmFloorReduced, Material.AirFilmFloorReduced)
     elsif type == 'roof'
-      Constructions.apply_open_cavity_roof(runner, model, surfaces, 'AdiabaticRoofConstruction',
+      Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                                            Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles),
                                            false, Material.AirFilmOutside,
@@ -1720,7 +1720,7 @@ class OSModel
     end
   end
 
-  def self.add_airflow(runner, model, weather, spaces, airloop_map)
+  def self.add_airflow(model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -1751,7 +1751,7 @@ class OSModel
       end
     end
 
-    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
+    Airflow.apply(model, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
   end

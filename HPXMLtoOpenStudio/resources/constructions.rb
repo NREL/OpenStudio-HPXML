@@ -3,7 +3,7 @@
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
-  def self.apply_wood_stud_wall(runner, model, surfaces, constr_name,
+  def self.apply_wood_stud_wall(model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, mat_int_finish, osb_thick_in,
                                 rigid_r, mat_ext_finish, inside_film, outside_film,
@@ -65,7 +65,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_double_stud_wall(runner, model, surfaces, constr_name,
+  def self.apply_double_stud_wall(model, surfaces, constr_name,
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
                                   mat_int_finish, osb_thick_in, rigid_r,
@@ -138,7 +138,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_cmu_wall(runner, model, surfaces, constr_name,
+  def self.apply_cmu_wall(model, surfaces, constr_name,
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
                           mat_int_finish, osb_thick_in, rigid_r,
@@ -209,7 +209,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_icf_wall(runner, model, surfaces, constr_name,
+  def self.apply_icf_wall(model, surfaces, constr_name,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
                           mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film,
@@ -262,7 +262,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_sip_wall(runner, model, surfaces, constr_name, sip_r,
+  def self.apply_sip_wall(model, surfaces, constr_name, sip_r,
                           sip_thick_in, framing_factor, sheathing_thick_in,
                           mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film,
@@ -322,7 +322,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_steel_stud_wall(runner, model, surfaces, constr_name,
+  def self.apply_steel_stud_wall(model, surfaces, constr_name,
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
                                  mat_int_finish, osb_thick_in, rigid_r,
@@ -385,7 +385,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_generic_layered_wall(runner, model, surfaces, constr_name,
+  def self.apply_generic_layered_wall(model, surfaces, constr_name,
                                       thick_ins, conds, denss, specheats,
                                       mat_int_finish, osb_thick_in, rigid_r,
                                       mat_ext_finish, inside_film, outside_film,
@@ -455,7 +455,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_rim_joist(runner, model, surfaces, constr_name,
+  def self.apply_rim_joist(model, surfaces, constr_name,
                            cavity_r, install_grade, framing_factor,
                            mat_int_finish, osb_thick_in,
                            rigid_r, mat_ext_finish, inside_film,
@@ -515,7 +515,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_open_cavity_roof(runner, model, surfaces, constr_name,
+  def self.apply_open_cavity_roof(model, surfaces, constr_name,
                                   cavity_r, install_grade, cavity_ins_thick_in,
                                   framing_factor, framing_thick_in,
                                   osb_thick_in, rigid_r,
@@ -588,7 +588,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
+  def self.apply_closed_cavity_roof(model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, mat_int_finish,
                                     osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
@@ -658,7 +658,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_ceiling(runner, model, surfaces, constr_name,
+  def self.apply_ceiling(model, surfaces, constr_name,
                          cavity_r, install_grade, addtl_r,
                          framing_factor, joist_height_in,
                          mat_int_finish, inside_film, outside_film)
@@ -699,13 +699,13 @@ class Constructions
     end
     constr.add_layer(inside_film)
 
-    constr.set_interior_material_properties(debug: true)
+    constr.set_interior_material_properties()
 
     # Create and assign construction to ceiling surfaces
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_floor(runner, model, surfaces, constr_name,
+  def self.apply_floor(model, surfaces, constr_name,
                        cavity_r, install_grade,
                        framing_factor, joist_height_in,
                        plywood_thick_in, rigid_r, mat_floor_covering,
@@ -755,7 +755,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_foundation_wall(runner, model, surfaces, constr_name,
+  def self.apply_foundation_wall(model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
                                  mat_wall, height_above_grade)
@@ -782,7 +782,7 @@ class Constructions
     end
   end
 
-  def self.apply_foundation_slab(runner, model, surface, constr_name,
+  def self.apply_foundation_slab(model, surface, constr_name,
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
@@ -844,7 +844,7 @@ class Constructions
     surface.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', UnitConversions.convert(exposed_perimeter, 'ft', 'm'))
   end
 
-  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor, inside_film, outside_film)
+  def self.apply_door(model, subsurfaces, constr_name, ufactor, inside_film, outside_film)
     return if subsurfaces.empty?
 
     # Define materials
@@ -863,15 +863,15 @@ class Constructions
     constr.create_and_assign_constructions(subsurfaces, model)
   end
 
-  def self.apply_window(runner, model, subsurface, constr_name, ufactor, shgc)
-    apply_window_skylight(runner, model, 'Window', subsurface, constr_name, ufactor, shgc)
+  def self.apply_window(model, subsurface, constr_name, ufactor, shgc)
+    apply_window_skylight(model, 'Window', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_skylight(runner, model, subsurface, constr_name, ufactor, shgc)
-    apply_window_skylight(runner, model, 'Skylight', subsurface, constr_name, ufactor, shgc)
+  def self.apply_skylight(model, subsurface, constr_name, ufactor, shgc)
+    apply_window_skylight(model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area,
+  def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area,
                                  basement_frac_of_cfa, living_space)
 
     imdefs = []
@@ -896,14 +896,14 @@ class Constructions
       imdefs << imdef
     end
 
-    apply_wood_stud_wall(runner, model, imdefs, constr_name,
+    apply_wood_stud_wall(model, imdefs, constr_name,
                          0, 1, 3.5, false, 0.16,
                          mat_int_finish, 0, 0, mat_int_finish,
                          Material.AirFilmVertical,
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(runner, model, furniture_mass, cfa, ubfa, gfa,
+  def self.apply_furniture(model, furniture_mass, cfa, ubfa, gfa,
                            basement_frac_of_cfa, living_space)
 
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
@@ -1326,7 +1326,7 @@ class Constructions
     return mat
   end
 
-  def self.apply_window_skylight(runner, model, type, subsurface, constr_name, ufactor, shgc)
+  def self.apply_window_skylight(model, type, subsurface, constr_name, ufactor, shgc)
     # Define materials
     if type == 'Skylight'
       # As of 2004, NFRC skylights are rated at a 20-degree slope (instead of vertical), but
@@ -1465,7 +1465,7 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_wood_stud_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_wood_stud_wall(model, surfaces, "#{wall_id} construction",
                            cavity_r, install_grade, constr_set.stud.thick_in,
                            cavity_filled, constr_set.framing_factor,
                            constr_set.mat_int_finish, constr_set.osb_thick_in,
@@ -1486,7 +1486,7 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_steel_stud_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_steel_stud_wall(model, surfaces, "#{wall_id} construction",
                             cavity_r, install_grade, constr_set.cavity_thick_in,
                             cavity_filled, constr_set.framing_factor,
                             constr_set.corr_factor, constr_set.mat_int_finish,
@@ -1503,7 +1503,7 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_double_stud_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_double_stud_wall(model, surfaces, "#{wall_id} construction",
                              cavity_r, install_grade, constr_set.stud.thick_in,
                              constr_set.stud.thick_in, constr_set.framing_factor,
                              constr_set.framing_spacing, is_staggered,
@@ -1523,7 +1523,7 @@ class Constructions
       ]
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_cmu_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_cmu_wall(model, surfaces, "#{wall_id} construction",
                      constr_set.thick_in, constr_set.cond_in, density,
                      constr_set.framing_factor, furring_r,
                      furring_cavity_depth_in, furring_spacing,
@@ -1540,7 +1540,7 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_sip_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_sip_wall(model, surfaces, "#{wall_id} construction",
                      cavity_r, constr_set.thick_in, constr_set.framing_factor,
                      constr_set.sheath_thick_in, constr_set.mat_int_finish,
                      constr_set.osb_thick_in, constr_set.rigid_r,
@@ -1553,7 +1553,7 @@ class Constructions
       ]
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_icf_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_icf_wall(model, surfaces, "#{wall_id} construction",
                      icf_r, constr_set.ins_thick_in,
                      constr_set.concrete_thick_in, constr_set.framing_factor,
                      constr_set.mat_int_finish, constr_set.osb_thick_in,
@@ -1596,7 +1596,7 @@ class Constructions
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      apply_generic_layered_wall(runner, model, surfaces, "#{wall_id} construction",
+      apply_generic_layered_wall(model, surfaces, "#{wall_id} construction",
                                  thick_ins, conds, denss, specheats,
                                  constr_set.mat_int_finish, constr_set.osb_thick_in,
                                  constr_set.rigid_r, constr_set.mat_ext_finish,
@@ -1944,7 +1944,7 @@ class Construction
     end
   end
 
-  def set_interior_material_properties(solar_absorptance = 0.6, emittance = 0.9, debug: false)
+  def set_interior_material_properties(solar_absorptance = 0.6, emittance = 0.9)
     if @layers_materials.size > 3 # Only apply if there is a separate interior material
       @layers_materials[-2].each do |interior_material|
         interior_material.sAbs = solar_absorptance

@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
+                 *)
+                 ^
+/mnt/c/git/openstudio-hpxml/BuildResidentialScheduleFile/resources/schedules.rb:1044: syntax error, unexpected `end', expecting end-of-input</error>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>2c42f222-d6a3-4265-9be1-b25dd9c1a97a</version_id>
-  <version_modified>20220521T194245Z</version_modified>
+  <version_id>518a5319-ef4c-4501-b998-696bb8b161d6</version_id>
+  <version_modified>20220521T195635Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -925,7 +928,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AC7E1DEF</checksum>
+      <checksum>62C073B2</checksum>
     </file>
     <file>
       <version>
@@ -936,7 +939,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9B9E1ED1</checksum>
+      <checksum>3C7B01AF</checksum>
     </file>
   </files>
 </measure>
