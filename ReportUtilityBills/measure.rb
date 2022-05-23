@@ -183,10 +183,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  def timeseries_frequency
+  def timeseries_frequency(args)
     # Use monthly for fossil fuels and simple electric rates
     # Use hourly for detailed electric rates (URDB tariff or real time pricing)
-    return 'monthly'
+    if args[:electricity_bill_type] == 'Simple'
+      return 'monthly'
+    elsif args[:electricity_bill_type] == 'Detailed'
+      return 'hourly'
+    end
   end
 
   def check_for_warnings(args, pv_systems)
@@ -267,7 +271,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Fuel outputs
     fuels.each do |fuel_type, fuel|
       fuel.meters.each do |meter|
-        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency};").get
+        if fuel_type == FT::Elec
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency(args)};").get
+        else
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
+        end
       end
     end
 
@@ -327,11 +335,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Setup outputs
     fuels, utility_rates, utility_bills = setup_outputs()
 
-    # Get timestamps
-    @timestamps, _, _ = OutputMethods.get_timestamps(timeseries_frequency, @msgpackData, @hpxml)
-
     # Get outputs
-    get_outputs(fuels)
+    get_outputs(fuels, args)
 
     # Preprocess arguments
     preprocess_arguments(args)
@@ -523,7 +528,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
-          net_elec = CalculateUtilityBill.detailed_electric(fuels, rate, bill, net_elec)
+          net_elec = CalculateUtilityBill.detailed_electric(fuel.timeseries, rate, bill, net_elec)
         else
           net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end
@@ -603,13 +608,20 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return fuels, utility_rates, utility_bills
   end
 
-  def get_outputs(fuels)
+  def get_outputs(fuels, args)
     fuels.each do |(fuel_type, is_production), fuel|
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
       unit_conv /= 139.0 if fuel_type == FT::Oil
       unit_conv /= 91.6 if fuel_type == FT::Propane
 
-      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0)
+      if fuel_type == FT::Elec
+        timeseries_freq = timeseries_frequency(args)
+        timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
+      else
+        timeseries_freq = 'monthly'
+        timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
+      end
+      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
     end
   end
 
@@ -622,10 +634,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     }
   end
 
-  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder)
-    return [0.0] * @timestamps.size if meter_names.empty?
+  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timestamps, timeseries_freq)
+    return [0.0] * timestamps.size if meter_names.empty?
 
-    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_frequency]
+    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_freq]
     cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
     rows = @msgpackData['MeterData'][msgpack_timeseries_name]['Rows']
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }

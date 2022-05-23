@@ -94,8 +94,65 @@ class CalculateUtilityBill
     return net_elec
   end
 
-  def self.detailed_electric(fuels, rate, bill, net_elec)
-    # TODO
+  def self.get_schedule_value(schedule, month, hour_day)
+    return schedule[0][0]
+  end
+
+  def self.detailed_electric(fuel_time_series, rate, bill, net_elec)
+    num_energyrate_periods = rate.energyratestructure.size
+    has_periods = false
+    if num_energyrate_periods > 1
+      has_periods = true
+    end
+
+    num_energyrate_tiers = rate.energyratestructure[0].size
+    has_tiered = false
+    if num_energyrate_tiers > 1
+      has_tiered = true
+    end
+
+    month = 0
+    if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
+      if !rate.energyratestructure.empty?
+
+      end
+
+      (0...fuel_time_series.size).to_a.each do |hour|
+        hour_day = 0
+
+        if (num_energyrate_periods != 0) || (num_energyrate_tiers != 0)
+          sched_rate = get_schedule_value(rate.energyweekdayschedule, month, hour_day)
+          sched_rate = get_schedule_value(rate.energyweekendschedule, month, hour_day)
+        end
+
+        if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1)
+          if has_tiered
+            new_tier = 0
+
+            if !has_periods # tiered only
+
+            else # tiered and TOU
+
+            end
+
+          else # TOU only
+
+          end
+        else
+          elec_rate = rate.flatratebuy
+          if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
+            elec_rate += rate.energyratestructure[0][0]['rate']
+            elec_cost << elec_hour * elec_rate
+            monthly_energy_charge[month] += elec_cost[hour]
+          end
+        end
+
+        # if hour == end_of_month[month]
+        # month += 1
+        # end
+      end
+    end
+
     return net_elec
   end
 
@@ -180,7 +237,7 @@ def process_usurdb(filepath)
         end
 
         structures[k][period_idx][tier_idx][tier_name] = v
-      else
+      else # not eiaid, schedule, or structure
         begin
           rate[k] = Float(v)
         rescue # string
