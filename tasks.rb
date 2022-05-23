@@ -4864,25 +4864,15 @@ if ARGV[0].to_sym == :update_measures
 
   # Apply rubocop
   cops = ['Layout',
-          'Lint/AmbiguousAssignment',
-          'Lint/AmbiguousBlockAssociation',
-          'Lint/AssignmentInCondition',
-          'Lint/BooleanSymbol',
-          'Lint/CircularArgumentReference',
           'Lint/DeprecatedClassMethods',
           'Lint/DuplicateElsifCondition',
           'Lint/DuplicateHashKey',
           'Lint/DuplicateMethods',
-          'Lint/ElseLayout',
           'Lint/InterpolationCheck',
           'Lint/LiteralAsCondition',
-          'Lint/MultipleComparison',
           'Lint/RedundantStringCoercion',
-          'Lint/RequireParentheses',
-          'Lint/ReturnInVoidContext',
           'Lint/SelfAssignment',
           'Lint/UnderscorePrefixedVariableName',
-          'Lint/UnreachableCode',
           'Lint/UnusedBlockArgument',
           'Lint/UnusedMethodArgument',
           'Lint/UselessAssignment',
@@ -4909,7 +4899,7 @@ if ARGV[0].to_sym == :update_measures
   require 'oga'
   require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
   Dir['**/measure.xml'].each do |measure_xml|
-    for n_attempt in 1..5 # For some reason CLI randomly generates errors, so try multiple times; FIXME: Fix CLI so this doesn't happen
+    for n_attempt in 1..5 # For some reason CLI randomly generates errors, so try multiple times
       measure_dir = File.dirname(measure_xml)
       command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
       system(command, [:out, :err] => File::NULL)
@@ -4927,7 +4917,21 @@ if ARGV[0].to_sym == :update_measures
           fail "#{measure_xml}: #{err_val}" # Error generated all 5 times, fail
         else
           # Remove error from measure XML, try again
-          new_lines = File.readlines(measure_xml).select { |l| !l.include?('<error>') }
+          orig_lines = File.readlines(measure_xml)
+          new_lines = []
+          inside_error = false
+          orig_lines.each do |l|
+            if l.include? '<error>'
+              inside_error = true
+            end
+            if l.include? '</error>'
+              inside_error = false
+              next
+            end
+            next if inside_error
+
+            new_lines << l
+          end
           File.open(measure_xml, 'w') do |file|
             file.puts new_lines
           end

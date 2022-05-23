@@ -1,19 +1,10 @@
 <?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
-...                              *)
-...                              ^
-/mnt/c/git/openstudio-hpxml/BuildResidentialHPXML/resources/geometry.rb:226: syntax error, unexpected *
-...                              *)
-...                              ^
-/mnt/c/git/openstudio-hpxml/BuildResidentialHPXML/resources/geometry.rb:837: syntax error, unexpected `end', expecting end-of-input
-  end
-  ^~~
-</error>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>30c668b7-cd18-41d1-8090-617ae45f54b1</version_id>
-  <version_modified>20220521T195633Z</version_modified>
+  <version_id>37c7d319-92c1-4adf-aae5-3c229a585470</version_id>
+  <version_modified>20220523T144839Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -7489,7 +7480,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>077DAD23</checksum>
+      <checksum>232F3921</checksum>
     </file>
   </files>
 </measure>
