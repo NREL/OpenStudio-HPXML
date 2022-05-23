@@ -1148,7 +1148,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     u =  0.0743
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
     ther_eff = 1.0
-    cop = 2.820
     tank_height = 1.2192
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     loc = water_heating_system.location
@@ -1166,9 +1165,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
     assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
-
-    # Check heat pump cooling coil cop
-    assert_in_epsilon(cop, coil.ratedCOP, 0.001)
   end
 
   def _test_measure(args_hash)

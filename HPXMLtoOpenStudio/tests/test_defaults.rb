@@ -559,7 +559,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.walls[1].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, nil, 180)
+    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, nil, nil)
   end
 
   def test_foundation_walls
@@ -3318,7 +3318,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_nil(wall.interior_finish_thickness)
     end
-    assert_equal(azimuth, wall.azimuth)
+    if not azimuth.nil?
+      assert_equal(azimuth, wall.azimuth)
+    else
+      assert_nil(wall.azimuth)
+    end
   end
 
   def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness, azimuth, area,
