@@ -496,6 +496,27 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
   end
 
+  def test_non_integer_number_of_occupants
+    ['smooth', 'stochastic'].each do |schedule_mode|
+      num_occupants = 3.2
+
+      hpxml = _create_hpxml('base.xml')
+      hpxml.building_occupancy.number_of_residents = num_occupants
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+      @args_hash['schedules_type'] = schedule_mode
+      @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, "occupancy-#{schedule_mode}.csv"))
+      model, hpxml, result = _test_measure()
+
+      info_msgs = result.info.map { |x| x.logMessage }
+      if schedule_mode == 'smooth'
+        assert(info_msgs.any? { |info_msg| info_msg.include?("GeometryNumOccupants=#{num_occupants}") })
+      else
+        assert(info_msgs.any? { |info_msg| info_msg.include?("GeometryNumOccupants=#{Float(Integer(num_occupants))}") })
+      end
+    end
+  end
+
   def _test_measure()
     # create an instance of the measure
     measure = BuildResidentialScheduleFile.new
