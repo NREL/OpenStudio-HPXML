@@ -1680,8 +1680,6 @@ class HVACSizing
     return if (hvac.ChargeDefectRatio.to_f.abs < 0.001) && (hvac.AirflowDefectRatioCooling.to_f.abs < 0.001) && (hvac.AirflowDefectRatioHeating.to_f.abs < 0.001)
 
     tin_cool = UnitConversions.convert(@cool_setpoint, 'F', 'C')
-    # tin_heat = UnitConversions.convert(@heat_setpoint, 'F', 'C')
-
     tout_cool = UnitConversions.convert(weather.design.CoolingDrybulb, 'F', 'C')
     tout_heat = UnitConversions.convert(weather.design.HeatingDrybulb, 'F', 'C')
 
