@@ -41,7 +41,7 @@ class HPXMLTest < MiniTest::Test
     all_results = {}
     all_sizing_results = {}
     all_bill_results = {}
-    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+    Parallel.map(xmls, in_threads: 1) do |xml|
       _test_schema_validation(xml)
       xml_name = File.basename(xml)
       all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
