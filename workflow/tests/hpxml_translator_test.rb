@@ -41,7 +41,7 @@ class HPXMLTest < MiniTest::Test
     all_results = {}
     all_sizing_results = {}
     all_bill_results = {}
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       _test_schema_validation(xml)
       xml_name = File.basename(xml)
       all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
@@ -471,8 +471,8 @@ class HPXMLTest < MiniTest::Test
 
     # Check discrepancy between total load and sum of component loads
     if not xml.include? 'ASHRAE_Standard_140'
-      sum_component_htg_loads = results.select { |k, _v| k.start_with? 'Component Load: Heating:' }.map { |_k, v| v }.sum(0.0)
-      sum_component_clg_loads = results.select { |k, _v| k.start_with? 'Component Load: Cooling:' }.map { |_k, v| v }.sum(0.0)
+      sum_component_htg_loads = results.select { |k, _v| k.start_with? 'Component Load: Heating:' }.values.sum(0.0)
+      sum_component_clg_loads = results.select { |k, _v| k.start_with? 'Component Load: Cooling:' }.values.sum(0.0)
       total_htg_load = results['Load: Heating: Delivered (MBtu)']
       total_clg_load = results['Load: Cooling: Delivered (MBtu)']
       abs_htg_load_delta = (total_htg_load - sum_component_htg_loads).abs
@@ -494,17 +494,17 @@ class HPXMLTest < MiniTest::Test
     return if xml.include? 'ASHRAE_Standard_140'
 
     # Heating design loads
-    hpxml.hvac_plant.class::HDL_ATTRS.each do |attr, _element_name|
+    hpxml.hvac_plant.class::HDL_ATTRS.keys.each do |attr|
       results["heating_load_#{attr.to_s.gsub('hdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
     end
 
     # Cooling sensible design loads
-    hpxml.hvac_plant.class::CDL_SENS_ATTRS.each do |attr, _element_name|
+    hpxml.hvac_plant.class::CDL_SENS_ATTRS.keys.each do |attr|
       results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
     end
 
     # Cooling latent design loads
-    hpxml.hvac_plant.class::CDL_LAT_ATTRS.each do |attr, _element_name|
+    hpxml.hvac_plant.class::CDL_LAT_ATTRS.keys.each do |attr|
       results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
     end
 
@@ -1207,10 +1207,10 @@ class HPXMLTest < MiniTest::Test
 
     # HVAC Load Fractions
     if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
-      htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |_k, v| v }.sum(0.0)
+      htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
       assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
-    clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |_k, v| v }.sum(0.0)
+    clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
     assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Mechanical Ventilation
@@ -1275,7 +1275,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Lighting
-    ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.map { |_k, v| v }.sum(0.0)
+    ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
     assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
 
     # Get fuels
@@ -1357,8 +1357,8 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Check unmet hours
-    unmet_hours_htg = results.select { |k, _v| k.include? 'Unmet Hours: Heating' }.map { |_k, v| v }.sum(0.0)
-    unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.map { |_k, v| v }.sum(0.0)
+    unmet_hours_htg = results.select { |k, _v| k.include? 'Unmet Hours: Heating' }.values.sum(0.0)
+    unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.values.sum(0.0)
     if hpxml_path.include? 'base-hvac-undersized.xml'
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
@@ -1386,7 +1386,7 @@ class HPXMLTest < MiniTest::Test
     require 'csv'
 
     output_keys = []
-    results.each do |_xml, xml_results|
+    results.values.each do |xml_results|
       xml_results.keys.each do |key|
         next if output_keys.include? key
 
@@ -1421,7 +1421,7 @@ class HPXMLTest < MiniTest::Test
     require 'csv'
 
     output_keys = nil
-    all_sizing_results.each do |_xml, xml_results|
+    all_sizing_results.values.each do |xml_results|
       output_keys = xml_results.keys
       break
     end
@@ -1445,7 +1445,7 @@ class HPXMLTest < MiniTest::Test
     require 'csv'
 
     output_keys = nil
-    all_bill_results.each do |_xml, xml_results|
+    all_bill_results.values.each do |xml_results|
       output_keys = xml_results.keys
       break
     end
