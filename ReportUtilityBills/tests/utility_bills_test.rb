@@ -185,6 +185,14 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
+  def test_detailed_calculations_sample_tiered_pv_none
+    skip
+  end
+
+  def test_detailed_calculations_sample_tou_pv_none
+    skip
+  end
+
   def test_detailed_calculations_sample_tiered_tou_pv_none
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
@@ -215,18 +223,17 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
-  def test_detailed_calculations_user_specified_pv_none
+  # TODO: test pv_1kW, pv_10kW, etc
+
+  def test_workflow_detailed_calculations
     # TODO: should use a large house so we can really test the tiers
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json'
-    fuels, utility_rates, utility_bills = @measure.setup_outputs()
-    _load_timeseries(fuels, '../tests/PV_None.csv')
-    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
-    assert(File.exist?(@measure_bills_csv))
-    actual_bills = _get_actual_bills(@measure_bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 66
-    _check_bills(@expected_bills, actual_bills)
+    _test_workflow()
+    assert(File.exist?(@workflow_bills_csv))
+    actual_bills = _get_actual_bills(@workflow_bills_csv)
+    assert_operator(actual_bills['Electricity: Total ($)'], :>, 0)
   end
 
   def test_workflow_wood_cord
@@ -335,9 +342,6 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_warning_user_specified_but_no_rates
-    skip
-    # if we don't put electricity_utility_rate_type in the osw then it doesn't get set below
-    # yet if we put it in the osw, we need to set it to a value. but then it can't be uninitialized...
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     expected_warnings = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
@@ -474,12 +478,21 @@ class ReportUtilityBillsTest < MiniTest::Test
         end
         step.setArgument(json_arg_name, json_arg_val)
       end
+      if json_step['measure_dir_name'] == 'ReportUtilityBills'
+        @args_hash.each do |arg_name, arg_val|
+          if !found_args.include?(arg_name)
+            step.setArgument(arg_name, arg_val)
+            found_args << arg_name
+          end
+        end
+      end
       steps.push(step)
     end
+
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(@template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    # assert_equal(@args_hash.size, found_args.size) # FIXME: what's the point of this?
+    assert_equal(@args_hash.size, found_args.size)
 
     # Run OSW
     command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}"

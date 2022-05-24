@@ -210,7 +210,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Require user-specified utility rate if 'Detailed' and 'User-Specified'
     if args[:electricity_bill_type].get == 'Detailed' && args[:electricity_utility_rate_type].is_initialized && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      warnings << 'Must specify a utility rate json/csv path when choosing User-Specified utility rate type.'
+      warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
     end
 
     # Require not DSE
