@@ -194,6 +194,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 66
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -408,6 +409,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     # Convert hourly data to monthly data
     num_days_in_month = Constants.NumDaysInMonths(2002) # Arbitrary non-leap year
     fuels.each do |(fuel_type, is_production), fuel|
+      next unless fuel_type != FT::Elec || @args_hash['electricity_bill_type'] != 'Detailed'
+
       ts_data = fuel.timeseries.dup
       fuel.timeseries = []
       start_day = 0
