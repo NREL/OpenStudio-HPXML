@@ -185,16 +185,18 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
-  def test_detailed_calculations_user_specified_pv_none
+  def test_detailed_calculations_sample_tiered_tou_pv_none
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
-    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_None.csv')
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
-    @expected_bills['Electricity: Fixed ($)'] = 66
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 333
+    @expected_bills['Electricity: Total ($)'] = 441
+    @expected_bills['Total ($)'] = 1230
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -206,6 +208,24 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 352
+    @expected_bills['Electricity: Total ($)'] = 460
+    @expected_bills['Total ($)'] = 1249
+    _check_bills(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_user_specified_pv_none
+    # TODO: should use a large house so we can really test the tiers
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 66
     _check_bills(@expected_bills, actual_bills)
   end
 

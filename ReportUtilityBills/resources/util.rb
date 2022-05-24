@@ -177,6 +177,46 @@ class CalculateUtilityBill
     return net_elec
   end
 
+  def self.real_time_pricing(header, fuel_time_series, is_production, rate, bill, net_elec)
+    year = header.sim_calendar_year
+    start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
+    today = start_day
+
+    hourly_fuel_cost = [0] * 8760
+    bill.monthly_energy_charge = [0] * 12
+
+    (0...fuel_time_series.size).to_a.each do |hour|
+      hour_day = hour % 24 # calculate hour of the day
+
+      month = today.month - 1
+
+      elec_rate = rate.realtimeprice[hour]
+
+      hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+      bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+
+      next unless hour_day == 23 # last hour of the day
+
+      if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
+        if is_production
+          # TODO
+        else
+          if not rate.fixedmonthlycharge.nil?
+            # If the run period doesn't span the entire month, prorate the fixed charges
+            prorate_fraction = calculate_monthly_prorate(header, month + 1)
+            bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
+          end
+
+          bill.annual_energy_charge += bill.monthly_energy_charge[month]
+          bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+        end
+      end
+
+      today += 1 # next day
+    end
+    return net_elec
+  end
+
   def self.calculate_monthly_prorate(header, month)
     begin_month = header.sim_begin_month
     begin_day = header.sim_begin_day

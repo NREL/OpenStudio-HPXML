@@ -528,9 +528,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       bill = utility_bills[fuel_type]
 
       if fuel_type == FT::Elec
-        if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
+        if args[:electricity_bill_type] == 'Detailed'
           # TODO: support realtimeprice in detailed_electric method?
-          net_elec = CalculateUtilityBill.detailed_electric(header, fuel.timeseries, is_production, rate, bill, net_elec)
+          if rate.realtimeprice.empty?
+            net_elec = CalculateUtilityBill.detailed_electric(header, fuel.timeseries, is_production, rate, bill, net_elec)
+          else
+            net_elec = CalculateUtilityBill.real_time_pricing(header, fuel.timeseries, is_production, rate, bill, net_elec)
+          end
         else
           net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end

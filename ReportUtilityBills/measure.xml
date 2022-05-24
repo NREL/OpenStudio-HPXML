@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>76306387-fb73-4427-96ce-55b6c81c014e</version_id>
-  <version_modified>20220524T191611Z</version_modified>
+  <version_id>2cb3086f-61b9-4dc8-892e-22460475e02f</version_id>
+  <version_modified>20220524T200923Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -348,13 +348,13 @@
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1A96BE1A</checksum>
+      <checksum>961F3872</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6763EEF5</checksum>
+      <checksum>069E2651</checksum>
     </file>
     <file>
       <version>
@@ -365,13 +365,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0C4009FA</checksum>
+      <checksum>3FDABA75</checksum>
     </file>
     <file>
       <filename>results_bills.csv</filename>
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
-      <checksum>FCC6923E</checksum>
+      <checksum>3E10EC85</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Tiered Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E7521706</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Tiered Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EC926978</checksum>
+    </file>
+    <file>
+      <filename>Data/CustomRates/Sample Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6BE68A8D</checksum>
     </file>
   </files>
 </measure>
