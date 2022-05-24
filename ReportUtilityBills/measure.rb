@@ -269,7 +269,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, _, _ = setup_outputs()
 
     # Fuel outputs
-    fuels.values.each do |fuel|
+    fuels.each.each do |(fuel_type, _is_production), fuel|
       fuel.meters.each do |meter|
         if fuel_type == FT::Elec
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency(args)};").get
@@ -624,7 +624,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         timeseries_freq = timeseries_frequency(args)
       end
-      timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
+      timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
       fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
     end
   end

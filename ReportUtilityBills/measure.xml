@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>5bbdd3b6-956b-44ab-ab88-2ad2f7e23a6b</version_id>
-  <version_modified>20220524T201522Z</version_modified>
+  <version_id>6e6d413b-7d6c-4134-89cb-4fce07bff86b</version_id>
+  <version_modified>20220524T212958Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -345,17 +345,6 @@
       <checksum>480A250F</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>5DE2B789</checksum>
-    </file>
-    <file>
       <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -384,6 +373,17 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>535D428A</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9E437931</checksum>
     </file>
   </files>
 </measure>
