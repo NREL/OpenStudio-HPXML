@@ -335,11 +335,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Setup outputs
     fuels, utility_rates, utility_bills = setup_outputs()
 
-    # Get outputs
-    get_outputs(fuels, args)
-
     # Preprocess arguments
     preprocess_arguments(args)
+
+    # Get outputs
+    get_outputs(fuels, args)
 
     # Get utility rates
     warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
@@ -614,13 +614,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       unit_conv /= 139.0 if fuel_type == FT::Oil
       unit_conv /= 91.6 if fuel_type == FT::Propane
 
+      timeseries_freq = 'monthly'
       if fuel_type == FT::Elec
         timeseries_freq = timeseries_frequency(args)
-        timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
-      else
-        timeseries_freq = 'monthly'
-        timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
       end
+      timestamps, _, _ = OutputMethods.get_timestamps(timeseries_freq, @msgpackData, @hpxml)
       fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
     end
   end
