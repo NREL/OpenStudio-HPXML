@@ -186,9 +186,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def timeseries_frequency(args)
     # Use monthly for fossil fuels and simple electric rates
     # Use hourly for detailed electric rates (URDB tariff or real time pricing)
-    if args[:electricity_bill_type] == 'Simple'
+    if args[:electricity_bill_type].get == 'Simple'
       return 'monthly'
-    elsif args[:electricity_bill_type] == 'Detailed'
+    elsif args[:electricity_bill_type].get == 'Detailed'
       return 'hourly'
     end
   end
@@ -269,7 +269,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels, _, _ = setup_outputs()
 
     # Fuel outputs
-    fuels.each.each do |(fuel_type, _is_production), fuel|
+    fuels.each do |(fuel_type, _is_production), fuel|
       fuel.meters.each do |meter|
         if fuel_type == FT::Elec
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency(args)};").get
@@ -335,11 +335,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Setup outputs
     fuels, utility_rates, utility_bills = setup_outputs()
 
-    # Preprocess arguments
-    preprocess_arguments(args)
-
     # Get outputs
     get_outputs(fuels, args)
+
+    # Preprocess arguments
+    preprocess_arguments(args)
 
     # Get utility rates
     warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, args, @hpxml.header.state_code, @hpxml.pv_systems, runner)
