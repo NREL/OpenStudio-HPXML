@@ -33,7 +33,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -85,7 +84,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -140,7 +138,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -193,7 +190,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -249,7 +245,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -302,7 +297,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -348,7 +342,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -400,7 +393,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2012') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -453,7 +445,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=10') })
@@ -506,7 +497,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
       @args_hash['schedules_type'] = schedule_mode
       @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, "occupancy-#{schedule_mode}.csv"))
-      model, hpxml, result = _test_measure()
+      _model, _hpxml, result = _test_measure()
 
       info_msgs = result.info.map { |x| x.logMessage }
       if schedule_mode == 'smooth'

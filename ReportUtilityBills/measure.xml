@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>2cb3086f-61b9-4dc8-892e-22460475e02f</version_id>
-  <version_modified>20220524T200923Z</version_modified>
+  <version_id>5bbdd3b6-956b-44ab-ab88-2ad2f7e23a6b</version_id>
+  <version_modified>20220524T201522Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -333,28 +333,16 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
-      <filetype>json</filetype>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1417452B</checksum>
-    </file>
-    <file>
-      <filename>rates/5a0b28045457a3ea2aca608e.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>535D428A</checksum>
+      <checksum>069E2651</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>961F3872</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>069E2651</checksum>
+      <checksum>480A250F</checksum>
     </file>
     <file>
       <version>
@@ -365,13 +353,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3FDABA75</checksum>
+      <checksum>5DE2B789</checksum>
     </file>
     <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3E10EC85</checksum>
+      <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1417452B</checksum>
     </file>
     <file>
       <filename>Data/CustomRates/Sample Tiered Rate.json</filename>
@@ -390,6 +378,12 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>6BE68A8D</checksum>
+    </file>
+    <file>
+      <filename>rates/5a0b28045457a3ea2aca608e.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>535D428A</checksum>
     </file>
   </files>
 </measure>

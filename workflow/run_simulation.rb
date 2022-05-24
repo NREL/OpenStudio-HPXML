@@ -121,12 +121,12 @@ OptionParser.new do |opts|
   end
 
   options[:skip_validation] = false
-  opts.on('-s', '--skip-validation', 'Skip Schema/Schematron validation for faster performance') do |t|
+  opts.on('-s', '--skip-validation', 'Skip Schema/Schematron validation for faster performance') do |_t|
     options[:skip_validation] = true
   end
 
   options[:add_comp_loads] = false
-  opts.on('--add-component-loads', 'Add heating/cooling component loads calculation') do |t|
+  opts.on('--add-component-loads', 'Add heating/cooling component loads calculation') do |_t|
     options[:add_comp_loads] = true
   end
 
@@ -145,7 +145,7 @@ OptionParser.new do |opts|
   end
 
   options[:add_utility_bills] = false
-  opts.on('--add-utility-bills', 'Add utility bill calculations (using default rates).') do |t|
+  opts.on('--add-utility-bills', 'Add utility bill calculations (using default rates).') do |_t|
     options[:add_utility_bills] = true
   end
 
@@ -159,12 +159,12 @@ OptionParser.new do |opts|
   end
 
   options[:version] = false
-  opts.on('-v', '--version', 'Reports the version') do |t|
+  opts.on('-v', '--version', 'Reports the version') do |_t|
     options[:version] = true
   end
 
   options[:debug] = false
-  opts.on('-d', '--debug') do |t|
+  opts.on('-d', '--debug') do |_t|
     options[:debug] = true
   end
 
