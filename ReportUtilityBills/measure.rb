@@ -450,6 +450,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
           else
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+            rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter) # TODO: is this correct?
             rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
 
             rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
@@ -528,7 +529,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if fuel_type == FT::Elec
         if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
-          net_elec = CalculateUtilityBill.detailed_electric(fuel.timeseries, rate, bill, net_elec)
+          # TODO: support realtimeprice in detailed_electric method?
+          net_elec = CalculateUtilityBill.detailed_electric(header, fuel.timeseries, is_production, rate, bill, net_elec)
         else
           net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end

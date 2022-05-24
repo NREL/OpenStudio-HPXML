@@ -58,7 +58,6 @@ class CalculateUtilityBill
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     sum_fuel_time_series = fuel_time_series.sum
     monthly_fuel_cost = [0] * 12
-    net_elec_cost = 0
     (0...fuel_time_series.size).to_a.each do |month|
       if is_production && fuel_type == FT::Elec && rate.feed_in_tariff_rate
         monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff_rate
@@ -88,71 +87,93 @@ class CalculateUtilityBill
         bill.annual_energy_charge += bill.monthly_energy_charge[month]
         bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
-
-      net_elec_cost = 0
     end
     return net_elec
   end
 
-  def self.get_schedule_value(schedule, month, hour_day)
-    return schedule[0][0]
-  end
-
-  def self.detailed_electric(fuel_time_series, rate, bill, net_elec)
+  def self.detailed_electric(header, fuel_time_series, is_production, rate, bill, net_elec)
     num_energyrate_periods = rate.energyratestructure.size
     has_periods = false
     if num_energyrate_periods > 1
       has_periods = true
     end
 
-    num_energyrate_tiers = rate.energyratestructure[0].size
+    num_energyrate_tiers = rate.energyratestructure[0].size # can't this differ for each period?
     has_tiered = false
     if num_energyrate_tiers > 1
       has_tiered = true
     end
 
-    month = 0
-    if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
-      if !rate.energyratestructure.empty?
+    year = header.sim_calendar_year
+    start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
+    today = start_day
 
-      end
+    hourly_fuel_cost = [0] * 8760
+    bill.monthly_energy_charge = [0] * 12
+
+    if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
 
       (0...fuel_time_series.size).to_a.each do |hour|
-        hour_day = 0
+        hour_day = hour % 24 # calculate hour of the day
+
+        month = today.month - 1
 
         if (num_energyrate_periods != 0) || (num_energyrate_tiers != 0)
-          sched_rate = get_schedule_value(rate.energyweekdayschedule, month, hour_day)
-          sched_rate = get_schedule_value(rate.energyweekendschedule, month, hour_day)
+          if (1..5).to_a.include?(today.wday) # weekday
+            sched_rate = rate.energyweekdayschedule[month][hour_day]
+          else # weekend
+            sched_rate = rate.energyweekendschedule[month][hour_day]
+          end
         end
 
         if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1)
+          tiers = rate.energyratestructure[sched_rate]
+
           if has_tiered
-            new_tier = 0
+            tier = tiers[0] # TODO
 
             if !has_periods # tiered only
 
             else # tiered and TOU
+              elec_rate = tier[:rate]
 
+              hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+              bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
             end
 
           else # TOU only
 
           end
-        else
+        else # not tiered or TOU
           elec_rate = rate.flatratebuy
           if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
-            elec_rate += rate.energyratestructure[0][0]['rate']
-            elec_cost << elec_hour * elec_rate
-            monthly_energy_charge[month] += elec_cost[hour]
+            elec_rate += rate.energyratestructure[0][0][:rate]
+
+            hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+            bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
           end
         end
 
-        # if hour == end_of_month[month]
-        # month += 1
-        # end
+        next unless hour_day == 23 # last hour of the day
+
+        if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
+          if is_production
+            # TODO
+          else
+            if not rate.fixedmonthlycharge.nil?
+              # If the run period doesn't span the entire month, prorate the fixed charges
+              prorate_fraction = calculate_monthly_prorate(header, month + 1)
+              bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
+            end
+
+            bill.annual_energy_charge += bill.monthly_energy_charge[month]
+            bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+          end
+        end
+
+        today += 1 # next day
       end
     end
-
     return net_elec
   end
 
