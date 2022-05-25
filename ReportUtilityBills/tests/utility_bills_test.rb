@@ -194,9 +194,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
-    @expected_bills['Electricity: Marginal ($)'] = 474
-    @expected_bills['Electricity: Total ($)'] = 581
-    @expected_bills['Total ($)'] = 1370
+    @expected_bills['Electricity: Marginal ($)'] = 577
+    @expected_bills['Electricity: Total ($)'] = 684
+    @expected_bills['Total ($)'] = 1473
     _check_bills(@expected_bills, actual_bills)
   end
 
@@ -224,9 +224,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
-    @expected_bills['Electricity: Marginal ($)'] = 333
-    @expected_bills['Electricity: Total ($)'] = 441
-    @expected_bills['Total ($)'] = 1230
+    @expected_bills['Electricity: Marginal ($)'] = 376
+    @expected_bills['Electricity: Total ($)'] = 484
+    @expected_bills['Total ($)'] = 1273
     _check_bills(@expected_bills, actual_bills)
   end
 
