@@ -436,9 +436,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                                            File.dirname(hpxml_path),
                                            'Tariff File')
           else # sample rates
-            custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
-            custom_rate_file = "#{args[:electricity_utility_rate_type]}.json"
-            filepath = File.join(custom_rates_folder, custom_rate_file)
+            sample_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/SampleRates')
+            sample_rate_file = "#{args[:electricity_utility_rate_type]}.json"
+            filepath = File.join(sample_rates_folder, sample_rate_file)
           end
 
           tariff = JSON.parse(File.read(filepath), symbolize_names: true)

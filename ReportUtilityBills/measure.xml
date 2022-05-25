@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>d73b77f6-bc42-4fe9-8301-422174a37fa4</version_id>
-  <version_modified>20220524T234721Z</version_modified>
+  <version_id>3810e30d-72a6-4dce-923f-1216a08fd8dd</version_id>
+  <version_modified>20220525T000858Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -333,40 +333,16 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>069E2651</checksum>
-    </file>
-    <file>
-      <filename>Data/CustomRates/Sample Real-Time Pricing Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1417452B</checksum>
-    </file>
-    <file>
-      <filename>Data/CustomRates/Sample Tiered Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E7521706</checksum>
-    </file>
-    <file>
-      <filename>Data/CustomRates/Sample Tiered Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EC926978</checksum>
-    </file>
-    <file>
-      <filename>Data/CustomRates/Sample Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6BE68A8D</checksum>
-    </file>
-    <file>
       <filename>rates/5a0b28045457a3ea2aca608e.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>535D428A</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B8EBB4B9</checksum>
     </file>
     <file>
       <version>
@@ -377,13 +353,43 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AAC81297</checksum>
+      <checksum>806F02E2</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CD0F0704</checksum>
+      <checksum>14A82F2E</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0E3AA3E4</checksum>
+    </file>
+    <file>
+      <filename>Data/SampleRates/Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1417452B</checksum>
+    </file>
+    <file>
+      <filename>Data/SampleRates/Sample Tiered Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F6861EB6</checksum>
+    </file>
+    <file>
+      <filename>Data/SampleRates/Sample Tiered Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EC926978</checksum>
+    </file>
+    <file>
+      <filename>Data/SampleRates/Sample Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8022AB7B</checksum>
     </file>
   </files>
 </measure>

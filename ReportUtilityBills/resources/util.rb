@@ -128,12 +128,16 @@ class CalculateUtilityBill
 
         if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1)
           tiers = rate.energyratestructure[sched_rate]
+          tier = tiers[0]
 
           if has_tiered
             tier = tiers[0] # TODO
 
             if !has_periods # tiered only
+              elec_rate = tier[:rate]
 
+              hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+              bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
             else # tiered and TOU
               elec_rate = tier[:rate]
 
@@ -142,7 +146,10 @@ class CalculateUtilityBill
             end
 
           else # TOU only
+            elec_rate = tier[:rate]
 
+            hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+            bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
           end
         else # not tiered or TOU
           elec_rate = rate.flatratebuy
