@@ -452,6 +452,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
             rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter) # TODO: is this correct?
             rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
+            rate.flatratefueladj = tariff[:flatratefueladj] if tariff.keys.include?(:flatratefueladj)
 
             rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
             rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)

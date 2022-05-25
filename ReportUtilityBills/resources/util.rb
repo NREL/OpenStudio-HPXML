@@ -12,6 +12,7 @@ class UtilityRate
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
+    @flatratefueladj = 0.0
     @realtimeprice = []
 
     @net_metering_excess_sellback_type = nil
@@ -29,7 +30,7 @@ class UtilityRate
 
     @flatdemandstructure = []
   end
-  attr_accessor(:fixedmonthlycharge, :flatratebuy, :realtimeprice,
+  attr_accessor(:fixedmonthlycharge, :flatratebuy, :flatratefueladj, :realtimeprice,
                 :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
                 :feed_in_tariff_rate,
                 :energyratestructure, :energyweekdayschedule, :energyweekendschedule,
@@ -98,7 +99,11 @@ class CalculateUtilityBill
       has_periods = true
     end
 
-    num_energyrate_tiers = rate.energyratestructure[0].size # can't this differ for each period?
+    length_tiers = []
+    rate.energyratestructure.each do |period|
+      length_tiers << period.size
+    end
+    num_energyrate_tiers = length_tiers.max
     has_tiered = false
     if num_energyrate_tiers > 1
       has_tiered = true
@@ -109,9 +114,14 @@ class CalculateUtilityBill
     today = start_day
 
     hourly_fuel_cost = [0] * 8760
+    elec_month = [0] * 12
     bill.monthly_energy_charge = [0] * 12
 
+    tier = 0
     if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
+
+      elec_period = [0] * num_energyrate_periods
+      elec_tier = [0] * length_tiers.max
 
       (0...fuel_time_series.size).to_a.each do |hour|
         hour_day = hour % 24 # calculate hour of the day
@@ -126,39 +136,64 @@ class CalculateUtilityBill
           end
         end
 
-        if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1)
+        elec_month[month] += fuel_time_series[hour]
+
+        if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
           tiers = rate.energyratestructure[sched_rate]
-          tier = tiers[0]
 
           if has_tiered
-            tier = tiers[0] # TODO
 
-            if !has_periods # tiered only
-              elec_rate = tier[:rate]
-
-              hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
-              bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
-            else # tiered and TOU
-              elec_rate = tier[:rate]
-
-              hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
-              bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+            # init
+            new_tier = false
+            if tiers.size > 1
+              if tier < tiers.size
+                if tiers[tier].keys.include?(:max) && elec_month[month] >= tiers[tier][:max]
+                  tier += 1
+                  new_tier = true
+                  elec_lower_tier = fuel_time_series[hour] - (elec_month[month] - tiers[tier - 1][:max])
+                end
+              end
             end
 
+            if !has_periods # tiered only
+              elec_rate = tiers[tier][:rate]
+              if new_tier
+                hourly_fuel_cost[hour] = (elec_lower_tier * tiers[tier - 1][:rate]) + ((fuel_time_series[hour] - elec_lower_tier) * tiers[tier][:rate])
+                bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+              else
+                hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+                bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+              end
+
+            else # tiered and TOU (monthly energy charge account for below)
+              elec_period[sched_rate] += fuel_time_series[hour]
+              if (tier > 0) && (tiers.size == 1)
+                elec_tier[0] += fuel_time_series[hour]
+              else
+                if new_tier
+                  elec_tier[tier - 1] += elec_lower_tier
+                  elec_tier[tier] += fuel_time_series[hour] - elec_lower_tier
+                else
+                  elec_tier[tier] += fuel_time_series[hour]
+                end
+              end
+
+            end
           else # TOU only
-            elec_rate = tier[:rate]
+            elec_rate = tiers[0][:rate]
 
             hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
             bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+
           end
         else # not tiered or TOU
-          elec_rate = rate.flatratebuy
+          elec_rate = rate.flatratebuy + rate.flatratefueladj
           if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
             elec_rate += rate.energyratestructure[0][0][:rate]
-
-            hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
-            bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
           end
+          hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+          bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
+
         end
 
         next unless hour_day == 23 # last hour of the day
@@ -172,7 +207,31 @@ class CalculateUtilityBill
               prorate_fraction = calculate_monthly_prorate(header, month + 1)
               bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
             end
+          end
 
+          if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
+
+            if has_periods && has_tiered # tiered and TOU
+              frac_elec_period = [0] * num_energyrate_periods
+              (0...num_energyrate_periods).each do |period|
+                next unless elec_month[month] > 0
+
+                frac_elec_period[period] = elec_period[period] / elec_month[month]
+                (0...rate.energyratestructure[period].size).each do |t|
+                  if t < elec_tier.size
+                    bill.monthly_energy_charge[month] += rate.energyratestructure[period][t][:rate] * frac_elec_period[period] * elec_tier[t]
+                  end
+                end
+              end
+            end
+
+            bill.monthly_energy_charge[month] += (rate.flatratebuy + rate.flatratefueladj) * elec_month[month]
+            elec_period = [0] * num_energyrate_periods
+            elec_tier = [0] * length_tiers.max
+            tier = 0
+          end
+
+          if not is_production
             bill.annual_energy_charge += bill.monthly_energy_charge[month]
             bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
           end
