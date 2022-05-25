@@ -1482,7 +1482,7 @@ class OSModel
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
-        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system,
+        airloop_map[sys_id] = HVAC.apply_boiler(model, heating_system,
                                                 sequential_heat_load_fracs, @conditioned_zone)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
