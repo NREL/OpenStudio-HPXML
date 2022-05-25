@@ -23,17 +23,17 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
       # Run w/ ACCA sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-acca.xml"))
-      model_acca, hpxml_acca = _test_measure(args_hash)
+      _model_acca, hpxml_acca = _test_measure(args_hash)
 
       # Run w/ HERS sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-hers.xml"))
-      model_hers, hpxml_hers = _test_measure(args_hash)
+      _model_hers, hpxml_hers = _test_measure(args_hash)
 
       # Run w/ MaxLoad sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, "#{hpxml_file}-maxload.xml"))
-      model_maxload, hpxml_maxload = _test_measure(args_hash)
+      _model_maxload, hpxml_maxload = _test_measure(args_hash)
 
       # Check that MaxLoad >= HERS > ACCA for heat pump heating capacity
       hp_capacity_acca = hpxml_acca.heat_pumps[0].heating_capacity
