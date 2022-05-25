@@ -639,7 +639,7 @@
       "energyratestructure": [
         [
           {
-            "max": 650,
+            "max": 150,
             "rate": 0.06,
             "unit": "kWh"
           },
@@ -650,12 +650,12 @@
         ],
         [
           {
-            "max": 650,
+            "max": 150,
             "rate": 0.09,
             "unit": "kWh"
           },
           {
-            "max": 1000,
+            "max": 300,
             "rate": 0.11,
             "unit": "kWh"
           },
