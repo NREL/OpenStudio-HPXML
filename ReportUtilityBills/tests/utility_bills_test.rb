@@ -200,6 +200,40 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
+  def test_detailed_calculations_sample_tiered_pv_1kW
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 577
+    @expected_bills['Electricity: PV Credit ($)'] = 190
+    @expected_bills['Electricity: Total ($)'] = 494
+    @expected_bills['Total ($)'] = 1283
+    _check_bills(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_10kW
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 577
+    @expected_bills['Electricity: PV Credit ($)'] = 576
+    @expected_bills['Electricity: Total ($)'] = 108
+    @expected_bills['Total ($)'] = 897
+    _check_bills(@expected_bills, actual_bills)
+  end
+
   def test_detailed_calculations_sample_tou_pv_none
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
@@ -245,7 +279,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_bills(@expected_bills, actual_bills)
   end
 
-  # TODO: test pv_1kW, pv_10kW, etc
+  # TODO: remaining tests
 
   def test_workflow_detailed_calculations
     # TODO: should use a large house so we can really test the tiers
