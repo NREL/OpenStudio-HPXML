@@ -3,13 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-<<<<<<< HEAD
-  <version_id>1799069d-5aae-4954-9211-80e263498d00</version_id>
-  <version_modified>20220602T181746Z</version_modified>
-=======
   <version_id>84be6959-cd37-45c9-89e7-bc2be857e11f</version_id>
   <version_modified>20220602T171332Z</version_modified>
->>>>>>> master
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
