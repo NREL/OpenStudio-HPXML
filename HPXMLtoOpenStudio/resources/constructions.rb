@@ -1298,7 +1298,10 @@ class Constructions
     settings.setDeepGroundDepth(40)
     settings.setMinimumCellDimension(0.2)
     settings.setMaximumCellGrowthCoefficient(3.0)
-    settings.setSimulationTimestep('Hourly')
+    # Using 'Timestep' instead of 'Hourly' below because it makes timeseries
+    # results smoother with only a small increase in runtime (generally
+    # less than 10%).
+    settings.setSimulationTimestep('Timestep')
   end
 
   def self.create_insulation_material(model, name, rvalue)
