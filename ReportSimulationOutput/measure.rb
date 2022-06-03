@@ -1612,12 +1612,22 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         # Add header per DataFileTemplate.pdf; see https://github.com/NREL/wex/wiki/DView
-        start_day = Schedule.get_day_num_from_month_day(@hpxml.header.sim_calendar_year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
+        year = @hpxml.header.sim_calendar_year
+        start_day = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
         start_hr = (start_day - 1) * 24
+        if timeseries_frequency == 'timestep'
+          interval_hrs = @hpxml.header.timestep / 60.0
+        elsif timeseries_frequency == 'hourly'
+          interval_hrs = 1.0
+        elsif timeseries_frequency == 'daily'
+          interval_hrs = 24.0
+        elsif timeseries_frequency == 'monthly'
+          interval_hrs = Constants.NumDaysInYear(year) * 24.0 / 12
+        end
         header_data = [['wxDVFileHeaderVer.1'],
                        data[0].map { |d| d.sub(':', '|') }, # Series name (series can be organized into groups by entering Group Name|Series Name)
-                       data[0].map { |_d| start_hr + 0.5 }, # Start time of the first data point; 0.5 implies average over the first hour
-                       data[0].map { |_d| @hpxml.header.timestep / 60.0 }, # Time interval in hours
+                       data[0].map { |_d| start_hr + interval_hrs / 2.0 }, # Start time of the first data point; 0.5 implies average over the first hour
+                       data[0].map { |_d| interval_hrs }, # Time interval in hours
                        data[1]] # Units
         data.delete_at(1) # Remove units, added to header data above
         data.delete_at(0) # Remove series name, added to header data above
