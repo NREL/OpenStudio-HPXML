@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>10</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-smooth.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv</SchedulesFilePath>
       <AdditionalProperties>
         <ParentHPXMLFile>base-simcontrol-timestep-10-mins.xml</ParentHPXMLFile>
       </AdditionalProperties>
