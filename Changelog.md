@@ -14,6 +14,7 @@ __New Features__
 __Bugfixes__
 - Fixes heating (or cooling) setpoints affecting the conditioned space temperature outside the heating (or cooling) season.
 - Fixes handling non-integer number of occupants when using the stochastic occupancy schedule generator.
+- Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
 
 ## OpenStudio-HPXML v1.4.0
 
