@@ -156,6 +156,9 @@ Detailed Schedule Inputs
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
+Frequency of schedule values do not need to match the simulation timestep.
+For example, schedules can be hourly with a 10-minutely simulation timestep, or 10-minutely with an hourly simulation timestep.
+
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/SoftwareInfo/extension/SchedulesFilePath`` elements.
 The column names available in the schedule CSV files are:
 
