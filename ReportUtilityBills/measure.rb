@@ -524,25 +524,33 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   def get_utility_bills(fuels, utility_rates, utility_bills, args, header)
     net_elec = 0
+
+    # Simple
     fuels.each do |(fuel_type, is_production), fuel|
       rate = utility_rates[fuel_type]
       bill = utility_bills[fuel_type]
 
       if fuel_type == FT::Elec
-        if args[:electricity_bill_type] == 'Detailed'
-          # TODO: support realtimeprice in detailed_electric method?
-          if rate.realtimeprice.empty?
-            net_elec = CalculateUtilityBill.detailed_electric(header, fuel.timeseries, is_production, rate, bill, net_elec)
-          else
-            net_elec = CalculateUtilityBill.real_time_pricing(header, fuel.timeseries, is_production, rate, bill, net_elec)
-          end
-        else
+        if args[:electricity_bill_type] == 'Simple'
           net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end
       else
         net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
+
+    # Detailed
+    if args[:electricity_bill_type] == 'Detailed'
+      rate = utility_rates[FT::Elec]
+      bill = utility_bills[FT::Elec]
+
+      if rate.realtimeprice.empty?
+        CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
+      else
+        CalculateUtilityBill.real_time_pricing(header, fuels, rate, bill)
+      end
+    end
+
     return net_elec
   end
 
@@ -553,6 +561,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if bill.annual_production_credit > bill.annual_energy_charge
         bill.annual_production_credit = bill.annual_energy_charge
       end
+
       if net_elec < 0
         bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
       end

@@ -66,8 +66,8 @@ class CalculateUtilityBill
         monthly_fuel_cost[month] = fuel_time_series[month] * rate.flatratebuy
       end
 
-      if fuel_type == FT::Elec && sum_fuel_time_series != 0 # has PV
-        if is_production
+      if fuel_type == FT::Elec && sum_fuel_time_series != 0
+        if is_production # has PV
           net_elec -= fuel_time_series[month]
         else
           net_elec += fuel_time_series[month]
@@ -92,7 +92,11 @@ class CalculateUtilityBill
     return net_elec
   end
 
-  def self.detailed_electric(header, fuel_time_series, is_production, rate, bill, net_elec)
+  def self.detailed_electric(header, fuels, rate, bill)
+    fuel_time_series = fuels[[FT::Elec, false]].timeseries
+    pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
+    net_elec_energy_ann = 0
+
     num_energyrate_periods = rate.energyratestructure.size
     has_periods = false
     if num_energyrate_periods > 1
@@ -114,14 +118,24 @@ class CalculateUtilityBill
     today = start_day
 
     hourly_fuel_cost = [0] * 8760
+    net_hourly_fuel_cost = [0] * 8760
     elec_month = [0] * 12
+    net_elec_month = [0] * 12
     bill.monthly_energy_charge = [0] * 12
+    net_monthly_energy_charge = [0] * 12
+    production_fit_month = [0] * 12
 
     tier = 0
+    net_tier = 0
     if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
 
       elec_period = [0] * num_energyrate_periods
       elec_tier = [0] * length_tiers.max
+
+      if pv_fuel_time_series.sum != 0 # has PV
+        net_elec_period = [0] * num_energyrate_periods
+        net_elec_tier = [0] * length_tiers.max
+      end
 
       (0...fuel_time_series.size).to_a.each do |hour|
         hour_day = hour % 24 # calculate hour of the day
@@ -136,7 +150,15 @@ class CalculateUtilityBill
           end
         end
 
-        elec_month[month] += fuel_time_series[hour]
+        elec_hour = fuel_time_series[hour]
+        elec_month[month] += elec_hour
+
+        if pv_fuel_time_series.sum != 0 # has PV
+          pv_hour = pv_fuel_time_series[hour]
+          net_elec_hour = elec_hour - pv_hour
+          net_elec_month[month] += net_elec_hour
+          net_elec_energy_ann += net_elec_hour
+        end
 
         if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
           tiers = rate.energyratestructure[sched_rate]
@@ -150,7 +172,7 @@ class CalculateUtilityBill
                 if tiers[tier].keys.include?(:max) && elec_month[month] >= tiers[tier][:max]
                   tier += 1
                   new_tier = true
-                  elec_lower_tier = fuel_time_series[hour] - (elec_month[month] - tiers[tier - 1][:max])
+                  elec_lower_tier = elec_hour - (elec_month[month] - tiers[tier - 1][:max])
                 end
               end
             end
@@ -158,23 +180,23 @@ class CalculateUtilityBill
             if !has_periods # tiered only
               elec_rate = tiers[tier][:rate]
               if new_tier
-                hourly_fuel_cost[hour] = (elec_lower_tier * tiers[tier - 1][:rate]) + ((fuel_time_series[hour] - elec_lower_tier) * tiers[tier][:rate])
+                hourly_fuel_cost[hour] = (elec_lower_tier * tiers[tier - 1][:rate]) + ((elec_hour - elec_lower_tier) * tiers[tier][:rate])
                 bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
               else
-                hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+                hourly_fuel_cost[hour] = elec_hour * elec_rate
                 bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
               end
 
-            else # tiered and TOU (monthly energy charge account for below)
-              elec_period[sched_rate] += fuel_time_series[hour]
+            else # tiered and TOU
+              elec_period[sched_rate] += elec_hour
               if (tier > 0) && (tiers.size == 1)
-                elec_tier[0] += fuel_time_series[hour]
+                elec_tier[0] += elec_hour
               else
                 if new_tier
                   elec_tier[tier - 1] += elec_lower_tier
-                  elec_tier[tier] += fuel_time_series[hour] - elec_lower_tier
+                  elec_tier[tier] += elec_hour - elec_lower_tier
                 else
-                  elec_tier[tier] += fuel_time_series[hour]
+                  elec_tier[tier] += elec_hour
                 end
               end
 
@@ -182,7 +204,7 @@ class CalculateUtilityBill
           else # TOU only
             elec_rate = tiers[0][:rate]
 
-            hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+            hourly_fuel_cost[hour] = elec_hour * elec_rate
             bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
 
           end
@@ -191,22 +213,88 @@ class CalculateUtilityBill
           if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
             elec_rate += rate.energyratestructure[0][0][:rate]
           end
-          hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+          hourly_fuel_cost[hour] = elec_hour * elec_rate
           bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
 
+        end
+
+        if pv_fuel_time_series.sum != 0 # has PV
+          if rate.feed_in_tariff_rate
+            production_fit_month[month] += pv_hour * rate.feed_in_tariff_rate
+          else
+            if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1)
+              if has_tiered
+
+                # init
+                net_new_tier = false
+                net_lower_tier = false
+                if tiers.size > 1
+                  if net_tier < tiers.size && tiers[net_tier].keys.include?(:max) && net_elec_month[month] >= tiers[net_tier][:max]
+                    net_tier += 1
+                    net_new_tier = true
+                    net_elec_lower_tier = net_elec_hour - (net_elec_month[month] - tiers[net_tier - 1][:max])
+                  end
+                  if net_tier > 0 && tiers[net_tier].keys.include?(:max) && net_elec_month[month] < tiers[net_tier - 1][:max]
+                    net_tier -= 1
+                    net_lower_tier = true
+                    net_elec_upper_tier = net_elec_hour - (net_elec_month[month] - tiers[net_tier][:max])
+                  end
+                end
+
+                if !has_periods # tiered only
+                  net_elec_rate = tiers[net_tier][:rate]
+                  if net_new_tier
+                    net_hourly_fuel_cost[hour] = (net_elec_lower_tier * tiers[net_tier - 1][:rate]) + ((net_elec_hour - net_elec_lower_tier) * tiers[net_tier][:rate])
+                    net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+                  elsif net_lower_tier
+                    net_hourly_fuel_cost[hour] = (net_elec_upper_tier * tiers[net_tier + 1][:rate]) + ((net_elec_hour - net_elec_upper_tier) * tiers[net_tier][:rate])
+                    net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+                  else
+                    net_hourly_fuel_cost[hour] = net_elec_hour * net_elec_rate
+                    net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+                  end
+                else # tiered and TOU
+                  net_elec_period[sched_rate] += net_elec_hour
+                  if (net_tier > 0) && (tiers.size == 1)
+                    net_elec_tier[0] += net_elec_hour
+                  else
+                    if net_new_tier
+                      net_elec_tier[net_tier - 1] += net_elec_lower_tier
+                      net_elec_tier[net_tier] += net_elec_hour - net_elec_lower_tier
+                    elsif net_lower_tier
+                      net_elec_tier[net_tier + 1] += net_elec_upper_tier
+                      net_elec_tier[net_tier] += net_elec_hour - net_elec_upper_tier
+                    else
+                      net_elec_tier[net_tier] += net_elec_hour
+                    end
+                  end
+                end
+              else # TOU only
+                net_elec_rate = tiers[0][:rate]
+
+                net_hourly_fuel_cost[hour] = net_elec_hour * net_elec_rate
+                net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+
+              end
+            else # not tiered or TOU
+              net_elec_rate = rate.flatratebuy * rate.flatratefueladj
+              if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
+                net_elec_rate += rate.energyratestructure[0][0][:rate]
+              end
+              net_hourly_fuel_cost[hour] = net_elec_hour * net_elec_rate
+              net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+
+            end
+          end
         end
 
         next unless hour_day == 23 # last hour of the day
 
         if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
-          if is_production
-            # TODO
-          else
-            if not rate.fixedmonthlycharge.nil?
-              # If the run period doesn't span the entire month, prorate the fixed charges
-              prorate_fraction = calculate_monthly_prorate(header, month + 1)
-              bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
-            end
+          if not rate.fixedmonthlycharge.nil?
+            # If the run period doesn't span the entire month, prorate the fixed charges
+            prorate_fraction = calculate_monthly_prorate(header, month + 1)
+            bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
           end
 
           if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
@@ -231,19 +319,112 @@ class CalculateUtilityBill
             tier = 0
           end
 
-          if not is_production
-            bill.annual_energy_charge += bill.monthly_energy_charge[month]
-            bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+          if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # has PV
+            if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
+
+              if has_periods && has_tiered # tiered and TOU
+                net_frac_elec_period = [0] * num_energyrate_periods
+                (0...num_energyrate_periods).each do |period|
+                  next unless net_elec_month[month] > 0
+
+                  net_frac_elec_period[period] = net_elec_period[period] / net_elec_month[month]
+                  (0...rate.energyratestructure[period].size).each do |t|
+                    if t < net_elec_tier.size
+                      net_monthly_energy_charge[month] += rate.energyratestructure[period][t][:rate] * net_frac_elec_period[period] * net_elec_tier[t]
+                    end
+                  end
+                end
+              end
+
+              net_monthly_energy_charge[month] += (rate.flatratebuy + rate.flatratefueladj) * net_elec_month[month]
+              net_elec_period = [0] * num_energyrate_periods
+              net_elec_tier = [0] * length_tiers.max
+              net_tier = 0
+            end
           end
+
+          if pv_fuel_time_series.sum != 0 # has PV
+            if rate.feed_in_tariff_rate
+              bill.monthly_production_credit[month] = production_fit_month[month]
+            else
+              bill.monthly_production_credit[month] = bill.monthly_energy_charge[month] - net_monthly_energy_charge[month]
+            end
+            bill.annual_production_credit += bill.monthly_production_credit[month]
+          end
+
+          bill.annual_energy_charge += bill.monthly_energy_charge[month]
+          bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
         end
 
         today += 1 # next day
+
+        next unless hour == 8759 # End of year, calculate annual totals and set monthly/annual outputs
+
+        # FIXME: move annual true up for detailed bills outside this method (like simple)
+
+        annual_total_charge = bill.annual_energy_charge + bill.annual_fixed_charge
+        monthly_min_charge = 0
+        true_up_month = 12
+
+        if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+
+          annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, true_up_month)
+          end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
+
+          annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
+          bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
+
+        else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
+
+          # TODO
+
+        end
       end
     end
-    return net_elec
   end
 
-  def self.real_time_pricing(header, fuel_time_series, is_production, rate, bill, net_elec)
+  def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, _true_up_month)
+    payments = [0] * 12
+    rollover = [0] * 12
+    net_monthly_bill = [0] * 12
+    months_loop = (0..11)
+
+    months_loop.to_a.each_with_index do |m, i|
+      net_monthly_bill[m] = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
+      # Pay bill if rollover can't cover it, or just pay min charge.
+      payments[i] = [net_monthly_bill[m] + rollover[i - 1], monthly_min_charge].max
+
+      if net_monthly_bill[m] <= 0
+        # Surplus this month, add to rollover total
+        rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i] + [monthly_min_charge - monthly_fixed_charge[m], 0].max)
+
+      elsif rollover[i - 1] < 0
+        # Use previous month's bill credit to pay this bill; subtract from rollover total
+        rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i])
+
+      end
+    end
+    annual_payments = payments.sum
+    end_of_year_bill_credit = rollover[-1]
+
+    return annual_payments, end_of_year_bill_credit
+  end
+
+  def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec_energy_ann)
+    if net_metering_excess_sellback_type == 'Retail Electricity Cost'
+      excess_sellback = 0
+    else
+      excess_sellback = -[net_elec_energy_ann, 0].min * net_metering_user_excess_sellback_rate
+      end_of_year_bill_credit = 0
+    end
+
+    return end_of_year_bill_credit, excess_sellback
+  end
+
+  def self.real_time_pricing(header, fuels, rate, bill)
+    fuel_time_series = fuels[[FT::Elec, false]].timeseries
+    # pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
+
     year = header.sim_calendar_year
     start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
     today = start_day
@@ -256,31 +437,27 @@ class CalculateUtilityBill
 
       month = today.month - 1
 
+      elec_hour = fuel_time_series[hour]
       elec_rate = rate.realtimeprice[hour]
 
-      hourly_fuel_cost[hour] = fuel_time_series[hour] * elec_rate
+      hourly_fuel_cost[hour] = elec_hour * elec_rate
       bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
 
       next unless hour_day == 23 # last hour of the day
 
       if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
-        if is_production
-          # TODO
-        else
-          if not rate.fixedmonthlycharge.nil?
-            # If the run period doesn't span the entire month, prorate the fixed charges
-            prorate_fraction = calculate_monthly_prorate(header, month + 1)
-            bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
-          end
-
-          bill.annual_energy_charge += bill.monthly_energy_charge[month]
-          bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+        if not rate.fixedmonthlycharge.nil?
+          # If the run period doesn't span the entire month, prorate the fixed charges
+          prorate_fraction = calculate_monthly_prorate(header, month + 1)
+          bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
         end
+
+        bill.annual_energy_charge += bill.monthly_energy_charge[month]
+        bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
 
       today += 1 # next day
     end
-    return net_elec
   end
 
   def self.calculate_monthly_prorate(header, month)
