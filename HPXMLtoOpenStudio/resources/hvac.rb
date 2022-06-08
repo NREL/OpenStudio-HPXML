@@ -1431,7 +1431,7 @@ class HVAC
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
       fan_or_pump_program.addLine("ElseIf #{load_clg_sensor.name} < 0")
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
-      fan_or_pump_program.addLine("ElseIf ((#{load_htg_sensor.name} + #{load_clg_sensor.name}) / 2.0) > 0")
+      fan_or_pump_program.addLine("ElseIf ((#{load_htg_sensor.name} + #{load_clg_sensor.name}) / 2.0) < 0")
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
       fan_or_pump_program.addLine('Else')
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
