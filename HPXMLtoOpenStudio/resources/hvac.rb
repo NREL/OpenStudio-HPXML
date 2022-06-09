@@ -116,13 +116,13 @@ class HVAC
       set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
-      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system, control_zone)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
+        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system, control_zone)
       end
       if not heating_system.nil?
-        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
+        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system, control_zone)
       end
     end
 
@@ -177,7 +177,7 @@ class HVAC
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
     fan.addToNode(air_loop.supplyInletNode)
-    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system)
+    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system, control_zone)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -322,7 +322,7 @@ class HVAC
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
-    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
 
     # Pipes
     chiller_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
@@ -338,7 +338,7 @@ class HVAC
 
     # Fan
     fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
@@ -358,10 +358,9 @@ class HVAC
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(equip_def.name.to_s)
-      # Since pump energy occurs throughout year, use zone_for_disaggregation_by_load as an approximation
+      # Since pump energy occurs throughout year, use zone_for_backup_disaggregation as an approximation
       # to ensure all energy is disaggregated into heating vs cooling.
-      disaggregate_fan_or_pump(model, equip, nil, nil, nil, heat_pump,
-                               zone_for_disaggregation_by_load: control_zone)
+      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
     end
 
     # Air Loop
@@ -408,7 +407,7 @@ class HVAC
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil, hp_ap.supp_max_temp)
@@ -575,7 +574,7 @@ class HVAC
       zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
       zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system, control_zone)
     else
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
@@ -591,7 +590,7 @@ class HVAC
       zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
       zone_hvac.setName(obj_name + ' baseboard')
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system, control_zone)
     end
 
     control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
@@ -643,7 +642,7 @@ class HVAC
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system)
+    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system, control_zone)
 
     # Unitary System
     unitary_system = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil, htg_cfm, nil)
@@ -1389,7 +1388,7 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object, zone_for_disaggregation_by_load: nil)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object, control_zone)
     # Disaggregate into heating/cooling output energy use.
 
     sys_id = hpxml_object.id
@@ -1407,27 +1406,88 @@ class HVAC
     fan_or_pump_sensor.setKeyName(fan_or_pump.name.to_s)
     fan_or_pump_var = fan_or_pump.name.to_s.gsub(' ', '_')
 
-    if not zone_for_disaggregation_by_load.nil?
-      # Use predicted load to disaggregate heating vs cooling
+    load_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate')
+    load_htg_sensor.setName('zone load to htg sp s')
+    load_htg_sensor.setKeyName(control_zone.name.to_s)
 
-      load_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate')
-      load_htg_sensor.setName('zone predicted load to htg s')
-      load_htg_sensor.setKeyName(zone_for_disaggregation_by_load.name.to_s)
+    load_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
+    load_clg_sensor.setName('zone load to clg sp s')
+    load_clg_sensor.setKeyName(control_zone.name.to_s)
 
-      load_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
-      load_clg_sensor.setName('zone predicted load to clg s')
-      load_clg_sensor.setKeyName(zone_for_disaggregation_by_load.name.to_s)
+    if clg_object.nil?
+      clg_object_sensor = nil
+    else
+      if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        var = 'Evaporative Cooler Water Volume'
+      else
+        var = "Cooling Coil #{EPlus::FuelTypeElectricity} Energy"
+      end
+      clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+      clg_object_sensor.setName("#{clg_object.name} s")
+      clg_object_sensor.setKeyName(clg_object.name.to_s)
+    end
 
-      sensors = { 'clg' => load_clg_sensor,
-                  'primary_htg' => load_htg_sensor }
+    if htg_object.nil?
+      htg_object_sensor = nil
+    else
+      htg_fuel = EPlus::FuelTypeElectricity
+      var = "Heating Coil #{htg_fuel} Energy"
+      if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
+        htg_fuel = htg_object.fuelType
+        var = "Heating Coil #{htg_fuel} Energy"
+      elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+        var = 'Baseboard Total Heating Energy'
+      elsif htg_object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
+        var = 'Fan Coil Heating Energy'
+      end
 
-      # Disaggregate electric fan/pump energy
-      fan_or_pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
+      htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+      htg_object_sensor.setName("#{htg_object.name} s")
+      htg_object_sensor.setKeyName(htg_object.name.to_s)
+    end
+
+    if backup_htg_object.nil?
+      backup_htg_object_sensor = nil
+    else
+      backup_htg_fuel = EPlus::FuelTypeElectricity
+      var = "Heating Coil #{backup_htg_fuel} Energy"
+      if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
+        backup_htg_fuel = backup_htg_object.fuelType
+        var = "Heating Coil #{backup_htg_fuel} Energy"
+      end
+
+      backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+      backup_htg_object_sensor.setName("#{backup_htg_object.name} s")
+      backup_htg_object_sensor.setKeyName(backup_htg_object.name.to_s)
+    end
+
+    sensors = { 'clg' => clg_object_sensor,
+                'primary_htg' => htg_object_sensor,
+                'backup_htg' => backup_htg_object_sensor }
+    sensors = sensors.select { |_m, s| !s.nil? }
+
+    # Disaggregate electric fan/pump energy
+    fan_or_pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
+    if htg_object.is_a?(OpenStudio::Model::ZoneHVACBaseboardConvectiveWater) || htg_object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
+      # Pump may occasionally run when baseboard isn't, so just assign all pump energy here
+      mode, _sensor = sensors.first
+      if (sensors.size != 1) || (mode != 'primary_htg')
+        fail 'Unexpected situation.'
+      end
+
+      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
+    else
       sensors.keys.each do |mode|
         fan_or_pump_program.addLine("Set #{fan_or_pump_var}_#{mode} = 0")
       end
-      fan_or_pump_program.addLine("If #{load_htg_sensor.name} > 0")
+      sensors.each_with_index do |(mode, sensor), i|
+        str_prefix = (i == 0 ? 'If' : 'ElseIf')
+        fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
+        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
+      end
+      # Neither heating or cooling objects are operating; disaggregate by zone predicted load
+      fan_or_pump_program.addLine("ElseIf #{load_htg_sensor.name} > 0")
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
       fan_or_pump_program.addLine("ElseIf #{load_clg_sensor.name} < 0")
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
@@ -1436,90 +1496,6 @@ class HVAC
       fan_or_pump_program.addLine('Else')
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
       fan_or_pump_program.addLine('EndIf')
-
-    else
-      # Use htg_object, clg_object, etc. to disaggregate heating vs cooling
-
-      if clg_object.nil?
-        clg_object_sensor = nil
-      else
-        if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
-          var = 'Evaporative Cooler Water Volume'
-        else
-          var = "Cooling Coil #{EPlus::FuelTypeElectricity} Energy"
-        end
-        clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        clg_object_sensor.setName("#{clg_object.name} s")
-        clg_object_sensor.setKeyName(clg_object.name.to_s)
-      end
-
-      if htg_object.nil?
-        htg_object_sensor = nil
-      else
-        htg_fuel = EPlus::FuelTypeElectricity
-        var = "Heating Coil #{htg_fuel} Energy"
-        if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-          htg_fuel = htg_object.fuelType
-          var = "Heating Coil #{htg_fuel} Energy"
-        elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
-          var = 'Baseboard Total Heating Energy'
-        elsif htg_object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
-          var = 'Fan Coil Heating Energy'
-        end
-
-        htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        htg_object_sensor.setName("#{htg_object.name} s")
-        htg_object_sensor.setKeyName(htg_object.name.to_s)
-      end
-
-      if backup_htg_object.nil?
-        backup_htg_object_sensor = nil
-      else
-        backup_htg_fuel = EPlus::FuelTypeElectricity
-        var = "Heating Coil #{backup_htg_fuel} Energy"
-        if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-          backup_htg_fuel = backup_htg_object.fuelType
-          var = "Heating Coil #{backup_htg_fuel} Energy"
-        end
-
-        backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        backup_htg_object_sensor.setName("#{backup_htg_object.name} s")
-        backup_htg_object_sensor.setKeyName(backup_htg_object.name.to_s)
-      end
-
-      sensors = { 'clg' => clg_object_sensor,
-                  'primary_htg' => htg_object_sensor,
-                  'backup_htg' => backup_htg_object_sensor }
-      sensors = sensors.select { |_m, s| !s.nil? }
-
-      # Disaggregate electric fan/pump energy
-      fan_or_pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
-      if htg_object.is_a?(OpenStudio::Model::ZoneHVACBaseboardConvectiveWater) || htg_object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
-        # Pump may occasionally run when baseboard isn't, so just assign all pump energy here
-        mode, _sensor = sensors.first
-        if (sensors.size != 1) || (mode != 'primary_htg')
-          fail 'Unexpected situation.'
-        end
-
-        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
-      else
-        sensors.keys.each do |mode|
-          fan_or_pump_program.addLine("Set #{fan_or_pump_var}_#{mode} = 0")
-        end
-        sensors.each_with_index do |(mode, sensor), i|
-          if i == 0
-            fan_or_pump_program.addLine("If #{sensor.name} > 0")
-          elsif i == 2
-            fan_or_pump_program.addLine('Else')
-          else
-            fan_or_pump_program.addLine("ElseIf #{sensor.name} > 0")
-          end
-          fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
-        end
-        fan_or_pump_program.addLine('EndIf')
-      end
-
     end
 
     fan_or_pump_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
