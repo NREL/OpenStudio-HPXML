@@ -32,6 +32,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   # - Sample Tiered Rate
   #   - Tier 1: 150 Max kWh
   #   - Tier 2: 300 Max kWh
+  # - Sample Tiered Time-of-Use Rate
+  #   - Tier 1: 150 Max kWh (Period 1 and 2)
+  #   - Tier 2: 300 Max kWh (Period 2)
   # - All other options left at default values
   # Then retrieve 1.csv from output folder, copy it, rename it
 
@@ -490,6 +493,24 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: Total ($)'] = 484
     @expected_bills['Total ($)'] = 1273
+    _check_bills(@expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_1kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 376
+    @expected_bills['Electricity: PV Credit ($)'] = -111
+    @expected_bills['Electricity: Total ($)'] = 388
+    @expected_bills['Total ($)'] = 1176
     _check_bills(@expected_bills, actual_bills)
   end
 
