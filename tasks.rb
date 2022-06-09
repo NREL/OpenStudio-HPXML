@@ -1024,7 +1024,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['misc_plug_loads_other_annual_kwh'] = 7302.0
     args['misc_plug_loads_other_frac_sensible'] = 0.822
     args['misc_plug_loads_other_frac_latent'] = 0.178
-    args['misc_plug_loads_other_usage_multiplier'] = 1.0
     args['misc_plug_loads_well_pump_present'] = false
     args['misc_plug_loads_vehicle_present'] = false
     args['misc_fuel_loads_grill_present'] = false
