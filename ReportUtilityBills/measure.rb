@@ -547,21 +547,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Annual true up
-    annual_true_up(utility_rates, utility_bills, net_elec)
-  end
-
-  def annual_true_up(utility_rates, utility_bills, net_elec)
-    rate = utility_rates[FT::Elec]
-    bill = utility_bills[FT::Elec]
-    if rate.net_metering_excess_sellback_type == 'User-Specified'
-      if bill.annual_production_credit > bill.annual_energy_charge
-        bill.annual_production_credit = bill.annual_energy_charge
-      end
-
-      if net_elec < 0
-        bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
-      end
-    end
+    CalculateUtilityBill.annual_true_up(utility_rates, utility_bills, net_elec)
   end
 
   def get_annual_bills(utility_bills)

@@ -92,6 +92,20 @@ class CalculateUtilityBill
     return net_elec
   end
 
+  def self.annual_true_up(utility_rates, utility_bills, net_elec)
+    rate = utility_rates[FT::Elec]
+    bill = utility_bills[FT::Elec]
+    # Only make changes for cases where there's a user specified annual excess sellback rate
+    if rate.net_metering_excess_sellback_type == 'User-Specified'
+      if bill.annual_production_credit > bill.annual_energy_charge
+        bill.annual_production_credit = bill.annual_energy_charge
+      end
+      if net_elec < 0 # net producer, give credit at user specified rate
+        bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
+      end
+    end
+  end
+
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
