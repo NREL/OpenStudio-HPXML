@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>ac3510ae-8cf8-4268-98ac-9e599ad59f88</version_id>
-  <version_modified>20220609T170019Z</version_modified>
+  <version_id>3507cebc-9fb1-495b-9fd6-9bf0600baa24</version_id>
+  <version_modified>20220609T175610Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -333,35 +333,6 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>79D2DD7D</checksum>
-    </file>
-    <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>196C71CD</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>C911E40A</checksum>
-    </file>
-    <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DD007D95</checksum>
-    </file>
-    <file>
       <filename>Data/SampleRates/Sample Real-Time Pricing Rate.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -390,6 +361,35 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>535D428A</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>94C0C55E</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>871AEB66</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9F7CD630</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>253A05C2</checksum>
     </file>
   </files>
 </measure>

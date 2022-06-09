@@ -357,28 +357,21 @@ class CalculateUtilityBill
         end
 
         today += 1 # next day
+      end
 
-        next unless hour == 8759 # End of year, calculate annual totals and set monthly/annual outputs
+      annual_total_charge = bill.annual_energy_charge + bill.annual_fixed_charge
+      monthly_min_charge = 0
+      true_up_month = 12
 
-        # FIXME: move annual true up for detailed bills outside this method (like simple)
+      if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
 
-        annual_total_charge = bill.annual_energy_charge + bill.annual_fixed_charge
-        monthly_min_charge = 0
-        true_up_month = 12
+        annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, true_up_month)
+        end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
 
-        if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+        annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
+        bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
-          annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, true_up_month)
-          end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
-
-          annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
-          bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
-
-        else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
-
-          # TODO
-
-        end
+      else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
       end
     end
   end

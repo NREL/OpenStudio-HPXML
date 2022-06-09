@@ -348,10 +348,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Calculate utility bills
-    net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
-
-    # Annual true up
-    annual_true_up(utility_rates, utility_bills, net_elec)
+    get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
 
     # Calculate annual bills
     get_annual_bills(utility_bills)
@@ -504,8 +501,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Grid connection fee
       next unless fuel_type == FT::Elec
 
-      next unless args[:electricity_bill_type] == 'Simple'
-
       next unless pv_systems.size > 0
 
       monthly_fee = 0.0
@@ -551,7 +546,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    return net_elec
+    # Annual true up
+    annual_true_up(utility_rates, utility_bills, net_elec)
   end
 
   def annual_true_up(utility_rates, utility_bills, net_elec)
