@@ -117,8 +117,8 @@ class CalculateUtilityBill
     start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
     today = start_day
 
-    hourly_fuel_cost = [0] * 8760
-    net_hourly_fuel_cost = [0] * 8760
+    hourly_fuel_cost = [0] * fuel_time_series.size
+    net_hourly_fuel_cost = [0] * fuel_time_series.size
     elec_month = [0] * 12
     net_elec_month = [0] * 12
     bill.monthly_energy_charge = [0] * 12
@@ -234,7 +234,7 @@ class CalculateUtilityBill
                     net_new_tier = true
                     net_elec_lower_tier = net_elec_hour - (net_elec_month[month] - tiers[net_tier - 1][:max])
                   end
-                  if net_tier > 0 && tiers[net_tier].keys.include?(:max) && net_elec_month[month] < tiers[net_tier - 1][:max]
+                  if net_tier > 0 && tiers[net_tier - 1].keys.include?(:max) && net_elec_month[month] < tiers[net_tier - 1][:max]
                     net_tier -= 1
                     net_lower_tier = true
                     net_elec_upper_tier = net_elec_hour - (net_elec_month[month] - tiers[net_tier][:max])
@@ -290,7 +290,7 @@ class CalculateUtilityBill
 
         next unless hour_day == 23 # last hour of the day
 
-        if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
+        if Schedule.day_end_months(year).include?(today.yday)
           if not rate.fixedmonthlycharge.nil?
             # If the run period doesn't span the entire month, prorate the fixed charges
             prorate_fraction = calculate_monthly_prorate(header, month + 1)
@@ -414,16 +414,19 @@ class CalculateUtilityBill
     return end_of_year_bill_credit, excess_sellback
   end
 
-  def self.real_time_pricing(header, fuels, rate, bill)
+  def self.real_time_pricing(header, fuels, rate, bill, net_elec)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
-    # pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
+    pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
 
     year = header.sim_calendar_year
     start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
     today = start_day
 
-    hourly_fuel_cost = [0] * 8760
+    hourly_fuel_cost = [0] * fuel_time_series.size
+    net_hourly_fuel_cost = [0] * fuel_time_series.size
     bill.monthly_energy_charge = [0] * 12
+    net_monthly_energy_charge = [0] * 12
+    production_fit_month = [0] * 12
 
     (0...fuel_time_series.size).to_a.each do |hour|
       hour_day = hour % 24 # calculate hour of the day
@@ -431,18 +434,43 @@ class CalculateUtilityBill
       month = today.month - 1
 
       elec_hour = fuel_time_series[hour]
-      elec_rate = rate.realtimeprice[hour]
 
+      if pv_fuel_time_series.sum != 0 # has PV
+        pv_hour = pv_fuel_time_series[hour]
+        net_elec_hour = elec_hour - pv_hour
+        net_elec += net_elec_hour
+      end
+
+      elec_rate = rate.realtimeprice[hour]
       hourly_fuel_cost[hour] = elec_hour * elec_rate
       bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
 
+      if pv_fuel_time_series.sum != 0 # has PV
+        if rate.feed_in_tariff_rate
+          production_fit_month[month] += pv_hour * rate.feed_in_tariff_rate
+        else
+          net_elec_rate = rate.realtimeprice[hour]
+          net_hourly_fuel_cost[hour] = net_elec_hour * net_elec_rate
+          net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
+        end
+      end
+
       next unless hour_day == 23 # last hour of the day
 
-      if Schedule.day_end_months(year).include?(today.yday) # TODO: this wouldn't work if run period is within 1 month
+      if Schedule.day_end_months(year).include?(today.yday)
         if not rate.fixedmonthlycharge.nil?
           # If the run period doesn't span the entire month, prorate the fixed charges
           prorate_fraction = calculate_monthly_prorate(header, month + 1)
           bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
+        end
+
+        if pv_fuel_time_series.sum != 0 # has PV
+          if rate.feed_in_tariff_rate
+            bill.monthly_production_credit[month] = production_fit_month[month]
+          else
+            bill.monthly_production_credit[month] = bill.monthly_energy_charge[month] - net_monthly_energy_charge[month]
+          end
+          bill.annual_production_credit += bill.monthly_production_credit[month]
         end
 
         bill.annual_energy_charge += bill.monthly_energy_charge[month]
@@ -451,6 +479,7 @@ class CalculateUtilityBill
 
       today += 1 # next day
     end
+    return net_elec
   end
 
   def self.calculate_monthly_prorate(header, month)
