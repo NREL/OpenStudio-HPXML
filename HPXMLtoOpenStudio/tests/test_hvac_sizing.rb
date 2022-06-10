@@ -44,6 +44,10 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
     end
   end
 
+  def test_heat_pump_separate_backup_systems
+    # TODO
+  end
+
   def test_slab_f_factor
     def get_unins_slab()
       slab = HPXML::Slab.new(nil)

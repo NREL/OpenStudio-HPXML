@@ -42,39 +42,24 @@ class HVACSizing
     # Aggregate zone loads into initial loads
     aggregate_loads(bldg_design_loads)
 
-    # Get HVAC information for each HVAC system.
-    hvac_infos = {}
-    hvac_systems.each do |hvac_system|
-      hvac_infos[hvac_system] = get_hvac_information(hvac_system)
-    end
-
-    # Loop through each HVAC system and apply duct loads
-    # to calculate total building design loads.
-    total_ducts_heat_load = 0.0
-    total_ducts_cool_load_sens = 0.0
-    total_ducts_cool_load_lat = 0.0
-    hvac_systems.each do |hvac_system|
-      hvac = hvac_infos[hvac_system]
-      next if is_system_to_skip(hvac)
-
-      apply_hvac_temperatures(hvac, bldg_design_loads)
-      ducts_heat_load = calculate_load_ducts_heating(bldg_design_loads, hvac)
-      ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(bldg_design_loads, weather, hvac)
-
-      total_ducts_heat_load += ducts_heat_load.to_f
-      total_ducts_cool_load_sens += ducts_cool_load_sens.to_f
-      total_ducts_cool_load_lat += ducts_cool_load_lat.to_f
-    end
-    apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
-
     # Loop through each HVAC system and calculate equipment values.
     all_hvac_sizing_values = {}
+    bldg_design_loads_without_ducts = bldg_design_loads.dup
     hvac_systems.each do |hvac_system|
-      hvac = hvac_infos[hvac_system]
+      hvac = get_hvac_information(hvac_system)
       next if is_system_to_skip(hvac)
 
+      system_design_loads = bldg_design_loads_without_ducts.dup
+
+      # Apply duct loads as needed
+      apply_hvac_temperatures(hvac, system_design_loads)
+      ducts_heat_load = calculate_load_ducts_heating(system_design_loads, hvac)
+      ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(system_design_loads, weather, hvac)
+      apply_load_ducts(system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
+      apply_load_ducts(bldg_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
+
       hvac_sizing_values = HVACSizingValues.new
-      apply_hvac_loads(hvac, hvac_sizing_values, bldg_design_loads)
+      apply_hvac_loads(hvac, hvac_sizing_values, system_design_loads)
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
       apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac)
       apply_hvac_installation_quality(hvac_sizing_values, weather, hvac)
@@ -1343,13 +1328,13 @@ class HVACSizing
   end
 
   def self.apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
-    bldg_design_loads.Heat_Ducts += total_ducts_heat_load
-    bldg_design_loads.Heat_Tot += total_ducts_heat_load
-    bldg_design_loads.Cool_Ducts_Sens += total_ducts_cool_load_sens
-    bldg_design_loads.Cool_Sens += total_ducts_cool_load_sens
-    bldg_design_loads.Cool_Ducts_Lat += total_ducts_cool_load_lat
-    bldg_design_loads.Cool_Lat += total_ducts_cool_load_lat
-    bldg_design_loads.Cool_Tot += total_ducts_cool_load_sens + total_ducts_cool_load_lat
+    bldg_design_loads.Heat_Ducts += total_ducts_heat_load.to_f
+    bldg_design_loads.Heat_Tot += total_ducts_heat_load.to_f
+    bldg_design_loads.Cool_Ducts_Sens += total_ducts_cool_load_sens.to_f
+    bldg_design_loads.Cool_Sens += total_ducts_cool_load_sens.to_f
+    bldg_design_loads.Cool_Ducts_Lat += total_ducts_cool_load_lat.to_f
+    bldg_design_loads.Cool_Lat += total_ducts_cool_load_lat.to_f
+    bldg_design_loads.Cool_Tot += total_ducts_cool_load_sens.to_f + total_ducts_cool_load_lat.to_f
   end
 
   def self.apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac)
