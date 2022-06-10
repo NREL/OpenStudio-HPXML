@@ -204,7 +204,7 @@ class HVAC
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                         control_zone)
+                                         control_zone, clg_ssn_sensor)
 
     obj_name = Constants.ObjectNameGroundSourceHeatPump
 
@@ -360,7 +360,7 @@ class HVAC
       equip.setEndUseSubcategory(equip_def.name.to_s)
       # Since pump energy occurs throughout year, use zone_for_backup_disaggregation as an approximation
       # to ensure all energy is disaggregated into heating vs cooling.
-      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump, clg_ssn_sensor)
     end
 
     # Air Loop
@@ -1388,7 +1388,7 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object, clg_ssn_sensor = nil)
     # Disaggregate into heating/cooling output energy use.
 
     sys_id = hpxml_object.id
@@ -1477,6 +1477,12 @@ class HVAC
         str_prefix = (i == 0 ? 'If' : 'ElseIf')
         fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
         fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
+      end
+      if not clg_ssn_sensor.nil?
+        fan_or_pump_program.addLine("ElseIf #{clg_ssn_sensor.name} > 0")
+        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
+        fan_or_pump_program.addLine('Else')
+        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
       end
       fan_or_pump_program.addLine('EndIf')
     end
