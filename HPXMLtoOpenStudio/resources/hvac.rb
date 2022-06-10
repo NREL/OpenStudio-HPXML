@@ -116,13 +116,13 @@ class HVAC
       set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
-      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system, control_zone)
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system, control_zone)
+        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
       end
       if not heating_system.nil?
-        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system, control_zone)
+        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
       end
     end
 
@@ -177,7 +177,7 @@ class HVAC
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
     fan.addToNode(air_loop.supplyInletNode)
-    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system, control_zone)
+    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -322,7 +322,7 @@ class HVAC
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
-    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
+    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Pipes
     chiller_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
@@ -338,7 +338,7 @@ class HVAC
 
     # Fan
     fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
@@ -360,7 +360,7 @@ class HVAC
       equip.setEndUseSubcategory(equip_def.name.to_s)
       # Since pump energy occurs throughout year, use zone_for_backup_disaggregation as an approximation
       # to ensure all energy is disaggregated into heating vs cooling.
-      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
+      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump)
     end
 
     # Air Loop
@@ -407,7 +407,7 @@ class HVAC
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump, control_zone)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil, hp_ap.supp_max_temp)
@@ -574,7 +574,7 @@ class HVAC
       zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
       zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system, control_zone)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
@@ -590,7 +590,7 @@ class HVAC
       zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
       zone_hvac.setName(obj_name + ' baseboard')
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system, control_zone)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     end
 
     control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
@@ -642,7 +642,7 @@ class HVAC
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system, control_zone)
+    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system)
 
     # Unitary System
     unitary_system = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil, htg_cfm, nil)
@@ -1388,7 +1388,7 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object, control_zone)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
 
     sys_id = hpxml_object.id
@@ -1405,14 +1405,6 @@ class HVAC
     fan_or_pump_sensor.setName("#{fan_or_pump.name} s")
     fan_or_pump_sensor.setKeyName(fan_or_pump.name.to_s)
     fan_or_pump_var = fan_or_pump.name.to_s.gsub(' ', '_')
-
-    load_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate')
-    load_htg_sensor.setName('zone load to htg sp s')
-    load_htg_sensor.setKeyName(control_zone.name.to_s)
-
-    load_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
-    load_clg_sensor.setName('zone load to clg sp s')
-    load_clg_sensor.setKeyName(control_zone.name.to_s)
 
     if clg_object.nil?
       clg_object_sensor = nil
@@ -1486,15 +1478,6 @@ class HVAC
         fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
         fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
       end
-      # Neither heating or cooling objects are operating; disaggregate by zone predicted load
-      fan_or_pump_program.addLine("ElseIf #{load_htg_sensor.name} > 0")
-      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
-      fan_or_pump_program.addLine("ElseIf #{load_clg_sensor.name} < 0")
-      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
-      fan_or_pump_program.addLine("ElseIf ((#{load_htg_sensor.name} + #{load_clg_sensor.name}) / 2.0) < 0")
-      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
-      fan_or_pump_program.addLine('Else')
-      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
       fan_or_pump_program.addLine('EndIf')
     end
 
