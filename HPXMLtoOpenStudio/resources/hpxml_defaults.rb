@@ -2551,11 +2551,6 @@ class HPXMLDefaults
               htg_sys.backup_heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
               htg_sys.backup_heating_capacity_isdefaulted = true
             end
-          elsif htg_sys.backup_type == HPXML::HeatPumpBackupTypeSeparate
-            if htg_sys.backup_system.heating_capacity.nil? || ((htg_sys.backup_system.heating_capacity - hvac_sizing_values.Heat_Capacity_Supp).abs >= 1.0)
-              htg_sys.backup_system.heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
-              htg_sys.backup_system.heating_capacity_isdefaulted = true
-            end
           end
         end
 
@@ -2565,10 +2560,6 @@ class HPXMLDefaults
                  HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
           htg_sys.heating_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
           htg_sys.heating_airflow_cfm_isdefaulted = true
-        end
-        if htg_sys.is_a?(HPXML::HeatPump) && (htg_sys.backup_type == HPXML::HeatPumpBackupTypeSeparate)
-          htg_sys.backup_system.heating_airflow_cfm = hvac_sizing_values.Heat_Airflow_Supp.round
-          htg_sys.backup_system.heating_airflow_cfm_isdefaulted = true
         end
 
         # Heating GSHP loop
