@@ -358,8 +358,8 @@ class HVAC
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(equip_def.name.to_s)
-      # Since pump energy occurs throughout year, use zone_for_backup_disaggregation as an approximation
-      # to ensure all energy is disaggregated into heating vs cooling.
+      # Since pump energy occurs throughout year, use cooling season definition to disaggregate
+      # heating vs cooling for hours where the GSHP is not operating.
       disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump, clg_ssn_sensor)
     end
 
