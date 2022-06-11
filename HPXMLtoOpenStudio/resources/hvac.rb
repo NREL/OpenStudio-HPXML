@@ -204,7 +204,7 @@ class HVAC
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                         control_zone, clg_ssn_sensor)
+                                         control_zone)
 
     obj_name = Constants.ObjectNameGroundSourceHeatPump
 
@@ -348,7 +348,7 @@ class HVAC
       # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
       shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
       equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      equip_def.setName(Constants.ObjectNameSharedPump(obj_name))
+      equip_def.setName(Constants.ObjectNameGSHPSharedPump)
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(equip_def.name.to_s)
       equip.setSpace(control_zone.spaces[0])
@@ -358,9 +358,7 @@ class HVAC
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(equip_def.name.to_s)
-      # Since pump energy occurs throughout year, use cooling season definition to disaggregate
-      # heating vs cooling for hours where the GSHP is not operating.
-      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump, clg_ssn_sensor)
+      equip.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
 
     # Air Loop
@@ -1388,7 +1386,7 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object, clg_ssn_sensor = nil)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
 
     sys_id = hpxml_object.id
@@ -1477,12 +1475,6 @@ class HVAC
         str_prefix = (i == 0 ? 'If' : 'ElseIf')
         fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
         fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
-      end
-      if not clg_ssn_sensor.nil?
-        fan_or_pump_program.addLine("ElseIf #{clg_ssn_sensor.name} > 0")
-        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_clg = #{fan_or_pump_sensor.name}")
-        fan_or_pump_program.addLine('Else')
-        fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_primary_htg = #{fan_or_pump_sensor.name}")
       end
       fan_or_pump_program.addLine('EndIf')
     end
