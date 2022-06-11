@@ -676,7 +676,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Disaggregate GSHP shared pump energy into heating vs cooling
+    # Disaggregate 8760 GSHP shared pump energy into heating vs cooling by
+    # applying proportionally to the GSHP heating & cooling fan/pump energy use.
     gshp_shared_loop_end_use = @end_uses[[FT::Elec, 'TempGSHPSharedPump']]
     htg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::HeatingFanPump]]
     clg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::CoolingFanPump]]
