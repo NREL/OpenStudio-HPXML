@@ -12,9 +12,11 @@ __New Features__
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type.
 
 __Bugfixes__
+- Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
 - Fixes heating (or cooling) setpoints affecting the conditioned space temperature outside the heating (or cooling) season.
 - Fixes handling non-integer number of occupants when using the stochastic occupancy schedule generator.
 - Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
+- Fixes possible output error for ground source heat pumps with a shared hydronic circulation loop.
 
 ## OpenStudio-HPXML v1.4.0
 
