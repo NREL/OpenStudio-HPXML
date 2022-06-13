@@ -16,17 +16,17 @@ require_relative '../measure.rb'
 require 'csv'
 
 class ReportUtilityBillsTest < MiniTest::Test
-  # BEopt 2.8.0.0:
+  # BEopt 2.9.0.0:
   # - Standard, New Construction, Single-Family Detached
   # - 600 sq ft (30 x 20)
   # - EPW Location: USA_CO_Denver.Intl.AP.725650_TMY3.epw
   # - Cooking Range: Propane
   # - Water Heater: Oil Standard
   # - PV System: None, 1.0 kW, 10.0 kW
-  # - Timestep: 10 min
+  # - Timestep: 60 min
   # - User-Specified rates (calculated using default value):
   #   - Electricity: 0.1195179675994109 $/kWh
-  #   - Natural Gas: 0.7468734851091381 $/therm
+  #   - Natural Gas: 0.7734017611590879 $/therm
   #   - Fuel Oil: 3.495346153846154 $/gal
   #   - Propane: 2.4532692307692305 $/gal
   # - Sample Tiered Rate
@@ -56,18 +56,15 @@ class ReportUtilityBillsTest < MiniTest::Test
     # From BEopt Output screen (Utility Bills $/yr)
     @expected_bills = {
       'Electricity: Fixed ($)' => 96,
-      'Electricity: Marginal ($)' => 629,
+      'Electricity: Marginal ($)' => 632,
       'Electricity: PV Credit ($)' => 0,
-      'Electricity: Total ($)' => 725,
       'Natural Gas: Fixed ($)' => 96,
-      'Natural Gas: Marginal ($)' => 154,
-      'Natural Gas: Total ($)' => 250,
+      'Natural Gas: Marginal ($)' => 149,
       'Fuel Oil: Total ($)' => 462,
       'Propane: Total ($)' => 76,
       'Wood Cord: Total ($)' => 0,
       'Wood Pellets: Total ($)' => 0,
-      'Coal: Total ($)' => 0,
-      'Total ($)' => 1514,
+      'Coal: Total ($)' => 0
     }
 
     @measure = ReportUtilityBills.new
@@ -91,7 +88,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW
@@ -102,9 +100,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -177
-    @expected_bills['Electricity: Total ($)'] = 548
-    @expected_bills['Total ($)'] = 1337
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW
@@ -114,10 +111,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -918
-    @expected_bills['Electricity: Total ($)'] = -193
-    @expected_bills['Total ($)'] = 596
-    _check_bills(@expected_bills, actual_bills)
+    @expected_bills['Electricity: PV Credit ($)'] = -920
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW_retail
@@ -128,10 +124,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -1779
-    @expected_bills['Electricity: Total ($)'] = -1054
-    @expected_bills['Total ($)'] = -265
-    _check_bills(@expected_bills, actual_bills)
+    @expected_bills['Electricity: PV Credit ($)'] = -1777
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_feed_in_tariff
@@ -143,9 +138,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: PV Credit ($)'] = -178
-    @expected_bills['Electricity: Total ($)'] = 547
-    @expected_bills['Total ($)'] = 1336
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_10kW_feed_in_tariff
@@ -156,10 +150,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
-    @expected_bills['Electricity: PV Credit ($)'] = -1787
-    @expected_bills['Electricity: Total ($)'] = -1061
-    @expected_bills['Total ($)'] = -272
-    _check_bills(@expected_bills, actual_bills)
+    @expected_bills['Electricity: PV Credit ($)'] = -1785
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars_per_kW
@@ -172,9 +165,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 126
     @expected_bills['Electricity: PV Credit ($)'] = -177
-    @expected_bills['Electricity: Total ($)'] = 578
-    @expected_bills['Total ($)'] = 1367
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars
@@ -188,9 +180,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 186
     @expected_bills['Electricity: PV Credit ($)'] = -177
-    @expected_bills['Electricity: Total ($)'] = 638
-    @expected_bills['Total ($)'] = 1427
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   # Detailed Calculations
@@ -207,9 +198,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
-    @expected_bills['Electricity: Total ($)'] = 684
-    @expected_bills['Total ($)'] = 1473
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW
@@ -224,9 +214,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -190
-    @expected_bills['Electricity: Total ($)'] = 494
-    @expected_bills['Total ($)'] = 1283
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_10kW
@@ -241,9 +230,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -576
-    @expected_bills['Electricity: Total ($)'] = 108
-    @expected_bills['Total ($)'] = 897
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_10kW_retail
@@ -259,9 +247,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -1442
-    @expected_bills['Electricity: Total ($)'] = -757
-    @expected_bills['Total ($)'] = 31
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW_feed_in_tariff
@@ -277,9 +264,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -178
-    @expected_bills['Electricity: Total ($)'] = 507
-    @expected_bills['Total ($)'] = 1295
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_10kW_feed_in_tariff
@@ -295,9 +281,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -1786
-    @expected_bills['Electricity: Total ($)'] = -1101
-    @expected_bills['Total ($)'] = -313
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW_grid_fee_dollars_per_kW
@@ -313,9 +298,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 138
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -190
-    @expected_bills['Electricity: Total ($)'] = 524
-    @expected_bills['Total ($)'] = 1313
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW_grid_fee_dollars
@@ -332,9 +316,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 198
     @expected_bills['Electricity: Marginal ($)'] = 577
     @expected_bills['Electricity: PV Credit ($)'] = -190
-    @expected_bills['Electricity: Total ($)'] = 584
-    @expected_bills['Total ($)'] = 1373
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   # Time-of-Use
@@ -349,9 +332,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
-    @expected_bills['Electricity: Total ($)'] = 499
-    @expected_bills['Total ($)'] = 1288
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW
@@ -366,9 +348,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -111
-    @expected_bills['Electricity: Total ($)'] = 388
-    @expected_bills['Total ($)'] = 1176
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_10kW
@@ -383,9 +364,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -391
-    @expected_bills['Electricity: Total ($)'] = 108
-    @expected_bills['Total ($)'] = 896
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_10kW_retail
@@ -401,9 +381,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -1115
-    @expected_bills['Electricity: Total ($)'] = -616
-    @expected_bills['Total ($)'] = 173
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW_feed_in_tariff
@@ -419,9 +398,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -178
-    @expected_bills['Electricity: Total ($)'] = 321
-    @expected_bills['Total ($)'] = 1110
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_10kW_feed_in_tariff
@@ -437,9 +415,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -1787
-    @expected_bills['Electricity: Total ($)'] = -1287
-    @expected_bills['Total ($)'] = -499
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW_grid_fee_dollars_per_kW
@@ -455,9 +432,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 138
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -111
-    @expected_bills['Electricity: Total ($)'] = 418
-    @expected_bills['Total ($)'] = 1206
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW_grid_fee_dollars
@@ -474,9 +450,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 198
     @expected_bills['Electricity: Marginal ($)'] = 391
     @expected_bills['Electricity: PV Credit ($)'] = -111
-    @expected_bills['Electricity: Total ($)'] = 478
-    @expected_bills['Total ($)'] = 1266
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   # Tiered and Time-of-Use
@@ -492,9 +467,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 376
-    @expected_bills['Electricity: Total ($)'] = 484
-    @expected_bills['Total ($)'] = 1273
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW
@@ -509,9 +483,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -107
-    @expected_bills['Electricity: Total ($)'] = 378
-    @expected_bills['Total ($)'] = 1166
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_10kW
@@ -524,11 +497,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
-    @expected_bills['Electricity: Marginal ($)'] = 376
-    @expected_bills['Electricity: PV Credit ($)'] = -376
-    @expected_bills['Electricity: Total ($)'] = 108
-    @expected_bills['Total ($)'] = 896
-    _check_bills(@expected_bills, actual_bills)
+    @expected_bills['Electricity: Marginal ($)'] = 379
+    @expected_bills['Electricity: PV Credit ($)'] = -379 # FIXME 377
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_10kW_retail
@@ -545,9 +517,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -376
-    @expected_bills['Electricity: Total ($)'] = 108
-    @expected_bills['Total ($)'] = 896
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW_feed_in_tariff
@@ -563,9 +534,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -178
-    @expected_bills['Electricity: Total ($)'] = 306
-    @expected_bills['Total ($)'] = 1095
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_10kW_feed_in_tariff
@@ -581,9 +551,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -1786
-    @expected_bills['Electricity: Total ($)'] = -1302
-    @expected_bills['Total ($)'] = -513
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW_grid_fee_dollars_per_kW
@@ -599,9 +568,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 138
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -107
-    @expected_bills['Electricity: Total ($)'] = 408
-    @expected_bills['Total ($)'] = 1196
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW_grid_fee_dollars
@@ -618,9 +586,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 198
     @expected_bills['Electricity: Marginal ($)'] = 376
     @expected_bills['Electricity: PV Credit ($)'] = -107
-    @expected_bills['Electricity: Total ($)'] = 468
-    @expected_bills['Total ($)'] = 1256
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   # Real-time Pricing
@@ -635,9 +602,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
-    @expected_bills['Electricity: Total ($)'] = 460
-    @expected_bills['Total ($)'] = 1249
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW
@@ -652,9 +618,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -104 # FIXME 107
-    @expected_bills['Electricity: Total ($)'] = 355
-    @expected_bills['Total ($)'] = 1144
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_10kW
@@ -669,9 +634,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -641
-    @expected_bills['Electricity: Total ($)'] = -181
-    @expected_bills['Total ($)'] = 607
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_10kW_retail
@@ -687,9 +651,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -1047 # FIXME 1070
-    @expected_bills['Electricity: Total ($)'] = -587
-    @expected_bills['Total ($)'] = 201
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW_feed_in_tariff
@@ -705,9 +668,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -178
-    @expected_bills['Electricity: Total ($)'] = 282
-    @expected_bills['Total ($)'] = 1070
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_10kW_feed_in_tariff
@@ -723,9 +685,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 108
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -1786
-    @expected_bills['Electricity: Total ($)'] = -1326
-    @expected_bills['Total ($)'] = -538
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW_grid_fee_dollars_per_kW
@@ -741,9 +702,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 138
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -104 # FIXME 107
-    @expected_bills['Electricity: Total ($)'] = 385
-    @expected_bills['Total ($)'] = 1174
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW_grid_fee_dollars
@@ -760,9 +720,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Fixed ($)'] = 198
     @expected_bills['Electricity: Marginal ($)'] = 352
     @expected_bills['Electricity: PV Credit ($)'] = -104 # FIXME 107
-    @expected_bills['Electricity: Total ($)'] = 445
-    @expected_bills['Total ($)'] = 1234
-    _check_bills(@expected_bills, actual_bills)
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
   end
 
   # Workflow Tests
@@ -926,15 +885,6 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert_equal(0.0, CalculateUtilityBill.calculate_monthly_prorate(header, 5))
   end
 
-  def _check_bills(expected_bills, actual_bills)
-    bills = expected_bills.keys | actual_bills.keys
-    bills.each do |bill|
-      assert(expected_bills.keys.include?(bill))
-      assert(actual_bills.keys.include?(bill))
-      assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
-    end
-  end
-
   def _get_actual_bills(bills_csv)
     actual_bills = {}
     File.readlines(bills_csv).each do |line|
@@ -944,6 +894,22 @@ class ReportUtilityBillsTest < MiniTest::Test
       actual_bills[key] = Float(value)
     end
     return actual_bills
+  end
+
+  def _get_expected_bills(expected_bills)
+    expected_bills['Electricity: Total ($)'] = expected_bills['Electricity: Fixed ($)'] + expected_bills['Electricity: Marginal ($)'] + expected_bills['Electricity: PV Credit ($)']
+    expected_bills['Natural Gas: Total ($)'] = expected_bills['Natural Gas: Fixed ($)'] + expected_bills['Natural Gas: Marginal ($)']
+    expected_bills['Total ($)'] = expected_bills['Electricity: Total ($)'] + expected_bills['Natural Gas: Total ($)'] + expected_bills['Fuel Oil: Total ($)'] + expected_bills['Propane: Total ($)'] + expected_bills['Wood Cord: Total ($)'] + expected_bills['Wood Pellets: Total ($)'] + expected_bills['Coal: Total ($)']
+    return expected_bills
+  end
+
+  def _check_bills(expected_bills, actual_bills)
+    bills = expected_bills.keys | actual_bills.keys
+    bills.each do |bill|
+      assert(expected_bills.keys.include?(bill))
+      assert(actual_bills.keys.include?(bill))
+      assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
+    end
   end
 
   def _load_timeseries(fuels, path)
