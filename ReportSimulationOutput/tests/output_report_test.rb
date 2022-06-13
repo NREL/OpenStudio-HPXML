@@ -124,8 +124,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     'Unmet Hours: Cooling (hr)',
     'Peak Electricity: Winter Total (W)',
     'Peak Electricity: Summer Total (W)',
-    'Peak Load: Heating: Delivered (kBtu)',
-    'Peak Load: Cooling: Delivered (kBtu)',
+    'Peak Load: Heating: Delivered (kBtu/hr)',
+    'Peak Load: Cooling: Delivered (kBtu/hr)',
     'Component Load: Heating: Roofs (MBtu)',
     'Component Load: Heating: Ceilings (MBtu)',
     'Component Load: Heating: Walls (MBtu)',
@@ -241,6 +241,8 @@ class ReportSimulationOutputTest < MiniTest::Test
   BaseHPXMLTimeseriesColsZoneTemps = [
     'Temperature: Attic - Unvented',
     'Temperature: Living Space',
+    'Temperature: Heating Setpoint',
+    'Temperature: Cooling Setpoint',
   ]
 
   BaseHPXMLTimeseriesColsAirflows = [
@@ -704,6 +706,23 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps)
+  end
+
+  def test_timeseries_hourly_zone_temperatures_without_cooling
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-furnace-gas-only.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint']
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint'])
   end
 
   def test_timeseries_hourly_zone_temperatures_mf_space
@@ -1175,7 +1194,6 @@ class ReportSimulationOutputTest < MiniTest::Test
       annual_csv, timeseries_csv = _test_measure(args_hash, eri_design)
       assert(File.exist?(annual_csv))
       assert(!File.exist?(timeseries_csv))
-      expected_annual_rows = AnnualRows
       actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
       assert(actual_annual_rows.include? 'ERI: Building: CFA')
 
@@ -1238,13 +1256,13 @@ class ReportSimulationOutputTest < MiniTest::Test
   def _parse_time(ts)
     date, time = ts.split('T')
     year, month, day = date.split('-')
-    hour, minute, second = time.split(':')
+    hour, minute, _second = time.split(':')
     return Time.utc(year, month, day, hour, minute)
   end
 
   def _check_for_constant_timeseries_step(time_col)
     steps = []
-    time_col.each_with_index do |ts, i|
+    time_col.each_with_index do |_ts, i|
       next if i < 3
 
       t0 = _parse_time(time_col[i - 1])
