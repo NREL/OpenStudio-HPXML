@@ -241,6 +241,8 @@ class ReportSimulationOutputTest < MiniTest::Test
   BaseHPXMLTimeseriesColsZoneTemps = [
     'Temperature: Attic - Unvented',
     'Temperature: Living Space',
+    'Temperature: Heating Setpoint',
+    'Temperature: Cooling Setpoint',
   ]
 
   BaseHPXMLTimeseriesColsAirflows = [
@@ -704,6 +706,23 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps)
+  end
+
+  def test_timeseries_hourly_zone_temperatures_without_cooling
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-furnace-gas-only.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint']
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint'])
   end
 
   def test_timeseries_hourly_zone_temperatures_mf_space

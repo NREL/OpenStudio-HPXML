@@ -209,6 +209,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       comp_loads_program = nil
     end
+    has_heating = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_heating').get
+    has_cooling = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_cooling').get
 
     timeseries_frequency = runner.getOptionalStringArgumentValue('timeseries_frequency', user_arguments)
     timeseries_frequency = timeseries_frequency.is_initialized ? timeseries_frequency.get : 'none'
@@ -366,6 +368,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if @model.getScheduleConstants.select { |o| o.name.to_s == key }.size == 0
 
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
+      end
+      # Also report thermostat setpoints
+      if has_heating
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{timeseries_frequency};").get
+      end
+      if has_cooling
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{timeseries_frequency};").get
       end
     end
 
@@ -844,6 +853,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @zone_temps[scheduled_temperature_name].name = "Temperature: #{scheduled_temperature_name.split.map(&:capitalize).join(' ')}"
         @zone_temps[scheduled_temperature_name].timeseries_units = 'F'
         @zone_temps[scheduled_temperature_name].timeseries_output = get_report_variable_data_timeseries([scheduled_temperature_name], ['Schedule Value'], 9.0 / 5.0, 32.0, timeseries_frequency)
+      end
+      { 'Heating Setpoint' => 'Zone Thermostat Heating Setpoint Temperature',
+        'Cooling Setpoint' => 'Zone Thermostat Cooling Setpoint Temperature' }.each do |sp_name, sp_var|
+        @zone_temps[sp_name] = ZoneTemp.new
+        @zone_temps[sp_name].name = "Temperature: #{sp_name}"
+        @zone_temps[sp_name].timeseries_units = 'F'
+        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationLivingSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 
