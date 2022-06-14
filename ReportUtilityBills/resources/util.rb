@@ -519,6 +519,21 @@ def process_usurdb(filepath)
   require 'csv'
   require 'json'
 
+  skip_keywords = true
+  keywords = ['lighting',
+              'lights',
+              'private light',
+              'yard light',
+              'security light',
+              'lumens',
+              'watt hps',
+              'incandescent',
+              'halide',
+              'lamps',
+              '[partial]',
+              'rider',
+              'irrigation']
+
   puts 'Parsing CSV...'
   rates = CSV.read(filepath, headers: true)
   rates = rates.map { |d| d.to_hash }
@@ -527,6 +542,7 @@ def process_usurdb(filepath)
   residential_rates = []
   rates.each do |rate|
     next if rate['sector'] != 'Residential'
+    next if keywords.any? { |x| rate['name'].downcase.include?(x) } && skip_keywords
 
     rate.each do |k, v|
       rate.delete(k) if v.nil?
