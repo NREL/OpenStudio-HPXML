@@ -447,7 +447,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
           else
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-            rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter) # TODO: is this correct?
+            rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter)
             rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
             rate.flatratefueladj = tariff[:flatratefueladj] if tariff.keys.include?(:flatratefueladj)
 
@@ -460,6 +460,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
 
             rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
+
+            if rate.demandratestructure || rate.demandweekdayschedule || rate.demandweekendschedule || rate.flatdemandstructure
+              warnings << 'Demand charges are not currently supported when calculating detailed utility bills.'
+            end
           end
         end
 

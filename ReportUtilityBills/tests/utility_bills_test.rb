@@ -857,6 +857,15 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(!File.exist?(@workflow_bills_csv))
   end
 
+  def test_warning_demand_charges
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/539f6aacec4f024411ec92ab.json'
+    expected_warnings = ['Demand charges are not currently supported when calculating detailed utility bills.']
+    _test_workflow(expected_warnings: expected_warnings)
+    assert(!File.exist?(@workflow_bills_csv))
+  end
+
   def test_monthly_prorate
     # Test begin_month == end_month
     header = HPXML::Header.new(nil)
