@@ -23,19 +23,11 @@ class UtilityRate
     @energyratestructure = []
     @energyweekdayschedule = []
     @energyweekendschedule = []
-
-    @demandratestructure = []
-    @demandweekdayschedule = []
-    @demandweekendschedule = []
-
-    @flatdemandstructure = []
   end
   attr_accessor(:fixedmonthlycharge, :flatratebuy, :flatratefueladj, :realtimeprice,
                 :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
                 :feed_in_tariff_rate,
-                :energyratestructure, :energyweekdayschedule, :energyweekendschedule,
-                :demandratestructure, :demandweekdayschedule, :demandweekendschedule,
-                :flatdemandstructure)
+                :energyratestructure, :energyweekdayschedule, :energyweekendschedule)
 end
 
 class UtilityBill

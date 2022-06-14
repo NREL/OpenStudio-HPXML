@@ -455,13 +455,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
             rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
 
-            rate.demandratestructure = tariff[:demandratestructure] if tariff.keys.include?(:demandratestructure)
-            rate.demandweekdayschedule = tariff[:demandweekdayschedule] if tariff.keys.include?(:demandweekdayschedule)
-            rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
-
-            rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
-
-            if rate.demandratestructure || rate.demandweekdayschedule || rate.demandweekendschedule || rate.flatdemandstructure
+            if tariff.keys.include?(:demandratestructure) || tariff.keys.include?(:flatdemandstructure)
               warnings << 'Demand charges are not currently supported when calculating detailed utility bills.'
             end
           end
