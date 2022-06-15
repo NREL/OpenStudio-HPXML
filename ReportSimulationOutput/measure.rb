@@ -900,25 +900,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if not @emissions.empty?
       kwh_to_mwh = UnitConversions.convert(1.0, 'kWh', 'MWh')
 
-      hourly_elec_net = nil
-      @end_uses.each do |_key, end_use|
-        next unless end_use.hourly_output.size > 0
-
-        hourly_elec_net = [0.0] * end_use.hourly_output.size if hourly_elec_net.nil?
-        hourly_elec_net = hourly_elec_net.zip(end_use.hourly_output).map { |x, y| x + y * kwh_to_mwh }
-      end
-      if include_timeseries_emissions
-        if timeseries_frequency == 'timestep' && @hpxml.header.timestep != 60
-          timeseries_elec_net = outputs[:elec_net_timeseries].map { |x| x * kwh_to_mwh }
-        else
-          # Need to perform calculations hourly at a minimum
-          timeseries_elec_net = hourly_elec_net.dup
-        end
-      end
-
       # Calculate for each scenario
       @hpxml.header.emissions_scenarios.each do |scenario|
         key = [scenario.emissions_type, scenario.name]
+
+        # Get hourly electricity factors
         if not scenario.elec_schedule_filepath.nil?
           # Obtain Cambium hourly factors for the simulation run period
           num_header_rows = scenario.elec_schedule_number_of_header_rows
@@ -938,62 +924,85 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
         hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
 
-        if hourly_elec_net.size == hourly_elec_factors[sim_start_hour..sim_end_hour].size + 24
-          # Use leap-year for calculations
-          year = 2000
-          sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
-          # Duplicate Feb 28 Cambium values for Feb 29
-          hourly_elec_factors = hourly_elec_factors[0..1415] + hourly_elec_factors[1392..1415] + hourly_elec_factors[1416..8759]
-        end
-        hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour] # Trim to sim period
+        # Calculate annual/timeseries emissions for each end use
+        @end_uses.each do |eu_key, end_use|
+          fuel_type, _end_use_type = eu_key
+          next unless fuel_type == FT::Elec
+          next unless end_use.hourly_output.size > 0
 
-        fail 'Unexpected failure for emissions calculations.' if hourly_elec_factors.size != hourly_elec_net.size
+          hourly_elec = end_use.hourly_output
 
-        # Calculate annual emissions for net electricity
-        if scenario.elec_units == HPXML::EmissionsScenario::UnitsKgPerMWh
-          elec_units_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
-        elsif scenario.elec_units == HPXML::EmissionsScenario::UnitsLbPerMWh
-          elec_units_mult = 1.0
-        end
-        @emissions[key].annual_output_by_fuel[FT::Elec] = hourly_elec_net.zip(hourly_elec_factors).map { |x, y| x * y * elec_units_mult }.sum
-        if include_timeseries_emissions
-          # Calculate hourly emissions for net electricity
+          if hourly_elec.size == hourly_elec_factors[sim_start_hour..sim_end_hour].size + 24
+            # Use leap-year for calculations
+            year = 2000
+            sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
+            # Duplicate Feb 28 Cambium values for Feb 29
+            hourly_elec_factors = hourly_elec_factors[0..1415] + hourly_elec_factors[1392..1415] + hourly_elec_factors[1416..8759]
+          end
+          hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour] # Trim to sim period
+
+          fail 'Unexpected failure for emissions calculations.' if hourly_elec_factors.size != hourly_elec.size
+
+          # Calculate annual emissions for end use
+          if scenario.elec_units == HPXML::EmissionsScenario::UnitsKgPerMWh
+            elec_units_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
+          elsif scenario.elec_units == HPXML::EmissionsScenario::UnitsLbPerMWh
+            elec_units_mult = 1.0
+          end
+          @emissions[key].annual_output_by_end_use[eu_key] = hourly_elec.zip(hourly_elec_factors).map { |x, y| x * y * kwh_to_mwh * elec_units_mult }.sum
+
+          next unless include_timeseries_emissions
+
+          # Calculate timeseries emissions for end use
+
+          if timeseries_frequency == 'timestep' && @hpxml.header.timestep != 60
+            timeseries_elec = nil
+            end_use.timeseries_output_by_system.each do |_sys_id, timeseries_output|
+              timeseries_elec = [0.0] * timeseries_output.size if timeseries_elec.nil?
+              timeseries_elec = timeseries_elec.zip(timeseries_output.map { |x| x * kwh_to_mwh }).map { |x, y| x + y }
+            end
+          else
+            # Need to perform calculations hourly at a minimum
+            timeseries_elec = end_use.hourly_output.map { |x| x * kwh_to_mwh }
+          end
+
           if timeseries_frequency == 'timestep'
             n_timesteps_per_hour = Integer(60.0 / @hpxml.header.timestep)
             timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
           else
             timeseries_elec_factors = hourly_elec_factors.dup
           end
-          fail 'Unexpected failure for emissions calculations.' if timeseries_elec_factors.size != timeseries_elec_net.size
+          fail 'Unexpected failure for emissions calculations.' if timeseries_elec_factors.size != timeseries_elec.size
 
-          @emissions[key].timeseries_output_by_fuel[FT::Elec] = timeseries_elec_net.zip(timeseries_elec_factors).map { |n, f| n * f * elec_units_mult }
+          @emissions[key].timeseries_output_by_end_use[eu_key] = timeseries_elec.zip(timeseries_elec_factors).map { |n, f| n * f * elec_units_mult }
 
           # Aggregate up from hourly to the desired timeseries frequency
-          if ['daily', 'monthly'].include? timeseries_frequency
-            if timeseries_frequency == 'daily'
-              n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
-            elsif timeseries_frequency == 'monthly'
-              n_days_per_month = Constants.NumDaysInMonths(year)
-              n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
-              n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
-              n_days_per_period[-1] = @hpxml.header.sim_end_day
-              n_hours_per_period = n_days_per_period.map { |x| x * 24 }
-            end
-            fail 'Unexpected failure for emissions calculations.' if n_hours_per_period.sum != @emissions[key].timeseries_output_by_fuel[FT::Elec].size
+          next unless ['daily', 'monthly'].include? timeseries_frequency
 
-            timeseries_output = []
-            start_hour = 0
-            n_hours_per_period.each do |n_hours|
-              timeseries_output << @emissions[key].timeseries_output_by_fuel[FT::Elec][start_hour..start_hour + n_hours - 1].sum()
-              start_hour += n_hours
-            end
-            @emissions[key].timeseries_output_by_fuel[FT::Elec] = timeseries_output
+          if timeseries_frequency == 'daily'
+            n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
+          elsif timeseries_frequency == 'monthly'
+            n_days_per_month = Constants.NumDaysInMonths(year)
+            n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
+            n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
+            n_days_per_period[-1] = @hpxml.header.sim_end_day
+            n_hours_per_period = n_days_per_period.map { |x| x * 24 }
           end
+          fail 'Unexpected failure for emissions calculations.' if n_hours_per_period.sum != @emissions[key].timeseries_output_by_end_use[eu_key].size
+
+          timeseries_output = []
+          start_hour = 0
+          n_hours_per_period.each do |n_hours|
+            timeseries_output << @emissions[key].timeseries_output_by_end_use[eu_key][start_hour..start_hour + n_hours - 1].sum()
+            start_hour += n_hours
+          end
+          @emissions[key].timeseries_output_by_end_use[eu_key] = timeseries_output
         end
 
         # Calculate emissions for fossil fuels
-        @fuels.each do |fuel_type, fuel|
-          next if [FT::Elec].include? fuel_type
+        @end_uses.each do |eu_key, end_use|
+          fuel_type, _end_use_type = eu_key
+          next if fuel_type == FT::Elec
 
           fuel_map = { FT::Gas => [scenario.natural_gas_units, scenario.natural_gas_value],
                        FT::Propane => [scenario.propane_units, scenario.propane_value],
@@ -1003,7 +1012,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                        FT::WoodPellets => [scenario.wood_pellets_units, scenario.wood_pellets_value] }
           fuel_units, fuel_factor = fuel_map[fuel_type]
           if fuel_factor.nil?
-            if fuel.annual_output != 0
+            if end_use.annual_output != 0
               runner.registerWarning("No emissions factor found for Scenario=#{scenario.name}, Type=#{scenario.emissions_type}, Fuel=#{fuel_type}.")
             end
             fuel_factor = 0.0
@@ -1014,13 +1023,31 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             fuel_units_mult = 1.0
           end
 
-          @emissions[key].annual_output_by_fuel[fuel_type] = UnitConversions.convert(fuel.annual_output, fuel.annual_units, 'MBtu') * fuel_factor * fuel_units_mult
+          @emissions[key].annual_output_by_end_use[eu_key] = UnitConversions.convert(end_use.annual_output, end_use.annual_units, 'MBtu') * fuel_factor * fuel_units_mult
           next unless include_timeseries_emissions
 
-          fuel_to_mbtu = UnitConversions.convert(1.0, fuel.timeseries_units, 'MBtu')
-          fail 'Unexpected failure for emissions calculations.' if fuel.timeseries_output.size != @emissions[key].timeseries_output_by_fuel[FT::Elec].size
+          fuel_to_mbtu = UnitConversions.convert(1.0, end_use.timeseries_units, 'MBtu')
 
-          @emissions[key].timeseries_output_by_fuel[fuel_type] = fuel.timeseries_output.map { |f| f * fuel_to_mbtu * fuel_factor * fuel_units_mult }
+          end_use.timeseries_output_by_system.each do |_sys_id, timeseries_output|
+            @emissions[key].timeseries_output_by_end_use[eu_key] = [0.0] * timeseries_output.size if @emissions[key].timeseries_output_by_end_use[eu_key].nil?
+            @emissions[key].timeseries_output_by_end_use[eu_key] = @emissions[key].timeseries_output_by_end_use[eu_key].zip(timeseries_output.map { |f| f * fuel_to_mbtu * fuel_factor * fuel_units_mult }).map { |x, y| x + y }
+          end
+        end
+
+        # Roll up end use emissions to fuel emissions
+        @fuels.each do |fuel_type, _fuel|
+          @emissions[key].annual_output_by_fuel[fuel_type] = 0.0
+          @emissions[key].annual_output_by_end_use.keys.each do |eu_key|
+            next unless eu_key[0] == fuel_type
+            next if @emissions[key].annual_output_by_end_use[eu_key] == 0
+
+            @emissions[key].annual_output_by_fuel[fuel_type] += @emissions[key].annual_output_by_end_use[eu_key]
+
+            next unless include_timeseries_emissions
+
+            @emissions[key].timeseries_output_by_fuel[fuel_type] = [0.0] * @emissions[key].timeseries_output_by_end_use[eu_key].size if @emissions[key].timeseries_output_by_fuel[fuel_type].nil?
+            @emissions[key].timeseries_output_by_fuel[fuel_type] = @emissions[key].timeseries_output_by_fuel[fuel_type].zip(@emissions[key].timeseries_output_by_end_use[eu_key]).map { |x, y| x + y }
+          end
         end
 
         # Sum individual fuel results for total
@@ -1119,12 +1146,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if not @emissions.empty?
       results_out << [line_break]
-      # Include total and disaggregated by fuel
       @emissions.each do |_scenario_key, emission|
+        # Emissions total
         results_out << ["#{emission.name} (#{emission.annual_units})", emission.annual_output.to_f.round(2)]
-        emission.annual_output_by_fuel.each do |fuel, _annual_output|
-          results_out << ["#{emission.name.gsub(': Total', ': ' + fuel)} (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(2)]
+        # Emissions by fuel
+        emission.annual_output_by_fuel.each do |fuel, annual_output|
+          results_out << ["#{emission.name.gsub(': Total', ': ' + fuel)} (#{emission.annual_units})", annual_output.to_f.round(2)]
         end
+        # Emissions by end use
+        # FIXME: Uncomment this
+        # emission.annual_output_by_end_use.each do |key, _annual_output|
+        #  results_out << ["#{emission.name.gsub(': Total', ': ' + key)} (#{emission.annual_units})", annual_output.to_f.round(2)]
+        # end
       end
     end
     results_out << [line_break]
@@ -1929,10 +1962,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   class Emission < BaseOutput
     def initialize()
       super()
+      @timeseries_output_by_end_use = {}
       @timeseries_output_by_fuel = {}
       @annual_output_by_fuel = {}
+      @annual_output_by_end_use = {}
     end
-    attr_accessor(:annual_output_by_fuel, :timeseries_output_by_fuel)
+    attr_accessor(:annual_output_by_fuel, :annual_output_by_end_use, :timeseries_output_by_fuel, :timeseries_output_by_end_use)
   end
 
   class HotWater < BaseOutput
