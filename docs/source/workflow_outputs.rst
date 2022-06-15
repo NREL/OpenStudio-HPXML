@@ -213,6 +213,7 @@ Annual Emissions
 ~~~~~~~~~~~~~~~~
 
 Results for each emissions scenario defined in the HPXML file is listed as shown below.
+Note that rows below with values of zero will be excluded.
 
    =======================================================================  ==================================================================
    Type                                                                     Notes
