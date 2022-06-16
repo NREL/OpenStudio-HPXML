@@ -370,6 +370,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-additional-properties.xml' => 'base.xml',
+    'base-misc-bills.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -2124,6 +2125,16 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
   if ['base-misc-additional-properties.xml'].include? hpxml_file
     args['additional_properties'] += '|LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
+  elsif ['base-misc-bills.xml'].include? hpxml_file
+    args['bills_scenario_names'] = 'Simple Bills - Net Metering, Simple Bills - Feed-In Tariff'
+    args['bills_electricity_marginal_rates'] = '0.12, 0.13'
+    args['bills_natural_gas_marginal_rates'] = '1.01, 1.02'
+    args['bills_pv_compensation_types'] = 'Net Metering,Feed-In Tariff'
+    args['bills_pv_annual_excess_sellback_rate_types'] = 'User-Specified,Retail Electricity Cost'
+    args['bills_pv_net_metering_annual_excess_sellback_rates'] = '0.03,NA'
+    args['bills_pv_feed_in_tariff_rates'] = 'NA,0.12'
+    args['bills_pv_grid_connection_fee_units'] = '$/kW,$'
+    args['bills_pv_monthly_grid_connection_fees'] = '2.5,7.5'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
