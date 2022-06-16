@@ -1386,9 +1386,10 @@ end
 
   def get_external_file(tmp_schedules_path)
 puts "tmp_schedules_path #{tmp_schedules_path}"
-puts File.exist?(tmp_schedules_path)
+puts "File.exist?(tmp_schedules_path) #{File.exist?(tmp_schedules_path)}"
     if File.exist? tmp_schedules_path
       @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
+puts "@external_file.is_initialized #{@external_file.is_initialized}"
       if @external_file.is_initialized
         @external_file = @external_file.get
         # ExternalFile creates a new file, so delete our temporary one immediately if we can
