@@ -869,6 +869,7 @@ class HPXML < Object
   class Header < BaseElement
     def initialize(hpxml_object, *args)
       @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
+      @bills_scenarios = BillsScenarios.new(hpxml_object)
       super(hpxml_object, *args)
     end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
@@ -882,6 +883,7 @@ class HPXML < Object
              :occupancy_calculation_type, :extension_properties]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
+    attr_reader(:bills_scenarios)
 
     def check_for_errors
       errors = []
@@ -910,6 +912,8 @@ class HPXML < Object
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
 
       errors += @emissions_scenarios.check_for_errors
+
+      errors += @bills_scenarios.check_for_errors
 
       return errors
     end
@@ -986,6 +990,7 @@ class HPXML < Object
         end
       end
       @emissions_scenarios.to_oga(software_info)
+      @bills_scenarios.to_oga(software_info)
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -1055,6 +1060,7 @@ class HPXML < Object
         end
       end
       @emissions_scenarios.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
+      @bills_scenarios.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
@@ -1161,6 +1167,84 @@ class HPXML < Object
       @wood_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/Value", :float)
       @wood_pellets_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Units", :string)
       @wood_pellets_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Value", :float)
+    end
+  end
+
+  class BillsScenarios < BaseArrayElement
+    def add(**kwargs)
+      self << BillsScenario.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(software_info)
+      return if software_info.nil?
+
+      XMLHelper.get_elements(software_info, 'extension/BillsScenarios/BillsScenario').each do |bills_scenario|
+        self << BillsScenario.new(@hpxml_object, bills_scenario)
+      end
+    end
+  end
+
+  class BillsScenario < BaseElement
+    ATTRS = [:name, :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
+             :coal_marginal_rate, :wood_marginal_rate, :wood_pellets_marginal_rate,
+             :pv_compensation_type, :pv_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate, :pv_feed_in_tariff_rate, :pv_grid_connection_fee_unit, :pv_monthly_grid_connection_fee]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.bills_scenarios.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(software_info)
+      bills_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'BillsScenarios'])
+      bills_scenario = XMLHelper.add_element(bills_scenarios, 'BillsScenario')
+      XMLHelper.add_element(bills_scenario, 'Name', @name, :string) unless @name.nil?
+      { HPXML::FuelTypeElectricity => [@elec_marginal_rate, @elec_marginal_rate_isdefaulted],
+        HPXML::FuelTypeNaturalGas => [@natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
+        HPXML::FuelTypePropane => [@propane_marginal_rate, @propane_marginal_rate_isdefaulted],
+        HPXML::FuelTypeOil => [@fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
+        HPXML::FuelTypeCoal => [@coal_marginal_rate, @coal_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodCord => [@wood_marginal_rate, @wood_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodPellets => [@wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
+        marginal_rate, marginal_rate_isdefaulted = vals
+        next if marginal_rate.nil?
+
+        bills_factor = XMLHelper.add_element(bills_scenario, 'BillsFactor')
+        XMLHelper.add_element(bills_factor, 'FuelType', fuel, :string)
+        XMLHelper.add_element(bills_factor, 'MarginalRate', marginal_rate, :float, marginal_rate_isdefaulted)
+      end
+      if not @pv_compensation_type.nil?
+        pv = XMLHelper.add_element(bills_scenario, 'Photovoltaics')
+        XMLHelper.add_element(pv, 'CompensationType', pv_compensation_type, :string, pv_compensation_type_isdefaulted)
+        XMLHelper.add_element(pv, 'AnnualExcessSellbackRateType', pv_annual_excess_sellback_rate_type, :string, pv_annual_excess_sellback_rate_type_isdefaulted) unless @pv_annual_excess_sellback_rate_type.nil?
+        XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRate', pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
+        XMLHelper.add_element(pv, 'FeedInTariffRate', pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
+        XMLHelper.add_element(pv, 'GridConnectionFeeUnits', pv_grid_connection_fee_unit, :string, pv_grid_connection_fee_unit_isdefaulted) unless @pv_grid_connection_fee_unit.nil?
+        XMLHelper.add_element(pv, 'MonthlyGridConnectionFee', pv_monthly_grid_connection_fee, :float, pv_monthly_grid_connection_fee_isdefaulted) unless @pv_monthly_grid_connection_fee.nil?
+      end
+    end
+
+    def from_oga(bills_scenario)
+      return if bills_scenario.nil?
+
+      @name = XMLHelper.get_value(bills_scenario, 'Name', :string)
+      @elec_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/MarginalRate", :float)
+      @natural_gas_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/MarginalRate", :float)
+      @propane_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypePropane}']/MarginalRate", :float)
+      @fuel_oil_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeOil}']/MarginalRate", :float)
+      @coal_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeCoal}']/MarginalRate", :float)
+      @wood_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/MarginalRate", :float)
+      @wood_pellets_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/MarginalRate", :float)
+      @pv_compensation_type = XMLHelper.get_value(bills_scenario, 'Photovoltaics/CompensationType', :string)
+      @pv_annual_excess_sellback_rate_type = XMLHelper.get_value(bills_scenario, 'Photovoltaics/AnnualExcessSellbackRateType', :string)
+      @pv_net_metering_annual_excess_sellback_rate = XMLHelper.get_value(bills_scenario, 'Photovoltaics/NetMeteringAnnualExcessSellbackRate', :float)
+      @pv_feed_in_tariff_rate = XMLHelper.get_value(bills_scenario, 'Photovoltaics/FeedInTariffRate', :float)
+      @pv_grid_connection_fee_unit = XMLHelper.get_value(bills_scenario, 'Photovoltaics/GridConnectionFeeUnits', :string)
+      @pv_monthly_grid_connection_fee = XMLHelper.get_value(bills_scenario, 'Photovoltaics/MonthlyGridConnectionFee', :float)
     end
   end
 
