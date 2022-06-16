@@ -4,7 +4,8 @@ __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
-- Timeseries outputs:
+- Annual/timeseries outputs:
+  - Adds annual emission outputs disaggregated by end use; timeseries emission outputs disaggregated by end use can be requested.
   - Allows generating timeseries unmet hours for heating and cooling.
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
