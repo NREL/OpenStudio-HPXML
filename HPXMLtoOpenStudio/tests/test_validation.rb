@@ -60,7 +60,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
     rescue LoadError
     end
-    Dir.chdir(begin_dir) # Prevent above code from changing the working dir and causing random test failtures
+    Dir.chdir(begin_dir) # Prevent above code from changing the working dir and causing random test failures
   end
 
   def test_role_attributes_in_schematron_doc
