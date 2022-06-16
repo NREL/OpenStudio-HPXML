@@ -155,7 +155,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def outputs
     outs = OpenStudio::Measure::OSOutputVector.new
 
-    setup_outputs()
+    setup_outputs(true)
 
     all_outputs = []
     all_outputs << @totals
@@ -209,6 +209,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       comp_loads_program = nil
     end
+    has_heating = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_heating').get
+    has_cooling = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_cooling').get
 
     timeseries_frequency = runner.getOptionalStringArgumentValue('timeseries_frequency', user_arguments)
     timeseries_frequency = timeseries_frequency.is_initialized ? timeseries_frequency.get : 'none'
@@ -240,7 +242,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : nil
     end
 
-    setup_outputs(user_output_variables)
+    setup_outputs(false, user_output_variables)
 
     # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries
     # end use consumption because EnergyPlus results may be post-processed due to HVAC DSE.
@@ -367,6 +369,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
       end
+      # Also report thermostat setpoints
+      if has_heating
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{timeseries_frequency};").get
+      end
+      if has_cooling
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{timeseries_frequency};").get
+      end
     end
 
     # Airflow outputs (timeseries only)
@@ -467,7 +476,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
 
-    setup_outputs(user_output_variables)
+    setup_outputs(false, user_output_variables)
 
     if not File.exist? File.join(output_dir, 'eplusout.msgpack')
       runner.registerError('Cannot find eplusout.msgpack.')
@@ -655,7 +664,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
     @peak_loads.each do |_load_type, peak_load|
-      peak_load.annual_output = UnitConversions.convert(get_tabular_data_value(peak_load.report.upcase, 'EMS', 'Custom Monthly Report', ['Maximum of Months'], "#{peak_load.ems_variable.upcase}_PEAKLOAD_OUTVAR {Maximum}", 'W'), 'Wh', peak_load.annual_units)
+      peak_load.annual_output = UnitConversions.convert(get_tabular_data_value(peak_load.report.upcase, 'EMS', 'Custom Monthly Report', ['Maximum of Months'], "#{peak_load.ems_variable.upcase}_PEAKLOAD_OUTVAR {Maximum}", 'W'), 'W', peak_load.annual_units)
     end
 
     # End Uses
@@ -675,6 +684,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
+
+    # Disaggregate 8760 GSHP shared pump energy into heating vs cooling by
+    # applying proportionally to the GSHP heating & cooling fan/pump energy use.
+    gshp_shared_loop_end_use = @end_uses[[FT::Elec, 'TempGSHPSharedPump']]
+    htg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::HeatingFanPump]]
+    clg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::CoolingFanPump]]
+    gshp_shared_loop_end_use.annual_output_by_system.keys.each do |sys_id|
+      # Calculate heating & cooling fan/pump end use multiplier
+      htg_energy = htg_fan_pump_end_use.annual_output_by_system[sys_id]
+      clg_energy = clg_fan_pump_end_use.annual_output_by_system[sys_id]
+      shared_pump_energy = gshp_shared_loop_end_use.annual_output_by_system[sys_id]
+      energy_multiplier = (htg_energy + clg_energy + shared_pump_energy) / (htg_energy + clg_energy)
+      # Apply multiplier
+      apply_multiplier_to_output(htg_fan_pump_end_use, nil, sys_id, energy_multiplier)
+      apply_multiplier_to_output(clg_fan_pump_end_use, nil, sys_id, energy_multiplier)
+    end
+    @end_uses.delete([FT::Elec, 'TempGSHPSharedPump'])
 
     # Hot Water Uses
     @hot_water_uses.each do |_hot_water_type, hot_water|
@@ -827,6 +853,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @zone_temps[scheduled_temperature_name].name = "Temperature: #{scheduled_temperature_name.split.map(&:capitalize).join(' ')}"
         @zone_temps[scheduled_temperature_name].timeseries_units = 'F'
         @zone_temps[scheduled_temperature_name].timeseries_output = get_report_variable_data_timeseries([scheduled_temperature_name], ['Schedule Value'], 9.0 / 5.0, 32.0, timeseries_frequency)
+      end
+      { 'Heating Setpoint' => 'Zone Thermostat Heating Setpoint Temperature',
+        'Cooling Setpoint' => 'Zone Thermostat Cooling Setpoint Temperature' }.each do |sp_name, sp_var|
+        @zone_temps[sp_name] = ZoneTemp.new
+        @zone_temps[sp_name].name = "Temperature: #{sp_name}"
+        @zone_temps[sp_name].timeseries_units = 'F'
+        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationLivingSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 
@@ -1612,12 +1645,22 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         # Add header per DataFileTemplate.pdf; see https://github.com/NREL/wex/wiki/DView
-        start_day = Schedule.get_day_num_from_month_day(@hpxml.header.sim_calendar_year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
+        year = @hpxml.header.sim_calendar_year
+        start_day = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
         start_hr = (start_day - 1) * 24
+        if timeseries_frequency == 'timestep'
+          interval_hrs = @hpxml.header.timestep / 60.0
+        elsif timeseries_frequency == 'hourly'
+          interval_hrs = 1.0
+        elsif timeseries_frequency == 'daily'
+          interval_hrs = 24.0
+        elsif timeseries_frequency == 'monthly'
+          interval_hrs = Constants.NumDaysInYear(year) * 24.0 / 12
+        end
         header_data = [['wxDVFileHeaderVer.1'],
                        data[0].map { |d| d.sub(':', '|') }, # Series name (series can be organized into groups by entering Group Name|Series Name)
-                       data[0].map { |_d| start_hr + 0.5 }, # Start time of the first data point; 0.5 implies average over the first hour
-                       data[0].map { |_d| @hpxml.header.timestep / 60.0 }, # Time interval in hours
+                       data[0].map { |_d| start_hr + interval_hrs / 2.0 }, # Start time of the first data point; 0.5 implies average over the first hour
+                       data[0].map { |_d| interval_hrs }, # Time interval in hours
                        data[1]] # Units
         data.delete_at(1) # Remove units, added to header data above
         data.delete_at(0) # Remove series name, added to header data above
@@ -1782,14 +1825,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Annual
     orig_value = obj.annual_output_by_system[sys_id]
     obj.annual_output_by_system[sys_id] = orig_value * mult
-    sync_obj.annual_output += (orig_value * mult - orig_value)
+    if not sync_obj.nil?
+      sync_obj.annual_output += (orig_value * mult - orig_value)
+    end
 
     # Timeseries
     if not obj.timeseries_output_by_system.empty?
       orig_values = obj.timeseries_output_by_system[sys_id]
       obj.timeseries_output_by_system[sys_id] = obj.timeseries_output_by_system[sys_id].map { |x| x * mult }
       diffs = obj.timeseries_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
-      sync_obj.timeseries_output = sync_obj.timeseries_output.zip(diffs).map { |x, y| x + y }
+      if not sync_obj.nil?
+        sync_obj.timeseries_output = sync_obj.timeseries_output.zip(diffs).map { |x, y| x + y }
+      end
     end
 
     # Hourly Electricity (for Cambium)
@@ -1985,7 +2032,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
-  def setup_outputs(user_output_variables = nil)
+  def setup_outputs(called_from_outputs_method, user_output_variables = nil)
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
         return 'kWh'
@@ -2099,6 +2146,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Lighting]))
     @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Fireplace]))
     @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Generator]))
+    if not called_from_outputs_method
+      # Temporary end use to disaggregate 8760 GSHP shared loop pump energy into heating vs cooling.
+      # This end use will not appear in output data/files.
+      @end_uses[[FT::Elec, 'TempGSHPSharedPump']] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, 'TempGSHPSharedPump']))
+    end
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
       end_use.name = "End Use: #{fuel_type}: #{end_use_type}"
@@ -2263,7 +2315,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @peak_loads.each do |load_type, peak_load|
       peak_load.name = "Peak Load: #{load_type}"
-      peak_load.annual_units = 'kBtu'
+      peak_load.annual_units = 'kBtu/hr'
     end
 
     # Zone Temperatures
@@ -2464,6 +2516,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
+                    Constants.ObjectNameGSHPSharedPump => 'TempGSHPSharedPump',
                     Constants.ObjectNameClothesWasher => EUT::ClothesWasher,
                     Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
                     Constants.ObjectNameDishwasher => EUT::Dishwasher,

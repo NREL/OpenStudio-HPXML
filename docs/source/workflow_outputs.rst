@@ -285,12 +285,12 @@ Peak Building Loads
 
 Peak building loads are listed below.
 
-   ====================================  ==================================
-   Type                                  Notes
-   ====================================  ==================================
-   Peak Load: Heating: Delivered (kBtu)  Includes HVAC distribution losses.
-   Peak Load: Cooling: Delivered (kBtu)  Includes HVAC distribution losses.
-   ====================================  ==================================
+   =======================================  ==================================
+   Type                                     Notes
+   =======================================  ==================================
+   Peak Load: Heating: Delivered (kBtu/hr)  Includes HVAC distribution losses.
+   Peak Load: Cooling: Delivered (kBtu/hr)  Includes HVAC distribution losses.
+   =======================================  ==================================
 
 Note that the "Delivered" peak loads represent the energy delivered by the HVAC system; if a system is significantly undersized, there will be unmet peak load not reflected by these values.
 
@@ -362,7 +362,7 @@ Depending on the outputs requested, the file may include:
    Total Loads                          Heating, cooling, and hot water loads (in kBtu) for the building.
    Component Loads                      Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
    Unmet Hours                          Heating and cooling unmet hours.
-   Zone Temperatures                    Average temperatures (in deg-F) for each space modeled (e.g., living space, attic, garage, basement, crawlspace, etc.).
+   Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., living space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
    EnergyPlus Output Variables          These are optional and can be requested with the ReportSimulationOutput ``user_output_variables`` argument.
