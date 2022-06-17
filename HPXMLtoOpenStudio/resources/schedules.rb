@@ -1157,8 +1157,11 @@ class SchedulesFile
     convert_setpoints
 
     tmpdir = Dir.tmpdir
+puts "ENV.keys.include?('LOCAL_SCRATCH') #{ENV.keys.include?('LOCAL_SCRATCH')}"
     tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
     tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
+puts "tmpdir #{tmpdir}"
+puts "tmpfile #{tmpfile}"
     tmp_schedules_path = tmpfile.path.to_s
 
     export(tmp_schedules_path)
@@ -1387,9 +1390,9 @@ end
   def get_external_file(tmp_schedules_path)
 puts "tmp_schedules_path #{tmp_schedules_path}"
 puts "File.exist?(tmp_schedules_path) #{File.exist?(tmp_schedules_path)}"
+puts "@model.getExternalFiles.size1 #{@model.getExternalFiles.size}"
     if File.exist? tmp_schedules_path
       @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
-puts "@external_file.is_initialized #{@external_file.is_initialized}"
       if @external_file.is_initialized
         @external_file = @external_file.get
         # ExternalFile creates a new file, so delete our temporary one immediately if we can
@@ -1397,8 +1400,11 @@ puts "@external_file.is_initialized #{@external_file.is_initialized}"
           File.delete(tmp_schedules_path)
         rescue
         end
+      else
+        fail "Could not get external file for path '#{tmp_schedules_path}'."
       end
     end
+puts "@model.getExternalFiles.size2 #{@model.getExternalFiles.size}"
   end
 
   def set_vacancy
