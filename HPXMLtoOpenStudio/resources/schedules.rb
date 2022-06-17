@@ -1157,11 +1157,8 @@ class SchedulesFile
     convert_setpoints
 
     tmpdir = Dir.tmpdir
-puts "ENV.keys.include?('LOCAL_SCRATCH') #{ENV.keys.include?('LOCAL_SCRATCH')}"
     tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
     tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
-puts "tmpdir #{tmpdir}"
-puts "tmpfile #{tmpfile}"
     tmp_schedules_path = tmpfile.path.to_s
 
     export(tmp_schedules_path)
@@ -1294,11 +1291,7 @@ puts "tmpfile #{tmpfile}"
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
-begin
     schedule_file = OpenStudio::Model::ScheduleFile.new(@external_file)
-rescue
-puts "@external_file #{@external_file}"
-end
     schedule_file.setName(col_name)
     schedule_file.setColumnNumber(col_index + 1)
     schedule_file.setRowstoSkipatTop(rows_to_skip)
@@ -1388,9 +1381,6 @@ end
   end
 
   def get_external_file(tmp_schedules_path)
-puts "tmp_schedules_path #{tmp_schedules_path}"
-puts "File.exist?(tmp_schedules_path) #{File.exist?(tmp_schedules_path)}"
-puts "@model.getExternalFiles.size1 #{@model.getExternalFiles.size}"
     if File.exist? tmp_schedules_path
       @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
       if @external_file.is_initialized
@@ -1404,7 +1394,6 @@ puts "@model.getExternalFiles.size1 #{@model.getExternalFiles.size}"
         fail "Could not get external file for path '#{tmp_schedules_path}'."
       end
     end
-puts "@model.getExternalFiles.size2 #{@model.getExternalFiles.size}"
   end
 
   def set_vacancy
