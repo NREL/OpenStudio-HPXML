@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7df07b86-8cab-4818-8891-294f6432459b</version_id>
-  <version_modified>20220617T192755Z</version_modified>
+  <version_id>01eb9cc2-7942-4d0c-83e5-55ed249209b2</version_id>
+  <version_modified>20220620T194230Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -132,18 +132,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>FC0A4F2E</checksum>
-    </file>
-    <file>
-      <filename>validator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BF53D293</checksum>
-    </file>
-    <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DAFB64CF</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
@@ -338,18 +326,6 @@
       <checksum>0408C060</checksum>
     </file>
     <file>
-      <filename>hpxml_schematron/HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8ABCD77B</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>446225BE</checksum>
-    </file>
-    <file>
       <filename>schedule_files/water-heater-operating-modes.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -366,12 +342,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2DFF87CD</checksum>
-    </file>
-    <file>
-      <filename>version.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C2F66DD0</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -426,12 +396,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>A7803905</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9D553FA2</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
@@ -518,12 +482,6 @@
       <checksum>46636AA2</checksum>
     </file>
     <file>
-      <filename>meta_measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0953188C</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -554,23 +512,6 @@
       <checksum>447BF966</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>3D53043B</checksum>
-    </file>
-    <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2140989E</checksum>
-    </file>
-    <file>
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -581,6 +522,71 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3FCCEA0E</checksum>
+    </file>
+    <file>
+      <filename>xmlhelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DEF0DEFA</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>32C3F807</checksum>
+    </file>
+    <file>
+      <filename>version.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C42640F0</checksum>
+    </file>
+    <file>
+      <filename>meta_measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>332F36EE</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator_stylesheet.xslt</filename>
+      <filetype>xslt</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>23D0588A</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/iso-schematron.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2785B05C</checksum>
+    </file>
+    <file>
+      <filename>xmlvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5C54A5D5</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7007C68F</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>F1329D03</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D934622A</checksum>
     </file>
   </files>
 </measure>

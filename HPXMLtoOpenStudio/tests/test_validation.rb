@@ -6,13 +6,15 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require 'csv'
+require_relative '../resources/xmlhelper.rb'
+require_relative '../resources/xmlvalidator.rb'
 
 class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
+    @hpxml_schema_path = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
     @epvalidator_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    @hpxml_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml')
 
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
     @tmp_csv_path = File.join(@sample_files_path, 'tmp.csv')
@@ -38,29 +40,17 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       puts "[#{i + 1}/#{xmls.size}] Testing #{File.basename(xml)}..."
 
       # Test validation
+      _test_schema_validation(xml, @hpxml_schema_path)
       hpxml_doc = HPXML.new(hpxml_path: xml, building_id: 'MyBuilding').to_oga()
-      _test_schema_validation(hpxml_doc, xml)
-      _test_schematron_validation(hpxml_doc, expected_errors: []) # Ensure no errors
+      _test_schematron_validation(xml, hpxml_doc, expected_errors: []) # Ensure no errors
     end
     puts
   end
 
   def test_validation_of_schematron_doc
-    begin_dir = Dir.pwd
     # Check that the schematron file is valid
-
-    begin
-      require 'schematron-nokogiri'
-
-      [@epvalidator_stron_path, @hpxml_stron_path].each do |s_path|
-        xml_doc = Nokogiri::XML(File.open(s_path)) do |config|
-          config.options = Nokogiri::XML::ParseOptions::STRICT
-        end
-        SchematronNokogiri::Schema.new(xml_doc)
-      end
-    rescue LoadError
-    end
-    Dir.chdir(begin_dir) # Prevent above code from changing the working dir and causing random test failures
+    schematron_schema_path = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'iso-schematron.xsd'))
+    _test_schema_validation(@epvalidator_stron_path, schematron_schema_path)
   end
 
   def test_role_attributes_in_schematron_doc
@@ -93,7 +83,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def test_schematron_error_messages
+  def test_schema_schematron_error_messages
     # Test case => Error message
     all_expected_errors = { 'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -136,7 +126,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
-                            'invalid-assembly-effective-rvalue' => ['Expected AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation, id: "Wall1Insulation"]'],
+                            'invalid-assembly-effective-rvalue' => ["Element 'AssemblyEffectiveRValue'"],
                             'invalid-battery-capacities-ah' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-battery-capacities-kwh' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-calendar-year-low' => ['Expected CalendarYear to be greater than or equal to 1600'],
@@ -156,14 +146,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                                     'Expected extension/ChargeDefectRatio to be greater than or equal to -0.9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
                             'invalid-hvac-installation-quality2' => ['Expected extension/AirflowDefectRatio to be less than or equal to 9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
                                                                      'Expected extension/ChargeDefectRatio to be less than or equal to 9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
-                            'invalid-id2' => ['Expected SystemIdentifier with id attribute [context: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight]'],
-                            'invalid-input-parameters' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
-                                                           "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
-                                                           "Expected Year to be '2021' or '2018' or '2015' or '2012' or '2009' or '2006' or '2003' [context: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC]",
-                                                           'Expected Azimuth to be less than 360 [context: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof, id: "Roof1"]',
-                                                           'Expected RadiantBarrierGrade to be less than or equal to 3 [context: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof, id: "Roof1"]',
-                                                           'Expected EnergyFactor to be less than or equal to 5 [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher1"]'],
-                            'invalid-insulation-top' => ['Expected DistanceToTopOfInsulation to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer, id: "FoundationWall1Insulation"]'],
+                            'invalid-id2' => ["Element 'SystemIdentifier': The attribute 'id' is required but missing.\n at /mnt/c/git/openstudio-hpxml/workflow/sample_files/tmp.xml:306 while processing \"id\""],
+                            'invalid-input-parameters' => ["Element 'Transaction'",
+                                                           "Element 'SiteType'",
+                                                           "Element 'Year'",
+                                                           "Element 'Azimuth'",
+                                                           "Element 'RadiantBarrierGrade'",
+                                                           "Element 'EnergyFactor'"],
+                            'invalid-insulation-top' => ["Element 'DistanceToTopOfInsulation'"],
                             'invalid-number-of-bedrooms-served' => ['Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[IsSharedSystem="true"], id: "PVSystem1"]'],
                             'invalid-number-of-conditioned-floors' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'invalid-number-of-units-served' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]'],
@@ -334,9 +324,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['heat-pump-multiple-backup-systems'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
         hpxml.heating_systems << hpxml.heating_systems[0].dup
+        hpxml.heating_systems[-1].id = 'HeatingSystem2'
         hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
         hpxml.heat_pumps[0].fraction_cool_load_served = 0.5
         hpxml.heat_pumps << hpxml.heat_pumps[0].dup
+        hpxml.heat_pumps[-1].id = 'HeatPump2'
+        hpxml.heat_pumps[-1].primary_heating_system = false
+        hpxml.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-distribution-return-duct-leakage-missing'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-evap-cooler-only-ducted.xml'))
         hpxml.hvac_distributions[0].duct_leakage_measurements[-1].delete
@@ -461,6 +455,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.frame_floors << hpxml.frame_floors[0].dup
         hpxml.frame_floors[1].id = "FrameFloor#{hpxml.frame_floors.size}"
+        hpxml.frame_floors[1].insulation_id = "FrameFloorInsulation#{hpxml.frame_floors.size}"
         hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
         hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
       elsif ['multifamily-reference-water-heater'].include? error_case
@@ -497,11 +492,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
 
       # Test against schematron
-      _test_schematron_validation(hpxml_doc, expected_errors: expected_errors)
+      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+      _test_schema_and_schematron_validation(@tmp_hpxml_path, hpxml_doc, expected_errors: expected_errors)
     end
   end
 
-  def test_schematron_warning_messages
+  def test_schema_schematron_warning_messages
     # Test case => Warning message
     all_expected_warnings = { 'battery-pv-output-power-low' => ['Max power output should typically be greater than or equal to 500 W.',
                                                                 'Max power output should typically be greater than or equal to 500 W.',
@@ -663,7 +659,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       hpxml_doc = hpxml.to_oga()
 
       # Test against schematron
-      _test_schematron_validation(hpxml_doc, expected_warnings: expected_warnings)
+      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+      _test_schema_and_schematron_validation(@tmp_hpxml_path, hpxml_doc, expected_warnings: expected_warnings)
     end
   end
 
@@ -671,7 +668,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Test case => Error message
     all_expected_errors = { 'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
-                            'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
+                            'duplicate-id' => ["Element 'SystemIdentifier', attribute 'id': 'PlugLoad1' is not a valid value of the atomic type 'xs:ID'."],
                             'emissions-duplicate-names' => ['Found multiple Emissions Scenarios with the Scenario Name='],
                             'emissions-wrong-columns' => ['Emissions File has too few columns. Cannot find column number'],
                             'emissions-wrong-filename' => ["Emissions File file path 'invalid-wrong-filename.csv' does not exist."],
@@ -688,18 +685,18 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double check inputs."],
                             'invalid-battery-capacity-units' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
-                            'invalid-datatype-boolean' => ["Cannot convert 'FOOBAR' to boolean for Roof/RadiantBarrier."],
-                            'invalid-datatype-integer' => ["Cannot convert '2.5' to integer for BuildingConstruction/NumberofBedrooms."],
+                            'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
+                            'invalid-datatype-integer' => ["Element 'NumberofBedrooms': '2.5' is not a valid value of the atomic type 'IntegerGreaterThanOrEqualToZero_simple'."],
                             'invalid-datatype-float' => ["Cannot convert 'FOOBAR' to float for Slab/extension/CarpetFraction."],
                             'invalid-daylight-saving' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-distribution-cfa-served' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                   'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath' => ["foo.epw' could not be found."],
-                            'invalid-id' => ["Empty SystemIdentifier ID ('') detected for skylights."],
+                            'invalid-id' => ["Element 'SystemIdentifier', attribute 'id': '' is not a valid value of the atomic type 'xs:ID'."],
                             'invalid-neighbor-shading-azimuth' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeatingSystem1'"],
                             'invalid-relatedhvac-desuperheater' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeatingSystem1'."],
-                            'invalid-schema-version' => ["HPXML version #{Version::HPXML_Version} is required."],
+                            'invalid-schema-version' => ["Element 'HPXML', attribute 'schemaVersion'"],
                             'invalid-skylights-physical-properties' => ["Could not lookup UFactor and SHGC for skylight 'Skylight2'."],
                             'invalid-timestep' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
@@ -748,7 +745,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.dehumidifiers[-1].rh_setpoint = 0.55
       elsif ['duplicate-id'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.windows[-1].id = hpxml.windows[0].id
+        hpxml.plug_loads[-1].id = hpxml.plug_loads[0].id
       elsif ['emissions-duplicate-names'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-emissions.xml'))
         hpxml.header.emissions_scenarios << hpxml.header.emissions_scenarios[0].dup
@@ -1128,9 +1125,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   private
 
-  def _test_schematron_validation(hpxml_doc, expected_errors: nil, expected_warnings: nil)
-    # Validate via validator.rb
-    errors, warnings = Validator.run_validators(hpxml_doc, [@epvalidator_stron_path, @hpxml_stron_path])
+  def _test_schematron_validation(hpxml_path, hpxml_doc, expected_errors: nil, expected_warnings: nil)
+    errors, warnings = XMLValidator.validate_against_schematron(hpxml_path, @epvalidator_stron_path, hpxml_doc)
     if not expected_errors.nil?
       _compare_errors_or_warnings('error', errors, expected_errors)
     end
@@ -1139,12 +1135,21 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _test_schema_validation(hpxml_doc, xml)
-    # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema'))
-    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
+  def _test_schema_validation(hpxml_path, schema_path)
+    errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
     if errors.size > 0
-      flunk "#{xml}: #{errors}"
+      flunk "#{hpxml_path}: #{errors}"
+    end
+  end
+
+  def _test_schema_and_schematron_validation(hpxml_path, hpxml_doc, expected_errors: nil, expected_warnings: nil)
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, @epvalidator_stron_path, hpxml_doc)
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, @hpxml_schema_path)
+    if not expected_errors.nil?
+      _compare_errors_or_warnings('error', sct_errors + xsd_errors, expected_errors)
+    end
+    if not expected_warnings.nil?
+      _compare_errors_or_warnings('warning', sct_warnings + xsd_warnings, expected_warnings)
     end
   end
 

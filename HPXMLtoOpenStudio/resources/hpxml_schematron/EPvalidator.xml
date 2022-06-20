@@ -1396,7 +1396,7 @@
     <sch:title>[GarageVentilation]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForGarageVentilation="true"]'>
       <!-- Warnings -->
-      <sch:report role='WARN' test='true'>Ventilation fans for the garage are not currently modeled.</sch:report>
+      <sch:report role='WARN' test='true()'>Ventilation fans for the garage are not currently modeled.</sch:report>
     </sch:rule>
   </sch:pattern>
 
