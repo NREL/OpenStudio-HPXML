@@ -6,8 +6,19 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require 'csv'
 require_relative '../measure.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
+require 'oga'
 
 class ReportSimulationOutputTest < MiniTest::Test
+  def setup
+    @tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
+  end
+
+  def teardown
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+  end
+
   AnnualRows = [
     'Energy Use: Total (MBtu)',
     'Energy Use: Net (MBtu)',
@@ -1165,33 +1176,39 @@ class ReportSimulationOutputTest < MiniTest::Test
 
   def test_eri_designs
     # Create derivative HPXML file w/ ERI design type set
-    require 'fileutils'
-    require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
-    require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
-    require 'oga'
-    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
-    [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
-      new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/tests/test-eri.xml')
-      FileUtils.cp(old_hpxml_path, new_hpxml_path)
-      hpxml = HPXML.new(hpxml_path: new_hpxml_path)
+    hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
+    [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIRatedHome].each do |eri_design|
+      hpxml = HPXML.new(hpxml_path: hpxml_path)
       hpxml.header.eri_design = eri_design
-      XMLHelper.write_file(hpxml.to_oga(), new_hpxml_path)
+      XMLHelper.write_file(hpxml.to_oga(), @tmp_hpxml_path)
 
       # Run tests
-      args_hash = { 'hpxml_path' => '../workflow/tests/test-eri.xml' }
-      annual_csv, timeseries_csv = _test_measure(args_hash, eri_design)
+      args_hash = { 'hpxml_path' => @tmp_hpxml_path }
+      annual_csv, timeseries_csv = _test_measure(args_hash, eri_design: eri_design)
       assert(File.exist?(annual_csv))
       assert(!File.exist?(timeseries_csv))
       actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
       assert(actual_annual_rows.include? 'ERI: Building: CFA')
 
       # Cleanup
-      File.delete(new_hpxml_path)
       File.delete(annual_csv)
     end
   end
 
-  def _test_measure(args_hash, eri_design = nil)
+  def test_for_unsuccessful_simulation_infinity
+    # Create HPXML w/ AFUE=0 to generate Infinity result
+    hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml.heating_systems[0].heating_efficiency_afue = 0.0
+    XMLHelper.write_file(hpxml.to_oga(), @tmp_hpxml_path)
+
+    args_hash = { 'hpxml_path' => @tmp_hpxml_path }
+    annual_csv, timeseries_csv = _test_measure(args_hash, expect_success: false)
+    assert(!File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+  end
+
+  def _test_measure(args_hash, expect_success: true, eri_design: nil)
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-run-hpxml.osw')
@@ -1222,17 +1239,15 @@ class ReportSimulationOutputTest < MiniTest::Test
 
     # Run OSW
     success = system("#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path}\"")
-    assert_equal(true, success)
+    assert_equal(expect_success, success)
 
     # Cleanup
     File.delete(osw_path)
 
     if not eri_design.nil?
-      output_dir = File.dirname(File.join(File.dirname(__FILE__), '..', args_hash['hpxml_path']))
-      hpxml_name = File.basename(args_hash['hpxml_path']).gsub('.xml', '')
-      annual_csv = File.join(output_dir, "#{hpxml_name}.csv")
-      timeseries_csv = File.join(output_dir, "#{hpxml_name}_Hourly.csv")
-      run_log = File.join(output_dir, 'run.log')
+      annual_csv = args_hash['hpxml_path'].gsub('.xml', '.csv')
+      timeseries_csv = args_hash['hpxml_path'].gsub('.xml', '_Hourly.csv')
+      run_log = File.join(File.dirname(args_hash['hpxml_path']), 'run.log')
     else
       annual_csv = File.join(File.dirname(template_osw), 'run', 'results_annual.csv')
       timeseries_csv = File.join(File.dirname(template_osw), 'run', 'results_timeseries.csv')
