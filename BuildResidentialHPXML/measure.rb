@@ -2971,15 +2971,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
     end
 
+    XMLHelper.write_file(hpxml_doc, hpxml_path)
+    runner.registerInfo("Wrote file: #{hpxml_path}")
+
     # Check for invalid HPXML file
     if args[:apply_validation].is_initialized && args[:apply_validation].get
       if not validate_hpxml(runner, hpxml_path, hpxml_doc)
         return false
       end
     end
-
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
-    runner.registerInfo("Wrote file: #{hpxml_path}")
 
     # Uncomment for debugging purposes
     # File.write(hpxml_path.gsub('.xml', '.osm'), model.to_s)
