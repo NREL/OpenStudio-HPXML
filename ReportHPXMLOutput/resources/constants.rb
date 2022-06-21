@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BS
+class BO
   EnclosureWallAreaThermalBoundary = 'Enclosure: Wall Area Thermal Boundary'
   EnclosureWallAreaExterior = 'Enclosure: Wall Area Exterior'
   EnclosureFoundationWallAreaExterior = 'Enclosure: Foundation Wall Area Exterior'
@@ -51,23 +51,23 @@ class BS
   DesignLoadsCoolingLatentInfilVent = 'Design Loads Cooling Latent: Infiltration/Ventilation'
   DesignLoadsCoolingLatentIntGains = 'Design Loads Cooling Latent: Internal Gains'
 
-  def self.get_units(cost_mult_type)
-    if cost_mult_type.include?('Area')
+  def self.get_units(bldg_type)
+    if bldg_type.include? 'Area'
       return 'ft^2'
-    elsif cost_mult_type.include?('Perimeter')
+    elsif bldg_type.include? 'Perimeter'
       return 'ft'
-    elsif cost_mult_type.include?('Capacity')
+    elsif bldg_type.include? 'Capacity'
       return 'Btu/h'
-    elsif cost_mult_type.include?('Tank Volume')
+    elsif bldg_type.include? 'Tank Volume'
       return 'gal'
-    elsif cost_mult_type.include?('Flow Rate')
+    elsif bldg_type.include? 'Flow Rate'
       return 'cfm'
-    elsif cost_mult_type == 'Fixed'
+    elsif bldg_type == 'Fixed'
       return '1'
-    elsif cost_mult_type.include?('Design Loads')
+    elsif bldg_type.include? 'Design Loads'
       return 'Btu/h'
     end
 
-    fail "Unable to assign units to: #{cost_mult_type}"
+    fail "Unable to assign units to: #{bldg_type}"
   end
 end
