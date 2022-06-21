@@ -1106,8 +1106,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
     all_total += @ideal_system_loads.values.map { |x| x.annual_output.to_f }.sum(0.0)
-    if all_total == 0 || all_total.infinite?
+    if all_total == 0
       runner.registerError('Simulation unsuccessful.')
+      return false
+    elsif all_total.infinite?
+      runner.registerError('Simulation used infinite energy; double-check inputs.')
       return false
     end
 

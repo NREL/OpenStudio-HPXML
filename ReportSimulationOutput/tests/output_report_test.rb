@@ -1203,9 +1203,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga(), @tmp_hpxml_path)
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path }
-    annual_csv, timeseries_csv = _test_measure(args_hash, expect_success: false)
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
     assert(!File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
+    assert(File.readlines(run_log).any? { |line| line.include?('Simulation used infinite energy; double-check inputs.') })
   end
 
   def _test_measure(args_hash, expect_success: true, eri_design: nil)
