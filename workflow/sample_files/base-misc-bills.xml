@@ -27,7 +27,7 @@
           </BillsFactor>
           <Photovoltaics>
             <CompensationType>Net Metering</CompensationType>
-            <AnnualExcessSellbackRateType>User-Specified</AnnualExcessSellbackRateType>
+            <NetMeteringAnnualExcessSellbackRateType>User-Specified</NetMeteringAnnualExcessSellbackRateType>
             <NetMeteringAnnualExcessSellbackRate>0.03</NetMeteringAnnualExcessSellbackRate>
             <GridConnectionFeeUnits>$/kW</GridConnectionFeeUnits>
             <MonthlyGridConnectionFee>2.5</MonthlyGridConnectionFee>
@@ -45,7 +45,6 @@
           </BillsFactor>
           <Photovoltaics>
             <CompensationType>Feed-In Tariff</CompensationType>
-            <AnnualExcessSellbackRateType>Retail Electricity Cost</AnnualExcessSellbackRateType>
             <FeedInTariffRate>0.12</FeedInTariffRate>
             <GridConnectionFeeUnits>$</GridConnectionFeeUnits>
             <MonthlyGridConnectionFee>7.5</MonthlyGridConnectionFee>

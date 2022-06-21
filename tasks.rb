@@ -2130,7 +2130,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['bills_electricity_marginal_rates'] = '0.12, 0.13'
     args['bills_natural_gas_marginal_rates'] = '1.01, 1.02'
     args['bills_pv_compensation_types'] = 'Net Metering,Feed-In Tariff'
-    args['bills_pv_annual_excess_sellback_rate_types'] = 'User-Specified,Retail Electricity Cost'
+    args['bills_pv_net_metering_annual_excess_sellback_rate_types'] = 'User-Specified,Retail Electricity Cost'
     args['bills_pv_net_metering_annual_excess_sellback_rates'] = '0.03,NA'
     args['bills_pv_feed_in_tariff_rates'] = 'NA,0.12'
     args['bills_pv_grid_connection_fee_units'] = '$/kW,$'

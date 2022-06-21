@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b4f5a2d0-db32-4686-9be5-f9016e45f4b9</version_id>
-  <version_modified>20220616T184515Z</version_modified>
+  <version_id>6edeca08-2649-479a-8b9c-87bed8064c19</version_id>
+  <version_modified>20220621T214648Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6202,9 +6202,9 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_annual_excess_sellback_rate_types</name>
-      <display_name>Bills: PV Annual Excess Sellback Rate Types</display_name>
-      <description>PV annual excess sellback rate types. If multiple scenarios, use a comma-separated list.</description>
+      <name>bills_pv_net_metering_annual_excess_sellback_rate_types</name>
+      <display_name>Bills: PV Net Metering Annual Excess Sellback Rate Types</display_name>
+      <description>PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6212,7 +6212,7 @@
     <argument>
       <name>bills_pv_net_metering_annual_excess_sellback_rates</name>
       <display_name>Bills: PV Net Metering Annual Excess Sellback Rates</display_name>
-      <description>PV net metering annual excess sellback rates. If multiple scenarios, use a comma-separated list.</description>
+      <description>PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6220,7 +6220,7 @@
     <argument>
       <name>bills_pv_feed_in_tariff_rates</name>
       <display_name>Bills: PV Feed-In Tariff Rates</display_name>
-      <description>PV feed-in tariff rates. If multiple scenarios, use a comma-separated list.</description>
+      <description>PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6322,7 +6322,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5D1E0541</checksum>
+      <checksum>7721ABBC</checksum>
     </file>
   </files>
 </measure>

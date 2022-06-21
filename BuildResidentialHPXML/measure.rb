@@ -2918,19 +2918,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('PV compensation types. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_annual_excess_sellback_rate_types', false)
-    arg.setDisplayName('Bills: PV Annual Excess Sellback Rate Types')
-    arg.setDescription('PV annual excess sellback rate types. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_net_metering_annual_excess_sellback_rate_types', false)
+    arg.setDisplayName('Bills: PV Net Metering Annual Excess Sellback Rate Types')
+    arg.setDescription("PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_net_metering_annual_excess_sellback_rates', false)
     arg.setDisplayName('Bills: PV Net Metering Annual Excess Sellback Rates')
-    arg.setDescription('PV net metering annual excess sellback rates. If multiple scenarios, use a comma-separated list.')
+    arg.setDescription("PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_feed_in_tariff_rates', false)
     arg.setDisplayName('Bills: PV Feed-In Tariff Rates')
-    arg.setDescription('PV feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
+    arg.setDescription('PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_grid_connection_fee_units', false)
@@ -3544,10 +3544,10 @@ class HPXMLFile
         bills_pv_compensation_types = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_annual_excess_sellback_rate_types].is_initialized
-        bills_pv_annual_excess_sellback_rate_types = args[:bills_pv_annual_excess_sellback_rate_types].get.split(',').map(&:strip)
+      if args[:bills_pv_net_metering_annual_excess_sellback_rate_types].is_initialized
+        bills_pv_net_metering_annual_excess_sellback_rate_types = args[:bills_pv_net_metering_annual_excess_sellback_rate_types].get.split(',').map(&:strip)
       else
-        bills_pv_annual_excess_sellback_rate_types = [nil] * bills_scenario_names.size
+        bills_pv_net_metering_annual_excess_sellback_rate_types = [nil] * bills_scenario_names.size
       end
 
       if args[:bills_pv_net_metering_annual_excess_sellback_rates].is_initialized
@@ -3582,14 +3582,14 @@ class HPXMLFile
                                                  marginal_rates[HPXML::FuelTypeWoodCord],
                                                  marginal_rates[HPXML::FuelTypeWoodPellets],
                                                  bills_pv_compensation_types,
-                                                 bills_pv_annual_excess_sellback_rate_types,
+                                                 bills_pv_net_metering_annual_excess_sellback_rate_types,
                                                  bills_pv_net_metering_annual_excess_sellback_rates,
                                                  bills_pv_feed_in_tariff_rates,
                                                  bills_pv_grid_connection_fee_units,
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
         elec_marginal_rate = Float(elec_marginal_rate) rescue nil
         natural_gas_marginal_rate = Float(natural_gas_marginal_rate) rescue nil
         propane_marginal_rate = Float(propane_marginal_rate) rescue nil
@@ -3598,8 +3598,19 @@ class HPXMLFile
         wood_marginal_rate = Float(wood_marginal_rate) rescue nil
         wood_pellets_marginal_rate = Float(wood_pellets_marginal_rate) rescue nil
 
-        pv_net_metering_annual_excess_sellback_rate = Float(pv_net_metering_annual_excess_sellback_rate) rescue nil
-        pv_feed_in_tariff_rate = Float(pv_feed_in_tariff_rate) rescue nil
+        if pv_compensation_type == 'Net Metering'
+          if pv_net_metering_annual_excess_sellback_rate_type == 'User-Specified'
+            pv_net_metering_annual_excess_sellback_rate = Float(pv_net_metering_annual_excess_sellback_rate) rescue nil
+          else
+            pv_net_metering_annual_excess_sellback_rate = nil
+          end
+          pv_feed_in_tariff_rate = nil
+        elsif pv_compensation_type == 'Feed-In Tariff'
+          pv_feed_in_tariff_rate = Float(pv_feed_in_tariff_rate) rescue nil
+          pv_net_metering_annual_excess_sellback_rate_type = nil
+          pv_net_metering_annual_excess_sellback_rate = nil
+        end
+
         pv_monthly_grid_connection_fee = Float(pv_monthly_grid_connection_fee) rescue nil
 
         hpxml.header.bills_scenarios.add(name: name,
@@ -3611,7 +3622,7 @@ class HPXMLFile
                                          wood_marginal_rate: wood_marginal_rate,
                                          wood_pellets_marginal_rate: wood_pellets_marginal_rate,
                                          pv_compensation_type: pv_compensation_type,
-                                         pv_annual_excess_sellback_rate_type: pv_annual_excess_sellback_rate_type,
+                                         pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,
                                          pv_net_metering_annual_excess_sellback_rate: pv_net_metering_annual_excess_sellback_rate,
                                          pv_feed_in_tariff_rate: pv_feed_in_tariff_rate,
                                          pv_grid_connection_fee_unit: pv_grid_connection_fee_unit,

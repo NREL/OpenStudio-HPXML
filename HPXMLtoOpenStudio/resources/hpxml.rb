@@ -1187,7 +1187,9 @@ class HPXML < Object
   class BillsScenario < BaseElement
     ATTRS = [:name, :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
              :coal_marginal_rate, :wood_marginal_rate, :wood_pellets_marginal_rate,
-             :pv_compensation_type, :pv_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate, :pv_feed_in_tariff_rate, :pv_grid_connection_fee_unit, :pv_monthly_grid_connection_fee]
+             :pv_compensation_type, :pv_net_metering_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate,
+             :pv_feed_in_tariff_rate,
+             :pv_grid_connection_fee_unit, :pv_monthly_grid_connection_fee]
     attr_accessor(*ATTRS)
 
     def delete
@@ -1220,7 +1222,7 @@ class HPXML < Object
       if not @pv_compensation_type.nil?
         pv = XMLHelper.add_element(bills_scenario, 'Photovoltaics')
         XMLHelper.add_element(pv, 'CompensationType', pv_compensation_type, :string, pv_compensation_type_isdefaulted)
-        XMLHelper.add_element(pv, 'AnnualExcessSellbackRateType', pv_annual_excess_sellback_rate_type, :string, pv_annual_excess_sellback_rate_type_isdefaulted) unless @pv_annual_excess_sellback_rate_type.nil?
+        XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRateType', pv_net_metering_annual_excess_sellback_rate_type, :string, pv_net_metering_annual_excess_sellback_rate_type_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate_type.nil?
         XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRate', pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
         XMLHelper.add_element(pv, 'FeedInTariffRate', pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
         XMLHelper.add_element(pv, 'GridConnectionFeeUnits', pv_grid_connection_fee_unit, :string, pv_grid_connection_fee_unit_isdefaulted) unless @pv_grid_connection_fee_unit.nil?
@@ -1240,7 +1242,7 @@ class HPXML < Object
       @wood_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/MarginalRate", :float)
       @wood_pellets_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/MarginalRate", :float)
       @pv_compensation_type = XMLHelper.get_value(bills_scenario, 'Photovoltaics/CompensationType', :string)
-      @pv_annual_excess_sellback_rate_type = XMLHelper.get_value(bills_scenario, 'Photovoltaics/AnnualExcessSellbackRateType', :string)
+      @pv_net_metering_annual_excess_sellback_rate_type = XMLHelper.get_value(bills_scenario, 'Photovoltaics/NetMeteringAnnualExcessSellbackRateType', :string)
       @pv_net_metering_annual_excess_sellback_rate = XMLHelper.get_value(bills_scenario, 'Photovoltaics/NetMeteringAnnualExcessSellbackRate', :float)
       @pv_feed_in_tariff_rate = XMLHelper.get_value(bills_scenario, 'Photovoltaics/FeedInTariffRate', :float)
       @pv_grid_connection_fee_unit = XMLHelper.get_value(bills_scenario, 'Photovoltaics/GridConnectionFeeUnits', :string)
