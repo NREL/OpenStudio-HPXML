@@ -20,7 +20,7 @@ __Bugfixes__
 - Fixes handling non-integer number of occupants when using the stochastic occupancy schedule generator.
 - Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
 - Fixes possible output error for ground source heat pumps with a shared hydronic circulation loop.
-- Throws an error if simulation results are Infinity.
+- Provides an error message if the EnergyPlus simulation used infinite energy.
 
 ## OpenStudio-HPXML v1.4.0
 
