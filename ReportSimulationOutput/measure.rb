@@ -1109,6 +1109,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if all_total == 0
       runner.registerError('Simulation unsuccessful.')
       return false
+    elsif all_total.infinite?
+      runner.registerError('Simulation used infinite energy; double-check inputs.')
+      return false
     end
 
     # Check sum of electricity produced end use outputs match total output from meter
