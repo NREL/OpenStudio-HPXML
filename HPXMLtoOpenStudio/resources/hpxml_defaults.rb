@@ -310,21 +310,6 @@ class HPXMLDefaults
         scenario.fuel_oil_marginal_rate_isdefaulted = true
       end
 
-      if scenario.coal_marginal_rate.nil?
-        scenario.coal_marginal_rate = 0.015
-        scenario.coal_marginal_rate_isdefaulted = true
-      end
-
-      if scenario.wood_marginal_rate.nil?
-        scenario.wood_marginal_rate = 0.015
-        scenario.wood_marginal_rate_isdefaulted = true
-      end
-
-      if scenario.wood_pellets_marginal_rate.nil?
-        scenario.wood_pellets_marginal_rate = 0.015
-        scenario.wood_pellets_marginal_rate_isdefaulted = true
-      end
-
       if scenario.pv_compensation_type.nil?
         scenario.pv_compensation_type = 'Net Metering'
         scenario.pv_compensation_type_isdefaulted = true

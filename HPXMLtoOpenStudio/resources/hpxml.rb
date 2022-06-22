@@ -1215,7 +1215,7 @@ class HPXML < Object
         HPXML::FuelTypeWoodCord => [nil, nil, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
         HPXML::FuelTypeWoodPellets => [nil, nil, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
         fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted = vals
-        next if fixed_charge.nil? && marginal_rate.nil?
+        next if [HPXML::FuelTypeCoal, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include?(fuel) && marginal_rate.nil?
 
         bills_factor = XMLHelper.add_element(bills_scenario, 'BillsFactor')
         XMLHelper.add_element(bills_factor, 'FuelType', fuel, :string)

@@ -250,7 +250,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.bills_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12.0, 12.0, 0, 0, 0, 0, 0.015, 0.015, 0.015, 'Net Metering', 'User-Specified', 0.03, nil, '$/kW', 0.0)
+      _test_default_bills_values(scenario, 12.0, 12.0, 0, 0, 0, 0, nil, nil, nil, 'Net Metering', 'User-Specified', 0.03, nil, '$/kW', 0.0)
     end
   end
 
