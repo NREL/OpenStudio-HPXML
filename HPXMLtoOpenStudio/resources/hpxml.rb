@@ -1224,12 +1224,17 @@ class HPXML < Object
       end
       if not @pv_compensation_type.nil?
         pv = XMLHelper.add_element(bills_scenario, 'Photovoltaics')
-        XMLHelper.add_element(pv, 'CompensationType', pv_compensation_type, :string, pv_compensation_type_isdefaulted)
-        XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRateType', pv_net_metering_annual_excess_sellback_rate_type, :string, pv_net_metering_annual_excess_sellback_rate_type_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate_type.nil?
-        XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRate', pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
-        XMLHelper.add_element(pv, 'FeedInTariffRate', pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
-        XMLHelper.add_element(pv, 'GridConnectionFeeUnits', pv_grid_connection_fee_unit, :string, pv_grid_connection_fee_unit_isdefaulted) unless @pv_grid_connection_fee_unit.nil?
-        XMLHelper.add_element(pv, 'MonthlyGridConnectionFee', pv_monthly_grid_connection_fee, :float, pv_monthly_grid_connection_fee_isdefaulted) unless @pv_monthly_grid_connection_fee.nil?
+        XMLHelper.add_element(pv, 'CompensationType', @pv_compensation_type, :string, pv_compensation_type_isdefaulted)
+        if @pv_compensation_type == 'Net Metering'
+          XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRateType', @pv_net_metering_annual_excess_sellback_rate_type, :string, pv_net_metering_annual_excess_sellback_rate_type_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate_type.nil?
+          if @pv_net_metering_annual_excess_sellback_rate_type == 'User-Specified'
+            XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRate', @pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
+          end
+        elsif @pv_compensation_type == 'Feed-In Tariff'
+          XMLHelper.add_element(pv, 'FeedInTariffRate', @pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
+        end
+        XMLHelper.add_element(pv, 'GridConnectionFeeUnits', @pv_grid_connection_fee_unit, :string, pv_grid_connection_fee_unit_isdefaulted) unless @pv_grid_connection_fee_unit.nil?
+        XMLHelper.add_element(pv, 'MonthlyGridConnectionFee', @pv_monthly_grid_connection_fee, :float, pv_monthly_grid_connection_fee_isdefaulted) unless @pv_monthly_grid_connection_fee.nil?
       end
     end
 
