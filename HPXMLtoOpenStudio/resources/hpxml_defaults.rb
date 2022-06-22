@@ -33,6 +33,7 @@ class HPXMLDefaults
 
     apply_header(hpxml, epw_file)
     apply_emissions_scenarios(hpxml)
+    apply_bills_scenarios(hpxml)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
@@ -271,6 +272,91 @@ class HPXMLDefaults
       scenario.wood_pellets_units_isdefaulted = true
       scenario.wood_pellets_value = wood_pellets
       scenario.wood_pellets_value_isdefaulted = true
+    end
+  end
+
+  def get_auto_marginal_rate(_state_code, _fuel_type, _fixed_rate)
+    # TODO
+    return 0
+  end
+
+  def self.apply_bills_scenarios(hpxml)
+    hpxml.header.bills_scenarios.each do |scenario|
+      if scenario.elec_fixed_charge.nil?
+        scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
+        scenario.elec_fixed_charge_isdefaulted = true
+      end
+      if scenario.elec_marginal_rate.nil?
+        scenario.elec_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, FT::Elec, scenario.elec_fixed_charge)
+        scenario.elec_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.natural_gas_fixed_charge.nil?
+        scenario.natural_gas_fixed_charge = 12.0 # https://www.aga.org/sites/default/files/aga_energy_analysis_-_natural_gas_utility_rate_structure.pdf says $11.25/month in 2015
+        scenario.natural_gas_fixed_charge_isdefaulted = true
+      end
+      if scenario.natural_gas_marginal_rate.nil?
+        scenario.natural_gas_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, FT::Gas, scenario.natural_gas_fixed_charge)
+        scenario.natural_gas_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.propane_marginal_rate.nil?
+        scenario.propane_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, FT::Propane, nil)
+        scenario.propane_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.fuel_oil_marginal_rate.nil?
+        scenario.fuel_oil_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, FT::Oil, nil)
+        scenario.fuel_oil_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.coal_marginal_rate.nil?
+        scenario.coal_marginal_rate = 0.015
+        scenario.coal_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.wood_marginal_rate.nil?
+        scenario.wood_marginal_rate = 0.015
+        scenario.wood_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.wood_pellets_marginal_rate.nil?
+        scenario.wood_pellets_marginal_rate = 0.015
+        scenario.wood_pellets_marginal_rate_isdefaulted = true
+      end
+
+      if scenario.pv_compensation_type.nil?
+        scenario.pv_compensation_type = 'Net Metering'
+        scenario.pv_compensation_type_isdefaulted = true
+      end
+
+      if scenario.pv_compensation_type == 'Net Metering'
+        if scenario.pv_net_metering_annual_excess_sellback_rate_type.nil?
+          scenario.pv_net_metering_annual_excess_sellback_rate_type = 'User-Specified'
+          scenario.pv_net_metering_annual_excess_sellback_rate_type_isdefaulted = true
+        end
+        if scenario.pv_net_metering_annual_excess_sellback_rate_type == 'User-Specified'
+          if scenario.pv_net_metering_annual_excess_sellback_rate.nil?
+            scenario.pv_net_metering_annual_excess_sellback_rate = 0.03
+            scenario.pv_net_metering_annual_excess_sellback_rate_isdefaulted = true
+          end
+        end
+      elsif scenario.pv_compensation_type == 'Feed-In Tariff'
+        if scenario.pv_feed_in_tariff_rate.nil?
+          scenario.pv_feed_in_tariff_rate = 0.12
+          scenario.pv_feed_in_tariff_rate_isdefaulted = true
+        end
+      end
+
+      if scenario.pv_grid_connection_fee_unit.nil?
+        scenario.pv_grid_connection_fee_unit = '$/kW'
+        scenario.pv_grid_connection_fee_unit_isdefaulted = true
+      end
+
+      if scenario.pv_monthly_grid_connection_fee.nil?
+        scenario.pv_monthly_grid_connection_fee = 0.0
+        scenario.pv_monthly_grid_connection_fee_isdefaulted = true
+      end
     end
   end
 

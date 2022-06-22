@@ -202,6 +202,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
+  def test_bills
+    # TODO
+  end
+
   def test_site
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
