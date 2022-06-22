@@ -13,6 +13,8 @@ __New Features__
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
 - ReportUtilityBills measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type.
+- ReportHPXMLOutput measure:
+  - Adds a variety of additional outputs.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
@@ -21,6 +23,8 @@ __Bugfixes__
 - Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
 - Fixes possible output error for ground source heat pumps with a shared hydronic circulation loop.
 - Provides an error message if the EnergyPlus simulation used infinite energy.
+- ReportHPXMLOutput measure:
+  - Reported window /door areas now exclude non-thermal boundary surfaces (e.g., garage doors to outside).
 
 ## OpenStudio-HPXML v1.4.0
 

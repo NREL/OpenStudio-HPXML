@@ -207,16 +207,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.site.site_type = HPXML::SiteTypeRural
     hpxml.site.shielding_of_home = HPXML::ShieldingExposed
+    hpxml.site.azimuth_of_front_of_home = 123
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 123)
 
     # Test defaults
     hpxml.site.site_type = nil
     hpxml.site.shielding_of_home = nil
+    hpxml.site.azimuth_of_front_of_home = nil
+    hpxml.site.orientation_of_front_of_home = HPXML::OrientationEast
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 90)
   end
 
   def test_neighbor_buildings
@@ -3215,9 +3218,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_site_values(hpxml, site_type, shielding_of_home)
+  def _test_default_site_values(hpxml, site_type, shielding_of_home, azimuth_of_front_of_home)
     assert_equal(site_type, hpxml.site.site_type)
     assert_equal(shielding_of_home, hpxml.site.shielding_of_home)
+    assert_equal(azimuth_of_front_of_home, hpxml.site.azimuth_of_front_of_home)
   end
 
   def _test_default_neighbor_building_values(hpxml, azimuths)

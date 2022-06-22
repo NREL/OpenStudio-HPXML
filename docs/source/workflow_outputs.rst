@@ -394,6 +394,7 @@ Enclosure outputs are listed below.
    =======================================================  ====================
    Enclosure: Wall Area Thermal Boundary (ft^2)             Total thermal boundary wall area
    Enclosure: Wall Area Exterior (ft^2)                     Total exterior wall area
+   Enclosure: Wall Area Exterior Thermal Boundary (ft^2)    Total exterior thermal boundary wall area
    Enclosure: Foundation Wall Area Exterior (ft^2)          Total exterior foundation wall area
    Enclosure: Floor Area Conditioned (ft^2)                 Total conditioned floor area
    Enclosure: Floor Area Lighting (ft^2)                    Total lighting floor area
@@ -401,11 +402,21 @@ Enclosure outputs are listed below.
    Enclosure: Ceiling Area Thermal Boundary (ft^2)          Total thermal boundary ceiling area
    Enclosure: Roof Area (ft^2)                              Total roof area
    Enclosure: Window Area (ft^2)                            Total window area
+   Enclosure: Window Area Front (ft^2)                      Window area facing front [#]_
+   Enclosure: Window Area Back (ft^2)                       Window area facing back
+   Enclosure: Window Area Left (ft^2)                       Window area facing left, when viewing the house from the front
+   Enclosure: Window Area Right (ft^2)                      Window area facing right, when viewing the house from the front
    Enclosure: Door Area (ft^2)                              Total door area
+   Enclosure: Duct Area Unconditioned (ft^2)                Total duct area
    Enclosure: Duct Area Unconditioned (ft^2)                Total unconditioned duct area
    Enclosure: Rim Joist Area (ft^2)                         Total rim joist area
    Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)  Total thermal boundary slab exposed perimeter
+   Enclosure: Slab Perimeter Insulated Area (ft^2)          Total insulated perimeter area of slabs
+   Enclosure: Slab Under-Slab Insulated Area (ft^2)         Total insulated under-slab area of slabs
+   Enclosure: Partition Wall Area (ft^2)                    Total partition wall area
    =======================================================  ====================
+   
+   [#] Window areas facing Front, Back, Left, and Right are only provided if ``OrientationOfFrontOfHome`` or ``AzimuthOfFrontOfHome`` has been provided in the HPXML file.
 
 Systems
 ~~~~~~~
@@ -421,6 +432,7 @@ Autosized HVAC systems are based on ACCA Manual S calculations.
    Systems: Heat Pump Backup Capacity (Btu/h)               Total HVAC heat pump backup capacity
    Systems: Water Heater Tank Volume (gal)                  Total water heater tank volume
    Systems: Mechanical Ventilation Flow Rate (cfm)          Total mechanical ventilation flow rate
+   Systems: PV Capacity (W)                                 Total photovoltaic capacity
    =======================================================  ====================
 
 If the HPXML file has ``Systems/HVAC/HVACPlant/PrimarySystems`` populated, then additional system outputs will be provided:
@@ -434,6 +446,17 @@ If the HPXML file has ``Systems/HVAC/HVACPlant/PrimarySystems`` populated, then 
    Secondary Systems: Cooling Capacity (Btu/h)              Cooling capacity of secondary system; only provided if a non-primary system is present
    Secondary Systems: Heating Capacity (Btu/h)              Heating capacity of secondary system; only provided if a non-primary system is present
    Secondary Systems: Heat Pump Backup Capacity (Btu/h)     Heat pump backup capacity of secondary system; only provided if a non-primary system is present
+   =======================================================  ====================
+
+Appliances
+~~~~~~~~~~
+
+Appliance outputs are listed below.
+
+   =======================================================  ====================
+   Type                                                     Notes
+   =======================================================  ====================
+   Appliances: Dehumidifier Capacity (pints/day)            Total dehumidifier capacity
    =======================================================  ====================
 
 Design Loads

@@ -11,44 +11,7 @@ require 'csv'
 require_relative '../measure.rb'
 
 class ReportHPXMLOutputTest < MiniTest::Test
-  def test_hpxml_with_primary_systems
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-multiple.xml' }
-    hpxml_csv = _test_measure(args_hash)
-    assert(File.exist?(hpxml_csv))
-    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert_includes(actual_rows, 'Systems: Heating Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Systems: Cooling Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Primary Systems: Cooling Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Primary Systems: Heating Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Primary Systems: Heat Pump Backup Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Secondary Systems: Cooling Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Secondary Systems: Heating Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Secondary Systems: Heat Pump Backup Capacity (Btu/h)')
-  end
-
-  def test_hpxml_without_primary_systems
-    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files', 'base.xml'))
-    hpxml.hvac_systems.each do |hvac_system|
-      hvac_system.primary_system = false
-    end
-    tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
-    XMLHelper.write_file(hpxml.to_oga(), tmp_hpxml_path)
-    args_hash = { 'hpxml_path' => '../ReportHPXMLOutput/tests/tmp.xml' }
-    hpxml_csv = _test_measure(args_hash)
-    File.delete(tmp_hpxml_path) if File.exist?(tmp_hpxml_path)
-    assert(File.exist?(hpxml_csv))
-    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert_includes(actual_rows, 'Systems: Heating Capacity (Btu/h)')
-    assert_includes(actual_rows, 'Systems: Cooling Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Primary Systems: Cooling Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Primary Systems: Heating Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Primary Systems: Heat Pump Backup Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Secondary Systems: Cooling Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Secondary Systems: Heating Capacity (Btu/h)')
-    refute_includes(actual_rows, 'Secondary Systems: Heat Pump Backup Capacity (Btu/h)')
-  end
-
-  def test_furnace_and_central_air_conditioner_xml
+  def test_base
     args_hash = {}
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
@@ -56,6 +19,7 @@ class ReportHPXMLOutputTest < MiniTest::Test
     expected_multipliers = {
       'Enclosure: Wall Area Thermal Boundary (ft^2)' => 1200.0,
       'Enclosure: Wall Area Exterior (ft^2)' => 1425.0,
+      'Enclosure: Wall Area Exterior Thermal Boundary (ft^2)' => 1200.0,
       'Enclosure: Foundation Wall Area Exterior (ft^2)' => 1200.0,
       'Enclosure: Floor Area Conditioned (ft^2)' => 2700.0,
       'Enclosure: Floor Area Lighting (ft^2)' => 2700.0,
@@ -63,18 +27,25 @@ class ReportHPXMLOutputTest < MiniTest::Test
       'Enclosure: Ceiling Area Thermal Boundary (ft^2)' => 1350.0,
       'Enclosure: Roof Area (ft^2)' => 1509.4,
       'Enclosure: Window Area (ft^2)' => 360.0,
+      'Enclosure: Window Area Front (ft^2)' => 108,
+      'Enclosure: Window Area Back (ft^2)' => 108,
+      'Enclosure: Window Area Left (ft^2)' => 72,
+      'Enclosure: Window Area Right (ft^2)' => 72,
       'Enclosure: Door Area (ft^2)' => 40.0,
+      'Enclosure: Duct Area (ft^2)' => 200.0,
       'Enclosure: Duct Area Unconditioned (ft^2)' => 200.0,
       'Enclosure: Rim Joist Area (ft^2)' => 115.6,
       'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => 150.0,
-      'Systems: Heating Capacity (Btu/h)' => 36000.0,
+      'Enclosure: Slab Perimeter Insulated Area (ft^2)' => 0.0,
+      'Enclosure: Slab Under-Slab Insulated Area (ft^2)' => 0.0,
+      'Enclosure: Partition Wall Area (ft^2)' => 2700.0,
       'Systems: Cooling Capacity (Btu/h)' => 24000.0,
+      'Systems: Heating Capacity (Btu/h)' => 36000.0,
       'Systems: Heat Pump Backup Capacity (Btu/h)' => 0.0,
       'Systems: Water Heater Tank Volume (gal)' => 40.0,
       'Systems: Mechanical Ventilation Flow Rate (cfm)' => 0.0,
-      'Primary Systems: Heating Capacity (Btu/h)' => 36000.0,
-      'Primary Systems: Cooling Capacity (Btu/h)' => 24000.0,
-      'Primary Systems: Heat Pump Backup Capacity (Btu/h)' => 0.0,
+      'Systems: PV Capacity (W)' => 0.0,
+      'Appliances: Dehumidifier Capacity (pints/day)' => 0.0,
       'Design Loads Heating: Total (Btu/h)' => 32302.0,
       'Design Loads Heating: Ducts (Btu/h)' => 8597.0,
       'Design Loads Heating: Windows (Btu/h)' => 7508.0,
@@ -101,14 +72,17 @@ class ReportHPXMLOutputTest < MiniTest::Test
       'Design Loads Cooling Latent: Total (Btu/h)' => 0.0,
       'Design Loads Cooling Latent: Ducts (Btu/h)' => 0.0,
       'Design Loads Cooling Latent: Infiltration/Ventilation (Btu/h)' => 0.0,
-      'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0
+      'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0,
+      'Primary Systems: Cooling Capacity (Btu/h)' => 24000.0,
+      'Primary Systems: Heating Capacity (Btu/h)' => 36000.0,
+      'Primary Systems: Heat Pump Backup Capacity (Btu/h)' => 0.0,
     }
 
     actual_multipliers = _get_actual_multipliers(hpxml_csv)
     assert_equal(expected_multipliers, actual_multipliers)
   end
 
-  def test_air_source_heat_pump_xml
+  def test_air_source_heat_pumps
     hpxml_files = ['base-hvac-air-to-air-heat-pump-1-speed.xml',
                    'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml']
     hpxml_files.each do |hpxml_file|
@@ -125,27 +99,9 @@ class ReportHPXMLOutputTest < MiniTest::Test
       end
 
       expected_multipliers = {
-        'Enclosure: Wall Area Thermal Boundary (ft^2)' => 1200.0,
-        'Enclosure: Wall Area Exterior (ft^2)' => 1425.0,
-        'Enclosure: Foundation Wall Area Exterior (ft^2)' => 1200.0,
-        'Enclosure: Floor Area Conditioned (ft^2)' => 2700.0,
-        'Enclosure: Floor Area Lighting (ft^2)' => 2700.0,
-        'Enclosure: Floor Area Foundation (ft^2)' => 1350.0,
-        'Enclosure: Ceiling Area Thermal Boundary (ft^2)' => 1350.0,
-        'Enclosure: Roof Area (ft^2)' => 1509.4,
-        'Enclosure: Window Area (ft^2)' => 360.0,
-        'Enclosure: Door Area (ft^2)' => 40.0,
-        'Enclosure: Duct Area Unconditioned (ft^2)' => 200.0,
-        'Enclosure: Rim Joist Area (ft^2)' => 115.6,
-        'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => 150.0,
-        'Systems: Heating Capacity (Btu/h)' => hp_capacity,
         'Systems: Cooling Capacity (Btu/h)' => hp_capacity,
+        'Systems: Heating Capacity (Btu/h)' => hp_capacity,
         'Systems: Heat Pump Backup Capacity (Btu/h)' => backup_capacity,
-        'Systems: Water Heater Tank Volume (gal)' => 40.0,
-        'Systems: Mechanical Ventilation Flow Rate (cfm)' => 0.0,
-        'Primary Systems: Heating Capacity (Btu/h)' => hp_capacity,
-        'Primary Systems: Cooling Capacity (Btu/h)' => hp_capacity,
-        'Primary Systems: Heat Pump Backup Capacity (Btu/h)' => backup_capacity,
         'Design Loads Heating: Total (Btu/h)' => 31214.0,
         'Design Loads Heating: Ducts (Btu/h)' => 7508.0,
         'Design Loads Heating: Windows (Btu/h)' => 7508.0,
@@ -172,12 +128,54 @@ class ReportHPXMLOutputTest < MiniTest::Test
         'Design Loads Cooling Latent: Total (Btu/h)' => 0.0,
         'Design Loads Cooling Latent: Ducts (Btu/h)' => 0.0,
         'Design Loads Cooling Latent: Infiltration/Ventilation (Btu/h)' => 0.0,
-        'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0
+        'Design Loads Cooling Latent: Internal Gains (Btu/h)' => 0.0,
+        'Primary Systems: Cooling Capacity (Btu/h)' => hp_capacity,
+        'Primary Systems: Heating Capacity (Btu/h)' => hp_capacity,
+        'Primary Systems: Heat Pump Backup Capacity (Btu/h)' => backup_capacity,
       }
 
       actual_multipliers = _get_actual_multipliers(hpxml_csv)
-      assert_equal(expected_multipliers, actual_multipliers)
+      expected_multipliers.each do |multiplier_name, expected_multiplier|
+        assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
+      end
     end
+  end
+
+  def test_with_primary_systems
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-multiple.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    assert_includes(actual_rows, 'Systems: Heating Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Systems: Cooling Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Primary Systems: Cooling Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Primary Systems: Heating Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Primary Systems: Heat Pump Backup Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Secondary Systems: Cooling Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Secondary Systems: Heating Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Secondary Systems: Heat Pump Backup Capacity (Btu/h)')
+  end
+
+  def test_without_primary_systems
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files', 'base.xml'))
+    hpxml.hvac_systems.each do |hvac_system|
+      hvac_system.primary_system = false
+    end
+    tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
+    XMLHelper.write_file(hpxml.to_oga(), tmp_hpxml_path)
+    args_hash = { 'hpxml_path' => '../ReportHPXMLOutput/tests/tmp.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    File.delete(tmp_hpxml_path) if File.exist?(tmp_hpxml_path)
+    assert(File.exist?(hpxml_csv))
+    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    assert_includes(actual_rows, 'Systems: Heating Capacity (Btu/h)')
+    assert_includes(actual_rows, 'Systems: Cooling Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Primary Systems: Cooling Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Primary Systems: Heating Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Primary Systems: Heat Pump Backup Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Secondary Systems: Cooling Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Secondary Systems: Heating Capacity (Btu/h)')
+    refute_includes(actual_rows, 'Secondary Systems: Heat Pump Backup Capacity (Btu/h)')
   end
 
   def test_foundations
@@ -199,6 +197,10 @@ class ReportHPXMLOutputTest < MiniTest::Test
       floor_area_foundation = 1350.0
       rim_joist_area = 115.6
       slab_exposed_perimeter_thermal_boundary = 150.0
+      slab_perimeter_insulated_area = 0.0
+      slab_underslab_insulated_area = 0.0
+      duct_area = 200.0
+      duct_area_unconditioned = 200.0
 
       if hpxml_file == 'base-foundation-ambient.xml'
         foundation_wall_area_exterior = 0.0
@@ -208,11 +210,15 @@ class ReportHPXMLOutputTest < MiniTest::Test
       elsif hpxml_file == 'base-foundation-basement-garage.xml'
         floor_area_foundation = 950.0
         slab_exposed_perimeter_thermal_boundary = 110.0
+      elsif hpxml_file == 'base-foundation-conditioned-basement-slab-insulation.xml'
+        slab_underslab_insulated_area = 600.0
       elsif hpxml_file == 'base-foundation-conditioned-crawlspace.xml'
         foundation_wall_area_exterior = 600.0
+        duct_area_unconditioned = 0.0
       elsif hpxml_file == 'base-foundation-slab.xml'
         foundation_wall_area_exterior = 0.0
         rim_joist_area = 0.0
+        slab_underslab_insulated_area = 1350.0
       elsif hpxml_file == 'base-foundation-unconditioned-basement.xml'
         slab_exposed_perimeter_thermal_boundary = 0.0
       elsif hpxml_file == 'base-foundation-unvented-crawlspace.xml'
@@ -229,13 +235,79 @@ class ReportHPXMLOutputTest < MiniTest::Test
         'Enclosure: Foundation Wall Area Exterior (ft^2)' => foundation_wall_area_exterior,
         'Enclosure: Floor Area Foundation (ft^2)' => floor_area_foundation,
         'Enclosure: Rim Joist Area (ft^2)' => rim_joist_area,
-        'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => slab_exposed_perimeter_thermal_boundary
+        'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => slab_exposed_perimeter_thermal_boundary,
+        'Enclosure: Slab Perimeter Insulated Area (ft^2)' => slab_perimeter_insulated_area,
+        'Enclosure: Slab Under-Slab Insulated Area (ft^2)' => slab_underslab_insulated_area,
+        'Enclosure: Duct Area (ft^2)' => duct_area,
+        'Enclosure: Duct Area Unconditioned (ft^2)' => duct_area_unconditioned,
       }
 
       actual_multipliers = _get_actual_multipliers(hpxml_csv)
       expected_multipliers.each do |multiplier_name, expected_multiplier|
         assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
       end
+    end
+  end
+
+  def test_garage
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-enclosure-2stories-garage.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+
+    expected_multipliers = {
+      'Enclosure: Wall Area Thermal Boundary (ft^2)' => 2080 + 320,
+      'Enclosure: Wall Area Exterior (ft^2)' => 2080 + 320 + 225,
+      'Enclosure: Wall Area Exterior Thermal Boundary (ft^2)' => 2080,
+    }
+
+    actual_multipliers = _get_actual_multipliers(hpxml_csv)
+    expected_multipliers.each do |multiplier_name, expected_multiplier|
+      assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
+    end
+  end
+
+  def test_dehumidifier
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-appliances-dehumidifier-multiple.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+
+    expected_multipliers = {
+      'Appliances: Dehumidifier Capacity (pints/day)' => 70
+    }
+
+    actual_multipliers = _get_actual_multipliers(hpxml_csv)
+    expected_multipliers.each do |multiplier_name, expected_multiplier|
+      assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
+    end
+  end
+
+  def test_pv
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-pv.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+
+    expected_multipliers = {
+      'Systems: PV Capacity (W)' => 5500
+    }
+
+    actual_multipliers = _get_actual_multipliers(hpxml_csv)
+    expected_multipliers.each do |multiplier_name, expected_multiplier|
+      assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
+    end
+  end
+
+  def test_partition_wall_area
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-enclosure-thermal-mass.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+
+    expected_multipliers = {
+      'Enclosure: Partition Wall Area (ft^2)' => 2160
+    }
+
+    actual_multipliers = _get_actual_multipliers(hpxml_csv)
+    expected_multipliers.each do |multiplier_name, expected_multiplier|
+      assert_equal(expected_multiplier, actual_multipliers[multiplier_name])
     end
   end
 

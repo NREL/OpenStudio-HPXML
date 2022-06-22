@@ -76,6 +76,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     bldg_outputs = {}
     bldg_outputs[BO::EnclosureWallAreaThermalBoundary] = BaseOutput.new
     bldg_outputs[BO::EnclosureWallAreaExterior] = BaseOutput.new
+    bldg_outputs[BO::EnclosureWallAreaExteriorThermalBoundary] = BaseOutput.new
     bldg_outputs[BO::EnclosureFoundationWallAreaExterior] = BaseOutput.new
     bldg_outputs[BO::EnclosureFloorAreaConditioned] = BaseOutput.new
     bldg_outputs[BO::EnclosureFloorAreaLighting] = BaseOutput.new
@@ -83,15 +84,27 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     bldg_outputs[BO::EnclosureCeilingAreaThermalBoundary] = BaseOutput.new
     bldg_outputs[BO::EnclosureRoofArea] = BaseOutput.new
     bldg_outputs[BO::EnclosureWindowArea] = BaseOutput.new
+    if not hpxml.site.azimuth_of_front_of_home.nil?
+      bldg_outputs[BO::EnclosureWindowAreaFront] = BaseOutput.new
+      bldg_outputs[BO::EnclosureWindowAreaBack] = BaseOutput.new
+      bldg_outputs[BO::EnclosureWindowAreaLeft] = BaseOutput.new
+      bldg_outputs[BO::EnclosureWindowAreaRight] = BaseOutput.new
+    end
     bldg_outputs[BO::EnclosureDoorArea] = BaseOutput.new
+    bldg_outputs[BO::EnclosureDuctArea] = BaseOutput.new
     bldg_outputs[BO::EnclosureDuctAreaUnconditioned] = BaseOutput.new
     bldg_outputs[BO::EnclosureRimJoistAreaExterior] = BaseOutput.new
     bldg_outputs[BO::EnclosureSlabExposedPerimeterThermalBoundary] = BaseOutput.new
+    bldg_outputs[BO::EnclosureSlabPerimeterInsulatedArea] = BaseOutput.new
+    bldg_outputs[BO::EnclosureSlabUnderSlabInsulatedArea] = BaseOutput.new
+    bldg_outputs[BO::EnclosurePartitionWallArea] = BaseOutput.new
     bldg_outputs[BO::SystemsCoolingCapacity] = BaseOutput.new
     bldg_outputs[BO::SystemsHeatingCapacity] = BaseOutput.new
     bldg_outputs[BO::SystemsHeatPumpBackupCapacity] = BaseOutput.new
     bldg_outputs[BO::SystemsWaterHeaterVolume] = BaseOutput.new
     bldg_outputs[BO::SystemsMechanicalVentilationFlowRate] = BaseOutput.new
+    bldg_outputs[BO::SystemsPVCapacity] = BaseOutput.new
+    bldg_outputs[BO::AppliancesDehumidifierCapacity] = BaseOutput.new
     bldg_outputs[BO::DesignLoadsHeatingTotal] = BaseOutput.new
     bldg_outputs[BO::DesignLoadsHeatingDucts] = BaseOutput.new
     bldg_outputs[BO::DesignLoadsHeatingWindows] = BaseOutput.new
@@ -122,7 +135,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
 
     # Building outputs
     bldg_outputs.each do |bldg_type, bldg_output|
-      bldg_output.output = get_bldg_outputiplier(hpxml, bldg_type)
+      bldg_output.output = get_bldg_output(hpxml, bldg_type)
     end
 
     # Primary and Secondary
@@ -194,7 +207,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:output, :units)
   end
 
-  def get_bldg_outputiplier(hpxml, bldg_type)
+  def get_bldg_output(hpxml, bldg_type)
     bldg_output = 0.0
     if bldg_type == BO::EnclosureWallAreaThermalBoundary
       hpxml.walls.each do |wall|
@@ -205,6 +218,12 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     elsif bldg_type == BO::EnclosureWallAreaExterior
       hpxml.walls.each do |wall|
         next unless wall.is_exterior
+
+        bldg_output += wall.area
+      end
+    elsif bldg_type == BO::EnclosureWallAreaExteriorThermalBoundary
+      hpxml.walls.each do |wall|
+        next unless wall.is_exterior_thermal_boundary
 
         bldg_output += wall.area
       end
@@ -248,17 +267,54 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       end
     elsif bldg_type == BO::EnclosureWindowArea
       hpxml.windows.each do |window|
+        next unless window.is_exterior_thermal_boundary
+
+        bldg_output += window.area
+      end
+    elsif bldg_type == BO::EnclosureWindowAreaFront
+      hpxml.windows.each do |window|
+        next unless window.is_exterior_thermal_boundary
+        next unless sanitize_azimuth(window.azimuth) == sanitize_azimuth(hpxml.site.azimuth_of_front_of_home)
+
+        bldg_output += window.area
+      end
+    elsif bldg_type == BO::EnclosureWindowAreaBack
+      hpxml.windows.each do |window|
+        next unless window.is_exterior_thermal_boundary
+        next unless sanitize_azimuth(window.azimuth) == sanitize_azimuth(hpxml.site.azimuth_of_front_of_home + 180)
+
+        bldg_output += window.area
+      end
+    elsif bldg_type == BO::EnclosureWindowAreaLeft
+      hpxml.windows.each do |window|
+        next unless window.is_exterior_thermal_boundary
+        next unless sanitize_azimuth(window.azimuth) == sanitize_azimuth(hpxml.site.azimuth_of_front_of_home + 90)
+
+        bldg_output += window.area
+      end
+    elsif bldg_type == BO::EnclosureWindowAreaRight
+      hpxml.windows.each do |window|
+        next unless window.is_exterior_thermal_boundary
+        next unless sanitize_azimuth(window.azimuth) == sanitize_azimuth(hpxml.site.azimuth_of_front_of_home + 270)
+
         bldg_output += window.area
       end
     elsif bldg_type == BO::EnclosureDoorArea
       hpxml.doors.each do |door|
+        next unless door.is_exterior_thermal_boundary
+
         bldg_output += door.area
+      end
+    elsif bldg_type == BO::EnclosureDuctArea
+      hpxml.hvac_distributions.each do |hvac_distribution|
+        hvac_distribution.ducts.each do |duct|
+          bldg_output += duct.duct_surface_area
+        end
       end
     elsif bldg_type == BO::EnclosureDuctAreaUnconditioned
       hpxml.hvac_distributions.each do |hvac_distribution|
         hvac_distribution.ducts.each do |duct|
-          next if [HPXML::LocationLivingSpace,
-                   HPXML::LocationBasementConditioned].include?(duct.duct_location)
+          next if HPXML::conditioned_locations.include?(duct.duct_location)
 
           bldg_output += duct.duct_surface_area
         end
@@ -273,6 +329,26 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
 
         bldg_output += slab.exposed_perimeter
       end
+    elsif bldg_type == BO::EnclosureSlabPerimeterInsulatedArea
+      hpxml.slabs.each do |slab|
+        next unless slab.is_exterior_thermal_boundary
+        next unless slab.perimeter_insulation_r_value > 0
+
+        bldg_output += slab.exposed_perimeter * slab.perimeter_insulation_depth
+      end
+    elsif bldg_type == BO::EnclosureSlabUnderSlabInsulatedArea
+      hpxml.slabs.each do |slab|
+        next unless slab.is_exterior_thermal_boundary
+        next unless slab.under_slab_insulation_r_value > 0
+
+        if slab.under_slab_insulation_spans_entire_slab
+          bldg_output += slab.area
+        else
+          bldg_output += slab.exposed_perimeter * slab.under_slab_insulation_width
+        end
+      end
+    elsif bldg_type == BO::EnclosurePartitionWallArea
+      bldg_output += hpxml.partition_wall_mass.area_fraction * hpxml.building_construction.conditioned_floor_area
     elsif bldg_type == BO::SystemsHeatingCapacity
       hpxml.heating_systems.each do |heating_system|
         next if heating_system.is_heat_pump_backup_system
@@ -308,6 +384,14 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
         next unless ventilation_fan.used_for_whole_building_ventilation
 
         bldg_output += ventilation_fan.flow_rate.to_f
+      end
+    elsif bldg_type == BO::SystemsPVCapacity
+      hpxml.pv_systems.each do |pv_system|
+        bldg_output += pv_system.max_power_output
+      end
+    elsif bldg_type == BO::AppliancesDehumidifierCapacity
+      hpxml.dehumidifiers.each do |dehumidifier|
+        bldg_output += dehumidifier.capacity
       end
     elsif bldg_type == BO::DesignLoadsHeatingTotal
       bldg_output += hpxml.hvac_plant.hdl_total
@@ -443,6 +527,17 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
+  end
+
+  def sanitize_azimuth(azimuth)
+    # Ensure 0 <= orientation < 360
+    while azimuth < 0
+      azimuth += 360
+    end
+    while azimuth >= 360
+      azimuth -= 360
+    end
+    return azimuth
   end
 end
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>007018d0-1f3c-469d-a782-72f7fc0d76a8</version_id>
-  <version_modified>20220621T182531Z</version_modified>
+  <version_id>87bc2b71-3401-426d-9038-aa1b4ecd6178</version_id>
+  <version_modified>20220622T000328Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -428,12 +428,6 @@
       <checksum>A7803905</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9D553FA2</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -506,12 +500,6 @@
       <checksum>E331EBCF</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6B760CF5</checksum>
-    </file>
-    <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -522,12 +510,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0953188C</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>999BF07A</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>
@@ -581,6 +563,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3FCCEA0E</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF2EC6D3</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3737ADB3</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8D249C7F</checksum>
     </file>
   </files>
 </measure>

@@ -285,6 +285,14 @@ class HPXMLDefaults
       hpxml.site.shielding_of_home_isdefaulted = true
     end
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
+
+    if hpxml.site.orientation_of_front_of_home.nil? && (not hpxml.site.azimuth_of_front_of_home.nil?)
+      hpxml.site.orientation_of_front_of_home = get_orientation_from_azimuth(hpxml.site.azimuth_of_front_of_home)
+      hpxml.site.orientation_of_front_of_home_isdefaulted = true
+    elsif hpxml.site.azimuth_of_front_of_home.nil? && (not hpxml.site.orientation_of_front_of_home.nil?)
+      hpxml.site.azimuth_of_front_of_home = get_azimuth_from_orientation(hpxml.site.orientation_of_front_of_home)
+      hpxml.site.azimuth_of_front_of_home_isdefaulted = true
+    end
   end
 
   def self.apply_neighbor_buildings(hpxml)
