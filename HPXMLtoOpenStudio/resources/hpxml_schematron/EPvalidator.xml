@@ -113,13 +113,41 @@
       <sch:assert role='ERROR' test='count(h:BillsFactor[h:FuelType="coal"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BillsFactor[FuelType="coal"]</sch:assert> <!-- See [BillsFactor=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:BillsFactor[h:FuelType="wood"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BillsFactor[FuelType="wood"]</sch:assert> <!-- See [BillsFactor=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:BillsFactor[h:FuelType="wood pellets"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BillsFactor[FuelType="wood pellets"]</sch:assert> <!-- See [BillsFactor=OtherFuel] -->
+      <sch:assert role='ERROR' test='count(h:BillsFactor/h:Photovoltaics) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BillsFactor/Photovoltaics</sch:assert> <!-- See [BillsFactor=Photovoltaics] -->
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[BillsFactor=OtherFuel]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:EmissionsScenarios/h:BillsScenario/h:BillsFactor[h:FuelType="coal" | h:FuelType="wood" | h:FuelType="wood pellets"]'>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:BillsScenarios/h:BillsScenario/h:BillsFactor[h:FuelType[text()="coal" or h:FuelType="wood" or h:FuelType="wood pellets"]]'>
       <sch:assert role='ERROR' test='count(h:MarginalRate) = 1'>Expected 1 element(s) for xpath: MarginalRate</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[BillsFactor=Photovoltaics]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:BillsScenarios/h:BillsScenario/h:BillsFactor/h:Photovoltaics'>
+      <sch:assert role='ERROR' test='count(h:CompensationType) = 1'>Expected 1 element(s) for xpath: CompensationType</sch:assert> <!-- See [BillsFactor=NetMetering] or [BillsFactor=FeedInTariff] -->
+      <sch:assert role='ERROR' test='h:CompensationType[text()="Net Metering" or text()="Feed-In Tariff"] or not(h:CompensationType)'>Expected CompensationType to be 'Net Metering' or 'Feed-In Tariff'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:GridConnectionFeeUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: GridConnectionFeeUnits</sch:assert>
+      <sch:assert role='ERROR' test='h:GridConnectionFeeUnits[text()="$/kW" or text()="$"] or not(h:CompensationType)'>Expected GridConnectionFeeUnits to be '$/kW' or '$'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:GridConnectionFeeUnits) + count(h:MonthlyGridConnectionFee) = 0 or count(h:GridConnectionFeeUnits) + count(h:MonthlyGridConnectionFee) = 2'>Expected 0 or 1 element(s) for xpath: GridConnectionFeeUnits | MonthlyGridConnectionFee</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[BillsFactor=NetMetering]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:BillsScenarios/h:BillsScenario/h:BillsFactor/h:Photovoltaics[h:CompensationType="Net Metering"]'>
+      <sch:assert role='ERROR' test='count(h:NetMeteringAnnualExcessSellbackRateType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NetMeteringAnnualExcessSellbackRateType</sch:assert>
+      <sch:assert role='ERROR' test='h:NetMeteringAnnualExcessSellbackRateType[text()="User-Specified" or text()="Retail Electricity Cost"] or not (h:NetMeteringAnnualExcessSellbackRateType)'>Expected NetMeteringAnnualExcessSellbackRateType to be 'User-Specified' or 'Retail Electricity Cost'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:NetMeteringAnnualExcessSellbackRateType[text()="User-Specified"]) + count(h:NetMeteringAnnualExcessSellbackRate) = 2 or count(h:NetMeteringAnnualExcessSellbackRateType[text()="Retail Electricity Cost"]) or not(h:NetMeteringAnnualExcessSellbackRateType)'>Expected 0 or 2 element(s) for xpath: NetMeteringAnnualExcessSellbackRateType | NetMeteringAnnualExcessSellbackRate</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[BillsFactor=FeedInTariff]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:BillsScenarios/h:BillsScenario/h:BillsFactor/h:Photovoltaics[h:CompensationType="Feed-In Tariff"]'>
+      <sch:assert role='ERROR' test='count(h:FeedInTariffRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FeedInTariffRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 

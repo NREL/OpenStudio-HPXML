@@ -206,7 +206,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     for pv_compensation_type in ['Net Metering', 'Feed-In Tariff']
-      hpxml.header.bills_scenarios.add(name: name,
+      hpxml.header.bills_scenarios.add(name: pv_compensation_type,
                                        elec_fixed_charge: 8,
                                        natural_gas_fixed_charge: 9,
                                        elec_marginal_rate: 0.2,
