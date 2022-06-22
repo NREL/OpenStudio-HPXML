@@ -2902,6 +2902,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Names of bills scenarios. If multiple scenarios, use a comma-separated list. If not provided, no bills scenarios are calculated.')
     args << arg
 
+    [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
+      underscore_case = OpenStudio::toUnderscoreCase(fuel)
+      all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
+      cap_case = fuel.capitalize
+
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument("bills_#{underscore_case}_fixed_charges", false)
+      arg.setDisplayName("Bills: #{all_caps_case} Fixed Charges")
+      arg.setDescription("#{cap_case} bills monthly fixed charges. If multiple scenarios, use a comma-separated list.")
+      args << arg
+    end
+
     ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
@@ -3527,6 +3538,17 @@ class HPXMLFile
     if args[:bills_scenario_names].is_initialized
       bills_scenario_names = args[:bills_scenario_names].get.split(',').map(&:strip)
 
+      fixed_charges = {}
+      [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
+        underscore_case = OpenStudio::toUnderscoreCase(fuel)
+
+        if args["bills_#{underscore_case}_fixed_charges".to_sym].is_initialized
+          fixed_charges[fuel] = args["bills_#{underscore_case}_fixed_charges".to_sym].get.split(',').map(&:strip)
+        else
+          fixed_charges[fuel] = [nil] * bills_scenario_names.size
+        end
+      end
+
       marginal_rates = {}
       ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
@@ -3574,7 +3596,9 @@ class HPXMLFile
         bills_pv_monthly_grid_connection_fees = [nil] * bills_scenario_names.size
       end
 
-      bills_scenarios = bills_scenario_names.zip(marginal_rates[HPXML::FuelTypeElectricity],
+      bills_scenarios = bills_scenario_names.zip(fixed_charges[HPXML::FuelTypeElectricity],
+                                                 fixed_charges[HPXML::FuelTypeNaturalGas],
+                                                 marginal_rates[HPXML::FuelTypeElectricity],
                                                  marginal_rates[HPXML::FuelTypeNaturalGas],
                                                  marginal_rates[HPXML::FuelTypePropane],
                                                  marginal_rates[HPXML::FuelTypeOil],
@@ -3589,7 +3613,9 @@ class HPXMLFile
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        elec_fixed_charge = Float(elec_fixed_charge) rescue nil
+        natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
         elec_marginal_rate = Float(elec_marginal_rate) rescue nil
         natural_gas_marginal_rate = Float(natural_gas_marginal_rate) rescue nil
         propane_marginal_rate = Float(propane_marginal_rate) rescue nil
@@ -3614,6 +3640,8 @@ class HPXMLFile
         pv_monthly_grid_connection_fee = Float(pv_monthly_grid_connection_fee) rescue nil
 
         hpxml.header.bills_scenarios.add(name: name,
+                                         elec_fixed_charge: elec_fixed_charge,
+                                         natural_gas_fixed_charge: natural_gas_fixed_charge,
                                          elec_marginal_rate: elec_marginal_rate,
                                          natural_gas_marginal_rate: natural_gas_marginal_rate,
                                          propane_marginal_rate: propane_marginal_rate,

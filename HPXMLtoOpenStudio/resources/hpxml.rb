@@ -1185,7 +1185,9 @@ class HPXML < Object
   end
 
   class BillsScenario < BaseElement
-    ATTRS = [:name, :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
+    ATTRS = [:name,
+             :elec_fixed_charge, :natural_gas_fixed_charge,
+             :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
              :coal_marginal_rate, :wood_marginal_rate, :wood_pellets_marginal_rate,
              :pv_compensation_type, :pv_net_metering_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate,
              :pv_feed_in_tariff_rate,
@@ -1205,19 +1207,20 @@ class HPXML < Object
       bills_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'BillsScenarios'])
       bills_scenario = XMLHelper.add_element(bills_scenarios, 'BillsScenario')
       XMLHelper.add_element(bills_scenario, 'Name', @name, :string) unless @name.nil?
-      { HPXML::FuelTypeElectricity => [@elec_marginal_rate, @elec_marginal_rate_isdefaulted],
-        HPXML::FuelTypeNaturalGas => [@natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
-        HPXML::FuelTypePropane => [@propane_marginal_rate, @propane_marginal_rate_isdefaulted],
-        HPXML::FuelTypeOil => [@fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
-        HPXML::FuelTypeCoal => [@coal_marginal_rate, @coal_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodCord => [@wood_marginal_rate, @wood_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodPellets => [@wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
-        marginal_rate, marginal_rate_isdefaulted = vals
-        next if marginal_rate.nil?
+      { HPXML::FuelTypeElectricity => [@elec_fixed_charge, @elec_fixed_charge_isdefaulted, @elec_marginal_rate, @elec_marginal_rate_isdefaulted],
+        HPXML::FuelTypeNaturalGas => [@natural_gas_fixed_charge, @natural_gas_fixed_charge_isdefaulted, @natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
+        HPXML::FuelTypePropane => [nil, nil, @propane_marginal_rate, @propane_marginal_rate_isdefaulted],
+        HPXML::FuelTypeOil => [nil, nil, @fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
+        HPXML::FuelTypeCoal => [nil, nil, @coal_marginal_rate, @coal_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodCord => [nil, nil, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodPellets => [nil, nil, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
+        fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted = vals
+        next if fixed_charge.nil? && marginal_rate.nil?
 
         bills_factor = XMLHelper.add_element(bills_scenario, 'BillsFactor')
         XMLHelper.add_element(bills_factor, 'FuelType', fuel, :string)
-        XMLHelper.add_element(bills_factor, 'MarginalRate', marginal_rate, :float, marginal_rate_isdefaulted)
+        XMLHelper.add_element(bills_factor, 'FixedCharge', fixed_charge, :float, fixed_charge_isdefaulted) unless fixed_charge.nil?
+        XMLHelper.add_element(bills_factor, 'MarginalRate', marginal_rate, :float, marginal_rate_isdefaulted) unless marginal_rate.nil?
       end
       if not @pv_compensation_type.nil?
         pv = XMLHelper.add_element(bills_scenario, 'Photovoltaics')
@@ -1234,7 +1237,9 @@ class HPXML < Object
       return if bills_scenario.nil?
 
       @name = XMLHelper.get_value(bills_scenario, 'Name', :string)
+      @elec_fixed_charge = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/FixedCharge", :float)
       @elec_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/MarginalRate", :float)
+      @natural_gas_fixed_charge = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/FixedCharge", :float)
       @natural_gas_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/MarginalRate", :float)
       @propane_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypePropane}']/MarginalRate", :float)
       @fuel_oil_marginal_rate = XMLHelper.get_value(bills_scenario, "BillsFactor[FuelType='#{HPXML::FuelTypeOil}']/MarginalRate", :float)

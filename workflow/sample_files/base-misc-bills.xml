@@ -19,11 +19,17 @@
           <Name>Simple Bills - Net Metering</Name>
           <BillsFactor>
             <FuelType>electricity</FuelType>
+            <FixedCharge>12.0</FixedCharge>
             <MarginalRate>0.12</MarginalRate>
           </BillsFactor>
           <BillsFactor>
             <FuelType>natural gas</FuelType>
+            <FixedCharge>11.0</FixedCharge>
             <MarginalRate>1.01</MarginalRate>
+          </BillsFactor>
+          <BillsFactor>
+            <FuelType>propane</FuelType>
+            <MarginalRate>3.0</MarginalRate>
           </BillsFactor>
           <Photovoltaics>
             <CompensationType>Net Metering</CompensationType>
@@ -37,11 +43,17 @@
           <Name>Simple Bills - Feed-In Tariff</Name>
           <BillsFactor>
             <FuelType>electricity</FuelType>
+            <FixedCharge>11.0</FixedCharge>
             <MarginalRate>0.13</MarginalRate>
           </BillsFactor>
           <BillsFactor>
             <FuelType>natural gas</FuelType>
+            <FixedCharge>12.0</FixedCharge>
             <MarginalRate>1.02</MarginalRate>
+          </BillsFactor>
+          <BillsFactor>
+            <FuelType>fuel oil</FuelType>
+            <MarginalRate>2.5</MarginalRate>
           </BillsFactor>
           <Photovoltaics>
             <CompensationType>Feed-In Tariff</CompensationType>
