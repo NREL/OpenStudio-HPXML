@@ -275,11 +275,6 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_auto_marginal_rate(_state_code, _fuel_type, _fixed_rate)
-    # TODO
-    return 0
-  end
-
   def self.apply_bills_scenarios(hpxml)
     hpxml.header.bills_scenarios.each do |scenario|
       if scenario.elec_fixed_charge.nil?
@@ -287,7 +282,7 @@ class HPXMLDefaults
         scenario.elec_fixed_charge_isdefaulted = true
       end
       if scenario.elec_marginal_rate.nil?
-        scenario.elec_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
+        scenario.elec_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
         scenario.elec_marginal_rate_isdefaulted = true
       end
 
@@ -296,17 +291,17 @@ class HPXMLDefaults
         scenario.natural_gas_fixed_charge_isdefaulted = true
       end
       if scenario.natural_gas_marginal_rate.nil?
-        scenario.natural_gas_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
+        scenario.natural_gas_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
         scenario.natural_gas_marginal_rate_isdefaulted = true
       end
 
       if scenario.propane_marginal_rate.nil?
-        scenario.propane_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypePropane, nil)
+        scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypePropane, nil)
         scenario.propane_marginal_rate_isdefaulted = true
       end
 
       if scenario.fuel_oil_marginal_rate.nil?
-        scenario.fuel_oil_marginal_rate = get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeOil, nil)
+        scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeOil, nil)
         scenario.fuel_oil_marginal_rate_isdefaulted = true
       end
 
