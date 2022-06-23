@@ -234,12 +234,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     segment = segment.strip
     results_out = []
     results_out << ["#{bill_scenario_name}: Total ($)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
-    results_out << [line_break]
+    # results_out << [line_break]
     utility_bills.each do |key, bill|
       new_segment = key.split(':', 2)[0]
       new_segment = new_segment.strip
       if new_segment != segment
-        results_out << [line_break]
+        # results_out << [line_break]
         segment = new_segment
       end
 
@@ -254,7 +254,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     elsif ['json', 'msgpack'].include? output_format
       h = {}
       results_out.each do |out|
-        next if out == [line_break]
+        # next if out == [line_break]
 
         if out[0].include? ':'
           grp, name = out[0].split(':', 2)
