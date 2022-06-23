@@ -428,6 +428,9 @@ class HPXMLTest < MiniTest::Test
     rundir = File.join(rundir, 'run')
 
     # Check results
+if !success
+puts xml
+end
     assert_equal(true, success)
 
     # Check for output files
