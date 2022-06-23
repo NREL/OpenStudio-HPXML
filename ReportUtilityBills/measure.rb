@@ -120,7 +120,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     warnings = check_for_warnings(args, @hpxml.pv_systems)
     return result if !warnings.empty?
 
-    fuels, _, _ = setup_outputs()
+    fuels = setup_fuel_outputs()
 
     # Fuel outputs
     fuels.values.each do |fuel|
@@ -175,7 +175,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    return true if @hpxml.header.bills_scenarios.empty?
+    # if you're calling this measure, but you didn't specify any bill scenarios, you probably still want utility bills
+    if @hpxml.header.bills_scenarios.empty?
+      @hpxml.header.bills_scenarios.add(name: 'Default',
+                                        coal_marginal_rate: 0.015,
+                                        wood_marginal_rate: 0.015,
+                                        wood_pellets_marginal_rate: 0.015)
+      HPXMLDefaults.apply_bills_scenarios(@hpxml)
+    end
 
     warnings = check_for_warnings(args, @hpxml.pv_systems)
     if register_warnings(runner, warnings)
@@ -185,8 +192,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Set paths
     output_path = File.join(output_dir, "results_bills.#{output_format}")
 
-    # Setup outputs
-    fuels, utility_rates, utility_bills = setup_outputs()
+    # Setup fuel outputs
+    fuels = setup_fuel_outputs()
 
     # Get timestamps
     @timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
@@ -195,6 +202,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     get_outputs(fuels)
 
     @hpxml.header.bills_scenarios.each do |bill_scenario|
+      utility_rates, utility_bills = setup_utility_outputs()
+
       # Get utility rates
       warnings = get_utility_rates(fuels, utility_rates, args, bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
@@ -436,7 +445,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def setup_outputs()
+  def setup_fuel_outputs()
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
         return 'kWh'
@@ -461,6 +470,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       fuel.units = get_timeseries_units_from_fuel_type(fuel_type)
     end
 
+    return fuels
+  end
+
+  def setup_utility_outputs()
     utility_rates = {}
     utility_rates[FT::Elec] = UtilityRate.new
     utility_rates[FT::Gas] = UtilityRate.new
@@ -479,7 +492,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     utility_bills[FT::WoodPellets] = UtilityBill.new
     utility_bills[FT::Coal] = UtilityBill.new
 
-    return fuels, utility_rates, utility_bills
+    return utility_rates, utility_bills
   end
 
   def get_outputs(fuels)
