@@ -196,7 +196,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.header.bills_scenarios.each do |bill_scenario|
       # Get utility rates
-      warnings = get_utility_rates(fuels, utility_rates, args, bill_scenario, @hpxml.header.state_code, @hpxml.pv_systems, runner)
+      warnings = get_utility_rates(fuels, utility_rates, args, bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
         return true
       end
@@ -301,7 +301,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def get_utility_rates(fuels, utility_rates, args, bill_scenario, _state_code, pv_systems, _runner = nil)
+  def get_utility_rates(fuels, utility_rates, args, bill_scenario, pv_systems)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0

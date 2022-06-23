@@ -1189,7 +1189,8 @@ class HPXML < Object
              :elec_fixed_charge, :natural_gas_fixed_charge,
              :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
              :coal_marginal_rate, :wood_marginal_rate, :wood_pellets_marginal_rate,
-             :pv_compensation_type, :pv_net_metering_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate,
+             :pv_compensation_type,
+             :pv_net_metering_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate,
              :pv_feed_in_tariff_rate,
              :pv_grid_connection_fee_unit, :pv_monthly_grid_connection_fee]
     attr_accessor(*ATTRS)
