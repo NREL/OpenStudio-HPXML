@@ -294,8 +294,6 @@ Default Values
 ~~~~~~~~~~~~~~
 
 If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
-Values are based on ANSI/RESNET/ICC 301 and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
-If no default value is available, a warning will be issued.
 
   ============  ==============  =============  =============
   Fuel Type     CO2e [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
@@ -307,6 +305,10 @@ If no default value is available, a warning will be issued.
   wood          --              --             --
   wood pellets  --              --             --
   ============  ==============  =============  =============
+
+Default values are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICCC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
+
+If no default value is available, a warning will be issued.
 
 .. _buildingsite:
 
