@@ -429,7 +429,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check results
 if !success
-puts xml
+puts "FAIL: #{xml}"
 end
     assert_equal(true, success)
 
