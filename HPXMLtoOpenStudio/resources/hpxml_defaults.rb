@@ -33,7 +33,7 @@ class HPXMLDefaults
 
     apply_header(hpxml, epw_file)
     apply_emissions_scenarios(hpxml)
-    apply_bills_scenarios(hpxml)
+    apply_utility_bill_scenarios(hpxml)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
@@ -275,8 +275,8 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_bills_scenarios(hpxml)
-    hpxml.header.bills_scenarios.each do |scenario|
+  def self.apply_utility_bill_scenarios(hpxml)
+    hpxml.header.utility_bill_scenarios.each do |scenario|
       if scenario.elec_fixed_charge.nil?
         scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
         scenario.elec_fixed_charge_isdefaulted = true
@@ -328,9 +328,9 @@ class HPXMLDefaults
         end
       end
 
-      if scenario.pv_grid_connection_fee_unit.nil?
-        scenario.pv_grid_connection_fee_unit = '$/kW'
-        scenario.pv_grid_connection_fee_unit_isdefaulted = true
+      if scenario.pv_monthly_grid_connection_fee_unit.nil?
+        scenario.pv_monthly_grid_connection_fee_unit = '$/kW'
+        scenario.pv_monthly_grid_connection_fee_unit_isdefaulted = true
       end
 
       if scenario.pv_monthly_grid_connection_fee.nil?

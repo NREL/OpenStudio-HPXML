@@ -175,14 +175,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    # if you're calling this measure, but you didn't specify any bill scenarios, you probably still want utility bills
-    if @hpxml.header.bills_scenarios.empty?
-      @hpxml.header.bills_scenarios.add(name: 'Default',
-                                        coal_marginal_rate: 0.015,
-                                        wood_marginal_rate: 0.015,
-                                        wood_pellets_marginal_rate: 0.015)
-      HPXMLDefaults.apply_bills_scenarios(@hpxml)
-    end
+    return true if @hpxml.header.utility_bill_scenarios.empty?
 
     warnings = check_for_warnings(args, @hpxml.pv_systems)
     if register_warnings(runner, warnings)
@@ -201,11 +194,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Get outputs
     get_outputs(fuels)
 
-    @hpxml.header.bills_scenarios.each do |bill_scenario|
+    @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      warnings = get_utility_rates(fuels, utility_rates, args, bill_scenario, @hpxml.pv_systems)
+      warnings = get_utility_rates(fuels, utility_rates, args, utility_bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
         return true
       end
@@ -220,8 +213,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       get_annual_bills(utility_bills)
 
       # Write/report results
-      write_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario.name)
-      report_runperiod_output_results(runner, utility_bills, bill_scenario.name)
+      write_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+      report_runperiod_output_results(runner, utility_bills, utility_bill_scenario.name)
     end
 
     return true
@@ -392,12 +385,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless pv_systems.size > 0
 
       monthly_fee = 0.0
-      if bill_scenario.pv_grid_connection_fee_unit == '$/kW'
+      if bill_scenario.pv_monthly_grid_connection_fee_unit == '$/kW'
         pv_systems.each do |pv_system|
           max_power_output_kW = UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
           monthly_fee += bill_scenario.pv_monthly_grid_connection_fee * max_power_output_kW
         end
-      elsif bill_scenario.pv_grid_connection_fee_unit == '$'
+      elsif bill_scenario.pv_monthly_grid_connection_fee_unit == '$'
         monthly_fee = bill_scenario.pv_monthly_grid_connection_fee
       end
       rate.fixedmonthlycharge += monthly_fee

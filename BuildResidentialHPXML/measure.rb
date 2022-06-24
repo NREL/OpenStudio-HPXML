@@ -2944,9 +2944,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_grid_connection_fee_units', false)
-    arg.setDisplayName('Bills: PV Grid Connection Fee Units')
-    arg.setDescription('PV grid connection fee units. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_monthly_grid_connection_fee_units', false)
+    arg.setDisplayName('Bills: PV Monthly Grid Connection Fee Units')
+    arg.setDescription('PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_monthly_grid_connection_fees', false)
@@ -3584,10 +3584,10 @@ class HPXMLFile
         bills_pv_feed_in_tariff_rates = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_grid_connection_fee_units].is_initialized
-        bills_pv_grid_connection_fee_units = args[:bills_pv_grid_connection_fee_units].get.split(',').map(&:strip)
+      if args[:bills_pv_monthly_grid_connection_fee_units].is_initialized
+        bills_pv_monthly_grid_connection_fee_units = args[:bills_pv_monthly_grid_connection_fee_units].get.split(',').map(&:strip)
       else
-        bills_pv_grid_connection_fee_units = [nil] * bills_scenario_names.size
+        bills_pv_monthly_grid_connection_fee_units = [nil] * bills_scenario_names.size
       end
 
       if args[:bills_pv_monthly_grid_connection_fees].is_initialized
@@ -3609,11 +3609,11 @@ class HPXMLFile
                                                  bills_pv_net_metering_annual_excess_sellback_rate_types,
                                                  bills_pv_net_metering_annual_excess_sellback_rates,
                                                  bills_pv_feed_in_tariff_rates,
-                                                 bills_pv_grid_connection_fee_units,
+                                                 bills_pv_monthly_grid_connection_fee_units,
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
         elec_marginal_rate = Float(elec_marginal_rate) rescue nil
@@ -3639,22 +3639,22 @@ class HPXMLFile
 
         pv_monthly_grid_connection_fee = Float(pv_monthly_grid_connection_fee) rescue nil
 
-        hpxml.header.bills_scenarios.add(name: name,
-                                         elec_fixed_charge: elec_fixed_charge,
-                                         natural_gas_fixed_charge: natural_gas_fixed_charge,
-                                         elec_marginal_rate: elec_marginal_rate,
-                                         natural_gas_marginal_rate: natural_gas_marginal_rate,
-                                         propane_marginal_rate: propane_marginal_rate,
-                                         fuel_oil_marginal_rate: fuel_oil_marginal_rate,
-                                         coal_marginal_rate: coal_marginal_rate,
-                                         wood_marginal_rate: wood_marginal_rate,
-                                         wood_pellets_marginal_rate: wood_pellets_marginal_rate,
-                                         pv_compensation_type: pv_compensation_type,
-                                         pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,
-                                         pv_net_metering_annual_excess_sellback_rate: pv_net_metering_annual_excess_sellback_rate,
-                                         pv_feed_in_tariff_rate: pv_feed_in_tariff_rate,
-                                         pv_grid_connection_fee_unit: pv_grid_connection_fee_unit,
-                                         pv_monthly_grid_connection_fee: pv_monthly_grid_connection_fee)
+        hpxml.header.utility_bill_scenarios.add(name: name,
+                                                elec_fixed_charge: elec_fixed_charge,
+                                                natural_gas_fixed_charge: natural_gas_fixed_charge,
+                                                elec_marginal_rate: elec_marginal_rate,
+                                                natural_gas_marginal_rate: natural_gas_marginal_rate,
+                                                propane_marginal_rate: propane_marginal_rate,
+                                                fuel_oil_marginal_rate: fuel_oil_marginal_rate,
+                                                coal_marginal_rate: coal_marginal_rate,
+                                                wood_marginal_rate: wood_marginal_rate,
+                                                wood_pellets_marginal_rate: wood_pellets_marginal_rate,
+                                                pv_compensation_type: pv_compensation_type,
+                                                pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,
+                                                pv_net_metering_annual_excess_sellback_rate: pv_net_metering_annual_excess_sellback_rate,
+                                                pv_feed_in_tariff_rate: pv_feed_in_tariff_rate,
+                                                pv_monthly_grid_connection_fee_unit: pv_monthly_grid_connection_fee_unit,
+                                                pv_monthly_grid_connection_fee: pv_monthly_grid_connection_fee)
       end
     end
 

@@ -202,35 +202,35 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def test_bills
+  def test_utility_bills
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     for pv_compensation_type in ['Net Metering', 'Feed-In Tariff']
-      hpxml.header.bills_scenarios.add(name: pv_compensation_type,
-                                       elec_fixed_charge: 8,
-                                       natural_gas_fixed_charge: 9,
-                                       elec_marginal_rate: 0.2,
-                                       natural_gas_marginal_rate: 20,
-                                       propane_marginal_rate: 10,
-                                       fuel_oil_marginal_rate: 5,
-                                       coal_marginal_rate: 6,
-                                       wood_marginal_rate: 7,
-                                       wood_pellets_marginal_rate: 8,
-                                       pv_compensation_type: pv_compensation_type,
-                                       pv_net_metering_annual_excess_sellback_rate_type: 'Retail Electricity Cost',
-                                       pv_net_metering_annual_excess_sellback_rate: 0.04,
-                                       pv_feed_in_tariff_rate: 0.15,
-                                       pv_grid_connection_fee_unit: '$',
-                                       pv_monthly_grid_connection_fee: 3)
+      hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
+                                              elec_fixed_charge: 8,
+                                              natural_gas_fixed_charge: 9,
+                                              elec_marginal_rate: 0.2,
+                                              natural_gas_marginal_rate: 20,
+                                              propane_marginal_rate: 10,
+                                              fuel_oil_marginal_rate: 5,
+                                              coal_marginal_rate: 6,
+                                              wood_marginal_rate: 7,
+                                              wood_pellets_marginal_rate: 8,
+                                              pv_compensation_type: pv_compensation_type,
+                                              pv_net_metering_annual_excess_sellback_rate_type: 'Retail Electricity Cost',
+                                              pv_net_metering_annual_excess_sellback_rate: 0.04,
+                                              pv_feed_in_tariff_rate: 0.15,
+                                              pv_monthly_grid_connection_fee_unit: '$',
+                                              pv_monthly_grid_connection_fee: 3)
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    scenarios = hpxml_default.header.bills_scenarios
+    scenarios = hpxml_default.header.utility_bill_scenarios
     _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, 'Net Metering', 'Retail Electricity Cost', nil, nil, '$', 3)
     _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, 'Feed-In Tariff', nil, nil, 0.15, '$', 3)
 
     # Test defaults
-    hpxml.header.bills_scenarios.each do |scenario|
+    hpxml.header.utility_bill_scenarios.each do |scenario|
       scenario.elec_fixed_charge = nil
       scenario.natural_gas_fixed_charge = nil
       scenario.elec_marginal_rate = nil
@@ -244,12 +244,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       scenario.pv_net_metering_annual_excess_sellback_rate_type = nil
       scenario.pv_net_metering_annual_excess_sellback_rate = nil
       scenario.pv_feed_in_tariff_rate = nil
-      scenario.pv_grid_connection_fee_unit = nil
+      scenario.pv_monthly_grid_connection_fee_unit = nil
       scenario.pv_monthly_grid_connection_fee = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    hpxml_default.header.bills_scenarios.each do |scenario|
+    hpxml_default.header.utility_bill_scenarios.each do |scenario|
       _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, 2.4532692307692305, 3.495346153846154, nil, nil, nil, 'Net Metering', 'User-Specified', 0.03, nil, '$/kW', 0.0)
     end
   end
@@ -3270,7 +3270,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_bills_values(scenario, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate,
                                  propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
                                  pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate,
-                                 pv_feed_in_tariff_rate, pv_grid_connection_fee_unit, pv_monthly_grid_connection_fee)
+                                 pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee)
     if elec_fixed_charge.nil?
       assert_nil(scenario.elec_fixed_charge)
     else
@@ -3336,10 +3336,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(pv_feed_in_tariff_rate, scenario.pv_feed_in_tariff_rate)
     end
-    if pv_grid_connection_fee_unit.nil?
-      assert_nil(scenario.pv_grid_connection_fee_unit)
+    if pv_monthly_grid_connection_fee_unit.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_unit)
     else
-      assert_equal(pv_grid_connection_fee_unit, scenario.pv_grid_connection_fee_unit)
+      assert_equal(pv_monthly_grid_connection_fee_unit, scenario.pv_monthly_grid_connection_fee_unit)
     end
     if pv_monthly_grid_connection_fee.nil?
       assert_nil(scenario.pv_monthly_grid_connection_fee)
