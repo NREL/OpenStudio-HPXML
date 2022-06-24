@@ -307,7 +307,6 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_warning_no_rates
-    skip
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-location-capetown-zaf.xml'
     expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
     bills_csv = _test_measure(expected_warnings: expected_warnings)

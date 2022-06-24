@@ -228,7 +228,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def write_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
-    line_break = nil
+    # line_break = nil
 
     segment = utility_bills.keys[0].split(':', 2)[0]
     segment = segment.strip
@@ -381,6 +381,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       elsif fuel_type == FT::Coal
         rate.flatratebuy = bill_scenario.coal_marginal_rate
       end
+
+      warnings << "Could not find a marginal #{fuel_type} rate." if rate.flatratebuy.nil?
 
       # Grid connection fee
       next unless fuel_type == FT::Elec
