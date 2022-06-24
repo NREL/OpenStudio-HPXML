@@ -8,8 +8,9 @@ class XMLValidator
     validator.errors.each do |e|
       next unless e.logMessage.count(':') >= 2
 
+      # Clean up message
       msg_txt = e.logMessage.split(':')[2..-1].join(':').strip
-      msg_txt = msg_txt.gsub("{#{HPXML::NameSpace}}", '')
+      msg_txt = msg_txt.gsub("{#{HPXML::NameSpace}}", '').gsub("\n", '')
       errors.append(msg_txt)
     end
     warnings += validator.warnings.map { |w| w.logMessage }
