@@ -1444,12 +1444,14 @@ class HPXMLTest < MiniTest::Test
   def _write_bill_results(all_bill_results, csv_out)
     require 'csv'
 
-    output_keys = nil
+    output_keys = []
     all_bill_results.values.each do |xml_results|
-      output_keys = xml_results.keys
-      break
+      xml_results.keys.each do |key|
+        next if output_keys.include? key
+
+        output_keys << key
+      end
     end
-    return if output_keys.nil?
 
     CSV.open(csv_out, 'w') do |csv|
       csv << ['HPXML'] + output_keys
