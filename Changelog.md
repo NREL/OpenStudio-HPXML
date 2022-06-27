@@ -13,6 +13,8 @@ __New Features__
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
+- ReportUtilityBills measure:
+  - Removes utility rate and PV related arguments in lieu of new utility bill scenarios feature.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
