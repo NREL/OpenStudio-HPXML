@@ -21,6 +21,7 @@ __Bugfixes__
 - Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
 - Fixes possible output error for ground source heat pumps with a shared hydronic circulation loop.
 - Provides an error message if the EnergyPlus simulation used infinite energy.
+- Fixes zero energy use for a ventilation fan w/ non-zero fan power and zero airflow rate.
 
 ## OpenStudio-HPXML v1.4.0
 
