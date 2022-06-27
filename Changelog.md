@@ -2,6 +2,7 @@
 
 __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
+- Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:
@@ -11,8 +12,7 @@ __New Features__
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
-- ReportUtilityBills measure:
-  - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type.
+  - Adds optional arguments for utility bill scenarios.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
