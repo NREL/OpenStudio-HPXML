@@ -495,7 +495,7 @@ OpenStudio-HPXML can optionally generate a utility bills output file.
 The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
 Monthly fixed charges and marginal rates, as well as PV compensation types/rates/fees, are defined to determine how utility bills are calculated.
 
-Results for each bills scenario defined in the HPXML file is listed as shown below.
+Results for each utility bill scenario defined in the HPXML file is listed as shown below.
 
    =============================================  ====================
    Type                                           Notes
