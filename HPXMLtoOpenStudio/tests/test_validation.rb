@@ -84,6 +84,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   end
 
   def test_schema_schematron_error_messages
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
     # Test case => Error message
     all_expected_errors = { 'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -498,6 +499,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   end
 
   def test_schema_schematron_warning_messages
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
     # Test case => Warning message
     all_expected_warnings = { 'battery-pv-output-power-low' => ['Max power output should typically be greater than or equal to 500 W.',
                                                                 'Max power output should typically be greater than or equal to 500 W.',
