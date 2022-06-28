@@ -224,7 +224,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
 
-Results for each emissions scenario defined in the HPXML file is listed as shown below.
+Results for each emissions scenario defined in the HPXML file are listed as shown below.
 Note that rows below with values of zero will be excluded.
 
    =======================================================================  ==================================================================
@@ -495,7 +495,7 @@ OpenStudio-HPXML can optionally generate a utility bills output file.
 The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
 Monthly fixed charges and marginal rates, as well as PV compensation types/rates/fees, are defined to determine how utility bills are calculated.
 
-Results for each utility bill scenario defined in the HPXML file is listed as shown below.
+Results for each utility bill scenario defined in the HPXML file are listed as shown below.
 
    =============================================  ====================
    Type                                           Notes
