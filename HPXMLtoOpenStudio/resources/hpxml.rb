@@ -246,7 +246,7 @@ class HPXML < Object
   PVCompensationTypeFeedInTariff = 'Feed-In Tariff'
   PVCompensationTypeNetMetering = 'Net Metering'
   PVGridConnectionFeeUnitsDollars = '$'
-  PVGridConnectionFeeUnitsDollarsPerkWh = '$/kWh'
+  PVGridConnectionFeeUnitsDollarsPerkW = '$/kW'
   PVModuleTypePremium = 'premium'
   PVModuleTypeStandard = 'standard'
   PVModuleTypeThinFilm = 'thin film'

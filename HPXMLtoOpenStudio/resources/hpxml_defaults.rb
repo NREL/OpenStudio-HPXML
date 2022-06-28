@@ -360,7 +360,7 @@ class HPXMLDefaults
       end
 
       if scenario.pv_monthly_grid_connection_fee_unit.nil?
-        scenario.pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollarsPerkWh
+        scenario.pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollarsPerkW
         scenario.pv_monthly_grid_connection_fee_unit_isdefaulted = true
       end
 

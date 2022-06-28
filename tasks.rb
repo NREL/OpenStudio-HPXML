@@ -2150,7 +2150,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = "#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}, NA"
     args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA'
     args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, 0.12'
-    args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{PVGridConnectionFeeUnitsDollarsPerkWh}, #{HPXML::PVGridConnectionFeeUnitsDollars}"
+    args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::PVGridConnectionFeeUnitsDollarsPerkW}, #{HPXML::PVGridConnectionFeeUnitsDollars}"
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 7.5'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')

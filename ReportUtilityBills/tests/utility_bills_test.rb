@@ -66,7 +66,7 @@ class ReportUtilityBillsTest < MiniTest::Test
                                              pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeUserSpecified,
                                              pv_net_metering_annual_excess_sellback_rate: 0.03,
                                              pv_feed_in_tariff_rate: 0.12,
-                                             pv_monthly_grid_connection_fee_unit: HPXML::PVGridConnectionFeeUnitsDollarsPerkWh,
+                                             pv_monthly_grid_connection_fee_unit: HPXML::PVGridConnectionFeeUnitsDollarsPerkW,
                                              pv_monthly_grid_connection_fee: 0.0)
 
     HPXMLDefaults.apply_header(@hpxml, nil)
