@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'oga'
-require_relative '../../HPXMLtoOpenStudio/resources/bill'
+require_relative '../../HPXMLtoOpenStudio/resources/utility_bills'
 require_relative '../../HPXMLtoOpenStudio/resources/constants'
 require_relative '../../HPXMLtoOpenStudio/resources/energyplus'
 require_relative '../../HPXMLtoOpenStudio/resources/hpxml'

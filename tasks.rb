@@ -371,8 +371,8 @@ def create_hpxmls
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-additional-properties.xml' => 'base.xml',
     'base-misc-bills.xml' => 'base.xml',
-    'base-misc-bills-net-metering.xml' => 'base-pv.xml',
-    'base-misc-bills-feed-in-tariff.xml' => 'base-pv.xml',
+    'base-misc-bills-none.xml' => 'base.xml',
+    'base-misc-bills-pv.xml' => 'base-pv.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -799,6 +799,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
     args['hot_tub_present'] = false
     args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
+    args['utility_bill_scenario_names'] = 'Bills'
   elsif ['ASHRAE_Standard_140/L100AC.xml'].include? hpxml_file
     args['weather_station_epw_filepath'] = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
@@ -2128,38 +2129,29 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if ['base-misc-additional-properties.xml'].include? hpxml_file
     args['additional_properties'] += '|LowIncome=false|Remodeled|Description=2-story home in Denver|comma=,|special=<|special2=>|special3=/|special4=\\'
   elsif ['base-misc-bills.xml'].include? hpxml_file
-    args['bills_scenario_names'] = 'Bills'
-    args['bills_electricity_fixed_charges'] = '12'
-    args['bills_electricity_marginal_rates'] = '0.12'
-    args['bills_natural_gas_fixed_charges'] = '12'
-    args['bills_natural_gas_marginal_rates'] = '1.10'
-    args['bills_propane_marginal_rates'] = '3'
-    args['bills_fuel_oil_marginal_rates'] = '4'
-  elsif ['base-misc-bills-net-metering.xml'].include? hpxml_file
-    args['bills_scenario_names'] = 'Bills'
-    args['bills_electricity_fixed_charges'] = '12'
-    args['bills_electricity_marginal_rates'] = '0.12'
-    args['bills_natural_gas_fixed_charges'] = '12'
-    args['bills_natural_gas_marginal_rates'] = '1.10'
-    args['bills_propane_marginal_rates'] = '3'
-    args['bills_fuel_oil_marginal_rates'] = '4'
-    args['bills_pv_compensation_types'] = 'Net Metering'
-    args['bills_pv_net_metering_annual_excess_sellback_rate_types'] = 'User-Specified'
-    args['bills_pv_net_metering_annual_excess_sellback_rates'] = '0.035'
-    args['bills_pv_monthly_grid_connection_fee_units'] = '$/kW'
-    args['bills_pv_monthly_grid_connection_fees'] = '2.5'
-  elsif ['base-misc-bills-feed-in-tariff.xml'].include? hpxml_file
-    args['bills_scenario_names'] = 'Bills'
-    args['bills_electricity_fixed_charges'] = '12'
-    args['bills_electricity_marginal_rates'] = '0.12'
-    args['bills_natural_gas_fixed_charges'] = '12'
-    args['bills_natural_gas_marginal_rates'] = '1.10'
-    args['bills_propane_marginal_rates'] = '3'
-    args['bills_fuel_oil_marginal_rates'] = '4'
-    args['bills_pv_compensation_types'] = 'Feed-In Tariff'
-    args['bills_pv_feed_in_tariff_rates'] = '0.12'
-    args['bills_pv_monthly_grid_connection_fee_units'] = '$'
-    args['bills_pv_monthly_grid_connection_fees'] = '7.5'
+    args['utility_bill_scenario_names'] = 'Bills'
+    args['utility_bill_electricity_fixed_charges'] = '12'
+    args['utility_bill_electricity_marginal_rates'] = '0.12'
+    args['utility_bill_natural_gas_fixed_charges'] = '12'
+    args['utility_bill_natural_gas_marginal_rates'] = '1.10'
+    args['utility_bill_propane_marginal_rates'] = '3'
+    args['utility_bill_fuel_oil_marginal_rates'] = '4'
+  elsif ['base-misc-bills-none.xml'].include? hpxml_file
+    args.delete('utility_bill_scenario_names')
+  elsif ['base-misc-bills-pv.xml'].include? hpxml_file
+    args['utility_bill_scenario_names'] = 'Net Metering, Feed-In Tariff'
+    args['utility_bill_electricity_fixed_charges'] = '12, 12'
+    args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12'
+    args['utility_bill_natural_gas_fixed_charges'] = '12, 12'
+    args['utility_bill_natural_gas_marginal_rates'] = '1.10, 1.10'
+    args['utility_bill_propane_marginal_rates'] = '3, 3'
+    args['utility_bill_fuel_oil_marginal_rates'] = '4, 4'
+    args['utility_bill_pv_compensation_types'] = 'Net Metering, Feed-In Tariff'
+    args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = 'User-Specified, NA'
+    args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA'
+    args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, 0.12'
+    args['utility_bill_pv_monthly_grid_connection_fee_units'] = '$/kW, $'
+    args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 7.5'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
@@ -2242,7 +2234,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args.delete('hvac_control_heating_weekend_setpoint')
     args.delete('hvac_control_cooling_weekday_setpoint')
     args.delete('hvac_control_cooling_weekend_setpoint')
-    args['bills_scenario_names'] = 'Bills'
   elsif ['base-misc-emissions.xml'].include? hpxml_file
     args['emissions_scenario_names'] = 'Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA'
     args['emissions_types'] = 'CO2e, CO2e, CO2e, SO2, NOx'

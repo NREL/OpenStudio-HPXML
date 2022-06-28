@@ -12,37 +12,8 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-pv.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-          <UtilityRate>
-            <FuelType>electricity</FuelType>
-            <FixedCharge>12.0</FixedCharge>
-            <MarginalRate>0.12</MarginalRate>
-          </UtilityRate>
-          <UtilityRate>
-            <FuelType>natural gas</FuelType>
-            <FixedCharge>12.0</FixedCharge>
-            <MarginalRate>1.1</MarginalRate>
-          </UtilityRate>
-          <UtilityRate>
-            <FuelType>propane</FuelType>
-            <MarginalRate>3.0</MarginalRate>
-          </UtilityRate>
-          <UtilityRate>
-            <FuelType>fuel oil</FuelType>
-            <MarginalRate>4.0</MarginalRate>
-          </UtilityRate>
-          <PVCompensation>
-            <CompensationType>Feed-In Tariff</CompensationType>
-            <FeedInTariffRate>0.12</FeedInTariffRate>
-            <MonthlyGridConnectionFeeUnits>$</MonthlyGridConnectionFeeUnits>
-            <MonthlyGridConnectionFee>7.5</MonthlyGridConnectionFee>
-          </PVCompensation>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -452,30 +423,6 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id='PVSystem1'/>
-            <Location>roof</Location>
-            <ModuleType>standard</ModuleType>
-            <Tracking>fixed</Tracking>
-            <ArrayAzimuth>180</ArrayAzimuth>
-            <ArrayTilt>20.0</ArrayTilt>
-            <MaxPowerOutput>4000.0</MaxPowerOutput>
-            <InverterEfficiency>0.96</InverterEfficiency>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
-          </PVSystem>
-          <PVSystem>
-            <SystemIdentifier id='PVSystem2'/>
-            <Location>roof</Location>
-            <ModuleType>premium</ModuleType>
-            <Tracking>fixed</Tracking>
-            <ArrayAzimuth>90</ArrayAzimuth>
-            <ArrayTilt>20.0</ArrayTilt>
-            <MaxPowerOutput>1500.0</MaxPowerOutput>
-            <InverterEfficiency>0.96</InverterEfficiency>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
-          </PVSystem>
-        </Photovoltaics>
       </Systems>
       <Appliances>
         <ClothesWasher>

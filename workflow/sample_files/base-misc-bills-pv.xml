@@ -16,7 +16,7 @@
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Bills</Name>
+          <Name>Net Metering</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
             <FixedCharge>12.0</FixedCharge>
@@ -41,6 +41,33 @@
             <NetMeteringAnnualExcessSellbackRate>0.035</NetMeteringAnnualExcessSellbackRate>
             <MonthlyGridConnectionFeeUnits>$/kW</MonthlyGridConnectionFeeUnits>
             <MonthlyGridConnectionFee>2.5</MonthlyGridConnectionFee>
+          </PVCompensation>
+        </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>Feed-In Tariff</Name>
+          <UtilityRate>
+            <FuelType>electricity</FuelType>
+            <FixedCharge>12.0</FixedCharge>
+            <MarginalRate>0.12</MarginalRate>
+          </UtilityRate>
+          <UtilityRate>
+            <FuelType>natural gas</FuelType>
+            <FixedCharge>12.0</FixedCharge>
+            <MarginalRate>1.1</MarginalRate>
+          </UtilityRate>
+          <UtilityRate>
+            <FuelType>propane</FuelType>
+            <MarginalRate>3.0</MarginalRate>
+          </UtilityRate>
+          <UtilityRate>
+            <FuelType>fuel oil</FuelType>
+            <MarginalRate>4.0</MarginalRate>
+          </UtilityRate>
+          <PVCompensation>
+            <CompensationType>Feed-In Tariff</CompensationType>
+            <FeedInTariffRate>0.12</FeedInTariffRate>
+            <MonthlyGridConnectionFeeUnits>$</MonthlyGridConnectionFeeUnits>
+            <MonthlyGridConnectionFee>7.5</MonthlyGridConnectionFee>
           </PVCompensation>
         </UtilityBillScenario>
       </UtilityBillScenarios>
