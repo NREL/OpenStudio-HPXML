@@ -320,7 +320,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::check_fuel(hpxml, HPXML::FuelTypeWood)
+      if HPXML::check_fuel(hpxml, HPXML::FuelTypeWoodCord)
         if scenario.wood_marginal_rate.nil?
           scenario.wood_marginal_rate = 0.015 # FIXME
           scenario.wood_marginal_rate_isdefaulted = true
