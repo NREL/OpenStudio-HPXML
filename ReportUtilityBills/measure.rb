@@ -184,6 +184,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Set paths
     output_path = File.join(output_dir, "results_bills.#{output_format}")
+    FileUtils.rm(output_path) if File.exist?(output_path)
 
     # Setup fuel outputs
     fuels = setup_fuel_outputs()
@@ -221,18 +222,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def write_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
-    # line_break = nil
-
     segment = utility_bills.keys[0].split(':', 2)[0]
     segment = segment.strip
     results_out = []
     results_out << ["#{bill_scenario_name}: Total ($)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
-    # results_out << [line_break]
     utility_bills.each do |key, bill|
       new_segment = key.split(':', 2)[0]
       new_segment = new_segment.strip
       if new_segment != segment
-        # results_out << [line_break]
         segment = new_segment
       end
 
@@ -247,8 +244,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     elsif ['json', 'msgpack'].include? output_format
       h = {}
       results_out.each do |out|
-        # next if out == [line_break]
-
         if out[0].include? ':'
           grp, name = out[0].split(':', 2)
           h[grp] = {} if h[grp].nil?
