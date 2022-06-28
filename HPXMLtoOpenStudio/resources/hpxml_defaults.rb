@@ -277,6 +277,7 @@ class HPXMLDefaults
 
   def self.apply_utility_bill_scenarios(hpxml)
     hpxml.header.utility_bill_scenarios.each do |scenario|
+      # if HPXML::check_fuel(hpxml, HPXML::FuelTypeElectricity)
       if scenario.elec_fixed_charge.nil?
         scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
         scenario.elec_fixed_charge_isdefaulted = true
@@ -285,7 +286,9 @@ class HPXMLDefaults
         scenario.elec_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
         scenario.elec_marginal_rate_isdefaulted = true
       end
+      # end
 
+      # if HPXML::check_fuel(hpxml, HPXML::FuelTypeNaturalGas)
       if scenario.natural_gas_fixed_charge.nil?
         scenario.natural_gas_fixed_charge = 12.0 # https://www.aga.org/sites/default/files/aga_energy_analysis_-_natural_gas_utility_rate_structure.pdf says $11.25/month in 2015
         scenario.natural_gas_fixed_charge_isdefaulted = true
@@ -294,16 +297,21 @@ class HPXMLDefaults
         scenario.natural_gas_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
         scenario.natural_gas_marginal_rate_isdefaulted = true
       end
+      # end
 
+      # if HPXML::check_fuel(hpxml, HPXML::FuelTypePropane)
       if scenario.propane_marginal_rate.nil?
         scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypePropane, nil)
         scenario.propane_marginal_rate_isdefaulted = true
       end
+      # end
 
+      # if HPXML::check_fuel(hpxml, HPXML::FuelTypeOil)
       if scenario.fuel_oil_marginal_rate.nil?
         scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeOil, nil)
         scenario.fuel_oil_marginal_rate_isdefaulted = true
       end
+      # end
 
       next unless hpxml.pv_systems.size > 0
 

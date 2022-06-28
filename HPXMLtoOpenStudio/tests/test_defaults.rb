@@ -204,7 +204,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_utility_bills
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-pv.xml')
+    hpxml.header.utility_bill_scenarios.clear
     for pv_compensation_type in [HPXML::PVCompensationTypeNetMetering, HPXML::PVCompensationTypeFeedInTariff]
       hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
                                               elec_fixed_charge: 8,
@@ -217,7 +218,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                               wood_marginal_rate: 7,
                                               wood_pellets_marginal_rate: 8,
                                               pv_compensation_type: pv_compensation_type,
-                                              pv_net_metering_annual_excess_sellback_rate_type: 'Retail Electricity Cost',
+                                              pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost,
                                               pv_net_metering_annual_excess_sellback_rate: 0.04,
                                               pv_feed_in_tariff_rate: 0.15,
                                               pv_monthly_grid_connection_fee_unit: '$',
