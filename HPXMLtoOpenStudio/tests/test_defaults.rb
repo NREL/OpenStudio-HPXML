@@ -251,7 +251,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, 2.4532692307692305, 3.495346153846154, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, HPXML::PVGridConnectionFeeUnitsDollarsPerkWh, 0.0)
+      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, HPXML::PVGridConnectionFeeUnitsDollarsPerkWh, 0.0)
     end
   end
 

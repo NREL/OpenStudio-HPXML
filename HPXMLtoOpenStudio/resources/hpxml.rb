@@ -6553,14 +6553,12 @@ class HPXML < Object
   end
 
   def self.check_fuel(hpxml, fuel)
-    hpxml_doc = hpxml.to_oga()
-
     ['HeatingSystemFuel',
      'CoolingSystemFuel',
      'HeatPumpFuel',
      'BackupSystemFuel',
      'FuelType'].each do |fuel_name|
-      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() == '#{fuel}']")
+      if XMLHelper.has_element(hpxml.to_oga, "//#{fuel_name}[text() = '#{fuel}']")
         return true
       end
     end
