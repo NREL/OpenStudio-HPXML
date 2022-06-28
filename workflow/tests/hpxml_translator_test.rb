@@ -42,7 +42,6 @@ class HPXMLTest < MiniTest::Test
     all_sizing_results = {}
     all_bill_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
-      _test_schema_validation(xml)
       xml_name = File.basename(xml)
       all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
@@ -95,7 +94,6 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? osm_path)
       hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
       assert(File.exist? hpxml_defaults_path)
-      _test_schema_validation(hpxml_defaults_path)
     end
   end
 
@@ -571,17 +569,6 @@ class HPXMLTest < MiniTest::Test
     end
 
     return results
-  end
-
-  def _test_schema_validation(xml)
-    # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema'))
-    hpxml_doc = XMLHelper.parse_file(xml)
-    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
-      puts "#{xml}: #{errors}"
-    end
-    assert_equal(0, errors.size)
   end
 
   def _verify_outputs(rundir, hpxml_path, results, hpxml)
