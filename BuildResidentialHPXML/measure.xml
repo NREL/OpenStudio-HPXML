@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>88682569-3da2-4295-9cbc-4f28503e3836</version_id>
-  <version_modified>20220624T194507Z</version_modified>
+  <version_id>9cdd8747-6304-49a9-8e38-b2d933065e92</version_id>
+  <version_modified>20220628T152700Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6130,129 +6130,129 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_scenario_names</name>
-      <display_name>Bills: Scenario Names</display_name>
-      <description>Names of bills scenarios. If multiple scenarios, use a comma-separated list. If not provided, no bills scenarios are calculated.</description>
+      <name>utility_bill_scenario_names</name>
+      <display_name>Utility Bills: Scenario Names</display_name>
+      <description>Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_electricity_fixed_charges</name>
-      <display_name>Bills: Electricity Fixed Charges</display_name>
-      <description>Electricity bills monthly fixed charges. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_electricity_fixed_charges</name>
+      <display_name>Utility Bills: Electricity Fixed Charges</display_name>
+      <description>Electricity utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_natural_gas_fixed_charges</name>
-      <display_name>Bills: Natural Gas Fixed Charges</display_name>
-      <description>Natural gas bills monthly fixed charges. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_natural_gas_fixed_charges</name>
+      <display_name>Utility Bills: Natural Gas Fixed Charges</display_name>
+      <description>Natural gas utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_electricity_marginal_rates</name>
-      <display_name>Bills: Electricity Marginal Rates</display_name>
-      <description>Electricity bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_electricity_marginal_rates</name>
+      <display_name>Utility Bills: Electricity Marginal Rates</display_name>
+      <description>Electricity utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_natural_gas_marginal_rates</name>
-      <display_name>Bills: Natural Gas Marginal Rates</display_name>
-      <description>Natural gas bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_natural_gas_marginal_rates</name>
+      <display_name>Utility Bills: Natural Gas Marginal Rates</display_name>
+      <description>Natural gas utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_propane_marginal_rates</name>
-      <display_name>Bills: Propane Marginal Rates</display_name>
-      <description>Propane bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_propane_marginal_rates</name>
+      <display_name>Utility Bills: Propane Marginal Rates</display_name>
+      <description>Propane utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_fuel_oil_marginal_rates</name>
-      <display_name>Bills: Fuel Oil Marginal Rates</display_name>
-      <description>Fuel oil bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_fuel_oil_marginal_rates</name>
+      <display_name>Utility Bills: Fuel Oil Marginal Rates</display_name>
+      <description>Fuel oil utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_coal_marginal_rates</name>
-      <display_name>Bills: Coal Marginal Rates</display_name>
-      <description>Coal bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_coal_marginal_rates</name>
+      <display_name>Utility Bills: Coal Marginal Rates</display_name>
+      <description>Coal utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_wood_marginal_rates</name>
-      <display_name>Bills: Wood Marginal Rates</display_name>
-      <description>Wood bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_wood_marginal_rates</name>
+      <display_name>Utility Bills: Wood Marginal Rates</display_name>
+      <description>Wood utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_wood_pellets_marginal_rates</name>
-      <display_name>Bills: Wood Pellets Marginal Rates</display_name>
-      <description>Wood pellets bills marginal rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_wood_pellets_marginal_rates</name>
+      <display_name>Utility Bills: Wood Pellets Marginal Rates</display_name>
+      <description>Wood pellets utility bill marginal rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_compensation_types</name>
-      <display_name>Bills: PV Compensation Types</display_name>
-      <description>PV compensation types. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_compensation_types</name>
+      <display_name>Utility Bills: PV Compensation Types</display_name>
+      <description>Utility bill PV compensation types. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_net_metering_annual_excess_sellback_rate_types</name>
-      <display_name>Bills: PV Net Metering Annual Excess Sellback Rate Types</display_name>
-      <description>PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_net_metering_annual_excess_sellback_rate_types</name>
+      <display_name>Utility Bills: PV Net Metering Annual Excess Sellback Rate Types</display_name>
+      <description>Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_net_metering_annual_excess_sellback_rates</name>
-      <display_name>Bills: PV Net Metering Annual Excess Sellback Rates</display_name>
-      <description>PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_net_metering_annual_excess_sellback_rates</name>
+      <display_name>Utility Bills: PV Net Metering Annual Excess Sellback Rates</display_name>
+      <description>Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_feed_in_tariff_rates</name>
-      <display_name>Bills: PV Feed-In Tariff Rates</display_name>
-      <description>PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_feed_in_tariff_rates</name>
+      <display_name>Utility Bills: PV Feed-In Tariff Rates</display_name>
+      <description>Utility bill PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_monthly_grid_connection_fee_units</name>
-      <display_name>Bills: PV Monthly Grid Connection Fee Units</display_name>
-      <description>PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_monthly_grid_connection_fee_units</name>
+      <display_name>Utility Bills: PV Monthly Grid Connection Fee Units</display_name>
+      <description>Utility bill PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>bills_pv_monthly_grid_connection_fees</name>
-      <display_name>Bills: PV Monthly Grid Connection Fees</display_name>
-      <description>PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.</description>
+      <name>utility_bill_pv_monthly_grid_connection_fees</name>
+      <display_name>Utility Bills: PV Monthly Grid Connection Fees</display_name>
+      <description>Utility bill PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6338,7 +6338,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B981C20E</checksum>
+      <checksum>2B114665</checksum>
     </file>
   </files>
 </measure>

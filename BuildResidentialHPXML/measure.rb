@@ -2897,9 +2897,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_scenario_names', false)
-    arg.setDisplayName('Bills: Scenario Names')
-    arg.setDescription('Names of bills scenarios. If multiple scenarios, use a comma-separated list. If not provided, no bills scenarios are calculated.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_scenario_names', false)
+    arg.setDisplayName('Utility Bills: Scenario Names')
+    arg.setDescription('Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.')
     args << arg
 
     [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
@@ -2907,9 +2907,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
 
-      arg = OpenStudio::Measure::OSArgument.makeStringArgument("bills_#{underscore_case}_fixed_charges", false)
-      arg.setDisplayName("Bills: #{all_caps_case} Fixed Charges")
-      arg.setDescription("#{cap_case} bills monthly fixed charges. If multiple scenarios, use a comma-separated list.")
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument("utility_bill_#{underscore_case}_fixed_charges", false)
+      arg.setDisplayName("Utility Bills: #{all_caps_case} Fixed Charges")
+      arg.setDescription("#{cap_case} utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.")
       args << arg
     end
 
@@ -2918,40 +2918,40 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
 
-      arg = OpenStudio::Measure::OSArgument.makeStringArgument("bills_#{underscore_case}_marginal_rates", false)
-      arg.setDisplayName("Bills: #{all_caps_case} Marginal Rates")
-      arg.setDescription("#{cap_case} bills marginal rates. If multiple scenarios, use a comma-separated list.")
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument("utility_bill_#{underscore_case}_marginal_rates", false)
+      arg.setDisplayName("Utility Bills: #{all_caps_case} Marginal Rates")
+      arg.setDescription("#{cap_case} utility bill marginal rates. If multiple scenarios, use a comma-separated list.")
       args << arg
     end
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_compensation_types', false)
-    arg.setDisplayName('Bills: PV Compensation Types')
-    arg.setDescription('PV compensation types. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_compensation_types', false)
+    arg.setDisplayName('Utility Bills: PV Compensation Types')
+    arg.setDescription('Utility bill PV compensation types. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_net_metering_annual_excess_sellback_rate_types', false)
-    arg.setDisplayName('Bills: PV Net Metering Annual Excess Sellback Rate Types')
-    arg.setDescription("PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_net_metering_annual_excess_sellback_rate_types', false)
+    arg.setDisplayName('Utility Bills: PV Net Metering Annual Excess Sellback Rate Types')
+    arg.setDescription("Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_net_metering_annual_excess_sellback_rates', false)
-    arg.setDisplayName('Bills: PV Net Metering Annual Excess Sellback Rates')
-    arg.setDescription("PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_net_metering_annual_excess_sellback_rates', false)
+    arg.setDisplayName('Utility Bills: PV Net Metering Annual Excess Sellback Rates')
+    arg.setDescription("Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_feed_in_tariff_rates', false)
-    arg.setDisplayName('Bills: PV Feed-In Tariff Rates')
-    arg.setDescription('PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_feed_in_tariff_rates', false)
+    arg.setDisplayName('Utility Bills: PV Feed-In Tariff Rates')
+    arg.setDescription('Utility bill PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_monthly_grid_connection_fee_units', false)
-    arg.setDisplayName('Bills: PV Monthly Grid Connection Fee Units')
-    arg.setDescription('PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_monthly_grid_connection_fee_units', false)
+    arg.setDisplayName('Utility Bills: PV Monthly Grid Connection Fee Units')
+    arg.setDescription('Utility bill PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('bills_pv_monthly_grid_connection_fees', false)
-    arg.setDisplayName('Bills: PV Monthly Grid Connection Fees')
-    arg.setDescription('PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_monthly_grid_connection_fees', false)
+    arg.setDisplayName('Utility Bills: PV Monthly Grid Connection Fees')
+    arg.setDescription('Utility bill PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('additional_properties', false)
@@ -3535,15 +3535,15 @@ class HPXMLFile
       end
     end
 
-    if args[:bills_scenario_names].is_initialized
-      bills_scenario_names = args[:bills_scenario_names].get.split(',').map(&:strip)
+    if args[:utility_bill_scenario_names].is_initialized
+      bills_scenario_names = args[:utility_bill_scenario_names].get.split(',').map(&:strip)
 
       fixed_charges = {}
       [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
-        if args["bills_#{underscore_case}_fixed_charges".to_sym].is_initialized
-          fixed_charges[fuel] = args["bills_#{underscore_case}_fixed_charges".to_sym].get.split(',').map(&:strip)
+        if args["utility_bill_#{underscore_case}_fixed_charges".to_sym].is_initialized
+          fixed_charges[fuel] = args["utility_bill_#{underscore_case}_fixed_charges".to_sym].get.split(',').map(&:strip)
         else
           fixed_charges[fuel] = [nil] * bills_scenario_names.size
         end
@@ -3553,45 +3553,45 @@ class HPXMLFile
       ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
-        if args["bills_#{underscore_case}_marginal_rates".to_sym].is_initialized
-          marginal_rates[fuel] = args["bills_#{underscore_case}_marginal_rates".to_sym].get.split(',').map(&:strip)
+        if args["utility_bill_#{underscore_case}_marginal_rates".to_sym].is_initialized
+          marginal_rates[fuel] = args["utility_bill_#{underscore_case}_marginal_rates".to_sym].get.split(',').map(&:strip)
         else
           marginal_rates[fuel] = [nil] * bills_scenario_names.size
         end
       end
 
-      if args[:bills_pv_compensation_types].is_initialized
-        bills_pv_compensation_types = args[:bills_pv_compensation_types].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_compensation_types].is_initialized
+        bills_pv_compensation_types = args[:utility_bill_pv_compensation_types].get.split(',').map(&:strip)
       else
         bills_pv_compensation_types = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_net_metering_annual_excess_sellback_rate_types].is_initialized
-        bills_pv_net_metering_annual_excess_sellback_rate_types = args[:bills_pv_net_metering_annual_excess_sellback_rate_types].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_net_metering_annual_excess_sellback_rate_types].is_initialized
+        bills_pv_net_metering_annual_excess_sellback_rate_types = args[:utility_bill_pv_net_metering_annual_excess_sellback_rate_types].get.split(',').map(&:strip)
       else
         bills_pv_net_metering_annual_excess_sellback_rate_types = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_net_metering_annual_excess_sellback_rates].is_initialized
-        bills_pv_net_metering_annual_excess_sellback_rates = args[:bills_pv_net_metering_annual_excess_sellback_rates].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].is_initialized
+        bills_pv_net_metering_annual_excess_sellback_rates = args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].get.split(',').map(&:strip)
       else
         bills_pv_net_metering_annual_excess_sellback_rates = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_feed_in_tariff_rates].is_initialized
-        bills_pv_feed_in_tariff_rates = args[:bills_pv_feed_in_tariff_rates].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_feed_in_tariff_rates].is_initialized
+        bills_pv_feed_in_tariff_rates = args[:utility_bill_pv_feed_in_tariff_rates].get.split(',').map(&:strip)
       else
         bills_pv_feed_in_tariff_rates = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_monthly_grid_connection_fee_units].is_initialized
-        bills_pv_monthly_grid_connection_fee_units = args[:bills_pv_monthly_grid_connection_fee_units].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_monthly_grid_connection_fee_units].is_initialized
+        bills_pv_monthly_grid_connection_fee_units = args[:utility_bill_pv_monthly_grid_connection_fee_units].get.split(',').map(&:strip)
       else
         bills_pv_monthly_grid_connection_fee_units = [nil] * bills_scenario_names.size
       end
 
-      if args[:bills_pv_monthly_grid_connection_fees].is_initialized
-        bills_pv_monthly_grid_connection_fees = args[:bills_pv_monthly_grid_connection_fees].get.split(',').map(&:strip)
+      if args[:utility_bill_pv_monthly_grid_connection_fees].is_initialized
+        bills_pv_monthly_grid_connection_fees = args[:utility_bill_pv_monthly_grid_connection_fees].get.split(',').map(&:strip)
       else
         bills_pv_monthly_grid_connection_fees = [nil] * bills_scenario_names.size
       end
