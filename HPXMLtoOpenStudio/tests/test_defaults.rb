@@ -205,7 +205,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_utility_bills
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    for pv_compensation_type in ['Net Metering', 'Feed-In Tariff']
+    for pv_compensation_type in [HPXML::PVCompensationTypeNetMetering, HPXML::PVCompensationTypeFeedInTariff]
       hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
                                               elec_fixed_charge: 8,
                                               natural_gas_fixed_charge: 9,
@@ -226,8 +226,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     scenarios = hpxml_default.header.utility_bill_scenarios
-    _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, 'Net Metering', 'Retail Electricity Cost', nil, nil, '$', 3)
-    _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, 'Feed-In Tariff', nil, nil, 0.15, '$', 3)
+    _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, HPXML::PVGridConnectionFeeUnitsDollars, 3)
+    _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, HPXML::PVGridConnectionFeeUnitsDollars, 3)
 
     # Test defaults
     hpxml.header.utility_bill_scenarios.each do |scenario|
@@ -250,7 +250,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, 2.4532692307692305, 3.495346153846154, nil, nil, nil, 'Net Metering', 'User-Specified', 0.03, nil, '$/kW', 0.0)
+      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, 2.4532692307692305, 3.495346153846154, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, HPXML::PVGridConnectionFeeUnitsDollarsPerkWh, 0.0)
     end
   end
 

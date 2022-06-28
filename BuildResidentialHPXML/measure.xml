@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>9cdd8747-6304-49a9-8e38-b2d933065e92</version_id>
-  <version_modified>20220628T152700Z</version_modified>
+  <version_id>9734fb30-7be1-4fb5-915e-008d0a816e0d</version_id>
+  <version_modified>20220628T161322Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6236,7 +6236,7 @@
     <argument>
       <name>utility_bill_pv_feed_in_tariff_rates</name>
       <display_name>Utility Bills: PV Feed-In Tariff Rates</display_name>
-      <description>Utility bill PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.</description>
+      <description>Utility bill PV annual full/gross feed-in tariff rates. Only applies if the PV compensation type is 'Feed-In Tariff'. If multiple scenarios, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6338,7 +6338,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2B114665</checksum>
+      <checksum>A2F2ECDE</checksum>
     </file>
   </files>
 </measure>

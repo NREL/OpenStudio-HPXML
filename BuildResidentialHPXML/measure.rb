@@ -2931,17 +2931,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_net_metering_annual_excess_sellback_rate_types', false)
     arg.setDisplayName('Utility Bills: PV Net Metering Annual Excess Sellback Rate Types')
-    arg.setDescription("Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'Net Metering'. If multiple scenarios, use a comma-separated list.")
+    arg.setDescription("Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeNetMetering}'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_net_metering_annual_excess_sellback_rates', false)
     arg.setDisplayName('Utility Bills: PV Net Metering Annual Excess Sellback Rates')
-    arg.setDescription("Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'Net Metering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.")
+    arg.setDescription("Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeNetMetering}' and the PV annual excess sellback rate type is '#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_feed_in_tariff_rates', false)
     arg.setDisplayName('Utility Bills: PV Feed-In Tariff Rates')
-    arg.setDescription('Utility bill PV annual full/gross feed-in tariff rates. If multiple scenarios, use a comma-separated list.')
+    arg.setDescription("Utility bill PV annual full/gross feed-in tariff rates. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeFeedInTariff}'. If multiple scenarios, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_pv_monthly_grid_connection_fee_units', false)
@@ -3624,14 +3624,14 @@ class HPXMLFile
         wood_marginal_rate = Float(wood_marginal_rate) rescue nil
         wood_pellets_marginal_rate = Float(wood_pellets_marginal_rate) rescue nil
 
-        if pv_compensation_type == 'Net Metering'
-          if pv_net_metering_annual_excess_sellback_rate_type == 'User-Specified'
+        if pv_compensation_type == HPXML::PVCompensationTypeNetMetering
+          if pv_net_metering_annual_excess_sellback_rate_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
             pv_net_metering_annual_excess_sellback_rate = Float(pv_net_metering_annual_excess_sellback_rate) rescue nil
           else
             pv_net_metering_annual_excess_sellback_rate = nil
           end
           pv_feed_in_tariff_rate = nil
-        elsif pv_compensation_type == 'Feed-In Tariff'
+        elsif pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
           pv_feed_in_tariff_rate = Float(pv_feed_in_tariff_rate) rescue nil
           pv_net_metering_annual_excess_sellback_rate_type = nil
           pv_net_metering_annual_excess_sellback_rate = nil

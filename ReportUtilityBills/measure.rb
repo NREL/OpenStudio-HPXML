@@ -62,7 +62,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
+    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified && !args[:electricity_utility_rate_user_specified].is_initialized
       warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
     end
 
@@ -355,11 +355,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         end
 
         # Net Metering
-        rate.net_metering_excess_sellback_type = bill_scenario.pv_net_metering_annual_excess_sellback_rate_type if bill_scenario.pv_compensation_type == 'Net Metering'
-        rate.net_metering_user_excess_sellback_rate = bill_scenario.pv_net_metering_annual_excess_sellback_rate if rate.net_metering_excess_sellback_type == 'User-Specified'
+        rate.net_metering_excess_sellback_type = bill_scenario.pv_net_metering_annual_excess_sellback_rate_type if bill_scenario.pv_compensation_type == HPXML::PVCompensationTypeNetMetering
+        rate.net_metering_user_excess_sellback_rate = bill_scenario.pv_net_metering_annual_excess_sellback_rate if rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
 
         # Feed-In Tariff
-        rate.feed_in_tariff_rate = bill_scenario.pv_feed_in_tariff_rate if bill_scenario.pv_compensation_type == 'Feed-In Tariff'
+        rate.feed_in_tariff_rate = bill_scenario.pv_feed_in_tariff_rate if bill_scenario.pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
       elsif fuel_type == FT::Gas
         rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge
         rate.flatratebuy = bill_scenario.natural_gas_marginal_rate
@@ -385,12 +385,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless pv_systems.size > 0
 
       monthly_fee = 0.0
-      if bill_scenario.pv_monthly_grid_connection_fee_unit == '$/kW'
+      if bill_scenario.pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollarsPerkWh
         pv_systems.each do |pv_system|
           max_power_output_kW = UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
           monthly_fee += bill_scenario.pv_monthly_grid_connection_fee * max_power_output_kW
         end
-      elsif bill_scenario.pv_monthly_grid_connection_fee_unit == '$'
+      elsif bill_scenario.pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollars
         monthly_fee = bill_scenario.pv_monthly_grid_connection_fee
       end
       rate.fixedmonthlycharge += monthly_fee
@@ -420,7 +420,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def annual_true_up(utility_rates, utility_bills, net_elec)
     rate = utility_rates[FT::Elec]
     bill = utility_bills[FT::Elec]
-    if rate.net_metering_excess_sellback_type == 'User-Specified'
+    if rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
       if bill.annual_production_credit > bill.annual_energy_charge
         bill.annual_production_credit = bill.annual_energy_charge
       end

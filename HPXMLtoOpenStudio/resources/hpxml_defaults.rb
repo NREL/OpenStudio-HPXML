@@ -305,23 +305,25 @@ class HPXMLDefaults
         scenario.fuel_oil_marginal_rate_isdefaulted = true
       end
 
+      next unless hpxml.pv_systems.size > 0
+
       if scenario.pv_compensation_type.nil?
-        scenario.pv_compensation_type = 'Net Metering'
+        scenario.pv_compensation_type = HPXML::PVCompensationTypeNetMetering
         scenario.pv_compensation_type_isdefaulted = true
       end
 
-      if scenario.pv_compensation_type == 'Net Metering'
+      if scenario.pv_compensation_type == HPXML::PVCompensationTypeNetMetering
         if scenario.pv_net_metering_annual_excess_sellback_rate_type.nil?
-          scenario.pv_net_metering_annual_excess_sellback_rate_type = 'User-Specified'
+          scenario.pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
           scenario.pv_net_metering_annual_excess_sellback_rate_type_isdefaulted = true
         end
-        if scenario.pv_net_metering_annual_excess_sellback_rate_type == 'User-Specified'
+        if scenario.pv_net_metering_annual_excess_sellback_rate_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
           if scenario.pv_net_metering_annual_excess_sellback_rate.nil?
             scenario.pv_net_metering_annual_excess_sellback_rate = 0.03
             scenario.pv_net_metering_annual_excess_sellback_rate_isdefaulted = true
           end
         end
-      elsif scenario.pv_compensation_type == 'Feed-In Tariff'
+      elsif scenario.pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
         if scenario.pv_feed_in_tariff_rate.nil?
           scenario.pv_feed_in_tariff_rate = 0.12
           scenario.pv_feed_in_tariff_rate_isdefaulted = true
@@ -329,7 +331,7 @@ class HPXMLDefaults
       end
 
       if scenario.pv_monthly_grid_connection_fee_unit.nil?
-        scenario.pv_monthly_grid_connection_fee_unit = '$/kW'
+        scenario.pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollarsPerkWh
         scenario.pv_monthly_grid_connection_fee_unit_isdefaulted = true
       end
 

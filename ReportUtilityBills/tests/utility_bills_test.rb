@@ -62,11 +62,11 @@ class ReportUtilityBillsTest < MiniTest::Test
                                              coal_marginal_rate: 0.015,
                                              wood_marginal_rate: 0.015,
                                              wood_pellets_marginal_rate: 0.015,
-                                             pv_compensation_type: 'Net Metering',
-                                             pv_net_metering_annual_excess_sellback_rate_type: 'User-Specified',
+                                             pv_compensation_type: HPXML::PVCompensationTypeNetMetering,
+                                             pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeUserSpecified,
                                              pv_net_metering_annual_excess_sellback_rate: 0.03,
                                              pv_feed_in_tariff_rate: 0.12,
-                                             pv_monthly_grid_connection_fee_unit: '$/kW',
+                                             pv_monthly_grid_connection_fee_unit: HPXML::PVGridConnectionFeeUnitsDollarsPerkWh,
                                              pv_monthly_grid_connection_fee: 0.0)
 
     HPXMLDefaults.apply_header(@hpxml, nil)
@@ -123,7 +123,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_10kW_retail
-    @hpxml.header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = 'Retail Electricity Cost'
+    @hpxml.header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -139,7 +139,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_1kW_feed_in_tariff
-    @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = 'Feed-In Tariff'
+    @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = HPXML::PVCompensationTypeFeedInTariff
     fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -155,7 +155,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_10kW_feed_in_tariff
-    @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = 'Feed-In Tariff'
+    @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = HPXML::PVCompensationTypeFeedInTariff
     fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -188,7 +188,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars
-    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_unit = '$'
+    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollars
     @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee = 7.50
     fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
@@ -333,7 +333,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_error_user_specified_but_no_rates
     skip
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    @args_hash['electricity_utility_rate_type'] = HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
     expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
     bills_csv = _test_measure(expected_errors: expected_errors)
     assert(!File.exist?(bills_csv))

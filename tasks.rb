@@ -2146,11 +2146,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_natural_gas_marginal_rates'] = '1.10, 1.10'
     args['utility_bill_propane_marginal_rates'] = '3, 3'
     args['utility_bill_fuel_oil_marginal_rates'] = '4, 4'
-    args['utility_bill_pv_compensation_types'] = 'Net Metering, Feed-In Tariff'
-    args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = 'User-Specified, NA'
+    args['utility_bill_pv_compensation_types'] = "#{HPXML::PVCompensationTypeNetMetering}, #{HPXML::PVCompensationTypeFeedInTariff}"
+    args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = "#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}, NA"
     args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA'
     args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, 0.12'
-    args['utility_bill_pv_monthly_grid_connection_fee_units'] = '$/kW, $'
+    args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{PVGridConnectionFeeUnitsDollarsPerkWh}, #{HPXML::PVGridConnectionFeeUnitsDollars}"
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 7.5'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
