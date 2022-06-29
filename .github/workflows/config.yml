@@ -22,8 +22,7 @@ jobs:
           rm -f Gemfile.lock && bundle install
           export DEBIAN_FRONTEND=noninteractive
           sudo apt update
-          sudo -E apt-get install -y wget unzip libxml2-utils python3-lxml python3-pip
-          sudo pip3 install sphinx sphinx-rtd-theme
+          sudo -E apt-get install -y wget unzip libxml2-utils python3-lxml python3-pip python3-sphinx-rtd-theme
 
       - name: XSD validation
         shell: bash
