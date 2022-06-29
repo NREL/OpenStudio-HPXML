@@ -47,9 +47,9 @@ class HPXMLTest < MiniTest::Test
       all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
-    _write_summary_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
-    _write_hvac_sizing_results(all_sizing_results.sort_by { |k, _v| k.downcase }.to_h, sizing_out)
-    _write_bill_results(all_bill_results.sort_by { |k, _v| k.downcase }.to_h, bills_out)
+    _write_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
+    _write_results(all_sizing_results.sort_by { |k, _v| k.downcase }.to_h, sizing_out)
+    _write_results(all_bill_results.sort_by { |k, _v| k.downcase }.to_h, bills_out)
   end
 
   def test_ashrae_140
@@ -1382,7 +1382,7 @@ class HPXMLTest < MiniTest::Test
     GC.start()
   end
 
-  def _write_summary_results(results, csv_out)
+  def _write_results(results, csv_out)
     require 'csv'
 
     output_keys = []
@@ -1394,13 +1394,8 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
-    column_headers = ['HPXML']
-    output_keys.each do |key|
-      column_headers << key
-    end
-
     CSV.open(csv_out, 'w') do |csv|
-      csv << column_headers
+      csv << ['HPXML'] + output_keys
       results.sort.each do |xml, xml_results|
         csv_row = [xml]
         output_keys.each do |key|
@@ -1414,57 +1409,7 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
-    puts "Wrote summary results to #{csv_out}."
-  end
-
-  def _write_hvac_sizing_results(all_sizing_results, csv_out)
-    require 'csv'
-
-    output_keys = nil
-    all_sizing_results.values.each do |xml_results|
-      output_keys = xml_results.keys
-      break
-    end
-    return if output_keys.nil?
-
-    CSV.open(csv_out, 'w') do |csv|
-      csv << ['HPXML'] + output_keys
-      all_sizing_results.sort.each do |xml, xml_results|
-        csv_row = [xml]
-        output_keys.each do |key|
-          csv_row << xml_results[key]
-        end
-        csv << csv_row
-      end
-    end
-
-    puts "Wrote HVAC sizing results to #{csv_out}."
-  end
-
-  def _write_bill_results(all_bill_results, csv_out)
-    require 'csv'
-
-    output_keys = []
-    all_bill_results.values.each do |xml_results|
-      xml_results.keys.each do |key|
-        next if output_keys.include? key
-
-        output_keys << key
-      end
-    end
-
-    CSV.open(csv_out, 'w') do |csv|
-      csv << ['HPXML'] + output_keys
-      all_bill_results.sort.each do |xml, xml_results|
-        csv_row = [xml]
-        output_keys.each do |key|
-          csv_row << xml_results[key]
-        end
-        csv << csv_row
-      end
-    end
-
-    puts "Wrote utility bill results to #{csv_out}."
+    puts "Wrote results to #{csv_out}."
   end
 
   def _write_ashrae_140_results(all_results, csv_out)
