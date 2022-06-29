@@ -2902,7 +2902,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.')
     args << arg
 
-    [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
+    ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
@@ -3539,7 +3539,7 @@ class HPXMLFile
       bills_scenario_names = args[:utility_bill_scenario_names].get.split(',').map(&:strip)
 
       fixed_charges = {}
-      [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].each do |fuel|
+      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if args["utility_bill_#{underscore_case}_fixed_charges".to_sym].is_initialized
@@ -3598,6 +3598,11 @@ class HPXMLFile
 
       bills_scenarios = bills_scenario_names.zip(fixed_charges[HPXML::FuelTypeElectricity],
                                                  fixed_charges[HPXML::FuelTypeNaturalGas],
+                                                 fixed_charges[HPXML::FuelTypePropane],
+                                                 fixed_charges[HPXML::FuelTypeOil],
+                                                 fixed_charges[HPXML::FuelTypeCoal],
+                                                 fixed_charges[HPXML::FuelTypeWoodCord],
+                                                 fixed_charges[HPXML::FuelTypeWoodPellets],
                                                  marginal_rates[HPXML::FuelTypeElectricity],
                                                  marginal_rates[HPXML::FuelTypeNaturalGas],
                                                  marginal_rates[HPXML::FuelTypePropane],
@@ -3613,15 +3618,20 @@ class HPXMLFile
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_fixed_charge, propane_marginal_rate, fuel_oil_fixed_charge, fuel_oil_marginal_rate, coal_fixed_charge, coal_marginal_rate, wood_fixed_charge, wood_marginal_rate, wood_pellets_fixed_charge, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
         elec_marginal_rate = Float(elec_marginal_rate) rescue nil
         natural_gas_marginal_rate = Float(natural_gas_marginal_rate) rescue nil
+        propane_fixed_charge = Float(propane_fixed_charge) rescue nil
         propane_marginal_rate = Float(propane_marginal_rate) rescue nil
+        fuel_oil_fixed_charge = Float(fuel_oil_fixed_charge) rescue nil
         fuel_oil_marginal_rate = Float(fuel_oil_marginal_rate) rescue nil
         coal_marginal_rate = Float(coal_marginal_rate) rescue nil
+        coal_fixed_charge = Float(coal_fixed_charge) rescue nil
+        wood_fixed_charge = Float(wood_fixed_charge) rescue nil
         wood_marginal_rate = Float(wood_marginal_rate) rescue nil
+        wood_pellets_fixed_charge = Float(wood_pellets_fixed_charge) rescue nil
         wood_pellets_marginal_rate = Float(wood_pellets_marginal_rate) rescue nil
 
         if pv_compensation_type == HPXML::PVCompensationTypeNetMetering
@@ -3648,10 +3658,15 @@ class HPXMLFile
                                                 natural_gas_fixed_charge: natural_gas_fixed_charge,
                                                 elec_marginal_rate: elec_marginal_rate,
                                                 natural_gas_marginal_rate: natural_gas_marginal_rate,
+                                                propane_fixed_charge: propane_fixed_charge,
                                                 propane_marginal_rate: propane_marginal_rate,
+                                                fuel_oil_fixed_charge: fuel_oil_fixed_charge,
                                                 fuel_oil_marginal_rate: fuel_oil_marginal_rate,
+                                                coal_fixed_charge: coal_fixed_charge,
                                                 coal_marginal_rate: coal_marginal_rate,
+                                                wood_fixed_charge: wood_fixed_charge,
                                                 wood_marginal_rate: wood_marginal_rate,
+                                                wood_pellets_fixed_charge: wood_pellets_fixed_charge,
                                                 wood_pellets_marginal_rate: wood_pellets_marginal_rate,
                                                 pv_compensation_type: pv_compensation_type,
                                                 pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,

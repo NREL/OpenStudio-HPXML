@@ -210,13 +210,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
                                               elec_fixed_charge: 8,
                                               natural_gas_fixed_charge: 9,
+                                              propane_fixed_charge: 10,
+                                              fuel_oil_fixed_charge: 11,
+                                              coal_fixed_charge: 12,
+                                              wood_fixed_charge: 13,
+                                              wood_pellets_fixed_charge: 14,
                                               elec_marginal_rate: 0.2,
-                                              natural_gas_marginal_rate: 20,
-                                              propane_marginal_rate: 10,
-                                              fuel_oil_marginal_rate: 5,
-                                              coal_marginal_rate: 6,
-                                              wood_marginal_rate: 7,
-                                              wood_pellets_marginal_rate: 8,
+                                              natural_gas_marginal_rate: 0.3,
+                                              propane_marginal_rate: 0.4,
+                                              fuel_oil_marginal_rate: 0.5,
+                                              coal_marginal_rate: 0.6,
+                                              wood_marginal_rate: 0.7,
+                                              wood_pellets_marginal_rate: 0.8,
                                               pv_compensation_type: pv_compensation_type,
                                               pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost,
                                               pv_net_metering_annual_excess_sellback_rate: 0.04,
@@ -226,13 +231,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     scenarios = hpxml_default.header.utility_bill_scenarios
-    _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, nil, 3)
-    _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, nil, 3)
+    _test_default_bills_values(scenarios[0], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, nil, 3)
+    _test_default_bills_values(scenarios[1], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, nil, 3)
 
     # Test defaults
     hpxml.header.utility_bill_scenarios.each do |scenario|
       scenario.elec_fixed_charge = nil
       scenario.natural_gas_fixed_charge = nil
+      scenario.propane_fixed_charge = nil
+      scenario.fuel_oil_fixed_charge = nil
+      scenario.coal_fixed_charge = nil
+      scenario.wood_fixed_charge = nil
+      scenario.wood_pellets_fixed_charge = nil
       scenario.elec_marginal_rate = nil
       scenario.natural_gas_marginal_rate = nil
       scenario.propane_marginal_rate = nil
@@ -250,7 +260,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, nil)
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
   end
 
@@ -3267,8 +3277,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_bills_values(scenario, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate,
-                                 propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
+  def _test_default_bills_values(scenario,
+                                 elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge,
+                                 elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
                                  pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate,
                                  pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_dollars_per_kw, pv_monthly_grid_connection_fee_dollars)
     if elec_fixed_charge.nil?
@@ -3280,6 +3291,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(scenario.natural_gas_fixed_charge)
     else
       assert_equal(natural_gas_fixed_charge, scenario.natural_gas_fixed_charge)
+    end
+    if propane_fixed_charge.nil?
+      assert_nil(scenario.propane_fixed_charge)
+    else
+      assert_equal(propane_fixed_charge, scenario.propane_fixed_charge)
+    end
+    if fuel_oil_fixed_charge.nil?
+      assert_nil(scenario.fuel_oil_fixed_charge)
+    else
+      assert_equal(fuel_oil_fixed_charge, scenario.fuel_oil_fixed_charge)
+    end
+    if coal_fixed_charge.nil?
+      assert_nil(scenario.coal_fixed_charge)
+    else
+      assert_equal(coal_fixed_charge, scenario.coal_fixed_charge)
+    end
+    if wood_fixed_charge.nil?
+      assert_nil(scenario.wood_fixed_charge)
+    else
+      assert_equal(wood_fixed_charge, scenario.wood_fixed_charge)
+    end
+    if wood_pellets_fixed_charge.nil?
+      assert_nil(scenario.wood_pellets_fixed_charge)
+    else
+      assert_equal(wood_pellets_fixed_charge, scenario.wood_pellets_fixed_charge)
     end
     if elec_marginal_rate.nil?
       assert_nil(scenario.elec_marginal_rate)

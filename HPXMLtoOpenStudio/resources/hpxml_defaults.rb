@@ -300,6 +300,10 @@ class HPXMLDefaults
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypePropane)
+        if scenario.propane_fixed_charge.nil?
+          scenario.propane_fixed_charge = 0.0
+          scenario.propane_fixed_charge_isdefaulted = true
+        end
         if scenario.propane_marginal_rate.nil?
           scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypePropane, nil)
           scenario.propane_marginal_rate_isdefaulted = true
@@ -307,6 +311,10 @@ class HPXMLDefaults
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeOil)
+        if scenario.fuel_oil_fixed_charge.nil?
+          scenario.fuel_oil_fixed_charge = 0.0
+          scenario.fuel_oil_fixed_charge_isdefaulted = true
+        end
         if scenario.fuel_oil_marginal_rate.nil?
           scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeOil, nil)
           scenario.fuel_oil_marginal_rate_isdefaulted = true
@@ -314,6 +322,10 @@ class HPXMLDefaults
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeCoal)
+        if scenario.coal_fixed_charge.nil?
+          scenario.coal_fixed_charge = 0.0
+          scenario.coal_fixed_charge_isdefaulted = true
+        end
         if scenario.coal_marginal_rate.nil?
           scenario.coal_marginal_rate = 0.015 # FIXME
           scenario.coal_marginal_rate_isdefaulted = true
@@ -321,6 +333,10 @@ class HPXMLDefaults
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeWoodCord)
+        if scenario.wood_fixed_charge.nil?
+          scenario.wood_fixed_charge = 0.0
+          scenario.wood_fixed_charge_isdefaulted = true
+        end
         if scenario.wood_marginal_rate.nil?
           scenario.wood_marginal_rate = 0.015 # FIXME
           scenario.wood_marginal_rate_isdefaulted = true
@@ -328,6 +344,10 @@ class HPXMLDefaults
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeWoodPellets)
+        if scenario.wood_pellets_fixed_charge.nil?
+          scenario.wood_pellets_fixed_charge = 0.0
+          scenario.wood_pellets_fixed_charge_isdefaulted = true
+        end
         if scenario.wood_pellets_marginal_rate.nil?
           scenario.wood_pellets_marginal_rate = 0.015 # FIXME
           scenario.wood_pellets_marginal_rate_isdefaulted = true
@@ -357,6 +377,11 @@ class HPXMLDefaults
           scenario.pv_feed_in_tariff_rate = 0.12
           scenario.pv_feed_in_tariff_rate_isdefaulted = true
         end
+      end
+
+      if scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil? && scenario.pv_monthly_grid_connection_fee_dollars.nil?
+        scenario.pv_monthly_grid_connection_fee_dollars = 0.0
+        scenario.pv_monthly_grid_connection_fee_dollars_isdefaulted = true
       end
     end
   end

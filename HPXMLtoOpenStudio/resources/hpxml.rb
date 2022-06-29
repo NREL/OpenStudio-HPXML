@@ -1192,7 +1192,8 @@ class HPXML < Object
 
   class UtilityBillScenario < BaseElement
     ATTRS = [:name,
-             :elec_fixed_charge, :natural_gas_fixed_charge,
+             :elec_fixed_charge, :natural_gas_fixed_charge, :propane_fixed_charge, :fuel_oil_fixed_charge,
+             :coal_fixed_charge, :wood_fixed_charge, :wood_pellets_fixed_charge,
              :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
              :coal_marginal_rate, :wood_marginal_rate, :wood_pellets_marginal_rate,
              :pv_compensation_type,
@@ -1216,11 +1217,11 @@ class HPXML < Object
       XMLHelper.add_element(utility_bill_scenario, 'Name', @name, :string) unless @name.nil?
       { HPXML::FuelTypeElectricity => [@elec_fixed_charge, @elec_fixed_charge_isdefaulted, @elec_marginal_rate, @elec_marginal_rate_isdefaulted],
         HPXML::FuelTypeNaturalGas => [@natural_gas_fixed_charge, @natural_gas_fixed_charge_isdefaulted, @natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
-        HPXML::FuelTypePropane => [nil, nil, @propane_marginal_rate, @propane_marginal_rate_isdefaulted],
-        HPXML::FuelTypeOil => [nil, nil, @fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
-        HPXML::FuelTypeCoal => [nil, nil, @coal_marginal_rate, @coal_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodCord => [nil, nil, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodPellets => [nil, nil, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
+        HPXML::FuelTypePropane => [@propane_fixed_charge, @propane_fixed_charge_isdefaulted, @propane_marginal_rate, @propane_marginal_rate_isdefaulted],
+        HPXML::FuelTypeOil => [@fuel_oil_fixed_charge, @fuel_oil_fixed_charge_isdefaulted, @fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
+        HPXML::FuelTypeCoal => [@coal_fixed_charge, @coal_fixed_charge_isdefaulted, @coal_marginal_rate, @coal_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodCord => [@wood_fixed_charge, @wood_fixed_charge_isdefaulted, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
+        HPXML::FuelTypeWoodPellets => [@wood_pellets_fixed_charge, @wood_pellets_fixed_charge_isdefaulted, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
         fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted = vals
         next if fixed_charge.nil? && marginal_rate.nil?
 
@@ -1261,10 +1262,15 @@ class HPXML < Object
       @elec_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeElectricity}']/MarginalRate", :float)
       @natural_gas_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeNaturalGas}']/FixedCharge", :float)
       @natural_gas_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeNaturalGas}']/MarginalRate", :float)
+      @propane_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypePropane}']/FixedCharge", :float)
       @propane_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypePropane}']/MarginalRate", :float)
+      @fuel_oil_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeOil}']/FixedCharge", :float)
       @fuel_oil_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeOil}']/MarginalRate", :float)
+      @coal_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeCoal}']/FixedCharge", :float)
       @coal_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeCoal}']/MarginalRate", :float)
+      @wood_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodCord}']/FixedCharge", :float)
       @wood_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodCord}']/MarginalRate", :float)
+      @wood_pellets_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodPellets}']/FixedCharge", :float)
       @wood_pellets_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodPellets}']/MarginalRate", :float)
       @pv_compensation_type = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/CompensationType', :string)
       @pv_net_metering_annual_excess_sellback_rate_type = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/NetMeteringAnnualExcessSellbackRateType', :string)

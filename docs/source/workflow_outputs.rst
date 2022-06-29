@@ -496,6 +496,7 @@ The utility bills output file is called ``results_bills.csv`` (or ``results_bill
 Monthly fixed charges and marginal rates, as well as PV compensation types/rates/fees, are defined to determine how utility bills are calculated.
 
 Results for each utility bill scenario defined in the HPXML file are listed as shown below.
+Note that rows below with values of zero will be excluded.
 
    =============================================  ====================
    Type                                           Notes
@@ -508,9 +509,19 @@ Results for each utility bill scenario defined in the HPXML file are listed as s
    <ScenarioName>: Natural Gas: Fixed ($)         Scenario annual fixed charges for natural gas.
    <ScenarioName>: Natural Gas: Marginal ($)      Scenario annual energy charges for natural gas.
    <ScenarioName>: Natural Gas: Total ($)         Scenario annual total charges for natural gas.
+   <ScenarioName>: Fuel Oil: Fixed ($)            Scenario annual fixed charges for fuel oil.
+   <ScenarioName>: Fuel Oil: Marginal ($)         Scenario annual energy charges for fuel oil.
    <ScenarioName>: Fuel Oil: Total ($)            Scenario annual total charges for fuel oil.
+   <ScenarioName>: Propane: Fixed ($)             Scenario annual fixed charges for propane.
+   <ScenarioName>: Propane: Marginal ($)          Scenario annual energy charges for propane.
    <ScenarioName>: Propane: Total ($)             Scenario annual total charges for propane.
+   <ScenarioName>: Wood Cord: Fixed ($)           Scenario annual fixed charges for wood cord.
+   <ScenarioName>: Wood Cord: Marginal ($)        Scenario annual energy charges for wood cord.
    <ScenarioName>: Wood Cord: Total ($)           Scenario annual total charges for wood cord.
+   <ScenarioName>: Wood Pellets: Fixed ($)        Scenario annual fixed charges for wood pellets.
+   <ScenarioName>: Wood Pellets: Marginal ($)     Scenario annual energy charges for wood pellets.
    <ScenarioName>: Wood Pellets: Total ($)        Scenario annual total charges for wood pellets.
+   <ScenarioName>: Coal: Fixed ($)                Scenario annual fixed charges for coal.
+   <ScenarioName>: Coal: Marginal ($)             Scenario annual energy charges for coal.
    <ScenarioName>: Coal: Total ($)                Scenario annual total charges for coal.
    =============================================  ====================

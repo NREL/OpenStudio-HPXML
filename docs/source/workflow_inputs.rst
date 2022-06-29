@@ -340,71 +340,44 @@ For each scenario, electricity utility rates can be optionally entered as an ``/
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
-Natural Gas Utility Rates
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Fuel Utility Rates
+~~~~~~~~~~~~~~~~~~
 
-For each scenario, natural gas utility rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
-
-  ================================  ========  =======  ===========  ========  ========  ============================================================
-  Element                           Type      Units    Constraints  Required  Default   Notes
-  ================================  ========  =======  ===========  ========  ========  ============================================================
-  ``FuelType``                      string             natural gas  Yes                 Utility rate fuel type
-  ``FixedCharge``                   double    $/month               No        12.0      Utility rate monthly fixed charge
-  ``MarginalRate``                  double    $/therm               No        See [#]_  Utility rate marginal rate
-  ================================  ========  =======  ===========  ========  ========  ============================================================
-
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``.
-
-Propane and Fuel Oil Utility Rates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For each scenario, propane and fuel oil utility rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
+For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
 
   ================================  ========  ========  ===========  ========  ========  ============================================================
   Element                           Type      Units     Constraints  Required  Default   Notes
   ================================  ========  ========  ===========  ========  ========  ============================================================
   ``FuelType``                      string              See [#]_     Yes                 Utility rate fuel type
-  ``MarginalRate``                  double    $/gallon               No        See [#]_  Utility rate marginal rate
+  ``FixedCharge``                   double    $/month                No        See [#]_  Utility rate monthly fixed charge
+  ``MarginalRate``                  double    See [#]_               No        See [#]_  Utility rate marginal rate
   ================================  ========  ========  ===========  ========  ========  ============================================================
 
-  .. [#] FuelType choices are "propane" and "fuel oil".
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv`` (propane) or ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv`` (fuel oil).
-
-Other Fuel Utility Rates
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-For each scenario, other fuel utility rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
-
-  ================================  ========  ======  ===========  ========  ========  ============================================================
-  Element                           Type      Units   Constraints  Required  Default   Notes
-  ================================  ========  ======  ===========  ========  ========  ============================================================
-  ``FuelType``                      string            See [#]_     Yes                 Utility rate fuel type
-  ``MarginalRate``                  double    $/kBtu               Yes                 Utility rate marginal rate
-  ================================  ========  ======  ===========  ========  ========  ============================================================
-
-  .. [#] FuelType choices are "coal", "wood", and "wood pellets".
+  .. [#] FuelType choices are "propane", "fuel oil", "coal", "wood", and "wood pellets".
+  .. [#] For "natural gas" default monthly fixed charge is $12.
+  .. [#] For "propane" and "fuel oil" units are $/gallon. For "coal", "wood", and "wood pellets" units are "$/kBtu".
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``.
 
 PV Compensation
 ~~~~~~~~~~~~~~~
 
 For each scenario, PV compensation information can be optionally entered in ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/PVCompensation``.
 
-  ===========================================  ========  =======  ===========  ========  ==============  =============================================================
-  Element                                      Type      Units    Constraints  Required  Default         Notes
-  ===========================================  ========  =======  ===========  ========  ==============  =============================================================
-  ``CompensationType``                         string             See [#]_     No        Net Metering    PV compensation type
-  ``NetMeteringAnnualExcessSellbackRateType``  string             See [#]_     No        User-Specified  PV compensation net metering annual excess sellback rate type
-  ``NetMeteringAnnualExcessSellbackRate``      double    $/kWh    See [#]_     No        0.03            PV compensation net metering annual excess sellback rate
-  ``FeedInTariffRate``                         double    $/kWh    See [#]_     No        0.12            PV compensation feed-in tariff rate
-  ``MonthlyGridConnectionFeeUnits``            string    $/month  See [#]_     No        $/kW            PV compensation monthly grid connection fee units
-  ``MonthlyGridConnectionFee``                 double                          No        0.0             PV compensation monthly grid connection fee
-  ===========================================  ========  =======  ===========  ========  ==============  =============================================================
+  =============================================================  ========  =======  ===========  ========  ==============  =============================================================
+  Element                                                        Type      Units    Constraints  Required  Default         Notes
+  =============================================================  ========  =======  ===========  ========  ==============  =============================================================
+  ``CompensationType``                                           string             See [#]_     No        Net Metering    PV compensation type
+  ``NetMeteringAnnualExcessSellbackRateType``                    string             See [#]_     No        User-Specified  PV compensation net metering annual excess sellback rate type
+  ``NetMeteringAnnualExcessSellbackRate``                        double    $/kWh    See [#]_     No        0.03            PV compensation net metering annual excess sellback rate
+  ``FeedInTariffRate``                                           double    $/kWh    See [#]_     No        0.12            PV compensation feed-in tariff rate
+  ``MonthlyGridConnectionFee[Units="$/kW" or Units="$"]/Value``  double                          No        See [#]_        PV compensation monthly grid connection fee
+  =============================================================  ========  =======  ===========  ========  ==============  =============================================================
 
   .. [#] CompensationType choices are "Net Metering" and "Feed-In Tariff".
   .. [#] NetMeteringAnnualExcessSellbackRateType choices are "User-Specified" and "Retail Electricity Cost", and only applies if CompensationType is "Net Metering".
   .. [#] NetMeteringAnnualExcessSellbackRate only applies if CompensationType is "Net Metering" and NetMeteringAnnualExcessSellbackRateType is "User-Specified".
   .. [#] FeedInTariffRate only applies if CompensationType is "Feed-In Tariff".
-  .. [#] MonthlyGridConnectionFeeUnits choices are "$/kW" and "$".
+  .. [#] If MonthlyGridConnectionFee[Units="$/kW" or Units="$"]/Value not provided, defaults to $0.
 
 .. _buildingsite:
 

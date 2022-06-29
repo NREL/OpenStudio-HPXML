@@ -233,10 +233,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         segment = new_segment
       end
 
-      results_out << ["#{bill_scenario_name}: #{key}: Fixed ($)", bill.annual_fixed_charge.round(2)] if [FT::Elec, FT::Gas].include? key
-      results_out << ["#{bill_scenario_name}: #{key}: Marginal ($)", bill.annual_energy_charge.round(2)] if [FT::Elec, FT::Gas].include? key
-      results_out << ["#{bill_scenario_name}: #{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include? key
-      results_out << ["#{bill_scenario_name}: #{key}: Total ($)", bill.annual_total.round(2)]
+      results_out << ["#{bill_scenario_name}: #{key}: Fixed ($)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
+      results_out << ["#{bill_scenario_name}: #{key}: Marginal ($)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
+      results_out << ["#{bill_scenario_name}: #{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(key) && bill.annual_production_credit != 0
+      results_out << ["#{bill_scenario_name}: #{key}: Total ($)", bill.annual_total.round(2)] if bill.annual_total != 0
     end
 
     if ['csv'].include? output_format
@@ -359,14 +359,19 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge
         rate.flatratebuy = bill_scenario.natural_gas_marginal_rate
       elsif fuel_type == FT::Oil
+        rate.fixedmonthlycharge = bill_scenario.fuel_oil_fixed_charge
         rate.flatratebuy = bill_scenario.fuel_oil_marginal_rate
       elsif fuel_type == FT::Propane
+        rate.fixedmonthlycharge = bill_scenario.propane_fixed_charge
         rate.flatratebuy = bill_scenario.propane_marginal_rate
       elsif fuel_type == FT::WoodCord
+        rate.fixedmonthlycharge = bill_scenario.wood_fixed_charge
         rate.flatratebuy = bill_scenario.wood_marginal_rate
       elsif fuel_type == FT::WoodPellets
+        rate.fixedmonthlycharge = bill_scenario.wood_pellets_fixed_charge
         rate.flatratebuy = bill_scenario.wood_pellets_marginal_rate
       elsif fuel_type == FT::Coal
+        rate.fixedmonthlycharge = bill_scenario.coal_fixed_charge
         rate.flatratebuy = bill_scenario.coal_marginal_rate
       end
 
