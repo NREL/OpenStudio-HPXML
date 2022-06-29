@@ -20,8 +20,9 @@ jobs:
       - name: Install software
         run: |
           rm -f Gemfile.lock && bundle install
+          ENV DEBIAN_FRONTEND=noninteractive
           sudo apt update
-          sudo apt-get install -y wget unzip libxml2-utils python3-lxml python3-pip
+          sudo -E apt-get install -y wget unzip libxml2-utils python3-lxml python3-pip
           sudo pip3 install sphinx sphinx-rtd-theme
 
       - name: XSD validation
