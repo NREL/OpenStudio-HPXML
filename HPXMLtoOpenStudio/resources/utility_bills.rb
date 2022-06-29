@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UtilityBills
-  def self.get_auto_marginal_rate(state_code, fuel_type, fixed_rate)
+  def self.get_auto_marginal_rate(runner, state_code, fuel_type, fixed_rate)
     state_name = Constants.StateCodesMap[state_code]
     return if state_name.nil?
 
@@ -46,6 +46,7 @@ class UtilityBills
         marginal_rates.keys.each do |k|
           header = k if k.include?(padd)
         end
+        average = "region (#{padd})"
 
         if marginal_rates[header].nil?
           if fuel_type == HPXML::FuelTypeOil
@@ -53,7 +54,10 @@ class UtilityBills
           elsif fuel_type == HPXML::FuelTypePropane
             header = 'Weekly U.S. Propane Residential Price  (Dollars per Gallon)'
           end
+          average = 'national'
         end
+
+        runner.registerWarning("Could not find state average #{fuel_type} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
       marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
     end

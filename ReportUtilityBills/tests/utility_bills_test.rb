@@ -63,7 +63,7 @@ class ReportUtilityBillsTest < MiniTest::Test
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
     HPXMLDefaults.apply_header(@hpxml, nil)
-    HPXMLDefaults.apply_utility_bill_scenarios(@hpxml)
+    HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
@@ -243,23 +243,21 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_workflow_leap_year
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-AMY-2012.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
-    assert_operator(actual_bills['Test: Total ($)'], :>, 0)
+    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
   end
 
   def test_workflow_semi_annual_run_period
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-runperiod-1-month.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     actual_bills = _get_actual_bills(bills_csv)
-    assert_operator(actual_bills['Test: Total ($)'], :>, 0)
+    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
   end
 
   def test_workflow_no_bill_scenarios
@@ -277,21 +275,38 @@ class ReportUtilityBillsTest < MiniTest::Test
     # and every fuel type.
     Constants.StateCodesMap.keys.each do |state_code|
       fuel_types.each do |fuel_type|
-        flatratebuy = UtilityBills.get_auto_marginal_rate(state_code, fuel_type, 0)
+        flatratebuy = UtilityBills.get_auto_marginal_rate(nil, state_code, fuel_type, 0)
         refute_nil(flatratebuy)
       end
     end
 
     # Check that any other state code is gracefully handled (no error)
     fuel_types.each do |fuel_type|
-      UtilityBills.get_auto_marginal_rate('XX', fuel_type, 0)
+      UtilityBills.get_auto_marginal_rate(nil, 'XX', fuel_type, 0)
     end
+  end
+
+  def test_warning_region
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-oil-location-miami-fl.xml'))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    expected_warnings = ['Could not find state average fuel oil rate based on Florida; using region (PADD 1C) average.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
+    assert(File.exist?(bills_csv))
+  end
+
+  def test_warning_national
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-propane-location-portland-or.xml'))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    expected_warnings = ['Could not find state average propane rate based on Oregon; using national average.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
+    assert(File.exist?(bills_csv))
   end
 
   def test_warning_dse
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['DSE is not currently supported when calculating utility bills.']
     bills_csv = _test_measure(expected_warnings: expected_warnings)
@@ -301,7 +316,6 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_warning_no_rates
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-capetown-zaf.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
     bills_csv = _test_measure(expected_warnings: expected_warnings)

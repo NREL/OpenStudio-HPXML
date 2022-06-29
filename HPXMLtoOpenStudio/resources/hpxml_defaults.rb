@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
+  def self.apply(runner, hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -33,7 +33,7 @@ class HPXMLDefaults
 
     apply_header(hpxml, epw_file)
     apply_emissions_scenarios(hpxml)
-    apply_utility_bill_scenarios(hpxml)
+    apply_utility_bill_scenarios(runner, hpxml)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
@@ -275,7 +275,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_utility_bill_scenarios(hpxml)
+  def self.apply_utility_bill_scenarios(runner, hpxml)
     hpxml.header.utility_bill_scenarios.each do |scenario|
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeElectricity)
         if scenario.elec_fixed_charge.nil?
@@ -283,7 +283,7 @@ class HPXMLDefaults
           scenario.elec_fixed_charge_isdefaulted = true
         end
         if scenario.elec_marginal_rate.nil?
-          scenario.elec_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
+          scenario.elec_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
           scenario.elec_marginal_rate_isdefaulted = true
         end
       end
@@ -294,21 +294,21 @@ class HPXMLDefaults
           scenario.natural_gas_fixed_charge_isdefaulted = true
         end
         if scenario.natural_gas_marginal_rate.nil?
-          scenario.natural_gas_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
+          scenario.natural_gas_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
           scenario.natural_gas_marginal_rate_isdefaulted = true
         end
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypePropane)
         if scenario.propane_marginal_rate.nil?
-          scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypePropane, nil)
+          scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypePropane, nil)
           scenario.propane_marginal_rate_isdefaulted = true
         end
       end
 
       if HPXML::check_fuel(hpxml, HPXML::FuelTypeOil)
         if scenario.fuel_oil_marginal_rate.nil?
-          scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(hpxml.header.state_code, HPXML::FuelTypeOil, nil)
+          scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeOil, nil)
           scenario.fuel_oil_marginal_rate_isdefaulted = true
         end
       end
