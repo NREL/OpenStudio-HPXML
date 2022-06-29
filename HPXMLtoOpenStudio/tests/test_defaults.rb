@@ -221,14 +221,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                               pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost,
                                               pv_net_metering_annual_excess_sellback_rate: 0.04,
                                               pv_feed_in_tariff_rate: 0.15,
-                                              pv_monthly_grid_connection_fee_unit: '$',
-                                              pv_monthly_grid_connection_fee: 3)
+                                              pv_monthly_grid_connection_fee_dollars: 3)
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     scenarios = hpxml_default.header.utility_bill_scenarios
-    _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, HPXML::PVGridConnectionFeeUnitsDollars, 3)
-    _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, HPXML::PVGridConnectionFeeUnitsDollars, 3)
+    _test_default_bills_values(scenarios[0], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, nil, 3)
+    _test_default_bills_values(scenarios[1], 8, 9, 0.2, 20, 10, 5, 6, 7, 8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, nil, 3)
 
     # Test defaults
     hpxml.header.utility_bill_scenarios.each do |scenario|
@@ -245,13 +244,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       scenario.pv_net_metering_annual_excess_sellback_rate_type = nil
       scenario.pv_net_metering_annual_excess_sellback_rate = nil
       scenario.pv_feed_in_tariff_rate = nil
-      scenario.pv_monthly_grid_connection_fee_unit = nil
-      scenario.pv_monthly_grid_connection_fee = nil
+      scenario.pv_monthly_grid_connection_fee_dollars_per_kw = nil
+      scenario.pv_monthly_grid_connection_fee_dollars = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, HPXML::PVGridConnectionFeeUnitsDollarsPerkW, 0.0)
+      _test_default_bills_values(scenario, 12.0, 12.0, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, nil)
     end
   end
 
@@ -3271,7 +3270,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_bills_values(scenario, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate,
                                  propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
                                  pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate,
-                                 pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee)
+                                 pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_dollars_per_kw, pv_monthly_grid_connection_fee_dollars)
     if elec_fixed_charge.nil?
       assert_nil(scenario.elec_fixed_charge)
     else
@@ -3337,15 +3336,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(pv_feed_in_tariff_rate, scenario.pv_feed_in_tariff_rate)
     end
-    if pv_monthly_grid_connection_fee_unit.nil?
-      assert_nil(scenario.pv_monthly_grid_connection_fee_unit)
+    if pv_monthly_grid_connection_fee_dollars_per_kw.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
     else
-      assert_equal(pv_monthly_grid_connection_fee_unit, scenario.pv_monthly_grid_connection_fee_unit)
+      assert_equal(pv_monthly_grid_connection_fee_dollars_per_kw, scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
     end
-    if pv_monthly_grid_connection_fee.nil?
-      assert_nil(scenario.pv_monthly_grid_connection_fee)
+    if pv_monthly_grid_connection_fee_dollars.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars)
     else
-      assert_equal(pv_monthly_grid_connection_fee, scenario.pv_monthly_grid_connection_fee)
+      assert_equal(pv_monthly_grid_connection_fee_dollars, scenario.pv_monthly_grid_connection_fee_dollars)
     end
   end
 

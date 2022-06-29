@@ -39,8 +39,10 @@
             <CompensationType>Net Metering</CompensationType>
             <NetMeteringAnnualExcessSellbackRateType>User-Specified</NetMeteringAnnualExcessSellbackRateType>
             <NetMeteringAnnualExcessSellbackRate>0.035</NetMeteringAnnualExcessSellbackRate>
-            <MonthlyGridConnectionFeeUnits>$/kW</MonthlyGridConnectionFeeUnits>
-            <MonthlyGridConnectionFee>2.5</MonthlyGridConnectionFee>
+            <MonthlyGridConnectionFee>
+              <Units>$/kW</Units>
+              <Value>2.5</Value>
+            </MonthlyGridConnectionFee>
           </PVCompensation>
         </UtilityBillScenario>
         <UtilityBillScenario>
@@ -66,8 +68,10 @@
           <PVCompensation>
             <CompensationType>Feed-In Tariff</CompensationType>
             <FeedInTariffRate>0.12</FeedInTariffRate>
-            <MonthlyGridConnectionFeeUnits>$</MonthlyGridConnectionFeeUnits>
-            <MonthlyGridConnectionFee>7.5</MonthlyGridConnectionFee>
+            <MonthlyGridConnectionFee>
+              <Units>$</Units>
+              <Value>7.5</Value>
+            </MonthlyGridConnectionFee>
           </PVCompensation>
         </UtilityBillScenario>
       </UtilityBillScenarios>

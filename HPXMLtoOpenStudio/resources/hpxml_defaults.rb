@@ -358,16 +358,6 @@ class HPXMLDefaults
           scenario.pv_feed_in_tariff_rate_isdefaulted = true
         end
       end
-
-      if scenario.pv_monthly_grid_connection_fee_unit.nil?
-        scenario.pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollarsPerkW
-        scenario.pv_monthly_grid_connection_fee_unit_isdefaulted = true
-      end
-
-      if scenario.pv_monthly_grid_connection_fee.nil?
-        scenario.pv_monthly_grid_connection_fee = 0.0
-        scenario.pv_monthly_grid_connection_fee_isdefaulted = true
-      end
     end
   end
 

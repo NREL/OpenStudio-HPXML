@@ -147,9 +147,7 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:PVCompensation'>
       <sch:assert role='ERROR' test='count(h:CompensationType) = 1'>Expected 1 element(s) for xpath: CompensationType</sch:assert> <!-- See [UtilityRate=NetMetering] or [UtilityRate=FeedInTariff] -->
       <sch:assert role='ERROR' test='h:CompensationType[text()="Net Metering" or text()="Feed-In Tariff"] or not(h:CompensationType)'>Expected CompensationType to be 'Net Metering' or 'Feed-In Tariff'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:MonthlyGridConnectionFeeUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MonthlyGridConnectionFeeUnits</sch:assert>
-      <sch:assert role='ERROR' test='h:MonthlyGridConnectionFeeUnits[text()="$/kW" or text()="$"] or not(h:MonthlyGridConnectionFeeUnits)'>Expected MonthlyGridConnectionFeeUnits to be '$/kW' or '$'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:MonthlyGridConnectionFeeUnits) + count(h:MonthlyGridConnectionFee) = 0 or count(h:MonthlyGridConnectionFeeUnits) + count(h:MonthlyGridConnectionFee) = 2'>Expected 0 or 1 element(s) for xpath: MonthlyGridConnectionFeeUnits | MonthlyGridConnectionFee</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MonthlyGridConnectionFee[h:Units="$/kW" or h:Units="$"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MonthlyGridConnectionFee[Units="$/kW" or Units="$"]/Value<sch:assert>
     </sch:rule>
   </sch:pattern>
 

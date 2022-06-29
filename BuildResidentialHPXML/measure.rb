@@ -3637,7 +3637,11 @@ class HPXMLFile
           pv_net_metering_annual_excess_sellback_rate = nil
         end
 
-        pv_monthly_grid_connection_fee = Float(pv_monthly_grid_connection_fee) rescue nil
+        if pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollarsPerkW
+          pv_monthly_grid_connection_fee_dollars_per_kw = Float(pv_monthly_grid_connection_fee) rescue nil
+        elsif pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollars
+          pv_monthly_grid_connection_fee_dollars = Float(pv_monthly_grid_connection_fee) rescue nil
+        end
 
         hpxml.header.utility_bill_scenarios.add(name: name,
                                                 elec_fixed_charge: elec_fixed_charge,
@@ -3653,8 +3657,8 @@ class HPXMLFile
                                                 pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,
                                                 pv_net_metering_annual_excess_sellback_rate: pv_net_metering_annual_excess_sellback_rate,
                                                 pv_feed_in_tariff_rate: pv_feed_in_tariff_rate,
-                                                pv_monthly_grid_connection_fee_unit: pv_monthly_grid_connection_fee_unit,
-                                                pv_monthly_grid_connection_fee: pv_monthly_grid_connection_fee)
+                                                pv_monthly_grid_connection_fee_dollars_per_kw: pv_monthly_grid_connection_fee_dollars_per_kw,
+                                                pv_monthly_grid_connection_fee_dollars: pv_monthly_grid_connection_fee_dollars)
       end
     end
 

@@ -1198,7 +1198,7 @@ class HPXML < Object
              :pv_compensation_type,
              :pv_net_metering_annual_excess_sellback_rate_type, :pv_net_metering_annual_excess_sellback_rate,
              :pv_feed_in_tariff_rate,
-             :pv_monthly_grid_connection_fee_unit, :pv_monthly_grid_connection_fee]
+             :pv_monthly_grid_connection_fee_dollars_per_kw, :pv_monthly_grid_connection_fee_dollars]
     attr_accessor(*ATTRS)
 
     def delete
@@ -1222,7 +1222,6 @@ class HPXML < Object
         HPXML::FuelTypeWoodCord => [nil, nil, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
         HPXML::FuelTypeWoodPellets => [nil, nil, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
         fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted = vals
-        # next if [HPXML::FuelTypeCoal, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include?(fuel) && marginal_rate.nil?
         next if fixed_charge.nil? && marginal_rate.nil?
 
         utility_rate = XMLHelper.add_element(utility_bill_scenario, 'UtilityRate')
@@ -1241,8 +1240,16 @@ class HPXML < Object
         elsif @pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
           XMLHelper.add_element(pv, 'FeedInTariffRate', @pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
         end
-        XMLHelper.add_element(pv, 'MonthlyGridConnectionFeeUnits', @pv_monthly_grid_connection_fee_unit, :string, pv_monthly_grid_connection_fee_unit_isdefaulted) unless @pv_monthly_grid_connection_fee_unit.nil?
-        XMLHelper.add_element(pv, 'MonthlyGridConnectionFee', @pv_monthly_grid_connection_fee, :float, pv_monthly_grid_connection_fee_isdefaulted) unless @pv_monthly_grid_connection_fee.nil?
+        if not @pv_monthly_grid_connection_fee_dollars_per_kw.nil?
+          monthly_grid_connection_fee = XMLHelper.add_element(pv, 'MonthlyGridConnectionFee')
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', PVGridConnectionFeeUnitsDollarsPerkW, :string)
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Value', @pv_monthly_grid_connection_fee_dollars_per_kw, :float, pv_monthly_grid_connection_fee_dollars_per_kw_isdefaulted)
+        end
+        if not @pv_monthly_grid_connection_fee_dollars.nil?
+          monthly_grid_connection_fee = XMLHelper.add_element(pv, 'MonthlyGridConnectionFee')
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', PVGridConnectionFeeUnitsDollars, :string)
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Value', @pv_monthly_grid_connection_fee_dollars, :float, pv_monthly_grid_connection_fee_dollars_isdefaulted)
+        end
       end
     end
 
@@ -1263,8 +1270,8 @@ class HPXML < Object
       @pv_net_metering_annual_excess_sellback_rate_type = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/NetMeteringAnnualExcessSellbackRateType', :string)
       @pv_net_metering_annual_excess_sellback_rate = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/NetMeteringAnnualExcessSellbackRate', :float)
       @pv_feed_in_tariff_rate = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/FeedInTariffRate', :float)
-      @pv_monthly_grid_connection_fee_unit = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/MonthlyGridConnectionFeeUnits', :string)
-      @pv_monthly_grid_connection_fee = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/MonthlyGridConnectionFee', :float)
+      @pv_monthly_grid_connection_fee_dollars_per_kw = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollarsPerkW}']/Value", :float)
+      @pv_monthly_grid_connection_fee_dollars = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollars}']/Value", :float)
     end
   end
 

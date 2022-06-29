@@ -166,7 +166,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars_per_kW
-    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee = 2.50
+    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars_per_kw = 2.50
     fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -183,8 +183,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars
-    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_unit = HPXML::PVGridConnectionFeeUnitsDollars
-    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee = 7.50
+    @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars = 7.50
     fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|

@@ -380,13 +380,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless pv_systems.size > 0
 
       monthly_fee = 0.0
-      if bill_scenario.pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollarsPerkW
+      if not bill_scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil?
         pv_systems.each do |pv_system|
           max_power_output_kW = UnitConversions.convert(pv_system.max_power_output, 'W', 'kW')
-          monthly_fee += bill_scenario.pv_monthly_grid_connection_fee * max_power_output_kW
+          monthly_fee += bill_scenario.pv_monthly_grid_connection_fee_dollars_per_kw * max_power_output_kW
         end
-      elsif bill_scenario.pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollars
-        monthly_fee = bill_scenario.pv_monthly_grid_connection_fee
+      elsif not bill_scenario.pv_monthly_grid_connection_fee_dollars.nil?
+        monthly_fee = bill_scenario.pv_monthly_grid_connection_fee_dollars
       end
       rate.fixedmonthlycharge += monthly_fee
     end
