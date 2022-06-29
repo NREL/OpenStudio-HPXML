@@ -28,6 +28,7 @@ require_relative '../HPXMLtoOpenStudio/resources/pv'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/util'
+require_relative '../HPXMLtoOpenStudio/resources/utility_bills'
 require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 require_relative '../HPXMLtoOpenStudio/resources/waterheater'
@@ -3170,6 +3171,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << 'One or more emissions arguments does not have enough comma-separated elements specified.' if error
     end
 
+    bills_args_initialized = [args[:utility_bill_scenario_names].is_initialized]
+    if bills_args_initialized.uniq[0]
+      bills_scenario_lengths = [args[:utility_bill_scenario_names].get.count(',')]
+      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+        underscore_case = OpenStudio::toUnderscoreCase(fuel)
+
+        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_fixed_charges".to_sym].get.count(',')] if args["utility_bill_#{underscore_case}_fixed_charges".to_sym].is_initialized
+        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_marginal_rates".to_sym].get.count(',')] if args["utility_bill_#{underscore_case}_marginal_rates".to_sym].is_initialized
+      end
+
+      error = (bills_scenario_lengths.uniq.size != 1)
+      errors << 'One or more utility bill arguments does not have enough comma-separated elements specified.' if error
+    end
+
     error = (args[:geometry_unit_aspect_ratio] <= 0)
     errors << 'Aspect ratio must be greater than zero.' if error
 
@@ -3618,20 +3633,20 @@ class HPXMLFile
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_fixed_charge, natural_gas_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_fixed_charge, propane_marginal_rate, fuel_oil_fixed_charge, fuel_oil_marginal_rate, coal_fixed_charge, coal_marginal_rate, wood_fixed_charge, wood_marginal_rate, wood_pellets_fixed_charge, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
-        elec_marginal_rate = Float(elec_marginal_rate) rescue nil
-        natural_gas_marginal_rate = Float(natural_gas_marginal_rate) rescue nil
         propane_fixed_charge = Float(propane_fixed_charge) rescue nil
-        propane_marginal_rate = Float(propane_marginal_rate) rescue nil
         fuel_oil_fixed_charge = Float(fuel_oil_fixed_charge) rescue nil
-        fuel_oil_marginal_rate = Float(fuel_oil_marginal_rate) rescue nil
-        coal_marginal_rate = Float(coal_marginal_rate) rescue nil
         coal_fixed_charge = Float(coal_fixed_charge) rescue nil
         wood_fixed_charge = Float(wood_fixed_charge) rescue nil
-        wood_marginal_rate = Float(wood_marginal_rate) rescue nil
         wood_pellets_fixed_charge = Float(wood_pellets_fixed_charge) rescue nil
+        elec_marginal_rate = Float(elec_marginal_rate) rescue nil
+        natural_gas_marginal_rate = Float(natural_gas_marginal_rate) rescue nil
+        propane_marginal_rate = Float(propane_marginal_rate) rescue nil
+        fuel_oil_marginal_rate = Float(fuel_oil_marginal_rate) rescue nil
+        coal_marginal_rate = Float(coal_marginal_rate) rescue nil
+        wood_marginal_rate = Float(wood_marginal_rate) rescue nil
         wood_pellets_marginal_rate = Float(wood_pellets_marginal_rate) rescue nil
 
         if pv_compensation_type == HPXML::PVCompensationTypeNetMetering
@@ -3656,17 +3671,17 @@ class HPXMLFile
         hpxml.header.utility_bill_scenarios.add(name: name,
                                                 elec_fixed_charge: elec_fixed_charge,
                                                 natural_gas_fixed_charge: natural_gas_fixed_charge,
+                                                propane_fixed_charge: propane_fixed_charge,
+                                                fuel_oil_fixed_charge: fuel_oil_fixed_charge,
+                                                coal_fixed_charge: coal_fixed_charge,
+                                                wood_fixed_charge: wood_fixed_charge,
+                                                wood_pellets_fixed_charge: wood_pellets_fixed_charge,
                                                 elec_marginal_rate: elec_marginal_rate,
                                                 natural_gas_marginal_rate: natural_gas_marginal_rate,
-                                                propane_fixed_charge: propane_fixed_charge,
                                                 propane_marginal_rate: propane_marginal_rate,
-                                                fuel_oil_fixed_charge: fuel_oil_fixed_charge,
                                                 fuel_oil_marginal_rate: fuel_oil_marginal_rate,
-                                                coal_fixed_charge: coal_fixed_charge,
                                                 coal_marginal_rate: coal_marginal_rate,
-                                                wood_fixed_charge: wood_fixed_charge,
                                                 wood_marginal_rate: wood_marginal_rate,
-                                                wood_pellets_fixed_charge: wood_pellets_fixed_charge,
                                                 wood_pellets_marginal_rate: wood_pellets_marginal_rate,
                                                 pv_compensation_type: pv_compensation_type,
                                                 pv_net_metering_annual_excess_sellback_rate_type: pv_net_metering_annual_excess_sellback_rate_type,
