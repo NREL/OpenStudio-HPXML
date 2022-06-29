@@ -2134,8 +2134,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_electricity_marginal_rates'] = '0.12'
     args['utility_bill_natural_gas_fixed_charges'] = '12'
     args['utility_bill_natural_gas_marginal_rates'] = '1.10'
-    args['utility_bill_propane_marginal_rates'] = '3'
-    args['utility_bill_fuel_oil_marginal_rates'] = '4'
   elsif ['base-misc-bills-none.xml'].include? hpxml_file
     args.delete('utility_bill_scenario_names')
   elsif ['base-misc-bills-pv.xml'].include? hpxml_file
@@ -2144,8 +2142,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12'
     args['utility_bill_natural_gas_fixed_charges'] = '12, 12'
     args['utility_bill_natural_gas_marginal_rates'] = '1.10, 1.10'
-    args['utility_bill_propane_marginal_rates'] = '3, 3'
-    args['utility_bill_fuel_oil_marginal_rates'] = '4, 4'
     args['utility_bill_pv_compensation_types'] = "#{HPXML::PVCompensationTypeNetMetering}, #{HPXML::PVCompensationTypeFeedInTariff}"
     args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = "#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}, NA"
     args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA'

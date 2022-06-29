@@ -27,14 +27,6 @@
             <FixedCharge>12.0</FixedCharge>
             <MarginalRate>1.1</MarginalRate>
           </UtilityRate>
-          <UtilityRate>
-            <FuelType>propane</FuelType>
-            <MarginalRate>3.0</MarginalRate>
-          </UtilityRate>
-          <UtilityRate>
-            <FuelType>fuel oil</FuelType>
-            <MarginalRate>4.0</MarginalRate>
-          </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>
     </extension>

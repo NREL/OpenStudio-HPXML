@@ -288,22 +288,6 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
-  def test_warning_region
-    skip
-    @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-oil-location-miami-fl.xml'
-    expected_warnings = ['Could not find state average Fuel Oil rate based on Florida; using region (PADD 1C) average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
-  end
-
-  def test_warning_national
-    skip
-    @args_hash['hpxml_path'] = '../workflow/sample_files/base-appliances-propane-location-portland-or.xml'
-    expected_warnings = ['Could not find state average Propane rate based on Oregon; using national average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
-  end
-
   def test_warning_dse
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))

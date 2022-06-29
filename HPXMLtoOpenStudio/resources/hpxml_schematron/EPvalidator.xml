@@ -102,8 +102,8 @@
       <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert>
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="electricity"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="electricity"]</sch:assert> <!-- See [UtilityRate=Electricity] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="natural gas"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="natural gas"]</sch:assert> <!-- See [UtilityRate=NaturalGas] -->
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="propane"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="propane"]</sch:assert> <!-- See [UtilityRate=PropaneAndFuelOil] -->
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="fuel oil"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="fuel oil"]</sch:assert> <!-- See [UtilityRate=PropaneAndFuelOil] -->
+      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="propane"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="propane"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
+      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="fuel oil"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="fuel oil"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="coal"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="coal"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="wood"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="wood"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="wood pellets"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="wood pellets"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
@@ -114,31 +114,23 @@
   <sch:pattern>
     <sch:title>[UtilityRate=Electricity]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType[text()="electricity"]]'>
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="electricity"]/h:FixedCharge) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="electricity"]/FixedCharge</sch:assert>
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="electricity"]/h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="electricity"]/MarginalRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:FixedCharge) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FixedCharge</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MarginalRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[UtilityRate=NaturalGas]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType[text()="natural gas"]]'>
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="natural gas"]/h:FixedCharge) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="natural gas"]/FixedCharge</sch:assert>
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="natural gas"]/h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="natural gas"]/MarginalRate</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[UtilityRate=PropaneAndFuelOil]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType[text()="propane" or h:FuelType="fuel oil"]]'>
-    <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="propane"]/h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="propane"]/MarginalRate</sch:assert>
-    <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="fuel oil"]/h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="fuel oil"]/MarginalRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:FixedCharge) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FixedCharge</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MarginalRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[UtilityRate=OtherFuel]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType[text()="coal" or h:FuelType="wood" or h:FuelType="wood pellets"]]'>
-      <sch:assert role='ERROR' test='count(h:MarginalRate) = 1'>Expected 1 element(s) for xpath: MarginalRate</sch:assert>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType[text()="propane" or h:FuelType="fuel oil" or text()="coal" or h:FuelType="wood" or h:FuelType="wood pellets"]]'>
+      <sch:assert role='ERROR' test='count(h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MarginalRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 
