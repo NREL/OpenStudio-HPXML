@@ -2137,17 +2137,17 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-misc-bills-none.xml'].include? hpxml_file
     args.delete('utility_bill_scenario_names')
   elsif ['base-misc-bills-pv.xml'].include? hpxml_file
-    args['utility_bill_scenario_names'] = 'Net Metering, Feed-In Tariff'
-    args['utility_bill_electricity_fixed_charges'] = '12, 12'
-    args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12'
-    args['utility_bill_natural_gas_fixed_charges'] = '12, 12'
-    args['utility_bill_natural_gas_marginal_rates'] = '1.10, 1.10'
-    args['utility_bill_pv_compensation_types'] = "#{HPXML::PVCompensationTypeNetMetering}, #{HPXML::PVCompensationTypeFeedInTariff}"
-    args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = "#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}, NA"
-    args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA'
-    args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, 0.12'
-    args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::PVGridConnectionFeeUnitsDollarsPerkW}, #{HPXML::PVGridConnectionFeeUnitsDollars}"
-    args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 7.5'
+    args['utility_bill_scenario_names'] = 'Net Metering User-Specified, Net Metering Retail, Feed-In Tariff'
+    args['utility_bill_electricity_fixed_charges'] = '10, 10, 10'
+    args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12, 0.12'
+    args['utility_bill_natural_gas_fixed_charges'] = '11, 11, 11'
+    args['utility_bill_natural_gas_marginal_rates'] = '1.10, 1.10, 1.10'
+    args['utility_bill_pv_compensation_types'] = "#{HPXML::PVCompensationTypeNetMetering}, #{HPXML::PVCompensationTypeNetMetering}, #{HPXML::PVCompensationTypeFeedInTariff}"
+    args['utility_bill_pv_net_metering_annual_excess_sellback_rate_types'] = "#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}, #{HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost}, NA"
+    args['utility_bill_pv_net_metering_annual_excess_sellback_rates'] = '0.035, NA, NA'
+    args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, NA, 0.13'
+    args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::PVGridConnectionFeeUnitsDollarsPerkW}, #{HPXML::PVGridConnectionFeeUnitsDollarsPerkW}, #{HPXML::PVGridConnectionFeeUnitsDollars}"
+    args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 2.5, 7.5'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')

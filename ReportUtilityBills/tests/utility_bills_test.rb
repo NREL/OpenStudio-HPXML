@@ -85,7 +85,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
-  def test_simple_calculations_pv_1kW
+  def test_simple_calculations_pv_1kW_net_metering_user_specified_excess_rate
     fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -100,7 +100,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
-  def test_simple_calculations_pv_10kW
+  def test_simple_calculations_pv_10kW_net_metering_user_specified_excess_rate
     fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -115,7 +115,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
-  def test_simple_calculations_pv_10kW_retail
+  def test_simple_calculations_pv_10kW_net_metering_retail_excess_rate
     @hpxml.header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
