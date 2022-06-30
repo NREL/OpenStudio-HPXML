@@ -2137,6 +2137,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-misc-bills-none.xml'].include? hpxml_file
     args.delete('utility_bill_scenario_names')
   elsif ['base-misc-bills-pv.xml'].include? hpxml_file
+    args['pv_system_max_power_output'] = 10000 # Ensure there is excess annual PV production
     args['utility_bill_scenario_names'] = 'Net Metering w/ Wholesale Excess Rate, Net Metering w/ Retail Excess Rate, Feed-In Tariff'
     args['utility_bill_electricity_fixed_charges'] = '10, 10, 10'
     args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12, 0.12'
