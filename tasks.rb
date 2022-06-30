@@ -2137,7 +2137,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-misc-bills-none.xml'].include? hpxml_file
     args.delete('utility_bill_scenario_names')
   elsif ['base-misc-bills-pv.xml'].include? hpxml_file
-    args['utility_bill_scenario_names'] = 'Net Metering User-Specified, Net Metering Retail, Feed-In Tariff'
+    args['utility_bill_scenario_names'] = 'Net Metering w/ Wholesale Excess Rate, Net Metering w/ Retail Excess Rate, Feed-In Tariff'
     args['utility_bill_electricity_fixed_charges'] = '10, 10, 10'
     args['utility_bill_electricity_marginal_rates'] = '0.12, 0.12, 0.12'
     args['utility_bill_natural_gas_fixed_charges'] = '11, 11, 11'

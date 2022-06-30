@@ -243,8 +243,8 @@ class HPXML < Object
   PlugLoadTypeWellPump = 'well pump'
   PVAnnualExcessSellbackRateTypeRetailElectricityCost = 'Retail Electricity Cost'
   PVAnnualExcessSellbackRateTypeUserSpecified = 'User-Specified'
-  PVCompensationTypeFeedInTariff = 'Feed-In Tariff'
-  PVCompensationTypeNetMetering = 'Net Metering'
+  PVCompensationTypeFeedInTariff = 'FeedInTariff'
+  PVCompensationTypeNetMetering = 'NetMetering'
   PVGridConnectionFeeUnitsDollars = '$'
   PVGridConnectionFeeUnitsDollarsPerkW = '$/kW'
   PVModuleTypePremium = 'premium'
@@ -1232,14 +1232,15 @@ class HPXML < Object
       end
       if not @pv_compensation_type.nil?
         pv = XMLHelper.add_element(utility_bill_scenario, 'PVCompensation')
-        XMLHelper.add_element(pv, 'CompensationType', @pv_compensation_type, :string, pv_compensation_type_isdefaulted)
+        pc_compensation_type = XMLHelper.add_element(pv, 'CompensationType')
+        pv_compensation_type_el = XMLHelper.add_element(pc_compensation_type, @pv_compensation_type, nil, nil, pv_compensation_type_isdefaulted)
         if @pv_compensation_type == HPXML::PVCompensationTypeNetMetering
-          XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRateType', @pv_net_metering_annual_excess_sellback_rate_type, :string, pv_net_metering_annual_excess_sellback_rate_type_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate_type.nil?
+          XMLHelper.add_element(pv_compensation_type_el, 'AnnualExcessSellbackRateType', @pv_net_metering_annual_excess_sellback_rate_type, :string, pv_net_metering_annual_excess_sellback_rate_type_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate_type.nil?
           if @pv_net_metering_annual_excess_sellback_rate_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
-            XMLHelper.add_element(pv, 'NetMeteringAnnualExcessSellbackRate', @pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
+            XMLHelper.add_element(pv_compensation_type_el, 'AnnualExcessSellbackRate', @pv_net_metering_annual_excess_sellback_rate, :float, pv_net_metering_annual_excess_sellback_rate_isdefaulted) unless @pv_net_metering_annual_excess_sellback_rate.nil?
           end
         elsif @pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
-          XMLHelper.add_element(pv, 'FeedInTariffRate', @pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
+          XMLHelper.add_element(pv_compensation_type_el, 'FeedInTariffRate', @pv_feed_in_tariff_rate, :float, pv_feed_in_tariff_rate_isdefaulted) unless @pv_feed_in_tariff_rate.nil?
         end
         if not @pv_monthly_grid_connection_fee_dollars_per_kw.nil?
           monthly_grid_connection_fee = XMLHelper.add_element(pv, 'MonthlyGridConnectionFee')
@@ -1272,10 +1273,15 @@ class HPXML < Object
       @wood_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodCord}']/MarginalRate", :float)
       @wood_pellets_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodPellets}']/FixedCharge", :float)
       @wood_pellets_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeWoodPellets}']/MarginalRate", :float)
-      @pv_compensation_type = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/CompensationType', :string)
-      @pv_net_metering_annual_excess_sellback_rate_type = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/NetMeteringAnnualExcessSellbackRateType', :string)
-      @pv_net_metering_annual_excess_sellback_rate = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/NetMeteringAnnualExcessSellbackRate', :float)
-      @pv_feed_in_tariff_rate = XMLHelper.get_value(utility_bill_scenario, 'PVCompensation/FeedInTariffRate', :float)
+      @pv_compensation_type = XMLHelper.get_child_name(utility_bill_scenario, 'PVCompensation/CompensationType')
+      if @pv_compensation_type == HPXML::PVCompensationTypeNetMetering
+        @pv_net_metering_annual_excess_sellback_rate_type = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/CompensationType/#{HPXML::PVCompensationTypeNetMetering}/AnnualExcessSellbackRateType", :string)
+        if @pv_net_metering_annual_excess_sellback_rate_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
+          @pv_net_metering_annual_excess_sellback_rate = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/CompensationType/#{HPXML::PVCompensationTypeNetMetering}/AnnualExcessSellbackRate", :float)
+        end
+      elsif @pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
+        @pv_feed_in_tariff_rate = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/CompensationType/#{HPXML::PVCompensationTypeFeedInTariff}/FeedInTariffRate", :float)
+      end
       @pv_monthly_grid_connection_fee_dollars_per_kw = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollarsPerkW}']/Value", :float)
       @pv_monthly_grid_connection_fee_dollars = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollars}']/Value", :float)
     end

@@ -16,7 +16,7 @@
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Net Metering User-Specified</Name>
+          <Name>Net Metering w/ Wholesale Excess Rate</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
             <FixedCharge>10.0</FixedCharge>
@@ -28,9 +28,12 @@
             <MarginalRate>1.1</MarginalRate>
           </UtilityRate>
           <PVCompensation>
-            <CompensationType>Net Metering</CompensationType>
-            <NetMeteringAnnualExcessSellbackRateType>User-Specified</NetMeteringAnnualExcessSellbackRateType>
-            <NetMeteringAnnualExcessSellbackRate>0.035</NetMeteringAnnualExcessSellbackRate>
+            <CompensationType>
+              <NetMetering>
+                <AnnualExcessSellbackRateType>User-Specified</AnnualExcessSellbackRateType>
+                <AnnualExcessSellbackRate>0.035</AnnualExcessSellbackRate>
+              </NetMetering>
+            </CompensationType>
             <MonthlyGridConnectionFee>
               <Units>$/kW</Units>
               <Value>2.5</Value>
@@ -38,7 +41,7 @@
           </PVCompensation>
         </UtilityBillScenario>
         <UtilityBillScenario>
-          <Name>Net Metering Retail</Name>
+          <Name>Net Metering w/ Retail Excess Rate</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
             <FixedCharge>10.0</FixedCharge>
@@ -50,8 +53,11 @@
             <MarginalRate>1.1</MarginalRate>
           </UtilityRate>
           <PVCompensation>
-            <CompensationType>Net Metering</CompensationType>
-            <NetMeteringAnnualExcessSellbackRateType>Retail Electricity Cost</NetMeteringAnnualExcessSellbackRateType>
+            <CompensationType>
+              <NetMetering>
+                <AnnualExcessSellbackRateType>Retail Electricity Cost</AnnualExcessSellbackRateType>
+              </NetMetering>
+            </CompensationType>
             <MonthlyGridConnectionFee>
               <Units>$/kW</Units>
               <Value>2.5</Value>
@@ -71,8 +77,11 @@
             <MarginalRate>1.1</MarginalRate>
           </UtilityRate>
           <PVCompensation>
-            <CompensationType>Feed-In Tariff</CompensationType>
-            <FeedInTariffRate>0.13</FeedInTariffRate>
+            <CompensationType>
+              <FeedInTariff>
+                <FeedInTariffRate>0.13</FeedInTariffRate>
+              </FeedInTariff>
+            </CompensationType>
             <MonthlyGridConnectionFee>
               <Units>$</Units>
               <Value>7.5</Value>
