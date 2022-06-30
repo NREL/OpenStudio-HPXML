@@ -245,8 +245,6 @@ class HPXML < Object
   PVAnnualExcessSellbackRateTypeUserSpecified = 'User-Specified'
   PVCompensationTypeFeedInTariff = 'FeedInTariff'
   PVCompensationTypeNetMetering = 'NetMetering'
-  PVGridConnectionFeeUnitsDollars = '$'
-  PVGridConnectionFeeUnitsDollarsPerkW = '$/kW'
   PVModuleTypePremium = 'premium'
   PVModuleTypeStandard = 'standard'
   PVModuleTypeThinFilm = 'thin film'
@@ -306,6 +304,8 @@ class HPXML < Object
   UnitsCFM25 = 'CFM25'
   UnitsCFM50 = 'CFM50'
   UnitsCOP = 'COP'
+  UnitsDollars = '$'
+  UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
   UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
@@ -1244,12 +1244,12 @@ class HPXML < Object
         end
         if not @pv_monthly_grid_connection_fee_dollars_per_kw.nil?
           monthly_grid_connection_fee = XMLHelper.add_element(pv, 'MonthlyGridConnectionFee')
-          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', PVGridConnectionFeeUnitsDollarsPerkW, :string)
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', UnitsDollarsPerkW, :string)
           XMLHelper.add_element(monthly_grid_connection_fee, 'Value', @pv_monthly_grid_connection_fee_dollars_per_kw, :float, pv_monthly_grid_connection_fee_dollars_per_kw_isdefaulted)
         end
         if not @pv_monthly_grid_connection_fee_dollars.nil?
           monthly_grid_connection_fee = XMLHelper.add_element(pv, 'MonthlyGridConnectionFee')
-          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', PVGridConnectionFeeUnitsDollars, :string)
+          XMLHelper.add_element(monthly_grid_connection_fee, 'Units', UnitsDollars, :string)
           XMLHelper.add_element(monthly_grid_connection_fee, 'Value', @pv_monthly_grid_connection_fee_dollars, :float, pv_monthly_grid_connection_fee_dollars_isdefaulted)
         end
       end
@@ -1282,8 +1282,8 @@ class HPXML < Object
       elsif @pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
         @pv_feed_in_tariff_rate = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/CompensationType/#{HPXML::PVCompensationTypeFeedInTariff}/FeedInTariffRate", :float)
       end
-      @pv_monthly_grid_connection_fee_dollars_per_kw = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollarsPerkW}']/Value", :float)
-      @pv_monthly_grid_connection_fee_dollars = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{PVGridConnectionFeeUnitsDollars}']/Value", :float)
+      @pv_monthly_grid_connection_fee_dollars_per_kw = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{UnitsDollarsPerkW}']/Value", :float)
+      @pv_monthly_grid_connection_fee_dollars = XMLHelper.get_value(utility_bill_scenario, "PVCompensation/MonthlyGridConnectionFee[Units='#{UnitsDollars}']/Value", :float)
     end
   end
 
@@ -6571,7 +6571,7 @@ class HPXML < Object
     return errors
   end
 
-  def self.check_fuel(hpxml, fuel)
+  def self.has_fuel(hpxml, fuel)
     ['HeatingSystemFuel',
      'CoolingSystemFuel',
      'HeatPumpFuel',

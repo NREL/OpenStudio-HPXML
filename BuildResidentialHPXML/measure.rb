@@ -3662,9 +3662,9 @@ class HPXMLFile
           pv_net_metering_annual_excess_sellback_rate = nil
         end
 
-        if pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollarsPerkW
+        if pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollarsPerkW
           pv_monthly_grid_connection_fee_dollars_per_kw = Float(pv_monthly_grid_connection_fee) rescue nil
-        elsif pv_monthly_grid_connection_fee_unit == HPXML::PVGridConnectionFeeUnitsDollars
+        elsif pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollars
           pv_monthly_grid_connection_fee_dollars = Float(pv_monthly_grid_connection_fee) rescue nil
         end
 
