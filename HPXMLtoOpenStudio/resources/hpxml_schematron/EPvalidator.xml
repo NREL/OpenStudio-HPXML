@@ -101,7 +101,7 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario'>
       <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert>
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="electricity"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="electricity"]</sch:assert> <!-- See [UtilityRate=Electricity] -->
-      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="natural gas"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="natural gas"]</sch:assert> <!-- See [UtilityRate=NaturalGas] -->
+      <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="natural gas"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="natural gas"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="propane"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="propane"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="fuel oil"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="fuel oil"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
       <sch:assert role='ERROR' test='count(h:UtilityRate[h:FuelType="coal"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UtilityRate[FuelType="coal"]</sch:assert> <!-- See [UtilityRate=OtherFuel] -->
