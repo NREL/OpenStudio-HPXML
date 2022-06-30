@@ -325,7 +325,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_error_user_specified_but_no_rates
     skip
     @args_hash['electricity_bill_type'] = 'Detailed'
-    @args_hash['electricity_utility_rate_type'] = HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
     bills_csv = _test_measure(expected_errors: expected_errors)
     assert(!File.exist?(bills_csv))

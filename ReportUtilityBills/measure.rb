@@ -62,7 +62,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified && !args[:electricity_utility_rate_user_specified].is_initialized
+    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
       warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
     end
 
