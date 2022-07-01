@@ -330,6 +330,8 @@ Electricity Rates
 
 For each scenario, electricity rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
 
+**Simple**
+
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
@@ -339,6 +341,18 @@ For each scenario, electricity rates can be optionally entered as an ``/HPXML/So
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+
+**Detailed**
+
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  Element                           Type      Units    Constraints  Required  Default   Notes
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ``FuelType``                      string             electricity  Yes                 Fuel type
+  ``TariffFilePath``                string             See [#]_     No                  Tariff file
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+
+  .. [#] TariffFilePath must point to a JSON file.
+         Sources of tariff files include TODO.
 
 Fuel Rates
 ~~~~~~~~~~

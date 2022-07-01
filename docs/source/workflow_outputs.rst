@@ -493,9 +493,6 @@ Utility Bill Outputs
 
 OpenStudio-HPXML can optionally generate a utility bills output file.
 The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
-Simple bill calculations define monthly fixed charges and marginal rates to determine how utility bills are calculated.
-Detailed bill calculations define either a tariff from the OpenEI Utility Rate Database (URDB), or a real-time pricing rate.
-Both bill calculation types also include PV compensation types/rates/fees.
 
 Results for each utility bill scenario defined in the HPXML file are listed as shown below.
 Note that rows below with values of zero will be excluded.

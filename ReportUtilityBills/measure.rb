@@ -9,6 +9,7 @@ require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/location.rb'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
 require_relative '../HPXMLtoOpenStudio/resources/output.rb'
+require_relative '../HPXMLtoOpenStudio/resources/util'
 
 # start the measure
 class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
@@ -187,13 +188,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     output_path = File.join(output_dir, "results_bills.#{output_format}")
     FileUtils.rm(output_path) if File.exist?(output_path)
 
-    # Setup fuel outputs
-    fuels = setup_fuel_outputs()
-
-    # Get outputs
-    get_outputs(fuels)
-
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      # Setup fuel outputs
+      fuels = setup_fuel_outputs()
+
+      # Get outputs
+      get_outputs(fuels, utility_bill_scenario)
+
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
@@ -485,7 +486,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return utility_rates, utility_bills
   end
 
-  def get_outputs(fuels)
+  def get_outputs(fuels, utility_bill_scenario)
     fuels.each do |(fuel_type, _is_production), fuel|
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
       unit_conv /= 139.0 if fuel_type == FT::Oil
@@ -493,7 +494,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       timeseries_freq = 'monthly'
       if fuel_type == FT::Elec
-        timeseries_freq = timeseries_frequency(@hpxml.header.utility_bill_scenarios)
+        timeseries_freq = 'hourly' if !utility_bill_scenario.elec_tariff_filepath.nil?
       end
       timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
       fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)

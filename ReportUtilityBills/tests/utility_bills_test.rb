@@ -88,8 +88,8 @@ class ReportUtilityBillsTest < MiniTest::Test
   # Simple Calculations
 
   def test_simple_calculations_pv_none
-    fuels = _load_timeseries(fuels, '../tests/PV_None.csv')
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -100,9 +100,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_1kW_net_metering_user_specified_excess_rate
-    fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -114,9 +114,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_pv_10kW_net_metering_user_specified_excess_rate
-    fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -129,9 +129,9 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_pv_10kW_net_metering_retail_excess_rate
     @hpxml.header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
-    fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -145,9 +145,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_pv_1kW_feed_in_tariff
     @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = HPXML::PVCompensationTypeFeedInTariff
     @hpxml.header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
-    fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -161,9 +161,9 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_pv_10kW_feed_in_tariff
     @hpxml.header.utility_bill_scenarios[-1].pv_compensation_type = HPXML::PVCompensationTypeFeedInTariff
     @hpxml.header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
-    fuels = _load_timeseries(fuels, '../tests/PV_10kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -176,9 +176,9 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars_per_kW
     @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars_per_kw = 2.50
-    fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -192,9 +192,9 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_pv_1kW_grid_fee_dollars
     @hpxml.header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars = 7.50
-    fuels = _load_timeseries(fuels, '../tests/PV_1kW.csv')
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       assert(File.exist?(@bills_csv))
@@ -412,17 +412,584 @@ class ReportUtilityBillsTest < MiniTest::Test
   # Tiered
 
   def test_detailed_calculations_sample_tiered_pv_none
+    @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json'
+    @hpxml.header.utility_bill_scenarios[-1].elec_fixed_charge = nil
+    @hpxml.header.utility_bill_scenarios[-1].elec_marginal_rate = nil
+    @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
+      utility_rates, utility_bills = @measure.setup_utility_outputs()
+      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      assert(File.exist?(@bills_csv))
+      actual_bills = _get_actual_bills(@bills_csv)
+      @expected_bills['Test: Electricity: Fixed ($)'] = 108
+      @expected_bills['Test: Electricity: Marginal ($)'] = 580
+      expected_bills = _get_expected_bills(@expected_bills)
+      _check_bills(expected_bills, actual_bills)
+    end
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_1kW
+    skip
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -190
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_10kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -580
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_10kW_retail
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -1443
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_1kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -178
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_10kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -1785
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_1kW_grid_fee_dollars_per_kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    @args_hash['pv_monthly_grid_connection_fee'] = 2.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 138
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -190
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_pv_1kW_grid_fee_dollars
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Rate'
+    @args_hash['pv_grid_connection_fee_units'] = '$'
+    @args_hash['pv_monthly_grid_connection_fee'] = 7.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 198
+    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: PV Credit ($)'] = -190
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  # Time-of-Use
+
+  def test_detailed_calculations_sample_tou_pv_none
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
     fuels, utility_rates, utility_bills = @measure.setup_outputs()
     _load_timeseries(fuels, '../tests/PV_None.csv')
     _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
     assert(File.exist?(@measure_bills_csv))
     actual_bills = _get_actual_bills(@measure_bills_csv)
     @expected_bills['Electricity: Fixed ($)'] = 108
-    @expected_bills['Electricity: Marginal ($)'] = 580
+    @expected_bills['Electricity: Marginal ($)'] = 393
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_1kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -112
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_10kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -393
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_10kW_retail
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -1127
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_1kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -178
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_10kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -1785
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_1kW_grid_fee_dollars_per_kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    @args_hash['pv_monthly_grid_connection_fee'] = 2.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 138
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -112
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tou_pv_1kW_grid_fee_dollars
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Time-of-Use Rate'
+    @args_hash['pv_grid_connection_fee_units'] = '$'
+    @args_hash['pv_monthly_grid_connection_fee'] = 7.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 198
+    @expected_bills['Electricity: Marginal ($)'] = 393
+    @expected_bills['Electricity: PV Credit ($)'] = -112
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  # Tiered and Time-of-Use
+
+  def test_detailed_calculations_sample_tiered_tou_pv_none
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_1kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -108
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_10kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -377
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_10kW_retail
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -377
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_1kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -178
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_10kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -1785
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_1kW_grid_fee_dollars_per_kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    @args_hash['pv_monthly_grid_connection_fee'] = 2.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 138
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -108
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_tiered_tou_pv_1kW_grid_fee_dollars
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Tiered Time-of-Use Rate'
+    @args_hash['pv_grid_connection_fee_units'] = '$'
+    @args_hash['pv_monthly_grid_connection_fee'] = 7.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 198
+    @expected_bills['Electricity: Marginal ($)'] = 377
+    @expected_bills['Electricity: PV Credit ($)'] = -108
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  # Real-time Pricing
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_none
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_None.csv')
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [])
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_1kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -106 # 107
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_10kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -641 # 642
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_10kW_retail
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    @args_hash['pv_annual_excess_sellback_rate_type'] = 'Retail Electricity Cost'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -1060 # 1075
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_1kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -178
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_10kW_feed_in_tariff
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_10kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 108
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -1785
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_1kW_grid_fee_dollars_per_kW
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    @args_hash['pv_monthly_grid_connection_fee'] = 2.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 138
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -106 # 107
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  def test_detailed_calculations_sample_real_time_pricing_pv_1kW_grid_fee_dollars
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'Sample Real-Time Pricing Rate'
+    @args_hash['pv_grid_connection_fee_units'] = '$'
+    @args_hash['pv_monthly_grid_connection_fee'] = 7.50
+    fuels, utility_rates, utility_bills = @measure.setup_outputs()
+    _load_timeseries(fuels, '../tests/PV_1kW.csv')
+    @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
+    _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems)
+    assert(File.exist?(@measure_bills_csv))
+    actual_bills = _get_actual_bills(@measure_bills_csv)
+    @expected_bills['Electricity: Fixed ($)'] = 198
+    @expected_bills['Electricity: Marginal ($)'] = 354
+    @expected_bills['Electricity: PV Credit ($)'] = -106 # 107
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+  end
+
+  # Workflow Tests
+
+  def test_workflow_detailed_calculations
+    skip
+    @args_hash['electricity_bill_type'] = 'Detailed'
+    @args_hash['electricity_utility_rate_type'] = 'User-Specified'
+    @args_hash['electricity_utility_rate_user_specified'] = '../../ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json'
+    _test_workflow()
+    assert(File.exist?(@workflow_bills_csv))
+    actual_bills = _get_actual_bills(@workflow_bills_csv)
+    assert_operator(actual_bills['Electricity: Total ($)'], :>, 0)
   end
 
   def _get_expected_bills(expected_bills)
@@ -459,7 +1026,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _load_timeseries(fuels, path)
+  def _load_timeseries(path, utility_bill_scenario)
     fuels = @measure.setup_fuel_outputs()
 
     columns = CSV.read(File.join(File.dirname(__FILE__), path)).transpose
@@ -498,7 +1065,9 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     # Convert hourly data to monthly data
     num_days_in_month = Constants.NumDaysInMonths(2002) # Arbitrary non-leap year
-    fuels.values.each do |fuel|
+    fuels.each do |(fuel_type, _is_production), fuel|
+      next unless fuel_type != FT::Elec || utility_bill_scenario.elec_tariff_filepath.nil?
+
       ts_data = fuel.timeseries.dup
       fuel.timeseries = []
       start_day = 0

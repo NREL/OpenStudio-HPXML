@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>ecd54808-49d3-42ff-9ab9-eb87475105e6</version_id>
-  <version_modified>20220701T170646Z</version_modified>
+  <version_id>261ca9bb-6a93-4d39-b9e2-b869e15cd835</version_id>
+  <version_modified>20220701T181957Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -145,12 +145,6 @@
       <checksum>535D428A</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AE8A9297</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -159,7 +153,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C1AE6203</checksum>
+      <checksum>AFCA7362</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6A0F4578</checksum>
     </file>
   </files>
 </measure>
