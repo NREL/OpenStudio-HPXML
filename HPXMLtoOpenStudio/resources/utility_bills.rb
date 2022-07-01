@@ -147,10 +147,10 @@ class UtilityBills
   end
 end
 
-if ARGV.size == 6
-  # Usage: openstudio utility_bills.rb elec_state elec_fixed_charge elec_marginal_rate gas_state gas_fixed_charge gas_marginal_rate
-  # E.g., if requesting state marginal/average rate based on user-specified fixed charge: openstudio utility_bills.rb CO 12.0 0.0 CO 12.0 0.0
-  # E.g., if requesting average rate based on user-specified fixed charge and marginal rate: openstudio utility_bills.rb CO 12.0 0.12 CO 12.0 1.10
+if ARGV.size == 8
+  # Usage: openstudio utility_bills.rb elec_state elec_fixed_charge elec_marginal_rate gas_state gas_fixed_charge gas_marginal_rate oil_state propane_state
+  # E.g., if requesting state marginal/average rate based on user-specified fixed charge: openstudio utility_bills.rb CO 12.0 0.0 CO 12.0 0.0 CO CO
+  # E.g., if requesting average rate based on user-specified fixed charge and marginal rate: openstudio utility_bills.rb CO 12.0 0.12 CO 12.0 1.10 CO CO
   require_relative 'hpxml'
   require_relative 'constants'
   require 'csv'
@@ -162,6 +162,8 @@ if ARGV.size == 6
   gas_state = ARGV[3]
   gas_fixed_charge = Float(ARGV[4])
   gas_marginal_rate = Float(ARGV[5])
+  oil_state = ARGV[6]
+  propane_state = ARGV[7]
 
   elec_marginal_rate = nil if elec_marginal_rate <= 0
   gas_marginal_rate = nil if gas_marginal_rate <= 0
@@ -169,9 +171,15 @@ if ARGV.size == 6
   gas_state = 'US' if Constants.StateCodesMap[gas_state].nil?
 
   { HPXML::FuelTypeElectricity => [elec_state, elec_fixed_charge, elec_marginal_rate],
-    HPXML::FuelTypeNaturalGas => [gas_state, gas_fixed_charge, gas_marginal_rate] }.each do |fuel_type, values|
+    HPXML::FuelTypeNaturalGas => [gas_state, gas_fixed_charge, gas_marginal_rate],
+    HPXML::FuelTypeOil => [oil_state, 0.0, nil],
+    HPXML::FuelTypePropane => [propane_state, 0.0, nil] }.each do |fuel_type, values|
     state_code, fixed_charge, marginal_rate = values
     marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate)
-    puts "#{fuel_type} #{marginal_rate.round(4)} #{average_rate.round(4)}"
+    if (not marginal_rate.nil?) && average_rate.nil?
+      puts "#{fuel_type} #{marginal_rate.round(4)} #{marginal_rate.round(4)}"
+    else
+      puts "#{fuel_type} #{marginal_rate.round(4)} #{average_rate.round(4)}"
+    end
   end
 end
