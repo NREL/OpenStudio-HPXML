@@ -191,6 +191,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Get outputs
       get_outputs(fuels, utility_bill_scenario)
 
+      # Setup utility outputs
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
@@ -290,7 +291,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def get_utility_rates(hpxml_path, fuels, utility_rates, _args, bill_scenario, pv_systems)
+  def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
@@ -376,7 +377,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings
   end
 
-  def get_utility_bills(fuels, utility_rates, utility_bills, _args, utility_bill_scenario, header)
+  def get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
     net_elec = 0
 
     # Simple
