@@ -2,7 +2,15 @@
 
 class UtilityBills
   def self.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
-    state_name = Constants.StateCodesMap[state_code]
+    if state_code == 'US'
+      if fuel_type == HPXML::FuelTypeElectricity
+        state_name = 'United States'
+      else
+        state_name = 'U.S.'
+      end
+    else
+      state_name = Constants.StateCodesMap[state_code]
+    end
     return if state_name.nil?
 
     average_rate = nil
@@ -139,27 +147,30 @@ class UtilityBills
   end
 end
 
-if ARGV.size == 5
-  # Usage: openstudio utility_bills.rb state_code elec_fixed_charge gas_fixed_charge elec_marginal_rate gas_marginal_rate
-  # E.g., if requesting state marginal/average rate based on user-specified fixed charge: openstudio utility_bills.rb CO 12.0 12.0 0.0 0.0
-  # E.g., if requesting average rate based on user-specified fixed charge and marginal rate: openstudio utility_bills.rb CO 12.0 12.0 0.12 1.10
+if ARGV.size == 6
+  # Usage: openstudio utility_bills.rb elec_state elec_fixed_charge elec_marginal_rate gas_state gas_fixed_charge gas_marginal_rate
+  # E.g., if requesting state marginal/average rate based on user-specified fixed charge: openstudio utility_bills.rb CO 12.0 0.0 CO 12.0 0.0
+  # E.g., if requesting average rate based on user-specified fixed charge and marginal rate: openstudio utility_bills.rb CO 12.0 0.12 CO 12.0 1.10
   require_relative 'hpxml'
   require_relative 'constants'
   require 'csv'
+  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-  state_code = ARGV[0]
+  elec_state = ARGV[0]
   elec_fixed_charge = Float(ARGV[1])
-  gas_fixed_charge = Float(ARGV[2])
-  elec_marginal_rate = Float(ARGV[3])
-  gas_marginal_rate = Float(ARGV[4])
+  elec_marginal_rate = Float(ARGV[2])
+  gas_state = ARGV[3]
+  gas_fixed_charge = Float(ARGV[4])
+  gas_marginal_rate = Float(ARGV[5])
 
   elec_marginal_rate = nil if elec_marginal_rate <= 0
   gas_marginal_rate = nil if gas_marginal_rate <= 0
+  elec_state = 'US' if Constants.StateCodesMap[elec_state].nil?
+  gas_state = 'US' if Constants.StateCodesMap[gas_state].nil?
 
-  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-  { HPXML::FuelTypeElectricity => [elec_fixed_charge, elec_marginal_rate],
-    HPXML::FuelTypeNaturalGas => [gas_fixed_charge, gas_marginal_rate] }.each do |fuel_type, values|
-    fixed_charge, marginal_rate = values
+  { HPXML::FuelTypeElectricity => [elec_state, elec_fixed_charge, elec_marginal_rate],
+    HPXML::FuelTypeNaturalGas => [gas_state, gas_fixed_charge, gas_marginal_rate] }.each do |fuel_type, values|
+    state_code, fixed_charge, marginal_rate = values
     marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate)
     puts "#{fuel_type} #{marginal_rate.round(4)} #{average_rate.round(4)}"
   end

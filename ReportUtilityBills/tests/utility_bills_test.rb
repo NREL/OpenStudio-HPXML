@@ -280,6 +280,12 @@ class ReportUtilityBillsTest < MiniTest::Test
       end
     end
 
+    # Check that we can successfully look up "auto" rates for the US too.
+    fuel_types.each do |fuel_type|
+      flatratebuy, _ = UtilityBills.get_rates_from_eia_data(nil, 'US', fuel_type, 0)
+      refute_nil(flatratebuy)
+    end
+
     # Check that any other state code is gracefully handled (no error)
     fuel_types.each do |fuel_type|
       UtilityBills.get_rates_from_eia_data(nil, 'XX', fuel_type, 0)
@@ -360,30 +366,36 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_call_from_cli
     # This is used by BEopt v3
 
-    state_code = 'CO'
-    elec_fixed_charge = 12.0
-    gas_fixed_charge = 12.0
-
     # Test retrieval of marginal/average rates for user-specified fixed charges
+    elec_state = 'CO'
+    elec_fixed_charge = 12.0
     elec_marginal_rate = 0.0
+    gas_state = 'US'
+    gas_fixed_charge = 12.0
     gas_marginal_rate = 0.0
     utility_bills_rb = File.join(File.dirname(__FILE__), '../../HPXMLtoOpenStudio/resources/utility_bills.rb')
-    io = IO.popen([OpenStudio.getOpenStudioCLI.to_s, utility_bills_rb, state_code,
-                   elec_fixed_charge.to_s, gas_fixed_charge.to_s, elec_marginal_rate.to_s, gas_marginal_rate.to_s])
+    io = IO.popen([OpenStudio.getOpenStudioCLI.to_s, utility_bills_rb,
+                   elec_state, elec_fixed_charge.to_s, elec_marginal_rate.to_s,
+                   gas_state, gas_fixed_charge.to_s, gas_marginal_rate.to_s])
     out_lines = io.read.split("\n")
     assert_equal(2, out_lines.size)
     assert_equal("#{HPXML::FuelTypeElectricity} 0.1136 0.1313", out_lines[0])
-    assert_equal("#{HPXML::FuelTypeNaturalGas} 0.717 0.8862", out_lines[1])
+    assert_equal("#{HPXML::FuelTypeNaturalGas} 0.9878 1.1803", out_lines[1])
 
     # Test retrieval of average rates for user-specified fixed charges and marginal rates
+    elec_state = 'US'
+    elec_fixed_charge = 12.0
     elec_marginal_rate = 0.12
+    gas_state = 'CO'
+    gas_fixed_charge = 12.0
     gas_marginal_rate = 0.8
     utility_bills_rb = File.join(File.dirname(__FILE__), '../../HPXMLtoOpenStudio/resources/utility_bills.rb')
-    io = IO.popen([OpenStudio.getOpenStudioCLI.to_s, utility_bills_rb, state_code,
-                   elec_fixed_charge.to_s, gas_fixed_charge.to_s, elec_marginal_rate.to_s, gas_marginal_rate.to_s])
+    io = IO.popen([OpenStudio.getOpenStudioCLI.to_s, utility_bills_rb,
+                   elec_state, elec_fixed_charge.to_s, elec_marginal_rate.to_s,
+                   gas_state, gas_fixed_charge.to_s, gas_marginal_rate.to_s])
     out_lines = io.read.split("\n")
     assert_equal(2, out_lines.size)
-    assert_equal("#{HPXML::FuelTypeElectricity} #{elec_marginal_rate} 0.1377", out_lines[0])
+    assert_equal("#{HPXML::FuelTypeElectricity} #{elec_marginal_rate} 0.133", out_lines[0])
     assert_equal("#{HPXML::FuelTypeNaturalGas} #{gas_marginal_rate} 0.9692", out_lines[1])
   end
 
