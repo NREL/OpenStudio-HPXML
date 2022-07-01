@@ -373,6 +373,7 @@ def create_hpxmls
     'base-misc-bills.xml' => 'base.xml',
     'base-misc-bills-none.xml' => 'base.xml',
     'base-misc-bills-pv.xml' => 'base-pv.xml',
+    'base-misc-bills-detailed.xml' => 'base-misc-bills-pv.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -410,6 +411,8 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
+    next if hpxml_file != 'base-misc-bills-detailed.xml'
+
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
@@ -2149,6 +2152,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, NA, 0.13'
     args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollars}"
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 2.5, 7.5'
+  elsif ['base-misc-bills-detailed.xml'].include? hpxml_file
+    args.delete('utility_bill_electricity_fixed_charges')
+    args.delete('utility_bill_electricity_marginal_rates')
+    args['utility_bill_electricity_filepaths'] = 'path1, path2, path3'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')

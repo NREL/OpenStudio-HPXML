@@ -1188,10 +1188,15 @@ class HPXML < Object
         self << UtilityBillScenario.new(@hpxml_object, utility_bill_scenario)
       end
     end
+
+    def has_detailed_rates
+      any? { |bill_scen| !bill_scen.elec_tariff_filepath.nil? }
+    end
   end
 
   class UtilityBillScenario < BaseElement
     ATTRS = [:name,
+             :elec_tariff_filepath,
              :elec_fixed_charge, :natural_gas_fixed_charge, :propane_fixed_charge, :fuel_oil_fixed_charge,
              :coal_fixed_charge, :wood_fixed_charge, :wood_pellets_fixed_charge,
              :elec_marginal_rate, :natural_gas_marginal_rate, :propane_marginal_rate, :fuel_oil_marginal_rate,
@@ -1215,6 +1220,11 @@ class HPXML < Object
       utility_bill_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'UtilityBillScenarios'])
       utility_bill_scenario = XMLHelper.add_element(utility_bill_scenarios, 'UtilityBillScenario')
       XMLHelper.add_element(utility_bill_scenario, 'Name', @name, :string) unless @name.nil?
+      if not @elec_tariff_filepath.nil?
+        utility_rate = XMLHelper.add_element(utility_bill_scenario, 'UtilityRate')
+        XMLHelper.add_element(utility_rate, 'FuelType', HPXML::FuelTypeElectricity, :string)
+        XMLHelper.add_element(utility_rate, 'TariffFilePath', @elec_tariff_filepath, :string)
+      end
       { HPXML::FuelTypeElectricity => [@elec_fixed_charge, @elec_fixed_charge_isdefaulted, @elec_marginal_rate, @elec_marginal_rate_isdefaulted],
         HPXML::FuelTypeNaturalGas => [@natural_gas_fixed_charge, @natural_gas_fixed_charge_isdefaulted, @natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
         HPXML::FuelTypePropane => [@propane_fixed_charge, @propane_fixed_charge_isdefaulted, @propane_marginal_rate, @propane_marginal_rate_isdefaulted],
@@ -1261,6 +1271,7 @@ class HPXML < Object
       @name = XMLHelper.get_value(utility_bill_scenario, 'Name', :string)
       @elec_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeElectricity}']/FixedCharge", :float)
       @elec_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeElectricity}']/MarginalRate", :float)
+      @elec_tariff_filepath = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeElectricity}']/TariffFilePath", :string)
       @natural_gas_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeNaturalGas}']/FixedCharge", :float)
       @natural_gas_marginal_rate = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypeNaturalGas}']/MarginalRate", :float)
       @propane_fixed_charge = XMLHelper.get_value(utility_bill_scenario, "UtilityRate[FuelType='#{HPXML::FuelTypePropane}']/FixedCharge", :float)

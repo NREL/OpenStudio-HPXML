@@ -45,25 +45,24 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  def timeseries_frequency
+  def timeseries_frequency(utility_bill_scenarios)
     # Use monthly for fossil fuels and simple electric rates
     # Use hourly for detailed electric rates (URDB tariff or real time pricing)
-    return 'monthly'
+    if !utility_bill_scenarios.has_detailed_rates
+      return 'monthly'
+    else
+      return 'hourly'
+    end
   end
 
-  def check_for_warnings(args, pv_systems)
+  def check_for_warnings(_args, utility_bill_scenarios, pv_systems)
     warnings = []
 
-    # Require full annual simulation
+    # Require full annual simulation if 'Detailed' or has PV
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      if args[:electricity_bill_type] != 'Simple' || pv_systems.size > 0
+      if utility_bill_scenarios.has_detailed_rates || pv_systems.size > 0
         warnings << 'A full annual simulation is required for calculating detailed utility bills.'
       end
-    end
-
-    # Require user-specified utility rate if 'User-Specified'
-    if args[:electricity_bill_type] == 'Detailed' && args[:electricity_utility_rate_type].get == 'User-Specified' && !args[:electricity_utility_rate_user_specified].is_initialized
-      warnings << 'Must specify a utility rate json path when choosing User-Specified utility rate type.'
     end
 
     # Require not DSE
@@ -111,21 +110,24 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(@model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings = check_for_warnings(args, @hpxml.pv_systems)
+    warnings = check_for_warnings(args, @hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
     return result if !warnings.empty?
 
     fuels = setup_fuel_outputs()
 
     # Fuel outputs
-    fuels.values.each do |fuel|
+    fuels.each do |(fuel_type, _is_production), fuel|
       fuel.meters.each do |meter|
-        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency};").get
+        if fuel_type == FT::Elec
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency(@hpxml.header.utility_bill_scenarios)};").get
+        else
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
+        end
       end
     end
 
@@ -160,7 +162,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-    args[:electricity_bill_type] = 'Simple' # TODO: support Detailed
     output_format = args[:output_format].get
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
@@ -177,7 +178,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     return true if @hpxml.header.utility_bill_scenarios.empty?
 
-    warnings = check_for_warnings(args, @hpxml.pv_systems)
+    warnings = check_for_warnings(args, @hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
     if register_warnings(runner, warnings)
       return true
     end
@@ -189,9 +190,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Setup fuel outputs
     fuels = setup_fuel_outputs()
 
-    # Get timestamps
-    @timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
-
     # Get outputs
     get_outputs(fuels)
 
@@ -199,16 +197,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      warnings = get_utility_rates(fuels, utility_rates, args, utility_bill_scenario, @hpxml.pv_systems)
+      warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, args, utility_bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
         return true
       end
 
       # Calculate utility bills
-      net_elec = get_utility_bills(fuels, utility_rates, utility_bills, args, @hpxml.header)
-
-      # Annual true up
-      annual_true_up(utility_rates, utility_bills, net_elec)
+      get_utility_bills(fuels, utility_rates, utility_bills, args, utility_bill_scenario, @hpxml.header)
 
       # Calculate annual bills
       get_annual_bills(utility_bills)
@@ -298,54 +293,42 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def get_utility_rates(fuels, utility_rates, args, bill_scenario, pv_systems)
+  def get_utility_rates(hpxml_path, fuels, utility_rates, _args, bill_scenario, pv_systems)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
-        if args[:electricity_bill_type] == 'Simple'
+        if bill_scenario.elec_tariff_filepath.nil?
           rate.fixedmonthlycharge = bill_scenario.elec_fixed_charge
           rate.flatratebuy = bill_scenario.elec_marginal_rate
-        elsif args[:electricity_bill_type] == 'Detailed'
-          if args[:electricity_utility_rate_type].get != 'Autoselect OpenEI'
-            if args[:electricity_utility_rate_type].get == 'User-Specified'
-              path = args[:electricity_utility_rate_user_specified].get
+        else
+          require 'json'
 
-              hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-              filepath = FilePath.check_path(path,
-                                             File.dirname(hpxml_path),
-                                             'Tariff File')
-            else # sample rates
-              custom_rates_folder = File.join(File.dirname(__FILE__), 'resources/Data/CustomRates')
-              custom_rate_file = "#{args[:electricity_utility_rate_type].get}.json"
-              filepath = File.join(custom_rates_folder, custom_rate_file)
-            end
+          filepath = FilePath.check_path(bill_scenario.elec_tariff_filepath,
+                                         File.dirname(hpxml_path),
+                                         'Tariff File')
 
-            fileread = File.read(filepath)
-            tariff = JSON.parse(fileread, symbolize_names: true)
-            tariff = tariff[:items][0]
+          tariff = JSON.parse(File.read(filepath), symbolize_names: true)
+          tariff = tariff[:items][0]
 
-            if tariff.keys.include?(:realtimepricing)
-              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-              rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
+          if tariff.keys.include?(:realtimepricing)
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+            rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
 
-            else
-              rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-              rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
-
-              rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
-              rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
-              rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
-
-              rate.demandratestructure = tariff[:demandratestructure] if tariff.keys.include?(:demandratestructure)
-              rate.demandweekdayschedule = tariff[:demandweekdayschedule] if tariff.keys.include?(:demandweekdayschedule)
-              rate.demandweekendschedule = tariff[:demandweekendschedule] if tariff.keys.include?(:demandweekendschedule)
-
-              rate.flatdemandstructure = tariff[:flatdemandstructure] if tariff.keys.include?(:flatdemandstructure)
-            end
           else
-            # TODO
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+            rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter)
+            rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
+            rate.flatratefueladj = tariff[:flatratefueladj] if tariff.keys.include?(:flatratefueladj)
+
+            rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
+            rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
+            rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
+
+            if tariff.keys.include?(:demandratestructure) || tariff.keys.include?(:flatdemandstructure)
+              warnings << 'Demand charges are not currently supported when calculating detailed utility bills.'
+            end
           end
         end
 
@@ -380,8 +363,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Grid connection fee
       next unless fuel_type == FT::Elec
 
-      next unless args[:electricity_bill_type] == 'Simple'
-
       next unless pv_systems.size > 0
 
       monthly_fee = 0.0
@@ -398,23 +379,37 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings
   end
 
-  def get_utility_bills(fuels, utility_rates, utility_bills, args, header)
+  def get_utility_bills(fuels, utility_rates, utility_bills, _args, utility_bill_scenario, header)
     net_elec = 0
+
+    # Simple
     fuels.each do |(fuel_type, is_production), fuel|
       rate = utility_rates[fuel_type]
       bill = utility_bills[fuel_type]
 
       if fuel_type == FT::Elec
-        if args[:electricity_bill_type] == 'Detailed' && rate.realtimeprice.empty?
-          net_elec = CalculateUtilityBill.detailed_electric(fuels, rate, bill, net_elec)
-        else
+        if utility_bill_scenario.elec_tariff_filepath.nil?
           net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
         end
       else
         net_elec = CalculateUtilityBill.simple(fuel_type, header, fuel.timeseries, is_production, rate, bill, net_elec)
       end
     end
-    return net_elec
+
+    # Detailed
+    if !utility_bill_scenario.elec_tariff_filepath.nil?
+      rate = utility_rates[FT::Elec]
+      bill = utility_bills[FT::Elec]
+
+      if rate.realtimeprice.empty?
+        CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
+      else
+        net_elec = CalculateUtilityBill.real_time_pricing(header, fuels, rate, bill, net_elec)
+      end
+    end
+
+    # Annual true up
+    CalculateUtilityBill.annual_true_up(utility_rates, utility_bills, net_elec)
   end
 
   def annual_true_up(utility_rates, utility_bills, net_elec)
@@ -496,7 +491,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       unit_conv /= 139.0 if fuel_type == FT::Oil
       unit_conv /= 91.6 if fuel_type == FT::Propane
 
-      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0)
+      timeseries_freq = 'monthly'
+      if fuel_type == FT::Elec
+        timeseries_freq = timeseries_frequency(@hpxml.header.utility_bill_scenarios)
+      end
+      timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
+      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
     end
   end
 
@@ -509,10 +509,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     }
   end
 
-  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder)
-    return [0.0] * @timestamps.size if meter_names.empty?
+  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timestamps, timeseries_freq)
+    return [0.0] * timestamps.size if meter_names.empty?
 
-    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_frequency]
+    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_freq]
     cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
     rows = @msgpackData['MeterData'][msgpack_timeseries_name]['Rows']
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }

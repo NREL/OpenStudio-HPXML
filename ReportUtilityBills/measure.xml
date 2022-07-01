@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>ef5d78fb-ab06-495a-aac9-80f42c1c7573</version_id>
-  <version_modified>20220701T152612Z</version_modified>
+  <version_id>ecd54808-49d3-42ff-9ab9-eb87475105e6</version_id>
+  <version_modified>20220701T170646Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -85,23 +85,6 @@
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>151F9601</checksum>
-    </file>
-    <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>86C9774F</checksum>
-    </file>
-    <file>
       <filename>PV_10kW.csv</filename>
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
@@ -160,6 +143,23 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>535D428A</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AE8A9297</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C1AE6203</checksum>
     </file>
   </files>
 </measure>
