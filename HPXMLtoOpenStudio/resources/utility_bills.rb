@@ -1,36 +1,44 @@
 # frozen_string_literal: true
 
 class UtilityBills
-  def self.get_auto_marginal_rate(runner, state_code, fuel_type, fixed_rate)
+  def self.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
     state_name = Constants.StateCodesMap[state_code]
     return if state_name.nil?
 
     average_rate = nil
-    marginal_rate = nil
     if fuel_type == HPXML::FuelTypeElectricity
-      year_ix = nil
-      rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv'))
-      rows.each do |row|
-        year_ix = row.index('2021') if row[0] == 'description'
-        next if row[0].upcase != "Residential : #{state_name}".upcase
-
-        average_rate = Float(row[year_ix]) / 100.0 # Convert cents/kWh to $/kWh
-      end
-
       household_consumption = get_household_consumption(state_code, fuel_type)
-      marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
+      if not marginal_rate.nil?
+        # Calculate average rate from user-specified fixed charge, user-specified marginal rate, and EIA data
+        average_rate = marginal_rate_to_average_rate(marginal_rate, fixed_charge, household_consumption)
+      else
+        # Calculate marginal & average rates from user-specified fixed charge and EIA data
+        year_ix = nil
+        rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv'))
+        rows.each do |row|
+          year_ix = row.index('2021') if row[0] == 'description'
+          next if row[0].upcase != "Residential : #{state_name}".upcase
+
+          average_rate = Float(row[year_ix]) / 100.0 # Convert cents/kWh to $/kWh
+        end
+        marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_charge, household_consumption)
+      end
 
     elsif fuel_type == HPXML::FuelTypeNaturalGas
-      rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
-      rows = rows[2..-1]
-
-      state_ix = rows[0].index("#{state_name} Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)")
-      rows[1..-1].each do |row|
-        average_rate = Float(row[state_ix]) / 10.37 if !row[state_ix].nil? # Convert Mcf to therms, from https://www.eia.gov/tools/faqs/faq.php?id=45&t=7
-      end
-
       household_consumption = get_household_consumption(state_code, fuel_type)
-      marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
+      if not marginal_rate.nil?
+        # Calculate average rate from user-specified fixed charge, user-specified marginal rate, and EIA data
+        average_rate = marginal_rate_to_average_rate(marginal_rate, fixed_charge, household_consumption)
+      else
+        # Calculate marginal & average rates from user-specified fixed charge and EIA data
+        rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv'))
+        rows = rows[2..-1]
+        state_ix = rows[0].index("#{state_name} Price of Natural Gas Delivered to Residential Consumers (Dollars per Thousand Cubic Feet)")
+        rows[1..-1].each do |row|
+          average_rate = Float(row[state_ix]) / 10.37 if !row[state_ix].nil? # Convert Mcf to therms, from https://www.eia.gov/tools/faqs/faq.php?id=45&t=7
+        end
+        marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_charge, household_consumption)
+      end
 
     elsif [HPXML::FuelTypeOil, HPXML::FuelTypePropane].include? fuel_type
       if fuel_type == HPXML::FuelTypeOil
@@ -62,7 +70,7 @@ class UtilityBills
       marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
     end
 
-    return marginal_rate
+    return marginal_rate, average_rate
   end
 
   def self.get_household_consumption(state_code, fuel_type)
@@ -78,8 +86,12 @@ class UtilityBills
     end
   end
 
-  def self.average_rate_to_marginal_rate(average_rate, fixed_rate, household_consumption)
-    return average_rate - 12.0 * fixed_rate / household_consumption
+  def self.average_rate_to_marginal_rate(average_rate, fixed_charge, household_consumption)
+    return average_rate - 12.0 * fixed_charge / household_consumption
+  end
+
+  def self.marginal_rate_to_average_rate(marginal_rate, fixed_charge, household_consumption)
+    return marginal_rate + 12.0 * fixed_charge / household_consumption
   end
 
   def self.get_state_code_to_padd
@@ -124,5 +136,31 @@ class UtilityBills
     end
 
     return marginal_rates
+  end
+end
+
+if ARGV.size == 5
+  # Usage: openstudio utility_bills.rb state_code elec_fixed_charge gas_fixed_charge elec_marginal_rate gas_marginal_rate
+  # E.g., if requesting state marginal/average rate based on user-specified fixed charge: openstudio utility_bills.rb CO 12.0 12.0 0.0 0.0
+  # E.g., if requesting average rate based on user-specified fixed charge and marginal rate: openstudio utility_bills.rb CO 12.0 12.0 0.12 1.10
+  require_relative 'hpxml'
+  require_relative 'constants'
+  require 'csv'
+
+  state_code = ARGV[0]
+  elec_fixed_charge = Float(ARGV[1])
+  gas_fixed_charge = Float(ARGV[2])
+  elec_marginal_rate = Float(ARGV[3])
+  gas_marginal_rate = Float(ARGV[4])
+
+  elec_marginal_rate = nil if elec_marginal_rate <= 0
+  gas_marginal_rate = nil if gas_marginal_rate <= 0
+
+  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+  { HPXML::FuelTypeElectricity => [elec_fixed_charge, elec_marginal_rate],
+    HPXML::FuelTypeNaturalGas => [gas_fixed_charge, gas_marginal_rate] }.each do |fuel_type, values|
+    fixed_charge, marginal_rate = values
+    marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate)
+    puts "#{fuel_type} #{marginal_rate.round(4)} #{average_rate.round(4)}"
   end
 end
