@@ -169,6 +169,8 @@ if ARGV.size == 8
   gas_marginal_rate = nil if gas_marginal_rate <= 0
   elec_state = 'US' if Constants.StateCodesMap[elec_state].nil?
   gas_state = 'US' if Constants.StateCodesMap[gas_state].nil?
+  oil_state = 'US' if Constants.StateCodesMap[oil_state].nil?
+  propane_state = 'US' if Constants.StateCodesMap[propane_state].nil?
 
   { HPXML::FuelTypeElectricity => [elec_state, elec_fixed_charge, elec_marginal_rate],
     HPXML::FuelTypeNaturalGas => [gas_state, gas_fixed_charge, gas_marginal_rate],
