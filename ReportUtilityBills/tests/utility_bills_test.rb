@@ -1081,13 +1081,12 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def _bill_calcs(fuels, utility_rates, utility_bills, header, pv_systems, utility_bill_scenario)
-    args = Hash[@args_hash.collect { |k, v| [k.to_sym, v] }]
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     output_format = 'csv'
     output_path = File.join(File.dirname(__FILE__), "results_bills.#{output_format}")
 
-    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, args, utility_bill_scenario, pv_systems)
-    @measure.get_utility_bills(fuels, utility_rates, utility_bills, args, utility_bill_scenario, header)
+    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems)
+    @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
     @measure.get_annual_bills(utility_bills)
 
     @measure.write_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)

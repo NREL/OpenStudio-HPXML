@@ -56,7 +56,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def check_for_warnings(_args, utility_bill_scenarios, pv_systems)
+  def check_for_warnings(utility_bill_scenarios, pv_systems)
     warnings = []
 
     # Require full annual simulation if 'Detailed' or has PV
@@ -108,15 +108,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return result
     end
 
-    # assign the user inputs to variables
-    args = get_argument_values(runner, arguments(@model), user_arguments)
-    args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings = check_for_warnings(args, @hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
+    warnings = check_for_warnings(@hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
     return result if !warnings.empty?
 
     fuels = setup_fuel_outputs()
@@ -179,7 +175,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     return true if @hpxml.header.utility_bill_scenarios.empty?
 
-    warnings = check_for_warnings(args, @hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
+    warnings = check_for_warnings(@hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
     if register_warnings(runner, warnings)
       return true
     end
@@ -198,13 +194,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, args, utility_bill_scenario, @hpxml.pv_systems)
+      warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, utility_bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
         return true
       end
 
       # Calculate utility bills
-      get_utility_bills(fuels, utility_rates, utility_bills, args, utility_bill_scenario, @hpxml.header)
+      get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
       # Calculate annual bills
       get_annual_bills(utility_bills)
