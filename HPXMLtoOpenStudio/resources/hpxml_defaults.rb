@@ -286,7 +286,7 @@ class HPXMLDefaults
           scenario.elec_fixed_charge_isdefaulted = true
         end
         if scenario.elec_marginal_rate.nil?
-          scenario.elec_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
+          scenario.elec_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml.header.state_code, HPXML::FuelTypeElectricity, scenario.elec_fixed_charge)
           scenario.elec_marginal_rate_isdefaulted = true
         end
       end
@@ -297,7 +297,7 @@ class HPXMLDefaults
           scenario.natural_gas_fixed_charge_isdefaulted = true
         end
         if scenario.natural_gas_marginal_rate.nil?
-          scenario.natural_gas_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
+          scenario.natural_gas_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml.header.state_code, HPXML::FuelTypeNaturalGas, scenario.natural_gas_fixed_charge)
           scenario.natural_gas_marginal_rate_isdefaulted = true
         end
       end
@@ -308,7 +308,7 @@ class HPXMLDefaults
           scenario.propane_fixed_charge_isdefaulted = true
         end
         if scenario.propane_marginal_rate.nil?
-          scenario.propane_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypePropane, nil)
+          scenario.propane_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml.header.state_code, HPXML::FuelTypePropane, nil)
           scenario.propane_marginal_rate_isdefaulted = true
         end
       end
@@ -319,7 +319,7 @@ class HPXMLDefaults
           scenario.fuel_oil_fixed_charge_isdefaulted = true
         end
         if scenario.fuel_oil_marginal_rate.nil?
-          scenario.fuel_oil_marginal_rate = UtilityBills.get_auto_marginal_rate(runner, hpxml.header.state_code, HPXML::FuelTypeOil, nil)
+          scenario.fuel_oil_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml.header.state_code, HPXML::FuelTypeOil, nil)
           scenario.fuel_oil_marginal_rate_isdefaulted = true
         end
       end
