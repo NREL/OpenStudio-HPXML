@@ -382,10 +382,10 @@ class ReportUtilityBillsTest < MiniTest::Test
                    oil_state, propane_state])
     out_lines = io.read.split("\n")
     assert_equal(4, out_lines.size)
-    assert_equal("#{HPXML::FuelTypeElectricity} 0.2022 0.2186", out_lines[0])
-    assert_equal("#{HPXML::FuelTypeNaturalGas} 0.9878 1.1803", out_lines[1])
-    assert_equal("#{HPXML::FuelTypeOil} 3.4361 3.4361", out_lines[2])
-    assert_equal("#{HPXML::FuelTypePropane} 2.6954 2.6954", out_lines[3])
+    assert_equal("#{HPXML::FuelTypeElectricity} 0.202184 0.2186", out_lines[0])
+    assert_equal("#{HPXML::FuelTypeNaturalGas} 0.987814 1.180328", out_lines[1])
+    assert_equal("#{HPXML::FuelTypeOil} 3.436115 3.436115", out_lines[2])
+    assert_equal("#{HPXML::FuelTypePropane} 2.695423 2.695423", out_lines[3])
 
     # Test retrieval of average rates for user-specified fixed charges and marginal rates
     elec_state = 'US'
@@ -403,10 +403,10 @@ class ReportUtilityBillsTest < MiniTest::Test
                    oil_state, propane_state])
     out_lines = io.read.split("\n")
     assert_equal(4, out_lines.size)
-    assert_equal("#{HPXML::FuelTypeElectricity} #{elec_marginal_rate} 0.133", out_lines[0])
-    assert_equal("#{HPXML::FuelTypeNaturalGas} #{gas_marginal_rate} 0.9558", out_lines[1])
-    assert_equal("#{HPXML::FuelTypeOil} 3.4953 3.4953", out_lines[2])
-    assert_equal("#{HPXML::FuelTypePropane} 3.6287 3.6287", out_lines[3])
+    assert_equal("#{HPXML::FuelTypeElectricity} #{elec_marginal_rate} 0.133043", out_lines[0])
+    assert_equal("#{HPXML::FuelTypeNaturalGas} #{gas_marginal_rate} 0.955844", out_lines[1])
+    assert_equal("#{HPXML::FuelTypeOil} 3.495346 3.495346", out_lines[2])
+    assert_equal("#{HPXML::FuelTypePropane} 3.628692 3.628692", out_lines[3])
   end
 
   def _check_bills(expected_bills, actual_bills)

@@ -179,9 +179,9 @@ if ARGV.size == 8
     state_code, fixed_charge, marginal_rate = values
     marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate)
     if (not marginal_rate.nil?) && average_rate.nil?
-      puts "#{fuel_type} #{marginal_rate.round(4)} #{marginal_rate.round(4)}"
+      puts "#{fuel_type} #{marginal_rate.round(6)} #{marginal_rate.round(6)}"
     else
-      puts "#{fuel_type} #{marginal_rate.round(4)} #{average_rate.round(4)}"
+      puts "#{fuel_type} #{marginal_rate.round(6)} #{average_rate.round(6)}"
     end
   end
 end
