@@ -169,6 +169,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
     @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack'), mode: 'rb'))
 
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
@@ -195,7 +196,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      warnings = get_utility_rates(hpxml_defaults_path, fuels, utility_rates, utility_bill_scenario, @hpxml.pv_systems)
+      warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
         return true
       end

@@ -3022,16 +3022,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
-    # Create HPXML file
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file)
-    if not hpxml_doc
-      runner.registerError('Unsuccessful creation of HPXML file.')
-      return false
-    end
-
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+    end
+
+    # Create HPXML file
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file, hpxml_path)
+    if not hpxml_doc
+      runner.registerError('Unsuccessful creation of HPXML file.')
+      return false
     end
 
     # Check for invalid HPXML file
@@ -3258,7 +3258,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_file)
+  def self.create(runner, model, args, epw_file, hpxml_path)
     success = create_geometry_envelope(runner, model, args)
     return false if not success
 
@@ -3270,7 +3270,7 @@ class HPXMLFile
 
     hpxml = HPXML.new
 
-    set_header(hpxml, args)
+    set_header(hpxml, args, hpxml_path)
     set_site(hpxml, args)
     set_neighbor_buildings(hpxml, args)
     set_building_occupancy(hpxml, args)
@@ -3411,7 +3411,7 @@ class HPXMLFile
     return true
   end
 
-  def self.set_header(hpxml, args)
+  def self.set_header(hpxml, args, hpxml_path)
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
@@ -3560,6 +3560,15 @@ class HPXMLFile
 
       if args[:utility_bill_electricity_filepaths].is_initialized
         bills_electricity_filepaths = args[:utility_bill_electricity_filepaths].get.split(',').map(&:strip)
+        bills_electricity_filepaths.each_with_index do |bills_electricity_filepath, i|
+          begin
+            FilePath.check_path(bills_electricity_filepath,
+                                File.dirname(hpxml_path),
+                                'Tariff File')
+          rescue
+            bills_electricity_filepaths[i] = nil
+          end
+        end
       else
         bills_electricity_filepaths = [nil] * bills_scenario_names.size
       end
