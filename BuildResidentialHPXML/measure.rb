@@ -2905,7 +2905,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_electricity_filepaths', false)
     arg.setDisplayName('Utility Bills: Electricity File Paths')
-    arg.setDescription('TODO. If multiple scenarios, use a comma-separated list.')
+    arg.setDescription('Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. If multiple scenarios, use a comma-separated list.')
     args << arg
 
     ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|

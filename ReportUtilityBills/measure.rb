@@ -46,23 +46,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  def timeseries_frequency(utility_bill_scenarios)
-    # Use monthly for fossil fuels and simple electric rates
-    # Use hourly for detailed electric rates (URDB tariff or real time pricing)
-    if !utility_bill_scenarios.has_detailed_rates
-      return 'monthly'
-    else
-      return 'hourly'
-    end
-  end
-
-  def check_for_warnings(utility_bill_scenarios, pv_systems)
+  def check_for_return_type_warnings()
     warnings = []
 
-    # Require full annual simulation if 'Detailed' or has PV
+    # Require full annual simulation if PV
     if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
-      if utility_bill_scenarios.has_detailed_rates || pv_systems.size > 0
-        warnings << 'A full annual simulation is required for calculating detailed utility bills.'
+      if @hpxml.pv_systems.size > 0
+        warnings << 'A full annual simulation is required for calculating utility bills for homes with PV.'
       end
     end
 
@@ -84,6 +74,19 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next if clg_system.distribution_system.annual_cooling_dse == 1
 
       warnings << 'DSE is not currently supported when calculating utility bills.'
+    end
+
+    return warnings.uniq
+  end
+
+  def check_for_next_type_warnings(utility_bill_scenario)
+    warnings = []
+
+    # Require full annual simulation if 'Detailed'
+    if !(@hpxml.header.sim_begin_month == 1 && @hpxml.header.sim_begin_day == 1 && @hpxml.header.sim_end_month == 12 && @hpxml.header.sim_end_day == 31)
+      if !utility_bill_scenario.elec_tariff_filepath.nil?
+        warnings << 'A full annual simulation is required for calculating detailed utility bills.'
+      end
     end
 
     return warnings.uniq
@@ -112,7 +115,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    warnings = check_for_warnings(@hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
+    warnings = check_for_return_type_warnings()
     return result if !warnings.empty?
 
     fuels = setup_fuel_outputs()
@@ -121,7 +124,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     fuels.each do |(fuel_type, _is_production), fuel|
       fuel.meters.each do |meter|
         if fuel_type == FT::Elec
-          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency(@hpxml.header.utility_bill_scenarios)};").get
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get if @hpxml.header.utility_bill_scenarios.has_simple_electric_rates
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get if @hpxml.header.utility_bill_scenarios.has_detailed_electric_rates
         else
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         end
@@ -176,7 +180,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     return true if @hpxml.header.utility_bill_scenarios.empty?
 
-    warnings = check_for_warnings(@hpxml.header.utility_bill_scenarios, @hpxml.pv_systems)
+    warnings = check_for_return_type_warnings()
     if register_warnings(runner, warnings)
       return true
     end
@@ -186,6 +190,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     FileUtils.rm(output_path) if File.exist?(output_path)
 
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      warnings = check_for_next_type_warnings(utility_bill_scenario)
+      if register_warnings(runner, warnings)
+        next
+      end
+
       # Setup fuel outputs
       fuels = setup_fuel_outputs()
 
@@ -198,7 +207,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Get utility rates
       warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, @hpxml.pv_systems)
       if register_warnings(runner, warnings)
-        return true
+        next
       end
 
       # Calculate utility bills
@@ -249,9 +258,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if output_format == 'json'
         require 'json'
-        File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+        File.open(output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
       elsif output_format == 'msgpack'
-        File.open(output_path, 'w') { |json| h.to_msgpack(json) }
+        File.open(output_path, 'a') { |json| h.to_msgpack(json) }
       end
     end
     runner.registerInfo("Wrote bills output to #{output_path}.")
@@ -491,9 +500,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       unit_conv /= 91.6 if fuel_type == FT::Propane
 
       timeseries_freq = 'monthly'
-      if fuel_type == FT::Elec
-        timeseries_freq = 'hourly' if !utility_bill_scenario.elec_tariff_filepath.nil?
-      end
+      timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
       timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
       fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
     end
