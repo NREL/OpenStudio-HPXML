@@ -2638,7 +2638,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                  HPXML::LocationAtticVented,
                  HPXML::LocationOtherHousingUnit,
                  HPXML::LocationBasementConditioned].include?(surface.exterior_adjacent_to)
-    next if surface.is_a?(HPXML::FrameFloor) && surface.is_floor
+    next if surface.is_a?(HPXML::Floor) && surface.is_floor
 
     surface.interior_finish_type = HPXML::InteriorFinishGypsumBoard
   end
@@ -2749,24 +2749,24 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
     hpxml.frame_floors[0].delete
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 550,
                            insulation_assembly_r_value: 18.7,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+                           other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
                            insulation_assembly_r_value: 18.7,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+                           other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 150,
                            insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+                           other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
@@ -2869,7 +2869,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.foundation_walls.each do |foundation_wall|
       foundation_wall.area = 1200.0 / hpxml.foundation_walls.size
     end
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationAtticUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 450,
@@ -3114,7 +3114,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
     hpxml.frame_floors[0].area = 675
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 675,
@@ -3255,7 +3255,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+    hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationGarage,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 400,
@@ -4510,7 +4510,7 @@ def renumber_hpxml_ids(hpxml)
   { hpxml.walls => 'Wall',
     hpxml.foundation_walls => 'FoundationWall',
     hpxml.rim_joists => 'RimJoist',
-    hpxml.frame_floors => 'FrameFloor',
+    hpxml.frame_floors => 'Floor',
     hpxml.roofs => 'Roof',
     hpxml.slabs => 'Slab',
     hpxml.windows => 'Window',
@@ -4612,6 +4612,7 @@ end
 def create_schematron_hpxml_validator(hpxml_docs)
   puts 'Generating HPXMLvalidator.xml...'
   elements_in_sample_files = get_elements_from_sample_files(hpxml_docs)
+  puts elements_in_sample_files
 
   hpxml_base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLBaseElements.xsd'))
   hpxml_base_elements_xsd_doc = Oga.parse_xml(hpxml_base_elements_xsd)
@@ -4782,7 +4783,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   id_names = ['SystemIdentifier',
               'BuildingID']
   idref_names = ['AttachedToRoof',
-                 'AttachedToFrameFloor',
+                 'AttachedToFloor',
                  'AttachedToSlab',
                  'AttachedToFoundationWall',
                  'AttachedToWall',

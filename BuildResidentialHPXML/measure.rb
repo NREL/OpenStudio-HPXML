@@ -3923,9 +3923,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          other_space_above_or_below = HPXML::FrameFloorOtherSpaceBelow
+          other_space_above_or_below = HPXML::FloorOtherSpaceBelow
         elsif surface.surfaceType == 'RoofCeiling'
-          other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
+          other_space_above_or_below = HPXML::FloorOtherSpaceAbove
         end
       end
 
@@ -3935,7 +3935,7 @@ class HPXMLFile
                HPXML::LocationBasementConditioned,
                HPXML::LocationCrawlspaceConditioned].include? exterior_adjacent_to
 
-      hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+      hpxml.frame_floors.add(id: "Floor#{hpxml.frame_floors.size + 1}",
                              exterior_adjacent_to: exterior_adjacent_to,
                              interior_adjacent_to: interior_adjacent_to,
                              area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),

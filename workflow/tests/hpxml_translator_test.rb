@@ -1028,7 +1028,7 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
-    # Enclosure FrameFloors
+    # Enclosure Floors
     hpxml.frame_floors.each do |frame_floor|
       frame_floor_id = frame_floor.id.upcase
 

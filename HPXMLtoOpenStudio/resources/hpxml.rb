@@ -119,8 +119,8 @@ class HPXML < Object
   FoundationWallTypeDoubleBrick = 'double brick'
   FoundationWallTypeSolidConcrete = 'solid concrete'
   FoundationWallTypeWood = 'wood'
-  FrameFloorOtherSpaceAbove = 'above'
-  FrameFloorOtherSpaceBelow = 'below'
+  FloorOtherSpaceAbove = 'above'
+  FloorOtherSpaceBelow = 'below'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -716,7 +716,7 @@ class HPXML < Object
     @rim_joists = RimJoists.new(self, hpxml)
     @walls = Walls.new(self, hpxml)
     @foundation_walls = FoundationWalls.new(self, hpxml)
-    @frame_floors = FrameFloors.new(self, hpxml)
+    @frame_floors = Floors.new(self, hpxml)
     @slabs = Slabs.new(self, hpxml)
     @windows = Windows.new(self, hpxml)
     @skylights = Skylights.new(self, hpxml)
@@ -1572,7 +1572,7 @@ class HPXML < Object
       end
       if not @attached_to_frame_floor_idrefs.nil?
         @attached_to_frame_floor_idrefs.each do |floor|
-          floor_attached = XMLHelper.add_element(attic, 'AttachedToFrameFloor')
+          floor_attached = XMLHelper.add_element(attic, 'AttachedToFloor')
           XMLHelper.add_attribute(floor_attached, 'idref', floor)
         end
       end
@@ -1609,7 +1609,7 @@ class HPXML < Object
         @attached_to_wall_idrefs << HPXML::get_idref(wall)
       end
       @attached_to_frame_floor_idrefs = []
-      XMLHelper.get_elements(attic, 'AttachedToFrameFloor').each do |frame_floor|
+      XMLHelper.get_elements(attic, 'AttachedToFloor').each do |frame_floor|
         @attached_to_frame_floor_idrefs << HPXML::get_idref(frame_floor)
       end
     end
@@ -1721,7 +1721,7 @@ class HPXML < Object
         sum_area += slab.area
       end
       if sum_area <= 0
-        # Check FrameFloors next
+        # Check Floors next
         attached_frame_floors.each do |frame_floor|
           sum_area += frame_floor.area
         end
@@ -1800,7 +1800,7 @@ class HPXML < Object
       end
       if not @attached_to_frame_floor_idrefs.nil?
         @attached_to_frame_floor_idrefs.each do |frame_floor|
-          floor_frame_attached = XMLHelper.add_element(foundation, 'AttachedToFrameFloor')
+          floor_frame_attached = XMLHelper.add_element(foundation, 'AttachedToFloor')
           XMLHelper.add_attribute(floor_frame_attached, 'idref', frame_floor)
         end
       end
@@ -1850,7 +1850,7 @@ class HPXML < Object
         @attached_to_slab_idrefs << HPXML::get_idref(slab)
       end
       @attached_to_frame_floor_idrefs = []
-      XMLHelper.get_elements(foundation, 'AttachedToFrameFloor').each do |frame_floor|
+      XMLHelper.get_elements(foundation, 'AttachedToFloor').each do |frame_floor|
         @attached_to_frame_floor_idrefs << HPXML::get_idref(frame_floor)
       end
       @attached_to_foundation_wall_idrefs = []
@@ -2478,21 +2478,21 @@ class HPXML < Object
     end
   end
 
-  class FrameFloors < BaseArrayElement
+  class Floors < BaseArrayElement
     def add(**kwargs)
-      self << FrameFloor.new(@hpxml_object, **kwargs)
+      self << Floor.new(@hpxml_object, **kwargs)
     end
 
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor').each do |frame_floor|
-        self << FrameFloor.new(@hpxml_object, frame_floor)
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Floors/Floor').each do |frame_floor|
+        self << Floor.new(@hpxml_object, frame_floor)
       end
     end
   end
 
-  class FrameFloor < BaseElement
+  class Floor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :other_space_above_or_below, :interior_finish_type, :interior_finish_thickness]
@@ -2503,7 +2503,7 @@ class HPXML < Object
         return true
       elsif [LocationAtticVented, LocationAtticUnvented].include? @exterior_adjacent_to
         return true
-      elsif [LocationOtherHousingUnit, LocationOtherHeatedSpace, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include?(@exterior_adjacent_to) && (@other_space_above_or_below == FrameFloorOtherSpaceAbove)
+      elsif [LocationOtherHousingUnit, LocationOtherHeatedSpace, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include?(@exterior_adjacent_to) && (@other_space_above_or_below == FloorOtherSpaceAbove)
         return true
       end
 
@@ -2563,8 +2563,8 @@ class HPXML < Object
     def to_oga(doc)
       return if nil?
 
-      frame_floors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'FrameFloors'])
-      frame_floor = XMLHelper.add_element(frame_floors, 'FrameFloor')
+      frame_floors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Floors'])
+      frame_floor = XMLHelper.add_element(frame_floors, 'Floor')
       sys_id = XMLHelper.add_element(frame_floor, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(frame_floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?

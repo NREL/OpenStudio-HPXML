@@ -460,9 +460,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['multifamily-reference-surface'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.frame_floors << hpxml.frame_floors[0].dup
-        hpxml.frame_floors[1].id = "FrameFloor#{hpxml.frame_floors.size}"
+        hpxml.frame_floors[1].id = "Floor#{hpxml.frame_floors.size}"
         hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-        hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
+        hpxml.frame_floors[1].other_space_above_or_below = HPXML::FloorOtherSpaceAbove
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
