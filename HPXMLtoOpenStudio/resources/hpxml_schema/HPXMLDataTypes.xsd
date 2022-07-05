@@ -57,12 +57,7 @@
 	</xs:complexType>
 	<xs:simpleType name="schemaVersionType">
 		<xs:restriction base="xs:string">
-<<<<<<< HEAD
-			<xs:enumeration value="3.0"/>
-			<xs:enumeration value="3.1"/>
-=======
 			<xs:enumeration value="4.0"/>
->>>>>>> d492c85480205a1255b3bd601a177bb661449220
 		</xs:restriction>
 	</xs:simpleType>
 	<!--Address Information Below-->
