@@ -116,6 +116,9 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:UtilityBillScenarios/h:UtilityBillScenario/h:UtilityRate[h:FuelType="electricity"]'>
       <sch:assert role='ERROR' test='count(h:FixedCharge) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FixedCharge</sch:assert>
       <sch:assert role='ERROR' test='count(h:MarginalRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MarginalRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:TariffFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TariffFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:FixedCharge) + count(h:TariffFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FixedCharge | TariffFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MarginalRate) + count(h:TariffFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MarginalRate | TariffFilePath</sch:assert>
     </sch:rule>
   </sch:pattern>
 

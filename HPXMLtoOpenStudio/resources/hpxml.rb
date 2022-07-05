@@ -1189,7 +1189,11 @@ class HPXML < Object
       end
     end
 
-    def has_detailed_rates
+    def has_simple_electric_rates
+      any? { |bill_scen| !bill_scen.elec_fixed_charge.nil? || !bill_scen.elec_marginal_rate.nil? }
+    end
+
+    def has_detailed_electric_rates
       any? { |bill_scen| !bill_scen.elec_tariff_filepath.nil? }
     end
   end

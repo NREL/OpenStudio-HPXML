@@ -332,6 +332,8 @@ For each scenario, electricity rates can be optionally entered as an ``/HPXML/So
 
 **Simple**
 
+If the utility rate type is simple, utility bills are calculated based on fixed charges and a marginal rate.
+
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
@@ -344,15 +346,17 @@ For each scenario, electricity rates can be optionally entered as an ``/HPXML/So
 
 **Detailed**
 
+If the utility rate type is detailed, utility bills are calculated using a tariff file.
+
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
   ``FuelType``                      string             electricity  Yes                 Fuel type
-  ``TariffFilePath``                string             See [#]_     No                  Tariff file
+  ``TariffFilePath``                string             See [#]_     No                  Tariff file with utility rate structure information
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
-  .. [#] TariffFilePath must point to a JSON file.
-         Sources of tariff files include TODO.
+  .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
+         Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_.
 
 Fuel Rates
 ~~~~~~~~~~
