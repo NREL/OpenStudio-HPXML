@@ -1491,7 +1491,7 @@ class HPXML < Object
 
       list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_frame_floor_idrefs.include? frame_floor.id }
       if @attached_to_frame_floor_idrefs.size > list.size
-        fail "Attached frame floor not found for attic '#{@id}'."
+        fail "Attached floor not found for attic '#{@id}'."
       end
 
       return list
@@ -1651,7 +1651,7 @@ class HPXML < Object
 
       list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_frame_floor_idrefs.include? frame_floor.id }
       if @attached_to_frame_floor_idrefs.size > list.size
-        fail "Attached frame floor not found for foundation '#{@id}'."
+        fail "Attached floor not found for foundation '#{@id}'."
       end
 
       return list
@@ -6387,7 +6387,7 @@ class HPXML < Object
       return true
     elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
           conditioned_locations.include?(surface.exterior_adjacent_to)
-      # E.g., frame floor between living space and conditioned basement, or
+      # E.g., floor between living space and conditioned basement, or
       # wall between living space and "other housing unit"
       return true
     end
