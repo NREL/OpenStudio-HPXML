@@ -17,16 +17,12 @@
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Simple</Name>
-          <UtilityRate>
-            <FuelType>electricity</FuelType>
-            <TariffFilePath>NA</TariffFilePath>
-          </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Detailed</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>

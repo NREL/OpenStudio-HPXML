@@ -2153,10 +2153,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 2.5, 7.5'
   elsif ['base-misc-bills-pv-detailed-only.xml'].include? hpxml_file
     args['utility_bill_scenario_names'] = 'Tiered, TOU, Tiered and TOU, Real-Time Pricing'
-    args['utility_bill_electricity_filepaths'] = '../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/Data/Sample Rates/Sample Time-of-Use Rate.json, ../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/Data/Sample Rates/Sample Real-Time Pricing Rate.json'
+    args['utility_bill_electricity_filepaths'] = '../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/Data/SampleRates/Sample Time-of-Use Rate.json, ../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/Data/SampleRates/Sample Real-Time Pricing Rate.json'
   elsif ['base-misc-bills-pv-mixed.xml'].include? hpxml_file
     args['utility_bill_scenario_names'] = 'Simple, Detailed'
-    args['utility_bill_electricity_filepaths'] = 'NA, ../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Rate.json'
+    args['utility_bill_electricity_filepaths'] = 'NA, ../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')

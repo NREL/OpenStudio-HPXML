@@ -19,28 +19,28 @@
           <Name>Tiered</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>TOU</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/Sample Rates/Sample Time-of-Use Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Time-of-Use Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Tiered and TOU</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/Sample Rates/Sample Tiered Time-of-Use Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Time-of-Use Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Real-Time Pricing</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/Sample Rates/Sample Real-Time Pricing Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Real-Time Pricing Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>
