@@ -528,7 +528,7 @@ HPXML Roofs
 
 Each pitched or flat roof surface that is exposed to ambient conditions is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof``.
 
-For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
+For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``Floor`` and not a ``Roof``.
 
   ======================================  =================  ================  =====================  =========  ==============================  ==================================
   Element                                 Type               Units             Constraints            Required   Default                         Notes
@@ -716,10 +716,10 @@ If insulation layers are provided, additional information is entered in each ``F
 
   .. [#] When NominalRValue is non-zero, DistanceToBottomOfInsulation must be greater than DistanceToTopOfInsulation and less than or equal to FoundationWall/Height.
 
-HPXML Frame Floors
+HPXML Floors
 ******************
 
-Each floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor``.
+Each floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor``.
 
   ======================================  ========  ============  ===========  ========  ========  ============================
   Element                                 Type      Units         Constraints  Required  Default   Notes
@@ -727,6 +727,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``SystemIdentifier``                    id                                   Yes                 Unique identifier
   ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                 Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
+  ``FloorType``                           element                 1 [#]_       Yes                 Floor type
   ``Area``                                double    ft2           > 0          Yes                 Gross area
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
   ``InteriorFinish/Thickness``            double    in            >= 0         No        0.5       Interior finish thickness
@@ -738,11 +739,12 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
+  .. [#] FloorType child element choices are ``WoodStud``, ``StructurallyInsulatedPanel``, ``SteelFrame``, ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
-For frame floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``FrameFloor``.
+For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
 
   ======================================  ========  =====  ==============  ========  =======  ==========================================
   Element                                 Type      Units  Constraints     Required  Default  Notes
