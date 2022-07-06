@@ -4637,7 +4637,6 @@ end
 def create_schematron_hpxml_validator(hpxml_docs)
   puts 'Generating HPXMLvalidator.xml...'
   elements_in_sample_files = get_elements_from_sample_files(hpxml_docs)
-  puts elements_in_sample_files
 
   hpxml_base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXMLBaseElements.xsd'))
   hpxml_base_elements_xsd_doc = Oga.parse_xml(hpxml_base_elements_xsd)
