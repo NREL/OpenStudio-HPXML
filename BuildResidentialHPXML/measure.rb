@@ -4150,10 +4150,10 @@ class HPXMLFile
                HPXML::LocationCrawlspaceConditioned].include? exterior_adjacent_to
 
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
-                             exterior_adjacent_to: exterior_adjacent_to,
-                             interior_adjacent_to: interior_adjacent_to,
-                             area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
-                             other_space_above_or_below: other_space_above_or_below)
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: interior_adjacent_to,
+                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
+                       other_space_above_or_below: other_space_above_or_below)
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id
 
       if hpxml.floors[-1].is_thermal_boundary
