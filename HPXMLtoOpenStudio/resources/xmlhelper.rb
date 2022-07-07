@@ -218,6 +218,8 @@ class XMLHelper
     File.open(out_path, 'w', newline: :crlf) do |f|
       f << doc_s
     end
+
+    return doc_s
   end
 end
 
