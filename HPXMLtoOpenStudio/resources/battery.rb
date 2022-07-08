@@ -61,17 +61,24 @@ class Battery
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
 
-    model.getElectricLoadCenterDistributions.each do |elcd|
-      next unless elcd.inverter.is_initialized
+    elcds = model.getElectricLoadCenterDistributions
+    if elcds.empty?
+      elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+      elcd.setName('Battery elec load center dist')
+      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+    else
+      elcd = elcds[0]
+      return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator)
 
       elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
-      elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
-      elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
-      elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
-      elcd.setElectricalStorage(elcs)
-      elcd.setDesignStorageControlDischargePower(rated_power_output)
-      elcd.setDesignStorageControlChargePower(rated_power_output)
     end
+
+    elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
+    elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
+    elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+    elcd.setElectricalStorage(elcs)
+    elcd.setDesignStorageControlDischargePower(rated_power_output)
+    elcd.setDesignStorageControlChargePower(rated_power_output)
   end
 
   def self.get_battery_default_values()

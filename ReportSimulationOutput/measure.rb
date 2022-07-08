@@ -297,6 +297,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if has_electricity_production
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{timeseries_frequency};").get
       end
@@ -823,9 +824,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Total/Net Electricity (Net includes, e.g., PV and generators)
-    outputs[:elec_prod_annual] = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
-    outputs[:elec_net_annual] = @fuels[FT::Elec].annual_output.to_f + outputs[:elec_prod_annual]
+    # Total/Net Electricity (Net includes, e.g., PV, generators, and batteries)
+    @end_uses[[FT::Elec, EUT::PV]].annual_output -= @end_uses[[FT::Elec, EUT::Battery]].annual_output
+    outputs[:elec_prod_annual] = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative && k[1] != EUT::Battery }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
+    outputs[:elec_net_annual] = @fuels[FT::Elec].annual_output.to_f + outputs[:elec_prod_annual] + @end_uses[[FT::Elec, EUT::Battery]].annual_output
     if include_timeseries_fuel_consumptions
       outputs[:elec_prod_timeseries] = [0.0] * @timestamps.size # Negative values
       @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative && eu.timeseries_output.size > 0 }.each do |_key, end_use|
@@ -1099,6 +1101,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def check_for_errors(runner, outputs)
     meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
+    meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) # remove battery energy losses
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -1119,7 +1122,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check sum of end use outputs match fuel outputs from meters
     @fuels.keys.each do |fuel_type|
-      sum_categories = @end_uses.select { |k, _eu| k[0] == fuel_type }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0)
+      sum_categories = @end_uses.select { |k, _eu| k[0] == fuel_type && k[1] != EUT::Battery }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0)
       meter_fuel_total = @fuels[fuel_type].annual_output.to_f
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
@@ -2185,6 +2188,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
                                                        is_negative: true)
+    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Battery]),
+                                                     is_negative: true)
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotWater]))
@@ -2614,6 +2619,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         fuel = object.to_GeneratorMicroTurbine.get.fuelType
         return { [FT::Elec, EUT::Generator] => ["Generator Produced AC #{EPlus::FuelTypeElectricity} Energy"],
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
+
+      elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,

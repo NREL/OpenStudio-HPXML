@@ -1852,8 +1852,6 @@ class OSModel
   end
 
   def self.add_batteries(model, spaces)
-    return if @hpxml.pv_systems.empty?
-
     @hpxml.batteries.each do |battery|
       # Assign space
       if battery.location != HPXML::LocationOutside
