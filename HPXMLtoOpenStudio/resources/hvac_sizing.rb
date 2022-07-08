@@ -57,16 +57,12 @@ class HVACSizing
 
       hvac_sizing_values = HVACSizingValues.new
       apply_hvac_loads(hvac, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
-      puts "1 #{hvac_sizing_values.Heat_Capacity_Supp} | #{hvac_sizing_values.Heat_Load}"
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
-      puts "2 #{hvac_sizing_values.Heat_Capacity_Supp} | #{hvac_sizing_values.Heat_Load}"
       apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac)
-      puts "3 #{hvac_sizing_values.Heat_Capacity_Supp} | #{hvac_sizing_values.Heat_Load}"
       apply_hvac_installation_quality(hvac_sizing_values, weather, hvac)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac)
       apply_hvac_ground_loop(hvac_sizing_values, weather, hvac)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac)
-      puts "4 #{hvac_sizing_values.Heat_Capacity_Supp} | #{hvac_sizing_values.Heat_Load}"
 
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
