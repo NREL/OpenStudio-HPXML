@@ -63,6 +63,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     'End Use: Electricity: Hot Tub Pump (MBtu)',
     'End Use: Electricity: PV (MBtu)',
     'End Use: Electricity: Generator (MBtu)',
+    'End Use: Electricity: Battery (MBtu)',
     'End Use: Natural Gas: Heating (MBtu)',
     'End Use: Natural Gas: Heating Heat Pump Backup (MBtu)',
     'End Use: Natural Gas: Hot Water (MBtu)',
