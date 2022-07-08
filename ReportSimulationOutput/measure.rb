@@ -699,12 +699,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
-        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: end_use.is_negative)
+        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: end_use.is_negative, is_storage: end_use.is_storage)
         if include_timeseries_end_use_consumptions
-          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: end_use.is_negative)
+          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: end_use.is_negative, is_storage: end_use.is_storage)
         end
         if include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: end_use.is_negative)
+          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: end_use.is_negative, is_storage: end_use.is_storage)
         end
       end
     end
@@ -825,8 +825,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Total/Net Electricity (Net includes, e.g., PV, generators, and batteries)
-    @end_uses[[FT::Elec, EUT::PV]].annual_output -= @end_uses[[FT::Elec, EUT::Battery]].annual_output
-    outputs[:elec_prod_annual] = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative && k[1] != EUT::Battery }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
+    outputs[:elec_prod_annual] = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
     outputs[:elec_net_annual] = @fuels[FT::Elec].annual_output.to_f + outputs[:elec_prod_annual] + @end_uses[[FT::Elec, EUT::Battery]].annual_output
     if include_timeseries_fuel_consumptions
       outputs[:elec_prod_timeseries] = [0.0] * @timestamps.size # Negative values
@@ -836,7 +835,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       outputs[:elec_net_timeseries] = @fuels[FT::Elec].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x + y }
     end
 
-    # Total/Net Energy (Net includes, e.g., PV and generators)
+    # Total/Net Energy (Net includes, e.g., PV, generators, and batteries)
     @totals[TE::Total].annual_output = 0.0
     @fuels.each do |_fuel_type, fuel|
       @totals[TE::Total].annual_output += fuel.annual_output
@@ -1811,16 +1810,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
-  def get_report_variable_data_annual(key_values, variables, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'), is_negative: false)
+  def get_report_variable_data_annual(key_values, variables, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'), is_negative: false, is_storage: false)
     return 0.0 if variables.empty?
 
     neg = is_negative ? -1.0 : 1.0
+    sto = is_storage ? -1.0 : 1.0
     keys_vars = key_values.zip(variables).map { |k, v| "#{k}:#{v}" }
     cols = @msgpackDataRunPeriod['Cols']
     timestamp = @msgpackDataRunPeriod['Rows'][0].keys[0]
     row = @msgpackDataRunPeriod['Rows'][0][timestamp]
     indexes = cols.each_index.select { |i| keys_vars.include? cols[i]['Variable'] }
-    val = row.each_index.select { |i| indexes.include? i }.map { |i| row[i] }.sum(0.0) * unit_conv * neg
+    val = row.each_index.select { |i| indexes.include? i }.map { |i| row[i] }.sum(0.0) * unit_conv * neg * sto
 
     return val
   end
@@ -1844,7 +1844,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return vals
   end
 
-  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, ems_shift: false)
+  def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, is_storage: false, ems_shift: false)
     return [0.0] * @timestamps.size if variables.empty?
 
     if key_values.uniq.size > 1 && key_values.include?('EMS') && ems_shift
@@ -1861,6 +1861,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       msgpack_data = @msgpackDataTimeseries
     end
     neg = is_negative ? -1.0 : 1.0
+    sto = is_storage ? -1.0 : 1.0
     keys_vars = key_values.zip(variables).map { |k, v| "#{k}:#{v}" }
     cols = msgpack_data['Cols']
     rows = msgpack_data['Rows']
@@ -1870,7 +1871,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       row = row[row.keys[0]]
       val = 0.0
       indexes.each do |i|
-        val += (row[i] * unit_conv + unit_adder) * neg
+        val += (row[i] * unit_conv + unit_adder) * neg * sto
       end
       vals << val
     end
@@ -2014,17 +2015,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   class EndUse < BaseOutput
-    def initialize(variables: [], is_negative: false)
+    def initialize(variables: [], is_negative: false, is_storage: false)
       super()
       @variables = variables
       @is_negative = is_negative
+      @is_storage = is_storage
       @timeseries_output_by_system = {}
       @annual_output_by_system = {}
       # These outputs used to apply Cambium hourly electricity factors
       @hourly_output = []
       @hourly_output_by_system = {}
     end
-    attr_accessor(:variables, :is_negative, :annual_output_by_system, :timeseries_output_by_system,
+    attr_accessor(:variables, :is_negative, :is_storage, :annual_output_by_system, :timeseries_output_by_system,
                   :hourly_output, :hourly_output_by_system)
   end
 
@@ -2189,7 +2191,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
                                                        is_negative: true)
     @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Battery]),
-                                                     is_negative: true)
+                                                     is_storage: true)
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotWater]))
@@ -2612,8 +2614,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameGarageLighting => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
         return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
-      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
-        return { [FT::Elec, EUT::PV] => ["Inverter AC Output #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized || object.to_GeneratorPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ['Inverter Conversion Loss Decrement Energy', "Generator Produced DC #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_GeneratorMicroTurbine.is_initialized
         fuel = object.to_GeneratorMicroTurbine.get.fuelType
