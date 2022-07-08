@@ -65,17 +65,39 @@ class Battery
     if elcds.empty?
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName('Battery elec load center dist')
-      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+      elcd.setElectricalBussType('AlternatingCurrentWithStorage') # AlternatingCurrentWithStorage, DirectCurrentWithInverterDCStorage, DirectCurrentWithInverterACStorage
+
+      # TrackFacilityElectricDemandStoreExcessOnSite
+      # TrackMeterDemandStoreExcessOnSite
+      # TrackChargeDischargeSchedules
+      # FacilityDemandLeveling
+
+      # TrackMeterDemandStoreExcessOnSite
+      # elcd.setStorageOperationScheme('TrackMeterDemandStoreExcessOnSite')
+      # elcd.setStorageControlTrackMeterName()
+
+      # TrackChargeDischargeSchedules
+      # elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
+      # elcd.setStorageChargePowerFractionSchedule(model.alwaysOnDiscreteSchedule)
+      # elcd.setStorageDischargePowerFractionSchedule(model.alwaysOnDiscreteSchedule)
+
+      # FacilityDemandLeveling
+      # elcd.setStorageOperationScheme('FacilityDemandLeveling')
+      # elcd.setStorageControlUtilityDemandTarget(7500)
+      # elcd.setStorageControlUtilityDemandTargetFractionSchedule(model.alwaysOnDiscreteSchedule)
+
+      # elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+      # elcd.setStorageConverter(elcsc)
     else
       elcd = elcds[0]
       return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator)
 
       elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+      elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
     end
 
     elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
     elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
-    elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
     elcd.setElectricalStorage(elcs)
     elcd.setDesignStorageControlDischargePower(rated_power_output)
     elcd.setDesignStorageControlChargePower(rated_power_output)

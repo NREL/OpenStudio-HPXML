@@ -361,6 +361,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: Electricity: Television (lb)",
                "Emissions: #{scenario}: Electricity: Plug Loads (lb)",
                "Emissions: #{scenario}: Electricity: PV (lb)",
+               "Emissions: #{scenario}: Electricity: Battery (lb)",
                "Emissions: #{scenario}: Natural Gas: Total (lb)",
                "Emissions: #{scenario}: Natural Gas: Heating (lb)"]
     end
@@ -401,6 +402,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: Electricity: Television",
                "Emissions: #{scenario}: Electricity: Plug Loads",
                "Emissions: #{scenario}: Electricity: PV",
+               "Emissions: #{scenario}: Electricity: Battery",
                "Emissions: #{scenario}: Natural Gas: Heating"]
     end
     return cols

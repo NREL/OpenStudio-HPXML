@@ -286,6 +286,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       has_electricity_production = true
     end
 
+    has_electricity_storage = false
+    if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
+      has_electricity_storage = true
+    end
+
     # Fuel outputs
     @fuels.each do |_fuel_type, fuel|
       fuel.meters.each do |meter|
@@ -297,10 +302,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if has_electricity_production
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{timeseries_frequency};").get
       end
+    end
+    if has_electricity_storage
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
     end
 
     # End Use/Hot Water Use/Ideal Load outputs
@@ -2614,8 +2621,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameGarageLighting => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
         return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
-      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized || object.to_GeneratorPVWatts.is_initialized
-        return { [FT::Elec, EUT::PV] => ['Inverter Conversion Loss Decrement Energy', "Generator Produced DC #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ['Inverter Conversion Loss Decrement Energy'] }
+
+      elsif object.to_GeneratorPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ["Generator Produced DC #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_GeneratorMicroTurbine.is_initialized
         fuel = object.to_GeneratorMicroTurbine.get.fuelType
