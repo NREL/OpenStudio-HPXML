@@ -1582,8 +1582,6 @@ class HVACSizing
         # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
         if hvac_sizing_values.Heat_Capacity >= 1.5 * hvac_sizing_values.Cool_Capacity
           hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load * 0.75
-        elsif hvac_sizing_values.Heat_Capacity < hvac_sizing_values.Cool_Capacity
-          hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Capacity # FIXME: What should be done here?
         end
 
         hvac_sizing_values.Cool_Capacity = [hvac_sizing_values.Cool_Capacity, hvac_sizing_values.Heat_Capacity].max
