@@ -854,7 +854,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -889,7 +889,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -924,7 +924,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
