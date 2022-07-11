@@ -307,7 +307,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     if has_electricity_storage
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
+      if include_timeseries_fuel_consumptions
+        result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
+      end
     end
 
     # End Use/Hot Water Use/Ideal Load outputs
@@ -633,10 +636,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Fuel Uses
-    @fuels.each do |_fuel_type, fuel|
+    @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
+      fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec
       if include_timeseries_fuel_consumptions
         fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
+        fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec
       end
     end
 
@@ -831,9 +836,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Total/Net Electricity (Net includes, e.g., PV, generators, and batteries)
+    # Total/Net Electricity (Net includes, e.g., PV and generators)
     outputs[:elec_prod_annual] = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
-    outputs[:elec_net_annual] = @fuels[FT::Elec].annual_output.to_f + outputs[:elec_prod_annual] + @end_uses[[FT::Elec, EUT::Battery]].annual_output
+    outputs[:elec_net_annual] = @fuels[FT::Elec].annual_output.to_f + outputs[:elec_prod_annual]
     if include_timeseries_fuel_consumptions
       outputs[:elec_prod_timeseries] = [0.0] * @timestamps.size # Negative values
       @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative && eu.timeseries_output.size > 0 }.each do |_key, end_use|
@@ -842,7 +847,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       outputs[:elec_net_timeseries] = @fuels[FT::Elec].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x + y }
     end
 
-    # Total/Net Energy (Net includes, e.g., PV, generators, and batteries)
+    # Total/Net Energy (Net includes, e.g., PV and generators)
     @totals[TE::Total].annual_output = 0.0
     @fuels.each do |_fuel_type, fuel|
       @totals[TE::Total].annual_output += fuel.annual_output
@@ -1128,7 +1133,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check sum of end use outputs match fuel outputs from meters
     @fuels.keys.each do |fuel_type|
-      sum_categories = @end_uses.select { |k, _eu| k[0] == fuel_type && k[1] != EUT::Battery }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0)
+      sum_categories = @end_uses.select { |k, _eu| k[0] == fuel_type }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0)
       meter_fuel_total = @fuels[fuel_type].annual_output.to_f
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
