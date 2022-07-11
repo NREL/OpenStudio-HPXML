@@ -216,6 +216,7 @@ def create_hpxmls
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-acca.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-hers.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload-miami-fl.xml' => 'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-acca.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-hers.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-maxload.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -2046,6 +2047,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['site_state_code'] = 'FL'
     args['weather_station_epw_filepath'] = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     args['heating_system_heating_capacity'] = 12000.0
+  elsif ['base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload-miami-fl.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '1A'
+    args['site_state_code'] = 'FL'
+    args['weather_station_epw_filepath'] = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
   elsif ['base-location-phoenix-az.xml'].include? hpxml_file
     args['site_iecc_zone'] = '2B'
     args['site_state_code'] = 'AZ'

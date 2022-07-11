@@ -446,12 +446,6 @@
       <checksum>46636AA2</checksum>
     </file>
     <file>
-      <filename>test_hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0653E0AB</checksum>
-    </file>
-    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -587,6 +581,18 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>7AF2540D</checksum>
+    </file>
+    <file>
+      <filename>test_hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CF3DB1D0</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D4AB73B6</checksum>
     </file>
   </files>
 </measure>
