@@ -1135,11 +1135,13 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnVacancy = 'vacancy'
+  ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
-  ColumnSleeping = 'sleeping'
+  ColumnBatteryCharging = 'battery_charging'
+  ColumnBatteryDischarging = 'battery_discharging'
 
   def initialize(runner: nil,
                  model: nil,

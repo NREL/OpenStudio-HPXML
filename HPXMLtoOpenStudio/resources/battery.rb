@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(model, battery)
+  def self.apply(model, battery, schedules_file)
     obj_name = battery.id
 
     rated_power_output = battery.rated_power_output # W
@@ -101,6 +101,23 @@ class Battery
     elcd.setElectricalStorage(elcs)
     elcd.setDesignStorageControlDischargePower(rated_power_output)
     elcd.setDesignStorageControlChargePower(rated_power_output)
+
+    if not schedules_file.nil?
+      charging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryCharging)
+      discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
+
+      if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
+        elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
+        elcd.setStorageChargePowerFractionSchedule(charging_schedule)
+        elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
+
+        elcd.setDesignStorageControlDischargePower(rated_power_output / 15.0)
+        elcd.setDesignStorageControlChargePower(rated_power_output / 15.0)
+
+        elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+        elcd.setStorageConverter(elcsc)
+      end
+    end
   end
 
   def self.get_battery_default_values()

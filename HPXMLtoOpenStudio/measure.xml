@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8e3d5395-ea09-4039-adf3-50b2fa900922</version_id>
-  <version_modified>20220709T001734Z</version_modified>
+  <version_id>e4c094e1-3c4d-494f-80b5-d89d8a5c8b39</version_id>
+  <version_modified>20220711T223030Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -482,12 +482,6 @@
       <checksum>77F1BC25</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3FCCEA0E</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -560,16 +554,28 @@
       <checksum>D4AB73B6</checksum>
     </file>
     <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E2EEFD57</checksum>
-    </file>
-    <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>70428541</checksum>
+    </file>
+    <file>
+      <filename>test_battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>173366F9</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D9C0EB8A</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B41F4334</checksum>
     </file>
     <file>
       <version>
@@ -580,13 +586,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4832EAB4</checksum>
+      <checksum>869E5C88</checksum>
     </file>
     <file>
-      <filename>test_battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>173366F9</checksum>
+      <filename>schedule_files/battery.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A29A9FEC</checksum>
     </file>
   </files>
 </measure>

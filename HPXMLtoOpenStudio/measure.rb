@@ -1857,7 +1857,7 @@ class OSModel
       if battery.location != HPXML::LocationOutside
         battery.additional_properties.space = get_space_from_location(battery.location, model, spaces)
       end
-      Battery.apply(model, battery)
+      Battery.apply(model, battery, @schedules_file)
     end
   end
 
