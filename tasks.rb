@@ -59,6 +59,7 @@ def create_hpxmls
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-battery.xml' => 'base.xml',
+    'base-battery-scheduled.xml' => 'base-battery.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -2470,7 +2471,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Battery Schedules
-  if ['base-pv-battery-scheduled.xml'].include? hpxml_file
+  if ['base-battery-scheduled.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
+  elsif ['base-pv-battery-scheduled.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
   end
 end

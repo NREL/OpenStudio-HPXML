@@ -2640,6 +2640,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
+      elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
+        return { [FT::Elec, EUT::PV] => ["Converter #{EPlus::FuelTypeElectricity} Loss Decrement Energy"] }
+        # on PV, allows base-pv-battery-scheduled.xml to work
+        # however, for base-battery-scheduled.xml we get (positive) PV
+        # FIXME: how should this be handled?
+        # return { [FT::Elec, EUT::Battery] => ["Converter #{EPlus::FuelTypeElectricity} Loss Decrement Energy"] }
+
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
                     Constants.ObjectNameGSHPSharedPump => 'TempGSHPSharedPump',
