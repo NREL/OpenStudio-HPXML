@@ -15,7 +15,7 @@ __New Features__
   - Adds optional arguments for utility bill scenarios.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios feature.
-- **[Breaking Change]** Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
+- **Breaking Change** Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
