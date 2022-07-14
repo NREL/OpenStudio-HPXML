@@ -594,5 +594,17 @@
       <usage_type>resource</usage_type>
       <checksum>D4AB73B6</checksum>
     </file>
+    <file>
+      <filename>utility_bills.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>35B866E9</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>18730FF6</checksum>
+    </file>
   </files>
 </measure>
