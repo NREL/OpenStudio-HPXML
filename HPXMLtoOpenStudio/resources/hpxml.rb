@@ -1924,8 +1924,8 @@ class HPXML < Object
       end
       if not @attached_to_floor_idrefs.nil?
         @attached_to_floor_idrefs.each do |floor|
-          floor_frame_attached = XMLHelper.add_element(foundation, 'AttachedToFloor')
-          XMLHelper.add_attribute(floor_frame_attached, 'idref', floor)
+          floor_attached = XMLHelper.add_element(foundation, 'AttachedToFloor')
+          XMLHelper.add_attribute(floor_attached, 'idref', floor)
         end
       end
       if not @attached_to_slab_idrefs.nil?

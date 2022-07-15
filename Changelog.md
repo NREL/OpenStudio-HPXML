@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.5.0
 
 __New Features__
+- **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - EnergyPlus modeling changes:
@@ -15,7 +16,6 @@ __New Features__
   - Adds optional arguments for utility bill scenarios.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios feature.
-- **Breaking Change** Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
