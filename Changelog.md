@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.5.0
 
 __New Features__
+- **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - EnergyPlus modeling changes:
@@ -18,6 +19,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
+- Fixes incorrect autosizing of heat pump *integrated* backup systems if using MaxLoad/HERS sizing methodology and cooling design load exceeds heating design load.
 - Fixes heating (or cooling) setpoints affecting the conditioned space temperature outside the heating (or cooling) season.
 - Fixes handling non-integer number of occupants when using the stochastic occupancy schedule generator.
 - Fixes units for Peak Loads (kBtu/hr, not kBtu) in annual results file.
