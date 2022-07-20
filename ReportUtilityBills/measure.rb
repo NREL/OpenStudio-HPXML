@@ -322,7 +322,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
           if tariff.keys.include?(:realtimepricing)
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-            rate.realtimeprice = tariff[:realtimepricing].split(',').map { |v| Float(v) }
+            rate.realtimeprice = tariff[:realtimepricing]
 
           else
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)

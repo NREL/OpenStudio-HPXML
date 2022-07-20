@@ -4630,7 +4630,7 @@ def download_utility_rates
   require_relative 'HPXMLtoOpenStudio/resources/util'
   require_relative 'ReportUtilityBills/resources/util'
 
-  rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/rates')
+  rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/data/detailed_rates')
   FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
   filepath = File.join(rates_dir, 'usurdb.csv')
 

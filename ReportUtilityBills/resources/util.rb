@@ -515,6 +515,12 @@ class CalculateUtilityBill
   end
 end
 
+def valid_filename(x)
+  x = "#{x}".gsub(/[^0-9A-Za-z\s]/, '') # remove non-alphanumeric
+  x = "#{x}".gsub(/\s+/, ' ').strip # remove multiple spaces
+  return x
+end
+
 def process_usurdb(filepath)
   require 'csv'
   require 'json'
@@ -542,6 +548,7 @@ def process_usurdb(filepath)
   residential_rates = []
   rates.each do |rate|
     next if rate['sector'] != 'Residential'
+    next if !rate['enddate'].nil?
     next if keywords.any? { |x| rate['name'].downcase.include?(x) } && skip_keywords
 
     rate.each do |k, v|
@@ -601,9 +608,14 @@ def process_usurdb(filepath)
   puts 'Exporting residential rates...'
   rates_dir = File.dirname(filepath)
   residential_rates.each do |residential_rate|
-    label = residential_rate['items'][0]['label']
-    ratepath = File.join(rates_dir, "#{label}.json")
+    utility = valid_filename(residential_rate['items'][0]['utility'])
+    name = valid_filename(residential_rate['items'][0]['name'])
+    startdate = residential_rate['items'][0]['startdate']
 
+    filename = "#{utility} - #{name}"
+    filename += " (Effective #{startdate.split(' ')[0]})" if !startdate.nil?
+
+    ratepath = File.join(rates_dir, "#{filename}.json")
     File.open(ratepath, 'w') do |f|
       json = JSON.pretty_generate(residential_rate)
       f.write(json)

@@ -2008,7 +2008,7 @@
 /workflow/sample_files/run
 /files
 /BuildResidentialHPXML/tests/extra_files
-/ReportUtilityBills/resources/rates/*.json
-!/ReportUtilityBills/resources/rates/5a0b28045457a3ea2aca608e.json
-!/ReportUtilityBills/resources/rates/539f6aacec4f024411ec92ab.json
+/ReportUtilityBills/resources/data/detailed_rates/*.json
+!/ReportUtilityBills/resources/data/detailed_rates/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json
+!/ReportUtilityBills/resources/data/detailed_rates/Missoula Electric Coop Inc - Irrigation 5 HP to 10 HP.json
 /ReportUtilityBills/tests/results_bills.csv
