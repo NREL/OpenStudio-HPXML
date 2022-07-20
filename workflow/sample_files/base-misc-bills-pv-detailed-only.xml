@@ -19,28 +19,28 @@
           <Name>Tiered</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/tests/Sample Tiered Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>TOU</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Time-of-Use Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/tests/Sample Time-of-Use Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Tiered and TOU</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Tiered Time-of-Use Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/tests/Sample Tiered Time-of-Use Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Real-Time Pricing</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/Data/SampleRates/Sample Real-Time Pricing Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>
@@ -119,7 +119,7 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFrameFloor idref='FrameFloor1'/>
+            <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -231,9 +231,9 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FrameFloor1'/>
+        <Floors>
+          <Floor>
+            <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
@@ -241,11 +241,11 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='FrameFloor1Insulation'/>
+              <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-        </FrameFloors>
+          </Floor>
+        </Floors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
