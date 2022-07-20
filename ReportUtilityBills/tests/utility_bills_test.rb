@@ -278,7 +278,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_workflow_detailed_calculations
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/resources/data/detailed_rates/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
@@ -349,7 +349,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_warning_demand_charges
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/resources/data/detailed_rates/Missoula Electric Coop Inc - Irrigation 5 HP to 10 HP.json')
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Arizona Public Service Co - Residential Service Saver Choice Plus.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Demand charges are not currently supported when calculating detailed utility bills.']
     bills_csv = _test_measure(expected_warnings: expected_warnings)
