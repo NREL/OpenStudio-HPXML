@@ -2009,4 +2009,5 @@
 /files
 /BuildResidentialHPXML/tests/extra_files
 /ReportUtilityBills/resources/data/detailed_rates
+!/ReportUtilityBills/resources/data/detailed_rates/rates.tar.gz
 /ReportUtilityBills/tests/results_bills.csv
