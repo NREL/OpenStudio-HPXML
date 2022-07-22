@@ -115,6 +115,7 @@ class Battery
         elcd.setDesignStorageControlChargePower(1000)
 
         elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+        # elcsc.setSimpleFixedEfficiency(1.0)
         elcd.setStorageConverter(elcsc)
       end
     end
