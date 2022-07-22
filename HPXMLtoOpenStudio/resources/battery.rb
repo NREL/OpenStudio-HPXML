@@ -65,29 +65,7 @@ class Battery
     if elcds.empty?
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName('Battery elec load center dist')
-      elcd.setElectricalBussType('AlternatingCurrentWithStorage') # AlternatingCurrentWithStorage, DirectCurrentWithInverterDCStorage, DirectCurrentWithInverterACStorage
-
-      # TrackFacilityElectricDemandStoreExcessOnSite
-      # TrackMeterDemandStoreExcessOnSite
-      # TrackChargeDischargeSchedules
-      # FacilityDemandLeveling
-
-      # TrackMeterDemandStoreExcessOnSite
-      # elcd.setStorageOperationScheme('TrackMeterDemandStoreExcessOnSite')
-      # elcd.setStorageControlTrackMeterName()
-
-      # TrackChargeDischargeSchedules
-      # elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
-      # elcd.setStorageChargePowerFractionSchedule(model.alwaysOnDiscreteSchedule)
-      # elcd.setStorageDischargePowerFractionSchedule(model.alwaysOnDiscreteSchedule)
-
-      # FacilityDemandLeveling
-      # elcd.setStorageOperationScheme('FacilityDemandLeveling')
-      # elcd.setStorageControlUtilityDemandTarget(7500)
-      # elcd.setStorageControlUtilityDemandTargetFractionSchedule(model.alwaysOnDiscreteSchedule)
-
-      # elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
-      # elcd.setStorageConverter(elcsc)
+      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
     else
       elcd = elcds[0]
       return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator)
