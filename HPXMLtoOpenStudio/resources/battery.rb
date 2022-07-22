@@ -111,8 +111,8 @@ class Battery
         elcd.setStorageChargePowerFractionSchedule(charging_schedule)
         elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
 
-        # elcd.setDesignStorageControlDischargePower(1000) # FIXME: moving this up causes PV production to go down, and vice versa. why?
-        # elcd.setDesignStorageControlChargePower(1000)
+        elcd.setDesignStorageControlDischargePower(1000)
+        elcd.setDesignStorageControlChargePower(1000)
 
         elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
         elcd.setStorageConverter(elcsc)

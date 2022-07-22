@@ -301,15 +301,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     if has_electricity_production
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:ElectricityProduced,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,PowerConversion:ElectricityProduced,runperiod;').get # Used for error checking
       if include_timeseries_fuel_consumptions
-        result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:ElectricityProduced,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,PowerConversion:ElectricityProduced,#{timeseries_frequency};").get
       end
     end
     if has_electricity_storage
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,PowerConversion:ElectricityProduced,runperiod;').get
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,PowerConversion:ElectricityProduced,#{timeseries_frequency};").get
       end
     end
 
@@ -639,9 +643,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
       fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec
+      fuel.annual_output -= get_report_meter_data_annual(['PowerConversion:ElectricityProduced']) if fuel_type == FT::Elec # FIXME comment for base-pv.xml
       if include_timeseries_fuel_consumptions
         fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
         fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec
+        fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['PowerConversion:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec # FIXME comment for base-pv.xml
       end
     end
 
@@ -1111,8 +1117,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
-    meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) # remove battery energy losses
+    meter_elec_produced = -1 * get_report_meter_data_annual(['Photovoltaic:ElectricityProduced'])
+    # meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) # remove battery energy losses
+    meter_elec_produced -= get_report_meter_data_annual(['PowerConversion:ElectricityProduced']) # remove inverter energy losses # FIXME uncomment for base-pv.xml
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -2641,11 +2648,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
-        return { [FT::Elec, EUT::PV] => ["Converter #{EPlus::FuelTypeElectricity} Loss Decrement Energy"] }
-        # on PV, allows base-pv-battery-scheduled.xml to work
-        # however, for base-battery-scheduled.xml we get (positive) PV
-        # FIXME: how should this be handled?
-        # return { [FT::Elec, EUT::Battery] => ["Converter #{EPlus::FuelTypeElectricity} Loss Decrement Energy"] }
+        return { [FT::Elec, EUT::Battery] => ["Converter #{EPlus::FuelTypeElectricity} Loss Decrement Energy"] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
