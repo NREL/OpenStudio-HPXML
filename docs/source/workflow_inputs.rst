@@ -109,7 +109,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
-         This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.).
+         This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
          A review of published reports shows recommendations ranging from 3 to 15, based on calibration to experimental/field data for residential homes.
 
 If daylight saving is enabled, additional information is specified in ``DaylightSaving``.
