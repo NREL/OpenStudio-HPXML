@@ -348,7 +348,7 @@
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF2</Units>
-                <Value>7.3</Value>
+                <Value>6.5</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>

@@ -1682,7 +1682,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsSEER2
     args['heat_pump_cooling_efficiency'] = (args['heat_pump_cooling_efficiency'] * 0.95).round(1)
     args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF2
-    args['heat_pump_heating_efficiency'] = (args['heat_pump_heating_efficiency'] * 0.95).round(1)
+    args['heat_pump_heating_efficiency'] = (args['heat_pump_heating_efficiency'] * 0.85).round(1)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_heating_capacity_17_f'] = 0.0

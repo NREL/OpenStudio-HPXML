@@ -347,9 +347,9 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_air_to_air_heat_pump_1_speed
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
-     'base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].each do |_hpxml_path|
+     'base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].each do |hpxml_path|
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_path))
       model, hpxml = _test_measure(args_hash)
 
       # Get HPXML values
