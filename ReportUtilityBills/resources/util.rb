@@ -12,8 +12,10 @@ class UtilityRate
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
-    @flatratefueladj = 0.0
     @realtimeprice = []
+
+    @minmonthlycharge = 0.0
+    @minannualcharge = nil
 
     @net_metering_excess_sellback_type = nil
     @net_metering_user_excess_sellback_rate = nil
@@ -24,7 +26,8 @@ class UtilityRate
     @energyweekdayschedule = []
     @energyweekendschedule = []
   end
-  attr_accessor(:fixedmonthlycharge, :flatratebuy, :flatratefueladj, :realtimeprice,
+  attr_accessor(:fixedmonthlycharge, :flatratebuy, :realtimeprice,
+                :minmonthlycharge, :minannualcharge,
                 :net_metering_excess_sellback_type, :net_metering_user_excess_sellback_rate,
                 :feed_in_tariff_rate,
                 :energyratestructure, :energyweekdayschedule, :energyweekendschedule)
@@ -133,7 +136,7 @@ class CalculateUtilityBill
 
     tier = 0
     net_tier = 0
-    if rate.flatratebuy || !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
+    if !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
 
       elec_period = [0] * num_energyrate_periods
       elec_tier = [0] * length_tiers.max
@@ -215,9 +218,8 @@ class CalculateUtilityBill
 
           end
         else # not tiered or TOU
-          elec_rate = rate.flatratebuy + rate.flatratefueladj
           if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
-            elec_rate += rate.energyratestructure[0][0][:rate]
+            elec_rate = rate.energyratestructure[0][0][:rate]
           end
           hourly_fuel_cost[hour] = elec_hour * elec_rate
           bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
@@ -283,9 +285,8 @@ class CalculateUtilityBill
 
               end
             else # not tiered or TOU
-              net_elec_rate = rate.flatratebuy * rate.flatratefueladj
               if (num_energyrate_periods == 1) && (num_energyrate_tiers == 1)
-                net_elec_rate += rate.energyratestructure[0][0][:rate]
+                net_elec_rate = rate.energyratestructure[0][0][:rate]
               end
               net_hourly_fuel_cost[hour] = net_elec_hour * net_elec_rate
               net_monthly_energy_charge[month] += net_hourly_fuel_cost[hour]
@@ -319,7 +320,6 @@ class CalculateUtilityBill
               end
             end
 
-            bill.monthly_energy_charge[month] += (rate.flatratebuy + rate.flatratefueladj) * elec_month[month]
             elec_period = [0] * num_energyrate_periods
             elec_tier = [0] * length_tiers.max
             tier = 0
@@ -342,7 +342,6 @@ class CalculateUtilityBill
                 end
               end
 
-              net_monthly_energy_charge[month] += (rate.flatratebuy + rate.flatratefueladj) * net_elec_month[month]
               net_elec_period = [0] * num_energyrate_periods
               net_elec_tier = [0] * length_tiers.max
               net_tier = 0
@@ -366,45 +365,60 @@ class CalculateUtilityBill
       end
 
       annual_total_charge = bill.annual_energy_charge + bill.annual_fixed_charge
-      monthly_min_charge = 0
       true_up_month = 12
 
       if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
 
-        annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, true_up_month)
+        annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
         end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
 
         annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
         bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
       else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
+        if rate.minannualcharge.nil?
+          monthly_bill = [0] * 12
+          (0..11).to_a.each do |m|
+            monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
+            if monthly_bill[m] < rate.minmonthlycharge
+              bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
+            end
+          end
+        else # California-style annual minimum
+          # TODO
+        end
       end
     end
   end
 
-  def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, monthly_min_charge, _true_up_month)
-    payments = [0] * 12
-    rollover = [0] * 12
-    net_monthly_bill = [0] * 12
-    months_loop = (0..11)
+  def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge, true_up_month)
+    # Calculate monthly payments, rollover, and min charges
+    if annual_min_charge.nil?
+      payments = [0] * 12
+      rollover = [0] * 12
+      net_monthly_bill = [0] * 12
+      months_loop = (true_up_month...12).to_a + (0...true_up_month).to_a
+      months_loop.to_a.each_with_index do |m, i|
+        net_monthly_bill[m] = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
+        # Pay bill if rollover can't cover it, or just pay min charge.
+        payments[i] = [net_monthly_bill[m] + rollover[i - 1], monthly_min_charge].max
 
-    months_loop.to_a.each_with_index do |m, i|
-      net_monthly_bill[m] = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
-      # Pay bill if rollover can't cover it, or just pay min charge.
-      payments[i] = [net_monthly_bill[m] + rollover[i - 1], monthly_min_charge].max
+        if net_monthly_bill[m] <= 0
+          # Surplus this month, add to rollover total
+          rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i] + [monthly_min_charge - monthly_fixed_charge[m], 0].max)
 
-      if net_monthly_bill[m] <= 0
-        # Surplus this month, add to rollover total
-        rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i] + [monthly_min_charge - monthly_fixed_charge[m], 0].max)
+        elsif rollover[i - 1] < 0
+          # Use previous month's bill credit to pay this bill; subtract from rollover total
+          rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i])
 
-      elsif rollover[i - 1] < 0
-        # Use previous month's bill credit to pay this bill; subtract from rollover total
-        rollover[i] += (rollover[i - 1] + net_monthly_bill[m] - payments[i])
-
+        end
       end
+      annual_payments = payments.sum
+      end_of_year_bill_credit = rollover[-1]
+
+    else # California-style Annual True-Up
+      # TODO
     end
-    annual_payments = payments.sum
-    end_of_year_bill_credit = rollover[-1]
 
     return annual_payments, end_of_year_bill_credit
   end
@@ -538,7 +552,8 @@ def process_usurdb(filepath)
               'lamps',
               '[partial]',
               'rider',
-              'irrigation']
+              'irrigation',
+              'grain']
 
   puts 'Parsing CSV...'
   rates = CSV.read(filepath, headers: true)
@@ -547,14 +562,42 @@ def process_usurdb(filepath)
   puts 'Selecting residential rates...'
   residential_rates = []
   rates.each do |rate|
+    # rates to skip
     next if rate['sector'] != 'Residential'
     next if !rate['enddate'].nil?
     next if keywords.any? { |x| rate['name'].downcase.include?(x) } && skip_keywords
 
+    # map fixed charge to version 3
+    if rate['fixedchargeunits'] == '$/day'
+      next
+    elsif rate['fixedchargeunits'] == '$/month'
+      rate['fixedmonthlycharge'] = rate['fixedchargefirstmeter'] if !rate['fixedchargefirstmeter'].nil?
+      rate['fixedmonthlycharge'] += rate['fixedchargeeaaddl'] if !rate['fixedchargeeaaddl'].nil?
+    elsif rate['fixedchargeunits'] == '$/year'
+      next
+    end
+
+    # map min charge to version 3
+    if rate['minchargeunits'] == '$/day'
+      next
+    elsif rate['minchargeunits'] == '$/month'
+      rate['minmonthlycharge'] = rate['mincharge'] if !rate['mincharge'].nil?
+    elsif rate['minchargeunits'] == '$/year'
+      rate['annualmincharge'] = rate['mincharge'] if !rate['mincharge'].nil?
+    end
+
+    rate.delete('fixedchargefirstmeter')
+    rate.delete('fixedchargeeaaddl')
+    rate.delete('fixedchargeunits')
+    rate.delete('mincharge')
+    rate.delete('minchargeunits')
+
+    # ignore blank fields
     rate.each do |k, v|
       rate.delete(k) if v.nil?
     end
 
+    # map schedules and structures
     structures = {}
     rate.each do |k, v|
       if ['eiaid'].include?(k)
@@ -601,6 +644,9 @@ def process_usurdb(filepath)
     end
 
     rate.update(structures)
+
+    # ignore rates without minimum fields
+    next if rate['energyweekdayschedule'].nil? || rate['energyweekendschedule'].nil? || rate['energyratestructure'].nil?
 
     residential_rates << { 'items' => [rate] }
   end

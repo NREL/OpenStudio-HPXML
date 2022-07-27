@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>b7961d23-7045-4f29-b9a3-6bee3342be57</version_id>
-  <version_modified>20220727T195824Z</version_modified>
+  <version_id>027727c0-4838-450a-9c5b-626c764c3719</version_id>
+  <version_modified>20220727T223215Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -67,41 +67,6 @@
       <checksum>0D33F8C0</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>A1F7BD55</checksum>
-    </file>
-    <file>
-      <filename>Sample Real-Time Pricing Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BFADA53C</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>60377B01</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5CD81206</checksum>
-    </file>
-    <file>
-      <filename>Sample Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8022AB7B</checksum>
-    </file>
-    <file>
       <filename>data/simple_rates/Average_retail_price_of_electricity.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -156,16 +121,51 @@
       <checksum>535D428A</checksum>
     </file>
     <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>CB76A133</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>17092663</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>04325A14</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DA5CF58E</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B863C168</checksum>
+    </file>
+    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F67813E0</checksum>
+      <checksum>14D34793</checksum>
     </file>
     <file>
       <filename>data/detailed_rates/rates.tar.gz</filename>
       <filetype>gz</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E9B9384C</checksum>
+      <checksum>CC10E1AB</checksum>
     </file>
   </files>
 </measure>

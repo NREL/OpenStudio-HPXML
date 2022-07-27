@@ -326,9 +326,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
           else
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-            rate.fixedmonthlycharge = tariff[:fixedchargefirstmeter] if tariff.keys.include?(:fixedchargefirstmeter)
-            rate.flatratebuy = tariff[:flatratebuy] if tariff.keys.include?(:flatratebuy)
-            rate.flatratefueladj = tariff[:flatratefueladj] if tariff.keys.include?(:flatratefueladj)
+            rate.minmonthlycharge = tariff[:minmonthlycharge] if tariff.keys.include?(:minmonthlycharge)
+            rate.minannualcharge = tariff[:minannualcharge] if tariff.keys.include?(:minannualcharge)
 
             rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
             rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
