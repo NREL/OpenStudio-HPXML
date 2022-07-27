@@ -645,6 +645,9 @@ def process_usurdb(filepath)
 
     rate.update(structures)
 
+    # ignore rates with demand charges
+    next if !rate['demandweekdayschedule'].nil? || !rate['demandweekendschedule'].nil? || !rate['demandratestructure'].nil? || !rate['flatdemandstructure'].nil?
+
     # ignore rates without minimum fields
     next if rate['energyweekdayschedule'].nil? || rate['energyweekendschedule'].nil? || rate['energyratestructure'].nil?
 

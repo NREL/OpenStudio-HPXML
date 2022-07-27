@@ -349,9 +349,19 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_warning_demand_charges
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Arizona Public Service Co - Residential Service Saver Choice Plus.json')
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Contains Demand Charges.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Demand charges are not currently supported when calculating detailed utility bills.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
+    assert(File.exist?(bills_csv))
+  end
+
+  def test_warning_missing_required_fields
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Missing Required Fields.json')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    expected_warnings = ['Tariff file must contain energyweekdayschedule, energyweekendschedule, and energyratestructure fields.']
     bills_csv = _test_measure(expected_warnings: expected_warnings)
     assert(File.exist?(bills_csv))
   end

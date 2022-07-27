@@ -325,17 +325,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.realtimeprice = tariff[:realtimepricing]
 
           else
-            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
-            rate.minmonthlycharge = tariff[:minmonthlycharge] if tariff.keys.include?(:minmonthlycharge)
-            rate.minannualcharge = tariff[:minannualcharge] if tariff.keys.include?(:minannualcharge)
+            fields = tariff.keys
+            if !fields.include?(:energyweekdayschedule) || !fields.include?(:energyweekendschedule) || !fields.include?(:energyratestructure)
+              warnings << 'Tariff file must contain energyweekdayschedule, energyweekendschedule, and energyratestructure fields.'
+            end
 
-            rate.energyratestructure = tariff[:energyratestructure] if tariff.keys.include?(:energyratestructure)
-            rate.energyweekdayschedule = tariff[:energyweekdayschedule] if tariff.keys.include?(:energyweekdayschedule)
-            rate.energyweekendschedule = tariff[:energyweekendschedule] if tariff.keys.include?(:energyweekendschedule)
-
-            if tariff.keys.include?(:demandratestructure) || tariff.keys.include?(:flatdemandstructure)
+            if fields.include?(:demandweekdayschedule) || fields.include?(:demandweekendschedule) || fields.include?(:demandratestructure) || fields.include?(:flatdemandstructure)
               warnings << 'Demand charges are not currently supported when calculating detailed utility bills.'
             end
+
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
+            rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
+            rate.minannualcharge = tariff[:minannualcharge] if fields.include?(:minannualcharge)
+
+            rate.energyratestructure = tariff[:energyratestructure]
+            rate.energyweekdayschedule = tariff[:energyweekdayschedule]
+            rate.energyweekendschedule = tariff[:energyweekendschedule]
+
           end
         end
 

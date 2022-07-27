@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>027727c0-4838-450a-9c5b-626c764c3719</version_id>
-  <version_modified>20220727T223215Z</version_modified>
+  <version_id>5df77bf1-e3df-4585-8b1e-7d9213f9b781</version_id>
+  <version_modified>20220727T231332Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -103,33 +103,10 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AF0217CA</checksum>
-    </file>
-    <file>
-      <filename>Arizona Public Service Co - Residential Service Saver Choice Plus.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>31A7BE3B</checksum>
-    </file>
-    <file>
       <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
       <checksum>535D428A</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>CB76A133</checksum>
     </file>
     <file>
       <filename>Sample Real-Time Pricing Rate.json</filename>
@@ -156,16 +133,45 @@
       <checksum>B863C168</checksum>
     </file>
     <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3DC92D16</checksum>
+    </file>
+    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14D34793</checksum>
+      <checksum>C96F2E2E</checksum>
     </file>
     <file>
       <filename>data/detailed_rates/rates.tar.gz</filename>
       <filetype>gz</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CC10E1AB</checksum>
+      <checksum>B4190FB1</checksum>
+    </file>
+    <file>
+      <filename>Contains Demand Charges.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31A7BE3B</checksum>
+    </file>
+    <file>
+      <filename>Missing Required Fields.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3DCED656</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>57BEE3F2</checksum>
     </file>
   </files>
 </measure>
