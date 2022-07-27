@@ -3,8 +3,6 @@
     {
       "description": "Sample file defined by BEopt.",
       "fixedmonthlycharge": 9,
-      "flatratebuy": 0,
-      "flatratefueladj": 0,
       "name": "Sample Real-Time Pricing Rate",
       "realtimepricing": [
         0.04625,

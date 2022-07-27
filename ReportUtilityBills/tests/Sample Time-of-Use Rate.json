@@ -5,9 +5,6 @@
       "sector": "Residential",
       "description": "Sample file defined by BEopt.",
       "fixedmonthlycharge": 9,
-      "fixedchargeunits": "$/month",
-      "flatratebuy": 0,
-      "flatratefueladj": 0,
       "energyweekdayschedule": [
         [
           0,
