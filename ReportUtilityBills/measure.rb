@@ -426,23 +426,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     CalculateUtilityBill.annual_true_up(utility_rates, utility_bills, net_elec)
   end
 
-  def annual_true_up(utility_rates, utility_bills, net_elec)
-    rate = utility_rates[FT::Elec]
-    bill = utility_bills[FT::Elec]
-    if rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
-      if bill.annual_production_credit > bill.annual_energy_charge
-        bill.annual_production_credit = bill.annual_energy_charge
-      end
-      if net_elec < 0
-        bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
-      end
-    end
-  end
-
   def get_annual_bills(utility_bills)
     utility_bills.values.each do |bill|
       if bill.annual_production_credit > 0
         bill.annual_production_credit *= -1
+      elsif bill.annual_production_credit < 0
+        bill.annual_production_credit = 0 # FIXME: is this correct? BEopt's "PV Credit" bar doesn't show up on the graph
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
