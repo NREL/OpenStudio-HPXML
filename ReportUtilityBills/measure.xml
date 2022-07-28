@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>5df77bf1-e3df-4585-8b1e-7d9213f9b781</version_id>
-  <version_modified>20220727T231332Z</version_modified>
+  <version_id>8ada8fd9-38eb-4507-8f5a-a03b8b588d28</version_id>
+  <version_modified>20220728T181842Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -133,18 +133,6 @@
       <checksum>B863C168</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3DC92D16</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C96F2E2E</checksum>
-    </file>
-    <file>
       <filename>data/detailed_rates/rates.tar.gz</filename>
       <filetype>gz</filetype>
       <usage_type>resource</usage_type>
@@ -163,6 +151,18 @@
       <checksum>3DCED656</checksum>
     </file>
     <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>38EC0AAA</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C936D228</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -171,7 +171,37 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>57BEE3F2</checksum>
+      <checksum>3CFEDC8D</checksum>
+    </file>
+    <file>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>52EC92FE</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DE41B5A9</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>398E84A6</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>837B034F</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C7D68128</checksum>
     </file>
   </files>
 </measure>

@@ -319,13 +319,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
           tariff = JSON.parse(File.read(filepath), symbolize_names: true)
           tariff = tariff[:items][0]
+          fields = tariff.keys
 
-          if tariff.keys.include?(:realtimepricing)
-            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if tariff.keys.include?(:fixedmonthlycharge)
+          if fields.include?(:realtimepricing)
+            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
+            rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
             rate.realtimeprice = tariff[:realtimepricing]
 
           else
-            fields = tariff.keys
             if !fields.include?(:energyweekdayschedule) || !fields.include?(:energyweekendschedule) || !fields.include?(:energyratestructure)
               warnings << 'Tariff file must contain energyweekdayschedule, energyweekendschedule, and energyratestructure fields.'
             end

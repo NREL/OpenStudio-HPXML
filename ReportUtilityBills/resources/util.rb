@@ -356,15 +356,14 @@ class CalculateUtilityBill
             end
             bill.annual_production_credit += bill.monthly_production_credit[month]
           end
-
-          bill.annual_energy_charge += bill.monthly_energy_charge[month]
-          bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
         end
 
         today += 1 # next day
-      end
+      end # (0...fuel_time_series.size).to_a.each do |hour|
 
-      annual_total_charge = bill.annual_energy_charge + bill.annual_fixed_charge
+      annual_fixed_charge = bill.monthly_fixed_charge.sum
+      annual_energy_charge = bill.monthly_energy_charge.sum
+      annual_total_charge = annual_energy_charge + annual_fixed_charge
       true_up_month = 12
 
       if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
@@ -377,6 +376,7 @@ class CalculateUtilityBill
 
       else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
         if rate.minannualcharge.nil?
+
           monthly_bill = [0] * 12
           (0..11).to_a.each do |m|
             monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
@@ -384,11 +384,17 @@ class CalculateUtilityBill
               bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
             end
           end
+
+          annual_energy_charge = bill.monthly_energy_charge.sum
+
         else # California-style annual minimum
           # TODO
         end
       end
-    end
+
+      bill.annual_energy_charge = annual_energy_charge
+      bill.annual_fixed_charge = annual_fixed_charge
+    end # if !rate.energyratestructure.empty? || !rate.fixedmonthlycharge.nil?
   end
 
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge, true_up_month)
@@ -493,12 +499,46 @@ class CalculateUtilityBill
           bill.annual_production_credit += bill.monthly_production_credit[month]
         end
 
-        bill.annual_energy_charge += bill.monthly_energy_charge[month]
-        bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
+        # bill.annual_energy_charge += bill.monthly_energy_charge[month]
+        # bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
 
       today += 1 # next day
     end
+
+    annual_fixed_charge = bill.monthly_fixed_charge.sum
+    annual_energy_charge = bill.monthly_energy_charge.sum
+    annual_total_charge = annual_energy_charge + annual_fixed_charge
+    true_up_month = 12
+
+    if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+
+      annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
+      end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
+
+      annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
+      bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
+
+    else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
+      if rate.minannualcharge.nil?
+
+        monthly_bill = [0] * 12
+        (0..11).to_a.each do |m|
+          monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
+          if monthly_bill[m] < rate.minmonthlycharge
+            bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
+          end
+        end
+
+        annual_energy_charge = bill.monthly_energy_charge.sum
+
+      else # California-style annual minimum
+        # TODO
+      end
+    end
+
+    bill.annual_energy_charge = annual_energy_charge
+    bill.annual_fixed_charge = annual_fixed_charge
     return net_elec
   end
 
