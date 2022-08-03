@@ -1428,7 +1428,7 @@ class SchedulesFile
   end
 
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1488,6 +1488,13 @@ class SchedulesFile
   def self.OperatingModeColumnNames
     return [
       ColumnWaterHeaterOperatingMode
+    ]
+  end
+
+  def self.BatteryColumnNames
+    return [
+      ColumnBatteryCharging,
+      ColumnBatteryDischarging
     ]
   end
 

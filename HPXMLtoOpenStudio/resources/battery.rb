@@ -95,6 +95,8 @@ class Battery
         elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
         # elcsc.setSimpleFixedEfficiency(1.0)
         elcd.setStorageConverter(elcsc)
+      elsif (not charging_schedule.nil?) || (not discharging_schedule.nil?)
+        fail 'Must specify both a charging and discharging battery schedule.'
       end
     end
   end
