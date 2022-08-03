@@ -669,7 +669,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def test_measure_error_messages
     # Test case => Error message
-    all_expected_errors = { 'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
+    all_expected_errors = { 'battery-missing-schedule' => ['Must specify both a charging and discharging battery schedule.'],
+                            'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
                             'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
                             'emissions-duplicate-names' => ['Found multiple Emissions Scenarios with the Scenario Name='],
@@ -737,7 +738,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
-      if ['cfis-with-hydronic-distribution'].include? error_case
+      if ['battery-missing-schedule'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
+        csv_data.transpose.delete_at(1)
+        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
+      elsif ['cfis-with-hydronic-distribution'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-boiler-gas-only.xml'))
         hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                    fan_type: HPXML::MechVentTypeCFIS,
