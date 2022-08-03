@@ -302,10 +302,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if has_electricity_production
       result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:ElectricityProduced,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,Cogeneration:ElectricityProduced,runperiod;').get # Used for error checking
       result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:Inverter,runperiod;').get
       result << OpenStudio::IdfObject.load('Meter:Custom,Photovoltaic:Inverter,electricity,*,Inverter Conversion Loss Decrement Energy;').get
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:ElectricityProduced,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,Cogeneration:ElectricityProduced,#{timeseries_frequency};").get
         result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:Inverter,#{timeseries_frequency};").get
       end
     end
@@ -1119,7 +1121,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    meter_elec_produced = -1 * get_report_meter_data_annual(['Photovoltaic:ElectricityProduced'])
+    meter_elec_produced = 0.0
+    meter_elec_produced -= get_report_meter_data_annual(['Photovoltaic:ElectricityProduced'])
+    meter_elec_produced -= get_report_meter_data_annual(['Cogeneration:ElectricityProduced'])
     meter_elec_produced -= get_report_meter_data_annual(['PHOTOVOLTAIC:INVERTER'])
 
     # Check if simulation successful
