@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>296b380c-7d87-4515-83b1-eab149a129a0</version_id>
-  <version_modified>20220803T152323Z</version_modified>
+  <version_id>711cf18a-61ac-4f09-a871-e73619ce02b5</version_id>
+  <version_modified>20220803T162553Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -506,12 +506,6 @@
       <checksum>FC171B98</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>66A25AE7</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -534,12 +528,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>9525B42B</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0DD39AA7</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -566,22 +554,10 @@
       <checksum>14D38FD7</checksum>
     </file>
     <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>389986FC</checksum>
-    </file>
-    <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>70428541</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D9C0EB8A</checksum>
     </file>
     <file>
       <version>
@@ -599,6 +575,30 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>A29A9FEC</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AF7E6EAC</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D279454A</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>14A2A46E</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E01335B8</checksum>
     </file>
   </files>
 </measure>
