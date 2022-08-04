@@ -1406,7 +1406,7 @@ class Constructions
 
         program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
         program_cm.setName("#{program.name} calling manager")
-        program_cm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance') # https://github.com/NREL/EnergyPlus/pull/8477#discussion_r567320478
+        program_cm.setCallingPoint('EndOfSystemSizing') # https://github.com/NREL/EnergyPlus/pull/8477#discussion_r567320478
         program_cm.addProgram(program)
       else
         shading_ems[:program].addLine("Set #{actuator.name} = #{default_vf_to_ground}*#{shading_coeff}")
