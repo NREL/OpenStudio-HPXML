@@ -2,7 +2,8 @@
   "items": [
     {
       "description": "Sample file defined by BEopt.",
-      "fixedmonthlycharge": 9,
+      "fixedchargeunits": "$/month",
+      "fixedchargefirstmeter": 9,
       "name": "Sample Real-Time Pricing Rate",
       "realtimepricing": [
         0.04625,

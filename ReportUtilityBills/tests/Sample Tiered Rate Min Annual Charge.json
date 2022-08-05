@@ -4,8 +4,10 @@
       "name": "Sample Tiered Rate",
       "sector": "Residential",
       "description": "Sample file defined by BEopt.",
-      "fixedmonthlycharge": 9,
-      "annualmincharge": 10000,
+      "fixedchargeunits": "$/month",
+      "fixedchargefirstmeter": 9,
+      "minchargeunits": "$/year",
+      "mincharge": 10000,
       "energyweekdayschedule": [
         [
           0,

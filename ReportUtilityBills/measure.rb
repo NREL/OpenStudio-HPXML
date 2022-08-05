@@ -321,10 +321,27 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           tariff = tariff[:items][0]
           fields = tariff.keys
 
+          if fields.include?(:fixedchargeunits)
+            if tariff[:fixedchargeunits] == '$/month'
+              rate.fixedmonthlycharge = 0.0 if fields.include?(:fixedchargefirstmeter) || fields.include?(:fixedchargeeaaddl)
+              rate.fixedmonthlycharge += tariff[:fixedchargefirstmeter] if fields.include?(:fixedchargefirstmeter)
+              rate.fixedmonthlycharge += tariff[:fixedchargeeaaddl] if fields.include?(:fixedchargeeaaddl)
+            else
+              warnings << 'Fixed charge units must be $/month.'
+            end
+          end
+
+          if fields.include?(:minchargeunits)
+            if tariff[:minchargeunits] == '$/month'
+              rate.minmonthlycharge = tariff[:mincharge] if fields.include?(:mincharge)
+            elsif tariff[:minchargeunits] == '$/year'
+              rate.minannualcharge = tariff[:mincharge] if fields.include?(:mincharge)
+            else
+              warnings << 'Min charge units must be either $/month or $/year.'
+            end
+          end
+
           if fields.include?(:realtimepricing)
-            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
-            rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
-            rate.minannualcharge = tariff[:annualmincharge] if fields.include?(:annualmincharge)
             rate.realtimeprice = tariff[:realtimepricing]
 
           else
@@ -336,14 +353,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
               warnings << 'Demand charges are not currently supported when calculating detailed utility bills.'
             end
 
-            rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
-            rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
-            rate.minannualcharge = tariff[:annualmincharge] if fields.include?(:annualmincharge)
-
             rate.energyratestructure = tariff[:energyratestructure]
             rate.energyweekdayschedule = tariff[:energyweekdayschedule]
             rate.energyweekendschedule = tariff[:energyweekendschedule]
-
           end
         end
 

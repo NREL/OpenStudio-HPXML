@@ -346,6 +346,26 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(!File.exist?(bills_csv))
   end
 
+  def test_warning_invalid_fixed_charge_units
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Invalid Fixed Charge Units.json')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    expected_warnings = ['Fixed charge units must be $/month.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
+    assert(File.exist?(bills_csv))
+  end
+
+  def test_warning_invalid_min_charge_units
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Invalid Min Charge Units.json')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    expected_warnings = ['Min charge units must be either $/month or $/year.']
+    bills_csv = _test_measure(expected_warnings: expected_warnings)
+    assert(File.exist?(bills_csv))
+  end
+
   def test_warning_demand_charges
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
