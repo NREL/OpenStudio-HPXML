@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c3535870-8a12-4f23-aeb3-d934644816c2</version_id>
-  <version_modified>20220726T013415Z</version_modified>
+  <version_id>a0a0eef8-0084-4a28-bfa2-9f8104af7e38</version_id>
+  <version_modified>20220805T185535Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3628,7 +3628,7 @@
       <display_name>Water Heater: Standby Loss</display_name>
       <description>The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
-      <units>deg-F/hr</units>
+      <units>F/hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -6387,7 +6387,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1158C984</checksum>
+      <checksum>42919292</checksum>
     </file>
   </files>
 </measure>

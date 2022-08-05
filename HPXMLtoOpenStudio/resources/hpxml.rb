@@ -304,6 +304,7 @@ class HPXML < Object
   UnitsCFM25 = 'CFM25'
   UnitsCFM50 = 'CFM50'
   UnitsCOP = 'COP'
+  UnitsDegFPerHour = 'F/hr'
   UnitsDollars = '$'
   UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
@@ -4607,8 +4608,8 @@ class HPXML < Object
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
-             :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served, :tank_model_type, :operating_mode]
+             :related_hvac_idref, :third_party_certification, :standby_loss_units, :standby_loss_value,
+             :temperature, :is_shared_system, :number_of_units_served, :tank_model_type, :operating_mode]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -4665,7 +4666,11 @@ class HPXML < Object
         jacket = XMLHelper.add_element(water_heater_insulation, 'Jacket')
         XMLHelper.add_element(jacket, 'JacketRValue', @jacket_r_value, :float)
       end
-      XMLHelper.add_element(water_heating_system, 'StandbyLoss', @standby_loss, :float, @standby_loss_isdefaulted) unless @standby_loss.nil?
+      if (not @standby_loss_units.nil?) && (not @standby_loss_value.nil?)
+        standby_loss = XMLHelper.add_element(water_heating_system, 'StandbyLoss')
+        XMLHelper.add_element(standby_loss, 'Units', @standby_loss_units, :string, @standby_loss_units_isdefaulted)
+        XMLHelper.add_element(standby_loss, 'Value', @standby_loss_value, :float, @standby_loss_value_isdefaulted)
+      end
       XMLHelper.add_element(water_heating_system, 'HotWaterTemperature', @temperature, :float, @temperature_isdefaulted) unless @temperature.nil?
       XMLHelper.add_element(water_heating_system, 'UsesDesuperheater', @uses_desuperheater, :boolean) unless @uses_desuperheater.nil?
       if not @related_hvac_idref.nil?
@@ -4700,7 +4705,8 @@ class HPXML < Object
       @usage_bin = XMLHelper.get_value(water_heating_system, 'UsageBin', :string)
       @recovery_efficiency = XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency', :float)
       @jacket_r_value = XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue', :float)
-      @standby_loss = XMLHelper.get_value(water_heating_system, 'StandbyLoss', :float)
+      @standby_loss_units = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Units', :string)
+      @standby_loss_value = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Value', :float)
       @temperature = XMLHelper.get_value(water_heating_system, 'HotWaterTemperature', :float)
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))

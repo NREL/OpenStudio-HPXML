@@ -1762,7 +1762,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)
     arg.setDisplayName('Water Heater: Standby Loss')
     arg.setDescription('The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('deg-F/hr')
+    arg.setUnits(HPXML::UnitsDegFPerHour)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
@@ -5185,7 +5185,8 @@ class HPXMLFile
     if [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? water_heater_type
       if args[:water_heater_standby_loss].is_initialized
         if args[:water_heater_standby_loss].get > 0
-          standby_loss = args[:water_heater_standby_loss].get
+          standby_loss_value = args[:water_heater_standby_loss].get
+          standby_loss_units = HPXML::UnitsDegFPerHour
         end
       end
     end
@@ -5248,7 +5249,8 @@ class HPXMLFile
                                     recovery_efficiency: recovery_efficiency,
                                     uses_desuperheater: uses_desuperheater,
                                     related_hvac_idref: related_hvac_idref,
-                                    standby_loss: standby_loss,
+                                    standby_loss_units: standby_loss_units,
+                                    standby_loss_value: standby_loss_value,
                                     jacket_r_value: jacket_r_value,
                                     temperature: temperature,
                                     heating_capacity: heating_capacity,
