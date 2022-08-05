@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>2656afd3-bd87-4434-86a1-ebeb1cc8bf39</version_id>
-  <version_modified>20220728T214232Z</version_modified>
+  <version_id>ebe7aa45-0584-41ed-b823-61ef8592e9b3</version_id>
+  <version_modified>20220805T202000Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -175,16 +175,10 @@
       <checksum>C7D68128</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A17EF561</checksum>
-    </file>
-    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>FE5DE4CE</checksum>
+      <checksum>B8A9D0CD</checksum>
     </file>
     <file>
       <version>
@@ -195,13 +189,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>93EF8C27</checksum>
+      <checksum>1A16BF97</checksum>
     </file>
     <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
+      <filename>Sample Tiered Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
       <usage_type>test</usage_type>
-      <checksum>371021E6</checksum>
+      <checksum>144933DC</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AA1F1FA7</checksum>
     </file>
   </files>
 </measure>

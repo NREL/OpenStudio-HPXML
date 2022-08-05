@@ -324,6 +324,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           if fields.include?(:realtimepricing)
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
             rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
+            rate.minannualcharge = tariff[:annualmincharge] if fields.include?(:annualmincharge)
             rate.realtimeprice = tariff[:realtimepricing]
 
           else
@@ -337,7 +338,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
             rate.fixedmonthlycharge = tariff[:fixedmonthlycharge] if fields.include?(:fixedmonthlycharge)
             rate.minmonthlycharge = tariff[:minmonthlycharge] if fields.include?(:minmonthlycharge)
-            rate.minannualcharge = tariff[:minannualcharge] if fields.include?(:minannualcharge)
+            rate.minannualcharge = tariff[:annualmincharge] if fields.include?(:annualmincharge)
 
             rate.energyratestructure = tariff[:energyratestructure]
             rate.energyweekdayschedule = tariff[:energyweekdayschedule]
@@ -430,8 +431,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     utility_bills.values.each do |bill|
       if bill.annual_production_credit > 0
         bill.annual_production_credit *= -1
-      elsif bill.annual_production_credit < 0
-        bill.annual_production_credit = 0 # FIXME: is this correct? BEopt's "PV Credit" bar doesn't show up on the graph
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
