@@ -348,6 +348,7 @@ If the utility rate type is simple, utility bills are calculated based on fixed 
 
 If the utility rate type is detailed, utility bills are calculated using a tariff file.
 
+
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
@@ -357,6 +358,7 @@ If the utility rate type is detailed, utility bills are calculated using a tarif
 
   .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
          Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_.
+         Tariff file must be formatted to `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
 
 Fuel Rates
 ~~~~~~~~~~
