@@ -590,6 +590,8 @@ def valid_filename(x)
 end
 
 def process_usurdb(filepath)
+  # Map csv found at https://openei.org/apps/USURDB/download/usurdb.csv.gz to
+  # https://openei.org/services/doc/rest/util_rates/?version=7#response-fields
   require 'csv'
   require 'json'
 
@@ -621,30 +623,15 @@ def process_usurdb(filepath)
     next if !rate['enddate'].nil?
     next if keywords.any? { |x| rate['name'].downcase.include?(x) } && skip_keywords
 
-    # map fixed charge to version 3
-    if rate['fixedchargeunits'] == '$/day'
-      next
-    elsif rate['fixedchargeunits'] == '$/month'
-      rate['fixedmonthlycharge'] = rate['fixedchargefirstmeter'] if !rate['fixedchargefirstmeter'].nil?
-      rate['fixedmonthlycharge'] += rate['fixedchargeeaaddl'] if !rate['fixedchargeeaaddl'].nil?
-    elsif rate['fixedchargeunits'] == '$/year'
+    # fixed charges
+    if ['$/day', '$/year'].include?(rate['fixedchargeunits'])
       next
     end
 
-    # map min charge to version 3
-    if rate['minchargeunits'] == '$/day'
+    # min charges
+    if ['$/day'].include?(rate['minchargeunits'])
       next
-    elsif rate['minchargeunits'] == '$/month'
-      rate['minmonthlycharge'] = rate['mincharge'] if !rate['mincharge'].nil?
-    elsif rate['minchargeunits'] == '$/year'
-      rate['annualmincharge'] = rate['mincharge'] if !rate['mincharge'].nil?
     end
-
-    rate.delete('fixedchargefirstmeter')
-    rate.delete('fixedchargeeaaddl')
-    rate.delete('fixedchargeunits')
-    rate.delete('mincharge')
-    rate.delete('minchargeunits')
 
     # ignore blank fields
     rate.each do |k, v|
