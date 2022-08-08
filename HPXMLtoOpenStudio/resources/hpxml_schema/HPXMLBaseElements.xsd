@@ -1709,6 +1709,11 @@
 												430, Subpart B, Appendix E.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="HeatPumpCOP" type="Efficiency">
+										<xs:annotation>
+											<xs:documentation>The dimensionless coefficient of performance, used to measure the efficiency of a commercial heat pump water heater.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="FirstHourRating" type="Volume">
 										<xs:annotation>
 											<xs:documentation>[gal per hour] An estimate of the maximum volume of hot water in gallons that a storage water heater can supply within an hour that begins

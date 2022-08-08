@@ -130,12 +130,15 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'base-dhw-tank-coal.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-tank-elec-et.xml' => 'base.xml',
     'base-dhw-tank-elec-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-et.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-gas-uef.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-gas-uef-fhr.xml' => 'base-dhw-tank-gas-uef.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-cop.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-uef.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
@@ -153,6 +156,7 @@ def create_hpxmls
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-electric-uef.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-et.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-uef.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
@@ -701,7 +705,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.95
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 18767
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
@@ -962,7 +965,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency_type'] = 'EnergyFactor'
     args['water_heater_efficiency'] = 0
     args['water_heater_recovery_efficiency'] = 0
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0
@@ -1365,6 +1367,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     args['water_heater_tank_volume'] = 50
   elsif ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
+    args['water_heater_standby_loss_units'] = HPXML::UnitsDegFPerHour
     args['water_heater_standby_loss'] = 1.0
   elsif ['base-dhw-indirect-with-solar-fraction.xml',
          'base-dhw-solar-fraction.xml',
@@ -1416,6 +1419,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeThermosyphon
   elsif ['base-dhw-tank-coal.xml'].include? hpxml_file
     args['water_heater_fuel_type'] = HPXML::FuelTypeCoal
+  elsif ['base-dhw-tank-elec-et.xml'].include? hpxml_file
+    args['water_heater_tank_volume'] = 30
+    args['water_heater_efficiency_type'] = 'ThermalEfficiency'
+    args['water_heater_efficiency'] = 0.98
+    args['water_heater_standby_loss_units'] = HPXML::UnitsPercentPerHour
+    args['water_heater_standby_loss'] = 0.88
   elsif ['base-dhw-tank-elec-uef.xml'].include? hpxml_file
     args['water_heater_tank_volume'] = 30
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
@@ -1428,6 +1437,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_tank_volume'] = 50
     args['water_heater_efficiency'] = 0.59
     args['water_heater_heating_capacity'] = 40000
+  elsif ['base-dhw-tank-gas-et.xml'].include? hpxml_file
+    args['water_heater_efficiency_type'] = 'ThermalEfficiency'
+    args['water_heater_efficiency'] = 0.80
+    args['water_heater_standby_loss_units'] = HPXML::UnitsBtuPerHour
+    args['water_heater_standby_loss'] = 1200.0
+    args.delete('water_heater_heating_capacity')
   elsif ['base-dhw-tank-gas-uef.xml'].include? hpxml_file
     args['water_heater_tank_volume'] = 30
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
@@ -1438,6 +1453,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_type'] = HPXML::WaterHeaterTypeHeatPump
     args['water_heater_tank_volume'] = 80
     args['water_heater_efficiency'] = 2.3
+  elsif ['base-dhw-tank-heat-pump-cop.xml'].include? hpxml_file
+    args['water_heater_efficiency_type'] = 'HeatPumpCOP'
+    args['water_heater_efficiency'] = 3.1
   elsif ['base-dhw-tank-heat-pump-uef.xml'].include? hpxml_file
     args['water_heater_tank_volume'] = 50
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
@@ -1464,6 +1482,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_fuel_type'] = HPXML::FuelTypeNaturalGas
     args.delete('water_heater_tank_volume')
     args['water_heater_efficiency'] = 0.82
+  elsif ['base-dhw-tankless-gas-et.xml'].include? hpxml_file
+    args['water_heater_efficiency_type'] = 'ThermalEfficiency'
+    args['water_heater_efficiency'] = 0.82
+    args['water_heater_standby_loss_units'] = HPXML::UnitsBtuPerHour
+    args['water_heater_standby_loss'] = 672.6
   elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
     args['water_heater_efficiency'] = 0.93

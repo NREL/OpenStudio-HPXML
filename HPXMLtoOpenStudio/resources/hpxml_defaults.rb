@@ -482,6 +482,10 @@ class HPXMLDefaults
           next if water_heating_system.energy_factor >= 0.63
         elsif not water_heating_system.uniform_energy_factor.nil?
           next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
+        elsif not water_heating_system.thermal_efficiency.nil?
+          # FIXME
+        elsif not water_heating_system.heat_pump_cop.nil?
+          # FIXME
         end
 
         hpxml.building_construction.has_flue_or_chimney = true
@@ -1671,7 +1675,7 @@ class HPXMLDefaults
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
           water_heating_system.tank_volume_isdefaulted = true
         end
-        if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
+        if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil? && water_heating_system.thermal_efficiency.nil? && water_heating_system.heat_pump_cop.nil?
           water_heating_system.energy_factor = Waterheater.get_default_water_heater_efficiency_by_year_installed(water_heating_system.year_installed, water_heating_system.fuel_type)
           water_heating_system.energy_factor_isdefaulted = true
         end

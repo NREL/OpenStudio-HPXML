@@ -193,8 +193,8 @@ class Waterheater
       end
 
       act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-      a_side = calc_tank_areas(act_vol)[1]
-      ua = calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
+      _, a_side = calc_tank_areas(act_vol)
+      ua = calc_tank_ua_from_standby_loss(act_vol, water_heating_system, a_side, solar_fraction)
     else
       ua = 0.0
       act_vol = 1.0
@@ -753,7 +753,7 @@ class Waterheater
 
     # Calculate the COP based on EF
     if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
+      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101 # Inverse of calc_ef_from_uef()
       cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
     elsif not water_heating_system.uniform_energy_factor.nil?
       uef = water_heating_system.uniform_energy_factor
@@ -766,6 +766,8 @@ class Waterheater
       elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinHigh
         cop = 1.1022 * uef - 0.0877
       end
+    elsif not water_heating_system.heat_pump_cop.nil?
+      cop = water_heating_system.heat_pump_cop
     end
 
     coil = OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped.new(model)
@@ -1288,7 +1290,7 @@ class Waterheater
 
   def self.calc_tank_areas(act_vol, height = nil)
     if height.nil?
-      height = get_tank_height()
+      height = 4.0 # ft
     end
     diameter = 2.0 * (UnitConversions.convert(act_vol, 'gal', 'ft^3') / (height * Math::PI))**0.5 # feet
     a_top = Math::PI * diameter**2.0 / 4.0 # sqft
@@ -1298,26 +1300,37 @@ class Waterheater
     return surface_area, a_side
   end
 
-  def self.get_tank_height()
-    return 4.0 # feet
-  end
+  def self.calc_tank_ua_from_standby_loss(act_vol, water_heating_system, a_side, solar_fraction)
+    if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage
+      # Indirect water heater
+      if not [HPXML::UnitsDegFPerHour].include? water_heating_system.standby_loss_units
+        fail "Unexpected standby loss units '#{water_heating_system.standby_loss_units}' for indirect water heater. Should be '#{HPXML::UnitsDegFPerHour}'."
+      end
 
-  def self.calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
-    # Test conditions
-    cp = 0.999 # Btu/lb-F
-    rho = 8.216 # lb/gal
-    t_amb = 70.0 # F
-    t_tank_avg = 135.0 # F, Test begins at 137-138F stop at 133F
+      # Test conditions
+      cp = 0.999 # Btu/lb-F
+      rho = 8.216 # lb/gal
+      t_amb = 70.0 # F
+      t_tank_avg = 135.0 # F, Test begins at 137-138F stop at 133F
 
-    # UA calculation
-    q = water_heating_system.standby_loss_value * cp * act_vol * rho # Btu/hr
-    ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+      # UA calculation
+      q = water_heating_system.standby_loss_value * cp * act_vol * rho # Btu/hr
+      ua = q / (t_tank_avg - t_amb) # Btu/hr-F
 
-    # jacket
-    ua = apply_tank_jacket(water_heating_system, ua, a_side)
+      # jacket
+      ua = apply_tank_jacket(water_heating_system, ua, a_side)
 
-    ua *= (1.0 - solar_fraction)
-    return ua
+      ua *= (1.0 - solar_fraction)
+      return ua
+    elsif not water_heating_system.thermal_efficiency.nil?
+      # Commercial water heater
+      if not [HPXML::UnitsBtuPerHour, HPXML::UnitsPercentPerHour].include? water_heating_system.standby_loss_units
+        fail "Unexpected standby loss units '#{water_heating_system.standby_loss_units}' for commercial water heater. Should be '#{HPXML::UnitsBtuPerHour}' or '#{HPXML::UnitsPercentPerHour}'."
+      end
+
+      # FIXME: TODO
+      return 8.0
+    end
   end
 
   def self.get_default_num_bathrooms(num_beds)
@@ -1491,52 +1504,64 @@ class Waterheater
         eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
       elsif not water_heating_system.uniform_energy_factor.nil?
         eta_c = water_heating_system.uniform_energy_factor * water_heating_system.performance_adjustment
+      elsif not water_heating_system.thermal_efficiency.nil?
+        # FIXME: Performance adjustment?
+        eta_c = water_heating_system.thermal_efficiency
       end
       ua = 0.0
       surface_area = 1.0
-    else
-      density = 8.2938 # lb/gal
-      cp = 1.0007 # Btu/lb-F
-      t_in = 58.0 # F
-      t_env = 67.5 # F
+    else # Storage water heater
+      if not water_heating_system.thermal_efficiency.nil?
+        eta_c = water_heating_system.thermal_efficiency
 
-      if not water_heating_system.energy_factor.nil?
-        t = 135.0 # F
-        volume_drawn = 64.3 # gal/day
-      elsif not water_heating_system.uniform_energy_factor.nil?
-        t = 125.0 # F
-        if water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinVerySmall
-          volume_drawn = 10.0 # gal
-        elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinLow
-          volume_drawn = 38.0 # gal
-        elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinMedium
-          volume_drawn = 55.0 # gal
-        elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinHigh
-          volume_drawn = 84.0 # gal
-        end
-      end
+        # FIXME: Need to update calculation here
+        act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type)
+        surface_area, a_side = calc_tank_areas(act_vol)
+        ua = calc_tank_ua_from_standby_loss(act_vol, water_heating_system, a_side, solar_fraction)
+      else
+        density = 8.2938 # lb/gal
+        cp = 1.0007 # Btu/lb-F
+        t_in = 58.0 # F
+        t_env = 67.5 # F
 
-      draw_mass = volume_drawn * density # lb
-      q_load = draw_mass * cp * (t - t_in) # Btu/day
-      pow = water_heating_system.heating_capacity # Btu/h
-      surface_area, a_side = calc_tank_areas(act_vol)
-      if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
         if not water_heating_system.energy_factor.nil?
-          ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (pow * water_heating_system.energy_factor))) # Btu/hr-F
-          eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / pow) # conversion efficiency is supposed to be calculated with initial tank ua
+          t = 135.0 # F
+          volume_drawn = 64.3 # gal/day
         elsif not water_heating_system.uniform_energy_factor.nil?
-          ua = ((water_heating_system.recovery_efficiency / water_heating_system.uniform_energy_factor) - 1.0) / ((t - t_env) * (24.0 / q_load) - ((t - t_env) / (pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
-          eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
+          t = 125.0 # F
+          if water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinVerySmall
+            volume_drawn = 10.0 # gal
+          elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinLow
+            volume_drawn = 38.0 # gal
+          elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinMedium
+            volume_drawn = 55.0 # gal
+          elsif water_heating_system.usage_bin == HPXML::WaterHeaterUsageBinHigh
+            volume_drawn = 84.0 # gal
+          end
         end
-      else # is Electric
-        if not water_heating_system.energy_factor.nil?
-          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
-        elsif not water_heating_system.uniform_energy_factor.nil?
-          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
+
+        draw_mass = volume_drawn * density # lb
+        q_load = draw_mass * cp * (t - t_in) # Btu/day
+        pow = water_heating_system.heating_capacity # Btu/h
+        surface_area, a_side = calc_tank_areas(act_vol)
+        if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          if not water_heating_system.energy_factor.nil?
+            ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (pow * water_heating_system.energy_factor))) # Btu/hr-F
+            eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / pow) # conversion efficiency is supposed to be calculated with initial tank ua
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            ua = ((water_heating_system.recovery_efficiency / water_heating_system.uniform_energy_factor) - 1.0) / ((t - t_env) * (24.0 / q_load) - ((t - t_env) / (pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
+            eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
+          end
+        else # is Electric
+          if not water_heating_system.energy_factor.nil?
+            ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
+          end
+          eta_c = 1.0
         end
-        eta_c = 1.0
+        ua = apply_tank_jacket(water_heating_system, ua, a_side)
       end
-      ua = apply_tank_jacket(water_heating_system, ua, a_side)
     end
     ua *= (1.0 - solar_fraction)
     if water_heating_system.is_shared_system
@@ -1737,9 +1762,14 @@ class Waterheater
       # Fuel storage water heater
       # EF cutoffs derived from Figure 2 of http://title24stakeholders.com/wp-content/uploads/2017/10/2013_CASE-Report_High-efficiency-Water-Heater-Ready.pdf
       # FUTURE: Add an optional HPXML input for water heater type for a user to specify this (and default based on EF as below)
-      ef = water_heating_system.energy_factor
-      if ef.nil?
-        ef = calc_ef_from_uef(water_heating_system)
+      if (not water_heating_system.energy_factor.nil?) || (not water_heating_system.uniform_energy_factor.nil?)
+        ef = water_heating_system.energy_factor
+        if ef.nil?
+          ef = calc_ef_from_uef(water_heating_system)
+        end
+      elsif not water_heating_system.thermal_efficiency.nil?
+        # FIXME
+        ef = 0.75
       end
       if ef < 0.64
         skinlossfrac = 0.64 # Natural draft

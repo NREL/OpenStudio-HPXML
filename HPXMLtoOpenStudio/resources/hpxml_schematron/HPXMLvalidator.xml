@@ -399,10 +399,13 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 0 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &lt;= 5 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be less than or equal to 5</sch:assert>
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt; 0 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:HeatPumpCOP) &gt; 0 or not(h:HeatPumpCOP)'>Expected HeatPumpCOP to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:FirstHourRating) &gt; 0 or not(h:FirstHourRating)'>Expected FirstHourRating to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='h:UsageBin[text()="very small" or text()="low" or text()="medium" or text()="high"] or not(h:UsageBin)'>Expected UsageBin to be 'very small' or 'low' or 'medium' or 'high'</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &lt;= 5 or not(h:RecoveryEfficiency)'>Expected RecoveryEfficiency to be less than or equal to 5</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &gt; 0 or not(h:RecoveryEfficiency)'>Expected RecoveryEfficiency to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:ThermalEfficiency) &lt;= 1 or not(h:ThermalEfficiency)'>Expected ThermalEfficiency to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:ThermalEfficiency) &gt; 0 or not(h:ThermalEfficiency)'>Expected ThermalEfficiency to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1'>Expected SystemIdentifier with id attribute</sch:assert>
       <sch:assert role='ERROR' test='count(h:RelatedHVACSystem[@idref]) = count(h:RelatedHVACSystem)'>Expected idref attribute for RelatedHVACSystem</sch:assert>
     </sch:rule>
