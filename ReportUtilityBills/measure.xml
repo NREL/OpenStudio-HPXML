@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>a16140c5-6d02-4cfe-b174-8fc955c53d8f</version_id>
-  <version_modified>20220805T233435Z</version_modified>
+  <version_id>99fe7fc2-8eaa-4aaa-8ccd-753c3179ecc9</version_id>
+  <version_modified>20220808T172931Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -175,12 +175,6 @@
       <checksum>9B08E1EE</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B6AB8649</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -214,6 +208,30 @@
       <filetype>json</filetype>
       <usage_type>test</usage_type>
       <checksum>32FB5BA8</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FF24B8B5</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>179FE464</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AABBA8AA</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E0463041</checksum>
     </file>
   </files>
 </measure>
