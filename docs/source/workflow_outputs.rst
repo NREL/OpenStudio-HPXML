@@ -155,6 +155,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Hot Tub Pump (MBtu)
    End Use: Electricity: PV (MBtu)                                      Negative value for any power produced (including any battery storage)
    End Use: Electricity: Generator (MBtu)                               Negative value for any power produced
+   End Use: Electricity: Battery (MBtu)
    End Use: Natural Gas: Heating (MBtu)                                 Excludes heat pump backup
    End Use: Natural Gas: Heating Heat Pump Backup (MBtu)
    End Use: Natural Gas: Hot Water (MBtu)
