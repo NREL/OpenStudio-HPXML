@@ -5,6 +5,9 @@ __New Features__
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
+- New lithium ion battery capabilities:
+  - Allows modeling a battery without PV.
+  - Detailed charging/discharging schedules via CSV files.
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:
@@ -12,6 +15,7 @@ __New Features__
   - Allows generating timeseries unmet hours for heating and cooling.
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
+  - Disaggregates Battery outputs from PV outputs.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
