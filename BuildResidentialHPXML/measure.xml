@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>092cfe65-e145-4d17-90ac-f9cd008c5a89</version_id>
-  <version_modified>20220808T225739Z</version_modified>
+  <version_id>937811b6-e641-4ab2-90d9-1a4ce457a50e</version_id>
+  <version_modified>20220809T231600Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3634,7 +3634,7 @@
     <argument>
       <name>water_heater_standby_loss_units</name>
       <display_name>Water Heater: Standby Loss Units</display_name>
-      <description>The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be 'F/hr' for space-heating boilers and must be 'Btu/hr' or '%/hr' for commercial water heaters w/ thermal efficiency inputs.</description>
+      <description>The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be 'F/hr' for space-heating boilers and must be 'Btu/hr' or '%/hr' (entered as a fraction, e.g., 1.20%/hr = 0.0120) for commercial water heaters w/ thermal efficiency inputs.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6416,7 +6416,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>510F591E</checksum>
+      <checksum>C7EF1497</checksum>
     </file>
   </files>
 </measure>

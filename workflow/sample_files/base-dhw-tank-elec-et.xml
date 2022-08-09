@@ -406,7 +406,7 @@
             <ThermalEfficiency>0.98</ThermalEfficiency>
             <StandbyLoss>
               <Units>%/hr</Units>
-              <Value>0.88</Value>
+              <Value>0.0088</Value>
             </StandbyLoss>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>

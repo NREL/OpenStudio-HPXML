@@ -1768,7 +1768,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_standby_loss_units', water_heater_standby_loss_units_choices, false)
     arg.setDisplayName('Water Heater: Standby Loss Units')
-    arg.setDescription("The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be '#{HPXML::UnitsDegFPerHour}' for space-heating boilers and must be '#{HPXML::UnitsBtuPerHour}' or '#{HPXML::UnitsPercentPerHour}' for commercial water heaters w/ thermal efficiency inputs.")
+    arg.setDescription("The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be '#{HPXML::UnitsDegFPerHour}' for space-heating boilers and must be '#{HPXML::UnitsBtuPerHour}' or '#{HPXML::UnitsPercentPerHour}' (entered as a fraction, e.g., 1.20%/hr = 0.0120) for commercial water heaters w/ thermal efficiency inputs.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)

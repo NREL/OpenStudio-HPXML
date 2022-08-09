@@ -1508,6 +1508,7 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &lt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:ThermalEfficiency) &lt; 1 or not(h:ThermalEfficiency)'>Expected ThermalEfficiency to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:ThermalEfficiency) + count(h:StandbyLoss[h:Units="Btu/hr" or h:Units="%/hr"]/h:Value) = 0 or count(h:ThermalEfficiency) + count(h:StandbyLoss[h:Units="Btu/hr" or h:Units="%/hr"]/h:Value) = 2'>Expected 0 or 2 element(s) for xpath: ThermalEfficiency | StandbyLoss[Units="Btu/hr" or Units="%/hr"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='number(h:StandbyLoss[h:Units="%/hr"]/h:Value) &lt; 0.1 or not(h:StandbyLoss[h:Units="%/hr"]/h:Value)'>Expected StandbyLoss[Units="%/hr"]/Value to be less than 0.1</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsageBin) + count(h:FirstHourRating) &gt;= 0'>Expected 0 or more element(s) for xpath: UsageBin | FirstHourRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:RecoveryEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &gt; number(h:EnergyFactor) or not(h:RecoveryEfficiency) or not (h:EnergyFactor)'>Expected RecoveryEfficiency to be greater than EnergyFactor</sch:assert>
@@ -1534,6 +1535,7 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &lt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:ThermalEfficiency) &lt; 1 or not(h:ThermalEfficiency)'>Expected ThermalEfficiency to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:ThermalEfficiency) + count(h:StandbyLoss[h:Units="Btu/hr" or h:Units="%/hr"]/h:Value) = 0 or count(h:ThermalEfficiency) + count(h:StandbyLoss[h:Units="Btu/hr" or h:Units="%/hr"]/h:Value) = 2'>Expected 0 or 2 element(s) for xpath: ThermalEfficiency | StandbyLoss[Units="Btu/hr" or Units="%/hr"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='number(h:StandbyLoss[h:Units="%/hr"]/h:Value) &lt; 0.1 or not(h:StandbyLoss[h:Units="%/hr"]/h:Value)'>Expected StandbyLoss[Units="%/hr"]/Value to be less than 0.1</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:UniformEnergyFactor) &lt; 0.45'>UniformEnergyFactor should typically be greater than or equal to 0.45.</sch:report>
       <sch:report role='WARN' test='number(h:EnergyFactor) &lt; 0.45'>EnergyFactor should typically be greater than or equal to 0.45.</sch:report>

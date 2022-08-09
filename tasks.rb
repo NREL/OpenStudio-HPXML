@@ -1424,7 +1424,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency_type'] = 'ThermalEfficiency'
     args['water_heater_efficiency'] = 0.98
     args['water_heater_standby_loss_units'] = HPXML::UnitsPercentPerHour
-    args['water_heater_standby_loss'] = 0.88
+    args['water_heater_standby_loss'] = 0.0088
   elsif ['base-dhw-tank-elec-uef.xml'].include? hpxml_file
     args['water_heater_tank_volume'] = 30
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'

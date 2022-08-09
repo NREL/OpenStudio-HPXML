@@ -1332,7 +1332,7 @@ class Waterheater
     elsif standby_loss_units == HPXML::UnitsBtuPerHour
       q = standby_loss_value # Btu/hr
     elsif standby_loss_units == HPXML::UnitsPercentPerHour
-      q = standby_loss_value / 100.0 * act_vol * rho * (t_tank_avg - t_amb) # %/hr -> Btu/hr, FIXME: Review
+      q = standby_loss_value * act_vol * rho * (t_tank_avg - t_amb) # %/hr -> Btu/hr, FIXME: Review
     end
     ua = q / (t_tank_avg - t_amb) # Btu/hr-F
 
