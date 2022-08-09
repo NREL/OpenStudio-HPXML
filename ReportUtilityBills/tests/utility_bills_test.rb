@@ -1379,36 +1379,35 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_downloaded_utility_rates
-    # skip # this test takes a long time and shouldn't be part of regular ci testing
-
     require 'zlib'
     require 'tempfile'
 
-    tar_extract = Gem::Package::TarReader.new(Zlib::GzipReader.open(File.join(File.dirname(__FILE__), '../resources/data/detailed_rates/rates.tar.gz')))
-    tar_extract.rewind # The extract has to be rewinded after every iteration
-    tar_extract.each do |entry|
-      next unless entry.file?
+    @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+      fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
 
-      puts entry.full_name
+      tar_extract = Gem::Package::TarReader.new(Zlib::GzipReader.open(File.join(File.dirname(__FILE__), '../resources/data/detailed_rates/rates.tar.gz')))
+      tar_extract.rewind # The extract has to be rewinded after every iteration
+      tar_extract.each do |entry|
+        next unless entry.file?
 
-      tmpdir = Dir.tmpdir
-      tmpfile = Tempfile.new(['rate', '.json'], tmpdir)
-      tmp_path = tmpfile.path.to_s
+        puts entry.full_name
 
-      File.open(tmp_path, 'wb') do |f|
-        f.print entry.read
+        tmpdir = Dir.tmpdir
+        tmpfile = Tempfile.new(['rate', '.json'], tmpdir)
+        tmp_path = tmpfile.path.to_s
 
-        @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
+        File.open(tmp_path, 'wb') do |f|
+          f.print entry.read
+
           utility_bill_scenario.elec_tariff_filepath = tmp_path
-          fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
           utility_rates, utility_bills = @measure.setup_utility_outputs()
           File.delete(@bills_csv) if File.exist? @bills_csv
           _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
           assert(File.exist?(@bills_csv))
         end
       end
+      tar_extract.close
     end
-    tar_extract.close
   end
 
   def _get_expected_bills(expected_bills)
@@ -1447,7 +1446,6 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def _load_timeseries(path, utility_bill_scenario)
     fuels = @measure.setup_fuel_outputs()
-
     columns = CSV.read(File.join(File.dirname(__FILE__), path)).transpose
     columns.each do |col|
       col_name = col[0]

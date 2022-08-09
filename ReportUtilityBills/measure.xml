@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>0a5dbcc5-c3c2-4180-bd5f-afa05ddb1ad5</version_id>
-  <version_modified>20220809T213531Z</version_modified>
+  <version_id>f879cf9c-7a1b-4358-a587-4ffb5e6ad822</version_id>
+  <version_modified>20220809T230522Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -145,12 +145,6 @@
       <checksum>AD93D08A</checksum>
     </file>
     <file>
-      <filename>data/detailed_rates/rates.tar.gz</filename>
-      <filetype>gz</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7E54E2F8</checksum>
-    </file>
-    <file>
       <filename>Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
@@ -175,27 +169,10 @@
       <checksum>9B08E1EE</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>B35BB7F7</checksum>
-    </file>
-    <file>
       <filename>Sample Tiered Rate Min Annual Charge.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
       <checksum>1451047C</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B941317B</checksum>
     </file>
     <file>
       <filename>Invalid Fixed Charge Units.json</filename>
@@ -228,16 +205,33 @@
       <checksum>AABBA8AA</checksum>
     </file>
     <file>
+      <filename>data/detailed_rates/rates.tar.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F9BA6BF0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>21387ED1</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>15DF2EC9</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8352DEF4</checksum>
-    </file>
-    <file>
-      <filename>results_bills.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>926EC5B4</checksum>
+      <checksum>AC97912D</checksum>
     </file>
   </files>
 </measure>

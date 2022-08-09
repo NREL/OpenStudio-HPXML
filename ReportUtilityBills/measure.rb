@@ -356,6 +356,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.energyratestructure = tariff[:energyratestructure]
             rate.energyweekdayschedule = tariff[:energyweekdayschedule]
             rate.energyweekendschedule = tariff[:energyweekendschedule]
+
+            if rate.energyratestructure.collect { |r| r.collect { |s| s.keys.include?(:rate) } }.flatten.any? { |t| !t }
+              warnings << 'Every tier must contain a rate.'
+            end
+
+            if rate.energyratestructure.collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?(:sell)
+              warnings << 'No tier may contain a sell key.'
+            end
+
+            if rate.energyratestructure.collect { |r| r.collect { |s| s.keys.include?(:unit) } }.flatten.any? { |t| !t }
+              warnings << 'Every tier must contain a unit'
+            end
+
+            if rate.energyratestructure.collect { |r| r.collect { |s| s[:unit] == 'kWh' } }.flatten.any? { |t| !t }
+              warnings << 'All rates must be in units of kWh.'
+            end
           end
         end
 

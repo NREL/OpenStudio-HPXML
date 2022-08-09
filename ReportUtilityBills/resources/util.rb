@@ -115,6 +115,10 @@ class CalculateUtilityBill
     length_tiers = []
     rate.energyratestructure.each do |period|
       length_tiers << period.size
+
+      period.each do |tier|
+        tier[:rate] += tier[:adj] if tier.keys.include(:adj)
+      end
     end
     num_energyrate_tiers = length_tiers.max
     has_tiered = false
@@ -691,6 +695,16 @@ def process_usurdb(filepath)
 
     # ignore rates without minimum fields
     next if rate['energyweekdayschedule'].nil? || rate['energyweekendschedule'].nil? || rate['energyratestructure'].nil?
+
+    # ignore rates without a "rate" key
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('rate') } }.flatten.any? { |t| !t }
+
+    # ignore rates with a "sell" key
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?('sell')
+
+    # ignore rates with units other than "kWh"
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('unit') } }.flatten.any? { |t| !t }
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] == 'kWh' } }.flatten.any? { |t| !t }
 
     residential_rates << { 'items' => [rate] }
   end
