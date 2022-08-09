@@ -117,7 +117,7 @@ class CalculateUtilityBill
       length_tiers << period.size
 
       period.each do |tier|
-        tier[:rate] += tier[:adj] if tier.keys.include(:adj)
+        tier[:rate] += tier[:adj] if tier.keys.include?(:adj)
       end
     end
     num_energyrate_tiers = length_tiers.max
