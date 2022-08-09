@@ -479,13 +479,13 @@ class HPXMLDefaults
       end
       hpxml.water_heating_systems.each do |water_heating_system|
         if not water_heating_system.energy_factor.nil?
-          next if water_heating_system.energy_factor >= 0.63
+          next if water_heating_system.energy_factor >= 0.64
         elsif not water_heating_system.uniform_energy_factor.nil?
-          next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
+          next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.64
         elsif not water_heating_system.thermal_efficiency.nil?
-          # FIXME
+          next if water_heating_system.thermal_efficiency >= 0.80 # FIXME: Need to review
         elsif not water_heating_system.heat_pump_cop.nil?
-          # FIXME
+          next
         end
 
         hpxml.building_construction.has_flue_or_chimney = true
