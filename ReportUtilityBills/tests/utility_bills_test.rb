@@ -1406,6 +1406,8 @@ class ReportUtilityBillsTest < MiniTest::Test
             puts entry.full_name
             assert(false)
           end
+          actual_bills = _get_actual_bills(@bills_csv)
+          assert_operator(actual_bills['Test: Total ($)'], :>, 0)
         end
       end
       tar_extract.close
