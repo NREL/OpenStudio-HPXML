@@ -1379,6 +1379,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_downloaded_utility_rates
+    require 'rubygems/package'
     require 'zlib'
     require 'tempfile'
 
@@ -1389,8 +1390,6 @@ class ReportUtilityBillsTest < MiniTest::Test
       tar_extract.rewind # The extract has to be rewinded after every iteration
       tar_extract.each do |entry|
         next unless entry.file?
-
-        puts entry.full_name
 
         tmpdir = Dir.tmpdir
         tmpfile = Tempfile.new(['rate', '.json'], tmpdir)
@@ -1403,7 +1402,10 @@ class ReportUtilityBillsTest < MiniTest::Test
           utility_rates, utility_bills = @measure.setup_utility_outputs()
           File.delete(@bills_csv) if File.exist? @bills_csv
           _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
-          assert(File.exist?(@bills_csv))
+          if !File.exist?(@bills_csv)
+            puts entry.full_name
+            assert(false)
+          end
         end
       end
       tar_extract.close
