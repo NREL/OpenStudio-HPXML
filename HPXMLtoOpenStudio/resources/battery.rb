@@ -40,8 +40,9 @@ class Battery
     battery_surface_area = 0.306 * (nominal_capacity_kwh**(2.0 / 3.0)) # m^2
 
     # Assuming 3/4 of unusable charge is minimum SOC and 1/4 of unusable charge is maximum SOC, based on SAM defaults
-    minimum_storage_state_of_charge_fraction = 0.75 * (1.0 - usable_fraction)
-    maximum_storage_state_of_charge_fraction = 1.0 - 0.25 * (1.0 - usable_fraction)
+    unusable_fraction = 1.0 - usable_fraction
+    minimum_storage_state_of_charge_fraction = 0.75 * unusable_fraction
+    maximum_storage_state_of_charge_fraction = 1.0 - 0.25 * unusable_fraction
 
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
@@ -68,7 +69,7 @@ class Battery
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
     else
       elcd = elcds[0]
-      return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator)
+      return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator) # FIXME: support battery with generators?
 
       elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
       elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
@@ -89,8 +90,8 @@ class Battery
         elcd.setStorageChargePowerFractionSchedule(charging_schedule)
         elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
 
-        elcd.setDesignStorageControlDischargePower(1000)
-        elcd.setDesignStorageControlChargePower(1000)
+        # elcd.setDesignStorageControlDischargePower(1000)
+        # elcd.setDesignStorageControlChargePower(1000)
 
         elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
         # elcsc.setSimpleFixedEfficiency(1.0)
