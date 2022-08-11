@@ -63,13 +63,13 @@ class Battery
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
 
     elcds = model.getElectricLoadCenterDistributions
+    elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
     if elcds.empty?
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName('Battery elec load center dist')
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
     else
-      elcd = elcds[0]
-      return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator) # FIXME: support battery with generators?
+      elcd = elcds[0] # i.e., pv
 
       elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
       elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
