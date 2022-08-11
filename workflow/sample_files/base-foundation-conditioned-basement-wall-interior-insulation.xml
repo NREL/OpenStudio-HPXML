@@ -203,7 +203,7 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>10.0</NominalRValue>
-                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
                 <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
               </Layer>
             </Insulation>
