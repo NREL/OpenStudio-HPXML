@@ -59,7 +59,6 @@ def create_hpxmls
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-battery.xml' => 'base.xml',
-    'base-battery-generators.xml' => 'base-battery.xml',
     'base-battery-scheduled.xml' => 'base-battery.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
@@ -381,6 +380,10 @@ def create_hpxmls
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
+
+    'base-misc-generators-battery.xml' => 'base-misc-generators.xml',
+    'base-misc-generators-battery-scheduled.xml' => 'base-misc-generators-battery.xml',
+
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -389,13 +392,18 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+
     'base-pv-battery.xml' => 'base-battery.xml',
     'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
+
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
-    'base-pv-battery-generators.xml' => 'base-pv-battery.xml',
+
     'base-pv-generators.xml' => 'base-pv.xml',
+    'base-pv-generators-battery.xml' => 'base-pv-generators.xml',
+    'base-pv-generators-battery-scheduled.xml' => 'base-pv-generators-battery.xml',
+
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
@@ -2368,8 +2376,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Battery
   if ['base-battery.xml',
+      'base-misc-generators-battery.xml',
       'base-pv-battery.xml',
-      'base-pv-battery-garage.xml'].include? hpxml_file
+      'base-pv-battery-garage.xml',
+      'base-pv-generators-battery.xml'].include? hpxml_file
     args['battery_present'] = true
     if hpxml_file == 'base-pv-battery-garage.xml'
       args['battery_location'] = HPXML::LocationGarage
@@ -2489,7 +2499,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Battery Schedules
   if ['base-battery-scheduled.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
+  elsif ['base-misc-generators-battery-scheduled.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
   elsif ['base-pv-battery-scheduled.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
+  elsif ['base-pv-generators-battery-scheduled.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
   end
 end
@@ -4364,8 +4378,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
   elsif ['base-misc-generators.xml',
-         'base-battery-generators.xml',
-         'base-pv-battery-generators.xml',
          'base-pv-generators.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
