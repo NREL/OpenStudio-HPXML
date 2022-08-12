@@ -70,7 +70,7 @@ class Battery
       elcd = elcds[0]
       return unless elcd.inverter.is_initialized # return if not PV (i.e., a generator)
 
-      elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+      elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
       elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
     end
 
