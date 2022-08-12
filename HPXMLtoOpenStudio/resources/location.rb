@@ -120,13 +120,10 @@ class Location
 
   def self.get_sim_calendar_year(sim_calendar_year, epw_file)
     if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
-      if sim_calendar_year.nil?
-        sim_calendar_year = epw_file.startDateActualYear.get
-      end
-    else
-      if sim_calendar_year.nil?
-        sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
-      end
+      sim_calendar_year = epw_file.startDateActualYear.get
+    end
+    if sim_calendar_year.nil?
+      sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
     end
     return sim_calendar_year
   end

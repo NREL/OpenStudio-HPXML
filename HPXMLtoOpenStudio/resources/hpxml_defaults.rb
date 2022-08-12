@@ -144,7 +144,7 @@ class HPXMLDefaults
 
     sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
     if not hpxml.header.sim_calendar_year.nil?
-      if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
+      if hpxml.header.sim_calendar_year != sim_calendar_year
         hpxml.header.sim_calendar_year = sim_calendar_year
         hpxml.header.sim_calendar_year_isdefaulted = true
       end
