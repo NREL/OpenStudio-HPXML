@@ -4378,7 +4378,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
   elsif ['base-misc-generators.xml',
-         'base-pv-generators.xml'].include? hpxml_file
+         'base-misc-generators-battery.xml',
+         'base-misc-generators-battery-scheduled.xml',
+         'base-pv-generators.xml',
+         'base-pv-generators-battery.xml',
+         'base-pv-generators-battery-scheduled.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
