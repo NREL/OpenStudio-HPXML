@@ -1402,10 +1402,9 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? ColumnVacancy
     return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
-    col_names = SchedulesFile.ColumnNames
-
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
-      col_names.each do |col_name|
+    @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
+      @tmp_schedules.keys.each do |col_name|
+        next if col_name == ColumnVacancy
         next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
@@ -1428,7 +1427,7 @@ class SchedulesFile
   end
 
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1491,6 +1490,13 @@ class SchedulesFile
     ]
   end
 
+  def self.BatteryColumnNames
+    return [
+      ColumnBatteryCharging,
+      ColumnBatteryDischarging
+    ]
+  end
+
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
@@ -1503,7 +1509,7 @@ class SchedulesFile
                     ColumnPoolHeater,
                     ColumnHotTubPump,
                     ColumnHotTubHeater,
-                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end

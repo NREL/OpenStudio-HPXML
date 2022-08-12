@@ -59,6 +59,7 @@ def create_hpxmls
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-battery.xml' => 'base.xml',
+    'base-battery-generators.xml' => 'base-battery.xml',
     'base-battery-scheduled.xml' => 'base-battery.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
@@ -206,6 +207,7 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-backup-lockout-temperature.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -273,6 +275,7 @@ def create_hpxmls
     'base-hvac-boiler-propane-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-wood-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-1-speed-seer2.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -391,6 +394,8 @@ def create_hpxmls
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
+    'base-pv-battery-generators.xml' => 'base-pv-battery.xml',
+    'base-pv-generators.xml' => 'base-pv.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
@@ -532,7 +537,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   else
     args['hpxml_path'] = "../workflow/sample_files/#{hpxml_file}"
   end
-  args['apply_validation'] = true
+  args['apply_validation'] = false # It's faster not to validate and the CI tests will catch issues
 
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
@@ -1678,6 +1683,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].include? hpxml_file
+    args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsSEER2
+    args['heat_pump_cooling_efficiency'] = (args['heat_pump_cooling_efficiency'] * 0.95).round(1)
+    args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF2
+    args['heat_pump_heating_efficiency'] = (args['heat_pump_heating_efficiency'] * 0.85).round(1)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_heating_capacity_17_f'] = 0.0
@@ -1761,6 +1771,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heating_system_fuel'] = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-central-ac-only-1-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
+  elsif ['base-hvac-central-ac-only-1-speed-seer2.xml'].include? hpxml_file
+    args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsSEER2
+    args['cooling_system_cooling_efficiency'] = (args['cooling_system_cooling_efficiency'] * 0.95).round(1)
   elsif ['base-hvac-central-ac-only-2-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_cooling_efficiency'] = 18.0
@@ -4350,7 +4363,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
-  elsif ['base-misc-generators.xml'].include? hpxml_file
+  elsif ['base-misc-generators.xml',
+         'base-battery-generators.xml',
+         'base-pv-battery-generators.xml',
+         'base-pv-generators.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
