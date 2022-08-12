@@ -47,7 +47,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
       assert_equal(5000.0, elcd.designStorageControlChargePower.get)
@@ -117,8 +117,8 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal('AlternatingCurrentWithStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
-      assert_equal(1000.0, elcd.designStorageControlChargePower.get)
-      assert_equal(1000.0, elcd.designStorageControlDischargePower.get)
+      assert_equal(15000.0, elcd.designStorageControlChargePower.get)
+      assert_equal(15000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackChargeDischargeSchedules', elcd.storageOperationScheme)
       assert(elcd.storageChargePowerFractionSchedule.is_initialized)
@@ -149,7 +149,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
       assert_equal(15000.0, elcd.designStorageControlChargePower.get)
@@ -184,11 +184,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
-      assert_equal(1000.0, elcd.designStorageControlChargePower.get)
-      assert_equal(1000.0, elcd.designStorageControlDischargePower.get)
+      assert_equal(15000.0, elcd.designStorageControlChargePower.get)
+      assert_equal(15000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackChargeDischargeSchedules', elcd.storageOperationScheme)
       assert(elcd.storageChargePowerFractionSchedule.is_initialized)
@@ -219,7 +219,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
       assert_equal(15000.0, elcd.designStorageControlChargePower.get)
@@ -252,7 +252,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
       assert_equal(15000.0, elcd.designStorageControlChargePower.get)
@@ -284,7 +284,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
       elcd = elcds[0]
-      assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
+      assert_equal('DirectCurrentWithInverterACStorage', elcd.electricalBussType)
       assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
       assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
       assert_equal(15000.0, elcd.designStorageControlChargePower.get)
