@@ -176,7 +176,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:steps_in_day] = 24 * 60 / args[:minutes_per_step]
     args[:mkc_ts_per_day] = 96
     args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
-    args[:sim_year] = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+
+    calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+    args[:sim_year] = calendar_year
     args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
     args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
   end
