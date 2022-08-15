@@ -653,18 +653,18 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     hpxml = _create_hpxml('base-bldgtype-single-family-attached.xml')
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas()
     a_ext_ratio = exterior_area / total_area
-    assert_in_delta(0.840, a_ext_ratio, 0.001)
+    assert_in_delta(0.893, a_ext_ratio, 0.001)
 
     hpxml.attics[0].within_infiltration_volume = true
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas()
     a_ext_ratio = exterior_area / total_area
-    assert_in_delta(0.817, a_ext_ratio, 0.001)
+    assert_in_delta(0.882, a_ext_ratio, 0.001)
 
     # Test multifamily
     hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas()
     a_ext_ratio = exterior_area / total_area
-    assert_in_delta(0.247, a_ext_ratio, 0.001)
+    assert_in_delta(0.282, a_ext_ratio, 0.001)
   end
 
   def test_aspect_ratios
