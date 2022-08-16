@@ -10,7 +10,7 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <TemperatureCapacitanceMultiplier>1.0</TemperatureCapacitanceMultiplier>
+        <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
       </SimulationControl>
       <AdditionalProperties>
         <ParentHPXMLFile>base.xml</ParentHPXMLFile>

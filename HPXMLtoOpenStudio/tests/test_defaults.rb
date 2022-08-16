@@ -75,7 +75,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 7.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')

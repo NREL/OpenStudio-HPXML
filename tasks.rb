@@ -2388,7 +2388,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
     args['simulation_control_run_period'] = 'Jan 1 - Jan 31'
   elsif ['base-simcontrol-temperature-capacitance-multiplier.xml'].include? hpxml_file
-    args['simulation_control_temperature_capacitance_multiplier'] = 1.0
+    args['simulation_control_temperature_capacitance_multiplier'] = 7.0
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 10
   elsif ['base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml'].include? hpxml_file
