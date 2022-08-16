@@ -120,7 +120,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     unless (Pathname.new output_dir).absolute?
-      output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
+      output_dir = File.expand_path(output_dir)
     end
 
     if building_id.is_initialized
