@@ -28,6 +28,7 @@ __Bugfixes__
 - Fixes possible output error for ground source heat pumps with a shared hydronic circulation loop.
 - Provides an error message if the EnergyPlus simulation used infinite energy.
 - Fixes zero energy use for a ventilation fan w/ non-zero fan power and zero airflow rate.
+- Fixes excessive heat transfer when foundation wall interior insulation does not start from the top of the wall.
 
 ## OpenStudio-HPXML v1.4.0
 
