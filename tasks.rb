@@ -1225,7 +1225,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
     args['geometry_unit_cfa'] = 1800.0
-    args['geometry_unit_aspect_ratio'] = 0.667
+    args['geometry_unit_aspect_ratio'] = 0.6667
     args['geometry_building_num_units'] = 3
     args['geometry_unit_right_wall_is_adiabatic'] = true
     args['window_front_wwr'] = 0.18
@@ -1258,7 +1258,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if ['base-bldgtype-multifamily.xml'].include? hpxml_file
     args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
     args['geometry_unit_cfa'] = 900.0
-    args['geometry_unit_aspect_ratio'] = 0.667
+    args['geometry_unit_aspect_ratio'] = 0.6667
     args['geometry_foundation_type'] = HPXML::FoundationTypeAboveApartment
     args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
     args['geometry_unit_right_wall_is_adiabatic'] = true

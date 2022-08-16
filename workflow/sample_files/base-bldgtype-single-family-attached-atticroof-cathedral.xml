@@ -163,7 +163,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>854.5</Area>
+            <Area>854.7</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -182,7 +182,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>462.5</Area>
+            <Area>462.7</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <InteriorFinish>
