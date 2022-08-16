@@ -99,14 +99,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 7.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
 
     # Test defaults - calendar year override by AMY year
     hpxml.header.sim_calendar_year = 2020
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 7.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
 
     # Test defaults - invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -130,7 +130,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
-                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 7.0)
+                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0)
   end
 
   def test_emissions_factors
