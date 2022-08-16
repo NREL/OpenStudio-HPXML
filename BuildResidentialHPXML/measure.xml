@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c3535870-8a12-4f23-aeb3-d934644816c2</version_id>
-  <version_modified>20220726T013415Z</version_modified>
+  <version_id>47c88707-ad13-4e3a-a88c-7a25b7e82d75</version_id>
+  <version_modified>20220816T203916Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2706,7 +2706,7 @@
     <argument>
       <name>hvac_control_heating_season_period</name>
       <display_name>HVAC Control: Heating Season Period</display_name>
-      <description>Enter a date like "Nov 1 - Jun 30". If not provided, the OS-HPXML default is used.</description>
+      <description>Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -2714,7 +2714,7 @@
     <argument>
       <name>hvac_control_cooling_season_period</name>
       <display_name>HVAC Control: Cooling Season Period</display_name>
-      <description>Enter a date like "Jun 1 - Oct 31". If not provided, the OS-HPXML default is used.</description>
+      <description>Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6376,7 +6376,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E3EB0D54</checksum>
+      <checksum>BD45DBE1</checksum>
     </file>
     <file>
       <version>
@@ -6387,7 +6387,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1158C984</checksum>
+      <checksum>5E1FEEA9</checksum>
     </file>
   </files>
 </measure>
