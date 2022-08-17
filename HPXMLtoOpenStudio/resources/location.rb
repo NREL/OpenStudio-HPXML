@@ -22,7 +22,8 @@ class Location
     # parsing the weather file.
     if File.exist? weather_cache_path
       weather = WeatherProcess.new(nil, nil, weather_cache_path)
-    else
+    end
+    if weather.nil? || weather.data.AnnualAvgDrybulb.nil?
       weather = WeatherProcess.new(model, runner)
     end
 
@@ -94,5 +95,36 @@ class Location
     end
 
     return
+  end
+
+  def self.get_epw_path(hpxml, hpxml_path)
+    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
+
+    if not File.exist? epw_path
+      test_epw_path = File.join(File.dirname(hpxml_path), epw_path)
+      epw_path = test_epw_path if File.exist? test_epw_path
+    end
+    (1..3).to_a.each do |level_deep|
+      next unless not File.exist? epw_path
+
+      level = (['..'] * level_deep).join('/')
+      test_epw_path = File.join(File.dirname(__FILE__), level, 'weather', epw_path)
+      epw_path = test_epw_path if File.exist? test_epw_path
+    end
+    if not File.exist?(epw_path)
+      fail "'#{epw_path}' could not be found."
+    end
+
+    return epw_path
+  end
+
+  def self.get_sim_calendar_year(sim_calendar_year, epw_file)
+    if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
+      sim_calendar_year = epw_file.startDateActualYear.get
+    end
+    if sim_calendar_year.nil?
+      sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
+    end
+    return sim_calendar_year
   end
 end

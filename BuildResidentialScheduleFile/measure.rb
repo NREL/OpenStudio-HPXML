@@ -11,6 +11,7 @@ require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
+require_relative '../HPXMLtoOpenStudio/resources/location'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
@@ -33,7 +34,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   # define the arguments that the user will input
-  def arguments(model)
+  def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
     args = OpenStudio::Measure::OSArgumentVector.new
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
@@ -72,6 +73,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
+    arg.setDisplayName('Debug Mode?')
+    arg.setDescription('Applicable when schedules type is stochastic. If true: Write extra state column(s).')
+    arg.setDefaultValue(false)
+    args << arg
+
     return args
   end
 
@@ -105,14 +112,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     hpxml = HPXML.new(hpxml_path: hpxml_path)
 
     # create EpwFile object
-    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
-    if not File.exist? epw_path
-      epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
-    end
-    if not File.exist? epw_path
-      runner.registerError("Could not find EPW file at '#{epw_path}'.")
-      return false
-    end
+    epw_path = Location.get_epw_path(hpxml, hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
     # create the schedules
@@ -177,13 +177,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:mkc_ts_per_day] = 96
     args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
 
-    calendar_year = 2007 # default to TMY
-    if !hpxml.header.sim_calendar_year.nil?
-      calendar_year = hpxml.header.sim_calendar_year
-    end
-    if epw_file.startDateActualYear.is_initialized # AMY
-      calendar_year = epw_file.startDateActualYear.get
-    end
+    calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
     args[:sim_year] = calendar_year
     args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
     args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
@@ -201,6 +195,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     else
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
     end
+    # Stochastic occupancy required integer number of occupants
+    if args[:schedules_type] == 'stochastic'
+      args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
+    end
 
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
@@ -209,6 +207,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_vacancy_end_month] = end_month
       args[:schedules_vacancy_end_day] = end_day
     end
+
+    debug = false
+    if args[:schedules_type] == 'stochastic' && args[:debug].is_initialized
+      debug = args[:debug].get
+    end
+    args[:debug] = debug
   end
 end
 
