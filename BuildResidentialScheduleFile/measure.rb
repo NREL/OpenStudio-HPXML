@@ -105,7 +105,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     hpxml_output_path = args[:hpxml_output_path]
     unless (Pathname.new hpxml_output_path).absolute?
-      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
+      hpxml_output_path = File.expand_path(hpxml_output_path)
     end
     args[:hpxml_output_path] = hpxml_output_path
 
