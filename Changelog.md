@@ -17,7 +17,7 @@ __New Features__
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
 - ReportUtilityBills measure:
-  - Removes utility rate and PV related arguments in lieu of new utility bill scenarios feature.
+  - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
@@ -30,6 +30,8 @@ __Bugfixes__
 - Fixes zero energy use for a ventilation fan w/ non-zero fan power and zero airflow rate.
 - Fixes excessive heat transfer when foundation wall interior insulation does not start from the top of the wall.
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
+- BuildResidentialHPXML measure:
+  - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
 ## OpenStudio-HPXML v1.4.0
 
