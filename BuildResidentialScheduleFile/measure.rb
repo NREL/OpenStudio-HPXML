@@ -150,7 +150,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     output_csv_path = args[:output_csv_path]
     unless (Pathname.new output_csv_path).absolute?
-      output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), output_csv_path))
+      output_csv_path = File.expand_path(output_csv_path)
     end
 
     success = schedule_generator.export(schedules_path: output_csv_path)
