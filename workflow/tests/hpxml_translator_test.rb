@@ -476,7 +476,7 @@ class HPXMLTest < MiniTest::Test
         assert((abs_htg_load_delta < 0.6) || (abs_htg_load_frac < 0.1))
       end
       if hpxml.total_fraction_cool_load_served > 0
-        assert((abs_clg_load_delta < 0.6) || (abs_clg_load_frac < 0.1))
+        assert((abs_clg_load_delta < 1.1) || (abs_clg_load_frac < 0.1))
       end
     end
 
