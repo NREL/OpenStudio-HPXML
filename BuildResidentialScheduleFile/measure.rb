@@ -65,7 +65,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Schedules: Output CSV Path')
-    arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.')
+    arg.setDescription('Absolute/relative path of the CSV file containing occupancy schedules.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
