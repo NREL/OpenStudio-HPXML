@@ -890,20 +890,14 @@ class HPXML < Object
              :heat_pump_sizing_methodology, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths,
              :occupancy_calculation_type, :extension_properties, :iecc_eri_calculation_version,
-             :zerh_calculation_version, :temperature_capacitance_multiplier]
+             :zerh_calculation_version, :temperature_capacitance_multiplier,
+             :natvent_days_per_week]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
 
     def check_for_errors
       errors = []
-
-      if not @timestep.nil?
-        valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
-        if not valid_tsteps.include? @timestep
-          errors << "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
-        end
-      end
 
       errors += HPXML::check_dates('Run Period', @sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day)
 
@@ -920,9 +914,7 @@ class HPXML < Object
       end
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
-
       errors += @emissions_scenarios.check_for_errors
-
       errors += @utility_bill_scenarios.check_for_errors
 
       return errors
@@ -947,11 +939,15 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       if not @occupancy_calculation_type.nil?
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        XMLHelper.add_element(extension, 'OccupancyCalculationType', @occupancy_calculation_type, :string, @occupancy_calculation_type_isdefaulted) unless @occupancy_calculation_type.nil?
+        XMLHelper.add_element(extension, 'OccupancyCalculationType', @occupancy_calculation_type, :string, @occupancy_calculation_type_isdefaulted)
+      end
+      if not @natvent_days_per_week.nil?
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        XMLHelper.add_element(extension, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted)
       end
       if not @apply_ashrae140_assumptions.nil?
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
+        XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean)
       end
       { @eri_calculation_version => 'ERICalculation',
         @energystar_calculation_version => 'EnergyStarCalculation',
@@ -1058,6 +1054,7 @@ class HPXML < Object
       @dst_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @occupancy_calculation_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancyCalculationType', :string)
+      @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @heat_pump_sizing_methodology = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/HeatPumpSizingMethodology', :string)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)

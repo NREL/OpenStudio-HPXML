@@ -6,6 +6,7 @@ __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - Allows setting the EnergyPlus temperature capacitance multiplier.
+- Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:
