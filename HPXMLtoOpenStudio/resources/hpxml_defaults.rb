@@ -142,21 +142,15 @@ class HPXMLDefaults
       hpxml.header.sim_end_day_isdefaulted = true
     end
 
-    if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
-      if not hpxml.header.sim_calendar_year.nil?
-        if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
-          hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
-          hpxml.header.sim_calendar_year_isdefaulted = true
-        end
-      else
-        hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
+    sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+    if not hpxml.header.sim_calendar_year.nil?
+      if hpxml.header.sim_calendar_year != sim_calendar_year
+        hpxml.header.sim_calendar_year = sim_calendar_year
         hpxml.header.sim_calendar_year_isdefaulted = true
       end
     else
-      if hpxml.header.sim_calendar_year.nil?
-        hpxml.header.sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
-        hpxml.header.sim_calendar_year_isdefaulted = true
-      end
+      hpxml.header.sim_calendar_year = sim_calendar_year
+      hpxml.header.sim_calendar_year_isdefaulted = true
     end
 
     if hpxml.header.dst_enabled.nil?
@@ -208,6 +202,16 @@ class HPXMLDefaults
     if (not epw_file.nil?) && hpxml.header.time_zone_utc_offset.nil?
       hpxml.header.time_zone_utc_offset = epw_file.timeZone
       hpxml.header.time_zone_utc_offset_isdefaulted = true
+    end
+
+    if hpxml.header.temperature_capacitance_multiplier.nil?
+      hpxml.header.temperature_capacitance_multiplier = 1.0
+      hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml.header.natvent_days_per_week.nil?
+      hpxml.header.natvent_days_per_week = 3
+      hpxml.header.natvent_days_per_week_isdefaulted = true
     end
   end
 
