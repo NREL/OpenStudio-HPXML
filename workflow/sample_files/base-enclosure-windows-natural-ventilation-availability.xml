@@ -8,10 +8,10 @@
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
-      <NaturalVentilationAvailabilityDaysperWeek>7</NaturalVentilationAvailabilityDaysperWeek>
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <NaturalVentilationAvailabilityDaysperWeek>7</NaturalVentilationAvailabilityDaysperWeek>
       <AdditionalProperties>
         <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>
