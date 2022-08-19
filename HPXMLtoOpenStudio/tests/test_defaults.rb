@@ -49,10 +49,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.time_zone_utc_offset = -8
     hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeOperational
     hpxml.header.temperature_capacitance_multiplier = 1.5
+    hpxml.header.natvent_days_per_week = 7
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, HPXML::HeatPumpSizingMaxLoad,
-                                true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5)
+                                true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5, 7)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -72,10 +73,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.time_zone_utc_offset = nil
     hpxml.header.occupancy_calculation_type = nil
     hpxml.header.temperature_capacitance_multiplier = nil
+    hpxml.header.natvent_days_per_week = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -99,14 +101,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - calendar year override by AMY year
     hpxml.header.sim_calendar_year = 2020
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -130,7 +132,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
-                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0)
+                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
   end
 
   def test_emissions_factors
@@ -3221,7 +3223,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, heat_pump_sizing_methodology,
                                   allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
-                                  temperature_capacitance_multiplier)
+                                  temperature_capacitance_multiplier, natvent_days_per_week)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -3247,6 +3249,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(time_zone_utc_offset, hpxml.header.time_zone_utc_offset)
     assert_equal(occupancy_calculation_type, hpxml.header.occupancy_calculation_type)
     assert_equal(temperature_capacitance_multiplier, hpxml.header.temperature_capacitance_multiplier)
+    assert_equal(natvent_days_per_week, hpxml.header.natvent_days_per_week)
   end
 
   def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,

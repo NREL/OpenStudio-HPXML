@@ -208,6 +208,11 @@ class HPXMLDefaults
       hpxml.header.temperature_capacitance_multiplier = 1.0
       hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
     end
+
+    if hpxml.header.natvent_days_per_week.nil?
+      hpxml.header.natvent_days_per_week = 3
+      hpxml.header.natvent_days_per_week_isdefaulted = true
+    end
   end
 
   def self.apply_emissions_scenarios(hpxml)
