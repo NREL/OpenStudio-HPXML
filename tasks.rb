@@ -182,6 +182,7 @@ def create_hpxmls
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-walltypes.xml' => 'base.xml',
+    'base-enclosure-windows-natural-ventilation-availability.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
@@ -542,9 +543,9 @@ end
 
 def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   if hpxml_file.include? 'ASHRAE_Standard_140'
-    args['hpxml_path'] = "../workflow/tests/#{hpxml_file}"
+    args['hpxml_path'] = "workflow/tests/#{hpxml_file}"
   else
-    args['hpxml_path'] = "../workflow/sample_files/#{hpxml_file}"
+    args['hpxml_path'] = "workflow/sample_files/#{hpxml_file}"
   end
   args['apply_validation'] = false # It's faster not to validate and the CI tests will catch issues
 
@@ -1577,6 +1578,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['overhangs_right_depth'] = 1.5
     args['overhangs_right_distance_to_top_of_window'] = 2.0
     args['overhangs_right_distance_to_bottom_of_window'] = 6.0
+  elsif ['base-enclosure-windows-natural-ventilation-availability.xml'].include? hpxml_file
+    args['window_natvent_availability'] = 7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     args['window_area_front'] = 0
     args['window_area_back'] = 0

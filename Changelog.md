@@ -9,6 +9,7 @@ __New Features__
 - New lithium ion battery capabilities:
   - Allows modeling a battery without PV.
   - Detailed charging/discharging schedules via CSV files.
+- Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:
@@ -33,6 +34,7 @@ __Bugfixes__
 - Provides an error message if the EnergyPlus simulation used infinite energy.
 - Fixes zero energy use for a ventilation fan w/ non-zero fan power and zero airflow rate.
 - Fixes excessive heat transfer when foundation wall interior insulation does not start from the top of the wall.
+- Fixes how relative paths are treated when using an OpenStudio Workflow.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
