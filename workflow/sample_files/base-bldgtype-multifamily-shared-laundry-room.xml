@@ -143,6 +143,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>900.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -156,6 +159,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

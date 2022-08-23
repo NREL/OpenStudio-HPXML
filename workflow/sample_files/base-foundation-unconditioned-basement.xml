@@ -211,6 +211,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>basement - unconditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -221,6 +224,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

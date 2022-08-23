@@ -363,6 +363,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_num_occupants'] = 3
       args['floor_over_foundation_assembly_r'] = 0
       args['floor_over_garage_assembly_r'] = 0
+      args['floor_type'] = HPXML::FloorTypeWoodStud
       args['foundation_wall_thickness'] = 8.0
       args['foundation_wall_insulation_r'] = 8.9
       args['foundation_wall_insulation_distance_to_top'] = 0.0

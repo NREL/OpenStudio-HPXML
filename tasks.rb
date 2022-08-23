@@ -180,6 +180,7 @@ def create_hpxmls
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
+    'base-enclosure-floortypes.xml' => 'base.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-natural-ventilation-availability.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
@@ -569,6 +570,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 3
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodStud
     args['foundation_wall_thickness'] = 8.0
     args['foundation_wall_insulation_r'] = 8.9
     args['foundation_wall_insulation_distance_to_top'] = 0.0
@@ -836,6 +838,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 0
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodStud
     args['foundation_wall_thickness'] = 6.0
     args['foundation_wall_insulation_r'] = 0
     args['foundation_wall_insulation_distance_to_top'] = 0
@@ -3335,6 +3338,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
+  elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 1.35,
+                   HPXML::FloorTypeSteelStud => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: 1350 / floors_map.size,
+                       insulation_assembly_r_value: assembly_r)
+    end
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.rim_joists.reverse_each do |rim_joist|
       rim_joist.delete

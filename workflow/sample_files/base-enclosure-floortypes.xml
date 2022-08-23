@@ -11,7 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <NaturalVentilationAvailabilityDaysperWeek>7</NaturalVentilationAvailabilityDaysperWeek>
       <AdditionalProperties>
         <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>
@@ -95,7 +94,6 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -213,15 +211,38 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <StructurallyInsulatedPanel/>
             </FloorType>
-            <Area>1350.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
+            <Area>450.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>16.1</AssemblyEffectiveRValue>
+            </Insulation>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor2'/>
+            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <SolidConcrete/>
+            </FloorType>
+            <Area>450.0</Area>
+            <Insulation>
+              <SystemIdentifier id='Floor2Insulation'/>
+              <AssemblyEffectiveRValue>1.35</AssemblyEffectiveRValue>
+            </Insulation>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor3'/>
+            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <SteelFrame/>
+            </FloorType>
+            <Area>450.0</Area>
+            <Insulation>
+              <SystemIdentifier id='Floor3Insulation'/>
+              <AssemblyEffectiveRValue>8.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>

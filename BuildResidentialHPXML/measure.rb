@@ -467,6 +467,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(28.1)
     args << arg
 
+    floor_type_choices = OpenStudio::StringVector.new
+    floor_type_choices << HPXML::FloorTypeWoodStud
+    floor_type_choices << HPXML::FloorTypeSIP
+    floor_type_choices << HPXML::FloorTypeConcrete
+    floor_type_choices << HPXML::FloorTypeSteelStud
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
+    arg.setDisplayName('Floor: Type')
+    arg.setDescription('The type of floors.')
+    arg.setDefaultValue(HPXML::FloorTypeWoodStud)
+    args << arg
+
     foundation_wall_type_choices = OpenStudio::StringVector.new
     foundation_wall_type_choices << HPXML::FoundationWallTypeSolidConcrete
     foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlock
@@ -4168,9 +4180,12 @@ class HPXMLFile
                HPXML::LocationBasementConditioned,
                HPXML::LocationCrawlspaceConditioned].include? exterior_adjacent_to
 
+      floor_type = args[:floor_type]
+
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                        exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: interior_adjacent_to,
+                       floor_type: floor_type,
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                        other_space_above_or_below: other_space_above_or_below)
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id

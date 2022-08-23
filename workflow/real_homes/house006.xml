@@ -247,6 +247,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>1008.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>

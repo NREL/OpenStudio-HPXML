@@ -984,6 +984,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -997,6 +1000,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1010,6 +1016,9 @@
             <SystemIdentifier id='Floor3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1023,6 +1032,9 @@
             <SystemIdentifier id='Floor4'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1036,6 +1048,9 @@
             <SystemIdentifier id='Floor5'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1049,6 +1064,9 @@
             <SystemIdentifier id='Floor6'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1062,6 +1080,9 @@
             <SystemIdentifier id='Floor7'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1075,6 +1096,9 @@
             <SystemIdentifier id='Floor8'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1088,6 +1112,9 @@
             <SystemIdentifier id='Floor9'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1101,6 +1128,9 @@
             <SystemIdentifier id='Floor10'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>0.1</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

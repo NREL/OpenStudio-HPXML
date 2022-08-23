@@ -122,6 +122,10 @@ class HPXML < Object
   FoundationWallTypeWood = 'wood'
   FloorOtherSpaceAbove = 'above'
   FloorOtherSpaceBelow = 'below'
+  FloorTypeWoodStud = 'WoodStud'
+  FloorTypeSIP = 'StructurallyInsulatedPanel'
+  FloorTypeSteelStud = 'SteelFrame'
+  FloorTypeConcrete = 'SolidConcrete'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -2619,7 +2623,7 @@ class HPXML < Object
   end
 
   class Floor < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :other_space_above_or_below, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
@@ -2695,6 +2699,10 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
+      if not @floor_type.nil?
+        floor_type_el = XMLHelper.add_element(floor, 'FloorType')
+        XMLHelper.add_element(floor_type_el, @floor_type)
+      end
       XMLHelper.add_element(floor, 'Area', @area, :float) unless @area.nil?
       if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
         interior_finish = XMLHelper.add_element(floor, 'InteriorFinish')
@@ -2728,6 +2736,7 @@ class HPXML < Object
       @id = HPXML::get_id(floor)
       @exterior_adjacent_to = XMLHelper.get_value(floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(floor, 'InteriorAdjacentTo', :string)
+      @floor_type = XMLHelper.get_child_name(floor, 'FloorType')
       @area = XMLHelper.get_value(floor, 'Area', :float)
       interior_finish = XMLHelper.get_element(floor, 'InteriorFinish')
       if not interior_finish.nil?

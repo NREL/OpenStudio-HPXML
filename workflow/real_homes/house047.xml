@@ -117,6 +117,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>718.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
