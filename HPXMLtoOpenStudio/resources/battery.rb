@@ -86,9 +86,9 @@ class Battery
       discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
 
       if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
-        charging_schedule = schedules_file.schedules[SchedulesFile::ColumnBatteryCharging]
-        discharging_schedule = schedules_file.schedules[SchedulesFile::ColumnBatteryDischarging]
-        values = charging_schedule.zip(discharging_schedule)
+        charging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryCharging]
+        discharging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryDischarging]
+        values = charging_schedule_values.zip(discharging_schedule_values)
         if values.any? { |v| v[0] > 0 && v[1] > 0 }
           fail 'Cannot simultaneously charge and discharge the battery.'
         end
