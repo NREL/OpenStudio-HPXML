@@ -139,7 +139,7 @@ class WT
 end
 
 class OutputMethods
-  def self.get_timestamps(msgpackData, hpxml, add_dst_column = false, add_utc_column = false)
+  def self.get_timestamps(msgpackData, hpxml, add_dst_column = false, add_utc_column = false, use_dview_format = false)
     return if msgpackData.nil?
 
     if msgpackData.keys.include? 'MeterData'
@@ -150,7 +150,7 @@ class OutputMethods
       ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
     end
 
-    if add_dst_column
+    if add_dst_column || use_dview_format
       dst_start_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_begin_month, hpxml.header.dst_begin_day, 2)
       dst_end_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_end_month, hpxml.header.dst_end_day, 1)
     end
@@ -160,7 +160,7 @@ class OutputMethods
     end
 
     timestamps = []
-    timestamps_dst = [] if add_dst_column
+    timestamps_dst = [] if add_dst_column || use_dview_format
     timestamps_utc = [] if add_utc_column
     year = hpxml.header.sim_calendar_year.to_s
     ep_timestamps.each do |ep_timestamp|
@@ -171,7 +171,7 @@ class OutputMethods
 
       timestamps << ts.iso8601.delete('Z')
 
-      if add_dst_column
+      if add_dst_column || use_dview_format
         if (ts >= dst_start_ts) && (ts < dst_end_ts)
           ts_dst = ts + 3600 # 1 hr shift forward
         else
