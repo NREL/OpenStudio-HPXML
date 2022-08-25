@@ -532,7 +532,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if timeseries_frequency != 'none'
       add_dst_column = (add_timeseries_dst_column.is_initialized ? add_timeseries_dst_column.get : false)
       add_utc_column = (add_timeseries_utc_column.is_initialized ? add_timeseries_utc_column.get : false)
-      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(@msgpackDataTimeseries, @hpxml, add_dst_column, add_utc_column)
+      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(@msgpackDataTimeseries, @hpxml, add_dst_column, add_utc_column, use_dview_format)
     end
 
     # Retrieve outputs
@@ -585,6 +585,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_zone_temperatures,
                                     include_timeseries_airflows,
                                     include_timeseries_weather,
+                                    add_dst_column,
                                     timestamps_dst,
                                     timestamps_utc,
                                     use_dview_format)
@@ -1577,6 +1578,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_zone_temperatures,
                                       include_timeseries_airflows,
                                       include_timeseries_weather,
+                                      add_dst_column,
                                       timestamps_dst,
                                       timestamps_utc,
                                       use_dview_format)
@@ -1602,7 +1604,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @timestamps.each do |timestamp|
       data << timestamp
     end
-    if timestamps_dst
+    if add_dst_column
       timestamps2 = [['TimeDST', nil]]
       timestamps_dst.each do |timestamp|
         timestamps2[0] << timestamp
@@ -1769,6 +1771,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                        data[1]] # Units
         data.delete_at(1) # Remove units, added to header data above
         data.delete_at(0) # Remove series name, added to header data above
+
+        # Apply daylight savings
+        # https://github.com/NREL/BEopt2/blob/master/Modeling/output.py#L580-L583
+        dst_start_ix = nil
+        dst_end_ix = nil
+        @timestamps.zip(timestamps_dst).each_with_index do |ts, i|
+          dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
+          dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
+        end
+        dst_end_ix.downto(dst_start_ix + 1) do |i|
+          data[i + 1] = data[i]
+        end
+
         data.insert(0, *header_data) # Add header data to beginning
       end
 
