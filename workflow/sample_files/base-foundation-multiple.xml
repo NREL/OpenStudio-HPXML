@@ -300,6 +300,9 @@
             <SystemIdentifier id='Floor3'/>
             <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>675.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor3Insulation'/>

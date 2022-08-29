@@ -229,7 +229,7 @@
             <Area>450.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
-              <AssemblyEffectiveRValue>1.35</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>1.63</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>

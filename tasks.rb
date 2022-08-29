@@ -2806,18 +2806,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
@@ -2926,6 +2929,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationAtticUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                      insulation_assembly_r_value: 39.3)
@@ -3171,6 +3175,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 675,
                      insulation_assembly_r_value: 18.7)
     hpxml.slabs[0].area = 675
@@ -3312,6 +3317,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationGarage,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodStud,
                      area: 400,
                      insulation_assembly_r_value: 39.3)
     hpxml.slabs[0].area -= 400
@@ -3343,7 +3349,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       floor.delete
     end
     floors_map = { HPXML::FloorTypeSIP => 16.1,
-                   HPXML::FloorTypeConcrete => 1.35,
+                   HPXML::FloorTypeConcrete => 1.63,
                    HPXML::FloorTypeSteelStud => 8.1 }
     floors_map.each_with_index do |(floor_type, assembly_r), _i|
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",

@@ -216,6 +216,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>550.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
@@ -229,6 +232,9 @@
             <SystemIdentifier id='Floor3'/>
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor3Insulation'/>
@@ -242,6 +248,9 @@
             <SystemIdentifier id='Floor4'/>
             <ExteriorAdjacentTo>other heated space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodStud/>
+            </FloorType>
             <Area>150.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor4Insulation'/>
