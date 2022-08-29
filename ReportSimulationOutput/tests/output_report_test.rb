@@ -1054,8 +1054,18 @@ class ReportSimulationOutputTest < MiniTest::Test
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'output_format' => 'csv_dview',
                   'timeseries_frequency' => 'timestep',
-                  'include_timeseries_fuel_consumptions' => true,
-                  'add_timeseries_dst_column' => true }
+                  'include_timeseries_fuel_consumptions' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    assert_equal('wxDVFileHeaderVer.1', CSV.readlines(timeseries_csv)[0][0].strip)
+  end
+
+  def test_timeseries_for_dview_dst_disabled
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-simcontrol-daylight-saving-disabled.xml'),
+                  'output_format' => 'csv_dview',
+                  'timeseries_frequency' => 'timestep',
+                  'include_timeseries_fuel_consumptions' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
