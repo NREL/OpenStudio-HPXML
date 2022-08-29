@@ -197,4 +197,14 @@ class OutputMethods
       'monthly' => 'Monthly',
     }
   end
+
+  def self.get_dst_start_end_indexes(timestamps, timestamps_dst)
+    dst_start_ix = nil
+    dst_end_ix = nil
+    timestamps.zip(timestamps_dst).each_with_index do |ts, i|
+      dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
+      dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
+    end
+    return dst_start_ix, dst_end_ix
+  end
 end

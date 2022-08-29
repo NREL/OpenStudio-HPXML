@@ -1775,12 +1775,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Apply daylight savings
         # https://github.com/NREL/BEopt2/blob/master/Modeling/output.py#L580-L583
         if @hpxml.header.dst_enabled
-          dst_start_ix = nil
-          dst_end_ix = nil
-          @timestamps.zip(timestamps_dst).each_with_index do |ts, i|
-            dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
-            dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
-          end
+          dst_start_ix, dst_end_ix = OutputMethods.get_dst_start_end_indexes(@timestamps, timestamps_dst)
           dst_end_ix.downto(dst_start_ix + 1) do |i|
             data[i + 1] = data[i]
           end
