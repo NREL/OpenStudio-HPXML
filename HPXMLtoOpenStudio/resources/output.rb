@@ -205,6 +205,9 @@ class OutputMethods
       dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
       dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
     end
+
+    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? # run period ends before DST ends
+
     return dst_start_ix, dst_end_ix
   end
 end
