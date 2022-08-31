@@ -100,7 +100,6 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                          integer            1 - 12         No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            1 - 31         No        31                           Run period end date
   ``CalendarYear``                      integer            > 1600 [#]_    No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``DaylightSaving/Enabled``            boolean                           No        true                         Daylight saving enabled?
   ``TemperatureCapacitanceMultiplier``  double             > 0            No        1.0                          Multiplier on air heat capacitance [#]_
   ====================================  ========  =======  =============  ========  ===========================  =====================================
 
@@ -110,17 +109,6 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
-
-If daylight saving is enabled, additional information is specified in ``DaylightSaving``.
-
-  ======================================  ========  =====  =================  ========  =============================  ===========
-  Element                                 Type      Units  Constraints        Required  Default                        Description
-  ======================================  ========  =====  =================  ========  =============================  ===========
-  ``BeginMonth`` and ``BeginDayOfMonth``  integer          1 - 12 and 1 - 31  No        EPW else 3/12 (March 12) [#]_  Start date
-  ``EndMonth`` and ``EndDayOfMonth``      integer          1 - 12 and 1 - 31  No        EPW else 11/5 (November 5)     End date
-  ======================================  ========  =====  =================  ========  =============================  ===========
-
-  .. [#] Daylight saving dates will be defined according to the EPW weather file header; if not available, fallback default values listed above will be used.
 
 HPXML HVAC Sizing Control
 *************************
@@ -433,12 +421,24 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   ``Address/StateCode``                    string                        No        See [#]_  State/territory where the home is located
   ``Address/ZipCode``                      string           See [#]_     No                  ZIP Code where the home is located
   ``TimeZone/UTCOffset``                   double           See [#]_     No        See [#]_  Difference in decimal hours between the home's time zone and UTC
+  ``TimeZone/DSTObserved``                 boolean                       No        true      Daylight saving time observed?
   =======================================  ========  =====  ===========  ========  ========  ===============
 
   .. [#] If StateCode not provided, defaults according to the EPW weather file header.
   .. [#] ZipCode can be defined as the standard 5 number postal code, or it can have the additional 4 number code separated by a hyphen.
   .. [#] UTCOffset ranges from -12 to 14.
   .. [#] If UTCOffset not provided, defaults according to the EPW weather file header.
+
+If daylight saving time is observed, additional information can be specified in ``/HPXML/Building/Site/TimeZone/extension``.
+
+  ============================================  ========  =====  =================  ========  =============================  ===========
+  Element                                       Type      Units  Constraints        Required  Default                        Description
+  ============================================  ========  =====  =================  ========  =============================  ===========
+  ``DSTBeginMonth`` and ``DSTBeginDayOfMonth``  integer          1 - 12 and 1 - 31  No        EPW else 3/12 (March 12) [#]_  Start date
+  ``DSTEndMonth`` and ``DSTEndDayOfMonth``      integer          1 - 12 and 1 - 31  No        EPW else 11/5 (November 5)     End date
+  ============================================  ========  =====  =================  ========  =============================  ===========
+
+  .. [#] Daylight saving dates will be defined according to the EPW weather file header; if not available, fallback default values listed above will be used.
 
 HPXML Building Summary
 ----------------------

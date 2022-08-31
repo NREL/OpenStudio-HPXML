@@ -955,7 +955,7 @@ class HPXML < Object
         calculation = XMLHelper.add_element(extension, element_name)
         XMLHelper.add_element(calculation, 'Version', calculation_version, :string)
       end
-      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?)
+      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
         XMLHelper.add_element(simulation_control, 'Timestep', @timestep, :integer, @timestep_isdefaulted) unless @timestep.nil?
@@ -964,14 +964,6 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndMonth', @sim_end_month, :integer, @sim_end_month_isdefaulted) unless @sim_end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', @sim_end_day, :integer, @sim_end_day_isdefaulted) unless @sim_end_day.nil?
         XMLHelper.add_element(simulation_control, 'CalendarYear', @sim_calendar_year, :integer, @sim_calendar_year_isdefaulted) unless @sim_calendar_year.nil?
-        if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
-          daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
-          XMLHelper.add_element(daylight_saving, 'Enabled', @dst_enabled, :boolean, @dst_enabled_isdefaulted) unless @dst_enabled.nil?
-          XMLHelper.add_element(daylight_saving, 'BeginMonth', @dst_begin_month, :integer, @dst_begin_month_isdefaulted) unless @dst_begin_month.nil?
-          XMLHelper.add_element(daylight_saving, 'BeginDayOfMonth', @dst_begin_day, :integer, @dst_begin_day_isdefaulted) unless @dst_begin_day.nil?
-          XMLHelper.add_element(daylight_saving, 'EndMonth', @dst_end_month, :integer, @dst_end_month_isdefaulted) unless @dst_end_month.nil?
-          XMLHelper.add_element(daylight_saving, 'EndDayOfMonth', @dst_end_day, :integer, @dst_end_day_isdefaulted) unless @dst_end_day.nil?
-        end
         XMLHelper.add_element(simulation_control, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
       end
       if (not @heat_pump_sizing_methodology.nil?) || (not @allow_increased_fixed_capacities.nil?)
@@ -1001,7 +993,7 @@ class HPXML < Object
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
-      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?)
+      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
         site = XMLHelper.add_element(building, 'Site')
         site_id = XMLHelper.add_element(site, 'SiteID')
         XMLHelper.add_attribute(site_id, 'id', 'SiteID')
@@ -1019,9 +1011,14 @@ class HPXML < Object
         if not @cambium_region_gea.nil?
           XMLHelper.add_element(site, 'CambiumRegionGEA', @cambium_region_gea, :string, @cambium_region_gea_isdefaulted)
         end
-        if not @time_zone_utc_offset.nil?
+        if (not @time_zone_utc_offset.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
           time_zone = XMLHelper.add_element(site, 'TimeZone')
-          XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted)
+          XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted) unless @time_zone_utc_offset.nil?
+          XMLHelper.add_element(time_zone, 'DSTObserved', @dst_enabled, :boolean, @dst_enabled_isdefaulted) unless @dst_enabled.nil?
+          XMLHelper.add_extension(time_zone, 'DSTBeginMonth', @dst_begin_month, :integer, @dst_begin_month_isdefaulted) unless @dst_begin_month.nil?
+          XMLHelper.add_extension(time_zone, 'DSTBeginDayOfMonth', @dst_begin_day, :integer, @dst_begin_day_isdefaulted) unless @dst_begin_day.nil?
+          XMLHelper.add_extension(time_zone, 'DSTEndMonth', @dst_end_month, :integer, @dst_end_month_isdefaulted) unless @dst_end_month.nil?
+          XMLHelper.add_extension(time_zone, 'DSTEndDayOfMonth', @dst_end_day, :integer, @dst_end_day_isdefaulted) unless @dst_end_day.nil?
         end
       end
       project_status = XMLHelper.add_element(building, 'ProjectStatus')
@@ -1047,11 +1044,6 @@ class HPXML < Object
       @sim_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth', :integer)
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
-      @dst_enabled = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled', :boolean)
-      @dst_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth', :integer)
-      @dst_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth', :integer)
-      @dst_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndMonth', :integer)
-      @dst_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @occupancy_calculation_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancyCalculationType', :string)
       @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
@@ -1078,6 +1070,11 @@ class HPXML < Object
       @egrid_subregion = XMLHelper.get_value(hpxml, 'Building/Site/eGridSubregion', :string)
       @cambium_region_gea = XMLHelper.get_value(hpxml, 'Building/Site/CambiumRegionGEA', :string)
       @time_zone_utc_offset = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/UTCOffset', :float)
+      @dst_enabled = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/DSTObserved', :boolean)
+      @dst_begin_month = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/extension/DSTBeginMonth', :integer)
+      @dst_begin_day = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/extension/DSTBeginDayOfMonth', :integer)
+      @dst_end_month = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/extension/DSTEndMonth', :integer)
+      @dst_end_day = XMLHelper.get_value(hpxml, 'Building/Site/TimeZone/extension/DSTEndDayOfMonth', :integer)
     end
   end
 
