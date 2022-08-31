@@ -1775,7 +1775,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         data.delete_at(0) # Remove series name, added to header data above
 
         # Apply daylight savings
-        # https://github.com/NREL/BEopt2/blob/master/Modeling/output.py#L580-L583
         if @hpxml.header.dst_enabled
           dst_start_ix, dst_end_ix = OutputMethods.get_dst_start_end_indexes(@timestamps, timestamps_dst)
           dst_end_ix.downto(dst_start_ix + 1) do |i|
