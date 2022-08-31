@@ -586,6 +586,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_airflows,
                                     include_timeseries_weather,
                                     add_dst_column,
+                                    add_utc_column,
                                     timestamps_dst,
                                     timestamps_utc,
                                     use_dview_format)
@@ -1579,6 +1580,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_airflows,
                                       include_timeseries_weather,
                                       add_dst_column,
+                                      add_utc_column,
                                       timestamps_dst,
                                       timestamps_utc,
                                       use_dview_format)
@@ -1612,7 +1614,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       timestamps2 = []
     end
-    if timestamps_utc
+    if add_utc_column
       timestamps3 = [['TimeUTC', nil]]
       timestamps_utc.each do |timestamp|
         timestamps3[0] << timestamp
