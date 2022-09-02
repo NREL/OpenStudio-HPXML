@@ -1613,6 +1613,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1635,6 +1636,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1657,6 +1659,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1679,6 +1682,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1701,6 +1705,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1726,6 +1731,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1753,6 +1759,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1785,6 +1792,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_distribution.ducts.each do |duct|
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)

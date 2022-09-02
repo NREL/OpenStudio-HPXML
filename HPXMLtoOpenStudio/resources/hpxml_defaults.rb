@@ -1471,13 +1471,6 @@ class HPXMLDefaults
 
       # Default ducts
 
-      hvac_distribution.ducts.each do |ducts|
-        next unless ducts.duct_surface_area_multiplier.nil?
-
-        ducts.duct_surface_area_multiplier = 1.0
-        ducts.duct_surface_area_multiplier_isdefaulted = true
-      end
-
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
 
@@ -1545,6 +1538,13 @@ class HPXMLDefaults
           duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
           duct.duct_fraction_area_isdefaulted = true
         end
+      end
+
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_surface_area_multiplier.nil?
+
+        ducts.duct_surface_area_multiplier = 1.0
+        ducts.duct_surface_area_multiplier_isdefaulted = true
       end
     end
   end
