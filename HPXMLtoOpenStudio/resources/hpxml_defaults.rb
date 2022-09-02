@@ -1466,10 +1466,17 @@ class HPXMLDefaults
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
 
       # Default ducts
+
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_surface_area_multiplier.nil?
+
+        ducts.duct_surface_area_multiplier = 1.0
+        ducts.duct_surface_area_multiplier_isdefaulted = true
+      end
 
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
