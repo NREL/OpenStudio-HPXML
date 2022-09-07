@@ -151,7 +151,7 @@ class Airflow
     end
   end
 
-  def self.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, infil_a_ext, cfa, nbeds)
+  def self.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, cfa, nbeds)
     # Calculates Qfan cfm requirement per ASHRAE 62.2-2019
     infil_volume = infil_measurements[0].infiltration_volume
     infil_height = infil_measurements[0].infiltration_height

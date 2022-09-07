@@ -288,6 +288,7 @@ def create_hpxmls
     'base-hvac-ducts-leakage-cfm50.xml' => 'base.xml',
     'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
     'base-hvac-ducts-area-fractions.xml' => 'base-enclosure-2stories.xml',
+    'base-hvac-ducts-area-multipliers.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
@@ -4115,6 +4116,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[1].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
+  end
+  if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
   end
 
   # ------------------ #
