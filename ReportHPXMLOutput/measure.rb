@@ -146,7 +146,9 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
 
     segment, _ = bldg_outputs.keys[0].split(':', 2)
     segment = segment.strip
+
     results_out = []
+
     bldg_outputs.each do |key, bldg_output|
       new_segment, _ = key.split(':', 2)
       new_segment = new_segment.strip
@@ -155,11 +157,6 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
         segment = new_segment
       end
       results_out << ["#{key} (#{bldg_output.units})", bldg_output.output.round(2)]
-
-      bldg_type_str = OpenStudio::toUnderscoreCase("#{bldg_type} #{bldg_output.units}")
-      bldg_output = bldg_output.output.round(2)
-      runner.registerValue(bldg_type_str, bldg_output)
-      runner.registerInfo("Registering #{bldg_output} for #{bldg_type_str}.")
     end
 
     if ['csv'].include? output_format
@@ -182,6 +179,13 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     runner.registerInfo("Wrote hpxml output to #{output_path}.")
+
+    results_out.each do |name, value|
+      name = OpenStudio::toUnderscoreCase(name)
+
+      runner.registerValue(name, value)
+      runner.registerInfo("Registering #{value} for #{name}.")
+    end
   end
 
   class BaseOutput
