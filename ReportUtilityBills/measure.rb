@@ -264,7 +264,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def report_runperiod_output_results(runner, utility_bills, bill_scenario_name)
-    utility_bill_type_str = OpenStudio::toUnderscoreCase('Total USD')
+    utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} Total USD")
     utility_bill_type_val = utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)
     runner.registerValue(utility_bill_type_str, utility_bill_type_val)
     runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
