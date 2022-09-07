@@ -214,29 +214,57 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       get_annual_bills(utility_bills)
 
       # Write/report results
-      write_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
-      report_runperiod_output_results(runner, utility_bills, utility_bill_scenario.name)
+      report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
     end
 
     return true
   end
 
-  def write_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
+  def report_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
     segment = utility_bills.keys[0].split(':', 2)[0]
     segment = segment.strip
+
     results_out = []
     results_out << ["#{bill_scenario_name}: Total ($)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
-    utility_bills.each do |key, bill|
-      new_segment = key.split(':', 2)[0]
+
+    utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} Total USD")
+    utility_bill_type_val = utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)
+    runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+    runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+
+    utility_bills.each do |fuel_type, bill|
+      new_segment = fuel_type.split(':', 2)[0]
       new_segment = new_segment.strip
       if new_segment != segment
         segment = new_segment
       end
 
-      results_out << ["#{bill_scenario_name}: #{key}: Fixed ($)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
-      results_out << ["#{bill_scenario_name}: #{key}: Marginal ($)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
-      results_out << ["#{bill_scenario_name}: #{key}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(key) && bill.annual_production_credit != 0
-      results_out << ["#{bill_scenario_name}: #{key}: Total ($)", bill.annual_total.round(2)] if bill.annual_total != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed ($)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Marginal ($)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type) && bill.annual_production_credit != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Total ($)", bill.annual_total.round(2)] if bill.annual_total != 0
+
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Fixed USD")
+      utility_bill_type_val = bill.annual_fixed_charge.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+      runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Marginal USD")
+      utility_bill_type_val = bill.annual_energy_charge.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+      runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+
+      if [FT::Elec].include? fuel_type
+        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} PV Credit USD")
+        utility_bill_type_val = bill.annual_production_credit.round(2)
+        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
+      end
+
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Total USD")
+      utility_bill_type_val = bill.annual_total.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill_type_val)
+      runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
     end
 
     if ['csv'].include? output_format
@@ -261,41 +289,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
     end
     runner.registerInfo("Wrote bills output to #{output_path}.")
-  end
-
-  def report_runperiod_output_results(runner, utility_bills, bill_scenario_name)
-    utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} Total USD")
-    utility_bill_type_val = utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)
-    runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-    runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
-
-    utility_bills.each do |fuel_type, utility_bill|
-      if [FT::Elec, FT::Gas].include? fuel_type
-        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Fixed USD")
-        utility_bill_type_val = utility_bill.annual_fixed_charge.round(2)
-        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
-      end
-
-      if [FT::Elec, FT::Gas].include? fuel_type
-        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Marginal USD")
-        utility_bill_type_val = utility_bill.annual_energy_charge.round(2)
-        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
-      end
-
-      if [FT::Elec].include? fuel_type
-        utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} PV Credit USD")
-        utility_bill_type_val = utility_bill.annual_production_credit.round(2)
-        runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-        runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
-      end
-
-      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{bill_scenario_name} #{fuel_type} Total USD")
-      utility_bill_type_val = utility_bill.annual_total.round(2)
-      runner.registerValue(utility_bill_type_str, utility_bill_type_val)
-      runner.registerInfo("Registering #{utility_bill_type_val} for #{utility_bill_type_str}.")
-    end
   end
 
   def get_utility_rates(fuels, utility_rates, args, bill_scenario, pv_systems)

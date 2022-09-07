@@ -135,21 +135,13 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       bldg_output.units = BO.get_units(bldg_type)
     end
 
-    # Report results
-    bldg_outputs.each do |bldg_type, bldg_output|
-      bldg_type_str = OpenStudio::toUnderscoreCase("#{bldg_type} #{bldg_output.units}")
-      bldg_output = bldg_output.output.round(2)
-      runner.registerValue(bldg_type_str, bldg_output)
-      runner.registerInfo("Registering #{bldg_output} for #{bldg_type_str}.")
-    end
-
-    # Write results
-    write_output(runner, bldg_outputs, output_format, output_path)
+    # Write/report results
+    report_output_results(runner, bldg_outputs, output_format, output_path)
 
     return true
   end
 
-  def write_output(runner, bldg_outputs, output_format, output_path)
+  def report_output_results(runner, bldg_outputs, output_format, output_path)
     line_break = nil
 
     segment, _ = bldg_outputs.keys[0].split(':', 2)
@@ -163,6 +155,11 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
         segment = new_segment
       end
       results_out << ["#{key} (#{bldg_output.units})", bldg_output.output.round(2)]
+
+      bldg_type_str = OpenStudio::toUnderscoreCase("#{bldg_type} #{bldg_output.units}")
+      bldg_output = bldg_output.output.round(2)
+      runner.registerValue(bldg_type_str, bldg_output)
+      runner.registerInfo("Registering #{bldg_output} for #{bldg_type_str}.")
     end
 
     if ['csv'].include? output_format
