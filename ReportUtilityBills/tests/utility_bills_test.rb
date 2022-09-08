@@ -434,6 +434,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     @measure.report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
 
+    # Check written values exist and are registered
     assert(File.exist?(@bills_csv))
     actual_bills = _get_actual_bills(@bills_csv)
 
