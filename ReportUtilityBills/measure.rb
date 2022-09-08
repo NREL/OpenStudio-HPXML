@@ -264,7 +264,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote bills output to #{output_path}.")
 
     results_out.each do |name, value|
-      name.gsub! '($)', 'USD'
+      name = name.gsub('($)', 'USD')
       name = OpenStudio::toUnderscoreCase(name)
 
       runner.registerValue(name, value)

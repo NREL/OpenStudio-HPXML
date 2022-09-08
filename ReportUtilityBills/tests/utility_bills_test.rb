@@ -447,7 +447,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @measure.annual_true_up(utility_rates, utility_bills, net_elec)
     @measure.get_annual_bills(utility_bills)
 
-    @measure.write_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+    @measure.report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
   end
 
   def _test_measure(expected_errors: [], expected_warnings: [])
