@@ -282,7 +282,8 @@ class ReportHPXMLOutputTest < MiniTest::Test
     assert(File.exist?(hpxml_csv))
     actual_multipliers = _get_actual_multipliers(hpxml_csv)
 
-    runner_multipliers = JSON.parse(File.read(File.join(hpxml_csv, '..', 'results.json')))
+    results_json = File.join(File.dirname(template_osw), 'run', 'results.json')
+    runner_multipliers = JSON.parse(File.read(results_json))
     runner_multipliers = runner_multipliers['ReportHPXMLOutput']
 
     actual_multipliers.each do |name, value|
