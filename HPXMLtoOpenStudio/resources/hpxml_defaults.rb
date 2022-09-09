@@ -1466,7 +1466,7 @@ class HPXMLDefaults
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
 
       # Default ducts
@@ -1539,6 +1539,13 @@ class HPXMLDefaults
           duct.duct_fraction_area_isdefaulted = true
         end
       end
+
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_surface_area_multiplier.nil?
+
+        ducts.duct_surface_area_multiplier = 1.0
+        ducts.duct_surface_area_multiplier_isdefaulted = true
+      end
     end
   end
 
@@ -1560,7 +1567,7 @@ class HPXMLDefaults
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
-        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, 1.0, cfa, nbeds).round(1)
+        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, cfa, nbeds).round(1)
         vent_fan.rated_flow_rate_isdefaulted = true
       end
       if vent_fan.fan_power.nil?
