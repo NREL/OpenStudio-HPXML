@@ -145,8 +145,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      actual_bills = _get_actual_bills(@bills_csv)
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
       @expected_bills['Test: Electricity: PV Credit ($)'] = -1787
       @expected_bills['Test: Electricity: Total ($)'] = -1061
       @expected_bills['Test: Total ($)'] = -272
@@ -190,9 +189,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', wood_marginal_rate: 0.015)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_marginal_rate: 0.03)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
+    actual_bills = _test_measure()
     expected_val = actual_bills['Test 1: Wood Cord: Total ($)']
     assert_in_delta(expected_val * 2, actual_bills['Test 2: Wood Cord: Total ($)'], 1)
   end
@@ -203,9 +200,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', wood_pellets_marginal_rate: 0.02)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_pellets_marginal_rate: 0.01)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
+    actual_bills = _test_measure()
     expected_val = actual_bills['Test 1: Wood Pellets: Total ($)']
     assert_in_delta(expected_val / 2, actual_bills['Test 2: Wood Pellets: Total ($)'], 1)
   end
@@ -217,9 +212,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', coal_marginal_rate: 0.1)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 3', coal_marginal_rate: 0.025)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
+    actual_bills = _test_measure()
     expected_val = actual_bills['Test 1: Coal: Total ($)']
     assert_in_delta(expected_val * 2, actual_bills['Test 2: Coal: Total ($)'], 1)
     assert_in_delta(expected_val / 2, actual_bills['Test 3: Coal: Total ($)'], 1)
@@ -229,9 +222,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-AMY-2012.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
+    actual_bills = _test_measure()
     assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
   end
 
@@ -239,9 +230,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-runperiod-1-month.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
+    actual_bills = _test_measure()
     assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
   end
 
@@ -249,8 +238,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-bills-none.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(hpxml: hpxml)
+    assert_nil(actual_bills)
   end
 
   def test_auto_marginal_rate
@@ -282,8 +271,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-oil-location-miami-fl.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find state average fuel oil rate based on Florida; using region (PADD 1C) average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_national
@@ -291,8 +280,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-propane-location-portland-or.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find state average propane rate based on Oregon; using national average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_dse
@@ -300,8 +289,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['DSE is not currently supported when calculating utility bills.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_no_rates
@@ -309,8 +298,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-capetown-zaf.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_error_user_specified_but_no_rates
@@ -318,8 +307,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['electricity_bill_type'] = 'Detailed'
     @args_hash['electricity_utility_rate_type'] = 'User-Specified'
     expected_errors = ['Must specify a utility rate json path when choosing User-Specified utility rate type.']
-    bills_csv = _test_measure(expected_errors: expected_errors)
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_errors: expected_errors)
+    assert_nil(actual_bills)
   end
 
   def test_monthly_prorate
@@ -427,12 +416,12 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@bills_csv))
     actual_bills = _get_actual_bills(@bills_csv)
 
-    _check_for_runner_registered_values(runner, actual_bills)
+    _check_for_runner_registered_values(runner, nil, actual_bills)
 
     return actual_bills
   end
 
-  def _test_measure(expected_errors: [], expected_warnings: [])
+  def _test_measure(hpxml: nil, expected_errors: [], expected_warnings: [])
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-run-hpxml.osw')
@@ -468,7 +457,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     bills_csv = File.join(File.dirname(template_osw), 'run', 'results_bills.csv')
 
-    # check warnings/errors
+    # Check warnings/errors
     if not expected_errors.empty?
       expected_errors.each do |expected_error|
         assert(cli_output.include?("ERROR] #{expected_error}"))
@@ -480,7 +469,19 @@ class ReportUtilityBillsTest < MiniTest::Test
       end
     end
 
-    return bills_csv
+    if !hpxml.nil?
+      return if hpxml.header.utility_bill_scenarios.empty?
+    elsif (not expected_errors.empty?) || (not expected_warnings.empty?)
+      return
+    end
+
+    # Check written values exist and are registered
+    assert(File.exist?(bills_csv))
+    actual_bills = _get_actual_bills(bills_csv)
+
+    _check_for_runner_registered_values(nil, File.join(File.dirname(bills_csv), 'results.json'), actual_bills)
+
+    return actual_bills
   end
 
   def _get_actual_bills(bills_csv)
@@ -494,10 +495,16 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _check_for_runner_registered_values(runner, actual_bills)
-    runner_bills = {}
-    runner.result.stepValues.each do |step_value|
-      runner_bills[step_value.name] = get_value_from_workflow_step_value(step_value)
+  def _check_for_runner_registered_values(runner, results_json, actual_bills)
+    if !runner.nil?
+      runner_bills = {}
+      runner.result.stepValues.each do |step_value|
+        runner_bills[step_value.name] = get_value_from_workflow_step_value(step_value)
+      end
+    elsif !results_json.nil?
+      require 'json'
+      runner_bills = JSON.parse(File.read(results_json))
+      runner_bills = runner_bills['ReportUtilityBills']
     end
 
     actual_bills.each do |name, value|

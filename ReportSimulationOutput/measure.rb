@@ -1246,6 +1246,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     results_out.each do |name, value|
       next if name.nil? # line breaks
+      next if name.start_with?('ERI')
 
       name = OpenStudio::toUnderscoreCase(name)
 

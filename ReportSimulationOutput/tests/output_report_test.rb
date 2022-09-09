@@ -453,7 +453,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows + emission_annual_cols
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
-    assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
+    assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
     _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), expected_annual_rows)
   end
 
@@ -1194,7 +1194,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
-    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert(actual_annual_rows.include? 'ERI: Building: CFA')
   end
 
