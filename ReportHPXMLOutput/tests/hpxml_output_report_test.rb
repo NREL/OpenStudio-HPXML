@@ -231,17 +231,6 @@ class ReportHPXMLOutputTest < MiniTest::Test
     end
   end
 
-  def _get_actual_multipliers(hpxml_csv)
-    actual_multipliers = {}
-    File.readlines(hpxml_csv).each do |line|
-      next if line.strip.empty?
-
-      key, value = line.split(',').map { |x| x.strip }
-      actual_multipliers[key] = Float(value)
-    end
-    return actual_multipliers
-  end
-
   def _test_measure(args_hash)
     # Run measure via OSW
     require 'json'
@@ -282,18 +271,32 @@ class ReportHPXMLOutputTest < MiniTest::Test
     assert(File.exist?(hpxml_csv))
     actual_multipliers = _get_actual_multipliers(hpxml_csv)
 
-    results_json = File.join(File.dirname(template_osw), 'run', 'results.json')
+    _check_for_runner_registered_values(File.join(File.dirname(hpxml_csv), 'results.json'), actual_multipliers)
+
+    return actual_multipliers
+  end
+
+  def _get_actual_multipliers(hpxml_csv)
+    actual_multipliers = {}
+    File.readlines(hpxml_csv).each do |line|
+      next if line.strip.empty?
+
+      key, value = line.split(',').map { |x| x.strip }
+      actual_multipliers[key] = Float(value)
+    end
+    return actual_multipliers
+  end
+
+  def _check_for_runner_registered_values(results_json, actual_multipliers)
+    require 'json'
     runner_multipliers = JSON.parse(File.read(results_json))
     runner_multipliers = runner_multipliers['ReportHPXMLOutput']
 
     actual_multipliers.each do |name, value|
-      name = name.gsub('(', '').gsub(')', '')
-      name = OpenStudio::toUnderscoreCase(name)
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
 
       assert_includes(runner_multipliers.keys, name)
       assert_equal(value, runner_multipliers[name])
     end
-
-    return actual_multipliers
   end
 end

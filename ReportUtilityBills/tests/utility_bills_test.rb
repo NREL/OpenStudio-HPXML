@@ -357,17 +357,6 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
-  def _get_actual_bills(bills_csv)
-    actual_bills = {}
-    File.readlines(bills_csv).each do |line|
-      next if line.strip.empty?
-
-      key, value = line.split(',').map { |x| x.strip }
-      actual_bills[key] = Float(value)
-    end
-    return actual_bills
-  end
-
   def _load_timeseries(fuels, path)
     fuels = @measure.setup_fuel_outputs()
 
@@ -438,18 +427,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     assert(File.exist?(@bills_csv))
     actual_bills = _get_actual_bills(@bills_csv)
 
-    runner_bills = {}
-    runner.result.stepValues.each do |step_value|
-      runner_bills[step_value.name] = get_value_from_workflow_step_value(step_value)
-    end
-
-    actual_bills.each do |name, value|
-      name = name.gsub('($)', 'USD')
-      name = OpenStudio::toUnderscoreCase(name)
-
-      assert_includes(runner_bills.keys, name)
-      assert_equal(value, runner_bills[name])
-    end
+    _check_for_runner_registered_values(runner, actual_bills)
 
     return actual_bills
   end
@@ -503,5 +481,31 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
 
     return bills_csv
+  end
+
+  def _get_actual_bills(bills_csv)
+    actual_bills = {}
+    File.readlines(bills_csv).each do |line|
+      next if line.strip.empty?
+
+      key, value = line.split(',').map { |x| x.strip }
+      actual_bills[key] = Float(value)
+    end
+    return actual_bills
+  end
+
+  def _check_for_runner_registered_values(runner, actual_bills)
+    runner_bills = {}
+    runner.result.stepValues.each do |step_value|
+      runner_bills[step_value.name] = get_value_from_workflow_step_value(step_value)
+    end
+
+    actual_bills.each do |name, value|
+      name = name.gsub('($)', 'USD')
+      name = OpenStudio::toUnderscoreCase(name)
+
+      assert_includes(runner_bills.keys, name)
+      assert_equal(value, runner_bills[name])
+    end
   end
 end
