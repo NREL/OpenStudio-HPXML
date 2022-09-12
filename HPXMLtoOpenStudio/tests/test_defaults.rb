@@ -48,10 +48,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.state_code = 'CA'
     hpxml.header.time_zone_utc_offset = -8
     hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeOperational
+    hpxml.header.temperature_capacitance_multiplier = 1.5
+    hpxml.header.natvent_days_per_week = 7
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, HPXML::HeatPumpSizingMaxLoad,
-                                true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational)
+                                true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5, 7)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -70,10 +72,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
     hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
+    hpxml.header.natvent_days_per_week = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -93,17 +97,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
     hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - calendar year override by AMY year
     hpxml.header.sim_calendar_year = 2020
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
-                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset)
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -123,10 +128,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
     hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
-                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset)
+                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
   end
 
   def test_emissions_factors
@@ -199,6 +205,68 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                      nil, nil,
                                      nil, nil,
                                      nil, nil)
+    end
+  end
+
+  def test_utility_bills
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-pv.xml')
+    hpxml.header.utility_bill_scenarios.clear
+    for pv_compensation_type in [HPXML::PVCompensationTypeNetMetering, HPXML::PVCompensationTypeFeedInTariff]
+      hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
+                                              elec_fixed_charge: 8,
+                                              natural_gas_fixed_charge: 9,
+                                              propane_fixed_charge: 10,
+                                              fuel_oil_fixed_charge: 11,
+                                              coal_fixed_charge: 12,
+                                              wood_fixed_charge: 13,
+                                              wood_pellets_fixed_charge: 14,
+                                              elec_marginal_rate: 0.2,
+                                              natural_gas_marginal_rate: 0.3,
+                                              propane_marginal_rate: 0.4,
+                                              fuel_oil_marginal_rate: 0.5,
+                                              coal_marginal_rate: 0.6,
+                                              wood_marginal_rate: 0.7,
+                                              wood_pellets_marginal_rate: 0.8,
+                                              pv_compensation_type: pv_compensation_type,
+                                              pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost,
+                                              pv_net_metering_annual_excess_sellback_rate: 0.04,
+                                              pv_feed_in_tariff_rate: 0.15,
+                                              pv_monthly_grid_connection_fee_dollars: 3)
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    scenarios = hpxml_default.header.utility_bill_scenarios
+    _test_default_bills_values(scenarios[0], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, nil, 3)
+    _test_default_bills_values(scenarios[1], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, nil, 3)
+
+    # Test defaults
+    hpxml.header.utility_bill_scenarios.each do |scenario|
+      scenario.elec_fixed_charge = nil
+      scenario.natural_gas_fixed_charge = nil
+      scenario.propane_fixed_charge = nil
+      scenario.fuel_oil_fixed_charge = nil
+      scenario.coal_fixed_charge = nil
+      scenario.wood_fixed_charge = nil
+      scenario.wood_pellets_fixed_charge = nil
+      scenario.elec_marginal_rate = nil
+      scenario.natural_gas_marginal_rate = nil
+      scenario.propane_marginal_rate = nil
+      scenario.fuel_oil_marginal_rate = nil
+      scenario.coal_marginal_rate = nil
+      scenario.wood_marginal_rate = nil
+      scenario.wood_pellets_marginal_rate = nil
+      scenario.pv_compensation_type = nil
+      scenario.pv_net_metering_annual_excess_sellback_rate_type = nil
+      scenario.pv_net_metering_annual_excess_sellback_rate = nil
+      scenario.pv_feed_in_tariff_rate = nil
+      scenario.pv_monthly_grid_connection_fee_dollars_per_kw = nil
+      scenario.pv_monthly_grid_connection_fee_dollars = nil
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    hpxml_default.header.utility_bill_scenarios.each do |scenario|
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
   end
 
@@ -617,29 +685,29 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                          1000, 0.0, 10.0, 0.0, 10.0, HPXML::FoundationWallTypeSolidConcrete)
   end
 
-  def test_frame_floors
+  def test_floors
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    hpxml.frame_floors[0].interior_finish_type = HPXML::InteriorFinishWood
-    hpxml.frame_floors[0].interior_finish_thickness = 0.375
+    hpxml.floors[0].interior_finish_type = HPXML::InteriorFinishWood
+    hpxml.floors[0].interior_finish_thickness = 0.375
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishWood, 0.375)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishWood, 0.375)
 
     # Test defaults w/ ceiling
-    hpxml.frame_floors[0].interior_finish_type = nil
-    hpxml.frame_floors[0].interior_finish_thickness = nil
+    hpxml.floors[0].interior_finish_type = nil
+    hpxml.floors[0].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishGypsumBoard, 0.5)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishGypsumBoard, 0.5)
 
     # Test defaults w/ floor
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
-    hpxml.frame_floors[0].interior_finish_type = nil
-    hpxml.frame_floors[0].interior_finish_thickness = nil
+    hpxml.floors[0].interior_finish_type = nil
+    hpxml.floors[0].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishNone, nil)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishNone, nil)
   end
 
   def test_slabs
@@ -962,11 +1030,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = -0.11
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml.cooling_systems[0].cooling_capacity = 12345
-    hpxml.cooling_systems[0].cooling_efficiency_seer = 12.5
+    hpxml.cooling_systems[0].cooling_efficiency_seer = 12.0
     hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.5)
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
+
+    # Test defaults - SEER2
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer2 = 11.4
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -975,7 +1050,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = nil
     hpxml.cooling_systems[0].airflow_defect_ratio = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
-    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer2 = nil
     hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1321,6 +1396,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, 20.0)
 
+    # Test defaults - SEER2/HSPF2
+    hpxml.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer2 = 13.3
+    hpxml.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml.heat_pumps[0].heating_efficiency_hspf2 = 6.8
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, 20.0)
+
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
     hpxml.heat_pumps[0].compressor_type = nil
@@ -1331,8 +1415,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
-    hpxml.heat_pumps[0].cooling_efficiency_seer = nil
-    hpxml.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer2 = nil
+    hpxml.heat_pumps[0].heating_efficiency_hspf2 = nil
     hpxml.heat_pumps[0].year_installed = 2010
     hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1508,6 +1592,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     hpxml.hvac_distributions[0].number_of_return_registers = 2
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['attic - unvented']
@@ -1516,15 +1602,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [50.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [0.5]
+    expected_return_area_mults = [1.5]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ conditioned basement
     hpxml.hvac_distributions[0].number_of_return_registers = nil
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1534,9 +1623,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [270.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ multiple foundations
     hpxml = _create_hpxml('base-foundation-multiple.xml')
@@ -1545,6 +1636,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1554,9 +1646,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [67.5]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ foundation exposed to ambient
     hpxml = _create_hpxml('base-foundation-ambient.xml')
@@ -1565,6 +1659,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1574,9 +1669,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [67.5]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ building/unit adjacent to other housing unit
     hpxml = _create_hpxml('base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml')
@@ -1585,6 +1682,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1594,9 +1692,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [45.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building
     hpxml = _create_hpxml('base-enclosure-2stories.xml')
@@ -1605,6 +1705,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1614,9 +1715,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [227.82, 227.82, 75.94, 75.94]
     expected_supply_fracs = [0.375, 0.375, 0.125, 0.125]
     expected_return_fracs = [0.375, 0.375, 0.125, 0.125]
+    expected_supply_area_mults = [1.0, 1.0, 1.0, 1.0]
+    expected_return_area_mults = [1.0, 1.0, 1.0, 1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 1-story building & multiple HVAC systems
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1628,6 +1731,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1638,9 +1742,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [13.5, 13.5] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building & multiple HVAC systems
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1653,6 +1759,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1663,9 +1770,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [10.125, 10.125, 3.375, 3.375] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.375, 0.375, 0.125, 0.125] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.375, 0.375, 0.125, 0.125] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0, 1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0, 1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building & multiple HVAC systems & duct area fractions
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1683,6 +1792,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_distribution.ducts.each do |duct|
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1693,9 +1803,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [13.5, 13.5] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.75, 0.25] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
   end
 
   def test_mech_ventilation_fans
@@ -3138,7 +3250,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, heat_pump_sizing_methodology,
-                                  allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type)
+                                  allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
+                                  temperature_capacitance_multiplier, natvent_days_per_week)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -3163,6 +3276,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     assert_equal(time_zone_utc_offset, hpxml.header.time_zone_utc_offset)
     assert_equal(occupancy_calculation_type, hpxml.header.occupancy_calculation_type)
+    assert_equal(temperature_capacitance_multiplier, hpxml.header.temperature_capacitance_multiplier)
+    assert_equal(natvent_days_per_week, hpxml.header.natvent_days_per_week)
   end
 
   def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,
@@ -3212,6 +3327,113 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(wood_pellets_units, scenario.wood_pellets_units)
       assert_equal(wood_pellets_value, scenario.wood_pellets_value)
+    end
+  end
+
+  def _test_default_bills_values(scenario,
+                                 elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge,
+                                 elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
+                                 pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate,
+                                 pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_dollars_per_kw, pv_monthly_grid_connection_fee_dollars)
+    if elec_fixed_charge.nil?
+      assert_nil(scenario.elec_fixed_charge)
+    else
+      assert_equal(elec_fixed_charge, scenario.elec_fixed_charge)
+    end
+    if natural_gas_fixed_charge.nil?
+      assert_nil(scenario.natural_gas_fixed_charge)
+    else
+      assert_equal(natural_gas_fixed_charge, scenario.natural_gas_fixed_charge)
+    end
+    if propane_fixed_charge.nil?
+      assert_nil(scenario.propane_fixed_charge)
+    else
+      assert_equal(propane_fixed_charge, scenario.propane_fixed_charge)
+    end
+    if fuel_oil_fixed_charge.nil?
+      assert_nil(scenario.fuel_oil_fixed_charge)
+    else
+      assert_equal(fuel_oil_fixed_charge, scenario.fuel_oil_fixed_charge)
+    end
+    if coal_fixed_charge.nil?
+      assert_nil(scenario.coal_fixed_charge)
+    else
+      assert_equal(coal_fixed_charge, scenario.coal_fixed_charge)
+    end
+    if wood_fixed_charge.nil?
+      assert_nil(scenario.wood_fixed_charge)
+    else
+      assert_equal(wood_fixed_charge, scenario.wood_fixed_charge)
+    end
+    if wood_pellets_fixed_charge.nil?
+      assert_nil(scenario.wood_pellets_fixed_charge)
+    else
+      assert_equal(wood_pellets_fixed_charge, scenario.wood_pellets_fixed_charge)
+    end
+    if elec_marginal_rate.nil?
+      assert_nil(scenario.elec_marginal_rate)
+    else
+      assert_equal(elec_marginal_rate, scenario.elec_marginal_rate)
+    end
+    if natural_gas_marginal_rate.nil?
+      assert_nil(scenario.natural_gas_marginal_rate)
+    else
+      assert_equal(natural_gas_marginal_rate, scenario.natural_gas_marginal_rate)
+    end
+    if propane_marginal_rate.nil?
+      assert_nil(scenario.propane_marginal_rate)
+    else
+      assert_equal(propane_marginal_rate, scenario.propane_marginal_rate)
+    end
+    if fuel_oil_marginal_rate.nil?
+      assert_nil(scenario.fuel_oil_marginal_rate)
+    else
+      assert_equal(fuel_oil_marginal_rate, scenario.fuel_oil_marginal_rate)
+    end
+    if coal_marginal_rate.nil?
+      assert_nil(scenario.coal_marginal_rate)
+    else
+      assert_equal(coal_marginal_rate, scenario.coal_marginal_rate)
+    end
+    if wood_marginal_rate.nil?
+      assert_nil(scenario.wood_marginal_rate)
+    else
+      assert_equal(wood_marginal_rate, scenario.wood_marginal_rate)
+    end
+    if wood_pellets_marginal_rate.nil?
+      assert_nil(scenario.wood_pellets_marginal_rate)
+    else
+      assert_equal(wood_pellets_marginal_rate, scenario.wood_pellets_marginal_rate)
+    end
+    if pv_compensation_type.nil?
+      assert_nil(scenario.pv_compensation_type)
+    else
+      assert_equal(pv_compensation_type, scenario.pv_compensation_type)
+    end
+    if pv_net_metering_annual_excess_sellback_rate_type.nil?
+      assert_nil(scenario.pv_net_metering_annual_excess_sellback_rate_type)
+    else
+      assert_equal(pv_net_metering_annual_excess_sellback_rate_type, scenario.pv_net_metering_annual_excess_sellback_rate_type)
+    end
+    if pv_net_metering_annual_excess_sellback_rate.nil?
+      assert_nil(scenario.pv_net_metering_annual_excess_sellback_rate)
+    else
+      assert_equal(pv_net_metering_annual_excess_sellback_rate, scenario.pv_net_metering_annual_excess_sellback_rate)
+    end
+    if pv_feed_in_tariff_rate.nil?
+      assert_nil(scenario.pv_feed_in_tariff_rate)
+    else
+      assert_equal(pv_feed_in_tariff_rate, scenario.pv_feed_in_tariff_rate)
+    end
+    if pv_monthly_grid_connection_fee_dollars_per_kw.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
+    else
+      assert_equal(pv_monthly_grid_connection_fee_dollars_per_kw, scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
+    end
+    if pv_monthly_grid_connection_fee_dollars.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars)
+    else
+      assert_equal(pv_monthly_grid_connection_fee_dollars, scenario.pv_monthly_grid_connection_fee_dollars)
     end
   end
 
@@ -3343,12 +3565,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(type, foundation_wall.type)
   end
 
-  def _test_default_frame_floor_values(frame_floor, int_finish_type, int_finish_thickness)
-    assert_equal(int_finish_type, frame_floor.interior_finish_type)
+  def _test_default_floor_values(floor, int_finish_type, int_finish_thickness)
+    assert_equal(int_finish_type, floor.interior_finish_type)
     if not int_finish_thickness.nil?
-      assert_equal(int_finish_thickness, frame_floor.interior_finish_thickness)
+      assert_equal(int_finish_thickness, floor.interior_finish_thickness)
     else
-      assert_nil(frame_floor.interior_finish_thickness)
+      assert_nil(floor.interior_finish_thickness)
     end
   end
 
@@ -3709,7 +3931,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas,
-                                supply_fracs, return_fracs, n_return_registers)
+                                supply_fracs, return_fracs, n_return_registers, supply_area_mults, return_area_mults)
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
@@ -3721,11 +3943,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
           assert_equal(supply_locations[supply_duct_idx], duct.duct_location)
           assert_in_epsilon(supply_areas[supply_duct_idx], duct.duct_surface_area, 0.01)
           assert_in_epsilon(supply_fracs[supply_duct_idx], duct.duct_fraction_area, 0.01)
+          assert_in_epsilon(supply_area_mults[supply_duct_idx], duct.duct_surface_area_multiplier, 0.01)
           supply_duct_idx += 1
         elsif duct.duct_type == HPXML::DuctTypeReturn
           assert_equal(return_locations[return_duct_idx], duct.duct_location)
           assert_in_epsilon(return_areas[return_duct_idx], duct.duct_surface_area, 0.01)
           assert_in_epsilon(return_fracs[return_duct_idx], duct.duct_fraction_area, 0.01)
+          assert_in_epsilon(return_area_mults[return_duct_idx], duct.duct_surface_area_multiplier, 0.01)
           return_duct_idx += 1
         end
       end

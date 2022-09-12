@@ -8,6 +8,7 @@ require 'csv'
 require 'oga'
 require_relative 'resources/airflow'
 require_relative 'resources/battery'
+require_relative 'resources/utility_bills'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
@@ -113,14 +114,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+      hpxml_path = File.expand_path(hpxml_path)
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
     unless (Pathname.new output_dir).absolute?
-      output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
+      output_dir = File.expand_path(output_dir)
     end
 
     if building_id.is_initialized
@@ -168,12 +169,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     cache_path = epw_path.gsub('.epw', '-cache.csv')
     if not File.exist?(cache_path)
       # Process weather file to create cache .csv
-      runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-      epw_file = OpenStudio::EpwFile.new(epw_path)
-      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      weather = WeatherProcess.new(model, runner)
       begin
         File.open(cache_path, 'wb') do |file|
+          runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
+          epw_file = OpenStudio::EpwFile.new(epw_path)
+          OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+          weather = WeatherProcess.new(model, runner)
           weather.dump_to_csv(file)
         end
       rescue SystemCallError
@@ -213,7 +214,7 @@ class OSModel
                                         schedules_paths: @hpxml.header.schedules_filepaths)
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    set_defaults_and_globals(output_dir, epw_file, weather, @schedules_file)
+    set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
     validate_emissions_files()
     @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, weather, epw_file, @hpxml)
@@ -232,7 +233,7 @@ class OSModel
     add_roofs(runner, model, spaces)
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
-    add_frame_floors(runner, model, spaces)
+    add_floors(runner, model, spaces)
     add_foundation_walls_slabs(runner, model, spaces)
     add_shading_schedule(model, weather)
     add_windows(model, spaces)
@@ -265,7 +266,7 @@ class OSModel
     add_lighting(runner, model, epw_file, spaces)
 
     # Pools & Hot Tubs
-    add_pools_and_hot_tubs(model, spaces)
+    add_pools_and_hot_tubs(runner, model, spaces)
 
     # Other
 
@@ -329,7 +330,7 @@ class OSModel
     end
   end
 
-  def self.set_defaults_and_globals(output_dir, epw_file, weather, schedules_file)
+  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -342,7 +343,7 @@ class OSModel
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
+    HPXMLDefaults.apply(runner, @hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -626,18 +627,18 @@ class OSModel
     end
   end
 
-  def self.add_frame_floors(runner, model, spaces)
-    @hpxml.frame_floors.each do |frame_floor|
-      area = frame_floor.area
+  def self.add_floors(runner, model, spaces)
+    @hpxml.floors.each do |floor|
+      area = floor.area
       width = Math::sqrt(area)
       length = area / width
-      if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
+      if floor.interior_adjacent_to.include?('attic') || floor.exterior_adjacent_to.include?('attic')
         z_origin = @walls_top
       else
         z_origin = @foundation_top
       end
 
-      if frame_floor.is_ceiling
+      if floor.is_ceiling
         vertices = Geometry.create_ceiling_vertices(length, width, z_origin, @default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
@@ -647,19 +648,19 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
-      set_surface_interior(model, spaces, surface, frame_floor)
-      set_surface_exterior(model, spaces, surface, frame_floor)
-      surface.setName(frame_floor.id)
-      if frame_floor.is_interior
+      set_surface_interior(model, spaces, surface, floor)
+      set_surface_exterior(model, spaces, surface, floor)
+      surface.setName(floor.id)
+      if floor.is_interior
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
-      elsif frame_floor.is_floor
+      elsif floor.is_floor
         surface.setSunExposure('NoSun')
       end
 
       # Apply construction
 
-      if frame_floor.is_ceiling
+      if floor.is_ceiling
         if @apply_ashrae140_assumptions
           # Attic floor
           inside_film = Material.AirFilmFloorASHRAE140
@@ -668,7 +669,7 @@ class OSModel
           inside_film = Material.AirFilmFloorAverage
           outside_film = Material.AirFilmFloorAverage
         end
-        mat_int_finish = Material.InteriorFinishMaterial(frame_floor.interior_finish_type, frame_floor.interior_finish_thickness)
+        mat_int_finish = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
         if mat_int_finish.nil?
           fallback_mat_int_finish = nil
         else
@@ -692,12 +693,12 @@ class OSModel
           covering = Material.CoveringBare(1.0)
         else
           inside_film = Material.AirFilmFloorReduced
-          if frame_floor.is_exterior
+          if floor.is_exterior
             outside_film = Material.AirFilmOutside
           else
             outside_film = Material.AirFilmFloorReduced
           end
-          if frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace
+          if floor.interior_adjacent_to == HPXML::LocationLivingSpace
             covering = Material.CoveringBare
           end
         end
@@ -714,21 +715,21 @@ class OSModel
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, fallback_covering), # Fallback
         ]
       end
-      assembly_r = frame_floor.insulation_assembly_r_value
+      assembly_r = floor.insulation_assembly_r_value
 
       match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       install_grade = 1
-      if frame_floor.is_ceiling
+      if floor.is_ceiling
 
-        Constructions.apply_ceiling(model, [surface], "#{frame_floor.id} construction",
+        Constructions.apply_ceiling(model, [surface], "#{floor.id} construction",
                                     cavity_r, install_grade,
                                     constr_set.rigid_r, constr_set.framing_factor,
                                     constr_set.stud.thick_in, constr_set.mat_int_finish,
                                     inside_film, outside_film)
 
       else # Floor
-        Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
+        Constructions.apply_floor(model, [surface], "#{floor.id} construction",
                                   cavity_r, install_grade,
                                   constr_set.framing_factor, constr_set.stud.thick_in,
                                   constr_set.osb_thick_in, constr_set.rigid_r,
@@ -1039,12 +1040,12 @@ class OSModel
     # This ensures that the E+ reported Conditioned Floor Area is correct.
 
     sum_cfa = 0.0
-    @hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.is_floor
-      next unless HPXML::conditioned_finished_locations.include?(frame_floor.interior_adjacent_to) ||
-                  HPXML::conditioned_finished_locations.include?(frame_floor.exterior_adjacent_to)
+    @hpxml.floors.each do |floor|
+      next unless floor.is_floor
+      next unless HPXML::conditioned_finished_locations.include?(floor.interior_adjacent_to) ||
+                  HPXML::conditioned_finished_locations.include?(floor.exterior_adjacent_to)
 
-      sum_cfa += frame_floor.area
+      sum_cfa += floor.area
     end
     @hpxml.slabs.each do |slab|
       next unless HPXML::conditioned_finished_locations.include? slab.interior_adjacent_to
@@ -1686,23 +1687,23 @@ class OSModel
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups, @hpxml.lighting, @eri_version, @schedules_file, @cfa)
   end
 
-  def self.add_pools_and_hot_tubs(model, spaces)
+  def self.add_pools_and_hot_tubs(runner, model, spaces)
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces, @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_heater(runner, model, pool, Constants.ObjectNameMiscPoolHeater, spaces, @schedules_file)
       next if pool.pump_type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces, @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(runner, model, pool, Constants.ObjectNameMiscPoolPump, spaces, @schedules_file)
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces, @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_heater(runner, model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces, @schedules_file)
       next if hot_tub.pump_type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces, @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(runner, model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces, @schedules_file)
     end
   end
 
@@ -1763,7 +1764,7 @@ class OSModel
       next if ducts.duct_type.nil?
 
       # Calculate total duct area in unconditioned spaces
-      total_unconditioned_duct_area[ducts.duct_type] += ducts.duct_surface_area
+      total_unconditioned_duct_area[ducts.duct_type] += ducts.duct_surface_area * ducts.duct_surface_area_multiplier
     end
 
     # Create duct objects
@@ -1775,7 +1776,7 @@ class OSModel
       duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
 
       # Apportion leakage to individual ducts by surface area
-      duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
+      duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area * ducts.duct_surface_area_multiplier / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
 
       duct_leakage_frac = nil
@@ -1789,7 +1790,7 @@ class OSModel
         fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50, ducts.duct_surface_area, ducts.duct_insulation_r_value)
+      air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50, ducts.duct_surface_area * ducts.duct_surface_area_multiplier, ducts.duct_insulation_r_value)
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
@@ -1856,6 +1857,10 @@ class OSModel
     additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
     emissions_scenario_types = @hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s
     additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
+    has_heating = (@hpxml.total_fraction_heat_load_served > 0)
+    additionalProperties.setFeature('has_heating', has_heating)
+    has_cooling = (@hpxml.total_fraction_cool_load_served > 0)
+    additionalProperties.setFeature('has_cooling', has_cooling)
   end
 
   def self.add_unmet_hours_output(model)
