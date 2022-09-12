@@ -38,17 +38,17 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     # From BEopt Output screen (Utility Bills $/yr)
     @expected_bills = {
-      'Test: Total ($)' => 1514,
-      'Test: Electricity: Fixed ($)' => 96,
-      'Test: Electricity: Marginal ($)' => 629,
-      'Test: Electricity: Total ($)' => 725,
-      'Test: Natural Gas: Fixed ($)' => 96,
-      'Test: Natural Gas: Marginal ($)' => 154,
-      'Test: Natural Gas: Total ($)' => 250,
-      'Test: Fuel Oil: Marginal ($)' => 462,
-      'Test: Fuel Oil: Total ($)' => 462,
-      'Test: Propane: Marginal ($)' => 76,
-      'Test: Propane: Total ($)' => 76
+      'Test: Total (USD)' => 1514,
+      'Test: Electricity: Fixed (USD)' => 96,
+      'Test: Electricity: Marginal (USD)' => 629,
+      'Test: Electricity: Total (USD)' => 725,
+      'Test: Natural Gas: Fixed (USD)' => 96,
+      'Test: Natural Gas: Marginal (USD)' => 154,
+      'Test: Natural Gas: Total (USD)' => 250,
+      'Test: Fuel Oil: Marginal (USD)' => 462,
+      'Test: Fuel Oil: Total (USD)' => 462,
+      'Test: Propane: Marginal (USD)' => 76,
+      'Test: Propane: Total (USD)' => 76
     }
 
     @measure = ReportUtilityBills.new
@@ -89,9 +89,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
-      @expected_bills['Test: Electricity: Total ($)'] = 548
-      @expected_bills['Test: Total ($)'] = 1337
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
+      @expected_bills['Test: Electricity: Total (USD)'] = 548
+      @expected_bills['Test: Total (USD)'] = 1337
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -102,9 +102,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -918
-      @expected_bills['Test: Electricity: Total ($)'] = -193
-      @expected_bills['Test: Total ($)'] = 596
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -918
+      @expected_bills['Test: Electricity: Total (USD)'] = -193
+      @expected_bills['Test: Total (USD)'] = 596
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -116,9 +116,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1779
-      @expected_bills['Test: Electricity: Total ($)'] = -1054
-      @expected_bills['Test: Total ($)'] = -265
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1779
+      @expected_bills['Test: Electricity: Total (USD)'] = -1054
+      @expected_bills['Test: Total (USD)'] = -265
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -131,9 +131,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
-      @expected_bills['Test: Electricity: Total ($)'] = 547
-      @expected_bills['Test: Total ($)'] = 1336
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
+      @expected_bills['Test: Electricity: Total (USD)'] = 547
+      @expected_bills['Test: Total (USD)'] = 1336
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -146,9 +146,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1787
-      @expected_bills['Test: Electricity: Total ($)'] = -1061
-      @expected_bills['Test: Total ($)'] = -272
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1787
+      @expected_bills['Test: Electricity: Total (USD)'] = -1061
+      @expected_bills['Test: Total (USD)'] = -272
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -160,10 +160,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 126
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
-      @expected_bills['Test: Electricity: Total ($)'] = 578
-      @expected_bills['Test: Total ($)'] = 1367
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 126
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
+      @expected_bills['Test: Electricity: Total (USD)'] = 578
+      @expected_bills['Test: Total (USD)'] = 1367
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -175,10 +175,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       utility_rates, utility_bills = @measure.setup_utility_outputs()
       actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 186
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
-      @expected_bills['Test: Electricity: Total ($)'] = 638
-      @expected_bills['Test: Total ($)'] = 1427
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 186
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
+      @expected_bills['Test: Electricity: Total (USD)'] = 638
+      @expected_bills['Test: Total (USD)'] = 1427
       _check_bills(@expected_bills, actual_bills)
     end
   end
@@ -190,8 +190,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_marginal_rate: 0.03)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()
-    expected_val = actual_bills['Test 1: Wood Cord: Total ($)']
-    assert_in_delta(expected_val * 2, actual_bills['Test 2: Wood Cord: Total ($)'], 1)
+    expected_val = actual_bills['Test 1: Wood Cord: Total (USD)']
+    assert_in_delta(expected_val * 2, actual_bills['Test 2: Wood Cord: Total (USD)'], 1)
   end
 
   def test_workflow_wood_pellets
@@ -201,8 +201,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_pellets_marginal_rate: 0.01)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()
-    expected_val = actual_bills['Test 1: Wood Pellets: Total ($)']
-    assert_in_delta(expected_val / 2, actual_bills['Test 2: Wood Pellets: Total ($)'], 1)
+    expected_val = actual_bills['Test 1: Wood Pellets: Total (USD)']
+    assert_in_delta(expected_val / 2, actual_bills['Test 2: Wood Pellets: Total (USD)'], 1)
   end
 
   def test_workflow_coal
@@ -213,9 +213,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 3', coal_marginal_rate: 0.025)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()
-    expected_val = actual_bills['Test 1: Coal: Total ($)']
-    assert_in_delta(expected_val * 2, actual_bills['Test 2: Coal: Total ($)'], 1)
-    assert_in_delta(expected_val / 2, actual_bills['Test 3: Coal: Total ($)'], 1)
+    expected_val = actual_bills['Test 1: Coal: Total (USD)']
+    assert_in_delta(expected_val * 2, actual_bills['Test 2: Coal: Total (USD)'], 1)
+    assert_in_delta(expected_val / 2, actual_bills['Test 3: Coal: Total (USD)'], 1)
   end
 
   def test_workflow_leap_year
@@ -223,7 +223,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-AMY-2012.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()
-    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
+    assert_operator(actual_bills['Bills: Total (USD)'], :>, 0)
   end
 
   def test_workflow_semi_annual_run_period
@@ -231,7 +231,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-runperiod-1-month.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()
-    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
+    assert_operator(actual_bills['Bills: Total (USD)'], :>, 0)
   end
 
   def test_workflow_no_bill_scenarios
@@ -508,8 +508,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
 
     actual_bills.each do |name, value|
-      name = name.gsub('($)', 'USD')
-      name = OpenStudio::toUnderscoreCase(name)
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
 
       assert_includes(runner_bills.keys, name)
       assert_equal(value, runner_bills[name])

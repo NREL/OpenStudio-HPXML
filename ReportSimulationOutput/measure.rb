@@ -568,27 +568,27 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Write/report results
     report_runperiod_output_results(runner, outputs, output_format, annual_output_path, runperiod_n_digits, generate_eri_outputs)
-    write_timeseries_output_results(runner, outputs, output_format,
-                                    timeseries_output_path,
-                                    timeseries_frequency,
-                                    include_timeseries_total_consumptions,
-                                    include_timeseries_fuel_consumptions,
-                                    include_timeseries_end_use_consumptions,
-                                    include_timeseries_emissions,
-                                    include_timeseries_emission_fuels,
-                                    include_timeseries_emission_end_uses,
-                                    include_timeseries_hot_water_uses,
-                                    include_timeseries_total_loads,
-                                    include_timeseries_component_loads,
-                                    include_timeseries_unmet_hours,
-                                    include_timeseries_zone_temperatures,
-                                    include_timeseries_airflows,
-                                    include_timeseries_weather,
-                                    add_dst_column,
-                                    add_utc_column,
-                                    timestamps_dst,
-                                    timestamps_utc,
-                                    use_dview_format)
+    report_timeseries_output_results(runner, outputs, output_format,
+                                     timeseries_output_path,
+                                     timeseries_frequency,
+                                     include_timeseries_total_consumptions,
+                                     include_timeseries_fuel_consumptions,
+                                     include_timeseries_end_use_consumptions,
+                                     include_timeseries_emissions,
+                                     include_timeseries_emission_fuels,
+                                     include_timeseries_emission_end_uses,
+                                     include_timeseries_hot_water_uses,
+                                     include_timeseries_total_loads,
+                                     include_timeseries_component_loads,
+                                     include_timeseries_unmet_hours,
+                                     include_timeseries_zone_temperatures,
+                                     include_timeseries_airflows,
+                                     include_timeseries_weather,
+                                     add_dst_column,
+                                     add_utc_column,
+                                     timestamps_dst,
+                                     timestamps_utc,
+                                     use_dview_format)
 
     return true
   end
@@ -1245,10 +1245,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
 
     results_out.each do |name, value|
-      next if name.nil? # line breaks
-      next if name.start_with?('ERI')
+      next if name.nil? || value.nil?
 
-      name = OpenStudio::toUnderscoreCase(name)
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
 
       runner.registerValue(name, value)
       runner.registerInfo("Registering #{value} for #{name}.")
@@ -1518,27 +1517,27 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return results_out
   end
 
-  def write_timeseries_output_results(runner, outputs, output_format,
-                                      timeseries_output_path,
-                                      timeseries_frequency,
-                                      include_timeseries_total_consumptions,
-                                      include_timeseries_fuel_consumptions,
-                                      include_timeseries_end_use_consumptions,
-                                      include_timeseries_emissions,
-                                      include_timeseries_emission_fuels,
-                                      include_timeseries_emission_end_uses,
-                                      include_timeseries_hot_water_uses,
-                                      include_timeseries_total_loads,
-                                      include_timeseries_component_loads,
-                                      include_timeseries_unmet_hours,
-                                      include_timeseries_zone_temperatures,
-                                      include_timeseries_airflows,
-                                      include_timeseries_weather,
-                                      add_dst_column,
-                                      add_utc_column,
-                                      timestamps_dst,
-                                      timestamps_utc,
-                                      use_dview_format)
+  def report_timeseries_output_results(runner, outputs, output_format,
+                                       timeseries_output_path,
+                                       timeseries_frequency,
+                                       include_timeseries_total_consumptions,
+                                       include_timeseries_fuel_consumptions,
+                                       include_timeseries_end_use_consumptions,
+                                       include_timeseries_emissions,
+                                       include_timeseries_emission_fuels,
+                                       include_timeseries_emission_end_uses,
+                                       include_timeseries_hot_water_uses,
+                                       include_timeseries_total_loads,
+                                       include_timeseries_component_loads,
+                                       include_timeseries_unmet_hours,
+                                       include_timeseries_zone_temperatures,
+                                       include_timeseries_airflows,
+                                       include_timeseries_weather,
+                                       add_dst_column,
+                                       add_utc_column,
+                                       timestamps_dst,
+                                       timestamps_utc,
+                                       use_dview_format)
     return if @timestamps.nil?
 
     if not ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency

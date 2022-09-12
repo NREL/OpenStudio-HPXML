@@ -181,9 +181,9 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote hpxml output to #{output_path}.")
 
     results_out.each do |name, value|
-      next if name.nil? # line breaks
+      next if name.nil? || value.nil?
 
-      name = OpenStudio::toUnderscoreCase(name)
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
 
       runner.registerValue(name, value)
       runner.registerInfo("Registering #{value} for #{name}.")

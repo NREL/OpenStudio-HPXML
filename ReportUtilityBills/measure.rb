@@ -225,7 +225,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     segment = segment.strip
 
     results_out = []
-    results_out << ["#{bill_scenario_name}: Total ($)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
+    results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
 
     utility_bills.each do |fuel_type, bill|
       new_segment = fuel_type.split(':', 2)[0]
@@ -234,10 +234,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         segment = new_segment
       end
 
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed ($)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Marginal ($)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit ($)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type) && bill.annual_production_credit != 0
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Total ($)", bill.annual_total.round(2)] if bill.annual_total != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Marginal (USD)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type) && bill.annual_production_credit != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)] if bill.annual_total != 0
     end
 
     if ['csv'].include? output_format
@@ -264,8 +264,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote bills output to #{output_path}.")
 
     results_out.each do |name, value|
-      name = name.gsub('($)', 'USD')
-      name = OpenStudio::toUnderscoreCase(name)
+      next if name.nil? || value.nil?
+
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
 
       runner.registerValue(name, value)
       runner.registerInfo("Registering #{value} for #{name}.")
