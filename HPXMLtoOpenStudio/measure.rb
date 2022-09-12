@@ -1140,7 +1140,7 @@ class OSModel
     shading_schedules = {}
 
     surfaces = []
-    @hpxml.windows.each_with_index do |window, _i|
+    @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1229,7 +1229,7 @@ class OSModel
     surfaces = []
     shading_schedules = {}
 
-    @hpxml.skylights.each_with_index do |skylight, _i|
+    @hpxml.skylights.each do |skylight|
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
