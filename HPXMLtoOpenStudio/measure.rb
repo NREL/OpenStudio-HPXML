@@ -1137,12 +1137,10 @@ class OSModel
     end
     @hpxml.collapse_enclosure_surfaces()
 
-    shading_group = nil
     shading_schedules = {}
-    shading_ems = { sensors: {}, program: nil }
 
     surfaces = []
-    @hpxml.windows.each_with_index do |window, i|
+    @hpxml.windows.each_with_index do |window, _i|
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1190,9 +1188,7 @@ class OSModel
         Constructions.apply_window(model, sub_surface, 'WindowConstruction', ufactor, shgc)
 
         # Apply interior/exterior shading (as needed)
-        shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
-        shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @default_cooling_months)
+        Constructions.apply_window_skylight_shading(model, window, sub_surface, shading_schedules, @default_cooling_months)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1231,12 +1227,9 @@ class OSModel
 
   def self.add_skylights(model, spaces)
     surfaces = []
-
-    shading_group = nil
     shading_schedules = {}
-    shading_ems = { sensors: {}, program: nil }
 
-    @hpxml.skylights.each_with_index do |skylight, i|
+    @hpxml.skylights.each_with_index do |skylight, _i|
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
@@ -1268,9 +1261,7 @@ class OSModel
       Constructions.apply_skylight(model, sub_surface, 'SkylightConstruction', ufactor, shgc)
 
       # Apply interior/exterior shading (as needed)
-      shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @default_cooling_months)
+      Constructions.apply_window_skylight_shading(model, skylight, sub_surface, shading_schedules, @default_cooling_months)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')

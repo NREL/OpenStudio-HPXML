@@ -378,10 +378,6 @@ class Constants
     return 'room ac'
   end
 
-  def self.ObjectNameSkylightShade
-    return 'skylight shade'
-  end
-
   def self.ObjectNameSolarHotWater
     return 'solar hot water'
   end
@@ -424,10 +420,6 @@ class Constants
 
   def self.ObjectNameWholeHouseFan
     return 'whole house fan'
-  end
-
-  def self.ObjectNameWindowShade
-    return 'window shade'
   end
 
   def self.ScheduleTypeLimitsFraction
