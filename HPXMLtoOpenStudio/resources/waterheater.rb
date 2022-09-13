@@ -841,8 +841,20 @@ class Waterheater
       hpwh_cop.setMaximumValueofy(100)
     end
     # Assumptions and values
-    cap = 0.5 # kW
-    shr = 0.88 # unitless
+    if hpwh_type == 'split'
+      if split_hpwh_refrig == 'r410a'
+        cap = 0.714 # kW
+        shr = 0.98 # unitless
+      else
+        cap = 0.5 # kW FIXME: Populate
+        shr = 0.88 # unitless
+      end
+    else
+      cap = 0.5 # kW
+      shr = 0.88 # unitless
+    end
+    
+    
 
     # Calculate an altitude adjusted rated evaporator wetbulb temperature
     rated_ewb_F = 56.4
