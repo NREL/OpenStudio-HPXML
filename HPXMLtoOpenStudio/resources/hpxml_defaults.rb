@@ -142,21 +142,15 @@ class HPXMLDefaults
       hpxml.header.sim_end_day_isdefaulted = true
     end
 
-    if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
-      if not hpxml.header.sim_calendar_year.nil?
-        if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
-          hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
-          hpxml.header.sim_calendar_year_isdefaulted = true
-        end
-      else
-        hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
+    sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+    if not hpxml.header.sim_calendar_year.nil?
+      if hpxml.header.sim_calendar_year != sim_calendar_year
+        hpxml.header.sim_calendar_year = sim_calendar_year
         hpxml.header.sim_calendar_year_isdefaulted = true
       end
     else
-      if hpxml.header.sim_calendar_year.nil?
-        hpxml.header.sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
-        hpxml.header.sim_calendar_year_isdefaulted = true
-      end
+      hpxml.header.sim_calendar_year = sim_calendar_year
+      hpxml.header.sim_calendar_year_isdefaulted = true
     end
 
     if hpxml.header.dst_enabled.nil?
@@ -208,6 +202,16 @@ class HPXMLDefaults
     if (not epw_file.nil?) && hpxml.header.time_zone_utc_offset.nil?
       hpxml.header.time_zone_utc_offset = epw_file.timeZone
       hpxml.header.time_zone_utc_offset_isdefaulted = true
+    end
+
+    if hpxml.header.temperature_capacitance_multiplier.nil?
+      hpxml.header.temperature_capacitance_multiplier = 1.0
+      hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml.header.natvent_days_per_week.nil?
+      hpxml.header.natvent_days_per_week = 3
+      hpxml.header.natvent_days_per_week_isdefaulted = true
     end
   end
 
@@ -1466,7 +1470,7 @@ class HPXMLDefaults
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
 
       # Default ducts
@@ -1539,6 +1543,13 @@ class HPXMLDefaults
           duct.duct_fraction_area_isdefaulted = true
         end
       end
+
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_surface_area_multiplier.nil?
+
+        ducts.duct_surface_area_multiplier = 1.0
+        ducts.duct_surface_area_multiplier_isdefaulted = true
+      end
     end
   end
 
@@ -1560,7 +1571,7 @@ class HPXMLDefaults
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
-        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, 1.0, cfa, nbeds).round(1)
+        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, cfa, nbeds).round(1)
         vent_fan.rated_flow_rate_isdefaulted = true
       end
       if vent_fan.fan_power.nil?
