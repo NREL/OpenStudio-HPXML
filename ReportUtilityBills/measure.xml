@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>ea7df200-70a3-45e0-bfc2-5cd6502da8a6</version_id>
-  <version_modified>20220810T144811Z</version_modified>
+  <version_id>a4ffcc44-5088-4aa5-8825-a0ccc485bbca</version_id>
+  <version_modified>20220914T231243Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -67,6 +67,131 @@
       <checksum>0D33F8C0</checksum>
     </file>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>79E1C04E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B21017D0</checksum>
+    </file>
+    <file>
+      <filename>Contains Demand Charges.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31A7BE3B</checksum>
+    </file>
+    <file>
+      <filename>Invalid Fixed Charge Units.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CDC3F13</checksum>
+    </file>
+    <file>
+      <filename>Invalid Min Charge Units.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>32FB5BA8</checksum>
+    </file>
+    <file>
+      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>535D428A</checksum>
+    </file>
+    <file>
+      <filename>Missing Required Fields.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3DCED656</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FF24B8B5</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>947DF0DF</checksum>
+    </file>
+    <file>
+      <filename>Sample Real-Time Pricing Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>40D684ED</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1451047C</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1E16A054</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>27936FC1</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>179FE464</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F8BA7E1A</checksum>
+    </file>
+    <file>
+      <filename>Sample Tiered Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4508028D</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AABBA8AA</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B08E1EE</checksum>
+    </file>
+    <file>
+      <filename>Sample Time-of-Use Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AD93D08A</checksum>
+    </file>
+    <file>
+      <filename>data/detailed_rates/rates.tar.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F9BA6BF0</checksum>
+    </file>
+    <file>
       <filename>data/simple_rates/Average_retail_price_of_electricity.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -103,135 +228,10 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
-      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>535D428A</checksum>
-    </file>
-    <file>
-      <filename>Contains Demand Charges.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>31A7BE3B</checksum>
-    </file>
-    <file>
-      <filename>Missing Required Fields.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3DCED656</checksum>
-    </file>
-    <file>
-      <filename>Sample Real-Time Pricing Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>40D684ED</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>27936FC1</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4508028D</checksum>
-    </file>
-    <file>
-      <filename>Sample Time-of-Use Rate.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AD93D08A</checksum>
-    </file>
-    <file>
-      <filename>Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>947DF0DF</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1E16A054</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Time-of-Use Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F8BA7E1A</checksum>
-    </file>
-    <file>
-      <filename>Sample Time-of-Use Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9B08E1EE</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1451047C</checksum>
-    </file>
-    <file>
-      <filename>Invalid Fixed Charge Units.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6CDC3F13</checksum>
-    </file>
-    <file>
-      <filename>Invalid Min Charge Units.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>32FB5BA8</checksum>
-    </file>
-    <file>
-      <filename>Sample Real-Time Pricing Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FF24B8B5</checksum>
-    </file>
-    <file>
-      <filename>Sample Tiered Time-of-Use Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>179FE464</checksum>
-    </file>
-    <file>
-      <filename>Sample Time-of-Use Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AABBA8AA</checksum>
-    </file>
-    <file>
-      <filename>data/detailed_rates/rates.tar.gz</filename>
-      <filetype>gz</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F9BA6BF0</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>21387ED1</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>79E1C04E</checksum>
-    </file>
-    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E5A3F94E</checksum>
+      <checksum>F9944276</checksum>
     </file>
   </files>
 </measure>

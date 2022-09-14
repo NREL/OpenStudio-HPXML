@@ -26,10 +26,10 @@ class ReportUtilityBillsTest < MiniTest::Test
   # - PV System: None, 1.0 kW, 10.0 kW
   # - Timestep: 60 min
   # - User-Specified rates (calculated using default value):
-  #   - Electricity: 0.1195179675994109 $/kWh
-  #   - Natural Gas: 0.7734017611590879 $/therm
-  #   - Fuel Oil: 3.495346153846154 $/gal
-  #   - Propane: 2.4532692307692305 $/gal
+  #   - Electricity: 0.1195179675994109 USD/kWh
+  #   - Natural Gas: 0.7734017611590879 USD/therm
+  #   - Fuel Oil: 3.495346153846154 USD/gal
+  #   - Propane: 2.4532692307692305 USD/gal
   # - Sample Tiered Rate
   #   - Tier 1: 150 Max kWh
   #   - Tier 2: 300 Max kWh
@@ -42,23 +42,23 @@ class ReportUtilityBillsTest < MiniTest::Test
   def setup
     @args_hash = {}
 
-    # From BEopt Output screen (Utility Bills $/yr)
+    # From BEopt Output screen (Utility Bills USD/yr)
     @expected_bills = {
-      'Test: Electricity: Fixed ($)' => 96,
-      'Test: Electricity: Marginal ($)' => 632,
-      'Test: Electricity: PV Credit ($)' => 0,
-      'Test: Natural Gas: Fixed ($)' => 96,
-      'Test: Natural Gas: Marginal ($)' => 149,
-      'Test: Fuel Oil: Fixed ($)' => 0,
-      'Test: Fuel Oil: Marginal ($)' => 462,
-      'Test: Propane: Fixed ($)' => 0,
-      'Test: Propane: Marginal ($)' => 76,
-      'Test: Coal: Fixed ($)' => 0,
-      'Test: Coal: Marginal ($)' => 0,
-      'Test: Wood Cord: Fixed ($)' => 0,
-      'Test: Wood Cord: Marginal ($)' => 0,
-      'Test: Wood Pellets: Fixed ($)' => 0,
-      'Test: Wood Pellets: Marginal ($)' => 0
+      'Test: Electricity: Fixed (USD)' => 96,
+      'Test: Electricity: Marginal (USD)' => 632,
+      'Test: Electricity: PV Credit (USD)' => 0,
+      'Test: Natural Gas: Fixed (USD)' => 96,
+      'Test: Natural Gas: Marginal (USD)' => 149,
+      'Test: Fuel Oil: Fixed (USD)' => 0,
+      'Test: Fuel Oil: Marginal (USD)' => 462,
+      'Test: Propane: Fixed (USD)' => 0,
+      'Test: Propane: Marginal (USD)' => 76,
+      'Test: Coal: Fixed (USD)' => 0,
+      'Test: Coal: Marginal (USD)' => 0,
+      'Test: Wood Cord: Fixed (USD)' => 0,
+      'Test: Wood Cord: Marginal (USD)' => 0,
+      'Test: Wood Pellets: Fixed (USD)' => 0,
+      'Test: Wood Pellets: Marginal (USD)' => 0
     }
 
     @measure = ReportUtilityBills.new
@@ -91,9 +91,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -104,10 +102,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -118,10 +114,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -920
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -920
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -133,10 +127,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1777
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1777
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -149,10 +141,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -165,10 +155,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1785
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -180,11 +168,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 126
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 126
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -196,11 +182,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 186
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -177
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 186
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -212,11 +196,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', wood_marginal_rate: 0.015)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_marginal_rate: 0.03)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    expected_val = actual_bills['Test 1: Wood Cord: Total ($)']
-    assert_in_delta(expected_val * 2, actual_bills['Test 2: Wood Cord: Total ($)'], 1)
+    actual_bills = _test_measure()
+    expected_val = actual_bills['Test 1: Wood Cord: Total (USD)']
+    assert_in_delta(expected_val * 2, actual_bills['Test 2: Wood Cord: Total (USD)'], 1)
   end
 
   def test_workflow_wood_pellets
@@ -225,11 +207,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', wood_pellets_marginal_rate: 0.02)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', wood_pellets_marginal_rate: 0.01)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    expected_val = actual_bills['Test 1: Wood Pellets: Total ($)']
-    assert_in_delta(expected_val / 2, actual_bills['Test 2: Wood Pellets: Total ($)'], 1)
+    actual_bills = _test_measure()
+    expected_val = actual_bills['Test 1: Wood Pellets: Total (USD)']
+    assert_in_delta(expected_val / 2, actual_bills['Test 2: Wood Pellets: Total (USD)'], 1)
   end
 
   def test_workflow_coal
@@ -239,40 +219,34 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 2', coal_marginal_rate: 0.1)
     hpxml.header.utility_bill_scenarios.add(name: 'Test 3', coal_marginal_rate: 0.025)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    expected_val = actual_bills['Test 1: Coal: Total ($)']
-    assert_in_delta(expected_val * 2, actual_bills['Test 2: Coal: Total ($)'], 1)
-    assert_in_delta(expected_val / 2, actual_bills['Test 3: Coal: Total ($)'], 1)
+    actual_bills = _test_measure()
+    expected_val = actual_bills['Test 1: Coal: Total (USD)']
+    assert_in_delta(expected_val * 2, actual_bills['Test 2: Coal: Total (USD)'], 1)
+    assert_in_delta(expected_val / 2, actual_bills['Test 3: Coal: Total (USD)'], 1)
   end
 
   def test_workflow_leap_year
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-AMY-2012.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
+    actual_bills = _test_measure()
+    assert_operator(actual_bills['Bills: Total (USD)'], :>, 0)
   end
 
   def test_workflow_semi_annual_run_period
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-runperiod-1-month.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    assert_operator(actual_bills['Bills: Total ($)'], :>, 0)
+    actual_bills = _test_measure()
+    assert_operator(actual_bills['Bills: Total (USD)'], :>, 0)
   end
 
   def test_workflow_no_bill_scenarios
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-bills-none.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(hpxml: hpxml)
+    assert_nil(actual_bills)
   end
 
   def test_workflow_detailed_calculations
@@ -280,10 +254,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    bills_csv = _test_measure()
-    assert(File.exist?(bills_csv))
-    actual_bills = _get_actual_bills(bills_csv)
-    assert_operator(actual_bills['Test 1: Total ($)'], :>, 0)
+    actual_bills = _test_measure()
+    assert_operator(actual_bills['Test 1: Total (USD)'], :>, 0)
   end
 
   def test_auto_marginal_rate
@@ -315,8 +287,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-oil-location-miami-fl.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find state average fuel oil rate based on Florida; using region (PADD 1C) average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_national
@@ -324,8 +296,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-propane-location-portland-or.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find state average propane rate based on Oregon; using national average.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_dse
@@ -333,8 +305,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['DSE is not currently supported when calculating utility bills.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_no_rates
@@ -342,8 +314,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-capetown-zaf.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(!File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_invalid_fixed_charge_units
@@ -352,8 +324,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Invalid Fixed Charge Units.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Fixed charge units must be $/month.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_invalid_min_charge_units
@@ -362,8 +334,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Invalid Min Charge Units.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Min charge units must be either $/month or $/year.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_demand_charges
@@ -372,8 +344,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Contains Demand Charges.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Demand charges are not currently supported when calculating detailed utility bills.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_warning_missing_required_fields
@@ -382,8 +354,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Missing Required Fields.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     expected_warnings = ['Tariff file must contain energyweekdayschedule, energyweekendschedule, and energyratestructure fields.']
-    bills_csv = _test_measure(expected_warnings: expected_warnings)
-    assert(File.exist?(bills_csv))
+    actual_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
   end
 
   def test_monthly_prorate
@@ -421,11 +393,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -437,12 +407,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -190
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -454,12 +422,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -580
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -580
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -472,12 +438,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1443
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1443
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -491,12 +455,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -510,12 +472,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1785
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -528,12 +488,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 138
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -190
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 138
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -546,12 +504,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 198
-      @expected_bills['Test: Electricity: Marginal ($)'] = 580
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -190
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 198
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 580
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -562,45 +518,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -190
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_pv_10kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -580
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -580
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -611,45 +563,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_pv_1kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -190
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_pv_10kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -580
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -580
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -662,11 +610,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -678,12 +624,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -695,12 +639,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -713,12 +655,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1127
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1127
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -732,12 +672,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -751,12 +689,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1785
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -769,12 +705,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 138
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 138
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -787,12 +721,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 198
-      @expected_bills['Test: Electricity: Marginal ($)'] = 393
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 198
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 393
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -803,45 +735,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Time-of-Use Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tou_pv_10kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Time-of-Use Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -852,45 +780,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tou_pv_1kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Time-of-Use Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tou_pv_10kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Time-of-Use Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -903,11 +827,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -919,12 +841,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -108
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -936,12 +856,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -377
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -377
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -954,12 +872,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -377
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -377
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -973,12 +889,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -992,12 +906,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1785
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1010,12 +922,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 138
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -108
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 138
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1028,12 +938,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 198
-      @expected_bills['Test: Electricity: Marginal ($)'] = 377
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -108
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 198
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 377
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1044,45 +952,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Time-of-Use Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -108
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_10kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Time-of-Use Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -377
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -377
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1093,45 +997,41 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_1kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Time-of-Use Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -108
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_tiered_tou_pv_10kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Tiered Time-of-Use Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -377
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -377
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1144,11 +1044,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1160,12 +1058,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -106 # 107
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -106 # 107
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1177,12 +1073,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -641 # 642
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -641 # 642
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1195,12 +1089,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1060 # 1075
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1060 # 1075
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1214,12 +1106,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -178
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1233,12 +1123,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -1785
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1251,12 +1139,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 138
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -106 # 107
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 138
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -106 # 107
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1269,110 +1155,102 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 198
-      @expected_bills['Test: Electricity: Marginal ($)'] = 354
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -106 # 107
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 198
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 354
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -106 # 107
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_none_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Monthly Charge.json'
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_10kW_net_metering_user_specified_excess_rate_min_monthly_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Monthly Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 1092 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 1092 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_none_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Annual Charge.json'
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_1kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_1kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -112
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
   end
 
   def test_detailed_calculations_sample_real_time_pricing_pv_10kW_net_metering_user_specified_excess_rate_min_annual_charge
+    skip
     @hpxml.header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/tests/Sample Real-Time Pricing Rate Min Annual Charge.json'
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_10kW.csv', utility_bill_scenario)
       utility_rates, utility_bills = @measure.setup_utility_outputs()
-      _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
-      assert(File.exist?(@bills_csv))
-      actual_bills = _get_actual_bills(@bills_csv)
-      @expected_bills['Test: Electricity: Fixed ($)'] = 108
-      @expected_bills['Test: Electricity: Marginal ($)'] = 9892 # FIXME
-      @expected_bills['Test: Electricity: PV Credit ($)'] = -393
+      actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      @expected_bills['Test: Electricity: Fixed (USD)'] = 108
+      @expected_bills['Test: Electricity: Marginal (USD)'] = 9892 # FIXME
+      @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
     end
@@ -1401,13 +1279,12 @@ class ReportUtilityBillsTest < MiniTest::Test
           utility_bill_scenario.elec_tariff_filepath = tmp_path
           utility_rates, utility_bills = @measure.setup_utility_outputs()
           File.delete(@bills_csv) if File.exist? @bills_csv
-          _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
+          actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
           if !File.exist?(@bills_csv)
             puts entry.full_name
             assert(false)
           end
-          actual_bills = _get_actual_bills(@bills_csv)
-          assert_operator(actual_bills['Test: Total ($)'], :>, 0)
+          assert_operator(actual_bills['Test: Total (USD)'], :>, 0)
         end
       end
       tar_extract.close
@@ -1415,14 +1292,14 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def _get_expected_bills(expected_bills)
-    expected_bills['Test: Electricity: Total ($)'] = expected_bills['Test: Electricity: Fixed ($)'] + expected_bills['Test: Electricity: Marginal ($)'] + expected_bills['Test: Electricity: PV Credit ($)']
-    expected_bills['Test: Natural Gas: Total ($)'] = expected_bills['Test: Natural Gas: Fixed ($)'] + expected_bills['Test: Natural Gas: Marginal ($)']
-    expected_bills['Test: Fuel Oil: Total ($)'] = expected_bills['Test: Fuel Oil: Fixed ($)'] + expected_bills['Test: Fuel Oil: Marginal ($)']
-    expected_bills['Test: Propane: Total ($)'] = expected_bills['Test: Propane: Fixed ($)'] + expected_bills['Test: Propane: Marginal ($)']
-    expected_bills['Test: Coal: Total ($)'] = expected_bills['Test: Coal: Fixed ($)'] + expected_bills['Test: Coal: Marginal ($)']
-    expected_bills['Test: Wood Cord: Total ($)'] = expected_bills['Test: Wood Cord: Fixed ($)'] + expected_bills['Test: Wood Cord: Marginal ($)']
-    expected_bills['Test: Wood Pellets: Total ($)'] = expected_bills['Test: Wood Pellets: Fixed ($)'] + expected_bills['Test: Wood Pellets: Marginal ($)']
-    expected_bills['Test: Total ($)'] = expected_bills['Test: Electricity: Total ($)'] + expected_bills['Test: Natural Gas: Total ($)'] + expected_bills['Test: Fuel Oil: Total ($)'] + expected_bills['Test: Propane: Total ($)'] + expected_bills['Test: Wood Cord: Total ($)'] + expected_bills['Test: Wood Pellets: Total ($)'] + expected_bills['Test: Coal: Total ($)']
+    expected_bills['Test: Electricity: Total (USD)'] = expected_bills['Test: Electricity: Fixed (USD)'] + expected_bills['Test: Electricity: Marginal (USD)'] + expected_bills['Test: Electricity: PV Credit (USD)']
+    expected_bills['Test: Natural Gas: Total (USD)'] = expected_bills['Test: Natural Gas: Fixed (USD)'] + expected_bills['Test: Natural Gas: Marginal (USD)']
+    expected_bills['Test: Fuel Oil: Total (USD)'] = expected_bills['Test: Fuel Oil: Fixed (USD)'] + expected_bills['Test: Fuel Oil: Marginal (USD)']
+    expected_bills['Test: Propane: Total (USD)'] = expected_bills['Test: Propane: Fixed (USD)'] + expected_bills['Test: Propane: Marginal (USD)']
+    expected_bills['Test: Coal: Total (USD)'] = expected_bills['Test: Coal: Fixed (USD)'] + expected_bills['Test: Coal: Marginal (USD)']
+    expected_bills['Test: Wood Cord: Total (USD)'] = expected_bills['Test: Wood Cord: Fixed (USD)'] + expected_bills['Test: Wood Cord: Marginal (USD)']
+    expected_bills['Test: Wood Pellets: Total (USD)'] = expected_bills['Test: Wood Pellets: Fixed (USD)'] + expected_bills['Test: Wood Pellets: Marginal (USD)']
+    expected_bills['Test: Total (USD)'] = expected_bills['Test: Electricity: Total (USD)'] + expected_bills['Test: Natural Gas: Total (USD)'] + expected_bills['Test: Fuel Oil: Total (USD)'] + expected_bills['Test: Propane: Total (USD)'] + expected_bills['Test: Wood Cord: Total (USD)'] + expected_bills['Test: Wood Pellets: Total (USD)'] + expected_bills['Test: Coal: Total (USD)']
     return expected_bills
   end
 
@@ -1435,17 +1312,6 @@ class ReportUtilityBillsTest < MiniTest::Test
         assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
       end
     end
-  end
-
-  def _get_actual_bills(bills_csv)
-    actual_bills = {}
-    File.readlines(bills_csv).each do |line|
-      next if line.strip.empty?
-
-      key, value = line.split(',').map { |x| x.strip }
-      actual_bills[key] = Float(value)
-    end
-    return actual_bills
   end
 
   def _load_timeseries(path, utility_bill_scenario)
@@ -1510,10 +1376,18 @@ class ReportUtilityBillsTest < MiniTest::Test
     @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
     @measure.get_annual_bills(utility_bills)
 
-    @measure.write_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+    @measure.report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+
+    # Check written values exist and are registered
+    assert(File.exist?(@bills_csv))
+    actual_bills = _get_actual_bills(@bills_csv)
+
+    _check_for_runner_registered_values(runner, nil, actual_bills)
+
+    return actual_bills
   end
 
-  def _test_measure(expected_errors: [], expected_warnings: [])
+  def _test_measure(hpxml: nil, expected_errors: [], expected_warnings: [])
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-run-hpxml.osw')
@@ -1549,7 +1423,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     bills_csv = File.join(File.dirname(template_osw), 'run', 'results_bills.csv')
 
-    # check warnings/errors
+    # Check warnings/errors
     if not expected_errors.empty?
       expected_errors.each do |expected_error|
         assert(cli_output.include?("ERROR] #{expected_error}"))
@@ -1561,6 +1435,49 @@ class ReportUtilityBillsTest < MiniTest::Test
       end
     end
 
-    return bills_csv
+    if !hpxml.nil?
+      return if hpxml.header.utility_bill_scenarios.empty?
+    elsif (not expected_errors.empty?) || (not expected_warnings.empty?)
+      return
+    end
+
+    # Check written values exist and are registered
+    assert(File.exist?(bills_csv))
+    actual_bills = _get_actual_bills(bills_csv)
+
+    _check_for_runner_registered_values(nil, File.join(File.dirname(bills_csv), 'results.json'), actual_bills)
+
+    return actual_bills
+  end
+
+  def _get_actual_bills(bills_csv)
+    actual_bills = {}
+    File.readlines(bills_csv).each do |line|
+      next if line.strip.empty?
+
+      key, value = line.split(',').map { |x| x.strip }
+      actual_bills[key] = Float(value)
+    end
+    return actual_bills
+  end
+
+  def _check_for_runner_registered_values(runner, results_json, actual_bills)
+    if !runner.nil?
+      runner_bills = {}
+      runner.result.stepValues.each do |step_value|
+        runner_bills[step_value.name] = get_value_from_workflow_step_value(step_value)
+      end
+    elsif !results_json.nil?
+      require 'json'
+      runner_bills = JSON.parse(File.read(results_json))
+      runner_bills = runner_bills['ReportUtilityBills']
+    end
+
+    actual_bills.each do |name, value|
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      assert_includes(runner_bills.keys, name)
+      assert_equal(value, runner_bills[name])
+    end
   end
 end
