@@ -3331,12 +3331,6 @@ class HPXMLFile
     set_pool(hpxml, args)
     set_hot_tub(hpxml, args)
 
-    # Collapse surfaces so that we don't get, e.g., individual windows
-    # or the front wall split because of the door. Exclude foundation walls
-    # from the list so we get all 4 foundation walls.
-    hpxml.collapse_enclosure_surfaces([:roofs, :walls, :rim_joists, :floors,
-                                       :slabs, :windows, :skylights, :doors])
-
     # After surfaces are collapsed, round all areas
     (hpxml.roofs +
      hpxml.rim_joists +

@@ -378,7 +378,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
 
-  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true, building_id: nil)
+  def initialize(hpxml_path: nil, schematron_validators: [], building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -426,9 +426,6 @@ class HPXML < Object
     # Clean up
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
-    if collapse_enclosure
-      collapse_enclosure_surfaces()
-    end
   end
 
   def hvac_systems
@@ -6247,83 +6244,6 @@ class HPXML < Object
     XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', 'http://hpxmlonline.com/2019/10')
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
     return doc
-  end
-
-  def collapse_enclosure_surfaces(surf_types_of_interest = nil)
-    # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
-    # This can significantly speed up performance for HPXML files with lots of individual
-    # surfaces (e.g., windows).
-
-    surf_types = { roofs: @roofs,
-                   walls: @walls,
-                   rim_joists: @rim_joists,
-                   foundation_walls: @foundation_walls,
-                   floors: @floors,
-                   slabs: @slabs,
-                   windows: @windows,
-                   skylights: @skylights,
-                   doors: @doors }
-
-    attrs_to_ignore = [:id,
-                       :insulation_id,
-                       :perimeter_insulation_id,
-                       :under_slab_insulation_id,
-                       :area,
-                       :length,
-                       :exposed_perimeter]
-
-    # Look for pairs of surfaces that can be collapsed
-    surf_types.each do |surf_type, surfaces|
-      next unless surf_types_of_interest.nil? || surf_types_of_interest.include?(surf_type)
-
-      for i in 0..surfaces.size - 1
-        surf = surfaces[i]
-        next if surf.nil?
-
-        for j in (surfaces.size - 1).downto(i + 1)
-          surf2 = surfaces[j]
-          next if surf2.nil?
-
-          match = true
-          surf.class::ATTRS.each do |attribute|
-            next if attribute.to_s.end_with? '_isdefaulted'
-            next if attrs_to_ignore.include? attribute
-            next if (surf_type == :foundation_walls) && (attribute == :azimuth) # Azimuth of foundation walls is irrelevant
-            next if surf.send(attribute) == surf2.send(attribute)
-
-            match = false
-            break
-          end
-          next unless match
-
-          # Update values
-          if (not surf.area.nil?) && (not surf2.area.nil?)
-            surf.area += surf2.area
-          end
-          if (surf_type == :slabs) && (not surf.exposed_perimeter.nil?) && (not surf2.exposed_perimeter.nil?)
-            surf.exposed_perimeter += surf2.exposed_perimeter
-          end
-          if (surf_type == :foundation_walls) && (not surf.length.nil?) && (not surf2.length.nil?)
-            surf.length += surf2.length
-          end
-
-          # Update subsurface idrefs as appropriate
-          (@windows + @doors).each do |subsurf|
-            next unless subsurf.wall_idref == surf2.id
-
-            subsurf.wall_idref = surf.id
-          end
-          @skylights.each do |subsurf|
-            next unless subsurf.roof_idref == surf2.id
-
-            subsurf.roof_idref = surf.id
-          end
-
-          # Remove old surface
-          surfaces[j].delete
-        end
-      end
-    end
   end
 
   def delete_tiny_surfaces()

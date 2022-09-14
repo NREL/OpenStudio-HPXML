@@ -1128,15 +1128,6 @@ class OSModel
   end
 
   def self.add_windows(model, spaces)
-    # We already stored @fraction_of_windows_operable, so lets remove the
-    # fraction_operable properties from windows and re-collapse the enclosure
-    # so as to prevent potentially modeling multiple identical windows in E+,
-    # which can increase simulation runtime.
-    @hpxml.windows.each do |window|
-      window.fraction_operable = nil
-    end
-    @hpxml.collapse_enclosure_surfaces()
-
     shading_group = nil
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }

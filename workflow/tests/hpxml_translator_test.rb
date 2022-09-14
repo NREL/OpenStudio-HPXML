@@ -582,12 +582,6 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
-    # Collapse windows further using same logic as measure.rb
-    hpxml.windows.each do |window|
-      window.fraction_operable = nil
-    end
-    hpxml.collapse_enclosure_surfaces()
-
     # Check run.log warnings
     def skip_utility_bill_warning(err_line)
       utility_bill_warnings = ["#{EPlus::FuelTypeElectricity}:Facility".upcase,

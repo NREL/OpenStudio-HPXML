@@ -178,8 +178,7 @@ def create_hpxmls
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-storms.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
-    'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
-    'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
+    'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-natural-ventilation-availability.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
@@ -462,11 +461,11 @@ def create_hpxmls
 
       if hpxml_file.include? 'ASHRAE_Standard_140'
         hpxml_path = File.absolute_path(File.join(tests_dir, '..', 'tests', hpxml_file))
-        hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+        hpxml = HPXML.new(hpxml_path: hpxml_path)
         apply_hpxml_modification_ashrae_140(hpxml)
       else
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
-        hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+        hpxml = HPXML.new(hpxml_path: hpxml_path)
         apply_hpxml_modification(hpxml_file, hpxml)
       end
 
@@ -2494,8 +2493,6 @@ end
 def apply_hpxml_modification_ashrae_140(hpxml)
   # Set detailed HPXML values for ASHRAE 140 test files
 
-  renumber_hpxml_ids(hpxml)
-
   # ------------ #
   # HPXML Header #
   # ------------ #
@@ -2585,24 +2582,10 @@ def apply_hpxml_modification_ashrae_140(hpxml)
   hpxml.plug_loads[0].weekday_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
   hpxml.plug_loads[0].weekend_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
   hpxml.plug_loads[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-
-  # ----- #
-  # FINAL #
-  # ----- #
-
-  renumber_hpxml_ids(hpxml)
 end
 
 def apply_hpxml_modification(hpxml_file, hpxml)
   # Set detailed HPXML values for sample files
-
-  if hpxml_file.include? 'split-surfaces'
-    (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
-      surface.azimuth = nil
-    end
-    hpxml.collapse_enclosure_surfaces()
-  end
-  renumber_hpxml_ids(hpxml)
 
   # ------------ #
   # HPXML Header #
@@ -3483,16 +3466,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       insulation_assembly_r_value: roof_type[0] == HPXML::RoofTypeEPS ? 7.0 : 2.3)
       hpxml.attics[0].attached_to_roof_idrefs << hpxml.roofs[-1].id
     end
-  elsif ['base-enclosure-split-surfaces.xml',
-         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
       for i in 2..9
         hpxml.roofs << hpxml.roofs[n - 1].dup
         hpxml.roofs[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.roofs[-1].insulation_assembly_r_value += 0.01 * i
-        end
       end
     end
     hpxml.roofs << hpxml.roofs[-1].dup
@@ -3503,9 +3482,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       for i in 2..9
         hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
         hpxml.rim_joists[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.rim_joists[-1].insulation_assembly_r_value += 0.01 * i
-        end
       end
     end
     hpxml.rim_joists << hpxml.rim_joists[-1].dup
@@ -3516,9 +3492,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       for i in 2..9
         hpxml.walls << hpxml.walls[n - 1].dup
         hpxml.walls[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.walls[-1].insulation_assembly_r_value += 0.01 * i
-        end
       end
     end
     hpxml.walls << hpxml.walls[-1].dup
@@ -3529,9 +3502,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       for i in 2..9
         hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
         hpxml.foundation_walls[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.foundation_walls[-1].insulation_exterior_r_value += 0.01 * i
-        end
       end
     end
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
@@ -3542,9 +3512,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       for i in 2..9
         hpxml.floors << hpxml.floors[n - 1].dup
         hpxml.floors[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.floors[-1].insulation_assembly_r_value += 0.01 * i
-        end
       end
     end
     hpxml.floors << hpxml.floors[-1].dup
@@ -3556,10 +3523,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       for i in 2..9
         hpxml.slabs << hpxml.slabs[n - 1].dup
         hpxml.slabs[-1].id += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.slabs[-1].perimeter_insulation_depth += 0.01 * i
-          hpxml.slabs[-1].perimeter_insulation_r_value += 0.01 * i
-        end
       end
     end
     hpxml.slabs << hpxml.slabs[-1].dup
@@ -3575,11 +3538,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         if i >= 4
           hpxml.windows[-1].fraction_operable = 1.0
         end
-        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
-
-        hpxml.windows[-1].ufactor += 0.01 * i
-        hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
-        hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -3591,11 +3549,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += "_#{i}"
         hpxml.skylights[-1].roof_idref += "_#{i}"
-        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
-
-        hpxml.skylights[-1].ufactor += 0.01 * i
-        hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
-        hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup
@@ -3607,9 +3560,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         hpxml.doors << hpxml.doors[n - 1].dup
         hpxml.doors[-1].id += "_#{i}"
         hpxml.doors[-1].wall_idref += "_#{i}"
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.doors[-1].r_value += 0.01 * i
-        end
       end
     end
     hpxml.doors << hpxml.doors[-1].dup
@@ -4529,91 +4479,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.fuel_loads[2].weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
     hpxml.fuel_loads[2].weekend_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
     hpxml.fuel_loads[2].monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-  end
-
-  # ----- #
-  # FINAL #
-  # ----- #
-
-  # Collapse some surfaces whose azimuth is a minor effect to simplify HPXMLs.
-  if not hpxml_file.include? 'split-surfaces'
-    (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
-      surface.azimuth = nil
-    end
-    hpxml.collapse_enclosure_surfaces()
-  end
-
-  # After surfaces are collapsed, round all areas
-  (hpxml.roofs +
-     hpxml.rim_joists +
-     hpxml.walls +
-     hpxml.foundation_walls +
-     hpxml.floors +
-     hpxml.slabs +
-     hpxml.windows +
-     hpxml.skylights +
-     hpxml.doors).each do |s|
-    next if s.area.nil?
-
-    s.area = s.area.round(1)
-  end
-
-  renumber_hpxml_ids(hpxml)
-end
-
-def renumber_hpxml_ids(hpxml)
-  # Renumber surfaces
-  { hpxml.walls => 'Wall',
-    hpxml.foundation_walls => 'FoundationWall',
-    hpxml.rim_joists => 'RimJoist',
-    hpxml.floors => 'Floor',
-    hpxml.roofs => 'Roof',
-    hpxml.slabs => 'Slab',
-    hpxml.windows => 'Window',
-    hpxml.doors => 'Door',
-    hpxml.skylights => 'Skylight' }.each do |surfs, surf_name|
-    surfs.each_with_index do |surf, i|
-      (hpxml.attics + hpxml.foundations).each do |attic_or_fnd|
-        if attic_or_fnd.respond_to?(:attached_to_roof_idrefs) && !attic_or_fnd.attached_to_roof_idrefs.nil? && !attic_or_fnd.attached_to_roof_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_roof_idrefs << "#{surf_name}#{i + 1}"
-        end
-        if attic_or_fnd.respond_to?(:attached_to_wall_idrefs) && !attic_or_fnd.attached_to_wall_idrefs.nil? && !attic_or_fnd.attached_to_wall_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_wall_idrefs << "#{surf_name}#{i + 1}"
-        end
-        if attic_or_fnd.respond_to?(:attached_to_rim_joist_idrefs) && !attic_or_fnd.attached_to_rim_joist_idrefs.nil? && !attic_or_fnd.attached_to_rim_joist_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_rim_joist_idrefs << "#{surf_name}#{i + 1}"
-        end
-        if attic_or_fnd.respond_to?(:attached_to_floor_idrefs) && !attic_or_fnd.attached_to_floor_idrefs.nil? && !attic_or_fnd.attached_to_floor_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_floor_idrefs << "#{surf_name}#{i + 1}"
-        end
-        if attic_or_fnd.respond_to?(:attached_to_slab_idrefs) && !attic_or_fnd.attached_to_slab_idrefs.nil? && !attic_or_fnd.attached_to_slab_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_slab_idrefs << "#{surf_name}#{i + 1}"
-        end
-        if attic_or_fnd.respond_to?(:attached_to_foundation_wall_idrefs) && !attic_or_fnd.attached_to_foundation_wall_idrefs.nil? && !attic_or_fnd.attached_to_foundation_wall_idrefs.delete(surf.id).nil?
-          attic_or_fnd.attached_to_foundation_wall_idrefs << "#{surf_name}#{i + 1}"
-        end
-      end
-      (hpxml.windows + hpxml.doors).each do |subsurf|
-        if subsurf.respond_to?(:wall_idref) && (subsurf.wall_idref == surf.id)
-          subsurf.wall_idref = "#{surf_name}#{i + 1}"
-        end
-      end
-      hpxml.skylights.each do |subsurf|
-        if subsurf.respond_to?(:roof_idref) && (subsurf.roof_idref == surf.id)
-          subsurf.roof_idref = "#{surf_name}#{i + 1}"
-        end
-      end
-      surf.id = "#{surf_name}#{i + 1}"
-      if surf.respond_to? :insulation_id
-        surf.insulation_id = "#{surf_name}#{i + 1}Insulation"
-      end
-      if surf.respond_to? :perimeter_insulation_id
-        surf.perimeter_insulation_id = "#{surf_name}#{i + 1}PerimeterInsulation"
-      end
-      if surf.respond_to? :under_slab_insulation_id
-        surf.under_slab_insulation_id = "#{surf_name}#{i + 1}UnderSlabInsulation"
-      end
-    end
   end
 end
 

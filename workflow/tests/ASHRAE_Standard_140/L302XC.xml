@@ -71,8 +71,8 @@
             </VentilationRate>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
-            <AttachedToWall idref='Wall5'/>
-            <AttachedToWall idref='Wall6'/>
+            <AttachedToWall idref='Wall7'/>
+            <AttachedToWall idref='Wall8'/>
             <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
@@ -158,7 +158,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>456.0</Area>
+            <Area>47.0</Area>
             <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -179,8 +179,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>216.0</Area>
-            <Azimuth>270</Azimuth>
+            <Area>405.6</Area>
+            <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
@@ -196,6 +196,48 @@
           <Wall>
             <SystemIdentifier id='Wall5'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>3.3</Area>
+            <Azimuth>180</Azimuth>
+            <Siding>wood siding</Siding>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='Wall5Insulation'/>
+              <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
+          <Wall>
+            <SystemIdentifier id='Wall6'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>216.0</Area>
+            <Azimuth>270</Azimuth>
+            <Siding>wood siding</Siding>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='Wall6Insulation'/>
+              <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
+          <Wall>
+            <SystemIdentifier id='Wall7'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
             <WallType>
@@ -207,12 +249,12 @@
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
-              <SystemIdentifier id='Wall5Insulation'/>
+              <SystemIdentifier id='Wall7Insulation'/>
               <AssemblyEffectiveRValue>2.15</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall6'/>
+            <SystemIdentifier id='Wall8'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
@@ -225,7 +267,7 @@
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
-              <SystemIdentifier id='Wall6Insulation'/>
+              <SystemIdentifier id='Wall8Insulation'/>
               <AssemblyEffectiveRValue>2.15</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
@@ -277,7 +319,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>90.0</Area>
+            <Area>11.3</Area>
             <Azimuth>0</Azimuth>
             <UFactor>1.039</UFactor>
             <SHGC>0.67</SHGC>
@@ -291,8 +333,8 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>45.0</Area>
-            <Azimuth>90</Azimuth>
+            <Area>11.3</Area>
+            <Azimuth>0</Azimuth>
             <UFactor>1.039</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -301,12 +343,12 @@
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>90.0</Area>
-            <Azimuth>180</Azimuth>
+            <Area>11.3</Area>
+            <Azimuth>0</Azimuth>
             <UFactor>1.039</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -315,12 +357,12 @@
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>45.0</Area>
-            <Azimuth>270</Azimuth>
+            <Area>11.2</Area>
+            <Azimuth>0</Azimuth>
             <UFactor>1.039</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -329,7 +371,287 @@
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window5'/>
+            <Area>11.2</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window5InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window6'/>
+            <Area>11.2</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window6InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window7'/>
+            <Area>11.2</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window7InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window8'/>
+            <Area>11.2</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window8InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window9'/>
+            <Area>11.2</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window9InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall2'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window10'/>
+            <Area>11.2</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window10InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall2'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window11'/>
+            <Area>11.2</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window11InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall2'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window12'/>
+            <Area>11.2</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window12InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall2'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window13'/>
+            <Area>11.2</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window13InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window14'/>
+            <Area>11.2</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window14InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window15'/>
+            <Area>11.2</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window15InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window16'/>
+            <Area>11.2</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window16InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window17'/>
+            <Area>11.3</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window17InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window18'/>
+            <Area>11.3</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window18InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window19'/>
+            <Area>11.3</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window19InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window20'/>
+            <Area>11.3</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window20InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall4'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window21'/>
+            <Area>11.2</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window21InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall6'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window22'/>
+            <Area>11.2</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window22InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall6'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window23'/>
+            <Area>11.2</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window23InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall6'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window24'/>
+            <Area>11.2</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>1.039</UFactor>
+            <SHGC>0.67</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window24InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.0</FractionOperable>
+            <AttachedToWall idref='Wall6'/>
           </Window>
         </Windows>
         <Doors>
@@ -341,7 +663,7 @@
             <RValue>3.04</RValue>
           </Door>
           <Door>
-            <SystemIdentifier id='Door2'/>
+            <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall3'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
