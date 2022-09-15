@@ -1106,7 +1106,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.emissions_scenarios.delete(self)
+      @hpxml_object.header.emissions_scenarios.delete(self)
     end
 
     def check_for_errors
@@ -1203,7 +1203,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.utility_bill_scenarios.delete(self)
+      @hpxml_object.header.utility_bill_scenarios.delete(self)
     end
 
     def check_for_errors
@@ -1459,12 +1459,17 @@ class HPXML < Object
   end
 
   class ClimateandRiskZones < BaseElement
-    ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
-             :weather_station_epw_filepath]
+    def initialize(hpxml_object, *args)
+      @climate_zone_ieccs = ClimateZoneIECCs.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
+    ATTRS = [:weather_station_id, :weather_station_name, :weather_station_wmo, :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
+    attr_reader(:climate_zone_ieccs)
 
     def check_for_errors
       errors = []
+      errors += @climate_zone_ieccs.check_for_errors
       return errors
     end
 
@@ -1473,11 +1478,7 @@ class HPXML < Object
 
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'ClimateandRiskZones'])
 
-      if (not @iecc_year.nil?) && (not @iecc_zone.nil?)
-        climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
-        XMLHelper.add_element(climate_zone_iecc, 'Year', @iecc_year, :integer, @iecc_year_isdefaulted) unless @iecc_year.nil?
-        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @iecc_zone, :string, @iecc_zone_isdefaulted) unless @iecc_zone.nil?
-      end
+      @climate_zone_ieccs.to_oga(climate_and_risk_zones)
 
       if not @weather_station_id.nil?
         weather_station = XMLHelper.add_element(climate_and_risk_zones, 'WeatherStation')
@@ -1495,8 +1496,8 @@ class HPXML < Object
       climate_and_risk_zones = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/ClimateandRiskZones')
       return if climate_and_risk_zones.nil?
 
-      @iecc_year = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/Year', :integer)
-      @iecc_zone = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/ClimateZone', :string)
+      @climate_zone_ieccs.from_oga(climate_and_risk_zones)
+
       weather_station = XMLHelper.get_element(climate_and_risk_zones, 'WeatherStation')
       if not weather_station.nil?
         @weather_station_id = HPXML::get_id(weather_station)
@@ -1504,6 +1505,47 @@ class HPXML < Object
         @weather_station_wmo = XMLHelper.get_value(weather_station, 'WMO', :string)
         @weather_station_epw_filepath = XMLHelper.get_value(weather_station, 'extension/EPWFilePath', :string)
       end
+    end
+  end
+
+  class ClimateZoneIECCs < BaseArrayElement
+    def add(**kwargs)
+      self << ClimateZoneIECC.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(climate_and_risk_zones)
+      return if climate_and_risk_zones.nil?
+
+      XMLHelper.get_elements(climate_and_risk_zones, 'ClimateZoneIECC').each do |climate_zone_iecc|
+        self << ClimateZoneIECC.new(@hpxml_object, climate_zone_iecc)
+      end
+    end
+  end
+
+  class ClimateZoneIECC < BaseElement
+    ATTRS = [:year, :zone]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.climate_and_risk_zones.climate_zone_ieccs.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(climate_and_risk_zones)
+      climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
+      XMLHelper.add_element(climate_zone_iecc, 'Year', @year, :integer, @year_isdefaulted) unless @year.nil?
+      XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @zone, :string, @zone_isdefaulted) unless @zone.nil?
+    end
+
+    def from_oga(climate_zone_iecc)
+      return if climate_zone_iecc.nil?
+
+      @year = XMLHelper.get_value(climate_zone_iecc, 'Year', :integer)
+      @zone = XMLHelper.get_value(climate_zone_iecc, 'ClimateZone', :string)
     end
   end
 
