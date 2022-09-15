@@ -494,18 +494,13 @@ class HPXMLDefaults
   end
 
   def self.apply_climate_and_risk_zones(hpxml, epw_file)
-    if (not epw_file.nil?) && (hpxml.climate_and_risk_zones.iecc_zone.nil? || hpxml.climate_and_risk_zones.iecc_year.nil?)
-      if hpxml.climate_and_risk_zones.iecc_zone.nil?
-        climate_zone_iecc = Location.get_climate_zone_iecc(epw_file.wmoNumber)
-        if Constants.IECCZones.include? climate_zone_iecc
-          hpxml.climate_and_risk_zones.iecc_zone = climate_zone_iecc
-          hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
-        end
-      end
-
-      if (not hpxml.climate_and_risk_zones.iecc_zone.nil?) && hpxml.climate_and_risk_zones.iecc_year.nil?
-        hpxml.climate_and_risk_zones.iecc_year = 2006
-        hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+    if (not epw_file.nil?) && hpxml.climate_and_risk_zones.climate_zone_ieccs.empty?
+      zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+      if not zone.nil?
+        hpxml.climate_and_risk_zones.climate_zone_ieccs.add(zone: zone,
+                                                            year: 2006,
+                                                            zone_isdefaulted: true,
+                                                            year_isdefaulted: true)
       end
     end
   end
@@ -1701,7 +1696,7 @@ class HPXMLDefaults
         end
       end
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.iecc_zone)
+        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone)
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF

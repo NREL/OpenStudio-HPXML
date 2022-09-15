@@ -530,19 +530,19 @@ HPXML Climate Zones
 HPXML Climate Zone IECC
 ***********************
 
-Climate zone information can be entered as an ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC``.
+Climate zone information can be optionally entered as an ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC``.
 
   =================================  ========  =====  ===========  ========  ========  ===============
   Element                            Type      Units  Constraints  Required  Default   Description
   =================================  ========  =====  ===========  ========  ========  ===============
-  ``Year``                           integer          See [#]_     No        2006      IECC year
-  ``ClimateZone``                    string           See [#]_     No        See [#]_  IECC zone
+  ``Year``                           integer          See [#]_     Yes                 IECC year
+  ``ClimateZone``                    string           See [#]_     Yes                 IECC zone
   =================================  ========  =====  ===========  ========  ========  ===============
 
   .. [#] Year choices are 2003, 2006, 2009, 2012, 2015, 2018, or 2021.
   .. [#] ClimateZone choices are "1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", or "8".
-  .. [#] If ClimateZone not provided, defaults according to the EPW weather file header.
 
+If Climate zone information not provided, defaults according to the EPW weather file header.
 
 Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation``.
 
