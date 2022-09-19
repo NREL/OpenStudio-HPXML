@@ -308,9 +308,23 @@
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
             <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>6</NumberofUnitsServed>
-            <TankVolume>120.0</TankVolume>
-            <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
+            <NumberofUnitsServed>3</NumberofUnitsServed>
+            <TankVolume>60.0</TankVolume>
+            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
+            <HeatingCapacity>40000.0</HeatingCapacity>
+            <EnergyFactor>0.59</EnergyFactor>
+            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+            <HotWaterTemperature>125.0</HotWaterTemperature>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='WaterHeatingSystem2'/>
+            <FuelType>natural gas</FuelType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <IsSharedSystem>true</IsSharedSystem>
+            <NumberofUnitsServed>3</NumberofUnitsServed>
+            <TankVolume>60.0</TankVolume>
+            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
             <HeatingCapacity>40000.0</HeatingCapacity>
             <EnergyFactor>0.59</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
