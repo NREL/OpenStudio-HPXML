@@ -5445,7 +5445,7 @@ class HPXML < Object
 
         return hot_water_distribution
       end
-      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for clothes washer '#{@id}'."
+      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for dishwasher '#{@id}'."
     end
 
     def delete
