@@ -260,7 +260,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
           next if [HPXML::LocationLivingSpace,
                    HPXML::LocationBasementConditioned].include?(duct.duct_location)
 
-          bldg_output += duct.duct_surface_area
+          bldg_output += duct.duct_surface_area * duct.duct_surface_area_multiplier
         end
       end
     elsif bldg_type == BO::EnclosureRimJoistAreaExterior
