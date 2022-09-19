@@ -2385,7 +2385,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Battery
   if ['base-battery.xml',
       'base-misc-generators-battery.xml',
-      'base-pv-battery.xml',
       'base-pv-battery-garage.xml',
       'base-pv-generators-battery.xml'].include? hpxml_file
     args['battery_present'] = true
@@ -2397,6 +2396,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['battery_power'] = 15000
     args['battery_capacity'] = 20
     args['battery_usable_capacity'] = 18
+  elsif ['base-pv-battery-scheduled.xml'].include? hpxml_file
+    args['battery_power'] = 6000
   end
 
   # Simulation Control
