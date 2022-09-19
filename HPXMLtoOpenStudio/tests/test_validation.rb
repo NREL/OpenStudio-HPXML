@@ -398,7 +398,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.header.transaction = 'modify'
         hpxml.site.site_type = 'mountain'
-        hpxml.climate_and_risk_zones.iecc_year = 2020
+        hpxml.climate_and_risk_zones.climate_zone_ieccs[0].year = 2020
         hpxml.roofs.each do |roof|
           roof.radiant_barrier_grade = 4
         end
@@ -745,7 +745,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'unattached-hvac-distribution' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem1'."],
                             'unattached-skylight' => ["Attached roof 'foobar' not found for skylight 'Skylight1'."],
                             'unattached-solar-thermal-system' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem1'."],
+                            'unattached-shared-clothes-washer-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for clothes washer"],
                             'unattached-shared-clothes-washer-water-heater' => ["Attached water heating system 'foobar' not found for clothes washer"],
+                            'unattached-shared-dishwasher-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for dishwasher"],
                             'unattached-shared-dishwasher-water-heater' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."] }
 
@@ -1053,9 +1055,17 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['unattached-solar-thermal-system'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-solar-indirect-flat-plate.xml'))
         hpxml.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
+      elsif ['unattached-shared-clothes-washer-dhw-distribution'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
+        hpxml.clothes_washers[0].water_heating_system_idref = nil
+        hpxml.clothes_washers[0].hot_water_distribution_idref = 'foobar'
       elsif ['unattached-shared-clothes-washer-water-heater'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
         hpxml.clothes_washers[0].water_heating_system_idref = 'foobar'
+      elsif ['unattached-shared-dishwasher-dhw-distribution'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
+        hpxml.dishwashers[0].water_heating_system_idref = nil
+        hpxml.dishwashers[0].hot_water_distribution_idref = 'foobar'
       elsif ['unattached-shared-dishwasher-water-heater'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
         hpxml.dishwashers[0].water_heating_system_idref = 'foobar'

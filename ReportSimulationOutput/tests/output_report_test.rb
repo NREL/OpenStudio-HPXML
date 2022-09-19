@@ -429,9 +429,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
-    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), expected_annual_rows)
+    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
+    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_annual_only2
@@ -455,9 +455,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows + emission_annual_cols
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
-    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), expected_annual_rows)
+    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
+    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_timeseries_hourly_total_energy
@@ -1319,15 +1319,27 @@ class ReportSimulationOutputTest < MiniTest::Test
     end
   end
 
-  def _check_for_runner_registered_values(results_json, expected_annual_rows)
-    expected_registered_values = expected_annual_rows.map { |c| OpenStudio::toUnderscoreCase(c).chomp('_') }
+  def _get_actual_annual_rows(annual_csv)
+    actual_annual_rows = {}
+    File.readlines(annual_csv).each do |line|
+      next if line.strip.empty?
 
+      key, value = line.split(',').map { |x| x.strip }
+      actual_annual_rows[key] = Float(value)
+    end
+    return actual_annual_rows
+  end
+
+  def _check_for_runner_registered_values(results_json, actual_annual_rows)
     require 'json'
-    json = JSON.parse(File.read(results_json))
-    actual_registered_values = json['ReportSimulationOutput'].keys
+    runner_annual_rows = JSON.parse(File.read(results_json))
+    runner_annual_rows = runner_annual_rows['ReportSimulationOutput']
 
-    expected_registered_values.each do |val|
-      assert(actual_registered_values.include? val)
+    actual_annual_rows.each do |name, value|
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      assert_includes(runner_annual_rows.keys, name)
+      assert_equal(value, runner_annual_rows[name])
     end
   end
 end
