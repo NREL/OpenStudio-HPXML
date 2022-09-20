@@ -378,8 +378,6 @@ class CalculateUtilityBill
         annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
         bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
-        puts annual_total_charge, annual_payments, annual_total_charge_with_pv, bill.annual_production_credit
-
       else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
         if rate.minannualcharge.nil?
 
