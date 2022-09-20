@@ -422,7 +422,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if rate.realtimeprice.empty?
         CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
       else
-        net_elec = CalculateUtilityBill.real_time_pricing(header, fuels, rate, bill, net_elec)
+        CalculateUtilityBill.real_time_pricing(header, fuels, rate, bill)
       end
     end
 

@@ -378,6 +378,8 @@ class CalculateUtilityBill
         annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
         bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
+        puts annual_total_charge, annual_payments, annual_total_charge_with_pv, bill.annual_production_credit
+
       else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
         if rate.minannualcharge.nil?
 
@@ -460,9 +462,10 @@ class CalculateUtilityBill
     return end_of_year_bill_credit, excess_sellback
   end
 
-  def self.real_time_pricing(header, fuels, rate, bill, net_elec)
+  def self.real_time_pricing(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
+    net_elec = 0
 
     year = header.sim_calendar_year
     start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
@@ -525,39 +528,42 @@ class CalculateUtilityBill
 
     annual_fixed_charge = bill.monthly_fixed_charge.sum
     annual_energy_charge = bill.monthly_energy_charge.sum
-    # FIXME: unclear at this time whether real-time pricing should have applicable min monthly charges
-    # annual_total_charge = annual_energy_charge + annual_fixed_charge
-    # true_up_month = 12
 
-    # if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+    annual_total_charge = annual_energy_charge + annual_fixed_charge
+    true_up_month = 12
 
-    # annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
-    # end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
+    if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
 
-    # annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
-    # bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
+      annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
+      end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec)
 
-    # else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
-    # if rate.minannualcharge.nil?
+      annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
+      bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
-    # monthly_bill = [0] * 12
-    # (0..11).to_a.each do |m|
-    # monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
-    # if monthly_bill[m] < rate.minmonthlycharge
-    # bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
-    # end
-    # end
+    else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
+      if rate.minannualcharge.nil?
 
-    # annual_energy_charge = bill.monthly_energy_charge.sum
+        monthly_bill = [0] * 12
+        (0..11).to_a.each do |m|
+          monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
+          if monthly_bill[m] < rate.minmonthlycharge
+            bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
+          end
+        end
 
-    # else # California-style annual minimum
-    # # TODO
-    # end
-    # end
+        annual_energy_charge = bill.monthly_energy_charge.sum
+
+      else # California-style annual minimum
+        if annual_total_charge < rate.minannualcharge
+          increase_amount = rate.minannualcharge - annual_total_charge
+          annual_energy_charge += increase_amount
+          bill.monthly_energy_charge[true_up_month - 1] = bill.monthly_energy_charge[true_up_month - 1] + increase_amount
+        end
+      end
+    end
 
     bill.annual_energy_charge = annual_energy_charge
     bill.annual_fixed_charge = annual_fixed_charge
-    return net_elec
   end
 
   def self.calculate_monthly_prorate(header, month)

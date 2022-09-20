@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>a4ffcc44-5088-4aa5-8825-a0ccc485bbca</version_id>
-  <version_modified>20220914T231243Z</version_modified>
+  <version_id>d380c24e-859c-4bd1-86c4-08add41a7f19</version_id>
+  <version_modified>20220920T223155Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -65,23 +65,6 @@
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
       <checksum>0D33F8C0</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>79E1C04E</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>B21017D0</checksum>
     </file>
     <file>
       <filename>Contains Demand Charges.json</filename>
@@ -228,10 +211,27 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>855911DF</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>E2F28FAF</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F9944276</checksum>
+      <checksum>74C0A904</checksum>
     </file>
   </files>
 </measure>
