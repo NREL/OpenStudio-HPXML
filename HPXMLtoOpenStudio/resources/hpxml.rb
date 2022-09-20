@@ -1106,7 +1106,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.emissions_scenarios.delete(self)
+      @hpxml_object.header.emissions_scenarios.delete(self)
     end
 
     def check_for_errors
@@ -1212,7 +1212,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.utility_bill_scenarios.delete(self)
+      @hpxml_object.header.utility_bill_scenarios.delete(self)
     end
 
     def check_for_errors
@@ -1474,12 +1474,17 @@ class HPXML < Object
   end
 
   class ClimateandRiskZones < BaseElement
-    ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
-             :weather_station_epw_filepath]
+    def initialize(hpxml_object, *args)
+      @climate_zone_ieccs = ClimateZoneIECCs.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
+    ATTRS = [:weather_station_id, :weather_station_name, :weather_station_wmo, :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
+    attr_reader(:climate_zone_ieccs)
 
     def check_for_errors
       errors = []
+      errors += @climate_zone_ieccs.check_for_errors
       return errors
     end
 
@@ -1488,11 +1493,7 @@ class HPXML < Object
 
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'ClimateandRiskZones'])
 
-      if (not @iecc_year.nil?) && (not @iecc_zone.nil?)
-        climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
-        XMLHelper.add_element(climate_zone_iecc, 'Year', @iecc_year, :integer, @iecc_year_isdefaulted) unless @iecc_year.nil?
-        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @iecc_zone, :string, @iecc_zone_isdefaulted) unless @iecc_zone.nil?
-      end
+      @climate_zone_ieccs.to_oga(climate_and_risk_zones)
 
       if not @weather_station_id.nil?
         weather_station = XMLHelper.add_element(climate_and_risk_zones, 'WeatherStation')
@@ -1510,8 +1511,8 @@ class HPXML < Object
       climate_and_risk_zones = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/ClimateandRiskZones')
       return if climate_and_risk_zones.nil?
 
-      @iecc_year = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/Year', :integer)
-      @iecc_zone = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/ClimateZone', :string)
+      @climate_zone_ieccs.from_oga(climate_and_risk_zones)
+
       weather_station = XMLHelper.get_element(climate_and_risk_zones, 'WeatherStation')
       if not weather_station.nil?
         @weather_station_id = HPXML::get_id(weather_station)
@@ -1519,6 +1520,47 @@ class HPXML < Object
         @weather_station_wmo = XMLHelper.get_value(weather_station, 'WMO', :string)
         @weather_station_epw_filepath = XMLHelper.get_value(weather_station, 'extension/EPWFilePath', :string)
       end
+    end
+  end
+
+  class ClimateZoneIECCs < BaseArrayElement
+    def add(**kwargs)
+      self << ClimateZoneIECC.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(climate_and_risk_zones)
+      return if climate_and_risk_zones.nil?
+
+      XMLHelper.get_elements(climate_and_risk_zones, 'ClimateZoneIECC').each do |climate_zone_iecc|
+        self << ClimateZoneIECC.new(@hpxml_object, climate_zone_iecc)
+      end
+    end
+  end
+
+  class ClimateZoneIECC < BaseElement
+    ATTRS = [:year, :zone]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.climate_and_risk_zones.climate_zone_ieccs.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(climate_and_risk_zones)
+      climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
+      XMLHelper.add_element(climate_zone_iecc, 'Year', @year, :integer, @year_isdefaulted) unless @year.nil?
+      XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @zone, :string, @zone_isdefaulted) unless @zone.nil?
+    end
+
+    def from_oga(climate_zone_iecc)
+      return if climate_zone_iecc.nil?
+
+      @year = XMLHelper.get_value(climate_zone_iecc, 'Year', :integer)
+      @zone = XMLHelper.get_value(climate_zone_iecc, 'ClimateZone', :string)
     end
   end
 
@@ -5209,8 +5251,8 @@ class HPXML < Object
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :capacity, :label_usage, :usage_multiplier, :is_shared_appliance, :number_of_units,
-             :number_of_units_served, :water_heating_system_idref, :weekday_fractions,
-             :weekend_fractions, :monthly_multipliers]
+             :number_of_units_served, :water_heating_system_idref, :hot_water_distribution_idref,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
 
     attr_accessor(*ATTRS)
 
@@ -5225,6 +5267,17 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for clothes washer '#{@id}'."
     end
 
+    def hot_water_distribution
+      return if @hot_water_distribution_idref.nil?
+
+      @hpxml_object.hot_water_distributions.each do |hot_water_distribution|
+        next unless hot_water_distribution.id == @hot_water_distribution_idref
+
+        return hot_water_distribution
+      end
+      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for clothes washer '#{@id}'."
+    end
+
     def delete
       @hpxml_object.clothes_washers.delete(self)
     end
@@ -5232,6 +5285,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; water_heating_system; rescue StandardError => e; errors << e.message; end
+      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -5248,6 +5302,9 @@ class HPXML < Object
       if not @water_heating_system_idref.nil?
         attached_water_heater = XMLHelper.add_element(clothes_washer, 'AttachedToWaterHeatingSystem')
         XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
+      elsif not @hot_water_distribution_idref.nil?
+        attached_hot_water_dist = XMLHelper.add_element(clothes_washer, 'AttachedToHotWaterDistribution')
+        XMLHelper.add_attribute(attached_hot_water_dist, 'idref', @hot_water_distribution_idref)
       end
       XMLHelper.add_element(clothes_washer, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(clothes_washer, 'ModifiedEnergyFactor', @modified_energy_factor, :float) unless @modified_energy_factor.nil?
@@ -5272,6 +5329,7 @@ class HPXML < Object
       @is_shared_appliance = XMLHelper.get_value(clothes_washer, 'IsSharedAppliance', :boolean)
       @number_of_units_served = XMLHelper.get_value(clothes_washer, 'NumberofUnitsServed', :integer)
       @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToWaterHeatingSystem'))
+      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToHotWaterDistribution'))
       @location = XMLHelper.get_value(clothes_washer, 'Location', :string)
       @modified_energy_factor = XMLHelper.get_value(clothes_washer, 'ModifiedEnergyFactor', :float)
       @integrated_modified_energy_factor = XMLHelper.get_value(clothes_washer, 'IntegratedModifiedEnergyFactor', :float)
@@ -5378,9 +5436,9 @@ class HPXML < Object
 
   class Dishwasher < BaseElement
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
-             :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :label_usage, :usage_multiplier, :is_shared_appliance, :water_heating_system_idref,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+             :label_electric_rate, :label_gas_rate, :label_annual_gas_cost, :label_usage,
+             :usage_multiplier, :is_shared_appliance, :water_heating_system_idref,
+             :hot_water_distribution_idref, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def water_heating_system
@@ -5394,6 +5452,17 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for dishwasher '#{@id}'."
     end
 
+    def hot_water_distribution
+      return if @hot_water_distribution_idref.nil?
+
+      @hpxml_object.hot_water_distributions.each do |hot_water_distribution|
+        next unless hot_water_distribution.id == @hot_water_distribution_idref
+
+        return hot_water_distribution
+      end
+      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for dishwasher '#{@id}'."
+    end
+
     def delete
       @hpxml_object.dishwashers.delete(self)
     end
@@ -5401,6 +5470,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; water_heating_system; rescue StandardError => e; errors << e.message; end
+      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -5415,6 +5485,9 @@ class HPXML < Object
       if not @water_heating_system_idref.nil?
         attached_water_heater = XMLHelper.add_element(dishwasher, 'AttachedToWaterHeatingSystem')
         XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
+      elsif not @hot_water_distribution_idref.nil?
+        attached_hot_water_dist = XMLHelper.add_element(dishwasher, 'AttachedToHotWaterDistribution')
+        XMLHelper.add_attribute(attached_hot_water_dist, 'idref', @hot_water_distribution_idref)
       end
       XMLHelper.add_element(dishwasher, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', @rated_annual_kwh, :float, @rated_annual_kwh_isdefaulted) unless @rated_annual_kwh.nil?
@@ -5436,6 +5509,7 @@ class HPXML < Object
       @id = HPXML::get_id(dishwasher)
       @is_shared_appliance = XMLHelper.get_value(dishwasher, 'IsSharedAppliance', :boolean)
       @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(dishwasher, 'AttachedToWaterHeatingSystem'))
+      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(dishwasher, 'AttachedToHotWaterDistribution'))
       @location = XMLHelper.get_value(dishwasher, 'Location', :string)
       @rated_annual_kwh = XMLHelper.get_value(dishwasher, 'RatedAnnualkWh', :float)
       @energy_factor = XMLHelper.get_value(dishwasher, 'EnergyFactor', :float)

@@ -84,6 +84,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-generator.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent-multiple.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent-preconditioning.xml' => 'base-bldgtype-multifamily-shared-mechvent.xml',
@@ -4122,7 +4123,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
     hpxml.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecirControlTypeTimer
-  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml',
+         'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml'].include? hpxml_file
     hpxml.water_heating_systems.reverse_each do |water_heating_system|
       water_heating_system.delete
     end
@@ -4138,6 +4140,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: 125.0)
+    if hpxml_file == 'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml'
+      hpxml.water_heating_systems[0].fraction_dhw_load_served /= 2.0
+      hpxml.water_heating_systems[0].tank_volume /= 2.0
+      hpxml.water_heating_systems[0].number_of_units_served /= 2.0
+      hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
+      hpxml.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml.water_heating_systems.size}"
+    end
   elsif ['base-dhw-tank-gas-uef-fhr.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].first_hour_rating = 56.0
     hpxml.water_heating_systems[0].usage_bin = nil
@@ -4463,15 +4472,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hot_tubs[0].heater_weekend_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
     hpxml.hot_tubs[0].heater_monthly_multipliers = '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921'
   end
-  if ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
+  if ['base-bldgtype-multifamily-shared-laundry-room.xml',
+      'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml'].include? hpxml_file
     hpxml.clothes_washers[0].is_shared_appliance = true
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
-    hpxml.clothes_washers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.clothes_dryers[0].is_shared_appliance = true
     hpxml.dishwashers[0].is_shared_appliance = true
     hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
-    hpxml.dishwashers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+    if hpxml_file == 'base-bldgtype-multifamily-shared-laundry-room.xml'
+      hpxml.clothes_washers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+      hpxml.dishwashers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+    elsif hpxml_file == 'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml'
+      hpxml.clothes_washers[0].hot_water_distribution_idref = hpxml.hot_water_distributions[0].id
+      hpxml.dishwashers[0].hot_water_distribution_idref = hpxml.hot_water_distributions[0].id
+    end
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.refrigerators[0].primary_indicator = nil
   end

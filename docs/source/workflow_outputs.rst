@@ -132,7 +132,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)            Non-zero only when using detailed (not simple) solar thermal inputs
    End Use: Electricity: Lighting Interior (MBtu)
    End Use: Electricity: Lighting Garage (MBtu)
-   End Use: Electricity: Lighting Exterior (MBtu)
+   End Use: Electricity: Lighting Exterior (MBtu)                       Includes exterior holiday lighting
    End Use: Electricity: Mech Vent (MBtu)                               Excludes preheating/precooling
    End Use: Electricity: Mech Vent Preheating (MBtu)
    End Use: Electricity: Mech Vent Precooling (MBtu)
