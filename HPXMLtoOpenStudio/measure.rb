@@ -2442,9 +2442,11 @@ class OSModel
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     end
   end
 
