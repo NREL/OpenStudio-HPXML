@@ -35,6 +35,7 @@ __Bugfixes__
 - Fixes excessive heat transfer when foundation wall interior insulation does not start from the top of the wall.
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
 - Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
+- Fixes possible "Could not identify surface type for surface" error.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
