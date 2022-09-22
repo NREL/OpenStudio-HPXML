@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>900079a7-9220-4b8f-9b2d-75bbf69395f4</version_id>
-  <version_modified>20220920T230024Z</version_modified>
+  <version_id>04e6aa28-8be6-4f5a-b9f5-f6d4e4ae48d0</version_id>
+  <version_modified>20220922T173611Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -85,12 +85,6 @@
       <checksum>32FB5BA8</checksum>
     </file>
     <file>
-      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>535D428A</checksum>
-    </file>
-    <file>
       <filename>Missing Required Fields.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
@@ -169,12 +163,6 @@
       <checksum>AD93D08A</checksum>
     </file>
     <file>
-      <filename>data/detailed_rates/rates.tar.gz</filename>
-      <filetype>gz</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F9BA6BF0</checksum>
-    </file>
-    <file>
       <filename>data/simple_rates/Average_retail_price_of_electricity.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -222,16 +210,28 @@
       <checksum>E2F28FAF</checksum>
     </file>
     <file>
+      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>953EE2AC</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>74C0A904</checksum>
+      <checksum>C7E46FA2</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B21E538A</checksum>
+      <checksum>B210B3A6</checksum>
+    </file>
+    <file>
+      <filename>data/detailed_rates/rates.zip</filename>
+      <filetype>zip</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6CBD0C70</checksum>
     </file>
   </files>
 </measure>
