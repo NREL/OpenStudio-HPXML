@@ -1256,36 +1256,36 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_downloaded_utility_rates
     require 'rubygems/package'
-    require 'zlib'
+    require 'zip'
     require 'tempfile'
 
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
 
-      tar_extract = Gem::Package::TarReader.new(Zlib::GzipReader.open(File.join(File.dirname(__FILE__), '../resources/data/detailed_rates/rates.tar.gz')))
-      tar_extract.rewind # The extract has to be rewinded after every iteration
-      tar_extract.each do |entry|
-        next unless entry.file?
+      Zip.on_exists_proc = true
+      Zip::File.open(File.join(File.dirname(__FILE__), '../resources/data/detailed_rates/rates.zip')) do |zip_file|
+        zip_file.each do |entry|
+          next unless entry.file?
 
-        tmpdir = Dir.tmpdir
-        tmpfile = Tempfile.new(['rate', '.json'], tmpdir)
-        tmp_path = tmpfile.path.to_s
+          tmpdir = Dir.tmpdir
+          tmpfile = Tempfile.new(['rate', '.json'], tmpdir)
+          tmp_path = tmpfile.path.to_s
 
-        File.open(tmp_path, 'wb') do |f|
-          f.print entry.read
+          File.open(tmp_path, 'wb') do |f|
+            f.print entry.get_input_stream.read
 
-          utility_bill_scenario.elec_tariff_filepath = tmp_path
-          utility_rates, utility_bills = @measure.setup_utility_outputs()
-          File.delete(@bills_csv) if File.exist? @bills_csv
-          actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
-          if !File.exist?(@bills_csv)
-            puts entry.full_name
-            assert(false)
+            utility_bill_scenario.elec_tariff_filepath = tmp_path
+            utility_rates, utility_bills = @measure.setup_utility_outputs()
+            File.delete(@bills_csv) if File.exist? @bills_csv
+            actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
+            if !File.exist?(@bills_csv)
+              puts entry.name
+              assert(false)
+            end
+            assert_operator(actual_bills['Test: Total (USD)'], :>, 0)
           end
-          assert_operator(actual_bills['Test: Total (USD)'], :>, 0)
         end
       end
-      tar_extract.close
     end
   end
 
