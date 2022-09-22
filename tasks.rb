@@ -4687,10 +4687,9 @@ def download_utility_rates
     end
   end
 
-  process_usurdb(filepath)
+  num_rates_actual = process_usurdb(filepath)
 
-  num_rates_actual = Dir[File.join(rates_dir, '*.json')].count
-  puts "#{num_rates_actual} rate files are available in the rates directory."
+  puts "#{num_rates_actual} rate files are available in rates.zip."
   puts 'Completed.'
   exit!
 end

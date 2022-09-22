@@ -602,6 +602,7 @@ def process_usurdb(filepath)
   # https://openei.org/services/doc/rest/util_rates/?version=7#response-fields
   require 'csv'
   require 'json'
+  require 'zip'
 
   skip_keywords = true
   keywords = ['lighting',
@@ -621,6 +622,8 @@ def process_usurdb(filepath)
 
   puts 'Parsing CSV...'
   rates = CSV.read(filepath, headers: true)
+
+  puts 'Creating hashes...'
   rates = rates.map { |d| d.to_hash }
 
   puts 'Selecting residential rates...'
@@ -652,7 +655,8 @@ def process_usurdb(filepath)
       if ['eiaid'].include?(k)
         rate[k] = Integer(Float(v))
       elsif k.include?('schedule')
-        rate[k] = eval(v) # arrays
+        # all of a sudden some fields have an "L" character (?)
+        rate[k] = eval(v.gsub('L', '')) # arrays
       elsif k.include?('structure')
         rate.delete(k)
 
@@ -707,28 +711,43 @@ def process_usurdb(filepath)
     next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?('sell')
 
     # ignore rates with units other than "kWh"
-    next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('unit') } }.flatten.any? { |t| !t }
-    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] == 'kWh' } }.flatten.any? { |t| !t }
+    # next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('unit') } }.flatten.any? { |t| !t }
+    # next if rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] == 'kWh' } }.flatten.any? { |t| !t }
+    rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] = 'kWh' } } # this field is suddenly gone, so assume kWh?
 
     residential_rates << { 'items' => [rate] }
   end
 
+  FileUtils.rm(filepath)
+
   puts 'Exporting residential rates...'
   rates_dir = File.dirname(filepath)
-  residential_rates.each do |residential_rate|
-    utility = valid_filename(residential_rate['items'][0]['utility'])
-    name = valid_filename(residential_rate['items'][0]['name'])
-    startdate = residential_rate['items'][0]['startdate']
+  zippath = File.join(rates_dir, 'rates.zip')
+  zipcontents = []
+  Zip::File.open(zippath, create: true) do |zipfile|
+    residential_rates.each do |residential_rate|
+      utility = valid_filename(residential_rate['items'][0]['utility'])
+      name = valid_filename(residential_rate['items'][0]['name'])
+      startdate = residential_rate['items'][0]['startdate']
 
-    filename = "#{utility} - #{name}"
-    filename += " (Effective #{startdate.split(' ')[0]})" if !startdate.nil?
+      filename = "#{utility} - #{name}"
+      filename += " (Effective #{startdate.split(' ')[0]})" if !startdate.nil?
 
-    ratepath = File.join(rates_dir, "#{filename}.json")
-    File.open(ratepath, 'w') do |f|
-      json = JSON.pretty_generate(residential_rate)
-      f.write(json)
+      ratepath = File.join(rates_dir, "#{filename}.json")
+      File.open(ratepath, 'w') do |f|
+        json = JSON.pretty_generate(residential_rate)
+        f.write(json)
+      end
+      zipname = File.basename(ratepath)
+      next if zipcontents.include?(zipname)
+
+      zipfile.add(zipname, ratepath)
+      zipcontents << zipname
     end
   end
 
-  FileUtils.rm(filepath)
+  num_rates_actual = Dir[File.join(rates_dir, '*.json')].count
+  FileUtils.rm(Dir[File.join(rates_dir, '*.json')])
+
+  return num_rates_actual
 end
