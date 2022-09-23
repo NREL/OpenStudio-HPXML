@@ -262,11 +262,11 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_sip_constr(model, surfaces, constr_name, sip_r,
-                            sip_thick_in, framing_factor, sheathing_thick_in,
-                            mat_int_finish, osb_thick_in, rigid_r,
-                            mat_ext_finish, inside_film, outside_film,
-                            solar_absorptance = nil, emittance = nil)
+  def self.apply_sip_wall(model, surfaces, constr_name, sip_r,
+                          sip_thick_in, framing_factor, sheathing_thick_in,
+                          mat_int_finish, osb_thick_in, rigid_r,
+                          mat_ext_finish, inside_film, outside_film,
+                          solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
 
@@ -286,7 +286,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: "#{constr_name} rigid ins", thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'wall rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -306,9 +306,9 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_name} spline layer")
-    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], "#{constr_name} ins layer")
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_name} spline layer")
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'wall spline layer')
+    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'wall ins layer')
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'wall spline layer')
     constr.add_layer(mat_int_sheath)
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
@@ -385,11 +385,11 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_generic_layered_constr(model, surfaces, constr_name,
-                                        thick_ins, conds, denss, specheats,
-                                        mat_int_finish, osb_thick_in, rigid_r,
-                                        mat_ext_finish, inside_film, outside_film,
-                                        solar_absorptance = nil, emittance = nil)
+  def self.apply_generic_layered_wall(model, surfaces, constr_name,
+                                      thick_ins, conds, denss, specheats,
+                                      mat_int_finish, osb_thick_in, rigid_r,
+                                      mat_ext_finish, inside_film, outside_film,
+                                      solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
 
@@ -402,18 +402,18 @@ class Constructions
 
     # Define materials
     mats = []
-    mats << Material.new(name: "#{constr_name} layer 1", thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
+    mats << Material.new(name: 'wall layer 1', thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
     if not thick_ins[1].nil?
-      mats << Material.new(name: "#{constr_name} layer 2", thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
+      mats << Material.new(name: 'wall layer 2', thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
     end
     if not thick_ins[2].nil?
-      mats << Material.new(name: "#{constr_name} layer 3", thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
+      mats << Material.new(name: 'wall layer 3', thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
     end
     if not thick_ins[3].nil?
-      mats << Material.new(name: "#{constr_name} layer 4", thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
+      mats << Material.new(name: 'wall layer 4', thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
     end
     if not thick_ins[4].nil?
-      mats << Material.new(name: "#{constr_name} layer 5", thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
+      mats << Material.new(name: 'wall layer 5', thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
     end
     mat_osb = nil
     if osb_thick_in > 0
@@ -422,7 +422,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: "#{constr_name} rigid ins", thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'wall rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -848,6 +848,136 @@ class Constructions
     end
     constr.add_layer(inside_film)
 
+    constr.set_interior_material_properties()
+
+    # Create and assign construction to surfaces
+    constr.create_and_assign_constructions(surfaces, model)
+  end
+
+  def self.apply_sip_floor_ceiling(model, surfaces, constr_name, sip_r,
+                                   sip_thick_in, framing_factor, sheathing_thick_in,
+                                   mat_int_finish, osb_thick_in, rigid_r,
+                                   mat_ext_finish, inside_film, outside_film,
+                                   solar_absorptance = nil, emittance = nil)
+
+    return if surfaces.empty?
+
+    # Define materials
+    spline_thick_in = 0.5
+    ins_thick_in = sip_thick_in - (2.0 * spline_thick_in) # in
+    mat_int_sheath = Material.OSBSheathing(sheathing_thick_in)
+    mat_framing_inner_outer = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.Wood)
+    mat_framing_middle = Material.new(thick_in: ins_thick_in, mat_base: BaseMaterial.Wood)
+    mat_spline = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.Wood)
+    mat_ins_inner_outer = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: sip_thick_in / sip_r)
+    mat_ins_middle = Material.new(thick_in: ins_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: sip_thick_in / sip_r)
+    mat_osb = nil
+    if osb_thick_in > 0
+    mat_osb = Material.OSBSheathing(osb_thick_in)
+    end
+    mat_rigid = nil
+    if rigid_r > 0
+    rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
+    mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+    end
+
+    # Set paths
+    spline_frac = 4.0 / 48.0 # One 4" spline for every 48" wide panel
+    cavity_frac = 1.0 - (spline_frac + framing_factor)
+    path_fracs = [framing_factor, spline_frac, cavity_frac]
+
+    # Define construction
+    constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
+    if not mat_ext_finish.nil?
+    constr.add_layer(mat_ext_finish)
+    end
+    if not mat_rigid.nil?
+    constr.add_layer(mat_rigid)
+    end
+    if not mat_osb.nil?
+    constr.add_layer(mat_osb)
+    end
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
+    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'floor ins layer')
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
+    constr.add_layer(mat_int_sheath)
+    if not mat_int_finish.nil?
+    constr.add_layer(mat_int_finish)
+    end
+    constr.add_layer(inside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
+    constr.set_interior_material_properties()
+
+    # Create and assign construction to surfaces
+    constr.create_and_assign_constructions(surfaces, model)
+  end
+
+  def self.apply_generic_layered_floor_ceiling(model, surfaces, constr_name,
+                                               thick_ins, conds, denss, specheats,
+                                               mat_int_finish, osb_thick_in, rigid_r,
+                                               mat_ext_finish, inside_film, outside_film,
+                                               solar_absorptance = nil, emittance = nil)
+
+    return if surfaces.empty?
+
+    # Validate inputs
+    for idx in 0..4
+    if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
+    fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
+    end
+    end
+
+    # Define materials
+    mats = []
+    mats << Material.new(name: 'floor layer 1', thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
+    if not thick_ins[1].nil?
+    mats << Material.new(name: 'floor layer 2', thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
+    end
+    if not thick_ins[2].nil?
+    mats << Material.new(name: 'floor layer 3', thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
+    end
+    if not thick_ins[3].nil?
+    mats << Material.new(name: 'floor layer 4', thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
+    end
+    if not thick_ins[4].nil?
+    mats << Material.new(name: 'floor layer 5', thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
+    end
+    mat_osb = nil
+    if osb_thick_in > 0
+    mat_osb = Material.OSBSheathing(osb_thick_in)
+    end
+    mat_rigid = nil
+    if rigid_r > 0
+    rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
+    mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+    end
+
+    # Set paths
+    path_fracs = [1]
+
+    # Define construction
+    constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
+    if not mat_ext_finish.nil?
+    constr.add_layer(mat_ext_finish)
+    end
+    if not mat_rigid.nil?
+    constr.add_layer(mat_rigid)
+    end
+    if not mat_osb.nil?
+    constr.add_layer(mat_osb)
+    end
+    mats.each do |mat|
+    constr.add_layer(mat)
+    end
+    if not mat_int_finish.nil?
+    constr.add_layer(mat_int_finish)
+    end
+    constr.add_layer(inside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
     constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
@@ -1652,12 +1782,12 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_sip_constr(model, surfaces, "#{wall_id} construction",
-                       cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                       constr_set.sheath_thick_in, constr_set.mat_int_finish,
-                       constr_set.osb_thick_in, constr_set.rigid_r,
-                       constr_set.mat_ext_finish, inside_film, outside_film,
-                       solar_absorptance, emittance)
+      apply_sip_wall(model, surfaces, "#{wall_id} construction",
+                     cavity_r, constr_set.thick_in, constr_set.framing_factor,
+                     constr_set.sheath_thick_in, constr_set.mat_int_finish,
+                     constr_set.osb_thick_in, constr_set.rigid_r,
+                     constr_set.mat_ext_finish, inside_film, outside_film,
+                     solar_absorptance, emittance)
     elsif wall_type == HPXML::WallTypeICF
       constr_sets = [
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # ICF w/4" concrete and 2" rigid ins layers
@@ -1708,12 +1838,12 @@ class Constructions
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      apply_generic_layered_constr(model, surfaces, "#{wall_id} construction",
-                                   thick_ins, conds, denss, specheats,
-                                   constr_set.mat_int_finish, constr_set.osb_thick_in,
-                                   constr_set.rigid_r, constr_set.mat_ext_finish,
-                                   inside_film, outside_film, solar_absorptance,
-                                   emittance)
+      apply_generic_layered_wall(model, surfaces, "#{wall_id} construction",
+                                 thick_ins, conds, denss, specheats,
+                                 constr_set.mat_int_finish, constr_set.osb_thick_in,
+                                 constr_set.rigid_r, constr_set.mat_ext_finish,
+                                 inside_film, outside_film, solar_absorptance,
+                                 emittance)
     else
       fail "Unexpected wall type '#{wall_type}'."
     end
@@ -1773,7 +1903,6 @@ class Constructions
 
     elsif floor_type == HPXML::FloorTypeSteelStud
       install_grade = 1
-      cavity_filled = true
       corr_factor = 0.45
       if is_ceiling
         constr_sets = [
@@ -1784,7 +1913,7 @@ class Constructions
           SteelStudConstructionSet.new(5.5, corr_factor, 0.10, 10.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R10
           SteelStudConstructionSet.new(3.5, corr_factor, 0.13, 0.0, 0.0, mat_int_finish, nil),          # 2x4, 16" o.c.
           SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, fallback_mat_int_finish, nil), # Fallback
-        ] # FIXME: Make sure that these sets are reasonable
+        ]
         match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
         apply_steel_stud_ceiling(model, surface, "#{floor_id} construction",
@@ -1798,7 +1927,7 @@ class Constructions
           SteelStudConstructionSet.new(5.5, corr_factor, 0.10, 0.0, 0.75, nil, mat_ext_finish),           # 2x6, 24" o.c.
           SteelStudConstructionSet.new(3.5, corr_factor, 0.13, 0.0, 0.5, nil, mat_ext_finish),           # 2x4, 16" o.c.
           SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, nil, fallback_mat_ext_finish), # Fallback
-        ] # FIXME: Make sure that these sets are reasonable
+        ]
         match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
         apply_steel_stud_floor(model, surface, "#{floor_id} construction",
@@ -1812,23 +1941,25 @@ class Constructions
       sheathing_thick_in = 0.44
 
       constr_sets = [
-        SIPConstructionSet.new(10.0, 0.16, 0.0, sheathing_thick_in, 0.75, mat_int_finish, mat_ext_finish),                  # 10" SIP core
-        SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.75, mat_int_finish, mat_ext_finish),                   # 5" SIP core
+        SIPConstructionSet.new(16.0, 0.16, 0.0, sheathing_thick_in, 0.75, mat_int_finish, mat_ext_finish),                  # 16" SIP core
+        SIPConstructionSet.new(12.0, 0.16, 0.0, sheathing_thick_in, 0.75, mat_int_finish, mat_ext_finish),                  # 12" SIP core
+        SIPConstructionSet.new(8.0, 0.16, 0.0, sheathing_thick_in, 0.75, mat_int_finish, mat_ext_finish),                   # 8" SIP core
         SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
-      ]  # FIXME: Make sure that these sets are reasonable
+      ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_sip_constr(model, surface, "#{floor_id} construction",
-                       cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                       constr_set.sheath_thick_in, constr_set.mat_int_finish,
-                       constr_set.osb_thick_in, constr_set.rigid_r,
-                       constr_set.mat_ext_finish, inside_film, outside_film)
+      apply_sip_floor_ceiling(model, surface, "#{floor_id} construction",
+                              cavity_r, constr_set.thick_in, constr_set.framing_factor,
+                              constr_set.sheath_thick_in, constr_set.mat_int_finish,
+                              constr_set.osb_thick_in, constr_set.rigid_r,
+                              constr_set.mat_ext_finish, inside_film, outside_film)
     elsif floor_type == HPXML::FloorTypeConcrete
       constr_sets = [
+        GenericConstructionSet.new(20.0, 0.75, mat_int_finish, mat_ext_finish),                  # w/R-20 rigid
         GenericConstructionSet.new(10.0, 0.75, mat_int_finish, mat_ext_finish),                  # w/R-10 rigid
         GenericConstructionSet.new(0.0, 0.75, mat_int_finish, mat_ext_finish),                   # Standard
         GenericConstructionSet.new(0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
-      ]  # FIXME: Make sure that these sets are reasonable
+      ]
       match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       thick_in = 6.0
@@ -1842,11 +1973,11 @@ class Constructions
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      apply_generic_layered_constr(model, surface, "#{floor_id} construction",
-                                   thick_ins, conds, denss, specheats,
-                                   constr_set.mat_int_finish, constr_set.osb_thick_in,
-                                   constr_set.rigid_r, constr_set.mat_ext_finish,
-                                   inside_film, outside_film)
+      apply_generic_layered_floor_ceiling(model, surface, "#{floor_id} construction",
+                                          thick_ins, conds, denss, specheats,
+                                          constr_set.mat_int_finish, constr_set.osb_thick_in,
+                                          constr_set.rigid_r, constr_set.mat_ext_finish,
+                                          inside_film, outside_film)
     else
       fail "Unexpected floor type '#{floor_type}'."
     end
