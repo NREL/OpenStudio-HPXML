@@ -494,6 +494,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
       next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
       next if s.logMessage.include? 'Appears there are no design condition fields in the EPW file'
+      next if s.logMessage.include? 'Volume calculation will be potentially inaccurate'
 
       f << "OS Message: #{s.logMessage}\n"
     end
