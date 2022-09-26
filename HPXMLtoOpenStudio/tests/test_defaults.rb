@@ -1930,18 +1930,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
     vent_fan.cfis_vent_mode_airflow_fraction = 0.5
+    vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplemental
+    vent_fan.cfis_supplemental_fan_idref = vent_fan.id
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 330, 0.5)
+    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 330, 0.5, HPXML::CFISModeSupplemental)
 
     # Test defaults w/ CFIS
     vent_fan.is_shared_system = nil
     vent_fan.hours_in_operation = nil
     vent_fan.fan_power = nil
     vent_fan.cfis_vent_mode_airflow_fraction = nil
+    vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 8.0, 165.0, 330, 1.0)
+    _test_default_mech_vent_values(hpxml_default, false, 8.0, 165.0, 330, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml = _create_hpxml('base-mechvent-erv.xml')
@@ -3954,7 +3957,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate,
-                                     cfis_vent_mode_airflow_fraction = nil)
+                                     cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
@@ -3965,6 +3968,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(vent_fan.cfis_vent_mode_airflow_fraction)
     else
       assert_equal(cfis_vent_mode_airflow_fraction, vent_fan.cfis_vent_mode_airflow_fraction)
+    end
+    if cfis_addtl_runtime_operating_mode.nil?
+      assert_nil(vent_fan.cfis_addtl_runtime_operating_mode)
+    else
+      assert_equal(cfis_addtl_runtime_operating_mode, vent_fan.cfis_addtl_runtime_operating_mode)
     end
   end
 
