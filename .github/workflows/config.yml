@@ -61,7 +61,7 @@ jobs:
   run-workflow-tests:
     runs-on: ubuntu-latest
     container:
-      image: docker://nrel/dev-3.5.0-alpha
+      image: docker://nrel/openstudio:dev-3.5.0-alpha
     steps:
       - uses: actions/checkout@v2
         with:
