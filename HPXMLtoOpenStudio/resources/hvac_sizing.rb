@@ -954,7 +954,7 @@ class HVACSizing
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         # FIXME: Assumes slab is uninsulated?
-        k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
+        k_soil = UnitConversions.convert(@hpxml.site.ground_conductivity, 'in', 'ft')
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
         foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
         z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
@@ -3286,7 +3286,7 @@ class HVACSizing
       wall_ins_heights = [foundation_wall.insulation_interior_distance_to_bottom - foundation_wall.insulation_interior_distance_to_top,
                           foundation_wall.insulation_exterior_distance_to_bottom - foundation_wall.insulation_exterior_distance_to_top]
     end
-    k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
+    k_soil = UnitConversions.convert(@hpxml.site.ground_conductivity, 'in', 'ft')
 
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
     u_wall_with_soil = 0.0
@@ -3332,7 +3332,7 @@ class HVACSizing
       end
     end
 
-    soil_r_per_foot = Material.Soil(12.0).rvalue
+    soil_r_per_foot = @hpxml.site.ground_conductivity
     slab_r_gravel_per_inch = 0.65 # Based on calibration by Tony Fontanini
 
     # Because of uncertainty pertaining to the effective path radius, F-values are calculated
