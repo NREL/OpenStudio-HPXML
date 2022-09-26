@@ -455,7 +455,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
   ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
-  ``extension/GroundConductivity``  double    Btu/hr-ft-F  > 0
+  ``extension/GroundConductivity``  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil
   ``extension/Neighbors``           element                >= 0         No        <none>    Presence of neighboring buildings for solar shading
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
