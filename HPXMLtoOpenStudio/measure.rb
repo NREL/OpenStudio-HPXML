@@ -690,7 +690,7 @@ class OSModel
           end
         end
       end
-      
+
       Constructions.apply_floor_ceiling_construction(runner, model, [surface], floor.id, floor.floor_type, floor.is_ceiling, floor.insulation_assembly_r_value,
                                                      mat_int_finish, inside_film, outside_film, covering)
     end

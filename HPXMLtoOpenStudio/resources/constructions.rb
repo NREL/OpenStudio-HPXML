@@ -728,7 +728,6 @@ class Constructions
       end
       mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / eR)
     end
-    mat_framing = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.Wood)
     mat_gap = Material.AirCavityOpen(joist_height_in)
 
     # Set paths
@@ -804,10 +803,10 @@ class Constructions
   end
 
   def self.apply_steel_stud_floor(model, surfaces, constr_name,
-                                 cavity_r, install_grade,
-                                 framing_factor, correction_factor, joist_height_in,
-                                 plywood_thick_in, rigid_r, mat_floor_covering,
-                                 inside_film, outside_film)
+                                  cavity_r, install_grade,
+                                  framing_factor, correction_factor, joist_height_in,
+                                  plywood_thick_in, rigid_r, mat_floor_covering,
+                                  inside_film, outside_film)
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -821,7 +820,6 @@ class Constructions
     else
       mat_cavity = Material.new(thick_in: mat_2x.thick_in, mat_base: BaseMaterial.InsulationGenericDensepack, k_in: mat_2x.thick_in / eR)
     end
-    mat_framing = Material.new(thick_in: mat_2x.thick_in, mat_base: BaseMaterial.Wood)
     mat_gap = Material.AirCavityOpen(joist_height_in)
     mat_rigid = nil
     if rigid_r > 0
@@ -873,12 +871,12 @@ class Constructions
     mat_ins_middle = Material.new(thick_in: ins_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: sip_thick_in / sip_r)
     mat_osb = nil
     if osb_thick_in > 0
-    mat_osb = Material.OSBSheathing(osb_thick_in)
+      mat_osb = Material.OSBSheathing(osb_thick_in)
     end
     mat_rigid = nil
     if rigid_r > 0
-    rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-    mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
+      mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -890,20 +888,20 @@ class Constructions
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-    constr.add_layer(mat_ext_finish)
+      constr.add_layer(mat_ext_finish)
     end
     if not mat_rigid.nil?
-    constr.add_layer(mat_rigid)
+      constr.add_layer(mat_rigid)
     end
     if not mat_osb.nil?
-    constr.add_layer(mat_osb)
+      constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
     constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'floor ins layer')
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
     constr.add_layer(mat_int_sheath)
     if not mat_int_finish.nil?
-    constr.add_layer(mat_int_finish)
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -924,34 +922,34 @@ class Constructions
 
     # Validate inputs
     for idx in 0..4
-    if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
-    fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
-    end
+      if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
+        fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
+      end
     end
 
     # Define materials
     mats = []
     mats << Material.new(name: 'floor layer 1', thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
     if not thick_ins[1].nil?
-    mats << Material.new(name: 'floor layer 2', thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
+      mats << Material.new(name: 'floor layer 2', thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
     end
     if not thick_ins[2].nil?
-    mats << Material.new(name: 'floor layer 3', thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
+      mats << Material.new(name: 'floor layer 3', thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
     end
     if not thick_ins[3].nil?
-    mats << Material.new(name: 'floor layer 4', thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
+      mats << Material.new(name: 'floor layer 4', thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
     end
     if not thick_ins[4].nil?
-    mats << Material.new(name: 'floor layer 5', thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
+      mats << Material.new(name: 'floor layer 5', thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
     end
     mat_osb = nil
     if osb_thick_in > 0
-    mat_osb = Material.OSBSheathing(osb_thick_in)
+      mat_osb = Material.OSBSheathing(osb_thick_in)
     end
     mat_rigid = nil
     if rigid_r > 0
-    rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-    mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
+      mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -961,19 +959,19 @@ class Constructions
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-    constr.add_layer(mat_ext_finish)
+      constr.add_layer(mat_ext_finish)
     end
     if not mat_rigid.nil?
-    constr.add_layer(mat_rigid)
+      constr.add_layer(mat_rigid)
     end
     if not mat_osb.nil?
-    constr.add_layer(mat_osb)
+      constr.add_layer(mat_osb)
     end
     mats.each do |mat|
-    constr.add_layer(mat)
+      constr.add_layer(mat)
     end
     if not mat_int_finish.nil?
-    constr.add_layer(mat_int_finish)
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -1894,12 +1892,11 @@ class Constructions
         match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
         apply_wood_stud_floor(model, surface, "#{floor_id} construction",
-                              cavity_r, install_grade, 
+                              cavity_r, install_grade,
                               constr_set.framing_factor, constr_set.stud.thick_in,
                               constr_set.osb_thick_in, constr_set.rigid_r, constr_set.mat_ext_finish,
                               inside_film, outside_film)
       end
-      
 
     elsif floor_type == HPXML::FloorTypeSteelStud
       install_grade = 1
@@ -1918,14 +1915,14 @@ class Constructions
 
         apply_steel_stud_ceiling(model, surface, "#{floor_id} construction",
                                  cavity_r, install_grade, constr_set.rigid_r,
-                                 constr_set.framing_factor, constr_set.corr_factor, constr_set.cavity_thick_in, 
+                                 constr_set.framing_factor, constr_set.corr_factor, constr_set.cavity_thick_in,
                                  constr_set.mat_int_finish, inside_film, outside_film)
       else
         constr_sets = [
           SteelStudConstructionSet.new(5.5, corr_factor, 0.10, 10.0, 0.75, nil, mat_ext_finish),          # 2x6, 24" o.c. + R20
           SteelStudConstructionSet.new(5.5, corr_factor, 0.10, 10.0, 0.75, nil, mat_ext_finish),          # 2x6, 24" o.c. + R10
           SteelStudConstructionSet.new(5.5, corr_factor, 0.10, 0.0, 0.75, nil, mat_ext_finish),           # 2x6, 24" o.c.
-          SteelStudConstructionSet.new(3.5, corr_factor, 0.13, 0.0, 0.5, nil, mat_ext_finish),           # 2x4, 16" o.c.
+          SteelStudConstructionSet.new(3.5, corr_factor, 0.13, 0.0, 0.5, nil, mat_ext_finish), # 2x4, 16" o.c.
           SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, nil, fallback_mat_ext_finish), # Fallback
         ]
         match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
@@ -1936,7 +1933,7 @@ class Constructions
                                constr_set.osb_thick_in, constr_set.rigid_r, constr_set.mat_ext_finish,
                                inside_film, outside_film)
       end
-      
+
     elsif floor_type == HPXML::FloorTypeSIP
       sheathing_thick_in = 0.44
 
