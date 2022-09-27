@@ -21,6 +21,7 @@ __New Features__
   - Adds optional arguments for utility bill scenarios.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
+- Allows shared dishwasher/clothes washer to be attached to a hot water distribution system instead of a single water heater.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
@@ -33,6 +34,8 @@ __Bugfixes__
 - Fixes zero energy use for a ventilation fan w/ non-zero fan power and zero airflow rate.
 - Fixes excessive heat transfer when foundation wall interior insulation does not start from the top of the wall.
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
+- Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
+- Fixes possible "Could not identify surface type for surface" error.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
