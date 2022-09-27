@@ -7,7 +7,7 @@ __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - Allows setting the EnergyPlus temperature capacitance multiplier.
-- Allows setting the ground conductivity used for foundation heat transfer.
+- Allows setting the ground soil conductivity used for foundation heat transfer and ground source heat pumps.
 - Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - Allows specifying duct surface area multipliers.
 - EnergyPlus modeling changes:
