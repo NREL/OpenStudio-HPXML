@@ -154,7 +154,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_detailed_occupancy_schedules
-    skip # FIXME: Temporary
     [false, true].each do |debug|
       # Check that the simulation produces stochastic schedules if requested
       sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
@@ -268,7 +267,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_schedule
-    skip # FIXME: Temporary
     # Check that simulation works using template-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 
@@ -311,7 +309,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_build_hpxml_and_schedule
-    skip # FIXME: Temporary
     # Check that simulation works using template-build-and-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 
@@ -453,7 +450,7 @@ class HPXMLTest < MiniTest::Test
     return results, sizing_results, bill_results
   end
 
-  def _get_simulation_results(annual_csv_path, xml, hpxml)
+  def _get_simulation_results(annual_csv_path, xml, _hpxml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
@@ -475,12 +472,12 @@ class HPXMLTest < MiniTest::Test
       abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
       abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
       # Check that the difference is less than 0.6MBtu or less than 10%
-      #if hpxml.total_fraction_heat_load_served > 0
+      # if hpxml.total_fraction_heat_load_served > 0
       #  assert((abs_htg_load_delta < 0.6) || (abs_htg_load_frac < 0.1))
-      #end
-      #if hpxml.total_fraction_cool_load_served > 0
+      # end
+      # if hpxml.total_fraction_cool_load_served > 0
       #  assert((abs_clg_load_delta < 1.1) || (abs_clg_load_frac < 0.1))
-      #end
+      # end
     end
 
     return results
