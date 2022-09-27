@@ -162,8 +162,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-number-of-units-served' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]'],
                             'invalid-shared-vent-in-unit-flowrate' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "VentilationFan1"]'],
                             'invalid-timestep' => ['Expected Timestep to be 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, or 1'],
-                            'invalid-timezone-utcoffset-low' => ['Expected TimeZone/UTCOffset to be greater than or equal to -12'],
-                            'invalid-timezone-utcoffset-high' => ['Expected TimeZone/UTCOffset to be less than or equal to 14'],
+                            'invalid-timezone-utcoffset-low' => ["Element 'UTCOffset': [facet 'minInclusive'] The value '-13.0' is less than the minimum value allowed ('-12')."],
+                            'invalid-timezone-utcoffset-high' => ["Element 'UTCOffset': [facet 'maxInclusive'] The value '15.0' is greater than the maximum value allowed ('14')."],
                             'invalid-ventilation-fan' => ['Expected 1 element(s) for xpath: UsedForWholeBuildingVentilation[text()="true"] | UsedForLocalVentilation[text()="true"] | UsedForSeasonalCoolingLoadReduction[text()="true"] | UsedForGarageVentilation[text()="true"]'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting]'],
@@ -468,7 +468,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.floors << hpxml.floors[0].dup
         hpxml.floors[1].id = "Floor#{hpxml.floors.size}"
-        hpxml.floors[1].insulation_id = "FloorInsulation#{hpxml.frame_floors.size}"
+        hpxml.floors[1].insulation_id = "FloorInsulation#{hpxml.floors.size}"
         hpxml.floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
         hpxml.floors[1].other_space_above_or_below = HPXML::FloorOtherSpaceAbove
       elsif ['multifamily-reference-water-heater'].include? error_case
