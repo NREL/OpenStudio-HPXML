@@ -389,23 +389,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_climate_and_risk_zones
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    hpxml.climate_and_risk_zones.iecc_year = 2009
-    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].year = 2009
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone = '2B'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, 2009, '2B')
 
     # Test defaults
-    hpxml.climate_and_risk_zones.iecc_year = nil
-    hpxml.climate_and_risk_zones.iecc_zone = nil
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, 2006, '5B')
 
     # Test defaults - invalid IECC zone
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
-    hpxml.climate_and_risk_zones.iecc_year = nil
-    hpxml.climate_and_risk_zones.iecc_zone = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, nil, nil)
@@ -3470,14 +3467,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_climate_and_risk_zones_values(hpxml, iecc_year, iecc_zone)
     if iecc_year.nil?
-      assert_nil(hpxml.climate_and_risk_zones.iecc_year)
+      assert_equal(0, hpxml.climate_and_risk_zones.climate_zone_ieccs.size)
     else
-      assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
+      assert_equal(iecc_year, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].year)
     end
     if iecc_zone.nil?
-      assert_nil(hpxml.climate_and_risk_zones.iecc_zone)
+      assert_equal(0, hpxml.climate_and_risk_zones.climate_zone_ieccs.size)
     else
-      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
+      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone)
     end
   end
 
