@@ -154,7 +154,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_detailed_occupancy_schedules
-    skip # FIXME: Temporary
     [false, true].each do |debug|
       # Check that the simulation produces stochastic schedules if requested
       sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
@@ -268,7 +267,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_schedule
-    skip # FIXME: Temporary
     # Check that simulation works using template-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 
@@ -311,7 +309,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_build_hpxml_and_schedule
-    skip # FIXME: Temporary
     # Check that simulation works using template-build-and-run-hpxml-with-stochastic-occupancy.osw
     require 'json'
 

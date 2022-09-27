@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>256ddf44-8961-4449-9dd2-fd1f315e1131</version_id>
-  <version_modified>20220926T175505Z</version_modified>
+  <version_id>2dc2ee73-d403-47f8-97f6-360338148ba2</version_id>
+  <version_modified>20220927T025915Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -326,12 +326,6 @@
       <checksum>0F94C201</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>500A5756</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -494,12 +488,6 @@
       <checksum>89B1B71D</checksum>
     </file>
     <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B13FEA8C</checksum>
-    </file>
-    <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -528,12 +516,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>84489603</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A2B7F8E1</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
@@ -593,6 +575,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>D5FA7468</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8DC67954</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F4418C0F</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FA398582</checksum>
     </file>
   </files>
 </measure>
