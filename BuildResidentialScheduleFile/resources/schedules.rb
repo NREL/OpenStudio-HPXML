@@ -71,6 +71,9 @@ class ScheduleGenerator
     success = set_vacancy(args: args)
     return false if not success
 
+    success = set_outage(args: args)
+    return false if not success
+
     return true
   end
 
@@ -797,6 +800,33 @@ class ScheduleGenerator
         vacancy.fill(1.0, 0, end_day_num * args[:steps_in_day]) # Fill between start of year and end day
       end
       @schedules[SchedulesFile::ColumnVacancy] = vacancy
+    end
+    return true
+  end
+
+  def set_outage(args:)
+    if (not args[:schedules_outage_begin_month].nil?) && (not args[:schedules_outage_begin_day].nil?) && (not args[:schedules_outage_begin_hour].nil?) && (not args[:schedules_outage_end_month].nil?) && (not args[:schedules_outage_end_day].nil?) && (not args[:schedules_outage_end_hour].nil?)
+      start_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day])
+
+      outage_begin = Time.new(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day], args[:schedules_outage_begin_hour])
+      outage_end = Time.new(@sim_year, args[:schedules_outage_end_month], args[:schedules_outage_end_day], args[:schedules_outage_end_hour])
+
+      outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
+      if outage_end >= outage_begin
+        outage_hours = (outage_end - outage_begin) / 3600.0
+        outage.fill(1.0, (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour], outage_hours * args[:steps_in_hour]) # Fill between start/end days
+      else # Wrap around year
+        outage_begin = Time.new(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day], args[:schedules_outage_begin_hour])
+        outage_end = Time.new(@sim_year + 1, 1, 1)
+        outage_hours = (outage_end - outage_begin) / 3600.0
+        outage.fill(1.0, (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour], outage_hours * args[:steps_in_hour]) # Fill between start day and end of year
+
+        outage_begin = Time.new(@sim_year, 1, 1)
+        outage_end = Time.new(@sim_year, args[:schedules_outage_end_month], args[:schedules_outage_end_day], args[:schedules_outage_end_hour])
+        outage_hours = (outage_end - outage_begin) / 3600.0
+        outage.fill(1.0, 0, outage_hours * args[:steps_in_hour]) # Fill between start of year and end day
+      end
+      @schedules[SchedulesFile::ColumnOutage] = outage
     end
     return true
   end

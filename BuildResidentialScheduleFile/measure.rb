@@ -57,6 +57,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_outage_period', false)
+    arg.setDisplayName('Schedules: Outage Period')
+    arg.setDescription('Specifies the outage period. Enter a date/time like "Dec 15 10am - Jan 15 2pm". 12am is the final hour of a given day.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
     arg.setDisplayName('Schedules: Random Seed')
     arg.setUnits('#')
@@ -162,6 +167,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "RandomSeed=#{args[:random_seed]}" if args[:schedules_random_seed].is_initialized
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
     info_msgs << "VacancyPeriod=#{args[:schedules_vacancy_period].get}" if args[:schedules_vacancy_period].is_initialized
+    info_msgs << "OutagePeriod=#{args[:schedules_outage_period].get}" if args[:schedules_outage_period].is_initialized
 
     runner.registerInfo("Created #{args[:schedules_type]} schedule with #{info_msgs.join(', ')}")
 
@@ -173,7 +179,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     if !hpxml.header.timestep.nil?
       args[:minutes_per_step] = hpxml.header.timestep
     end
-    args[:steps_in_day] = 24 * 60 / args[:minutes_per_step]
+    args[:steps_in_hour] = 60 / args[:minutes_per_step]
+    args[:steps_in_day] = 24 * args[:steps_in_hour]
     args[:mkc_ts_per_day] = 96
     args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
 
@@ -206,6 +213,16 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_vacancy_begin_day] = begin_day
       args[:schedules_vacancy_end_month] = end_month
       args[:schedules_vacancy_end_day] = end_day
+    end
+
+    if args[:schedules_outage_period].is_initialized
+      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_outage_period].get)
+      args[:schedules_outage_begin_month] = begin_month
+      args[:schedules_outage_begin_day] = begin_day
+      args[:schedules_outage_begin_hour] = begin_hour
+      args[:schedules_outage_end_month] = end_month
+      args[:schedules_outage_end_day] = end_day
+      args[:schedules_outage_end_hour] = end_hour
     end
 
     debug = false
