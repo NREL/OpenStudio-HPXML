@@ -17,6 +17,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   end
 
   def test_workflows
+    skip # FIXME: Temporary
     # Extra buildings that don't correspond with sample files
     hpxmls_files = {
       # Base files to derive from
@@ -48,6 +49,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'extra-time-zone-different-than-epw.xml' => 'base-sfd.xml',
       'extra-emissions-fossil-fuel-factors.xml' => 'base-sfd.xml',
       'extra-bills-fossil-fuel-rates.xml' => 'base-sfd.xml',
+      'extra-seasons-building-america.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
@@ -309,12 +311,24 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         flunk "Error: Did not successfully generate #{hpxml_file}.\n#{e}\n#{e.backtrace.join('\n')}"
       end
     end
+
+    # Check generated HPXML files
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(@tests_dir, 'extra-seasons-building-america.xml')))
+    hvac_control = hpxml.hvac_controls[0]
+    assert_equal(10, hvac_control.seasons_heating_begin_month)
+    assert_equal(1, hvac_control.seasons_heating_begin_day)
+    assert_equal(6, hvac_control.seasons_heating_end_month)
+    assert_equal(30, hvac_control.seasons_heating_end_day)
+    assert_equal(5, hvac_control.seasons_cooling_begin_month)
+    assert_equal(1, hvac_control.seasons_cooling_begin_day)
+    assert_equal(10, hvac_control.seasons_cooling_end_month)
+    assert_equal(31, hvac_control.seasons_cooling_end_day)
   end
 
   private
 
   def _set_measure_argument_values(hpxml_file, args)
-    args['hpxml_path'] = "tests/extra_files/#{hpxml_file}"
+    args['hpxml_path'] = File.join(File.dirname(__FILE__), "extra_files/#{hpxml_file}")
     args['apply_defaults'] = true
     args['apply_validation'] = true
 
@@ -784,6 +798,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['utility_bill_wood_marginal_rates'] = '14, 15'
       args['utility_bill_wood_pellets_fixed_charges'] = '16, 17'
       args['utility_bill_wood_pellets_marginal_rates'] = '18, 19'
+    elsif ['extra-seasons-building-america.xml'].include? hpxml_file
+      args['hvac_control_heating_season_period'] = HPXML::BuildingAmerica
+      args['hvac_control_cooling_season_period'] = HPXML::BuildingAmerica
     elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
       args['ducts_supply_leakage_to_outside_value'] = 0.0

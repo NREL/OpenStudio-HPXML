@@ -135,26 +135,20 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       bldg_output.units = BO.get_units(bldg_type)
     end
 
-    # Report results
-    bldg_outputs.each do |bldg_type, bldg_output|
-      bldg_type_str = OpenStudio::toUnderscoreCase("#{bldg_type} #{bldg_output.units}")
-      bldg_output = bldg_output.output.round(2)
-      runner.registerValue(bldg_type_str, bldg_output)
-      runner.registerInfo("Registering #{bldg_output} for #{bldg_type_str}.")
-    end
-
-    # Write results
-    write_output(runner, bldg_outputs, output_format, output_path)
+    # Write/report results
+    report_output_results(runner, bldg_outputs, output_format, output_path)
 
     return true
   end
 
-  def write_output(runner, bldg_outputs, output_format, output_path)
+  def report_output_results(runner, bldg_outputs, output_format, output_path)
     line_break = nil
 
     segment, _ = bldg_outputs.keys[0].split(':', 2)
     segment = segment.strip
+
     results_out = []
+
     bldg_outputs.each do |key, bldg_output|
       new_segment, _ = key.split(':', 2)
       new_segment = new_segment.strip
@@ -185,6 +179,15 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     runner.registerInfo("Wrote hpxml output to #{output_path}.")
+
+    results_out.each do |name, value|
+      next if name.nil? || value.nil?
+
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      runner.registerValue(name, value)
+      runner.registerInfo("Registering #{value} for #{name}.")
+    end
   end
 
   class BaseOutput
@@ -233,14 +236,14 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
         bldg_output += slab.area
       end
     elsif bldg_type == BO::EnclosureCeilingAreaThermalBoundary
-      hpxml.frame_floors.each do |frame_floor|
-        next unless frame_floor.is_thermal_boundary
-        next unless frame_floor.is_interior
-        next unless frame_floor.is_ceiling
+      hpxml.floors.each do |floor|
+        next unless floor.is_thermal_boundary
+        next unless floor.is_interior
+        next unless floor.is_ceiling
         next unless [HPXML::LocationAtticVented,
-                     HPXML::LocationAtticUnvented].include?(frame_floor.exterior_adjacent_to)
+                     HPXML::LocationAtticUnvented].include?(floor.exterior_adjacent_to)
 
-        bldg_output += frame_floor.area
+        bldg_output += floor.area
       end
     elsif bldg_type == BO::EnclosureRoofArea
       hpxml.roofs.each do |roof|
@@ -260,7 +263,7 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
           next if [HPXML::LocationLivingSpace,
                    HPXML::LocationBasementConditioned].include?(duct.duct_location)
 
-          bldg_output += duct.duct_surface_area
+          bldg_output += duct.duct_surface_area * duct.duct_surface_area_multiplier
         end
       end
     elsif bldg_type == BO::EnclosureRimJoistAreaExterior

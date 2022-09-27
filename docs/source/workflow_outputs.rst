@@ -132,7 +132,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)            Non-zero only when using detailed (not simple) solar thermal inputs
    End Use: Electricity: Lighting Interior (MBtu)
    End Use: Electricity: Lighting Garage (MBtu)
-   End Use: Electricity: Lighting Exterior (MBtu)
+   End Use: Electricity: Lighting Exterior (MBtu)                       Includes exterior holiday lighting
    End Use: Electricity: Mech Vent (MBtu)                               Excludes preheating/precooling
    End Use: Electricity: Mech Vent Preheating (MBtu)
    End Use: Electricity: Mech Vent Precooling (MBtu)
@@ -320,14 +320,14 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Type                                               Notes
    =================================================  =========================================================================================================
    Component Load: \*: Roofs (MBtu)                   Heat gain/loss through HPXML ``Roof`` elements adjacent to conditioned space
-   Component Load: \*: Ceilings (MBtu)                Heat gain/loss through HPXML ``FrameFloor`` elements (inferred to be ceilings) adjacent to conditioned space
+   Component Load: \*: Ceilings (MBtu)                Heat gain/loss through HPXML ``Floor`` elements (inferred to be ceilings) adjacent to conditioned space
    Component Load: \*: Walls (MBtu)                   Heat gain/loss through HPXML ``Wall`` elements adjacent to conditioned space
    Component Load: \*: Rim Joists (MBtu)              Heat gain/loss through HPXML ``RimJoist`` elements adjacent to conditioned space
    Component Load: \*: Foundation Walls (MBtu)        Heat gain/loss through HPXML ``FoundationWall`` elements adjacent to conditioned space
    Component Load: \*: Doors (MBtu)                   Heat gain/loss through HPXML ``Door`` elements adjacent to conditioned space
    Component Load: \*: Windows (MBtu)                 Heat gain/loss through HPXML ``Window`` elements adjacent to conditioned space, including solar
    Component Load: \*: Skylights (MBtu)               Heat gain/loss through HPXML ``Skylight`` elements adjacent to conditioned space, including solar
-   Component Load: \*: Floors (MBtu)                  Heat gain/loss through HPXML ``FrameFloor`` elements (inferred to be floors) adjacent to conditioned space
+   Component Load: \*: Floors (MBtu)                  Heat gain/loss through HPXML ``Floor`` elements (inferred to be floors) adjacent to conditioned space
    Component Load: \*: Slabs (MBtu)                   Heat gain/loss through HPXML ``Slab`` elements adjacent to conditioned space
    Component Load: \*: Internal Mass (MBtu)           Heat gain/loss from internal mass (e.g., furniture, interior walls/floors) in conditioned space
    Component Load: \*: Infiltration (MBtu)            Heat gain/loss from airflow induced by stack and wind effects

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>9a85e6ed-d621-45d5-9a2b-fb36ef997a46</version_id>
-  <version_modified>20220523T175956Z</version_modified>
+  <version_id>74586914-8053-4aef-9c75-908d4a7e6278</version_id>
+  <version_modified>20220927T004144Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -72,7 +72,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Schedules: Output CSV Path</display_name>
-      <description>Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.</description>
+      <description>Absolute/relative path of the CSV file containing occupancy schedules. Relative paths are relative to the HPXML output path.</description>
       <type>String</type>
       <units></units>
       <required>true</required>
@@ -916,6 +916,12 @@
       <checksum>127D96AC</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>15F4F182</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -924,19 +930,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3C7B01AF</checksum>
+      <checksum>AAE8B0D8</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>41CA164F</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>15F4F182</checksum>
+      <checksum>812DB669</checksum>
     </file>
   </files>
 </measure>
