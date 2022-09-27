@@ -312,7 +312,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     end
 
     # Check generated HPXML files
-    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(@tests_dir, 'extra-seasons-building-america.xml')))
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(@output_path, 'extra-seasons-building-america.xml')))
     hvac_control = hpxml.hvac_controls[0]
     assert_equal(10, hvac_control.seasons_heating_begin_month)
     assert_equal(1, hvac_control.seasons_heating_begin_day)
