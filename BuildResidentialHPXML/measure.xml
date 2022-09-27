@@ -166,6 +166,15 @@
       </choices>
     </argument>
     <argument>
+      <name>site_ground_conductivity</name>
+      <display_name>Site: Ground Conductivity</display_name>
+      <description>Conductivity of the ground soil. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>Btu/hr-ft-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>site_zip_code</name>
       <display_name>Site: Zip Code</display_name>
       <description>Zip code of the home address.</description>
