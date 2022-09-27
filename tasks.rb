@@ -400,6 +400,7 @@ def create_hpxmls
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-outage.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
@@ -418,6 +419,8 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
+    next if hpxml_file != 'base-schedules-detailed-occupancy-stochastic-outage.xml'
+
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
@@ -2423,6 +2426,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_type'] = 'stochastic'
     sch_args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-vacancy.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-outage.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['schedules_outage_period'] = 'Dec 31 5pm - Jan 2 12am'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-10-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
