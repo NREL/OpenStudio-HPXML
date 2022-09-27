@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0be40881-8b15-4dd9-a51f-432b4fec76cd</version_id>
-  <version_modified>20220927T180626Z</version_modified>
+  <version_id>6618a435-1411-44d5-9ad6-e54838b49e7e</version_id>
+  <version_modified>20220927T232444Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -404,12 +404,6 @@
       <checksum>3AFD26FF</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>93E95B59</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -593,6 +587,18 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>42C2E302</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C307E6A8</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>32FE7FA9</checksum>
     </file>
   </files>
 </measure>
