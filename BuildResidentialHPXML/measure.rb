@@ -137,6 +137,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default is used.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_conductivity', false)
+    arg.setDisplayName('Site: Ground Conductivity')
+    arg.setDescription('Conductivity of the ground soil. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('Btu/hr-ft-F')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
     arg.setDisplayName('Site: Zip Code')
     arg.setDescription('Zip code of the home address.')
@@ -3736,7 +3742,11 @@ class HPXMLFile
 
   def self.set_site(hpxml, args)
     if args[:site_shielding_of_home].is_initialized
-      shielding_of_home = args[:site_shielding_of_home].get
+      hpxml.site.shielding_of_home = args[:site_shielding_of_home].get
+    end
+
+    if args[:site_ground_conductivity].is_initialized
+      hpxml.site.ground_conductivity = args[:site_ground_conductivity].get
     end
 
     if args[:site_type].is_initialized
@@ -3775,7 +3785,6 @@ class HPXMLFile
     end
 
     hpxml.site.azimuth_of_front_of_home = args[:geometry_unit_orientation]
-    hpxml.site.shielding_of_home = shielding_of_home
   end
 
   def self.set_neighbor_buildings(hpxml, args)
