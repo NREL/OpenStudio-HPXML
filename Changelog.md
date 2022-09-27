@@ -2,6 +2,7 @@
 
 __New Features__
 - Updates to OpenStudio 3.5.0/EnergyPlus 22.2.
+- **Breaking Change**: Now performs full HPXML XSD schema validation (previously just limited checks); yields runtime speed improvements.
 - **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 - **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
