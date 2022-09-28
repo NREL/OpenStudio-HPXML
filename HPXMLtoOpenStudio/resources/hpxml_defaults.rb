@@ -403,6 +403,12 @@ class HPXMLDefaults
       hpxml.site.shielding_of_home = HPXML::ShieldingNormal
       hpxml.site.shielding_of_home_isdefaulted = true
     end
+
+    if hpxml.site.ground_conductivity.nil?
+      hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
+      hpxml.site.ground_conductivity_isdefaulted = true
+    end
+
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
   end
 
