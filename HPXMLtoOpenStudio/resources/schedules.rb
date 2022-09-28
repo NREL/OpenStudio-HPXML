@@ -1211,6 +1211,7 @@ class SchedulesFile
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
+    set_outage
     convert_setpoints
 
     tmpdir = Dir.tmpdir
@@ -1468,6 +1469,21 @@ class SchedulesFile
     end
   end
 
+  def set_outage
+    return unless @tmp_schedules.keys.include? ColumnOutage
+    return if @tmp_schedules[ColumnOutage].all? { |i| i == 0 }
+
+    col_names = SchedulesFile.ColumnNames
+
+    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
+      col_names.each do |col_name|
+        next unless affected_by_outage[col_name] # skip those unaffected by outage
+
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
+      end
+    end
+  end
+
   def convert_setpoints
     return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
 
@@ -1563,6 +1579,19 @@ class SchedulesFile
       affected_by_vacancy[column_name] = false
     end
     return affected_by_vacancy
+  end
+
+  def affected_by_outage
+    affected_by_outage = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      affected_by_outage[column_name] = true
+      next unless ([ColumnOccupants,
+                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+
+      affected_by_outage[column_name] = false
+    end
+    return affected_by_outage
   end
 
   def max_value_one
