@@ -964,9 +964,12 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
+                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag,
+                                        soil_k_in)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -1029,11 +1032,12 @@ class OSModel
       mat_carpet = Material.CoveringBare(slab.carpet_fraction,
                                          slab.carpet_r_value)
     end
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab_exp_perim, mat_carpet, kiva_foundation)
+                                        slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
     return surface.adjacentFoundation.get
   end
@@ -1558,7 +1562,7 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 living_zone)
+                                                                 living_zone, @hpxml.site.ground_conductivity)
 
       end
 

@@ -275,16 +275,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.site.site_type = HPXML::SiteTypeRural
     hpxml.site.shielding_of_home = HPXML::ShieldingExposed
+    hpxml.site.ground_conductivity = 0.8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8)
 
     # Test defaults
     hpxml.site.site_type = nil
     hpxml.site.shielding_of_home = nil
+    hpxml.site.ground_conductivity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0)
   end
 
   def test_neighbor_buildings
@@ -3434,9 +3436,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_site_values(hpxml, site_type, shielding_of_home)
+  def _test_default_site_values(hpxml, site_type, shielding_of_home, ground_conductivity)
     assert_equal(site_type, hpxml.site.site_type)
     assert_equal(shielding_of_home, hpxml.site.shielding_of_home)
+    assert_equal(ground_conductivity, hpxml.site.ground_conductivity)
   end
 
   def _test_default_neighbor_building_values(hpxml, azimuths)
