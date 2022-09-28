@@ -29,11 +29,11 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
-require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
+require_relative 'resources/xmlvalidator'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -132,12 +132,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     begin
       if skip_validation
-        stron_paths = []
+        xsd_path = nil
+        stron_path = nil
       else
-        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml'),
-                       File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
+        xsd_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schema', 'HPXML.xsd')
+        stron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
       end
-      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schema_path: xsd_path, schematron_path: stron_path, building_id: building_id)
       hpxml.errors.each do |error|
         runner.registerError(error)
       end
@@ -1652,8 +1653,6 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
-      # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
   end
@@ -2442,9 +2441,11 @@ class OSModel
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     end
   end
 

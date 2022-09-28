@@ -42,7 +42,6 @@ class HPXMLTest < MiniTest::Test
     all_sizing_results = {}
     all_bill_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
-      _test_schema_validation(xml)
       xml_name = File.basename(xml)
       all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
@@ -78,7 +77,7 @@ class HPXMLTest < MiniTest::Test
     ['csv', 'json', 'msgpack', 'csv_dview'].each do |output_format|
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-      command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --debug --hourly ALL --output-format #{output_format}"
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --debug --hourly ALL --output-format #{output_format}"
       system(command, err: File::NULL)
 
       output_format = 'csv' if output_format == 'csv_dview'
@@ -95,7 +94,6 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? osm_path)
       hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
       assert(File.exist? hpxml_defaults_path)
-      _test_schema_validation(hpxml_defaults_path)
     end
   end
 
@@ -103,7 +101,7 @@ class HPXMLTest < MiniTest::Test
     # Check that we can run a simulation using epJSON (instead of IDF) if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --ep-input-format epjson"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --ep-input-format epjson"
     system(command, err: File::NULL)
 
     # Check for epjson file
@@ -119,7 +117,7 @@ class HPXMLTest < MiniTest::Test
     # Check that we can run a simulation using IDF (instead of epJSON) if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --ep-input-format idf"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --ep-input-format idf"
     system(command, err: File::NULL)
 
     # Check for idf file
@@ -135,7 +133,7 @@ class HPXMLTest < MiniTest::Test
     # Run w/ --skip-validation and w/o --add-component-loads arguments
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --skip-validation"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --skip-validation"
     system(command, err: File::NULL)
 
     # Check for output files
@@ -163,7 +161,7 @@ class HPXMLTest < MiniTest::Test
 
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.absolute_path(tmp_hpxml_path)
-      command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --add-detailed-schedule stochastic"
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --add-detailed-schedule stochastic"
       command += ' -d' if debug
       system(command, err: File::NULL)
 
@@ -191,7 +189,7 @@ class HPXMLTest < MiniTest::Test
       # Check that the simulation produces timeseries with requested outputs
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-      command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml}"
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
       if not invalid_variable_only
         command += ' --hourly ALL'
         command += ' --add-timeseries-time-column DST'
@@ -249,7 +247,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -289,7 +287,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -331,7 +329,7 @@ class HPXMLTest < MiniTest::Test
       f.write(JSON.pretty_generate(json))
     end
 
-    command = "#{OpenStudio.getOpenStudioCLI} run -w \"#{osw_path_test}\""
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
     system(command, err: File::NULL)
 
     # Check for output files
@@ -359,18 +357,18 @@ class HPXMLTest < MiniTest::Test
     run_log = File.join(File.dirname(xml), 'run', 'run.log')
 
     # Check successful simulation when providing correct building ID
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --building-id MyBuilding"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyBuilding"
     system(command, err: File::NULL)
     assert_equal(true, File.exist?(csv_output_path))
 
     # Check unsuccessful simulation when providing incorrect building ID
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml} --building-id MyFoo"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyFoo"
     system(command, err: File::NULL)
     assert_equal(false, File.exist?(csv_output_path))
     assert(File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size > 0)
 
     # Check unsuccessful simulation when not providing building ID
-    command = "#{OpenStudio.getOpenStudioCLI} #{rb_path} -x #{xml}"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
     system(command, err: File::NULL)
     assert_equal(false, File.exist?(csv_output_path))
     assert(File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size > 0)
@@ -379,7 +377,7 @@ class HPXMLTest < MiniTest::Test
   def test_release_zips
     # Check release zips successfully created
     top_dir = File.join(@this_dir, '..', '..')
-    command = "#{OpenStudio.getOpenStudioCLI} #{File.join(top_dir, 'tasks.rb')} create_release_zips"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{File.join(top_dir, 'tasks.rb')}\" create_release_zips"
     system(command)
     assert_equal(2, Dir["#{top_dir}/*.zip"].size)
 
@@ -395,7 +393,7 @@ class HPXMLTest < MiniTest::Test
       end
 
       # Test run_simulation.rb
-      command = "#{OpenStudio.getOpenStudioCLI} OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
       system(command)
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
@@ -414,7 +412,7 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
     success = system(command)
 
     rundir = File.join(rundir, 'run')
@@ -433,8 +431,9 @@ class HPXMLTest < MiniTest::Test
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    stron_paths = [File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schematron_validators: stron_paths) # Validate in.xml to ensure it can be run back through OS-HPXML
+    xsd_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    stron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_path: xsd_path, schematron_path: stron_path) # Validate in.xml to ensure it can be run back through OS-HPXML
     if not hpxml.errors.empty?
       puts 'ERRORS:'
       hpxml.errors.each do |error|
@@ -566,17 +565,6 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _test_schema_validation(xml)
-    # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema'))
-    hpxml_doc = XMLHelper.parse_file(xml)
-    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
-      puts "#{xml}: #{errors}"
-    end
-    assert_equal(0, errors.size)
-  end
-
   def _verify_outputs(rundir, hpxml_path, results, hpxml)
     assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
@@ -705,6 +693,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
+      next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
       if err_line.include? 'Output:Meter: invalid Key Name'
         next if skip_utility_bill_warning(err_line)
