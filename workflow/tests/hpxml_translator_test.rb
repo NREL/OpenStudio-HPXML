@@ -594,7 +594,6 @@ class HPXMLTest < MiniTest::Test
     end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
-      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
