@@ -308,7 +308,9 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
       end
     elsif bldg_type == BO::SystemsMechanicalVentilationFlowRate
       hpxml.ventilation_fans.each do |ventilation_fan|
+        # FIXME: Update for CFIS w/ supplemental fan
         next unless ventilation_fan.used_for_whole_building_ventilation
+        next if ventilation_fan.is_cfis_supplemental_fan?
 
         bldg_output += ventilation_fan.flow_rate.to_f
       end

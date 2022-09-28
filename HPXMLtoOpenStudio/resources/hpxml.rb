@@ -4544,6 +4544,16 @@ class HPXML < Object
       fail "CFIS Supplemental Fan '#{@cfis_supplemental_fan_idref}' not found for ventilation fan '#{@id}'."
     end
 
+    def is_cfis_supplemental_fan?
+      @hpxml_object.ventilation_fans.each do |ventilation_fan|
+        next unless ventilation_fan.fan_type == MechVentTypeCFIS
+        next unless ventilation_fan.cfis_supplemental_fan_idref == @id
+
+        return true
+      end
+      return false
+    end
+
     def delete
       @hpxml_object.ventilation_fans.delete(self)
     end

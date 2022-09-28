@@ -1549,6 +1549,7 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless vent_fan.used_for_whole_building_ventilation
 
+      # FIXME: Check which of these apply for a CFIS supplemental fan
       if vent_fan.is_shared_system.nil?
         vent_fan.is_shared_system = false
         vent_fan.is_shared_system_isdefaulted = true
@@ -1569,15 +1570,15 @@ class HPXMLDefaults
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)).round(1)
         vent_fan.fan_power_isdefaulted = true
       end
-      if vent_fan.fan_type == HPXML::MechVentTypeCFIS
-        if vent_fan.cfis_vent_mode_airflow_fraction.nil?
-          vent_fan.cfis_vent_mode_airflow_fraction = 1.0
-          vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
-        end
-        if vent_fan.cfis_addtl_runtime_operating_mode.nil?
-          vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
-          vent_fan.cfis_addtl_runtime_operating_mode_isdefaulted = true
-        end
+      next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
+
+      if vent_fan.cfis_vent_mode_airflow_fraction.nil?
+        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
+        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
+      end
+      if vent_fan.cfis_addtl_runtime_operating_mode.nil?
+        vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
+        vent_fan.cfis_addtl_runtime_operating_mode_isdefaulted = true
       end
     end
 

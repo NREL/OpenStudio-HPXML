@@ -310,6 +310,10 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_equal(1, get_oed_for_ventilation(model, "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load").size)
   end
 
+  def test_mechanical_ventilation_cfis_with_supplemental_fan
+    # FIXME: TODO
+  end
+
   def test_ventilation_bath_kitchen_fans
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-bath-kitchen-fans.xml'))

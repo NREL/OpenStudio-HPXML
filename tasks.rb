@@ -366,6 +366,7 @@ def create_hpxmls
     'base-mechvent-cfis-airflow-fraction-zero.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
+    'base-mechvent-cfis-supplemental-fan.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-erv.xml' => 'base.xml',
     'base-mechvent-erv-atre-asre.xml' => 'base.xml',
     'base-mechvent-exhaust.xml' => 'base.xml',
@@ -4364,6 +4365,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-cfis-airflow-fraction-zero.xml'].include? hpxml_file
     hpxml.ventilation_fans[0].cfis_vent_mode_airflow_fraction = 0.0
+  elsif ['base-mechvent-cfis-supplemental-fan.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               tested_flow_rate: 50,
+                               fan_power: 12,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplemental
+    hpxml.ventilation_fans[0].cfis_supplemental_fan_idref = hpxml.ventilation_fans[1].id
   end
 
   # ---------------- #

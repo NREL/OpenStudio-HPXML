@@ -2005,7 +2005,9 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates()
-    vent_fans_mech = @hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.flow_rate > 0 && f.hours_in_operation > 0 }
+    # If CFIS w/ supplemental fan, assume air handler is running most of the hour and can provide
+    # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
+    vent_fans_mech = @hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.flow_rate > 0 && f.hours_in_operation > 0 && !f.is_cfis_supplemental_fan? }
     if vent_fans_mech.empty?
       return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     end
