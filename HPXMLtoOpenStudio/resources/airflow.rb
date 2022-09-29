@@ -1398,16 +1398,16 @@ class Airflow
         # Air handler meets additional runtime requirement
         infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w*#{@cfis_f_damper_extra_open_var[vent_mech.id].name}")
       elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplemental
-        infil_program.addLine("    Set cfis_suppl_Q_duct_oa = #{UnitConversions.convert(vent_mech.cfis_supplemental_fan.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
-        infil_program.addLine("    Set cfis_suppl_f = #{@cfis_f_damper_extra_open_var[vent_mech.id].name} / (cfis_suppl_Q_duct_oa / cfis_Q_duct_oa)")
+        infil_program.addLine("    Set cfis_suppl_Q_oa = #{UnitConversions.convert(vent_mech.cfis_supplemental_fan.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
+        infil_program.addLine("    Set cfis_suppl_f = #{@cfis_f_damper_extra_open_var[vent_mech.id].name} / (cfis_suppl_Q_oa / cfis_Q_duct_oa)")
         infil_program.addLine("    Set cfis_suppl_fan_w = #{vent_mech.cfis_supplemental_fan.unit_fan_power}") # W
         infil_program.addLine("    Set #{cfis_suppl_fan_actuator.name} = #{cfis_suppl_fan_actuator.name} + cfis_suppl_fan_w*cfis_suppl_f")
 
         if vent_mech.cfis_supplemental_fan.includes_supply_air?
-          infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + cfis_suppl_f * cfis_suppl_Q_duct_oa')
+          infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + cfis_suppl_f * cfis_suppl_Q_oa')
         end
         if vent_mech.cfis_supplemental_fan.includes_exhaust_air?
-          infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_duct_oa')
+          infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_oa')
         end
       end
 
