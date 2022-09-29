@@ -1194,6 +1194,9 @@ class SchedulesFile
   ColumnOutage = 'outage'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
+  ColumnHeatingSeason = 'heating_season'
+  ColumnCoolingSeason = 'cooling_season'
+  ColumnNaturalVentilation = 'natural_ventilation'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
   ColumnSleeping = 'sleeping'
@@ -1530,7 +1533,8 @@ class SchedulesFile
       ColumnHotTubHeater,
       ColumnHotWaterDishwasher,
       ColumnHotWaterClothesWasher,
-      ColumnHotWaterFixtures
+      ColumnHotWaterFixtures,
+      ColumnNaturalVentilation
     ]
   end
 

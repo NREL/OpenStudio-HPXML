@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9d73e75c-b92c-4144-93a6-cfb2bb86724d</version_id>
-  <version_modified>20220928T040622Z</version_modified>
+  <version_id>83a38a7b-b8e9-4a15-b217-11d921aca05c</version_id>
+  <version_modified>20220929T185849Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -506,12 +506,6 @@
       <checksum>84489603</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A2B7F8E1</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -566,17 +560,6 @@
       <checksum>41063A6B</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>927B84D4</checksum>
-    </file>
-    <file>
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -589,16 +572,51 @@
       <checksum>42C2E302</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>489830B4</checksum>
-    </file>
-    <file>
       <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>3B30200F</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>808224D4</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>85060BDA</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4E6CD360</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/natural-ventilation.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>125FE00F</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage-natvent.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>53CBBEDE</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/seasons.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6784F46E</checksum>
     </file>
   </files>
 </measure>

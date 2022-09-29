@@ -806,27 +806,63 @@ class ScheduleGenerator
 
   def set_outage(args:)
     if (not args[:schedules_outage_begin_month].nil?) && (not args[:schedules_outage_begin_day].nil?) && (not args[:schedules_outage_begin_hour].nil?) && (not args[:schedules_outage_end_month].nil?) && (not args[:schedules_outage_end_day].nil?) && (not args[:schedules_outage_end_hour].nil?)
+      outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
+
+      # natural ventilation during outage period
+      natural_ventilation = nil
+      if args[:schedules_outage_window_natvent_availability].is_initialized
+        # FIXME
+        # we need the natvent array so we can set to 0 or 1 during outage period
+        # need to get window_natvent_availability from the hpxml (defaulted or not)
+        # then need to create natural_ventilation array based on that value
+        natural_ventilation = Array.new(outage.size, 0.0)
+      end
+
       start_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day])
 
       outage_begin = Time.new(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day], args[:schedules_outage_begin_hour])
       outage_end = Time.new(@sim_year, args[:schedules_outage_end_month], args[:schedules_outage_end_day], args[:schedules_outage_end_hour])
 
-      outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
       if outage_end >= outage_begin
         outage_hours = (outage_end - outage_begin) / 3600.0
-        outage.fill(1.0, (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour], outage_hours * args[:steps_in_hour]) # Fill between start/end days
+        ix = (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
+        length = outage_hours * args[:steps_in_hour]
+        outage.fill(1.0, ix, length) # Fill between start/end days
+
+        if not natural_ventilation.nil?
+          fill = 0.0 # windows closed
+          fill = 1.0 if args[:schedules_outage_window_natvent_availability].get # windows open
+          natural_ventilation.fill(fill, ix, length) # Fill between start/end days
+        end
       else # Wrap around year
         outage_begin = Time.new(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day], args[:schedules_outage_begin_hour])
         outage_end = Time.new(@sim_year + 1, 1, 1)
         outage_hours = (outage_end - outage_begin) / 3600.0
-        outage.fill(1.0, (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour], outage_hours * args[:steps_in_hour]) # Fill between start day and end of year
+        ix = (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
+        length = outage_hours * args[:steps_in_hour]
+        outage.fill(1.0, ix, length) # Fill between start day and end of year
+
+        if not natural_ventilation.nil?
+          fill = 0.0 # windows closed
+          fill = 1.0 if args[:schedules_outage_window_natvent_availability].get # windows open
+          natural_ventilation.fill(fill, ix, length) # Fill between start day and end of year
+        end
 
         outage_begin = Time.new(@sim_year, 1, 1)
         outage_end = Time.new(@sim_year, args[:schedules_outage_end_month], args[:schedules_outage_end_day], args[:schedules_outage_end_hour])
         outage_hours = (outage_end - outage_begin) / 3600.0
-        outage.fill(1.0, 0, outage_hours * args[:steps_in_hour]) # Fill between start of year and end day
+        ix = 0
+        length = outage_hours * args[:steps_in_hour]
+        outage.fill(1.0, ix, length) # Fill between start of year and end day
+
+        if not natural_ventilation.nil?
+          fill = 0.0 # windows closed
+          fill = 1.0 if args[:schedules_outage_window_natvent_availability].get # windows open
+          natural_ventilation.fill(fill, ix, length) # Fill between start of year and end day
+        end
       end
       @schedules[SchedulesFile::ColumnOutage] = outage
+      @schedules[SchedulesFile::ColumnNaturalVentilation] = natural_ventilation if not natural_ventilation.nil?
     end
     return true
   end

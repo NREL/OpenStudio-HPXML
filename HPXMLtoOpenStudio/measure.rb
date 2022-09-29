@@ -2642,19 +2642,32 @@ class OSModel
   def self.set_heating_and_cooling_seasons()
     return if @hpxml.hvac_controls.size == 0
 
+    heating_ss = nil
+    cooling_ss = nil
+    if not @schedules_file.nil?
+      heating_ss = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSeason)
+      cooling_ss = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSeason)
+    end
+
     hvac_control = @hpxml.hvac_controls[0]
 
-    htg_start_month = hvac_control.seasons_heating_begin_month
-    htg_start_day = hvac_control.seasons_heating_begin_day
-    htg_end_month = hvac_control.seasons_heating_end_month
-    htg_end_day = hvac_control.seasons_heating_end_day
-    clg_start_month = hvac_control.seasons_cooling_begin_month
-    clg_start_day = hvac_control.seasons_cooling_begin_day
-    clg_end_month = hvac_control.seasons_cooling_end_month
-    clg_end_day = hvac_control.seasons_cooling_end_day
+    if heating_ss.nil?
+      htg_start_month = hvac_control.seasons_heating_begin_month
+      htg_start_day = hvac_control.seasons_heating_begin_day
+      htg_end_month = hvac_control.seasons_heating_end_month
+      htg_end_day = hvac_control.seasons_heating_end_day
 
-    @heating_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+      @heating_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    end
+
+    if cooling_ss.nil?
+      clg_start_month = hvac_control.seasons_cooling_begin_month
+      clg_start_day = hvac_control.seasons_cooling_begin_day
+      clg_end_month = hvac_control.seasons_cooling_end_month
+      clg_end_day = hvac_control.seasons_cooling_end_day
+
+      @cooling_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    end
   end
 end
 
