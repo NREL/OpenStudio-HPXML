@@ -708,7 +708,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.95
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 18767
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
@@ -969,7 +968,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency_type'] = 'EnergyFactor'
     args['water_heater_efficiency'] = 0
     args['water_heater_recovery_efficiency'] = 0
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0

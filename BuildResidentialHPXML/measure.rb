@@ -5230,7 +5230,8 @@ class HPXMLFile
     if [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? water_heater_type
       if args[:water_heater_standby_loss].is_initialized
         if args[:water_heater_standby_loss].get > 0
-          standby_loss = args[:water_heater_standby_loss].get
+          standby_loss_units = HPXML::UnitsDegFPerHour
+          standby_loss_value = args[:water_heater_standby_loss].get
         end
       end
     end
@@ -5293,7 +5294,8 @@ class HPXMLFile
                                     recovery_efficiency: recovery_efficiency,
                                     uses_desuperheater: uses_desuperheater,
                                     related_hvac_idref: related_hvac_idref,
-                                    standby_loss: standby_loss,
+                                    standby_loss_units: standby_loss_units,
+                                    standby_loss_value: standby_loss_value,
                                     jacket_r_value: jacket_r_value,
                                     temperature: temperature,
                                     heating_capacity: heating_capacity,

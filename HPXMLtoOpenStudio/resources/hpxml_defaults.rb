@@ -1670,14 +1670,16 @@ class HPXMLDefaults
         water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
         water_heating_system.performance_adjustment_isdefaulted = true
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss_value.nil?
         # Use equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
         act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
         surface_area = Waterheater.calc_tank_areas(act_vol)[0]
         sqft_by_gal = surface_area / act_vol # sqft/gal
-        water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
-        water_heating_system.standby_loss_isdefaulted = true
+        water_heating_system.standby_loss_value = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
+        water_heating_system.standby_loss_value_isdefaulted = true
+        water_heating_system.standby_loss_units = HPXML::UnitsDegFPerHour
+        water_heating_system.standby_loss_units_isdefaulted = true
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?

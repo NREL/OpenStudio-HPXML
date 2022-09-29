@@ -2175,6 +2175,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_heat_pump_water_heater_values(hpxml_default, [HPXML::WaterHeaterOperatingModeStandard])
   end
 
+  def test_indirect_water_heaters
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-dhw-indirect.xml')
+    hpxml.water_heating_systems[0].standby_loss_value = 0.99
+    hpxml.water_heating_systems[0].standby_loss_units = HPXML::UnitsDegFPerHour
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_indirect_water_heater_values(hpxml_default, [HPXML::UnitsDegFPerHour, 0.99])
+
+    # Test defaults
+    hpxml.water_heating_systems[0].standby_loss_value = nil
+    hpxml.water_heating_systems[0].standby_loss_units = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_indirect_water_heater_values(hpxml_default, [HPXML::UnitsDegFPerHour, 0.843])
+  end
+
   def test_hot_water_distribution
     # Test inputs not overridden by defaults -- standard
     hpxml = _create_hpxml('base.xml')
@@ -4044,6 +4061,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       operating_mode, = expected_wh_values[idx]
 
       assert_equal(operating_mode, wh_system.operating_mode)
+    end
+  end
+
+  def _test_default_indirect_water_heater_values(hpxml, *expected_wh_values)
+    indirect_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeCombiStorage }
+    assert_equal(expected_wh_values.size, indirect_water_heaters.size)
+    indirect_water_heaters.each_with_index do |wh_system, idx|
+      standby_loss_units, standby_loss_value, = expected_wh_values[idx]
+
+      assert_equal(standby_loss_units, wh_system.standby_loss_units)
+      assert_equal(standby_loss_value, wh_system.standby_loss_value)
     end
   end
 
