@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>b33f024f-9513-411e-88d3-0d7f7feecd26</version_id>
-  <version_modified>20220927T232813Z</version_modified>
+  <version_id>edd463ee-3dde-4506-8941-5b6a07c9e532</version_id>
+  <version_modified>20220929T185845Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -53,6 +53,24 @@
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_outage_window_natvent_availability</name>
+      <display_name>Schedules: Outage Period Natural Ventilation Availability</display_name>
+      <description>Whether natural ventilation is available during the outage period.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>schedules_random_seed</name>
@@ -913,13 +931,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>EE9DF8B5</checksum>
+      <checksum>348F1AE4</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CB4EEC2A</checksum>
+      <checksum>75A274DD</checksum>
     </file>
   </files>
 </measure>

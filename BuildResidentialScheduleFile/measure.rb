@@ -62,6 +62,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Specifies the outage period. Enter a date/time like "Dec 15 10am - Jan 15 2pm". 12am is the final hour of a given day.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('schedules_outage_window_natvent_availability', false)
+    arg.setDisplayName('Schedules: Outage Period Natural Ventilation Availability')
+    arg.setDescription('Whether natural ventilation is available during the outage period.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
     arg.setDisplayName('Schedules: Random Seed')
     arg.setUnits('#')
@@ -223,6 +228,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_outage_end_month] = end_month
       args[:schedules_outage_end_day] = end_day
       args[:schedules_outage_end_hour] = end_hour
+
+      args[:window_natvent_availability] = hpxml.header.natvent_days_per_week
     end
 
     debug = false
