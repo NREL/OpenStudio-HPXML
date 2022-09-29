@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>9a3394b8-30aa-4f07-a4c7-dfa6bbf1ba4b</version_id>
-  <version_modified>20220929T155118Z</version_modified>
+  <version_id>1c9724ae-7bd0-45d7-baa5-69e468fcd7d8</version_id>
+  <version_modified>20220929T200809Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3580,7 +3580,7 @@
     <argument>
       <name>water_heater_efficiency_type</name>
       <display_name>Water Heater: Efficiency Type</display_name>
-      <description>The efficiency type of water heater. Does not apply to space-heating boilers.</description>
+      <description>The efficiency type of water heater. Does not apply to space-heating boilers. For commercial water heaters, 'ThermalEfficiency' must be used for non-heat pump water heaters and 'HeatPumpCOP' must be used for heat pump water heaters.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3594,12 +3594,20 @@
           <value>UniformEnergyFactor</value>
           <display_name>UniformEnergyFactor</display_name>
         </choice>
+        <choice>
+          <value>ThermalEfficiency</value>
+          <display_name>ThermalEfficiency</display_name>
+        </choice>
+        <choice>
+          <value>HeatPumpCOP</value>
+          <display_name>HeatPumpCOP</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
       <name>water_heater_efficiency</name>
       <display_name>Water Heater: Efficiency</display_name>
-      <description>Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating boilers.</description>
+      <description>Rated Energy Factor or Uniform Energy Factor or Thermal Efficiency. Does not apply to space-heating boilers.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3650,11 +3658,32 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>water_heater_standby_loss_units</name>
+      <display_name>Water Heater: Standby Loss Units</display_name>
+      <description>The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be 'F/hr' for space-heating boilers and must be 'Btu/hr' or '%/hr' (entered as a fraction, e.g., 1.20%/hr = 0.0120) for commercial water heaters w/ thermal efficiency inputs.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>F/hr</value>
+          <display_name>F/hr</display_name>
+        </choice>
+        <choice>
+          <value>%/hr</value>
+          <display_name>%/hr</display_name>
+        </choice>
+        <choice>
+          <value>Btu/hr</value>
+          <display_name>Btu/hr</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>water_heater_standby_loss</name>
       <display_name>Water Heater: Standby Loss</display_name>
       <description>The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
-      <units>deg-F/hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -6413,7 +6442,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C00BFDD4</checksum>
+      <checksum>2E6C3073</checksum>
     </file>
   </files>
 </measure>

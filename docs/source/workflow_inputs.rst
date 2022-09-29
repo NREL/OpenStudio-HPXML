@@ -524,7 +524,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          
          - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
          - heating system is non-electric Fireplace, or
-         - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63.
+         - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.64.
 
 HPXML Climate Zones
 -------------------
@@ -2151,23 +2151,25 @@ Conventional Storage
 
 If a conventional storage water heater is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
-  Element                                                           Type               Units          Constraints      Required  Default   Notes
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
-  ``FuelType``                                                      string                            See [#]_         Yes                 Fuel type
-  ``TankVolume``                                                    double             gal            > 0              No        See [#]_  Nominal tank volume
-  ``HeatingCapacity``                                               double             Btu/hr         > 0              No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``YearInstalled``  double or integer  frac or #      < 1 or > 1600    Yes       See [#]_  EnergyGuide label rated efficiency or Year installed
-  ``UsageBin`` or ``FirstHourRating``                               string or double   str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
-  ``RecoveryEfficiency``                                            double             frac           0 - 1 [#]_       No        See [#]_  Recovery efficiency
-  ``WaterHeaterInsulation/Jacket/JacketRValue``                     double             F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
-  ``extension/TankModelType``                                       string                            See [#]_         No        mixed     Tank model type
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
+  =========================================================================================  =================  ==============  ===============  ========  ========  ====================================================
+  Element                                                                                    Type               Units           Constraints      Required  Default   Notes
+  =========================================================================================  =================  ==============  ===============  ========  ========  ====================================================
+  ``FuelType``                                                                               string                             See [#]_         Yes                 Fuel type
+  ``TankVolume``                                                                             double             gal             > 0              No        See [#]_  Nominal tank volume
+  ``HeatingCapacity``                                                                        double             Btu/hr          > 0              No        See [#]_  Heating capacity
+  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``ThermalEfficiency`` or ``YearInstalled``  double or integer  frac or #       < 1 or > 1600    Yes       See [#]_  EnergyGuide label rated efficiency or Year installed [#]_
+  ``UsageBin`` or ``FirstHourRating``                                                        string or double   str or gal/hr   See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
+  ``RecoveryEfficiency``                                                                     double             frac            0 - 1 [#]_       No        See [#]_  Recovery efficiency
+  ``StandbyLoss[Units="Btu/hr" or Units="%/hr"]/Value``                                      double             Btu/hr or %/hr  > 0              See [#]_            Storage tank standby losses
+  ``WaterHeaterInsulation/Jacket/JacketRValue``                                              double             F-ft2-hr/Btu    >= 0             No        0         R-value of additional tank insulation wrap
+  ``extension/TankModelType``                                                                string                             See [#]_         No        mixed     Tank model type
+  =========================================================================================  =================  ==============  ===============  ========  ========  ====================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] If HeatingCapacity not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
-  .. [#] If UniformEnergyFactor and EnergyFactor not provided, defaults to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/water_heater_efficiency.csv`` based on YearInstalled.
+  .. [#] If UniformEnergyFactor and EnergyFactor and ThermalEfficiency not provided, defaults to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/water_heater_efficiency.csv`` based on YearInstalled.
+  .. [#] UniformEnergyFactor and EnergyFactor are the rating metric for residential water heaters while ThermalEfficiency is the rating metric for commercial water heaters.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".
@@ -2179,6 +2181,7 @@ If a conventional storage water heater is specified, additional information is e
          - **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
          - **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
  
+  .. [#] StandbyLoss required for a commercial water heater (i.e., when ThermalEfficiency is provided).
   .. [#] TankModelType choices are "mixed" or "stratified".
 
 Tankless
@@ -2186,34 +2189,38 @@ Tankless
 
 If an instantaneous tankless water heater is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
-  Element                                      Type     Units         Constraints  Required      Default   Notes
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
-  ``FuelType``                                 string                 See [#]_     Yes                     Fuel type
-  ``PerformanceAdjustment``                    double   frac                       No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1          Yes                     EnergyGuide label rated efficiency
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
+  ====================================================================  =======  ==============  ===========  ============  ========  ==========================================================
+  Element                                                               Type     Units           Constraints  Required      Default   Notes
+  ====================================================================  =======  ==============  ===========  ============  ========  ==========================================================
+  ``FuelType``                                                          string                   See [#]_     Yes                     Fuel type
+  ``PerformanceAdjustment``                                             double   frac                         No            See [#]_  Multiplier on efficiency, typically to account for cycling
+  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``ThermalEfficiency``  double   frac            < 1          Yes                     EnergyGuide label rated efficiency [#]_
+  ``StandbyLoss[Units="Btu/hr" or Units="%/hr"]/Value``                 double   Btu/hr or %/hr  > 0          See [#]_                Storage tank standby losses
+  ====================================================================  =======  ==============  ===========  ============  ========  ==========================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] UniformEnergyFactor and EnergyFactor are the rating metric for residential water heaters while ThermalEfficiency is the rating metric for commercial water heaters.
+  .. [#] StandbyLoss required for a commercial water heater (i.e., when ThermalEfficiency is provided).
 
 Heat Pump
 ~~~~~~~~~
 
 If a heat pump water heater is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  =============================================  ================  =============  ===============  ========  ========  =============================================
-  Element                                        Type              Units          Constraints      Required  Default   Notes
-  =============================================  ================  =============  ===============  ========  ========  =============================================
-  ``FuelType``                                   string                           See [#]_         Yes                 Fuel type
-  ``TankVolume``                                 double            gal            > 0              Yes                 Nominal tank volume
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1              Yes                 EnergyGuide label rated efficiency
-  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
-  ``extension/OperatingMode``                    string                           See [#]_         No        standard  Operating mode [#]_
-  =============================================  ================  =============  ===============  ========  ========  =============================================
+  ==============================================================  ================  =============  ===============  ========  ========  =============================================
+  Element                                                         Type              Units          Constraints      Required  Default   Notes
+  ==============================================================  ================  =============  ===============  ========  ========  =============================================
+  ``FuelType``                                                    string                           See [#]_         Yes                 Fuel type
+  ``TankVolume``                                                  double            gal            > 0              Yes                 Nominal tank volume
+  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``HeatPumpCOP``  double            frac           > 1              Yes                 EnergyGuide label rated efficiency [#]_
+  ``UsageBin`` or ``FirstHourRating``                             string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``                   double            F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
+  ``extension/OperatingMode``                                     string                           See [#]_         No        standard  Operating mode [#]_
+  ==============================================================  ================  =============  ===============  ========  ========  =============================================
 
   .. [#] FuelType only choice is "electricity".
+  .. [#] UniformEnergyFactor and EnergyFactor are the rating metric for residential water heaters while HeatPumpCOP is the rating metric for commercial water heaters.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".

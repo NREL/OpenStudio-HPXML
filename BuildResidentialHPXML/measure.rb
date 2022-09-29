@@ -1717,12 +1717,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_efficiency_type_choices = OpenStudio::StringVector.new
     water_heater_efficiency_type_choices << 'EnergyFactor'
     water_heater_efficiency_type_choices << 'UniformEnergyFactor'
+    water_heater_efficiency_type_choices << 'ThermalEfficiency'
+    water_heater_efficiency_type_choices << 'HeatPumpCOP'
 
     water_heater_usage_bin_choices = OpenStudio::StringVector.new
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinVerySmall
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinLow
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinMedium
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinHigh
+
+    water_heater_standby_loss_units_choices = OpenStudio::StringVector.new
+    water_heater_standby_loss_units_choices << HPXML::UnitsDegFPerHour
+    water_heater_standby_loss_units_choices << HPXML::UnitsPercentPerHour
+    water_heater_standby_loss_units_choices << HPXML::UnitsBtuPerHour
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_type', water_heater_type_choices, true)
     arg.setDisplayName('Water Heater: Type')
@@ -1749,13 +1756,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_efficiency_type', water_heater_efficiency_type_choices, true)
     arg.setDisplayName('Water Heater: Efficiency Type')
-    arg.setDescription('The efficiency type of water heater. Does not apply to space-heating boilers.')
+    arg.setDescription("The efficiency type of water heater. Does not apply to space-heating boilers. For commercial water heaters, 'ThermalEfficiency' must be used for non-heat pump water heaters and 'HeatPumpCOP' must be used for heat pump water heaters.")
     arg.setDefaultValue('EnergyFactor')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency', true)
     arg.setDisplayName('Water Heater: Efficiency')
-    arg.setDescription('Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating boilers.')
+    arg.setDescription('Rated Energy Factor or Uniform Energy Factor or Thermal Efficiency. Does not apply to space-heating boilers.')
     arg.setDefaultValue(0.67)
     args << arg
 
@@ -1776,10 +1783,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_standby_loss_units', water_heater_standby_loss_units_choices, false)
+    arg.setDisplayName('Water Heater: Standby Loss Units')
+    arg.setDescription("The standby loss units of water heater. Only applies to space-heating boilers and commercial water heaters w/ thermal efficiency inputs. Must be '#{HPXML::UnitsDegFPerHour}' for space-heating boilers and must be '#{HPXML::UnitsBtuPerHour}' or '#{HPXML::UnitsPercentPerHour}' (entered as a fraction, e.g., 1.20%/hr = 0.0120) for commercial water heaters w/ thermal efficiency inputs.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)
     arg.setDisplayName('Water Heater: Standby Loss')
     arg.setDescription('The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('deg-F/hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
@@ -5200,6 +5211,19 @@ class HPXMLFile
         if water_heater_type != HPXML::WaterHeaterTypeTankless
           usage_bin = args[:water_heater_usage_bin].get if args[:water_heater_usage_bin].is_initialized
         end
+      elsif args[:water_heater_efficiency_type] == 'ThermalEfficiency' && args[:water_heater_type] != HPXML::WaterHeaterTypeHeatPump
+        thermal_efficiency = args[:water_heater_efficiency]
+        if args[:water_heater_standby_loss_units].is_initialized && args[:water_heater_standby_loss].is_initialized
+          standby_loss_units = args[:water_heater_standby_loss_units].get
+          standby_loss_value = args[:water_heater_standby_loss].get
+        end
+      elsif args[:water_heater_efficiency_type] == 'HeatPumpCOP' && args[:water_heater_type] == HPXML::WaterHeaterTypeHeatPump
+        heat_pump_cop = args[:water_heater_efficiency]
+      end
+    else
+      if args[:water_heater_standby_loss].is_initialized
+        standby_loss_units = args[:water_heater_standby_loss_units].get
+        standby_loss_value = args[:water_heater_standby_loss].get
       end
     end
 
@@ -5222,15 +5246,6 @@ class HPXMLFile
       energy_factor = nil
       if hpxml.heating_systems.size > 0
         related_hvac_idref = hpxml.heating_systems[0].id
-      end
-    end
-
-    if [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? water_heater_type
-      if args[:water_heater_standby_loss].is_initialized
-        if args[:water_heater_standby_loss].get > 0
-          standby_loss_units = HPXML::UnitsDegFPerHour
-          standby_loss_value = args[:water_heater_standby_loss].get
-        end
       end
     end
 
@@ -5288,6 +5303,8 @@ class HPXMLFile
                                     fraction_dhw_load_served: 1.0,
                                     energy_factor: energy_factor,
                                     uniform_energy_factor: uniform_energy_factor,
+                                    thermal_efficiency: thermal_efficiency,
+                                    heat_pump_cop: heat_pump_cop,
                                     usage_bin: usage_bin,
                                     recovery_efficiency: recovery_efficiency,
                                     uses_desuperheater: uses_desuperheater,

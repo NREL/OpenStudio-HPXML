@@ -4642,8 +4642,8 @@ class HPXML < Object
   end
 
   class WaterHeatingSystem < BaseElement
-    ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
-             :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
+    ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment, :heat_pump_cop,
+             :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :thermal_efficiency, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss_units, :standby_loss_value,
              :temperature, :is_shared_system, :number_of_units_served, :tank_model_type, :operating_mode]
@@ -4695,9 +4695,11 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
+      XMLHelper.add_element(water_heating_system, 'HeatPumpCOP', @heat_pump_cop, :float) unless @heat_pump_cop.nil?
       XMLHelper.add_element(water_heating_system, 'FirstHourRating', @first_hour_rating, :float) unless @first_hour_rating.nil?
       XMLHelper.add_element(water_heating_system, 'UsageBin', @usage_bin, :string, @usage_bin_isdefaulted) unless @usage_bin.nil?
       XMLHelper.add_element(water_heating_system, 'RecoveryEfficiency', @recovery_efficiency, :float, @recovery_efficiency_isdefaulted) unless @recovery_efficiency.nil?
+      XMLHelper.add_element(water_heating_system, 'ThermalEfficiency', @thermal_efficiency, :float, @thermal_efficiency_isdefaulted) unless @thermal_efficiency.nil?
       if not @jacket_r_value.nil?
         water_heater_insulation = XMLHelper.add_element(water_heating_system, 'WaterHeaterInsulation')
         jacket = XMLHelper.add_element(water_heater_insulation, 'Jacket')
@@ -4738,9 +4740,11 @@ class HPXML < Object
       @heating_capacity = XMLHelper.get_value(water_heating_system, 'HeatingCapacity', :float)
       @energy_factor = XMLHelper.get_value(water_heating_system, 'EnergyFactor', :float)
       @uniform_energy_factor = XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor', :float)
+      @heat_pump_cop = XMLHelper.get_value(water_heating_system, 'HeatPumpCOP', :float)
       @first_hour_rating = XMLHelper.get_value(water_heating_system, 'FirstHourRating', :float)
       @usage_bin = XMLHelper.get_value(water_heating_system, 'UsageBin', :string)
       @recovery_efficiency = XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency', :float)
+      @thermal_efficiency = XMLHelper.get_value(water_heating_system, 'ThermalEfficiency', :float)
       @jacket_r_value = XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue', :float)
       @standby_loss_units = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Units', :string)
       @standby_loss_value = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Value', :float)
