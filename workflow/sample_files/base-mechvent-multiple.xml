@@ -609,6 +609,9 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan17'/>
               <FanType>central fan integrated supply</FanType>
+              <CFISControls>
+                <AdditionalRuntimeOperatingMode>air handler fan</AdditionalRuntimeOperatingMode>
+              </CFISControls>
               <TestedFlowRate>40.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
@@ -618,6 +621,10 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan18'/>
               <FanType>central fan integrated supply</FanType>
+              <CFISControls>
+                <AdditionalRuntimeOperatingMode>supplemental fan</AdditionalRuntimeOperatingMode>
+                <SupplementalFan idref='VentilationFan5'/>
+              </CFISControls>
               <TestedFlowRate>42.5</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>

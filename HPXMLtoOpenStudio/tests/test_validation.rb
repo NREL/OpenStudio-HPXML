@@ -7,6 +7,11 @@ require 'fileutils'
 require_relative '../measure.rb'
 require 'csv'
 
+# FIXME: Check that CFIS supplemental fan is:
+# 1. Not of type CFIS
+# 2. Has UsedForWholeBuildingVentilation=true
+# ???
+
 class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))

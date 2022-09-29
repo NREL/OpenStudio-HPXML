@@ -2041,10 +2041,10 @@ class HVACSizing
     tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
     tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
 
-    # Calculate effectivenesses for all ERV/HRV and store results in a hash
+    # Calculate effectiveness for all ERV/HRV and store results in a hash
     hrv_erv_effectiveness_map = Airflow.calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
 
-    # Calculate cfm weighted average effectivenesses for the combined balanced airflow
+    # Calculate cfm weighted average effectiveness for the combined balanced airflow
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }

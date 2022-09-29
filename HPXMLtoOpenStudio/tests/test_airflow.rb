@@ -310,7 +310,11 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_equal(1, get_oed_for_ventilation(model, "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load").size)
   end
 
-  def test_mechanical_ventilation_cfis_with_supplemental_fan
+  def test_mechanical_ventilation_cfis_with_supplemental_exhaust_fan
+    # FIXME: TODO
+  end
+
+  def test_mechanical_ventilation_cfis_with_supplemental_erv_fan
     # FIXME: TODO
   end
 
