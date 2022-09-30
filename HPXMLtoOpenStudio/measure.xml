@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c359c465-d993-4e2a-b3f5-d4280bfd4de9</version_id>
-  <version_modified>20220930T203034Z</version_modified>
+  <version_id>56c59f09-d024-43bf-9795-7d7eefc836e8</version_id>
+  <version_modified>20220930T230605Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -434,12 +434,6 @@
       <checksum>869F95B2</checksum>
     </file>
     <file>
-      <filename>test_schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D8E236C3</checksum>
-    </file>
-    <file>
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -572,18 +566,6 @@
       <checksum>5C54F47C</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4E6CD360</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>808224D4</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -601,12 +583,6 @@
       <checksum>125FE00F</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-outage-natvent.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>53CBBEDE</checksum>
-    </file>
-    <file>
       <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -617,6 +593,36 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>6784F46E</checksum>
+    </file>
+    <file>
+      <filename>test_schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E9576B0A</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A279C11D</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D82D1856</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage-natvent.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>010BF2B3</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage-natvent-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5866C84E</checksum>
     </file>
   </files>
 </measure>

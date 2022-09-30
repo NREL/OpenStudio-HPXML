@@ -2437,7 +2437,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-occupancy-stochastic-outage-natvent.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
-    sch_args['schedules_outage_period'] = 'Nov 30 12am - Jan 31 12am'
+    sch_args['schedules_outage_period'] = 'Jun 30 12am - Jul 7 12am'
     sch_args['schedules_outage_window_natvent_availability'] = true
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage-natvent.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']

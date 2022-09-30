@@ -1533,8 +1533,7 @@ class SchedulesFile
       ColumnHotTubHeater,
       ColumnHotWaterDishwasher,
       ColumnHotWaterClothesWasher,
-      ColumnHotWaterFixtures,
-      ColumnNaturalVentilation
+      ColumnHotWaterFixtures
     ]
   end
 
