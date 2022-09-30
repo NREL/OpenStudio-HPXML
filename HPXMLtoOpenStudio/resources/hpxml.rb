@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'ostruct'
+
 '''
 Example Usage:
 
@@ -41,9 +43,6 @@ hpxml.walls[-1].area = 1000
 XMLHelper.write_file(hpxml.to_oga, "out.xml")
 
 '''
-
-require_relative 'version'
-require 'ostruct'
 
 # FUTURE: Remove all idref attributes, make object attributes instead
 #         E.g., in class Window, :wall_idref => :wall
