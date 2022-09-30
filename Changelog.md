@@ -11,6 +11,7 @@ __New Features__
 - Allows setting the ground soil conductivity used for foundation heat transfer and ground source heat pumps.
 - Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - Allows specifying duct surface area multipliers.
+- Design temperatures, used to calculate design loads for HVAC equipment autosizing, are now output in `in.xml` and `results_hpxml.csv`.
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:

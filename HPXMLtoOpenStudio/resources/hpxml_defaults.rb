@@ -2604,7 +2604,7 @@ class HPXMLDefaults
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh
 
-    # Assign heating design loads back to HPXML object
+    # Assign heating design loads to HPXML object
     hvacpl.hdl_total = bldg_design_loads.Heat_Tot.round
     hvacpl.hdl_walls = bldg_design_loads.Heat_Walls.round
     hvacpl.hdl_ceilings = bldg_design_loads.Heat_Ceilings.round
@@ -2624,7 +2624,7 @@ class HPXMLDefaults
       fail 'Heating design loads do not sum to total.'
     end
 
-    # Cooling sensible design loads back to HPXML object
+    # Assign cooling sensible design loads to HPXML object
     hvacpl.cdl_sens_total = bldg_design_loads.Cool_Sens.round
     hvacpl.cdl_sens_walls = bldg_design_loads.Cool_Walls.round
     hvacpl.cdl_sens_ceilings = bldg_design_loads.Cool_Ceilings.round
@@ -2647,7 +2647,7 @@ class HPXMLDefaults
       fail 'Cooling sensible design loads do not sum to total.'
     end
 
-    # Cooling latent design loads back to HPXML object
+    # Assign cooling latent design loads to HPXML object
     hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
     hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
     hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infil_Lat.round
@@ -2658,7 +2658,11 @@ class HPXMLDefaults
       fail 'Cooling latent design loads do not sum to total.'
     end
 
-    # Assign sizing values back to HPXML objects
+    # Assign design temperatures to HPXML object
+    hvacpl.temp_heating = weather.design.HeatingDrybulb.round(2)
+    hvacpl.temp_cooling = weather.design.CoolingDrybulb.round(2)
+
+    # Assign sizing values to HPXML objects
     all_hvac_sizing_values.each do |hvac_system, hvac_sizing_values|
       htg_sys = hvac_system[:heating]
       clg_sys = hvac_system[:cooling]
