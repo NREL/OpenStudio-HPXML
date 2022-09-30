@@ -811,11 +811,19 @@ class ScheduleGenerator
       # natural ventilation during outage period
       natural_ventilation = nil
       if args[:schedules_outage_window_natvent_availability].is_initialized
-        # FIXME
-        # we need the natvent array so we can set to 0 or 1 during outage period
-        # need to get window_natvent_availability from the hpxml (defaulted or not)
-        # then need to create natural_ventilation array based on that value
-        natural_ventilation = Array.new(outage.size, 0.0)
+        method_array = [1, 3, 5, 6, 2, 4, 0] # monday, wednesday, friday, saturday, tuesday, thursday, sunday
+        natural_ventilation = []
+        @total_days_in_year.times do |day|
+          today = @sim_start_day + day
+          availability = method_array[0...args[:window_natvent_availability]]
+          @steps_in_day.times do |_step|
+            if availability.include? today.wday
+              natural_ventilation << 1
+            else
+              natural_ventilation << 0
+            end
+          end
+        end
       end
 
       start_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day])

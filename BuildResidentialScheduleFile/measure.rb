@@ -228,7 +228,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_outage_end_day] = end_day
       args[:schedules_outage_end_hour] = end_hour
 
-      args[:window_natvent_availability] = hpxml.header.natvent_days_per_week
+      args[:window_natvent_availability] = 3
+      args[:window_natvent_availability] = hpxml.header.natvent_days_per_week if !hpxml.header.natvent_days_per_week.nil?
     end
 
     debug = false
