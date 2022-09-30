@@ -423,7 +423,8 @@ class Airflow
   def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, schedules_file = nil)
     if not schedules_file.nil?
       avail_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnNaturalVentilation)
-    else
+    end
+    if avail_sch.nil?
       avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
       avail_sch.setName("#{obj_name} avail schedule")
       Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
