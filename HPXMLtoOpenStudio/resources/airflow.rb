@@ -339,17 +339,17 @@ class Airflow
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
-    whf_zone = nil
+    whf_space = nil
     if not @spaces[HPXML::LocationAtticVented].nil?
-      whf_zone = @spaces[HPXML::LocationAtticVented].thermalZone.get
+      whf_space = @spaces[HPXML::LocationAtticVented]
     elsif not @spaces[HPXML::LocationAtticUnvented].nil?
-      whf_zone = @spaces[HPXML::LocationAtticUnvented].thermalZone.get
+      whf_space = @spaces[HPXML::LocationAtticUnvented]
     end
-    if not whf_zone.nil?
+    if not whf_space.nil?
       # Air from living to WHF zone (attic)
-      zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
+      zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_space)
       zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
-      zone_mixing.setSourceZone(@conditioned_zone)
+      zone_mixing.setSourceSpace(@living_space)
       liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
       liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
     end
@@ -382,7 +382,7 @@ class Airflow
     vent_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
     vent_program.addLine("Set #{nv_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{whf_flow_actuator.name} = 0") # Init
-    vent_program.addLine("Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
+    vent_program.addLine("Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_space.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
     vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
     vent_program.addLine('  Set WHF_Flow = 0')
@@ -394,7 +394,7 @@ class Airflow
     vent_program.addLine('  Set Adj = (@Max Adj 0)')
     vent_program.addLine('  If (WHF_Flow > 0)') # If available, prioritize whole house fan
     vent_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
-    vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
+    vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_space.nil?
     vent_program.addLine('    Set WHF_W = 0')
     vent_fans_whf.each do |vent_whf|
       vent_program.addLine("    Set WHF_W = WHF_W + #{vent_whf.fan_power} * #{whf_avail_sensors[vent_whf.id].name}")
@@ -600,23 +600,22 @@ class Airflow
         duct.location = duct.loc_schedule.name.to_s
       elsif not duct.loc_space.nil?
         duct.location = duct.loc_space.name.to_s
-        duct.zone = duct.loc_space.thermalZone.get
+        duct.space = duct.loc_space
       else # Outside/RoofDeck
         duct.location = HPXML::LocationOutside
-        duct.zone = nil
       end
     end
 
     return if ducts.size == 0 # No ducts
 
     # get duct located zone or ambient temperature schedule objects
-    duct_locations = ducts.map { |duct| if duct.zone.nil? then duct.loc_schedule else duct.zone end }.uniq
+    duct_locations = ducts.map { |duct| if duct.space.nil? then duct.loc_schedule else duct.space end }.uniq
 
-    # All duct zones are in living space?
+    # All ducts in living space?
     all_ducts_conditioned = true
-    duct_locations.each do |duct_zone|
-      if duct_locations.is_a? OpenStudio::Model::ThermalZone
-        next if duct_zone == @conditioned_zone
+    duct_locations.each do |duct_space|
+      if duct_space.is_a? OpenStudio::Model::Space
+        next if duct_space == @living_space
       end
 
       all_ducts_conditioned = false
@@ -698,7 +697,7 @@ class Airflow
 
     # Create one duct program for each duct location zone
     duct_locations.each_with_index do |duct_location, i|
-      next if (not duct_location.nil?) && (duct_location.name.to_s == @conditioned_zone.name.to_s)
+      next if duct_location == @living_space
 
       object_name_idx = "#{object.name}_#{i}"
 
@@ -706,9 +705,9 @@ class Airflow
 
       # Duct zone temperature
       dz_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DZ T".gsub(' ', '_'))
-      if duct_location.is_a? OpenStudio::Model::ThermalZone
+      if duct_location.is_a? OpenStudio::Model::Space
         dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-        dz_t_sensor.setKeyName(duct_location.name.to_s)
+        dz_t_sensor.setKeyName(duct_location.thermalZone.get.name.to_s)
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant
         dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         dz_t_sensor.setKeyName(duct_location.name.to_s)
@@ -722,9 +721,9 @@ class Airflow
 
       # Duct zone humidity ratio
       dz_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DZ W".gsub(' ', '_'))
-      if duct_location.is_a? OpenStudio::Model::ThermalZone
+      if duct_location.is_a? OpenStudio::Model::Space
         dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-        dz_w_sensor.setKeyName(duct_location.name.to_s)
+        dz_w_sensor.setKeyName(duct_location.thermalZone.get.name.to_s)
         dz_w_sensor.setName("#{dz_w_var.name} s")
         dz_w = "#{dz_w_sensor.name}"
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant # Outside or scheduled temperature
@@ -780,31 +779,31 @@ class Airflow
       equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', true, ra_duct_space, 1.0 - f_regain, f_regain]
 
       # Supply duct conduction impact on the duct zone
-      if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
+      if not duct_location.is_a? OpenStudio::Model::Space # Outside or scheduled temperature
         equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', false, duct_location, 0.0, 0.0]
       end
 
       # Return duct conduction impact on the duct zone
-      if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
+      if not duct_location.is_a? OpenStudio::Model::Space # Outside or scheduled temperature
         equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', false, duct_location, 0.0, 0.0]
       end
 
       # Supply duct sensible leakage impact on the duct zone
-      if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
+      if not duct_location.is_a? OpenStudio::Model::Space # Outside or scheduled temperature
         equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', false, duct_location, 0.0, 0.0]
       end
 
       # Supply duct latent leakage impact on the duct zone
-      if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
+      if not duct_location.is_a? OpenStudio::Model::Space # Outside or scheduled temperature
         equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', false, duct_location.spaces[0], 1.0, 0.0]
+        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', false, duct_location, 1.0, 0.0]
       end
 
       duct_vars = {}
@@ -843,11 +842,11 @@ class Airflow
       # List of: [Var name, object name, space, frac load latent, frac load outside]
       mix_act_infos = []
 
-      if duct_location.is_a? OpenStudio::Model::ThermalZone
+      if duct_location.is_a? OpenStudio::Model::Space
         # Accounts for leaks from the duct zone to the living zone
-        mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', @conditioned_zone, duct_location]
+        mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', @living_space, duct_location]
         # Accounts for leaks from the living zone to the duct zone
-        mix_act_infos << ['liv_to_dz_flow_rate', 'ZoneMixLvToDZ', duct_location, @conditioned_zone]
+        mix_act_infos << ['liv_to_dz_flow_rate', 'ZoneMixLvToDZ', duct_location, @living_space]
       end
 
       [false, true].each do |is_cfis|
@@ -861,15 +860,15 @@ class Airflow
         mix_act_infos.each do |act_info|
           var_name = "#{prefix}#{act_info[0]}"
           object_name = "#{object_name_idx} #{prefix}#{act_info[1]}".gsub(' ', '_')
-          dest_zone = act_info[2]
-          source_zone = act_info[3]
+          dest_space = act_info[2]
+          source_space = act_info[3]
 
           if not is_cfis
             duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
           end
-          zone_mixing = OpenStudio::Model::ZoneMixing.new(dest_zone)
+          zone_mixing = OpenStudio::Model::ZoneMixing.new(dest_space)
           zone_mixing.setName("#{object_name} mix")
-          zone_mixing.setSourceZone(source_zone)
+          zone_mixing.setSourceSpace(source_space)
           duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
           duct_actuators[var_name].setName("#{zone_mixing.name} act")
         end
@@ -882,9 +881,9 @@ class Airflow
       leakage_cfm25s = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
       ua_values = { HPXML::DuctTypeSupply => 0, HPXML::DuctTypeReturn => 0 }
       ducts.each do |duct|
-        next unless (duct_location.nil? && duct.zone.nil?) ||
-                    (!duct_location.nil? && !duct.zone.nil? && (duct.zone.name.to_s == duct_location.name.to_s)) ||
-                    (!duct_location.nil? && !duct.loc_schedule.nil? && (duct.loc_schedule.name.to_s == duct_location.name.to_s))
+        next unless (duct_location.nil? && duct.space.nil?) ||
+                    (!duct_location.nil? && !duct.space.nil? && (duct.space == duct_location)) ||
+                    (!duct_location.nil? && !duct.loc_schedule.nil? && (duct.loc_schedule == duct_location))
 
         if not duct.leakage_frac.nil?
           leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
@@ -901,12 +900,12 @@ class Airflow
 
       # Calculate fraction of outside air specific to this duct location
       f_oa = 1.0
-      if duct_location.is_a? OpenStudio::Model::ThermalZone # in a space
-        if (not @spaces[HPXML::LocationBasementUnconditioned].nil?) && (@spaces[HPXML::LocationBasementUnconditioned].thermalZone.get.name.to_s == duct_location.name.to_s)
+      if duct_location.is_a? OpenStudio::Model::Space # in a space
+        if (not @spaces[HPXML::LocationBasementUnconditioned].nil?) && (@spaces[HPXML::LocationBasementUnconditioned] == duct_location)
           f_oa = 0.0
-        elsif (not @spaces[HPXML::LocationCrawlspaceUnvented].nil?) && (@spaces[HPXML::LocationCrawlspaceUnvented].thermalZone.get.name.to_s == duct_location.name.to_s)
+        elsif (not @spaces[HPXML::LocationCrawlspaceUnvented].nil?) && (@spaces[HPXML::LocationCrawlspaceUnvented] == duct_location)
           f_oa = 0.0
-        elsif (not @spaces[HPXML::LocationAtticUnvented].nil?) && (@spaces[HPXML::LocationAtticUnvented].thermalZone.get.name.to_s == duct_location.name.to_s)
+        elsif (not @spaces[HPXML::LocationAtticUnvented].nil?) && (@spaces[HPXML::LocationAtticUnvented] == duct_location)
           f_oa = 0.0
         end
       end
@@ -1930,5 +1929,5 @@ class Duct
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :zone, :location)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :space, :location)
 end
