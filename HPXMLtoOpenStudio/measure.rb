@@ -6,34 +6,11 @@
 require 'pathname'
 require 'csv'
 require 'oga'
-require_relative 'resources/airflow'
-require_relative 'resources/battery'
-require_relative 'resources/utility_bills'
-require_relative 'resources/constants'
-require_relative 'resources/constructions'
-require_relative 'resources/energyplus'
-require_relative 'resources/generator'
-require_relative 'resources/geometry'
-require_relative 'resources/hotwater_appliances'
-require_relative 'resources/hpxml'
-require_relative 'resources/hpxml_defaults'
-require_relative 'resources/hvac'
-require_relative 'resources/hvac_sizing'
-require_relative 'resources/lighting'
-require_relative 'resources/location'
-require_relative 'resources/materials'
-require_relative 'resources/misc_loads'
-require_relative 'resources/psychrometrics'
-require_relative 'resources/pv'
-require_relative 'resources/schedules'
-require_relative 'resources/simcontrols'
-require_relative 'resources/unit_conversions'
-require_relative 'resources/util'
-require_relative 'resources/validator'
-require_relative 'resources/version'
-require_relative 'resources/waterheater'
-require_relative 'resources/weather'
-require_relative 'resources/xmlhelper'
+Dir["#{File.dirname(__FILE__)}/resources/*.rb"].each do |resource_file|
+  next if resource_file.include? 'minitest_helper.rb'
+
+  require resource_file
+end
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
