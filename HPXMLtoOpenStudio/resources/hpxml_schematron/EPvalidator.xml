@@ -166,8 +166,6 @@
       <sch:assert role='ERROR' test='count(h:Address/h:StateCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Address/StateCode</sch:assert>
       <sch:assert role='ERROR' test='count(h:Address/h:ZipCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Address/ZipCode</sch:assert>
       <sch:assert role='ERROR' test='count(h:TimeZone/h:UTCOffset) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TimeZone/UTCOffset</sch:assert>
-      <sch:assert role='ERROR' test='number(h:TimeZone/h:UTCOffset) &gt;= -12 or not(h:TimeZone/h:UTCOffset)'>Expected TimeZone/UTCOffset to be greater than or equal to -12</sch:assert>
-      <sch:assert role='ERROR' test='number(h:TimeZone/h:UTCOffset) &lt;= 14 or not(h:TimeZone/h:UTCOffset)'>Expected TimeZone/UTCOffset to be less than or equal to 14</sch:assert>
       <sch:assert role='ERROR' test='count(h:TimeZone/h:DSTObserved) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TimeZone/DSTObserved</sch:assert> <!-- See [DaylightSaving] -->
     </sch:rule>
   </sch:pattern>
@@ -258,6 +256,8 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site'>
       <sch:assert role='ERROR' test='count(h:SiteType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SiteType</sch:assert>
       <sch:assert role='ERROR' test='count(h:ShieldingofHome) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ShieldingofHome</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:GroundConductivity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GroundConductivity</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:GroundConductivity) &gt; 0 or not(h:extension/h:GroundConductivity)'>Expected extension/GroundConductivity to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:Neighbors) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/Neighbors</sch:assert> <!-- See [Neighbors] -->
     </sch:rule>
   </sch:pattern>
@@ -1477,7 +1477,7 @@
     <sch:title>[GarageVentilation]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForGarageVentilation="true"]'>
       <!-- Warnings -->
-      <sch:report role='WARN' test='true'>Ventilation fans for the garage are not currently modeled.</sch:report>
+      <sch:report role='WARN' test='true()'>Ventilation fans for the garage are not currently modeled.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1786,7 +1786,7 @@
     <sch:title>[ClothesWasherType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher[h:IsSharedAppliance="true"]'>
       <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) = 1'>Expected 1 element(s) for xpath: AttachedToWaterHeatingSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) + count(h:AttachedToHotWaterDistribution) = 1'>Expected 1 element(s) for xpath: AttachedToWaterHeatingSystem | AttachedToHotWaterDistribution</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1851,7 +1851,7 @@
     <sch:title>[DishwasherType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher[h:IsSharedAppliance="true"]'>
       <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) = 1'>Expected 1 element(s) for xpath: AttachedToWaterHeatingSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) + count(h:AttachedToHotWaterDistribution) = 1'>Expected 1 element(s) for xpath: AttachedToWaterHeatingSystem | AttachedToHotWaterDistribution</sch:assert>
     </sch:rule>
   </sch:pattern>
 

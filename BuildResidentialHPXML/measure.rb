@@ -29,11 +29,11 @@ require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/util'
 require_relative '../HPXMLtoOpenStudio/resources/utility_bills'
-require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 require_relative '../HPXMLtoOpenStudio/resources/waterheater'
 require_relative '../HPXMLtoOpenStudio/resources/weather'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
+require_relative '../HPXMLtoOpenStudio/resources/xmlvalidator'
 
 # start the measure
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
@@ -135,6 +135,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_shielding_of_home', site_shielding_of_home_choices, false)
     arg.setDisplayName('Site: Shielding of Home')
     arg.setDescription('Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default is used.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_conductivity', false)
+    arg.setDisplayName('Site: Ground Conductivity')
+    arg.setDescription('Conductivity of the ground soil. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('Btu/hr-ft-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
@@ -3039,15 +3045,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(hpxml_path)
     end
 
+    XMLHelper.write_file(hpxml_doc, hpxml_path)
+    runner.registerInfo("Wrote file: #{hpxml_path}")
+
     # Check for invalid HPXML file
     if args[:apply_validation].is_initialized && args[:apply_validation].get
       if not validate_hpxml(runner, hpxml_path, hpxml_doc)
         return false
       end
     end
-
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
-    runner.registerInfo("Wrote file: #{hpxml_path}")
 
     # Uncomment for debugging purposes
     # File.write(hpxml_path.gsub('.xml', '.osm'), model.to_s)
@@ -3235,27 +3241,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
-    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
-
     is_valid = true
 
     # Validate input HPXML against schema
-    XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
+    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
+    schema_path = File.join(schema_dir, 'HPXML.xsd')
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
 
     # Validate input HPXML against schematron docs
-    stron_paths = [File.join(schematron_dir, 'HPXMLvalidator.xml'),
-                   File.join(schematron_dir, 'EPvalidator.xml')]
-    errors, warnings = Validator.run_validators(hpxml_doc, stron_paths)
-    errors.each do |error|
+    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
+    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
+
+    # Handle errors/warnings
+    (xsd_errors + sct_errors).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-    warnings.each do |warning|
-      runner.registerWarning("#{warning}")
+    (xsd_warnings + sct_warnings).each do |warning|
+      runner.registerWarning("#{hpxml_path}: #{warning}")
     end
 
     return is_valid
@@ -3724,7 +3728,11 @@ class HPXMLFile
 
   def self.set_site(hpxml, args)
     if args[:site_shielding_of_home].is_initialized
-      shielding_of_home = args[:site_shielding_of_home].get
+      hpxml.site.shielding_of_home = args[:site_shielding_of_home].get
+    end
+
+    if args[:site_ground_conductivity].is_initialized
+      hpxml.site.ground_conductivity = args[:site_ground_conductivity].get
     end
 
     if args[:site_type].is_initialized
@@ -3763,7 +3771,6 @@ class HPXMLFile
     end
 
     hpxml.site.azimuth_of_front_of_home = args[:geometry_unit_orientation]
-    hpxml.site.shielding_of_home = shielding_of_home
   end
 
   def self.set_neighbor_buildings(hpxml, args)
@@ -3831,8 +3838,8 @@ class HPXMLFile
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
 
     if args[:site_iecc_zone].is_initialized
-      hpxml.climate_and_risk_zones.iecc_zone = args[:site_iecc_zone].get
-      hpxml.climate_and_risk_zones.iecc_year = 2006
+      hpxml.climate_and_risk_zones.climate_zone_ieccs.add(zone: args[:site_iecc_zone].get,
+                                                          year: 2006)
     end
 
     weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')

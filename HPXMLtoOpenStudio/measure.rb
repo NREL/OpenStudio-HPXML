@@ -29,11 +29,11 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
-require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
+require_relative 'resources/xmlvalidator'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -132,12 +132,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     begin
       if skip_validation
-        stron_paths = []
+        xsd_path = nil
+        stron_path = nil
       else
-        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml'),
-                       File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
+        xsd_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schema', 'HPXML.xsd')
+        stron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
       end
-      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schema_path: xsd_path, schematron_path: stron_path, building_id: building_id)
       hpxml.errors.each do |error|
         runner.registerError(error)
       end
@@ -908,6 +909,8 @@ class OSModel
       length *= total_slab_exp_perim / total_fnd_wall_length
     end
 
+    return if length < 0.1 # Avoid Kiva error if exposed wall length is too small
+
     if gross_area > net_area
       # Create a "notch" in the wall to account for the subsurfaces. This ensures that
       # we preserve the appropriate wall height, length, and area for Kiva.
@@ -960,9 +963,12 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
+                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag,
+                                        soil_k_in)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -1025,11 +1031,12 @@ class OSModel
       mat_carpet = Material.CoveringBare(slab.carpet_fraction,
                                          slab.carpet_r_value)
     end
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab_exp_perim, mat_carpet, kiva_foundation)
+                                        slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
     return surface.adjacentFoundation.get
   end
@@ -1537,14 +1544,16 @@ class OSModel
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
              HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  @conditioned_zone)
+
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 @conditioned_zone)
+                                                                 @conditioned_zone, @hpxml.site.ground_conductivity)
 
       end
 
@@ -1637,8 +1646,6 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
-      # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
   end
@@ -2415,8 +2422,12 @@ class OSModel
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model)
+    elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     end
   end
 
