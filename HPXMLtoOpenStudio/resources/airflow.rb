@@ -1361,10 +1361,20 @@ class Airflow
   end
 
   def self.apply_cfis(infil_program, vent_mech_fans, cfis_fan_actuator, cfis_suppl_fan_actuator)
-    infil_program.addLine('Set QWHV_cfis = 0.0')
-    infil_program.addLine('Set QWHV_cfis_suppl_sup = 0.0')
-    infil_program.addLine('Set QWHV_cfis_suppl_exh = 0.0')
+    infil_program.addLine('Set QWHV_cfis_sup = 0.0') # CFIS supply outdoor airflow rate
+    infil_program.addLine('Set QWHV_cfis_suppl_sup = 0.0') # CFIS supplemental fan supply outdoor airflow rate
+    infil_program.addLine('Set QWHV_cfis_suppl_exh = 0.0') # CFIS supplemental fan exhaust outdoor airflow rate
 
+    idx = 0
+    vent_mech_fans.each do |vent_mech|
+      next unless vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplemental
+      next unless [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.cfis_supplemental_fan.fan_type
+
+      idx += 1
+      infil_program.addLine("Set QWHV_cfis_suppl_erv_hrv#{idx} = 0.0") # CFIS supplemental fan ERV/HRV outdoor airflow rate
+    end
+
+    idx = 0
     vent_mech_fans.each do |vent_mech|
       infil_program.addLine('Set fan_rtf_hvac = 0')
       @fan_rtf_sensor[@cfis_airloop[vent_mech.id]].each do |rtf_sensor|
@@ -1409,6 +1419,11 @@ class Airflow
         if vent_mech.cfis_supplemental_fan.includes_exhaust_air?
           infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_oa')
         end
+        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.cfis_supplemental_fan.fan_type
+          # Store the flow rate to apply the ERV/HRV effectiveness to the fan load later
+          idx += 1
+          infil_program.addLine("    Set QWHV_cfis_suppl_erv_hrv#{idx} = QWHV_cfis_suppl_erv_hrv#{idx} + cfis_suppl_f * cfis_suppl_Q_oa")
+        end
       end
 
       infil_program.addLine('  Else')
@@ -1428,7 +1443,7 @@ class Airflow
       # Fan power is metered under fan cooling and heating meters
       infil_program.addLine('  EndIf')
       infil_program.addLine('  If QWHV_cfis_suppl_sup + QWHV_cfis_suppl_exh < 0.0001') # Only add CFIS air handler airflow if we have no CFIS supplemental fan airflow
-      infil_program.addLine('    Set QWHV_cfis = QWHV_cfis + cfis_f_damper_open * cfis_Q_duct_oa')
+      infil_program.addLine('    Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
       infil_program.addLine('  EndIf')
       infil_program.addLine('EndIf')
     end
@@ -1541,7 +1556,7 @@ class Airflow
     infil_program.addLine("Set QWHV_exh = #{UnitConversions.convert(exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
 
     infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + QWHV_exh + QWHV_cfis_suppl_exh')
-    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis + QWHV_cfis_suppl_sup')
+    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis_sup + QWHV_cfis_suppl_sup')
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
     if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
@@ -1581,9 +1596,19 @@ class Airflow
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
       # Therefore ERV is modeled within EMS infiltration program
       infil_program.addLine("If #{q_var} > 0")
+      idx = 0
       vent_mech_erv_hrv_tot.each do |vent_fan|
-        infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + #{UnitConversions.convert(vent_fan.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)} / #{q_var} * #{hrv_erv_effectiveness_map[vent_fan][:vent_mech_sens_eff]}")
-        infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + #{UnitConversions.convert(vent_fan.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)} / #{q_var} * #{hrv_erv_effectiveness_map[vent_fan][:vent_mech_lat_eff]}")
+        sens_eff = hrv_erv_effectiveness_map[vent_fan][:vent_mech_sens_eff]
+        lat_eff = hrv_erv_effectiveness_map[vent_fan][:vent_mech_lat_eff]
+        if vent_fan.is_cfis_supplemental_fan?
+          idx += 1
+          infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + QWHV_cfis_suppl_erv_hrv#{idx} / #{q_var} * #{sens_eff}")
+          infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + QWHV_cfis_suppl_erv_hrv#{idx} / #{q_var} * #{lat_eff}")
+        else
+          avg_oa_m3s = UnitConversions.convert(vent_fan.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)
+          infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + #{avg_oa_m3s} / #{q_var} * #{sens_eff}")
+          infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + #{avg_oa_m3s} / #{q_var} * #{lat_eff}")
+        end
       end
       infil_program.addLine('EndIf')
       infil_program.addLine('Set ERVCpMin = (@Min OASupCp ZoneCp)')
@@ -1742,10 +1767,12 @@ class Airflow
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
     infil_program.addLine('Set Qload = Qfan')
     vent_fans_mech.each do |f|
+      recirc_flow_rate = f.average_total_unit_flow_rate - f.average_oa_unit_flow_rate
+      next unless recirc_flow_rate > 0
+
       # Subtract recirculation air flow rate from Qfan, only come from supply side as exhaust is not allowed to have recirculation
-      infil_program.addLine("Set Qload = Qload - #{UnitConversions.convert(f.average_total_unit_flow_rate - f.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
+      infil_program.addLine("Set Qload = Qload - #{UnitConversions.convert(recirc_flow_rate, 'cfm', 'm^3/s').round(4)}")
     end
-    # FIXME: Need to include CFIS supplemental fan
     calculate_fan_loads(infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
 
     # Address preconditioning

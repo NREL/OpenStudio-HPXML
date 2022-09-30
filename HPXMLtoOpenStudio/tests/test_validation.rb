@@ -10,6 +10,7 @@ require 'csv'
 # FIXME: Check that CFIS supplemental fan is:
 # 1. Not of type CFIS
 # 2. Has UsedForWholeBuildingVentilation=true
+# 3. Not a shared system
 # ???
 
 class HPXMLtoOpenStudioValidationTest < MiniTest::Test
