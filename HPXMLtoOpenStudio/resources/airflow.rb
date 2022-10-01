@@ -1268,10 +1268,10 @@ class Airflow
     return obj_sch_sensor, cfm_mult
   end
 
-  def self.calc_hrv_erv_effectiveness(vent_mech_fans, vent_mech_cfis_suppl_fans = [])
+  def self.calc_hrv_erv_effectiveness(vent_mech_fans)
     # Create the mapping between mech vent instance and the effectiveness results
     hrv_erv_effectiveness_map = {}
-    (vent_mech_fans + vent_mech_cfis_suppl_fans).each do |vent_mech|
+    vent_mech_fans.each do |vent_mech|
       hrv_erv_effectiveness_map[vent_mech] = {}
 
       vent_mech_cfm = vent_mech.average_oa_unit_flow_rate
@@ -1365,16 +1365,6 @@ class Airflow
     infil_program.addLine('Set QWHV_cfis_suppl_sup = 0.0') # CFIS supplemental fan supply outdoor airflow rate
     infil_program.addLine('Set QWHV_cfis_suppl_exh = 0.0') # CFIS supplemental fan exhaust outdoor airflow rate
 
-    idx = 0
-    vent_mech_fans.each do |vent_mech|
-      next unless vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplemental
-      next unless [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.cfis_supplemental_fan.fan_type
-
-      idx += 1
-      infil_program.addLine("Set QWHV_cfis_suppl_erv_hrv#{idx} = 0.0") # CFIS supplemental fan ERV/HRV outdoor airflow rate
-    end
-
-    idx = 0
     vent_mech_fans.each do |vent_mech|
       infil_program.addLine('Set fan_rtf_hvac = 0')
       @fan_rtf_sensor[@cfis_airloop[vent_mech.id]].each do |rtf_sensor|
@@ -1413,16 +1403,10 @@ class Airflow
         infil_program.addLine("    Set cfis_suppl_fan_w = #{vent_mech.cfis_supplemental_fan.unit_fan_power}") # W
         infil_program.addLine("    Set #{cfis_suppl_fan_actuator.name} = #{cfis_suppl_fan_actuator.name} + cfis_suppl_fan_w*cfis_suppl_f")
 
-        if vent_mech.cfis_supplemental_fan.includes_supply_air?
+        if vent_mech.cfis_supplemental_fan.fan_type == HPXML::MechVentTypeSupply
           infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + cfis_suppl_f * cfis_suppl_Q_oa')
-        end
-        if vent_mech.cfis_supplemental_fan.includes_exhaust_air?
+        elsif vent_mech.cfis_supplemental_fan.fan_type == HPXML::MechVentTypeExhaust
           infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_oa')
-        end
-        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.cfis_supplemental_fan.fan_type
-          # Store the flow rate to apply the ERV/HRV effectiveness to the fan load later
-          idx += 1
-          infil_program.addLine("    Set QWHV_cfis_suppl_erv_hrv#{idx} = QWHV_cfis_suppl_erv_hrv#{idx} + cfis_suppl_f * cfis_suppl_Q_oa")
         end
       end
 
@@ -1449,7 +1433,7 @@ class Airflow
     end
   end
 
-  def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = nil, exh_fans = nil, bal_fans = nil, erv_hrv_fans = nil)
+  def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [])
     # Calculate fan heat fraction
     # 1.0: Fan heat does not enter space (e.g., exhaust)
     # 0.0: Fan heat does enter space (e.g., supply)
@@ -1596,19 +1580,12 @@ class Airflow
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
       # Therefore ERV is modeled within EMS infiltration program
       infil_program.addLine("If #{q_var} > 0")
-      idx = 0
       vent_mech_erv_hrv_tot.each do |vent_fan|
         sens_eff = hrv_erv_effectiveness_map[vent_fan][:vent_mech_sens_eff]
         lat_eff = hrv_erv_effectiveness_map[vent_fan][:vent_mech_lat_eff]
-        if vent_fan.is_cfis_supplemental_fan?
-          idx += 1
-          infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + QWHV_cfis_suppl_erv_hrv#{idx} / #{q_var} * #{sens_eff}")
-          infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + QWHV_cfis_suppl_erv_hrv#{idx} / #{q_var} * #{lat_eff}")
-        else
-          avg_oa_m3s = UnitConversions.convert(vent_fan.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)
-          infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + #{avg_oa_m3s} / #{q_var} * #{sens_eff}")
-          infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + #{avg_oa_m3s} / #{q_var} * #{lat_eff}")
-        end
+        avg_oa_m3s = UnitConversions.convert(vent_fan.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)
+        infil_program.addLine("  Set Effectiveness_Sens = Effectiveness_Sens + #{avg_oa_m3s} / #{q_var} * #{sens_eff}")
+        infil_program.addLine("  Set Effectiveness_Lat = Effectiveness_Lat + #{avg_oa_m3s} / #{q_var} * #{lat_eff}")
       end
       infil_program.addLine('EndIf')
       infil_program.addLine('Set ERVCpMin = (@Min OASupCp ZoneCp)')
@@ -1721,20 +1698,17 @@ class Airflow
     cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS) # Fan heat enters space
 
     # CFIS supplemental fan power
-    vent_mech_cfis_suppl_sup_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-    vent_mech_cfis_suppl_exh_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-    vent_mech_cfis_suppl_bal_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
-    vent_mech_cfis_suppl_erv_hrv_tot = vent_fans_cfis_suppl.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
     if not vent_fans_cfis_suppl.empty?
+      vent_mech_cfis_suppl_sup_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+      vent_mech_cfis_suppl_exh_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
       cfis_suppl_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFISSupplFan,
-                                                          vent_mech_cfis_suppl_sup_tot, vent_mech_cfis_suppl_exh_tot,
-                                                          vent_mech_cfis_suppl_bal_tot, vent_mech_cfis_suppl_erv_hrv_tot)
+                                                          vent_mech_cfis_suppl_sup_tot, vent_mech_cfis_suppl_exh_tot)
     else
       cfis_suppl_fan_actuator = nil
     end
 
     # Calculate effectiveness for all ERV/HRV and store results in a hash
-    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot, vent_mech_cfis_suppl_erv_hrv_tot)
+    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1773,7 +1747,7 @@ class Airflow
       # Subtract recirculation air flow rate from Qfan, only come from supply side as exhaust is not allowed to have recirculation
       infil_program.addLine("Set Qload = Qload - #{UnitConversions.convert(recirc_flow_rate, 'cfm', 'm^3/s').round(4)}")
     end
-    calculate_fan_loads(infil_program, vent_mech_erv_hrv_tot + vent_mech_cfis_suppl_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
+    calculate_fan_loads(infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
 
     # Address preconditioning
     calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, clg_ssn_sensor)

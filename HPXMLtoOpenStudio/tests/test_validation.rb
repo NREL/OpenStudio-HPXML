@@ -7,12 +7,6 @@ require 'fileutils'
 require_relative '../measure.rb'
 require 'csv'
 
-# FIXME: Check that CFIS supplemental fan is:
-# 1. Not of type CFIS
-# 2. Has UsedForWholeBuildingVentilation=true
-# 3. Not a shared system
-# ???
-
 class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
@@ -693,9 +687,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def test_measure_error_messages
+  def test_ruby_error_messages
     # Test case => Error message
     all_expected_errors = { 'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
+                            'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
+                            'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],
+                            'cfis-invalid-supplemental-fan3' => ["CFIS supplemental fan 'VentilationFan2' cannot be a shared system."],
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
                             'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
                             'emissions-duplicate-names' => ['Found multiple Emissions Scenarios with the Scenario Name='],
@@ -770,6 +767,21 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                    fan_type: HPXML::MechVentTypeCFIS,
                                    used_for_whole_building_ventilation: true,
                                    distribution_system_idref: hpxml.hvac_distributions[0].id)
+      elsif ['cfis-invalid-supplemental-fan'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
+        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan.fan_type = HPXML::MechVentTypeBalanced
+      elsif ['cfis-invalid-supplemental-fan2'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
+        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan.used_for_whole_building_ventilation = false
+        suppl_fan.used_for_garage_ventilation = true
+      elsif ['cfis-invalid-supplemental-fan3'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
+        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan.is_shared_system = true
+        suppl_fan.fraction_recirculation = 0.0
+        suppl_fan.in_unit_flow_rate = suppl_fan.tested_flow_rate / 2.0
       elsif ['dehumidifier-setpoints'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-dehumidifier-multiple.xml'))
         hpxml.dehumidifiers[-1].rh_setpoint = 0.55
@@ -1080,7 +1092,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def test_measure_warning_messages
+  def test_ruby_warning_messages
     # Test case => Error message
     all_expected_warnings = { 'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],

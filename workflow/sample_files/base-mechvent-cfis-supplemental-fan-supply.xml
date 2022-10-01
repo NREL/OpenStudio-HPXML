@@ -411,10 +411,9 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan2'/>
-              <FanType>heat recovery ventilator</FanType>
+              <FanType>supply only</FanType>
               <TestedFlowRate>50.0</TestedFlowRate>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>12.0</FanPower>
             </VentilationFan>
           </VentilationFans>

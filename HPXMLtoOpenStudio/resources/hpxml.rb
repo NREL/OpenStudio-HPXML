@@ -4535,6 +4535,16 @@ class HPXML < Object
       @hpxml_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.id == @cfis_supplemental_fan_idref
 
+        if not [MechVentTypeSupply, MechVentTypeExhaust].include? ventilation_fan.fan_type
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' must be of type '#{MechVentTypeSupply}' or '#{MechVentTypeExhaust}'."
+        end
+        if not ventilation_fan.used_for_whole_building_ventilation
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' must be set as used for whole building ventilation."
+        end
+        if ventilation_fan.is_shared_system
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' cannot be a shared system."
+        end
+
         return ventilation_fan
       end
       fail "CFIS Supplemental Fan '#{@cfis_supplemental_fan_idref}' not found for ventilation fan '#{@id}'."
