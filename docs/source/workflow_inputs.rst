@@ -1970,7 +1970,7 @@ If not entered, the simulation will not include mechanical ventilation.
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
          For a CFIS system, the HoursInOperation and the flow rate are combined to form the expected/required hourly ventilation rate (e.g., 90 cfm and 8 hrs/day produce an hourly ventilation rate of 30 cfm).
-         For a CFIS system with a supplemental fan, HoursInOperation is not used for the supplemental fan as its runtime is automatically calculated (based on the air handler runtime) to maintain the hourly ventilation rate.
+         For a CFIS system with a supplemental fan, HoursInOperation is not used for the supplemental fan as its runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly ventilation rate.
   .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          
          - "energy recovery ventilator", "heat recovery ventilator", or shared system: 1.0 W/cfm
