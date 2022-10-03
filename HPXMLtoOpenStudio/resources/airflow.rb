@@ -427,7 +427,6 @@ class Airflow
     if avail_sch.nil?
       avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
       avail_sch.setName("#{obj_name} avail schedule")
-      Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
       on_rule = OpenStudio::Model::ScheduleRule.new(avail_sch)
       on_rule.setName("#{obj_name} avail schedule rule")
       on_rule_day = on_rule.daySchedule
@@ -442,6 +441,7 @@ class Airflow
       on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
       on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
     end
+    Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
     return avail_sch
   end
 
