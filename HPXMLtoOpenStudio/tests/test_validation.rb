@@ -452,7 +452,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         int_cfl.fraction_of_units_in_location = 0.8
       elsif ['missing-cfis-supplemental-fan'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis.xml'))
-        hpxml.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplemental
+        hpxml.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
       elsif ['missing-distribution-cfa-served'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_distributions[0].ducts[1].duct_surface_area = nil

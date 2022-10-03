@@ -82,7 +82,7 @@ class HPXML < Object
   ClothesDryerControlTypeTimer = 'timer'
   CFISModeAirHandler = 'air handler fan'
   CFISModeNone = 'none'
-  CFISModeSupplemental = 'supplemental fan'
+  CFISModeSupplementalFan = 'supplemental fan'
   ColorDark = 'dark'
   ColorLight = 'light'
   ColorMedium = 'medium'

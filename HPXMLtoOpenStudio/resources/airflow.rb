@@ -1397,7 +1397,7 @@ class Airflow
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler
         # Air handler meets additional runtime requirement
         infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w*#{@cfis_f_damper_extra_open_var[vent_mech.id].name}")
-      elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplemental
+      elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
         if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_total_unit_flow_rate
           @runner.registerWarning("CFIS supplemental fan '#{vent_mech.cfis_supplemental_fan.id}' is undersized (#{vent_mech.cfis_supplemental_fan.oa_unit_flow_rate} cfm) compared to the target hourly ventilation rate (#{vent_mech.average_total_unit_flow_rate} cfm).")
         end
@@ -1412,8 +1412,6 @@ class Airflow
           infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_oa')
         end
       end
-      infil_program.addLine("    Set cfis_f_damper_open = @Max (cfis_f_damper_open-#{@cfis_f_damper_extra_open_var[vent_mech.id].name}) 0.0")
-      infil_program.addLine('    Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
       infil_program.addLine('  Else')
       # No need to turn on blower for extra ventilation
       infil_program.addLine('    Set cfis_fan_runtime = fan_rtf_hvac*ZoneTimeStep*60')
@@ -1428,8 +1426,15 @@ class Airflow
       infil_program.addLine('      Set cfis_f_damper_open = fan_rtf_hvac')
       infil_program.addLine("      Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name}+cfis_fan_runtime")
       infil_program.addLine('    EndIf')
-      infil_program.addLine('    Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
       infil_program.addLine('  EndIf')
+
+      if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
+        infil_program.addLine("  Set cfis_f_damper_open = @Max (cfis_f_damper_open-#{@cfis_f_damper_extra_open_var[vent_mech.id].name}) 0.0")
+        infil_program.addLine('  Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
+      else
+        infil_program.addLine('  Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
+      end
+
       infil_program.addLine('EndIf')
     end
   end

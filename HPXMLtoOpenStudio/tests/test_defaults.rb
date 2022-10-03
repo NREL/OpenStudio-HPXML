@@ -1932,7 +1932,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
     vent_fan.cfis_vent_mode_airflow_fraction = 0.5
-    vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplemental
+    vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                tested_flow_rate: 120,
                                fan_power: 30,
@@ -1941,7 +1941,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.cfis_supplemental_fan_idref = hpxml.ventilation_fans[-1].id
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 330, 0.5, HPXML::CFISModeSupplemental)
+    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 330, 0.5, HPXML::CFISModeSupplementalFan)
 
     # Test defaults w/ CFIS
     vent_fan.is_shared_system = nil
