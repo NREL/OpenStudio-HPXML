@@ -4376,8 +4376,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
          'base-mechvent-cfis-supplemental-fan-supply.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
-                               tested_flow_rate: 50,
-                               fan_power: 12,
+                               tested_flow_rate: 120,
+                               fan_power: 30,
                                used_for_whole_building_ventilation: true)
     if hpxml_file == 'base-mechvent-cfis-supplemental-fan-exhaust.xml'
       hpxml.ventilation_fans[-1].fan_type = HPXML::MechVentTypeExhaust
