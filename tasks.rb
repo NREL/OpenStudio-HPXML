@@ -409,7 +409,7 @@ def create_hpxmls
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-setbacks.xml' => 'base.xml',
-    'base-schedules-detailed-seasons.xml' => 'base.xml',
+    # 'base-schedules-detailed-seasons.xml' => 'base.xml', # TODO
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
