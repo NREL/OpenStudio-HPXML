@@ -304,7 +304,32 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
   end
 
   def test_mechanical_ventilation_cfis_with_supplemental_fan
-    # FIXME: TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan_cfm = vent_fan.oa_unit_flow_rate
+    vent_fan_power = vent_fan.fan_power
+    vent_fan_mins = vent_fan.hours_in_operation / 24.0 * 60.0
+    suppl_vent_fan_cfm = vent_fan.cfis_supplemental_fan.oa_unit_flow_rate
+    suppl_vent_fan_power = vent_fan.cfis_supplemental_fan.fan_power
+
+    # Check infiltration/ventilation program
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
+    assert_in_epsilon(vent_fan_cfm, UnitConversions.convert(program_values['cfis_Q_duct_oa'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(suppl_vent_fan_cfm, UnitConversions.convert(program_values['cfis_suppl_Q_oa'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(vent_fan_power, program_values['cfis_fan_w'].sum, 0.01)
+    assert_in_epsilon(suppl_vent_fan_power, program_values['cfis_suppl_fan_w'].sum, 0.01)
+    assert_in_epsilon(vent_fan_mins, program_values['cfis_t_min_hr_open'].sum, 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qbath'].sum, 'm^3/s', 'cfm'), 0.01)
+    # Load actuators
+    assert_equal(1, get_oed_for_ventilation(model, "#{Constants.ObjectNameMechanicalVentilationHouseFan} sensible load").size)
+    assert_equal(1, get_oed_for_ventilation(model, "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load").size)
   end
 
   def test_ventilation_bath_kitchen_fans
