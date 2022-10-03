@@ -4299,15 +4299,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                used_for_seasonal_cooling_load_reduction: true)
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
-                               tested_flow_rate: 27.5,
-                               hours_in_operation: 24,
-                               fan_power: 7.5,
-                               used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
-                               fan_type: HPXML::MechVentTypeExhaust,
                                tested_flow_rate: 12.5,
                                hours_in_operation: 14,
                                fan_power: 2.5,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               tested_flow_rate: 30.0,
+                               fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeBalanced,
