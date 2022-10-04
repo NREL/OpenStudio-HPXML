@@ -1335,7 +1335,6 @@ class Constructions
       clg_day_sch = clg_setpoint_sch.to_ScheduleRuleset.get.getDaySchedules(sim_begin_date, sim_begin_date)[0]
       cool_setpoint = UnitConversions.convert(clg_day_sch.values[0], 'C', 'F')
     else
-      # ScheduleFile, just make an assumption for now to avoid runtime impact of processing a CSV file.
       cool_setpoint = 68.0 # F, from ASHRAE 152 (avoids runtime impact from processing ScheduleFile CSV)
     end
 
@@ -1358,31 +1357,41 @@ class Constructions
     # Determine initial temperature
     # For unconditioned spaces, this overrides EnergyPlus's built-in assumption of 22C (71.6F);
     #   see https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L257-L259
-    # For conditioned spaces, this is similar to the EnergyPlus methodology but without the E+ 22.2 bug;
-    #   see https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
-    #   and https://github.com/NREL/EnergyPlus/issues/9692
+    # For conditioned spaces, this avoids an E+ 22.2 bug; see https://github.com/NREL/EnergyPlus/issues/9692
     if HPXML::conditioned_locations.include? slab.interior_adjacent_to
       initial_temp = indoor_temp
     else
       # Space temperature assumptions from ASHRAE 152 - Duct Efficiency Calculations.xls, Zone temperatures
       seasonal_outdoor_temp = weather.data.MonthlyAvgDrybulbs[sim_begin_month - 1]
       ground_temp = weather.data.GroundMonthlyTemps[sim_begin_month - 1]
-      # We could make better estimates by factoring in insulation locations/levels, but this is a reasonable start.
+      # We could make better estimates by factoring in insulation locations/levels,
+      # but using an average is a reasonable start.
       if slab.interior_adjacent_to == HPXML::LocationBasementUnconditioned
-        outdoor_weight = 0.2
-        ground_weight = 0.6
-        indoor_weight = 0.2
+        # Uninsulated: 50% ground, 20% outdoors, 30% indoors
+        # Insulated walls: 50% ground, 0% outdoors, 50% indoors
+        # Insulated ceiling: 75% ground, 25% outdoors, 0% indoors
+        ground_weight = (0.5 + 0.5 + 0.75) / 3
+        outdoor_weight = (0.2 + 0.0 + 0.25) / 3
+        indoor_weight = (0.3 + 0.5 + 0.0) / 3
         initial_temp = seasonal_outdoor_temp * outdoor_weight + ground_temp * ground_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceVented
-        outdoor_weight = 0.75
-        indoor_weight = 0.25
+        # Uninsulated: 50% outdoors, 50% indoors
+        # Insulated ceiling: 90% outdoors, 10% indoors
+        outdoor_weight = (0.5 + 0.9) / 2
+        indoor_weight = (0.5 + 0.1) / 2
         initial_temp = seasonal_outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceUnvented
-        outdoor_weight = 0.5
-        indoor_weight = 0.5
+        # Uninsulated: 40% outdoors, 60% indoors
+        # Insulated ceiling: 85% outdoors, 15% indoors
+        # Insulated walls & ceiling: 75% outdoors, 25% indoors
+        outdoor_weight = (0.4 + 0.85 + 0.75) / 3
+        indoor_weight = (0.6 + 0.15 + 0.25) / 3
         initial_temp = seasonal_outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationGarage
+        # outdoors + 11
         initial_temp = seasonal_outdoor_temp + 11.0
+      else
+        fail "Unhandled space: #{slab.interior_adjacent_to}"
       end
     end
 
