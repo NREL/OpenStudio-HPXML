@@ -1663,14 +1663,16 @@ class HPXMLDefaults
         water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
         water_heating_system.performance_adjustment_isdefaulted = true
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss_value.nil?
         # Use equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
         act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
         surface_area = Waterheater.calc_tank_areas(act_vol)[0]
         sqft_by_gal = surface_area / act_vol # sqft/gal
-        water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
-        water_heating_system.standby_loss_isdefaulted = true
+        water_heating_system.standby_loss_value = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
+        water_heating_system.standby_loss_value_isdefaulted = true
+        water_heating_system.standby_loss_units = HPXML::UnitsDegFPerHour
+        water_heating_system.standby_loss_units_isdefaulted = true
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
@@ -2602,7 +2604,7 @@ class HPXMLDefaults
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh
 
-    # Assign heating design loads back to HPXML object
+    # Assign heating design loads to HPXML object
     hvacpl.hdl_total = bldg_design_loads.Heat_Tot.round
     hvacpl.hdl_walls = bldg_design_loads.Heat_Walls.round
     hvacpl.hdl_ceilings = bldg_design_loads.Heat_Ceilings.round
@@ -2622,7 +2624,7 @@ class HPXMLDefaults
       fail 'Heating design loads do not sum to total.'
     end
 
-    # Cooling sensible design loads back to HPXML object
+    # Assign cooling sensible design loads to HPXML object
     hvacpl.cdl_sens_total = bldg_design_loads.Cool_Sens.round
     hvacpl.cdl_sens_walls = bldg_design_loads.Cool_Walls.round
     hvacpl.cdl_sens_ceilings = bldg_design_loads.Cool_Ceilings.round
@@ -2645,7 +2647,7 @@ class HPXMLDefaults
       fail 'Cooling sensible design loads do not sum to total.'
     end
 
-    # Cooling latent design loads back to HPXML object
+    # Assign cooling latent design loads to HPXML object
     hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
     hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
     hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infil_Lat.round
@@ -2656,7 +2658,11 @@ class HPXMLDefaults
       fail 'Cooling latent design loads do not sum to total.'
     end
 
-    # Assign sizing values back to HPXML objects
+    # Assign design temperatures to HPXML object
+    hvacpl.temp_heating = weather.design.HeatingDrybulb.round(2)
+    hvacpl.temp_cooling = weather.design.CoolingDrybulb.round(2)
+
+    # Assign sizing values to HPXML objects
     all_hvac_sizing_values.each do |hvac_system, hvac_sizing_values|
       htg_sys = hvac_system[:heating]
       clg_sys = hvac_system[:cooling]
