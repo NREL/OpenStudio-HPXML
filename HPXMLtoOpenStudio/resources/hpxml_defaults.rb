@@ -31,7 +31,7 @@ class HPXMLDefaults
       end
     end
 
-    apply_header(hpxml, epw_file)
+    apply_header(hpxml, epw_file, schedules_file)
     apply_emissions_scenarios(hpxml)
     apply_utility_bill_scenarios(runner, hpxml)
     apply_site(hpxml)
@@ -114,7 +114,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file)
+  def self.apply_header(hpxml, epw_file, schedules_file)
     if hpxml.header.occupancy_calculation_type.nil?
       hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
       hpxml.header.occupancy_calculation_type_isdefaulted = true
