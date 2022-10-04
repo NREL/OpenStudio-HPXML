@@ -827,6 +827,7 @@ class HVAC
     thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_sch)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
+    offset_db = hvac_control.onoff_thermostat_deadband
     if not offset_db.nil?
       thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(offset_db, 'r', 'k'))
     end

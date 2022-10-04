@@ -3826,6 +3826,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
   elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
     hpxml.header.timestep = 1
+    hpxml.header.temperature_capacitance_multiplier = 4.0
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     hpxml.heat_pumps[0].heating_capacity = 10000
     hpxml.heat_pumps[0].heating_capacity_17F = 5900.0
