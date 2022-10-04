@@ -1864,6 +1864,34 @@ class OSModel
   def self.add_unmet_hours_output(model, spaces)
     # We do our own unmet hours calculation via EMS so that we can incorporate,
     # e.g., heating/cooling seasons into the logic.
+
+    outage_sensor = nil
+    htg_season_sensor = nil
+    clg_season_sensor = nil
+    if not @schedules_file.nil?
+      outage_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnOutage)
+      heating_season_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSeason)
+      cooling_season_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSeason)
+
+      if not outage_sch.nil?
+        outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
+        outage_sensor.setKeyName(outage_sch.name.to_s)
+      end
+
+      if not heating_season_sch.nil?
+        htg_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        htg_season_sensor.setName("#{SchedulesFile::ColumnHeatingSeason} s")
+        htg_season_sensor.setKeyName(heating_season_sch.name.to_s)
+      end
+
+      if not cooling_season_sch.nil?
+        clg_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        clg_season_sensor.setName("#{SchedulesFile::ColumnCoolingSeason} s")
+        clg_season_sensor.setKeyName(cooling_season_sch.name.to_s)
+      end
+    end
+
     hvac_control = @hpxml.hvac_controls[0]
     if not hvac_control.nil?
       sim_year = @hpxml.header.sim_calendar_year
@@ -1892,19 +1920,31 @@ class OSModel
     program.addLine("Set #{htg_hrs} = 0")
     program.addLine("Set #{clg_hrs} = 0")
     if @hpxml.total_fraction_heat_load_served > 0
-      if htg_end_day >= htg_start_day
-        program.addLine("If (DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day})")
+      if htg_season_sensor.nil?
+        if htg_end_day >= htg_start_day
+          program.addLine("If (DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day})")
+        else
+          program.addLine("If (DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day})")
+        end
       else
-        program.addLine("If (DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day})")
+        line = "If (#{htg_season_sensor.name} == 1)"
+        line += " || (#{outage_sensor.name} == 1)" if not outage_sensor.nil?
+        program.addLine(line)
       end
       program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
       program.addLine('EndIf')
     end
     if @hpxml.total_fraction_cool_load_served > 0
-      if clg_end_day >= clg_start_day
-        program.addLine("If (DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day})")
+      if clg_season_sensor.nil?
+        if clg_end_day >= clg_start_day
+          program.addLine("If (DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day})")
+        else
+          program.addLine("If (DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day})")
+        end
       else
-        program.addLine("If (DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day})")
+        line = "If (#{clg_season_sensor.name} == 1)"
+        line += " || (#{outage_sensor.name} == 1)" if not outage_sensor.nil?
+        program.addLine(line)
       end
       program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
       program.addLine('EndIf')
@@ -2621,6 +2661,7 @@ class OSModel
     @heating_season = nil
     @cooling_season = nil
     if not @schedules_file.nil?
+      # the actual arrays are used for sequential fractions and setpoints
       schedules = @schedules_file.schedules
       @heating_season = schedules[SchedulesFile::ColumnHeatingSeason] if not schedules[SchedulesFile::ColumnHeatingSeason].nil?
       @cooling_season = schedules[SchedulesFile::ColumnCoolingSeason] if not schedules[SchedulesFile::ColumnCoolingSeason].nil?
