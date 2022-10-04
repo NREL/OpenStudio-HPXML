@@ -809,9 +809,9 @@ class ScheduleGenerator
       outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
 
       # heating/cooling seasons
-      # TODO: actually fill these in
-      heating_season = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 1)
-      cooling_season = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 1)
+      heating_season = Schedule.get_hourly_season(@sim_year, args[:seasons_heating_begin_month], args[:seasons_heating_begin_day], args[:seasons_heating_end_month], args[:seasons_heating_end_day])
+      cooling_season = Schedule.get_hourly_season(@sim_year, args[:seasons_cooling_begin_month], args[:seasons_cooling_begin_day], args[:seasons_cooling_end_month], args[:seasons_cooling_end_day])
+      # TODO: use args[:steps_in_hour] in making these potentially subhourly?
 
       # natural ventilation during outage period
       natural_ventilation = nil

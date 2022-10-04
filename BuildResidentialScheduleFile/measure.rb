@@ -228,6 +228,25 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:schedules_outage_end_day] = end_day
       args[:schedules_outage_end_hour] = end_hour
 
+      args[:seasons_heating_begin_month] = 1
+      args[:seasons_heating_begin_day] = 1
+      args[:seasons_heating_end_month] = 12
+      args[:seasons_heating_end_day] = 31
+      args[:seasons_cooling_begin_month] = 1
+      args[:seasons_cooling_begin_day] = 1
+      args[:seasons_cooling_end_month] = 12
+      args[:seasons_cooling_end_day] = 31
+      hpxml.hvac_controls.each do |hvac_control|
+        args[:seasons_heating_begin_month] = hvac_control.seasons_heating_begin_month if !hvac_control.seasons_heating_begin_month.nil?
+        args[:seasons_heating_begin_day] = hvac_control.seasons_heating_begin_day if !hvac_control.seasons_heating_begin_day.nil?
+        args[:seasons_heating_end_month] = hvac_control.seasons_heating_end_month if !hvac_control.seasons_heating_end_month.nil?
+        args[:seasons_heating_end_day] = hvac_control.seasons_heating_end_day if !hvac_control.seasons_heating_end_day.nil?
+        args[:seasons_cooling_begin_month] = hvac_control.seasons_cooling_begin_month if !hvac_control.seasons_cooling_begin_month.nil?
+        args[:seasons_cooling_begin_day] = hvac_control.seasons_cooling_begin_day if !hvac_control.seasons_cooling_begin_day.nil?
+        args[:seasons_cooling_end_month] = hvac_control.seasons_cooling_end_month if !hvac_control.seasons_cooling_end_month.nil?
+        args[:seasons_cooling_end_day] = hvac_control.seasons_cooling_end_day if !hvac_control.seasons_cooling_end_day.nil?
+      end
+
       args[:window_natvent_availability] = 3
       args[:window_natvent_availability] = hpxml.header.natvent_days_per_week if !hpxml.header.natvent_days_per_week.nil?
     end

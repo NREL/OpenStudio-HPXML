@@ -1025,6 +1025,7 @@ class Schedule
   end
 
   def self.get_hourly_season(year, start_month, start_day, end_month, end_day)
+    # TODO: pass in steps_in_hr to potentially return subhourly?
     start_day_num = get_day_num_from_month_day(year, start_month, start_day)
     end_day_num = get_day_num_from_month_day(year, end_month, end_day)
 
@@ -1083,7 +1084,7 @@ class Schedule
     return s
   end
 
-  def self.create_interval_from_season(model, values)
+  def self.create_ruleset_from_hourly_season(model, values)
     # FIXME: create a (potentially simpler) hourly ruleset here instead?
     start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
     timestep_day = OpenStudio::Time.new(1, 0)
@@ -1095,6 +1096,7 @@ class Schedule
   end
 
   def self.create_daily_from_hourly(daily)
+    # TODO: general this by passing in steps_in_hr to potentially create_daily_from_subhourly?
     hourly = []
     daily.each_slice(24) do |d|
       hourly << d

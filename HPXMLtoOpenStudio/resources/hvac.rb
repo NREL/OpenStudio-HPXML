@@ -3568,7 +3568,7 @@ class HVAC
       # elsif values.size == Constants.NumDaysInYear(model.getYearDescription.assumedYear)
       # s = Schedule.create_ruleset_from_daily_season(model, values)
     else
-      s = Schedule.create_interval_from_season(model, values)
+      s = Schedule.create_ruleset_from_hourly_season(model, values)
     end
 
     s.setName(sch_name)
