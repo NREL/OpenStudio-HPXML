@@ -808,6 +808,11 @@ class ScheduleGenerator
     if (not args[:schedules_outage_begin_month].nil?) && (not args[:schedules_outage_begin_day].nil?) && (not args[:schedules_outage_begin_hour].nil?) && (not args[:schedules_outage_end_month].nil?) && (not args[:schedules_outage_end_day].nil?) && (not args[:schedules_outage_end_hour].nil?)
       outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
 
+      # heating/cooling seasons
+      # TODO: actually fill these in
+      heating_season = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 1)
+      cooling_season = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 1)
+
       # natural ventilation during outage period
       natural_ventilation = nil
       if args[:schedules_outage_window_natvent_availability].is_initialized
@@ -837,6 +842,9 @@ class ScheduleGenerator
         length = outage_hours * args[:steps_in_hour]
         outage.fill(1.0, ix, length) # Fill between start/end days
 
+        heating_season.fill(0.0, ix, length) # Fill between start/end days
+        cooling_season.fill(0.0, ix, length) # Fill between start/end days
+
         if not natural_ventilation.nil?
           fill = 0.0 # windows closed
           fill = 1.0 if args[:schedules_outage_window_natvent_availability].get # windows open
@@ -849,6 +857,9 @@ class ScheduleGenerator
         ix = (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
         length = outage_hours * args[:steps_in_hour]
         outage.fill(1.0, ix, length) # Fill between start day and end of year
+
+        heating_season.fill(0.0, ix, length) # Fill between start day and end of year
+        cooling_season.fill(0.0, ix, length) # Fill between start day and end of year
 
         if not natural_ventilation.nil?
           fill = 0.0 # windows closed
@@ -863,6 +874,9 @@ class ScheduleGenerator
         length = outage_hours * args[:steps_in_hour]
         outage.fill(1.0, ix, length) # Fill between start of year and end day
 
+        heating_season.fill(0.0, ix, length) # Fill between start of year and end day
+        cooling_season.fill(0.0, ix, length) # Fill between start of year and end day
+
         if not natural_ventilation.nil?
           fill = 0.0 # windows closed
           fill = 1.0 if args[:schedules_outage_window_natvent_availability].get # windows open
@@ -870,6 +884,8 @@ class ScheduleGenerator
         end
       end
       @schedules[SchedulesFile::ColumnOutage] = outage
+      @schedules[SchedulesFile::ColumnHeatingSeason] = heating_season
+      @schedules[SchedulesFile::ColumnCoolingSeason] = cooling_season
       @schedules[SchedulesFile::ColumnNaturalVentilation] = natural_ventilation if not natural_ventilation.nil?
     end
     return true
