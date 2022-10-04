@@ -306,6 +306,7 @@ def create_hpxmls
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-only-detailed-setpoints.xml' => 'base-hvac-furnace-gas-only.xml',
+    'base-hvac-furnace-gas-only-detailed-seasons.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-furnace-gas-room-ac.xml' => 'base.xml',
     'base-hvac-furnace-oil-only.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-furnace-propane-only.xml' => 'base-hvac-furnace-gas-only.xml',
@@ -341,6 +342,7 @@ def create_hpxmls
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-detailed-setpoints.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-only-detailed-seasons.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-setpoints-daily-schedules.xml' => 'base-hvac-setpoints-daily-setbacks.xml',
@@ -2488,6 +2490,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Season Schedules
   if ['base-schedules-detailed-seasons.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/seasons.csv'
+  elsif ['base-hvac-furnace-gas-only-detailed-seasons.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/seasons-heating-only.csv'
+  elsif ['base-hvac-room-ac-only-detailed-seasons.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/seasons-cooling-only.csv'
   end
 
   # Natural Ventilation Schedules
