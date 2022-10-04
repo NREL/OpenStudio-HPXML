@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_hpxml_output</name>
   <uid>9561a0d7-60ad-48c5-8337-2461df044d80</uid>
-  <version_id>3ac2ae09-ea0f-4216-84dc-b34008aa5b08</version_id>
-  <version_modified>20220930T150435Z</version_modified>
+  <version_id>07518600-e138-40c5-9e39-0e7cea601588</version_id>
+  <version_modified>20221004T144244Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportHPXMLOutput</class_name>
   <display_name>HPXML Output Report</display_name>
@@ -62,13 +62,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>084AB878</checksum>
+      <checksum>B0567483</checksum>
     </file>
     <file>
       <filename>hpxml_output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C0E4766D</checksum>
+      <checksum>82E65BDD</checksum>
     </file>
     <file>
       <version>
@@ -79,7 +79,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7B07CD35</checksum>
+      <checksum>FB56C807</checksum>
     </file>
   </files>
 </measure>

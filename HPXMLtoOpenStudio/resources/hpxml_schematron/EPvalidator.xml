@@ -1569,7 +1569,7 @@
       <sch:assert role='ERROR' test='count(h:RelatedHVACSystem) = 1'>Expected 1 element(s) for xpath: RelatedHVACSystem</sch:assert> <!-- HeatingSystem (boiler) -->
       <sch:assert role='ERROR' test='count(h:TankVolume) = 1'>Expected 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
-      <sch:assert role='ERROR' test='count(h:StandbyLoss) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StandbyLoss</sch:assert>
+      <sch:assert role='ERROR' test='count(h:StandbyLoss[h:Units="F/hr"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StandbyLoss[Units="F/hr"]/Value</sch:assert>
     </sch:rule>
   </sch:pattern>
 
