@@ -39,7 +39,7 @@ __Bugfixes__
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
 - Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
 - Fixes possible "Could not identify surface type for surface" error.
-- Improved Kiva foundation model initial temperature assumptions based on space type.
+- Improves Kiva foundation model initial temperature assumptions based on space type.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
