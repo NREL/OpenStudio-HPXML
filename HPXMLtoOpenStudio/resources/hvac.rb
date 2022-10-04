@@ -591,8 +591,8 @@ class HVAC
       disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     end
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0]))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs, Constants.ObjectNameHeatingSequentialFraction))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0], Constants.ObjectNameCoolingSequentialFraction))
 
     return zone_hvac
   end
@@ -610,8 +610,8 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     zone_hvac.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0]))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs, Constants.ObjectNameHeatingSequentialFraction))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, [0], Constants.ObjectNameCoolingSequentialFraction))
   end
 
   def self.apply_unit_heater(model, heating_system,
@@ -647,8 +647,8 @@ class HVAC
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.addToThermalZone(control_zone)
 
-    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_fracs))
-    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, [0]))
+    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_fracs, Constants.ObjectNameHeatingSequentialFraction))
+    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, [0], Constants.ObjectNameCoolingSequentialFraction))
   end
 
   def self.apply_ideal_air_loads(model, obj_name, sequential_cool_load_fracs,
@@ -677,8 +677,8 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_fracs))
-    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_fracs))
+    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_fracs, Constants.ObjectNameCoolingSequentialFraction))
+    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_fracs, Constants.ObjectNameHeatingSequentialFraction))
   end
 
   def self.apply_dehumidifiers(model, dehumidifiers, living_space)
@@ -786,7 +786,7 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
+  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_season, cooling_season, year, schedules_file)
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
@@ -809,15 +809,19 @@ class HVAC
 
     # only deal with deadband issue if both schedules are simple
     if heating_sch.nil? && cooling_sch.nil?
-      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
+      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(runner, heating_season, cooling_season, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints)
     end
 
     if heating_sch.nil?
+      htg_weekday_setpoints = Schedule.create_daily_from_hourly(htg_weekday_setpoints)
+      htg_weekend_setpoints = Schedule.create_daily_from_hourly(htg_weekend_setpoints)
       heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
       heating_sch = heating_setpoint.schedule
     end
 
     if cooling_sch.nil?
+      clg_weekday_setpoints = Schedule.create_daily_from_hourly(clg_weekday_setpoints)
+      clg_weekend_setpoints = Schedule.create_daily_from_hourly(clg_weekend_setpoints)
       cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
       cooling_sch = cooling_setpoint.schedule
     end
@@ -830,7 +834,7 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
+  def self.create_setpoint_schedules(runner, heating_season, cooling_season, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints)
     # Create setpoint schedules
     # This method ensures that we don't construct a setpoint schedule where the cooling setpoint
     # is less than the heating setpoint, which would result in an E+ error.
@@ -839,22 +843,21 @@ class HVAC
     # to prevent unmet hours being reported. This is a dangerous idea. These setpoints are used
     # by natural ventilation, Kiva initialization, and probably other things.
 
-    num_days = Constants.NumDaysInYear(year)
     warning = false
-    (0..(num_days - 1)).to_a.each do |i|
-      if (heating_days[i] == cooling_days[i]) # both (or neither) heating/cooling seasons
-        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-      elsif heating_days[i] == 1 # heating only seasons; cooling has minimum of heating
+    heating_season.zip(cooling_season).each_with_index do |(hs, cs), i|
+      if (hs == cs) # both (or neither) heating/cooling seasons
+        htg_wkdy = average_setpoint(Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints[i], clg_weekday_setpoints[i])
+        htg_wked = average_setpoint(Constants.ObjectNameHeatingSetpoint, htg_weekend_setpoints[i], clg_weekend_setpoints[i])
+        clg_wkdy = average_setpoint(Constants.ObjectNameCoolingSetpoint, htg_weekday_setpoints[i], clg_weekday_setpoints[i])
+        clg_wked = average_setpoint(Constants.ObjectNameCoolingSetpoint, htg_weekend_setpoints[i], clg_weekend_setpoints[i])
+      elsif hs == 1 # heating only seasons; cooling has minimum of heating
         htg_wkdy = htg_weekday_setpoints[i]
         htg_wked = htg_weekend_setpoints[i]
-        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : c }
-        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : c }
-      elsif cooling_days[i] == 1 # cooling only seasons; heating has maximum of cooling
-        htg_wkdy = clg_weekday_setpoints[i].zip(htg_weekday_setpoints[i]).map { |c, h| c < h ? c : h }
-        htg_wked = clg_weekend_setpoints[i].zip(htg_weekend_setpoints[i]).map { |c, h| c < h ? c : h }
+        clg_wkdy = min_setpoint(Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints[i], clg_weekday_setpoints[i])
+        clg_wked = min_setpoint(Constants.ObjectNameHeatingSetpoint, htg_weekend_setpoints[i], clg_weekend_setpoints[i])
+      elsif cs == 1 # cooling only seasons; heating has maximum of cooling
+        htg_wkdy = min_setpoint(Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints[i], htg_weekday_setpoints[i])
+        htg_wked = min_setpoint(Constants.ObjectNameCoolingSetpoint, clg_weekend_setpoints[i], htg_weekend_setpoints[i])
         clg_wkdy = clg_weekday_setpoints[i]
         clg_wked = clg_weekend_setpoints[i]
       else
@@ -874,6 +877,34 @@ class HVAC
     end
 
     return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
+  end
+
+  def self.average_setpoint(setp, htg, clg)
+    if clg < htg
+      return (htg + clg) / 2.0
+    else
+      if setp == Constants.ObjectNameHeatingSetpoint
+        return htg
+      elsif setp == Constants.ObjectNameCoolingSetpoint
+        return clg
+      end
+    end
+  end
+
+  def self.min_setpoint(setp, htg, clg)
+    if clg < htg
+      if setp == Constants.ObjectNameHeatingSetpoint
+        return htg
+      elsif setp == Constants.ObjectNameCoolingSetpoint
+        return clg
+      end
+    else
+      if setp == Constants.ObjectNameHeatingSetpoint
+        return clg
+      elsif setp == Constants.ObjectNameCoolingSetpoint
+        return htg
+      end
+    end
   end
 
   def self.get_heating_setpoints(hvac_control, year)
@@ -906,7 +937,7 @@ class HVAC
     htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
-    return htg_weekday_setpoints, htg_weekend_setpoints
+    return htg_weekday_setpoints.flatten, htg_weekend_setpoints.flatten
   end
 
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
@@ -952,7 +983,7 @@ class HVAC
     clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
-    return clg_weekday_setpoints, clg_weekend_setpoints
+    return clg_weekday_setpoints.flatten, clg_weekend_setpoints.flatten
   end
 
   def self.get_default_heating_setpoint(control_type)
@@ -1671,8 +1702,8 @@ class HVAC
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_fracs))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_cool_load_fracs))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_fracs, Constants.ObjectNameHeatingSequentialFraction))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_cool_load_fracs, Constants.ObjectNameCoolingSequentialFraction))
 
     return air_loop
   end
@@ -3528,17 +3559,19 @@ class HVAC
     return sequential_load_fracs
   end
 
-  def self.get_sequential_load_schedule(model, fractions)
+  def self.get_sequential_load_schedule(model, fractions, sch_name)
     values = fractions.map { |f| f > 1 ? 1.0 : f.round(5) }
 
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setValue(values[0])
+      # elsif values.size == Constants.NumDaysInYear(model.getYearDescription.assumedYear)
+      # s = Schedule.create_ruleset_from_daily_season(model, values)
     else
-      s = Schedule.create_ruleset_from_daily_season(model, values)
+      s = Schedule.create_interval_from_season(model, values)
     end
 
-    s.setName('Sequential Fraction Schedule')
+    s.setName(sch_name)
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end
