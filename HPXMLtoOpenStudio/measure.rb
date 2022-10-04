@@ -210,7 +210,7 @@ class OSModel
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
     add_floors(runner, model, spaces)
-    add_foundation_walls_slabs(runner, model, spaces)
+    add_foundation_walls_slabs(runner, model, weather, spaces)
     add_shading_schedule(model, weather)
     add_windows(model, spaces)
     add_doors(model, spaces)
@@ -718,7 +718,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_walls_slabs(runner, model, spaces)
+  def self.add_foundation_walls_slabs(runner, model, weather, spaces)
     foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
@@ -797,7 +797,7 @@ class OSModel
         else
           z_origin = -1 * slab.depth_below_grade
         end
-        add_foundation_slab(model, spaces, slab, slab_exp_perim,
+        add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                             slab_area, z_origin, kiva_foundation)
       end
 
@@ -807,7 +807,7 @@ class OSModel
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
+        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
                             slab_area, z_origin, nil)
       end
 
@@ -954,7 +954,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(model, spaces, slab, slab_exp_perim,
+  def self.add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                                slab_area, z_origin, kiva_foundation)
 
     slab_tot_perim = slab_exp_perim
@@ -1015,7 +1015,15 @@ class OSModel
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
-    return surface.adjacentFoundation.get
+    kiva_foundation = surface.adjacentFoundation.get
+
+    Constructions.apply_foundation_initial_temp(kiva_foundation, slab, weather,
+                                                spaces[HPXML::LocationLivingSpace].thermalZone.get,
+                                                @hpxml.header.sim_begin_month,
+                                                @hpxml.header.sim_begin_day,
+                                                @hpxml.header.sim_calendar_year)
+
+    return kiva_foundation
   end
 
   def self.add_conditioned_floor_area(model, spaces)

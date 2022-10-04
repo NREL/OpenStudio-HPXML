@@ -1316,6 +1316,79 @@ class Constructions
     settings.setSimulationTimestep('Timestep')
   end
 
+  def self.apply_foundation_initial_temp(foundation, slab, weather, conditioned_zone,
+                                         sim_begin_month, sim_begin_day, sim_year)
+    # Set Kiva foundation initial temperature
+
+    # Get heating/cooling setpoints for the simulation start
+    sim_begin_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(sim_begin_month), sim_begin_day, sim_year)
+    setpoint_sch = conditioned_zone.thermostatSetpointDualSetpoint.get
+    htg_setpoint_sch = setpoint_sch.heatingSetpointTemperatureSchedule.get
+    if htg_setpoint_sch.to_ScheduleRuleset.is_initialized
+      htg_day_sch = htg_setpoint_sch.to_ScheduleRuleset.get.getDaySchedules(sim_begin_date, sim_begin_date)[0]
+      heat_setpoint = UnitConversions.convert(htg_day_sch.values[0], 'C', 'F')
+    else
+      heat_setpoint = 78.0 # F, from ASHRAE 152 (avoids runtime impact from processing ScheduleFile CSV)
+    end
+    clg_setpoint_sch = setpoint_sch.coolingSetpointTemperatureSchedule.get
+    if clg_setpoint_sch.to_ScheduleRuleset.is_initialized
+      clg_day_sch = clg_setpoint_sch.to_ScheduleRuleset.get.getDaySchedules(sim_begin_date, sim_begin_date)[0]
+      cool_setpoint = UnitConversions.convert(clg_day_sch.values[0], 'C', 'F')
+    else
+      # ScheduleFile, just make an assumption for now to avoid runtime impact of processing a CSV file.
+      cool_setpoint = 68.0 # F, from ASHRAE 152 (avoids runtime impact from processing ScheduleFile CSV)
+    end
+
+    # Approximate indoor temperature
+    # Methodology adapted from https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
+    heat_balance_temp = UnitConversions.convert(10.0, 'C', 'F')
+    cool_balance_temp = UnitConversions.convert(15.0, 'C', 'F')
+    outdoor_temp = weather.data.MonthlyAvgDailyLowDrybulbs[sim_begin_month - 1]
+    if outdoor_temp < heat_balance_temp
+      indoor_temp = heat_setpoint
+    elsif outdoor_temp > cool_balance_temp
+      indoor_temp = cool_setpoint
+    elsif cool_balance_temp == heat_balance_temp
+      indoor_temp = heat_balance_temp
+    else
+      weight = (cool_balance_temp - outdoor_temp) / (cool_balance_temp - heat_balance_temp)
+      indoor_temp = heat_setpoint * weight + cool_setpoint * (1.0 - weight)
+    end
+
+    # Determine initial temperature
+    # For unconditioned spaces, this overrides EnergyPlus's built-in assumption of 22C (71.6F);
+    #   see https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L257-L259
+    # For conditioned spaces, this is similar to the EnergyPlus methodology but without the E+ 22.2 bug;
+    #   see https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
+    #   and https://github.com/NREL/EnergyPlus/issues/9692
+    if HPXML::conditioned_locations.include? slab.interior_adjacent_to
+      initial_temp = indoor_temp
+    else
+      # Space temperature assumptions from ASHRAE 152 - Duct Efficiency Calculations.xls, Zone temperatures
+      seasonal_outdoor_temp = weather.data.MonthlyAvgDrybulbs[sim_begin_month - 1]
+      ground_temp = weather.data.GroundMonthlyTemps[sim_begin_month - 1]
+      # We could make better estimates by factoring in insulation locations/levels, but this is a reasonable start.
+      if slab.interior_adjacent_to == HPXML::LocationBasementUnconditioned
+        outdoor_weight = 0.2
+        ground_weight = 0.6
+        indoor_weight = 0.2
+        initial_temp = seasonal_outdoor_temp * outdoor_weight + ground_temp * ground_weight + indoor_weight * indoor_temp
+      elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceVented
+        outdoor_weight = 0.75
+        indoor_weight = 0.25
+        initial_temp = seasonal_outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
+      elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceUnvented
+        outdoor_weight = 0.5
+        indoor_weight = 0.5
+        initial_temp = seasonal_outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
+      elsif slab.interior_adjacent_to == HPXML::LocationGarage
+        initial_temp = seasonal_outdoor_temp + 11.0
+      end
+    end
+
+    foundation.setInitialIndoorAirTemperature(UnitConversions.convert(initial_temp, 'F', 'C'))
+  end
+
   def self.create_insulation_material(model, name, rvalue)
     rigid_mat = BaseMaterial.InsulationRigid
     mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
