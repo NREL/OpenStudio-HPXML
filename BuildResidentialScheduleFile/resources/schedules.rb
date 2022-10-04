@@ -794,10 +794,10 @@ class ScheduleGenerator
 
       vacancy = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
       if end_day_num >= start_day_num
-        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day], (end_day_num - start_day_num + 1) * args[:steps_in_day]) # Fill between start/end days
+        vacancy.fill(1.0, (start_day_num - 1) * @steps_in_day, (end_day_num - start_day_num + 1) * @steps_in_day) # Fill between start/end days
       else # Wrap around year
-        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day]) # Fill between start day and end of year
-        vacancy.fill(1.0, 0, end_day_num * args[:steps_in_day]) # Fill between start of year and end day
+        vacancy.fill(1.0, (start_day_num - 1) * @steps_in_day) # Fill between start day and end of year
+        vacancy.fill(1.0, 0, end_day_num * @steps_in_day) # Fill between start of year and end day
       end
       @schedules[SchedulesFile::ColumnVacancy] = vacancy
     end
@@ -809,9 +809,8 @@ class ScheduleGenerator
       outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
 
       # heating/cooling seasons
-      heating_season = Schedule.get_hourly_season(@sim_year, args[:seasons_heating_begin_month], args[:seasons_heating_begin_day], args[:seasons_heating_end_month], args[:seasons_heating_end_day])
-      cooling_season = Schedule.get_hourly_season(@sim_year, args[:seasons_cooling_begin_month], args[:seasons_cooling_begin_day], args[:seasons_cooling_end_month], args[:seasons_cooling_end_day])
-      # TODO: use args[:steps_in_hour] in making these potentially subhourly?
+      heating_season = Schedule.get_season(@sim_year, @steps_in_day, args[:seasons_heating_begin_month], args[:seasons_heating_begin_day], args[:seasons_heating_end_month], args[:seasons_heating_end_day])
+      cooling_season = Schedule.get_season(@sim_year, @steps_in_day, args[:seasons_cooling_begin_month], args[:seasons_cooling_begin_day], args[:seasons_cooling_end_month], args[:seasons_cooling_end_day])
 
       # natural ventilation during outage period
       natural_ventilation = nil
@@ -838,7 +837,7 @@ class ScheduleGenerator
 
       if outage_end >= outage_begin
         outage_hours = (outage_end - outage_begin) / 3600.0
-        ix = (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
+        ix = (start_day_num - 1) * @steps_in_day + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
         length = outage_hours * args[:steps_in_hour]
         outage.fill(1.0, ix, length) # Fill between start/end days
 
@@ -854,7 +853,7 @@ class ScheduleGenerator
         outage_begin = Time.new(@sim_year, args[:schedules_outage_begin_month], args[:schedules_outage_begin_day], args[:schedules_outage_begin_hour])
         outage_end = Time.new(@sim_year + 1, 1, 1)
         outage_hours = (outage_end - outage_begin) / 3600.0
-        ix = (start_day_num - 1) * args[:steps_in_day] + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
+        ix = (start_day_num - 1) * @steps_in_day + args[:schedules_outage_begin_hour] * args[:steps_in_hour]
         length = outage_hours * args[:steps_in_hour]
         outage.fill(1.0, ix, length) # Fill between start day and end of year
 

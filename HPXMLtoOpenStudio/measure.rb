@@ -2628,13 +2628,16 @@ class OSModel
 
     hvac_control = @hpxml.hvac_controls[0]
 
+    steps_in_hour = 60 / @hpxml.header.timestep
+    steps_in_day = 24 * steps_in_hour
+
     if @heating_season.nil?
       htg_start_month = hvac_control.seasons_heating_begin_month
       htg_start_day = hvac_control.seasons_heating_begin_day
       htg_end_month = hvac_control.seasons_heating_end_month
       htg_end_day = hvac_control.seasons_heating_end_day
 
-      @heating_season = Schedule.get_hourly_season(@hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+      @heating_season = Schedule.get_season(@hpxml.header.sim_calendar_year, steps_in_day, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
     end
 
     if @cooling_season.nil?
@@ -2643,7 +2646,7 @@ class OSModel
       clg_end_month = hvac_control.seasons_cooling_end_month
       clg_end_day = hvac_control.seasons_cooling_end_day
 
-      @cooling_season = Schedule.get_hourly_season(@hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+      @cooling_season = Schedule.get_season(@hpxml.header.sim_calendar_year, steps_in_day, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
     end
   end
 end

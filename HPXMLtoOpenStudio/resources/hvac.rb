@@ -795,14 +795,15 @@ class HVAC
     end
 
     # permit mixing detailed schedules with simple schedules
+    steps_in_hour = model.getTimestep.numberOfTimestepsPerHour
     if heating_sch.nil?
-      htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, year)
+      htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, year, steps_in_hour)
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnHeatingSetpoint}' schedule file and heating setpoint temperature provided; the latter will be ignored.") if !hvac_control.heating_setpoint_temp.nil?
     end
 
     if cooling_sch.nil?
-      clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+      clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, steps_in_hour)
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnCoolingSetpoint}' schedule file and cooling setpoint temperature provided; the latter will be ignored.") if !hvac_control.cooling_setpoint_temp.nil?
     end
@@ -813,15 +814,15 @@ class HVAC
     end
 
     if heating_sch.nil?
-      htg_weekday_setpoints = Schedule.create_daily_from_hourly(htg_weekday_setpoints)
-      htg_weekend_setpoints = Schedule.create_daily_from_hourly(htg_weekend_setpoints)
+      htg_weekday_setpoints = Schedule.create_hourly_by_day(htg_weekday_setpoints, steps_in_hour)
+      htg_weekend_setpoints = Schedule.create_hourly_by_day(htg_weekend_setpoints, steps_in_hour)
       heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
       heating_sch = heating_setpoint.schedule
     end
 
     if cooling_sch.nil?
-      clg_weekday_setpoints = Schedule.create_daily_from_hourly(clg_weekday_setpoints)
-      clg_weekend_setpoints = Schedule.create_daily_from_hourly(clg_weekend_setpoints)
+      clg_weekday_setpoints = Schedule.create_hourly_by_day(clg_weekday_setpoints, steps_in_hour)
+      clg_weekend_setpoints = Schedule.create_hourly_by_day(clg_weekend_setpoints, steps_in_hour)
       cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
       cooling_sch = cooling_setpoint.schedule
     end
@@ -907,13 +908,13 @@ class HVAC
     end
   end
 
-  def self.get_heating_setpoints(hvac_control, year)
+  def self.get_heating_setpoints(hvac_control, year, steps_in_hour)
     num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
       htg_setpoint = hvac_control.heating_setpoint_temp
-      htg_weekday_setpoints = [[htg_setpoint] * 24] * num_days
+      htg_weekday_setpoints = [[htg_setpoint] * 24 * steps_in_hour] * num_days
       # Apply heating setback?
       htg_setback = hvac_control.heating_setback_temp
       if not htg_setback.nil?
@@ -921,7 +922,7 @@ class HVAC
         htg_setback_start_hr = hvac_control.heating_setback_start_hour
         for d in 1..num_days
           for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-            htg_weekday_setpoints[d - 1][hr % 24] = htg_setback
+            htg_weekday_setpoints[d - 1][hr % (24 * steps_in_hour)] = htg_setback
           end
         end
       end
@@ -940,13 +941,13 @@ class HVAC
     return htg_weekday_setpoints.flatten, htg_weekend_setpoints.flatten
   end
 
-  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, steps_in_hour)
     num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
       # Base cooling setpoint
       clg_setpoint = hvac_control.cooling_setpoint_temp
-      clg_weekday_setpoints = [[clg_setpoint] * 24] * num_days
+      clg_weekday_setpoints = [[clg_setpoint] * 24 * steps_in_hour] * num_days
       # Apply cooling setup?
       clg_setup = hvac_control.cooling_setup_temp
       if not clg_setup.nil?
@@ -954,7 +955,7 @@ class HVAC
         clg_setup_start_hr = hvac_control.cooling_setup_start_hour
         for d in 1..num_days
           for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-            clg_weekday_setpoints[d - 1][hr % 24] = clg_setup
+            clg_weekday_setpoints[d - 1][hr % (24 * steps_in_hour)] = clg_setup
           end
         end
       end
@@ -974,8 +975,8 @@ class HVAC
         Schedule.months_to_days(year, months).each_with_index do |operation, d|
           next if operation != 1
 
-          clg_weekday_setpoints[d] = [clg_weekday_setpoints[d], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-          clg_weekend_setpoints[d] = [clg_weekend_setpoints[d], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekday_setpoints[d] = [clg_weekday_setpoints[d], Array.new(24 * steps_in_hour, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekend_setpoints[d] = [clg_weekend_setpoints[d], Array.new(24 * steps_in_hour, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
         end
       end
     end
@@ -3565,10 +3566,8 @@ class HVAC
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setValue(values[0])
-      # elsif values.size == Constants.NumDaysInYear(model.getYearDescription.assumedYear)
-      # s = Schedule.create_ruleset_from_daily_season(model, values)
     else
-      s = Schedule.create_ruleset_from_hourly_season(model, values)
+      s = Schedule.create_interval_from_season(model, values)
     end
 
     s.setName(sch_name)

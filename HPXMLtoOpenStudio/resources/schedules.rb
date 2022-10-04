@@ -1024,17 +1024,16 @@ class Schedule
     return season
   end
 
-  def self.get_hourly_season(year, start_month, start_day, end_month, end_day)
-    # TODO: pass in steps_in_hr to potentially return subhourly?
+  def self.get_season(year, steps_in_day, start_month, start_day, end_month, end_day)
     start_day_num = get_day_num_from_month_day(year, start_month, start_day)
     end_day_num = get_day_num_from_month_day(year, end_month, end_day)
 
     season = Array.new(Constants.NumHoursInYear(year), 0)
     if end_day_num >= start_day_num
-      season.fill(1, (start_day_num - 1) * 24, (end_day_num - start_day_num + 1) * 24) # Fill between start/end days
+      season.fill(1, (start_day_num - 1) * steps_in_day, (end_day_num - start_day_num + 1) * steps_in_day) # Fill between start/end days
     else # Wrap around year
-      season.fill(1, (start_day_num - 1) * 24) # Fill between start day and end of year
-      season.fill(1, 0, end_day_num * 24) # Fill between start of year and end day
+      season.fill(1, (start_day_num - 1) * steps_in_day) # Fill between start day and end of year
+      season.fill(1, 0, end_day_num * steps_in_day) # Fill between start of year and end day
     end
     return season
   end
@@ -1058,50 +1057,26 @@ class Schedule
     return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(year, i + 1, n) }
   end
 
-  def self.create_ruleset_from_daily_season(model, values)
-    s = OpenStudio::Model::ScheduleRuleset.new(model)
-    year = model.getYearDescription.assumedYear
-    start_value = values[0]
-    start_date = OpenStudio::Date::fromDayOfYear(1, year)
-    values.each_with_index do |value, i|
-      i += 1
-      next unless value != start_value || i == values.length
-
-      rule = OpenStudio::Model::ScheduleRule.new(s)
-      set_weekday_rule(rule)
-      set_weekend_rule(rule)
-      i += 1 if i == values.length
-      end_date = OpenStudio::Date::fromDayOfYear(i - 1, year)
-      rule.setStartDate(start_date)
-      rule.setEndDate(end_date)
-      day_schedule = rule.daySchedule
-      day_schedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), start_value)
-      break if i == values.length + 1
-
-      start_date = OpenStudio::Date::fromDayOfYear(i, year)
-      start_value = value
-    end
-    return s
-  end
-
-  def self.create_ruleset_from_hourly_season(model, values)
-    # FIXME: create a (potentially simpler) hourly ruleset here instead?
+  def self.create_interval_from_season(model, values)
     start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
-    timestep_day = OpenStudio::Time.new(1, 0)
+    steps_in_hour = model.getTimestep.numberOfTimestepsPerHour
+    minutes = 60 / steps_in_hour
+    timestep_day = OpenStudio::Time.new(0, 0, minutes)
     time_series_season = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(values), '')
     s = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_season, model).get
-    s = s.to_ScheduleFixedInterval.get
-    s.setTranslatetoScheduleFile(true)
     return s
   end
 
-  def self.create_daily_from_hourly(daily)
-    # TODO: general this by passing in steps_in_hr to potentially create_daily_from_subhourly?
-    hourly = []
-    daily.each_slice(24) do |d|
-      hourly << d
+  def self.create_hourly_by_day(array, steps_in_hour)
+    hourly_by_day = []
+    array.each_slice(24 * steps_in_hour) do |d|
+      hourly = []
+      (0...d.length).step(steps_in_hour).each do |i|
+        hourly << d[i]
+      end
+      hourly_by_day << hourly
     end
-    return hourly
+    return hourly_by_day
   end
 
   def self.parse_date_range(date_range)
