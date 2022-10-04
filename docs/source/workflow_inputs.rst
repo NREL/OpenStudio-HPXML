@@ -183,9 +183,9 @@ The column names available in the schedule CSV files are:
   ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes                  Yes
   ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No                   No
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No                   No
-  ``heating_season``               0/1    TODO                                                                               No                   Yes
-  ``cooling_season``               0/1    TODO                                                                               No                   Yes
-  ``natural_ventilation``          0/1    TODO                                                                               Yes                  Yes
+  ``heating_season``               0/1    Heating season schedule.                                                           No                   Yes
+  ``cooling_season``               0/1    Cooling season schedule.                                                           No                   Yes
+  ``natural_ventilation``          0/1    Natural ventilation schedule for operable windows.                                 Yes                  Yes
   ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                    No                   No
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.      No                   No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A                  N/A
@@ -953,6 +953,8 @@ If operable windows are defined, the availability of natural ventilation is ente
   =============================================  ========  =========  ===========  ========  ========  ========================================================
 
   .. [#] Default of 3 days per week (Monday/Wednesday/Friday) is based on `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+Alternatively, availability of natural ventilation can be defined using :ref:`detailedschedules`.
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Window``.
 
@@ -1751,6 +1753,8 @@ If a heating and/or cooling season is defined, additional information is entered
   ``EndMonth``         integer          1 - 12       Yes                End month
   ``EndDayOfMonth``    integer          1 - 31       Yes                End day
   ===================  ========  =====  ===========  ========  =======  ===========
+
+Alternatively, seasons can be defined using :ref:`detailedschedules`.
 
 Thermostat setpoints are additionally entered using either simple inputs or hourly inputs.
 Alternatively, setpoints can be defined using :ref:`detailedschedules`.
