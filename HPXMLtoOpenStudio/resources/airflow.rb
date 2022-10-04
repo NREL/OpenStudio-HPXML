@@ -440,6 +440,8 @@ class Airflow
       end
       on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
       on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnNaturalVentilation}' schedule file and natural ventilation days per week provided; the latter will be ignored.") if !num_days_per_week.nil?
     end
     Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
     return avail_sch

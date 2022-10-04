@@ -209,7 +209,8 @@ class HPXMLDefaults
       hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
-    if hpxml.header.natvent_days_per_week.nil?
+    schedules_file_includes_natvent = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnNaturalVentilation)
+    if hpxml.header.natvent_days_per_week.nil? && !schedules_file_includes_natvent
       hpxml.header.natvent_days_per_week = 3
       hpxml.header.natvent_days_per_week_isdefaulted = true
     end
@@ -1439,8 +1440,9 @@ class HPXMLDefaults
         hvac_control.cooling_setup_start_hour_isdefaulted = true
       end
 
-      if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
-         hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
+      schedules_file_includes_heating_season = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnHeatingSeason)
+      if (hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
+         hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?) && !schedules_file_includes_heating_season
         hvac_control.seasons_heating_begin_month = 1
         hvac_control.seasons_heating_begin_day = 1
         hvac_control.seasons_heating_end_month = 12
@@ -1451,8 +1453,9 @@ class HPXMLDefaults
         hvac_control.seasons_heating_end_day_isdefaulted = true
       end
 
-      next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? ||
-                  hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
+      schedules_file_includes_cooling_season = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCoolingSeason)
+      next unless (hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? ||
+         hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?) && !schedules_file_includes_cooling_season
 
       hvac_control.seasons_cooling_begin_month = 1
       hvac_control.seasons_cooling_begin_day = 1
