@@ -1024,6 +1024,20 @@ class Schedule
     return season
   end
 
+  def self.get_hourly_season(year, start_month, start_day, end_month, end_day)
+    start_day_num = get_day_num_from_month_day(year, start_month, start_day)
+    end_day_num = get_day_num_from_month_day(year, end_month, end_day)
+
+    season = Array.new(Constants.NumHoursInYear(year), 0)
+    if end_day_num >= start_day_num
+      season.fill(1, (start_day_num - 1) * 24, (end_day_num - start_day_num + 1) * 24) # Fill between start/end days
+    else # Wrap around year
+      season.fill(1, (start_day_num - 1) * 24) # Fill between start day and end of year
+      season.fill(1, 0, end_day_num * 24) # Fill between start of year and end day
+    end
+    return season
+  end
+
   def self.months_to_days(year, months)
     month_num_days = Constants.NumDaysInMonths(year)
     days = []
@@ -1067,6 +1081,25 @@ class Schedule
       start_value = value
     end
     return s
+  end
+
+  def self.create_interval_from_season(model, values)
+    # FIXME: create a (potentially simpler) hourly ruleset here instead?
+    start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
+    timestep_day = OpenStudio::Time.new(1, 0)
+    time_series_season = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(values), '')
+    s = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_season, model).get
+    s = s.to_ScheduleFixedInterval.get
+    s.setTranslatetoScheduleFile(true)
+    return s
+  end
+
+  def self.create_daily_from_hourly(daily)
+    hourly = []
+    daily.each_slice(24) do |d|
+      hourly << d
+    end
+    return hourly
   end
 
   def self.parse_date_range(date_range)
