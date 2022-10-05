@@ -1874,18 +1874,21 @@ class OSModel
       cooling_season_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSeason)
 
       if not outage_sch.nil?
+        Schedule.set_schedule_type_limits(model, outage_sch, Constants.ScheduleTypeLimitsFraction)
         outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
         outage_sensor.setKeyName(outage_sch.name.to_s)
       end
 
       if not heating_season_sch.nil?
+        Schedule.set_schedule_type_limits(model, heating_season_sch, Constants.ScheduleTypeLimitsFraction)
         htg_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         htg_season_sensor.setName("#{SchedulesFile::ColumnHeatingSeason} s")
         htg_season_sensor.setKeyName(heating_season_sch.name.to_s)
       end
 
       if not cooling_season_sch.nil?
+        Schedule.set_schedule_type_limits(model, cooling_season_sch, Constants.ScheduleTypeLimitsFraction)
         clg_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         clg_season_sensor.setName("#{SchedulesFile::ColumnCoolingSeason} s")
         clg_season_sensor.setKeyName(cooling_season_sch.name.to_s)
