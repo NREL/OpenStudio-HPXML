@@ -194,8 +194,14 @@ class Airflow
       phi = q_inf / q_tot
     end
     q_fan = q_tot - phi * (q_inf * infil_a_ext)
+    q_fan = [q_fan, 0].max
 
-    return [q_fan, 0].max
+    if not vent_fan.hours_in_operation.nil?
+      # Convert from hourly average requirement to actual fan flow rate
+      q_fan *= 24.0 / vent_fan.hours_in_operation
+    end
+
+    return q_fan
   end
 
   private
@@ -1447,9 +1453,15 @@ class Airflow
       fan_heat_lost_fraction = 0.0
     else
       # Calculate total fan power
-      sup_fans_w = sup_fans.map { |f| f.average_unit_fan_power }.sum(0.0)
-      exh_fans_w = exh_fans.map { |f| f.average_unit_fan_power }.sum(0.0)
-      bal_fans_w = (bal_fans + erv_hrv_fans).map { |f| f.average_unit_fan_power }.sum(0.0)
+      if obj_name == Constants.ObjectNameMechanicalVentilationHouseFanCFISSupplFan
+        sup_fans_w = sup_fans.map { |f| f.unit_fan_power }.sum(0.0)
+        exh_fans_w = exh_fans.map { |f| f.unit_fan_power }.sum(0.0)
+        bal_fans_w = (bal_fans + erv_hrv_fans).map { |f| f.unit_fan_power }.sum(0.0)
+      else
+        sup_fans_w = sup_fans.map { |f| f.average_unit_fan_power }.sum(0.0)
+        exh_fans_w = exh_fans.map { |f| f.average_unit_fan_power }.sum(0.0)
+        bal_fans_w = (bal_fans + erv_hrv_fans).map { |f| f.average_unit_fan_power }.sum(0.0)
+      end
       tot_fans_w = sup_fans_w + exh_fans_w + bal_fans_w
 
       # Calculate weighted-average value
