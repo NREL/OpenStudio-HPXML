@@ -1960,7 +1960,7 @@ If not entered, the simulation will not include mechanical ventilation.
   ``IsSharedSystem``                                                                             boolean            See [#]_     No        false      Whether it serves multiple dwelling units
   ``FanType``                                                                                    string             See [#]_     Yes                  Type of ventilation system
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate [#]_
-  ``HoursInOperation``                                                                           double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
+  ``HoursInOperation``                                                                           double    hrs/day  0 - 24       See [#]_  See [#]_   Hours per day of operation
   ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
   =============================================================================================  ========  =======  ===========  ========  =========  =========================================
 
@@ -1968,9 +1968,10 @@ If not entered, the simulation will not include mechanical ventilation.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
   .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_, including adjustments for A) infiltration credit, B) balanced vs imbalanced systems, and C) adiabatic surfaces for SFA/MF buildings.
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a CFIS system, in which case it is not used as an input.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
-         For a CFIS system, the HoursInOperation and the flow rate are combined to form the expected/required hourly ventilation rate (e.g., 90 cfm and 8 hrs/day produce an hourly ventilation rate of 30 cfm).
-         For a CFIS system with a supplemental fan, HoursInOperation is not used for the supplemental fan as its runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly ventilation rate.
+         For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
+         For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          
          - "energy recovery ventilator", "heat recovery ventilator", or shared system: 1.0 W/cfm
@@ -2021,7 +2022,7 @@ If a central fan integrated supply system is specified, additional information i
   ================================================  ======  =====  ===========  ========  ===============  ==================================
 
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
-  .. [#] SupplementalFan must reference another ``VentilationFan`` w/ UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
+  .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
   .. [#] HVACDistribution type cannot be HydronicDistribution.
   .. [#] Blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.
