@@ -1357,6 +1357,12 @@ class HPXMLTest < MiniTest::Test
     if hpxml_path.include? 'base-hvac-undersized.xml'
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
+    elsif hpxml_path.include? 'base-schedules-detailed-occupancy-stochastic-outage.xml'
+      assert_operator(unmet_hours_htg, :>, 1000)
+      assert_operator(unmet_hours_clg, :<, 350)
+    elsif hpxml_path.include? 'base-schedules-detailed-occupancy-stochastic-outage-natvent.xml'
+      assert_operator(unmet_hours_htg, :<, 350)
+      assert_operator(unmet_hours_clg, :>, 100)
     else
       if hpxml.total_fraction_heat_load_served == 0
         assert_equal(0, unmet_hours_htg)
