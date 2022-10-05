@@ -1316,11 +1316,12 @@ class Constructions
     settings.setSimulationTimestep('Timestep')
   end
 
-  def self.apply_foundation_initial_temp(foundation, slab, weather, conditioned_zone,
-                                         sim_begin_month, sim_begin_day, sim_year)
+  def self.apply_kiva_initial_temp(foundation, slab, weather, conditioned_zone,
+                                   sim_begin_month, sim_begin_day, sim_year,
+                                   foundation_walls_insulated, foundation_ceiling_insulated)
     # Set Kiva foundation initial temperature
 
-    outdoor_temp = weather.data.MonthlyAvgDailyLowDrybulbs[sim_begin_month - 1]
+    outdoor_temp = weather.data.MonthlyAvgDrybulbs[sim_begin_month - 1]
 
     # Approximate indoor temperature
     if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
@@ -1371,28 +1372,41 @@ class Constructions
     else
       # Space temperature assumptions from ASHRAE 152 - Duct Efficiency Calculations.xls, Zone temperatures
       ground_temp = weather.data.GroundMonthlyTemps[sim_begin_month - 1]
-      # We could make better estimates by factoring in insulation locations/levels,
-      # but using an average is a reasonable start.
       if slab.interior_adjacent_to == HPXML::LocationBasementUnconditioned
-        # Uninsulated: 50% ground, 20% outdoors, 30% indoors
-        # Insulated walls: 50% ground, 0% outdoors, 50% indoors
-        # Insulated ceiling: 75% ground, 25% outdoors, 0% indoors
-        ground_weight = (0.5 + 0.5 + 0.75) / 3
-        outdoor_weight = (0.2 + 0.0 + 0.25) / 3
-        indoor_weight = (0.3 + 0.5 + 0.0) / 3
+        if foundation_ceiling_insulated
+          # Insulated ceiling: 75% ground, 25% outdoor, 0% indoor
+          ground_weight, outdoor_weight, indoor_weight = 0.75, 0.25, 0.0
+        elsif foundation_walls_insulated
+          # Insulated walls: 50% ground, 0% outdoor, 50% indoor (case not in ASHRAE 152)
+          ground_weight, outdoor_weight, indoor_weight = 0.5, 0.0, 0.5
+        else
+          # Uninsulated: 50% ground, 20% outdoor, 30% indoor
+          ground_weight, outdoor_weight, indoor_weight = 0.5, 0.2, 0.3
+        end
         initial_temp = outdoor_temp * outdoor_weight + ground_temp * ground_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceVented
-        # Uninsulated: 50% outdoors, 50% indoors
-        # Insulated ceiling: 90% outdoors, 10% indoors
-        outdoor_weight = (0.5 + 0.9) / 2
-        indoor_weight = (0.5 + 0.1) / 2
+        if foundation_ceiling_insulated
+          # Insulated ceiling: 90% outdoor, 10% indoor
+          outdoor_weight, indoor_weight = 0.9, 0.1
+        elsif foundation_walls_insulated
+          # Insulated walls: 25% outdoor, 75% indoor (case not in ASHRAE 152)
+          outdoor_weight, indoor_weight = 0.25, 0.75
+        else
+          # Uninsulated: 50% outdoor, 50% indoor
+          outdoor_weight, indoor_weight = 0.5, 0.5
+        end
         initial_temp = outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationCrawlspaceUnvented
-        # Uninsulated: 40% outdoors, 60% indoors
-        # Insulated ceiling: 85% outdoors, 15% indoors
-        # Insulated walls & ceiling: 75% outdoors, 25% indoors
-        outdoor_weight = (0.4 + 0.85 + 0.75) / 3
-        indoor_weight = (0.6 + 0.15 + 0.25) / 3
+        if foundation_ceiling_insulated
+          # Insulated ceiling: 85% outdoor, 15% indoor
+          outdoor_weight, indoor_weight = 0.85, 0.15
+        elsif foundation_walls_insulated
+          # Insulated walls: 25% outdoor, 75% indoor
+          outdoor_weight, indoor_weight = 0.25, 0.75
+        else
+          # Uninsulated: 40% outdoor, 60% indoor
+          outdoor_weight, indoor_weight = 0.4, 0.6
+        end
         initial_temp = outdoor_temp * outdoor_weight + indoor_weight * indoor_temp
       elsif slab.interior_adjacent_to == HPXML::LocationGarage
         initial_temp = outdoor_temp + 11.0

@@ -1017,11 +1017,32 @@ class OSModel
 
     kiva_foundation = surface.adjacentFoundation.get
 
-    Constructions.apply_foundation_initial_temp(kiva_foundation, slab, weather,
-                                                spaces[HPXML::LocationLivingSpace].thermalZone.get,
-                                                @hpxml.header.sim_begin_month,
-                                                @hpxml.header.sim_begin_day,
-                                                @hpxml.header.sim_calendar_year)
+    foundation_walls_insulated = false
+    foundation_ceiling_insulated = false
+    @hpxml.foundation_walls.each do |fnd_wall|
+      next unless fnd_wall.interior_adjacent_to == slab.interior_adjacent_to
+      next unless fnd_wall.exterior_adjacent_to == HPXML::LocationGround
+
+      if fnd_wall.insulation_assembly_r_value.to_f > 5
+        foundation_walls_insulated = true
+      elsif fnd_wall.insulation_exterior_r_value.to_f + fnd_wall.insulation_interior_r_value.to_f > 0
+        foundation_walls_insulated = true
+      end
+    end
+    @hpxml.floors.each do |floor|
+      next unless floor.interior_adjacent_to == HPXML::LocationLivingSpace
+      next unless floor.exterior_adjacent_to == slab.interior_adjacent_to
+
+      if floor.insulation_assembly_r_value > 5
+        foundation_ceiling_insulated = true
+      end
+    end
+
+    Constructions.apply_kiva_initial_temp(kiva_foundation, slab, weather,
+                                          spaces[HPXML::LocationLivingSpace].thermalZone.get,
+                                          @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day,
+                                          @hpxml.header.sim_calendar_year,
+                                          foundation_walls_insulated, foundation_ceiling_insulated)
 
     return kiva_foundation
   end
