@@ -6,34 +6,11 @@
 require 'pathname'
 require 'csv'
 require 'oga'
-require_relative 'resources/airflow'
-require_relative 'resources/battery'
-require_relative 'resources/utility_bills'
-require_relative 'resources/constants'
-require_relative 'resources/constructions'
-require_relative 'resources/energyplus'
-require_relative 'resources/generator'
-require_relative 'resources/geometry'
-require_relative 'resources/hotwater_appliances'
-require_relative 'resources/hpxml'
-require_relative 'resources/hpxml_defaults'
-require_relative 'resources/hvac'
-require_relative 'resources/hvac_sizing'
-require_relative 'resources/lighting'
-require_relative 'resources/location'
-require_relative 'resources/materials'
-require_relative 'resources/misc_loads'
-require_relative 'resources/psychrometrics'
-require_relative 'resources/pv'
-require_relative 'resources/schedules'
-require_relative 'resources/simcontrols'
-require_relative 'resources/unit_conversions'
-require_relative 'resources/util'
-require_relative 'resources/validator'
-require_relative 'resources/version'
-require_relative 'resources/waterheater'
-require_relative 'resources/weather'
-require_relative 'resources/xmlhelper'
+Dir["#{File.dirname(__FILE__)}/resources/*.rb"].each do |resource_file|
+  next if resource_file.include? 'minitest_helper.rb'
+
+  require resource_file
+end
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -963,9 +940,12 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
+                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag,
+                                        soil_k_in)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -1028,11 +1008,12 @@ class OSModel
       mat_carpet = Material.CoveringBare(slab.carpet_fraction,
                                          slab.carpet_r_value)
     end
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab_exp_perim, mat_carpet, kiva_foundation)
+                                        slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
     return surface.adjacentFoundation.get
   end
@@ -1557,7 +1538,7 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 living_zone)
+                                                                 living_zone, @hpxml.site.ground_conductivity)
 
       end
 
@@ -2442,9 +2423,11 @@ class OSModel
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
+      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     end
   end
 

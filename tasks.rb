@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-def create_hpxmls
-  require_relative 'HPXMLtoOpenStudio/resources/constants'
-  require_relative 'HPXMLtoOpenStudio/resources/hpxml'
-  require_relative 'HPXMLtoOpenStudio/resources/meta_measure'
+Dir["#{File.dirname(__FILE__)}/HPXMLtoOpenStudio/resources/*.rb"].each do |resource_file|
+  next if resource_file.include? 'minitest_helper.rb'
 
+  require resource_file
+end
+
+def create_hpxmls
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, 'workflow/sample_files')
 
@@ -384,6 +386,7 @@ def create_hpxmls
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
+    'base-misc-ground-conductivity.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -707,7 +710,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.95
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 18767
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
@@ -968,7 +970,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency_type'] = 'EnergyFactor'
     args['water_heater_efficiency'] = 0
     args['water_heater_recovery_efficiency'] = 0
-    args['water_heater_standby_loss'] = 0
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0
@@ -2093,6 +2094,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('site_iecc_zone')
     args.delete('site_state_code')
+  elsif ['base-misc-ground-conductivity.xml'].include? hpxml_file
+    args['site_ground_conductivity'] = 0.8
   end
 
   # Mechanical Ventilation
@@ -4641,8 +4644,6 @@ def renumber_hpxml_ids(hpxml)
 end
 
 def download_epws
-  require_relative 'HPXMLtoOpenStudio/resources/util'
-
   require 'tempfile'
   tmpfile = Tempfile.new('epw')
 
@@ -5014,7 +5015,6 @@ if ARGV[0].to_sym == :update_measures
   # Update measures XMLs
   puts 'Updating measure.xmls...'
   require 'oga'
-  require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
   Dir['**/measure.xml'].each do |measure_xml|
     for n_attempt in 1..5 # For some reason CLI randomly generates errors, so try multiple times
       measure_dir = File.dirname(measure_xml)
@@ -5075,8 +5075,6 @@ if ARGV[0].to_sym == :update_hpxmls
 end
 
 if ARGV[0].to_sym == :cache_weather
-  require_relative 'HPXMLtoOpenStudio/resources/weather'
-
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
   puts 'Creating cache *.csv for weather files...'
@@ -5104,8 +5102,6 @@ if ARGV[0].to_sym == :download_utility_rates
 end
 
 if ARGV[0].to_sym == :create_release_zips
-  require_relative 'HPXMLtoOpenStudio/resources/version'
-
   release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false,
                   File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
 
