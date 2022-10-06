@@ -449,11 +449,25 @@ If the HPXML file has ``Systems/HVAC/HVACPlant/PrimarySystems`` populated, then 
    Secondary Systems: Heat Pump Backup Capacity (Btu/h)     Heat pump backup capacity of secondary system; only provided if a non-primary system is present
    =======================================================  ====================
 
+Design Temperatures
+~~~~~~~~~~~~~~~~~~~
+
+Design temperatures are used in the design load calculations for autosizing of HVAC equipment.
+1%/99% design temperatures are obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+If they are not available in the EPW header, the design temperatures are calculated from the 8760 hourly temperatures in the EPW.
+
+   ================================================================  ====================
+   Type                                                              Notes
+   ================================================================  ====================
+   Design Temperature: Heating (F)                                   99% heating drybulb temperature
+   Design Temperature: Cooling (F)                                   1% cooling drybulb temperature
+   ================================================================  ====================
+
 Design Loads
 ~~~~~~~~~~~~
 
-Design load outputs are listed below.
-Design loads are based on block load ACCA Manual J calculations.
+Design load outputs, used for autosizing of HVAC equipment, are listed below.
+Design loads are based on block load ACCA Manual J calculations using 1%/99% design temperatures.
 
    ================================================================  ====================
    Type                                                              Notes
