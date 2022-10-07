@@ -1219,16 +1219,7 @@ class Airflow
       obj_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if obj_sch.nil?
-      daily_sch = [0.0] * 24
-      remaining_hrs = vent_object.hours_in_operation
-      for hr in 1..(vent_object.hours_in_operation.ceil)
-        if remaining_hrs >= 1
-          daily_sch[(vent_object.start_hour + hr - 1) % 24] = 1.0
-        else
-          daily_sch[(vent_object.start_hour + hr - 1) % 24] = remaining_hrs
-        end
-        remaining_hrs -= 1
-      end
+      daily_sch = Schedule.create_daily_sch(vent_object.hours_in_operation, vent_object.start_hour)
       obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false)
       obj_sch = obj_sch.schedule
       obj_sch_name = obj_sch.name.to_s

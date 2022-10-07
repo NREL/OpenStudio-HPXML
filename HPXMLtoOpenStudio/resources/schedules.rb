@@ -1063,6 +1063,20 @@ class Schedule
     return s
   end
 
+  def self.create_daily_sch(hours_in_operation, start_hour)
+    daily_sch = [0.0] * 24
+    remaining_hrs = hours_in_operation
+    for hr in 1..(hours_in_operation.ceil)
+      if remaining_hrs >= 1
+        daily_sch[(start_hour + hr - 1) % 24] = 1.0
+      else
+        daily_sch[(start_hour + hr - 1) % 24] = remaining_hrs
+      end
+      remaining_hrs -= 1
+    end
+    return daily_sch
+  end
+
   def self.create_hourly_by_day(array, steps_in_hour)
     hourly_by_day = []
     array.each_slice(24 * steps_in_hour) do |d|
