@@ -368,6 +368,7 @@ def create_hpxmls
     'base-location-portland-or.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
+    'base-mechvent-bath-kitchen-fans-detailed-availability.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-airflow-fraction-zero.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
@@ -2513,6 +2514,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Dehumidifier Schedules
   if ['base-appliances-dehumidifier-detailed-availability.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/dehumidifier.csv'
+  end
+
+  # Local Ventilation Schedules
+  if ['base-mechvent-bath-kitchen-fans-detailed-availability.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/local-ventilation.csv'
   end
 
   # Water Heater Schedules
