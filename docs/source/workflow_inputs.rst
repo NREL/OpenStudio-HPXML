@@ -181,6 +181,7 @@ The column names available in the schedule CSV files are:
   ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                                 Yes                  Yes
   ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                             Yes                  Yes
   ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes                  Yes
+  ``dehumidifier``                 0/1    Dehumidifier availability schedule.                                                No                   Yes
   ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No                   No
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No                   No
   ``heating_season``               0/1    Heating season schedule.                                                           No                   Yes

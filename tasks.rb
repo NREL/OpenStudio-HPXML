@@ -46,6 +46,7 @@ def create_hpxmls
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-ief-whole-home.xml' => 'base-appliances-dehumidifier-ief-portable.xml',
     'base-appliances-dehumidifier-multiple.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-detailed-availability.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
@@ -2507,6 +2508,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Natural Ventilation Schedules
   if ['base-enclosure-windows-natural-ventilation-detailed-availability.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/natural-ventilation.csv'
+  end
+
+  # Dehumidifier Schedules
+  if ['base-appliances-dehumidifier-detailed-availability.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/dehumidifier.csv'
   end
 
   # Water Heater Schedules
