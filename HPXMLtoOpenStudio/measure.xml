@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>91f6adf5-aa25-475d-88cf-38a52298af7e</version_id>
-  <version_modified>20221007T154103Z</version_modified>
+  <version_id>4c9e5014-202f-49ae-af05-82c220538cf4</version_id>
+  <version_modified>20221007T162727Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -290,30 +290,6 @@
       <checksum>C2F66DD0</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-smooth.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3659E63B</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FAB83EF4</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F46D463C</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1C142FA2</checksum>
-    </file>
-    <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -584,16 +560,46 @@
       <checksum>46BB2E5A</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4D48A134</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>9C4C1B11</checksum>
+    </file>
+    <file>
+      <filename>test_schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B216F7C7</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-smooth.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>83D2D7D3</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4531298A</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C08BD0AD</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1A12535B</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F4CC9C0F</checksum>
     </file>
     <file>
       <version>
@@ -604,37 +610,37 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6E94975D</checksum>
+      <checksum>502D9DFE</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-outage-summer.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E5127FFE</checksum>
+      <checksum>D8671291</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-outage-winter.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D7FA43FE</checksum>
+      <checksum>17D0815D</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5947B892</checksum>
+      <checksum>34A6E31A</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>68549354</checksum>
+      <checksum>2C3832AA</checksum>
     </file>
     <file>
-      <filename>test_schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B216F7C7</checksum>
+      <filename>schedule_files/dehumidifier.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>464CFDF7</checksum>
     </file>
   </files>
 </measure>

@@ -103,6 +103,7 @@ class ScheduleGenerator
     create_average_pool_heater
     create_average_hot_tub_pump
     create_average_hot_tub_heater
+    create_average_dehumidifier
   end
 
   def create_average_occupants
@@ -206,6 +207,10 @@ class ScheduleGenerator
 
   def create_average_hot_tub_heater
     create_timeseries_from_weekday_weekend_monthly(sch_name: SchedulesFile::ColumnHotTubHeater, weekday_sch: Schedule.HotTubHeaterWeekdayFractions, weekend_sch: Schedule.HotTubHeaterWeekendFractions, monthly_sch: Schedule.HotTubHeaterMonthlyMultipliers)
+  end
+
+  def create_average_dehumidifier
+    create_timeseries_from_weekday_weekend_monthly(sch_name: SchedulesFile::ColumnDehumidifier, weekday_sch: Schedule.DehumidifierWeekdayFractions, weekend_sch: Schedule.DehumidifierWeekendFractions, monthly_sch: Schedule.DehumidifierMonthlyMultipliers)
   end
 
   def create_timeseries_from_weekday_weekend_monthly(sch_name:,
