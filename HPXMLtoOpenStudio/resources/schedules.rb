@@ -1199,6 +1199,8 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnDehumidifier = 'dehumidifier'
+  ColumnKitchenFan = 'kitchen_fan'
+  ColumnBathFan = 'bath_fan'
   ColumnVacancy = 'vacancy'
   ColumnOutage = 'outage'
   ColumnHeatingSetpoint = 'heating_setpoint'
@@ -1543,7 +1545,9 @@ class SchedulesFile
       ColumnHotWaterDishwasher,
       ColumnHotWaterClothesWasher,
       ColumnHotWaterFixtures,
-      ColumnDehumidifier
+      ColumnDehumidifier,
+      ColumnKitchenFan,
+      ColumnBathFan
     ]
   end
 
