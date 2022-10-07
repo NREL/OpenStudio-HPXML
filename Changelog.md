@@ -26,6 +26,7 @@ __New Features__
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
 - Allows shared dishwasher/clothes washer to be attached to a hot water distribution system instead of a single water heater.
 - Allows modeling on/off thermostat deadband with start-up degredation.
+- Improves Kiva foundation model heat transfer by providing better initial temperature assumptions based on foundation type and insulation levels.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
