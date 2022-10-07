@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>5aa0ff5c-a54b-449c-902b-5312f9baec5f</version_id>
-  <version_modified>20221007T194723Z</version_modified>
+  <version_id>b553b020-aa6c-43c2-9e76-9f304c25fff8</version_id>
+  <version_modified>20221007T222429Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -923,6 +923,12 @@
       <checksum>CF9FE088</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9A4AB0E4</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -931,13 +937,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5DB344B8</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EA68AB58</checksum>
+      <checksum>6EDE7E97</checksum>
     </file>
   </files>
 </measure>

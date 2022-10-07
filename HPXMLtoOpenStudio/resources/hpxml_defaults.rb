@@ -1596,7 +1596,8 @@ class HPXMLDefaults
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
         vent_fan.rated_flow_rate_isdefaulted = true
       end
-      if vent_fan.hours_in_operation.nil?
+      schedules_file_includes_kitchen_fan = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnKitchenFan)
+      if vent_fan.hours_in_operation.nil? && !schedules_file_includes_kitchen_fan
         vent_fan.hours_in_operation = 1.0 # hrs/day, per BA HSP
         vent_fan.hours_in_operation_isdefaulted = true
       end
@@ -1604,7 +1605,7 @@ class HPXMLDefaults
         vent_fan.fan_power = 0.3 * vent_fan.flow_rate # W, per BA HSP
         vent_fan.fan_power_isdefaulted = true
       end
-      if vent_fan.start_hour.nil?
+      if vent_fan.start_hour.nil? && !schedules_file_includes_kitchen_fan
         vent_fan.start_hour = 18 # 6 pm, per BA HSP
         vent_fan.start_hour_isdefaulted = true
       end
@@ -1622,7 +1623,8 @@ class HPXMLDefaults
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
         vent_fan.rated_flow_rate_isdefaulted = true
       end
-      if vent_fan.hours_in_operation.nil?
+      schedules_file_includes_bath_fan = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnBathFan)
+      if vent_fan.hours_in_operation.nil? && !schedules_file_includes_bath_fan
         vent_fan.hours_in_operation = 1.0 # hrs/day, per BA HSP
         vent_fan.hours_in_operation_isdefaulted = true
       end
@@ -1630,7 +1632,7 @@ class HPXMLDefaults
         vent_fan.fan_power = 0.3 * vent_fan.flow_rate # W, per BA HSP
         vent_fan.fan_power_isdefaulted = true
       end
-      if vent_fan.start_hour.nil?
+      if vent_fan.start_hour.nil? && !schedules_file_includes_bath_fan
         vent_fan.start_hour = 7 # 7 am, per BA HSP
         vent_fan.start_hour_isdefaulted = true
       end

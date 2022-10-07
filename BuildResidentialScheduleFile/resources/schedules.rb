@@ -799,25 +799,37 @@ class ScheduleGenerator
   end
 
   def set_kitchen_fan(args:)
-    # TODO
-    kitchen_fan = []
-    @total_days_in_year.times do |_day|
-      @steps_in_day.times do |_step|
-        kitchen_fan << 1
+    return true if !args[:has_kitchen_fan]
+
+    daily_sch = [0.0] * @steps_in_day
+    remaining_hrs = args[:kitchen_fan_hours_in_operation]
+    for hr in 1..(args[:kitchen_fan_hours_in_operation].ceil)
+      if remaining_hrs >= 1
+        daily_sch[(args[:kitchen_fan_start_hour] + hr - 1) % @steps_in_day] = 1.0
+      else
+        daily_sch[(args[:kitchen_fan_start_hour] + hr - 1) % @steps_in_day] = remaining_hrs
       end
+      remaining_hrs -= 1
     end
+    kitchen_fan = (daily_sch * @total_days_in_year).flatten
     @schedules[SchedulesFile::ColumnKitchenFan] = kitchen_fan
     return true
   end
 
   def set_bath_fan(args:)
-    # TODO
-    bath_fan = []
-    @total_days_in_year.times do |_day|
-      @steps_in_day.times do |_step|
-        bath_fan << 1
+    return true if !args[:has_bath_fan]
+
+    daily_sch = [0.0] * @steps_in_day
+    remaining_hrs = args[:bath_fan_hours_in_operation]
+    for hr in 1..(args[:bath_fan_hours_in_operation].ceil)
+      if remaining_hrs >= 1
+        daily_sch[(args[:bath_fan_start_hour] + hr - 1) % @steps_in_day] = 1.0
+      else
+        daily_sch[(args[:bath_fan_start_hour] + hr - 1) % @steps_in_day] = remaining_hrs
       end
+      remaining_hrs -= 1
     end
+    bath_fan = (daily_sch * @total_days_in_year).flatten
     @schedules[SchedulesFile::ColumnBathFan] = bath_fan
     return true
   end

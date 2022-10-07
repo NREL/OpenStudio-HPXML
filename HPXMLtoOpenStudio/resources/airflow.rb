@@ -1232,6 +1232,8 @@ class Airflow
       obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false)
       obj_sch = obj_sch.schedule
       obj_sch_name = obj_sch.name.to_s
+    else
+      runner.registerWarning("Both '#{col_name} schedule file and #{obj_type_name} hours in operation and start hour provided; the latter will be ignored.") if !vent_object.hours_in_operation.nil? && !vent_object.start_hour.nil?
     end
     obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     obj_sch_sensor.setName("#{obj_name} sch s")
