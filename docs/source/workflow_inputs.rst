@@ -1731,11 +1731,13 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
   ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
+  ``extension/OnOffThermostatDeadband``                    double    F      >= 0         No        0          On-off thermostats/deadbands [#]_
   =======================================================  ========  =====  ===========  ========  =========  ========================================
 
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
+  .. [#] OnOffThermostatDeadband should only be used if 100% heating or cooling is provided (FractionHeatLoadServed or FractionCoolLoadServed sum to 1.0). OnOffThermostatDeadband is only enabled when simulation time step is 1 minute, otherwise simulation will ignore this feature and throw a warning.
 
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
