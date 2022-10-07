@@ -131,7 +131,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-outage.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 7
+    schedule_constants = 9
     schedule_rulesets = 5
     schedule_fixed_intervals = 3
     schedule_files = 16
@@ -145,7 +145,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
 
   def test_stochastic_outage_natvent_schedules
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-outage-natvent.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-outage-summer.xml'))
     model, _hpxml = _test_measure(args_hash)
 
     schedule_constants = 7
