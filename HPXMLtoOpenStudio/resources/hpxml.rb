@@ -4111,7 +4111,7 @@ class HPXML < Object
   end
 
   class Duct < BaseElement
-    ATTRS = [:duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
+    ATTRS = [:id, :duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area]
     attr_accessor(*ATTRS)
 
@@ -4130,6 +4130,8 @@ class HPXML < Object
 
     def to_oga(air_distribution)
       ducts_el = XMLHelper.add_element(air_distribution, 'Ducts')
+      sys_id = XMLHelper.add_element(ducts_el, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(ducts_el, 'DuctType', @duct_type, :string) unless @duct_type.nil?
       if not @duct_insulation_material.nil?
         ins_material_el = XMLHelper.add_element(ducts_el, 'DuctInsulationMaterial')
@@ -4144,6 +4146,7 @@ class HPXML < Object
     def from_oga(duct)
       return if duct.nil?
 
+      @id = HPXML::get_id(duct)
       @duct_type = XMLHelper.get_value(duct, 'DuctType', :string)
       @duct_insulation_material = XMLHelper.get_child_name(duct, 'DuctInsulationMaterial')
       @duct_insulation_r_value = XMLHelper.get_value(duct, 'DuctInsulationRValue', :float)
