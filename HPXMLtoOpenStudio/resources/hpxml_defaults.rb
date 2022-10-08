@@ -56,7 +56,7 @@ class HPXMLDefaults
     apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
-    apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
+    apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds, schedules_file)
     apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml, schedules_file)
@@ -1553,7 +1553,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
+  def self.apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds, schedules_file)
     # Default mech vent systems
     hpxml.ventilation_fans.each do |vent_fan|
       next unless vent_fan.used_for_whole_building_ventilation
