@@ -2518,6 +2518,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Local Ventilation Schedules
   if ['base-mechvent-bath-kitchen-fans-detailed-availability.xml'].include? hpxml_file
+    args.delete('kitchen_fans_hours_in_operation')
+    args.delete('kitchen_fans_start_hour')
+    args.delete('bathroom_fans_hours_in_operation')
+    args.delete('bathroom_fans_start_hour')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/local-ventilation.csv'
   end
 
