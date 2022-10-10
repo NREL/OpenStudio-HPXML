@@ -1266,16 +1266,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if hvac_system.is_a? HPXML::HeatingSystem
         next if hvac_system.is_heat_pump_backup_system
 
-        htg_cap += hvac_system.heating_capacity
+        htg_cap += hvac_system.heating_capacity.to_f
       elsif hvac_system.is_a? HPXML::CoolingSystem
-        clg_cap += hvac_system.cooling_capacity
+        clg_cap += hvac_system.cooling_capacity.to_f
       elsif hvac_system.is_a? HPXML::HeatPump
-        htg_cap += hvac_system.heating_capacity
-        clg_cap += hvac_system.cooling_capacity
+        htg_cap += hvac_system.heating_capacity.to_f
+        clg_cap += hvac_system.cooling_capacity.to_f
         if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-          hp_backup_cap += hvac_system.backup_heating_capacity
+          hp_backup_cap += hvac_system.backup_heating_capacity.to_f
         elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
-          hp_backup_cap += hvac_system.backup_system.heating_capacity
+          hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f
         end
       end
     end
