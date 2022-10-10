@@ -16,8 +16,6 @@ class HPXMLTest < MiniTest::Test
   def test_simulations
     results_out = File.join(@results_dir, 'results.csv')
     File.delete(results_out) if File.exist? results_out
-    sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
-    File.delete(sizing_out) if File.exist? sizing_out
     bills_out = File.join(@results_dir, 'results_bills.csv')
     File.delete(bills_out) if File.exist? bills_out
 
@@ -35,16 +33,14 @@ class HPXMLTest < MiniTest::Test
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
-    all_sizing_results = {}
     all_bill_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       _test_schema_validation(xml)
       xml_name = File.basename(xml)
-      all_results[xml_name], all_sizing_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
+      all_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
     _write_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
-    _write_results(all_sizing_results.sort_by { |k, _v| k.downcase }.to_h, sizing_out)
     _write_results(all_bill_results.sort_by { |k, _v| k.downcase }.to_h, bills_out)
   end
 
@@ -426,12 +422,11 @@ class HPXMLTest < MiniTest::Test
       end
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
-    sizing_results = _get_hvac_sizing_results(hpxml, xml)
     bill_results = _get_bill_results(bills_csv_path)
     results = _get_simulation_results(annual_csv_path, xml, hpxml)
     _verify_outputs(rundir, xml, results, hpxml)
 
-    return results, sizing_results, bill_results
+    return results, bill_results
   end
 
   def _get_simulation_results(annual_csv_path, xml, hpxml)
@@ -462,80 +457,6 @@ class HPXMLTest < MiniTest::Test
       if hpxml.total_fraction_cool_load_served > 0
         assert((abs_clg_load_delta < 1.1) || (abs_clg_load_frac < 0.1))
       end
-    end
-
-    return results
-  end
-
-  def _get_hvac_sizing_results(hpxml, xml)
-    results = {}
-    return if xml.include? 'ASHRAE_Standard_140'
-
-    # Design temperatures
-    hpxml.hvac_plant.class::TEMPERATURE_ATTRS.keys.each do |attr|
-      results["temperature_#{attr.to_s.gsub('temp_', '')} [F]"] = hpxml.hvac_plant.send(attr.to_s)
-    end
-
-    # Heating design loads
-    hpxml.hvac_plant.class::HDL_ATTRS.keys.each do |attr|
-      results["heating_load_#{attr.to_s.gsub('hdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
-    end
-
-    # Cooling sensible design loads
-    hpxml.hvac_plant.class::CDL_SENS_ATTRS.keys.each do |attr|
-      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
-    end
-
-    # Cooling latent design loads
-    hpxml.hvac_plant.class::CDL_LAT_ATTRS.keys.each do |attr|
-      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
-    end
-
-    # Heating capacities/airflows
-    results['heating_capacity [Btuh]'] = 0.0
-    results['heating_backup_capacity [Btuh]'] = 0.0
-    results['heating_airflow [cfm]'] = 0.0
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_sys|
-      results['heating_capacity [Btuh]'] += htg_sys.heating_capacity
-      if htg_sys.is_a? HPXML::HeatPump
-        if not htg_sys.backup_heating_capacity.nil?
-          results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
-        elsif not htg_sys.backup_system.nil?
-          results['heating_backup_capacity [Btuh]'] += htg_sys.backup_system.heating_capacity
-        end
-      end
-      results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm.to_f
-    end
-
-    # Cooling capacity/airflows
-    results['cooling_capacity [Btuh]'] = 0.0
-    results['cooling_airflow [cfm]'] = 0.0
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_sys|
-      results['cooling_capacity [Btuh]'] += clg_sys.cooling_capacity
-      results['cooling_airflow [cfm]'] += clg_sys.cooling_airflow_cfm
-    end
-
-    assert(!results.empty?)
-
-    if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
-      # No heating equipment; check for zero heating capacities/airflows/duct loads
-      assert_equal(0.0, results['heating_capacity [Btuh]'])
-      assert_equal(0.0, results['heating_backup_capacity [Btuh]'])
-      assert_equal(0.0, results['heating_airflow [cfm]'])
-      assert_equal(0.0, results['heating_load_ducts [Btuh]'])
-    end
-    if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
-      # No cooling equipment; check for zero cooling capacities/airflows/duct loads
-      assert_equal(0.0, results['cooling_capacity [Btuh]'])
-      assert_equal(0.0, results['cooling_airflow [cfm]'])
-      assert_equal(0.0, results['cooling_load_sens_ducts [Btuh]'])
-      assert_equal(0.0, results['cooling_load_lat_ducts [Btuh]'])
-    end
-    if hpxml.hvac_distributions.map { |dist| dist.ducts.size }.empty?
-      # No ducts; check for zero duct loads
-      assert_equal(0.0, results['heating_load_ducts [Btuh]'])
-      assert_equal(0.0, results['cooling_load_sens_ducts [Btuh]'])
-      assert_equal(0.0, results['cooling_load_lat_ducts [Btuh]'])
     end
 
     return results
