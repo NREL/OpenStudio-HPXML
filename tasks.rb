@@ -331,7 +331,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
-    'base-hvac-none.xml' => 'base.xml',
+    'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-ptac.xml' => 'base.xml',
     'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
