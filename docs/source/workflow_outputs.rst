@@ -391,33 +391,33 @@ Design loads can also be found in the `in.xml` file.
    =====================================================================  ====================
    Type                                                                   Notes
    =====================================================================  ====================
-   HVAC Design Loads Heating: Total (Btu/h)                               Total heating design load
-   HVAC Design Loads Heating: Ducts (Btu/h)                               Heating design load for ducts
-   HVAC Design Loads Heating: Windows (Btu/h)                             Heating design load for windows
-   HVAC Design Loads Heating: Skylights (Btu/h)                           Heating design load for skylights
-   HVAC Design Loads Heating: Doors (Btu/h)                               Heating design load for doors
-   HVAC Design Loads Heating: Walls (Btu/h)                               Heating design load for walls
-   HVAC Design Loads Heating: Roofs (Btu/h)                               Heating design load for roofs
-   HVAC Design Loads Heating: Floors (Btu/h)                              Heating design load for floors
-   HVAC Design Loads Heating: Slabs (Btu/h)                               Heating design load for slabs
-   HVAC Design Loads Heating: Ceilings (Btu/h)                            Heating design load for ceilings
-   HVAC Design Loads Heating: Infiltration/Ventilation (Btu/h)            Heating design load for infiltration/ventilation
-   HVAC Design Loads Cooling Sensible: Total (Btu/h)                      Total sensible cooling design load
-   HVAC Design Loads Cooling Sensible: Ducts (Btu/h)                      Sensible cooling design load for ducts
-   HVAC Design Loads Cooling Sensible: Windows (Btu/h)                    Sensible cooling design load for windows
-   HVAC Design Loads Cooling Sensible: Skylights (Btu/h)                  Sensible cooling design load for skylights
-   HVAC Design Loads Cooling Sensible: Doors (Btu/h)                      Sensible cooling design load for doors
-   HVAC Design Loads Cooling Sensible: Walls (Btu/h)                      Sensible cooling design load for walls
-   HVAC Design Loads Cooling Sensible: Roofs (Btu/h)                      Sensible cooling design load for roofs
-   HVAC Design Loads Cooling Sensible: Floors (Btu/h)                     Sensible cooling design load for floors
-   HVAC Design Loads Cooling Sensible: Slabs (Btu/h)                      Sensible cooling design load for slabs
-   HVAC Design Loads Cooling Sensible: Ceilings (Btu/h)                   Sensible cooling design load for ceilings
-   HVAC Design Loads Cooling Sensible: Infiltration/Ventilation (Btu/h)   Sensible cooling design load for infiltration/ventilation
-   HVAC Design Loads Cooling Sensible: Internal Gains (Btu/h)             Sensible cooling design load for internal gains
-   HVAC Design Loads Cooling Latent: Total (Btu/h)                        Total latent cooling design load
-   HVAC Design Loads Cooling Latent: Ducts (Btu/h)                        Latent cooling design load for ducts
-   HVAC Design Loads Cooling Latent: Infiltration/Ventilation (Btu/h)     Latent cooling design load for infiltration/ventilation
-   HVAC Design Loads Cooling Latent: Internal Gains (Btu/h)               Latent cooling design load for internal gains
+   HVAC Design Load: Heating: Total (Btu/h)                               Total heating design load
+   HVAC Design Load: Heating: Ducts (Btu/h)                               Heating design load for ducts
+   HVAC Design Load: Heating: Windows (Btu/h)                             Heating design load for windows
+   HVAC Design Load: Heating: Skylights (Btu/h)                           Heating design load for skylights
+   HVAC Design Load: Heating: Doors (Btu/h)                               Heating design load for doors
+   HVAC Design Load: Heating: Walls (Btu/h)                               Heating design load for walls
+   HVAC Design Load: Heating: Roofs (Btu/h)                               Heating design load for roofs
+   HVAC Design Load: Heating: Floors (Btu/h)                              Heating design load for floors
+   HVAC Design Load: Heating: Slabs (Btu/h)                               Heating design load for slabs
+   HVAC Design Load: Heating: Ceilings (Btu/h)                            Heating design load for ceilings
+   HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)            Heating design load for infiltration/ventilation
+   HVAC Design Load: Cooling Sensible: Total (Btu/h)                      Total sensible cooling design load
+   HVAC Design Load: Cooling Sensible: Ducts (Btu/h)                      Sensible cooling design load for ducts
+   HVAC Design Load: Cooling Sensible: Windows (Btu/h)                    Sensible cooling design load for windows
+   HVAC Design Load: Cooling Sensible: Skylights (Btu/h)                  Sensible cooling design load for skylights
+   HVAC Design Load: Cooling Sensible: Doors (Btu/h)                      Sensible cooling design load for doors
+   HVAC Design Load: Cooling Sensible: Walls (Btu/h)                      Sensible cooling design load for walls
+   HVAC Design Load: Cooling Sensible: Roofs (Btu/h)                      Sensible cooling design load for roofs
+   HVAC Design Load: Cooling Sensible: Floors (Btu/h)                     Sensible cooling design load for floors
+   HVAC Design Load: Cooling Sensible: Slabs (Btu/h)                      Sensible cooling design load for slabs
+   HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)                   Sensible cooling design load for ceilings
+   HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)   Sensible cooling design load for infiltration/ventilation
+   HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)             Sensible cooling design load for internal gains
+   HVAC Design Load: Cooling Latent: Total (Btu/h)                        Total latent cooling design load
+   HVAC Design Load: Cooling Latent: Ducts (Btu/h)                        Latent cooling design load for ducts
+   HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)     Latent cooling design load for infiltration/ventilation
+   HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)               Latent cooling design load for internal gains
    =====================================================================  ====================
 
 .. _timeseries_outputs:
