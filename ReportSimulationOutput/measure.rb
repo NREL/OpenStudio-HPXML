@@ -1219,6 +1219,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(n_digits - 2)]
     end
 
+    results_out = append_sizing_results(results_out, line_break)
     if generate_eri_outputs
       results_out = append_eri_results(results_out, line_break)
     end
@@ -1256,6 +1257,69 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def get_runner_output_name(name, annual_units)
     return "#{name} #{annual_units}"
+  end
+
+  def append_sizing_results(results_out, line_break)
+    # Summary HVAC capacities
+    htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
+    @hpxml.hvac_systems.each do |hvac_system|
+      if hvac_system.is_a? HPXML::HeatingSystem
+        htg_cap += hvac_system.heating_capacity unless hvac_system.is_heat_pump_backup_system
+      elsif hvac_system.is_a? HPXML::CoolingSystem
+        clg_cap += hvac_system.cooling_capacity
+      elsif hvac_system.is_a? HPXML::HeatPump
+        htg_cap += hvac_system.heating_capacity
+        clg_cap += hvac_system.cooling_capacity
+        if not hvac_system.backup_heating_capacity.nil?
+          hp_backup_cap += hvac_system.backup_heating_capacity
+        elsif not hvac_system.backup_system.nil?
+          hp_backup_cap += hvac_system.backup_system.heating_capacity
+        end
+      end
+    end
+    results_out << [line_break]
+    results_out << ['HVAC Capacity: Heating (Btu/h)', htg_cap.round(1)]
+    results_out << ['HVAC Capacity: Cooling (Btu/h)', clg_cap.round(1)]
+    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hp_backup_cap.round(1)]
+
+    # HVAC design temperatures
+    results_out << [line_break]
+    results_out << ['HVAC Design Temperature: Heating (F)', @hpxml.hvac_plant.temp_heating.round(2)]
+    results_out << ['HVAC Design Temperature: Cooling (F)', @hpxml.hvac_plant.temp_cooling.round(2)]
+
+    # HVAC design loads
+    results_out << [line_break]
+    results_out << ['HVAC Design Loads Heating: Total (Btu/h)', @hpxml.hvac_plant.hdl_total.round(1)]
+    results_out << ['HVAC Design Loads Heating: Ducts (Btu/h)', @hpxml.hvac_plant.hdl_ducts.round(1)]
+    results_out << ['HVAC Design Loads Heating: Windows (Btu/h)', @hpxml.hvac_plant.hdl_windows.round(1)]
+    results_out << ['HVAC Design Loads Heating: Skylights (Btu/h)', @hpxml.hvac_plant.hdl_skylights.round(1)]
+    results_out << ['HVAC Design Loads Heating: Doors (Btu/h)', @hpxml.hvac_plant.hdl_doors.round(1)]
+    results_out << ['HVAC Design Loads Heating: Walls (Btu/h)', @hpxml.hvac_plant.hdl_walls.round(1)]
+    results_out << ['HVAC Design Loads Heating: Roofs (Btu/h)', @hpxml.hvac_plant.hdl_roofs.round(1)]
+    results_out << ['HVAC Design Loads Heating: Floors (Btu/h)', @hpxml.hvac_plant.hdl_floors.round(1)]
+    results_out << ['HVAC Design Loads Heating: Slabs (Btu/h)', @hpxml.hvac_plant.hdl_slabs.round(1)]
+    results_out << ['HVAC Design Loads Heating: Ceilings (Btu/h)', @hpxml.hvac_plant.hdl_ceilings.round(1)]
+    results_out << ['HVAC Design Loads Heating: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.hdl_infilvent.round(1)]
+    results_out << [line_break]
+    results_out << ['HVAC Design Loads Cooling Sensible: Total (Btu/h)', @hpxml.hvac_plant.cdl_sens_total.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Ducts (Btu/h)', @hpxml.hvac_plant.cdl_sens_ducts.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Windows (Btu/h)', @hpxml.hvac_plant.cdl_sens_windows.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Skylights (Btu/h)', @hpxml.hvac_plant.cdl_sens_skylights.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Doors (Btu/h)', @hpxml.hvac_plant.cdl_sens_doors.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Walls (Btu/h)', @hpxml.hvac_plant.cdl_sens_walls.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Roofs (Btu/h)', @hpxml.hvac_plant.cdl_sens_roofs.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Floors (Btu/h)', @hpxml.hvac_plant.cdl_sens_floors.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Slabs (Btu/h)', @hpxml.hvac_plant.cdl_sens_slabs.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Ceilings (Btu/h)', @hpxml.hvac_plant.cdl_sens_ceilings.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.cdl_sens_infilvent.round(1)]
+    results_out << ['HVAC Design Loads Cooling Sensible: Internal Gains (Btu/h)', @hpxml.hvac_plant.cdl_sens_intgains.round(1)]
+    results_out << [line_break]
+    results_out << ['HVAC Design Loads Cooling Latent: Total (Btu/h)', @hpxml.hvac_plant.cdl_lat_total.round(1)]
+    results_out << ['HVAC Design Loads Cooling Latent: Ducts (Btu/h)', @hpxml.hvac_plant.cdl_lat_ducts.round(1)]
+    results_out << ['HVAC Design Loads Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.cdl_lat_infilvent.round(1)]
+    results_out << ['HVAC Design Loads Cooling Latent: Internal Gains (Btu/h)', @hpxml.hvac_plant.cdl_lat_intgains.round(1)]
+
+    return results_out
   end
 
   def append_eri_results(results_out, line_break)
@@ -1450,7 +1514,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Collect energy consumptions (EC) by system
+    # Collect energy consumption (EC) by system
     htg_ecs, clg_ecs, dhw_ecs, prehtg_ecs, preclg_ecs = {}, {}, {}, {}, {}
     eut_map = { EUT::Heating => htg_ecs,
                 EUT::HeatingHeatPumpBackup => htg_ecs,
