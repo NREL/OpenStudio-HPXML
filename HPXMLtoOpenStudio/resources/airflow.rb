@@ -1672,7 +1672,7 @@ class Airflow
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, schedules_file, SchedulesFile::ColumnHouseFan, total_sup_exh_bal_w)
 
     # CFIS fan power
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true, schedules_file, SchedulesFile::ColumnHouseFan)
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true, nil, nil)
 
     # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
     sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)

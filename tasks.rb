@@ -370,7 +370,6 @@ def create_hpxmls
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans-detailed-availability.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
-    'base-mechvent-cfis-detailed-availability.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-airflow-fraction-zero.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -2532,8 +2531,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # House Ventilation Schedules
-  if ['base-mechvent-exhaust-detailed-availability.xml',
-      'base-mechvent-cfis-detailed-availability.xml'].include? hpxml_file
+  if ['base-mechvent-exhaust-detailed-availability.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/house-fan.csv'
   end
 
