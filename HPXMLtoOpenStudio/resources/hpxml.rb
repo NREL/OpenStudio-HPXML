@@ -4555,6 +4555,9 @@ class HPXML < Object
         if ventilation_fan.is_shared_system
           fail "CFIS supplemental fan '#{ventilation_fan.id}' cannot be a shared system."
         end
+        if not ventilation_fan.hours_in_operation.nil?
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' cannot have HoursInOperation specified."
+        end
 
         return ventilation_fan
       end
