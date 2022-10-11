@@ -5161,8 +5161,6 @@ if ARGV[0].to_sym == :create_release_zips
            'BuildResidentialScheduleFile/resources/**/*.*',
            'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/**/*.*',
-           'ReportHPXMLOutput/measure.*',
-           'ReportHPXMLOutput/resources/**/*.*',
            'ReportSimulationOutput/measure.*',
            'ReportSimulationOutput/resources/**/*.*',
            'ReportUtilityBills/measure.*',
