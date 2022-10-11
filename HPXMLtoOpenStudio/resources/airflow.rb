@@ -441,6 +441,7 @@ class Airflow
       on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
       on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
     else
+      num_days_per_week = nil if col_name == SchedulesFile::ColumnWholeHouseFan # FIXME: remove this once whf_num_days_per_week is exposed via HPXML
       runner.registerWarning("Both '#{col_name}' schedule file and days per week provided; the latter will be ignored.") if !num_days_per_week.nil?
     end
     Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
