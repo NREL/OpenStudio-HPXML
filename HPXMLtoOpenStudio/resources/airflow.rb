@@ -1419,10 +1419,10 @@ class Airflow
     end
   end
 
-  def self.add_ee_for_vent_fan_power(model, obj_name, frac_lost, is_cfis, schedules_file, pow = 0.0)
+  def self.add_ee_for_vent_fan_power(model, obj_name, frac_lost, is_cfis, schedules_file, col_name, pow = 0.0)
     avail_sch = nil
     if not schedules_file.nil?
-      avail_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHouseFan)
+      avail_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if avail_sch.nil?
       avail_sch = model.alwaysOnDiscreteSchedule
@@ -1668,10 +1668,10 @@ class Airflow
     else
       fan_heat_lost_fraction = 1.0
     end
-    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, schedules_file, total_sup_exh_bal_w)
+    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, schedules_file, SchedulesFile::ColumnHouseFan, total_sup_exh_bal_w)
 
     # CFIS fan power
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true, schedules_file)
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true, schedules_file, SchedulesFile::ColumnHouseFan)
 
     # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
     sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)

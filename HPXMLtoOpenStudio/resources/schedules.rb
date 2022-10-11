@@ -1502,8 +1502,10 @@ class SchedulesFile
 
     col_names = SchedulesFile.ColumnNames
 
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
+    _k, v = @tmp_schedules.first
+    v.each_with_index do |_ts, i|
       col_names.each do |col_name|
+        next unless @tmp_schedules.keys.include? col_name
         next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
@@ -1517,8 +1519,10 @@ class SchedulesFile
 
     col_names = SchedulesFile.ColumnNames
 
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
+    _k, v = @tmp_schedules.first
+    v.each_with_index do |_ts, i|
       col_names.each do |col_name|
+        next unless @tmp_schedules.keys.include? col_name
         next unless affected_by_outage[col_name] # skip those unaffected by outage
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
