@@ -185,6 +185,7 @@ The column names available in the schedule CSV files are:
   ``kitchen_fan``                  0/1    Range ventilation fan availability schedule.                                       Yes                  Yes
   ``bath_fan``                     0/1    Bath ventilation fan availability schedule.                                        Yes                  Yes
   ``house_fan``                    0/1    Whole ventilation fan availability schedule.                                       No                   Yes
+  ``whole_house_fan``              0/1    Whole house fan availability schedule.                                             Yes                  Yes
   ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No                   No
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No                   No
   ``heating_season``               0/1    Heating season schedule.                                                           No                   Yes
