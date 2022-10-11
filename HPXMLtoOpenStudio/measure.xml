@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d21c95d5-d8da-4984-ab5b-40da17cb1d91</version_id>
-  <version_modified>20221011T163411Z</version_modified>
+  <version_id>b445a2f2-fbf5-4bce-8c49-5832a8ba9d6c</version_id>
+  <version_modified>20221011T190432Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -595,42 +595,6 @@
       <checksum>D1D76BD1</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FD85B371</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>134C7BA1</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A3302065</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-smooth.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>49C18B5C</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-outage-winter.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3AD03332</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EE908DE6</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -649,16 +613,52 @@
       <checksum>15BA8BB3</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-outage-summer.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2FB84F0E</checksum>
-    </file>
-    <file>
       <filename>schedule_files/whole-house-fan.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>67AD3535</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E839C1BC</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-vacancy.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9B26060A</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>11DE8252</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-smooth.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8174DCB3</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage-winter.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4AED6F27</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>143AC947</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-outage-summer.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0CB691FB</checksum>
     </file>
   </files>
 </measure>

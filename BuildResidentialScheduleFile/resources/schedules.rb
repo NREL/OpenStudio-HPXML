@@ -71,6 +71,9 @@ class ScheduleGenerator
     success = set_local_ventilation(args: args)
     return false if not success
 
+    success = set_whole_house_fan(args: args)
+    return false if not success
+
     success = set_vacancy(args: args)
     return false if not success
 
@@ -809,6 +812,24 @@ class ScheduleGenerator
     bath_fan = daily_sch.map { |v| [v] * args[:steps_in_hour] }.flatten * @total_days_in_year
     @schedules[SchedulesFile::ColumnBathFan] = bath_fan
 
+    return true
+  end
+
+  def set_whole_house_fan(args:)
+    method_array = [1, 3, 5, 6, 2, 4, 0] # monday, wednesday, friday, saturday, tuesday, thursday, sunday
+    whole_house_fan = []
+    @total_days_in_year.times do |day|
+      today = @sim_start_day + day
+      availability = method_array[0...args[:whole_house_fan_availability]]
+      @steps_in_day.times do |_step|
+        if availability.include? today.wday
+          whole_house_fan << 1
+        else
+          whole_house_fan << 0
+        end
+      end
+    end
+    @schedules[SchedulesFile::ColumnWholeHouseFan] = whole_house_fan
     return true
   end
 
