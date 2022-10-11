@@ -1228,6 +1228,7 @@ class SchedulesFile
   ColumnKitchenFan = 'kitchen_fan'
   ColumnBathFan = 'bath_fan'
   ColumnHouseFan = 'house_fan'
+  ColumnWholeHouseFan = 'whole_house_fan'
   ColumnVacancy = 'vacancy'
   ColumnOutage = 'outage'
   ColumnHeatingSetpoint = 'heating_setpoint'
@@ -1574,6 +1575,7 @@ class SchedulesFile
       ColumnHotWaterFixtures,
       ColumnDehumidifier,
       ColumnHouseFan,
+      ColumnWholeHouseFan,
       ColumnKitchenFan,
       ColumnBathFan
     ]
