@@ -112,9 +112,9 @@ class Airflow
       break
     end
 
-    apply_natural_ventilation_and_whole_house_fan(runner, model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
+    apply_natural_ventilation_and_whole_house_fan(model, runner, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
                                                   hpxml.header.natvent_days_per_week, schedules_file)
-    apply_infiltration_and_ventilation_fans(runner, model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+    apply_infiltration_and_ventilation_fans(model, runner, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, hpxml.air_infiltration_measurements,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl)
   end
@@ -280,7 +280,7 @@ class Airflow
     end
   end
 
-  def self.apply_natural_ventilation_and_whole_house_fan(runner, model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor,
+  def self.apply_natural_ventilation_and_whole_house_fan(model, runner, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor,
                                                          natvent_days_per_week, schedules_file)
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
@@ -289,7 +289,7 @@ class Airflow
     end
 
     # NV Availability Schedule
-    nv_avail_sch = create_nv_and_whf_avail_sch(runner, model, Constants.ObjectNameNaturalVentilation, natvent_days_per_week, schedules_file, SchedulesFile::ColumnNaturalVentilation)
+    nv_avail_sch = create_nv_and_whf_avail_sch(model, runner, Constants.ObjectNameNaturalVentilation, natvent_days_per_week, schedules_file, SchedulesFile::ColumnNaturalVentilation)
 
     nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} avail s")
@@ -301,7 +301,7 @@ class Airflow
     vent_fans_whf.each_with_index do |vent_whf, index|
       whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
       obj_name = "#{Constants.ObjectNameWholeHouseFan} #{index}"
-      whf_avail_sch = create_nv_and_whf_avail_sch(runner, model, obj_name, whf_num_days_per_week, schedules_file, SchedulesFile::ColumnWholeHouseFan)
+      whf_avail_sch = create_nv_and_whf_avail_sch(model, runner, obj_name, whf_num_days_per_week, schedules_file, SchedulesFile::ColumnWholeHouseFan)
 
       whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       whf_avail_sensor.setName("#{obj_name} avail s")
@@ -432,7 +432,7 @@ class Airflow
     manager.addProgram(vent_program)
   end
 
-  def self.create_nv_and_whf_avail_sch(runner, model, obj_name, num_days_per_week, schedules_file, col_name)
+  def self.create_nv_and_whf_avail_sch(model, runner, obj_name, num_days_per_week, schedules_file, col_name)
     if not schedules_file.nil?
       avail_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
@@ -1222,7 +1222,7 @@ class Airflow
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
   end
 
-  def self.apply_local_ventilation(runner, model, vent_object, obj_type_name, schedules_file, index)
+  def self.apply_local_ventilation(model, runner, vent_object, obj_type_name, schedules_file, index)
     obj_name = "#{obj_type_name} #{index}"
 
     # Create schedule
@@ -1462,7 +1462,7 @@ class Airflow
     end
   end
 
-  def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [], schedules_file, col_name)
+  def self.add_ee_for_vent_fan_power(model, obj_name, schedules_file, col_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [])
     # Calculate fan heat fraction
     # 1.0: Fan heat does not enter space (e.g., exhaust)
     # 0.0: Fan heat does enter space (e.g., supply)
@@ -1555,7 +1555,7 @@ class Airflow
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each_with_index do |vent_kitchen, index|
       # Electricity impact
-      obj_sch_sensor = apply_local_ventilation(runner, model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, schedules_file, index)
+      obj_sch_sensor = apply_local_ventilation(model, runner, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, schedules_file, index)
       next unless @cooking_range_in_cond_space
 
       # Infiltration impact
@@ -1565,7 +1565,7 @@ class Airflow
     infil_program.addLine('Set Qbath = 0')
     vent_fans_bath.each_with_index do |vent_bath, index|
       # Electricity impact
-      obj_sch_sensor = apply_local_ventilation(runner, model, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan, schedules_file, index)
+      obj_sch_sensor = apply_local_ventilation(model, runner, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan, schedules_file, index)
       # Infiltration impact
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
@@ -1734,17 +1734,17 @@ class Airflow
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     # Non-CFIS fan power
-    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan,
-                              vent_mech_sup_tot, vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, schedules_file, col_name)
+    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, schedules_file, SchedulesFile::ColumnHouseFan,
+                              vent_mech_sup_tot, vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot)
 
     # CFIS fan power
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS) # Fan heat enters space
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, nil, nil) # Fan heat enters space
 
     # CFIS supplemental fan power
     if not vent_fans_cfis_suppl.empty?
       vent_mech_cfis_suppl_sup_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
       vent_mech_cfis_suppl_exh_tot = vent_fans_cfis_suppl.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-      cfis_suppl_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFISSupplFan,
+      cfis_suppl_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFISSupplFan, nil, nil,
                                                           vent_mech_cfis_suppl_sup_tot, vent_mech_cfis_suppl_exh_tot)
     else
       cfis_suppl_fan_actuator = nil
