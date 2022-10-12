@@ -3,7 +3,7 @@
 class HVAC
   def self.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                         control_zone)
+                                         control_zone, outage_sensor)
     is_heatpump = false
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
@@ -58,6 +58,8 @@ class HVAC
     if not cooling_system.nil?
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
+
+      crankcase_outage(model, clg_coil, outage_sensor)
 
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
@@ -1424,6 +1426,33 @@ class HVAC
     pump_program_calling_manager.setName("#{pump.name} power program calling manager")
     pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     pump_program_calling_manager.addProgram(pump_program)
+  end
+
+  def self.crankcase_outage(model, coil, _outage_sensor)
+    crankcase_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Crankcase Heater Electricity Energy')
+    crankcase_sensor.setName('crankcase s')
+    crankcase_sensor.setKeyName(coil.name.to_s)
+
+    coil_var = 'crankcase'
+
+    crankcase_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    crankcase_program.setName("#{coil_var} program")
+    crankcase_program.addLine("Set #{coil_var} = 0")
+    # crankcase_program.addLine("If #{outage_sensor.name} == 0") # FIXME
+    crankcase_program.addLine("Set #{coil_var} = #{crankcase_sensor.name}")
+    # crankcase_program.addLine("EndIf")
+
+    crankcase_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    crankcase_program_calling_manager.setName("#{coil.name} crankcase program calling manager")
+    crankcase_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
+    crankcase_program_calling_manager.addProgram(crankcase_program)
+
+    crankcase_ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{coil_var}")
+    crankcase_ems_output_var.setName('crankcase')
+    crankcase_ems_output_var.setTypeOfDataInVariable('Summed')
+    crankcase_ems_output_var.setUpdateFrequency('SystemTimestep')
+    crankcase_ems_output_var.setEMSProgramOrSubroutineName(crankcase_program)
+    crankcase_ems_output_var.setUnits('J')
   end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)

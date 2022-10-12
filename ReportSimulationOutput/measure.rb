@@ -2609,7 +2609,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
           # Crankcase variable only available if no DX heating coil on parent
-          vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
+          # FIXME: now accounted for by EMS output variable "crankcase"
+          # vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
         end
         return vars
 
@@ -2708,6 +2709,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
+        elsif object.name.to_s.include? 'crankcase'
+          return { [FT::Elec, EUT::Cooling] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end
