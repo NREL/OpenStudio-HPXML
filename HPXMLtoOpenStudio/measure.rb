@@ -196,9 +196,7 @@ class OSModel
     @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, weather, epw_file, @hpxml)
     add_simulation_params(model)
-
-    outage_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnOutage)
-    @outage_sensor = create_outage_sensor(model, outage_sch)
+    @outage_sensor = create_outage_sensor(model)
 
     # Conditioned space/zone
 
@@ -272,7 +270,12 @@ class OSModel
 
   private
 
-  def self.create_outage_sensor(model, outage_sch)
+  def self.create_outage_sensor(model)
+    outage_sch = nil
+    if not @schedules_file.nil?
+      outage_sch = @schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnOutage)
+    end
+
     outage_sensor = nil
     if not outage_sch.nil?
       Schedule.set_schedule_type_limits(model, outage_sch, Constants.ScheduleTypeLimitsFraction)
