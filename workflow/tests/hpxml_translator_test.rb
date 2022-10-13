@@ -23,7 +23,7 @@ class HPXMLTest < MiniTest::Test
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
-      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/*outage-full-year.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
         xmls << File.absolute_path(xml)
@@ -1113,6 +1113,10 @@ class HPXMLTest < MiniTest::Test
     if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix') && (not hpxml_path.include? 'outage-full-year')
       htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
       assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
+    elsif hpxml_path.include? 'outage-full-year'
+      htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
+      assert_operator(hpxml.total_fraction_heat_load_served, :>, 0)
+      assert_equal(0, htg_energy)
     end
     clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
     assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
@@ -1138,7 +1142,7 @@ class HPXMLTest < MiniTest::Test
           assert_operator(mv_energy, :<, fan_gj)
         end
       else
-        if not hpxml_path.include?('base-mechvent-bath-kitchen-fans-detailed-availability.xml')
+        if not hpxml_path.include? 'base-mechvent-bath-kitchen-fans-detailed-availability.xml'
           # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
           fan_gj = 0
           if not fan_sup.empty?
@@ -1183,9 +1187,12 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Lighting
-    if (not hpxml_path.include? 'outage-full-year')
-      ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
+    ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
+    if not hpxml_path.include? 'outage-full-year'
       assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+    else
+      assert_operator(hpxml.lighting_groups.size, :>, 0)
+      assert_equal(0, ltg_energy)
     end
 
     # Get fuels
@@ -1238,6 +1245,8 @@ class HPXMLTest < MiniTest::Test
       if htg_fuels.include? fuel
         if (not hpxml_path.include? 'autosize') && (not is_warm_climate) && (not hpxml_path.include? 'outage-full-year')
           assert_operator(energy_htg, :>, 0)
+        elsif hpxml_path.include? 'outage-full-year'
+          assert_equal(0, energy_htg)
         end
       else
         assert_equal(0, energy_htg)
