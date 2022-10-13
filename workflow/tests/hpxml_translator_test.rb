@@ -5,10 +5,6 @@ require 'openstudio'
 require 'fileutils'
 require 'parallel'
 require_relative '../../HPXMLtoOpenStudio/measure.rb'
-require_relative '../../HPXMLtoOpenStudio/resources/constants'
-require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
-require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
-require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 
 class HPXMLTest < MiniTest::Test
   def setup
@@ -486,6 +482,11 @@ class HPXMLTest < MiniTest::Test
     results = {}
     return if xml.include? 'ASHRAE_Standard_140'
 
+    # Design temperatures
+    hpxml.hvac_plant.class::TEMPERATURE_ATTRS.keys.each do |attr|
+      results["temperature_#{attr.to_s.gsub('temp_', '')} [F]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
+
     # Heating design loads
     hpxml.hvac_plant.class::HDL_ATTRS.keys.each do |attr|
       results["heating_load_#{attr.to_s.gsub('hdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
@@ -594,7 +595,6 @@ class HPXMLTest < MiniTest::Test
     end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
-      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."

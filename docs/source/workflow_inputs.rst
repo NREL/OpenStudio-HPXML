@@ -446,16 +446,18 @@ HPXML Site
 
 Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/Site``.
 
-  ================================  ========  =====  ===========  ========  ========  ============================================================
-  Element                           Type      Units  Constraints  Required  Default   Notes
-  ================================  ========  =====  ===========  ========  ========  ============================================================
-  ``SiteType``                      string           See [#]_     No        suburban  Terrain type for infiltration model
-  ``ShieldingofHome``               string           See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
-  ``extension/Neighbors``           element          >= 0         No        <none>    Presence of neighboring buildings for solar shading
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
+  Element                           Type      Units        Constraints  Required  Default   Notes
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
+  ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
+  ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
+  ``extension/GroundConductivity``  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
+  ``extension/Neighbors``           element                >= 0         No        <none>    Presence of neighboring buildings for solar shading
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+  .. [#] GroundConductivity used for foundation heat transfer and ground source heat pumps.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -2226,7 +2228,7 @@ If a combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``RelatedHVACSystem``                          idref                  See [#]_     Yes                     ID of boiler
   ``TankVolume``                                 double   gal           > 0          Yes                     Nominal volume of the storage tank
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No            0         R-value of additional storage tank insulation wrap
-  ``StandbyLoss``                                double   F/hr          > 0          No            See [#]_  Storage tank standby losses
+  ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0          No            See [#]_  Storage tank standby losses
   =============================================  =======  ============  ===========  ============  ========  ==================================================
 
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
