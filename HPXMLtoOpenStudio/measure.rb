@@ -1434,7 +1434,7 @@ class OSModel
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       if cooling_system.additional_properties.respond_to? :num_speeds
-        is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
+        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (cooling_system.additional_properties.num_speeds == 1)
       else
         is_ddb_control = false
       end
@@ -1549,7 +1549,7 @@ class OSModel
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       if heat_pump.additional_properties.respond_to? :num_speeds
-        is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
+        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (heat_pump.additional_properties.num_speeds == 1)
       else
         is_ddb_control = false
       end
@@ -1596,7 +1596,6 @@ class OSModel
     # Adds an ideal air system as needed to meet the load under certain circumstances:
     # 1. the sum of fractions load served is less than 1, or
     # 2. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
-    return if (not @hpxml.hvac_controls.empty?) && @hpxml.hvac_controls[0].is_deadband_control # do not create ideal system when onoff thermostat is modeled
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
@@ -1646,8 +1645,8 @@ class OSModel
     timestep = @hpxml.header.timestep
     # Do not apply on off thermostat if timestep is >= 2
     # Only availabe with 1 min time step
-    if timestep >= 2 && (not hvac_control.onoff_thermostat_deadband.nil?) && hvac_control.onoff_thermostat_deadband > 0
-      hvac_control.onoff_thermostat_deadband = nil
+    if timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
+      hvac_control.onoff_thermostat_deadband = 0.0
       runner.registerWarning('Time step too large to enable on-off thermostat deadband. Continute without on-off control.')
     end
 

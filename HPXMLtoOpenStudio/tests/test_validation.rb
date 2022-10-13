@@ -187,6 +187,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
+                            'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
+                            'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
+                            'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0'],
                             'ptac-unattached-cooling-system' => ['Expected 1 or more element(s) for xpath: ../CoolingSystem/CoolingSystemType[text()="packaged terminal air conditioner"'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem1"]'],
@@ -482,6 +485,15 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+      elsif ['onoff-thermostat-heat-load-fraction'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
+      elsif ['onoff-thermostat-cool-load-fraction'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml.heat_pumps[0].fraction_cool_load_served = 0.5
+      elsif ['onoff-thermostat-negative-value'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml.hvac_controls[0].onoff_thermostat_deadband = -1.0
       elsif ['ptac-unattached-cooling-system'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ptac-with-heating.xml'))
         hpxml.cooling_systems[0].delete
@@ -572,6 +584,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                         'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
+                              'onoff-thermostat-timestep-ten-mins' => ['Timestep should be 1 when extension/OnOffThermostatDeadbandTemperature exists'],
+                              'onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1 when extension/OnOffThermostatDeadbandTemperature exists'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
@@ -662,6 +676,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_controls[0].heating_setpoint_temp = 0
         hpxml.hvac_controls[0].cooling_setpoint_temp = 0
+      elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml.header.timestep = 10
+      elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0

@@ -291,7 +291,7 @@ class HVAC
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Condenser')
     sizing_plant.setDesignLoopExitTemperature(UnitConversions.convert(hp_ap.design_chw, 'F', 'C'))
-    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(hp_ap.design_delta_t, 'R', 'K'))
+    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(hp_ap.design_delta_t, 'deltaF', 'deltaC'))
 
     setpoint_mgr_follow_ground_temp = OpenStudio::Model::SetpointManagerFollowGroundTemperature.new(model)
     setpoint_mgr_follow_ground_temp.setName(obj_name + ' condenser loop temp')
@@ -446,7 +446,7 @@ class HVAC
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
     loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp - 32.0, 'R', 'K'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'R', 'K'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
@@ -531,7 +531,7 @@ class HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'R', 'K') * 3.0 # W/K
-    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'R', 'K') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
     fan_cfm = 400.0 * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM; assumes 400 cfm/ton
 
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
@@ -827,10 +827,7 @@ class HVAC
     thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_sch)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
-    offset_db = hvac_control.onoff_thermostat_deadband
-    if not offset_db.nil?
-      thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(offset_db, 'r', 'k'))
-    end
+    thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(hvac_control.onoff_thermostat_deadband, 'deltaF', 'deltaC'))
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
@@ -886,18 +883,10 @@ class HVAC
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
       htg_setpoint = hvac_control.heating_setpoint_temp
-      # Apply thermostat offset due to onoff control
-      offset_db = hvac_control.onoff_thermostat_deadband
-      if not offset_db.nil?
-        htg_setpoint = htg_setpoint - (offset_db / 2.0)
-      end
       htg_weekday_setpoints = [[htg_setpoint] * 24] * num_days
       # Apply heating setback?
       htg_setback = hvac_control.heating_setback_temp
       if not htg_setback.nil?
-        if not offset_db.nil?
-          htg_setback = htg_setback - (offset_db / 2.0)
-        end
         htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
         htg_setback_start_hr = hvac_control.heating_setback_start_hour
         for d in 1..num_days
@@ -914,6 +903,10 @@ class HVAC
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
       htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
+    # Apply thermostat offset due to onoff control
+    offset_db = hvac_control.onoff_thermostat_deadband
+    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| j - offset_db / 2.0 } }
+    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| j - offset_db / 2.0 } }
 
     htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
@@ -927,18 +920,10 @@ class HVAC
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
       # Base cooling setpoint
       clg_setpoint = hvac_control.cooling_setpoint_temp
-      # Apply thermostat offset due to onoff control
-      offset_db = hvac_control.onoff_thermostat_deadband
-      if not offset_db.nil?
-        clg_setpoint = clg_setpoint + (offset_db / 2.0)
-      end
       clg_weekday_setpoints = [[clg_setpoint] * 24] * num_days
       # Apply cooling setup?
       clg_setup = hvac_control.cooling_setup_temp
       if not clg_setup.nil?
-        if not offset_db.nil?
-          clg_setup = clg_setup + (offset_db / 2.0)
-        end
         clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
         clg_setup_start_hr = hvac_control.cooling_setup_start_hour
         for d in 1..num_days
@@ -969,6 +954,10 @@ class HVAC
       end
     end
 
+    # Apply thermostat offset due to onoff control
+    offset_db = hvac_control.onoff_thermostat_deadband
+    clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| j + offset_db / 2.0 } }
+    clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| j + offset_db / 2.0 } }
     clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
@@ -1587,7 +1576,7 @@ class HVAC
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
-    if is_ddb_control and (not htg_coil.nil?)
+    if is_ddb_control
       apply_supp_control_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
     end
     if heat_pump.is_dual_fuel
@@ -3150,14 +3139,14 @@ class HVAC
     end
     cycling_degrad_program.addLine("Set cc_out = #{cc_out_calc.join(' + ')}")
     cycling_degrad_program.addLine("Set ec_out = #{ec_out_calc.join(' + ')}")
-    (0...number_of_timestep_logged + 1).each do |t_i|
+    (0..number_of_timestep_logged).each do |t_i|
       if t_i == 0
         cycling_degrad_program.addLine("Set cc_now = #{energy_trend.name}")
       else
         cycling_degrad_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
       end
     end
-    (1...(cap_time + 1)).each do |t_i|
+    (1..cap_time).each do |t_i|
       if t_i == 1
         cycling_degrad_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
       else
@@ -3539,7 +3528,7 @@ class HVAC
     cvg = false
     final_n = nil
 
-    (1...itmax + 1).each do |n|
+    (1..itmax).each do |n|
       final_n = n
       (0...num_speeds).each do |i|
         cops_rated[i] = cop_max_speed * cops_norm[i]

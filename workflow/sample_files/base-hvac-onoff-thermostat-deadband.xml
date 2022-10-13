@@ -358,7 +358,7 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
             <extension>
-              <OnOffThermostatDeadband>2.0</OnOffThermostatDeadband>
+              <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
             </extension>
           </HVACControl>
           <HVACDistribution>

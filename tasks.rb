@@ -3830,8 +3830,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     hpxml.heat_pumps[0].heating_capacity = 10000
     hpxml.heat_pumps[0].heating_capacity_17F = 5900.0
-  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml',
          'base-mechvent-cfis-dse.xml'].include? hpxml_file

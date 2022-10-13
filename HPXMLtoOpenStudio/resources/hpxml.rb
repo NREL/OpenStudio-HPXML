@@ -4057,15 +4057,6 @@ class HPXML < Object
       return errors
     end
 
-    def is_deadband_control
-      if not @onoff_thermostat_deadband.nil?
-        if @onoff_thermostat_deadband > 0.0
-          return true
-        end
-      end
-      return false
-    end
-
     def to_oga(doc)
       return if nil?
 
@@ -4101,7 +4092,7 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
-      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
+      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadbandTemperature', @onoff_thermostat_deadband, :float, @onoff_thermostat_deadband_isdefaulted) unless @onoff_thermostat_deadband.nil?
     end
 
     def from_oga(hvac_control)
@@ -4130,7 +4121,7 @@ class HPXML < Object
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
-      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
+      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadbandTemperature', :float)
     end
   end
 
