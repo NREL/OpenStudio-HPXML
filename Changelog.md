@@ -30,9 +30,9 @@ __New Features__
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
 - New capabilities for hourly/sub-hourly scheduling via schedule CSV files:
   - Detailed HVAC seasons.
-  - Detailed natural ventilation for operable windows.
-  - Detailed dehumidifier availability schedule.
-  - Detailed whole/local ventilation and whole house fans.
+  - Detailed natural ventilation availability for operable windows.
+  - Detailed dehumidifier availability.
+  - Detailed whole/local ventilation and whole house fan availability.
 - BuildResidentialScheduleFile measure:
   - Adds optional argument for specifying a power outage period.
   - Adds optional argument for controlling natural ventilation availability during a power outage period.
