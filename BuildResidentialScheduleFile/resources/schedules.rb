@@ -1048,8 +1048,8 @@ class ScheduleGenerator
       outage = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
 
       # heating/cooling seasons
-      heating_season = Schedule.get_season(@sim_year, @steps_in_day, args[:seasons_heating_begin_month], args[:seasons_heating_begin_day], args[:seasons_heating_end_month], args[:seasons_heating_end_day])
-      cooling_season = Schedule.get_season(@sim_year, @steps_in_day, args[:seasons_cooling_begin_month], args[:seasons_cooling_begin_day], args[:seasons_cooling_end_month], args[:seasons_cooling_end_day])
+      heating_season = Schedule.get_season(@sim_year, @steps_in_hour, args[:seasons_heating_begin_month], args[:seasons_heating_begin_day], args[:seasons_heating_end_month], args[:seasons_heating_end_day])
+      cooling_season = Schedule.get_season(@sim_year, @steps_in_hour, args[:seasons_cooling_begin_month], args[:seasons_cooling_begin_day], args[:seasons_cooling_end_month], args[:seasons_cooling_end_day])
 
       # natural ventilation
       natural_ventilation = nil

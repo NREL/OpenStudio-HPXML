@@ -2513,6 +2513,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/seasons-heating-only.csv'
   elsif ['base-hvac-room-ac-only-detailed-seasons.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/seasons-cooling-only.csv'
+  elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
+    args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/seasons-10-mins.csv'
   end
 
   # Natural Ventilation Schedules
