@@ -84,11 +84,11 @@ class ScheduleGenerator
 
     create_smooth_lighting_interior
     create_smooth_lighting_exterior(@hpxml.lighting.exterior_weekday_fractions, @hpxml.lighting.exterior_weekend_fractions, @hpxml.lighting.exterior_monthly_multipliers)
-    
+
     if @hpxml.has_location(HPXML::LocationGarage)
       create_smooth_lighting_garage(@hpxml.lighting.exterior_weekday_fractions, @hpxml.lighting.exterior_weekend_fractions, @hpxml.lighting.exterior_monthly_multipliers)
     end
-    
+
     if @hpxml.lighting.holiday_exists
       create_smooth_lighting_exterior_holiday(@hpxml.lighting.holiday_weekday_fractions, @hpxml.lighting.holiday_weekend_fractions, @hpxml.lighting.exterior_monthly_multipliers)
     end
