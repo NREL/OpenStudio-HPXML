@@ -3052,6 +3052,7 @@ class HVAC
     supp_coil_avail_program.addLine('  EndIf')
     supp_coil_avail_program.addLine('Else') # Only turn on the backup coil when temprature is below lower end of ddb.
     r_s_a = ["#{htg_energy_trend.name} > 0"]
+    # Observe 5 mins before turning on supp coil
     (1...5).each do |t_i|
       r_s_a << "(@TrendValue #{htg_energy_trend.name} #{t_i}) > 0"
     end
