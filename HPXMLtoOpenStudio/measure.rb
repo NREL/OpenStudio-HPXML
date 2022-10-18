@@ -187,13 +187,13 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
-    @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml.header.schedules_filepaths)
-
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
+    @schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
+                                        vacancy_periods: @hpxml.header.vacancy_periods)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
     validate_emissions_files()
-    @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, weather, epw_file, @hpxml)
     add_simulation_params(model)
 

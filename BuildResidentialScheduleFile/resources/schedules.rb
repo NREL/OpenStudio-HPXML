@@ -78,9 +78,6 @@ class ScheduleGenerator
     success = create_stochastic_schedules(args: args)
     return false if not success
 
-    success = set_vacancy(args: args)
-    return false if not success
-
     return true
   end
 
@@ -600,23 +597,6 @@ class ScheduleGenerator
     fixtures_peak_flow = @schedules[SchedulesFile::ColumnHotWaterFixtures].max
     @schedules[SchedulesFile::ColumnHotWaterFixtures] = @schedules[SchedulesFile::ColumnHotWaterFixtures].map { |flow| flow / fixtures_peak_flow }
 
-    return true
-  end
-
-  def set_vacancy(args:)
-    if (not args[:schedules_vacancy_begin_month].nil?) && (not args[:schedules_vacancy_begin_day].nil?) && (not args[:schedules_vacancy_end_month].nil?) && (not args[:schedules_vacancy_end_day].nil?)
-      start_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_vacancy_begin_month], args[:schedules_vacancy_begin_day])
-      end_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
-
-      vacancy = Array.new(@schedules[SchedulesFile::ColumnOccupants].length, 0)
-      if end_day_num >= start_day_num
-        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day], (end_day_num - start_day_num + 1) * args[:steps_in_day]) # Fill between start/end days
-      else # Wrap around year
-        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day]) # Fill between start day and end of year
-        vacancy.fill(1.0, 0, end_day_num * args[:steps_in_day]) # Fill between start of year and end day
-      end
-      @schedules[SchedulesFile::ColumnVacancy] = vacancy
-    end
     return true
   end
 

@@ -12,24 +12,7 @@ class HPXMLDefaults
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-
-    infil_volume = nil
-    infil_height = nil
-    infil_measurements = []
-    hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
-      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
-      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach || is_cfm || is_nach)
-
-      infil_measurements << measurement
-      if not measurement.infiltration_volume.nil?
-        infil_volume = measurement.infiltration_volume
-      end
-      if not measurement.infiltration_height.nil?
-        infil_height = measurement.infiltration_height
-      end
-    end
+    infil_volume, infil_height, infil_measurements = get_infil_values(hpxml)
 
     apply_header(hpxml, epw_file)
     apply_emissions_scenarios(hpxml)
@@ -2801,5 +2784,26 @@ class HPXMLDefaults
         return -1.47 + 1.69 * noccs
       end
     end
+  end
+
+  def self.get_infil_values(hpxml)
+    infil_volume = nil
+    infil_height = nil
+    infil_measurements = []
+    hpxml.air_infiltration_measurements.each do |measurement|
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
+      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
+      next unless (is_ach || is_cfm || is_nach)
+
+      infil_measurements << measurement
+      if not measurement.infiltration_volume.nil?
+        infil_volume = measurement.infiltration_volume
+      end
+      if not measurement.infiltration_height.nil?
+        infil_height = measurement.infiltration_height
+      end
+    end
+    return infil_volume, infil_height, infil_measurements
   end
 end

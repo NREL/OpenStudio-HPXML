@@ -1160,17 +1160,20 @@ class SchedulesFile
 
   def initialize(runner: nil,
                  model: nil,
-                 schedules_paths:)
+                 schedules_paths:,
+                 year:,
+                 vacancy_periods:)
     return if schedules_paths.empty?
 
     @runner = runner
     @model = model
     @schedules_paths = schedules_paths
+    @year = year
 
     import()
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
-    set_vacancy
+    set_vacancy(vacancy_periods)
     convert_setpoints
 
     tmpdir = Dir.tmpdir
@@ -1192,6 +1195,7 @@ class SchedulesFile
   end
 
   def import()
+    num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
     @schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
@@ -1209,23 +1213,6 @@ class SchedulesFile
         if @schedules.keys.include? col_name
           fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
         end
-
-        @schedules[col_name] = values
-      end
-    end
-  end
-
-  def validate_schedules(year:)
-    @year = year
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
-
-    @schedules_paths.each do |schedules_path|
-      columns = CSV.read(schedules_path).transpose
-      columns.each do |col|
-        col_name = col[0]
-        values = col[1..-1].reject { |v| v.nil? }
-        values = values.map { |v| Float(v) }
-        schedule_length = values.length
 
         if max_value_one[col_name]
           if values.max > 1
@@ -1247,9 +1234,11 @@ class SchedulesFile
 
         valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
         valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
-        unless valid_num_rows.include? schedule_length
-          fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
+        unless valid_num_rows.include? values.length
+          fail "Schedule has invalid number of rows (#{values.length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
         end
+
+        @schedules[col_name] = values
       end
     end
   end
@@ -1413,8 +1402,30 @@ class SchedulesFile
     end
   end
 
-  def set_vacancy
-    return unless @tmp_schedules.keys.include? ColumnVacancy
+  def create_column_values_from_periods(col_name, periods)
+    # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
+    n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
+    steps_in_day = n_steps / 365
+
+    if @tmp_schedules[col_name].nil?
+      @tmp_schedules[col_name] = Array.new(n_steps, 0)
+    end
+
+    periods.each do |period|
+      start_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
+      end_day_num = Schedule.get_day_num_from_month_day(@year, period.end_month, period.end_day)
+
+      if end_day_num >= start_day_num
+        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day, (end_day_num - start_day_num + 1) * steps_in_day) # Fill between start/end days
+      else # Wrap around year
+        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day) # Fill between start day and end of year
+        @tmp_schedules[col_name].fill(1.0, 0, end_day_num * steps_in_day) # Fill between start of year and end day
+      end
+    end
+  end
+
+  def set_vacancy(vacancy_periods)
+    create_column_values_from_periods(ColumnVacancy, vacancy_periods)
     return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
     col_names = @tmp_schedules.keys

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>9d33bce7-541a-4d58-8120-5ca2a1a8e010</version_id>
-  <version_modified>20221018T222424Z</version_modified>
+  <version_id>55dbccbd-1b1c-403c-b2ed-8ff421c6b60c</version_id>
+  <version_modified>20221018T233432Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -17,14 +17,6 @@
       <description>Absolute/relative path of the HPXML file.</description>
       <type>String</type>
       <required>true</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>schedules_vacancy_period</name>
-      <display_name>Schedules: Vacancy Period</display_name>
-      <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".</description>
-      <type>String</type>
-      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -880,19 +872,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>519DEB0C</checksum>
+      <checksum>88E63175</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0CF8A83A</checksum>
+      <checksum>993D2C0A</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CACD5C47</checksum>
+      <checksum>A254355F</checksum>
     </file>
   </files>
 </measure>

@@ -402,7 +402,7 @@ def create_hpxmls
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
-    'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
@@ -2412,14 +2412,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Occupancy Schedules
-  if ['base-schedules-detailed-occupancy-stochastic.xml'].include? hpxml_file
+  if ['base-schedules-detailed-occupancy-stochastic.xml',
+      'base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
-  elsif ['base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-vacancy.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-10-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
@@ -2618,6 +2614,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.egrid_region = 'Western'
     hpxml.header.egrid_subregion = 'RMPA'
     hpxml.header.cambium_region_gea = 'RMPAc'
+  elsif ['base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
+    hpxml.header.vacancy_periods.add(begin_month: 12,
+                                     begin_day: 1,
+                                     end_month: 1,
+                                     end_day: 31)
   end
 
   # --------------------- #

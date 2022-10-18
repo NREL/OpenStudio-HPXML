@@ -66,14 +66,6 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     assert(schedule_file_names.include?(SchedulesFile::ColumnHotWaterFixtures))
   end
 
-  def test_stochastic_vacancy_schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
-    model, _hpxml = _test_measure(args_hash)
-
-    assert_equal(11, model.getScheduleFiles.size)
-  end
-
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
