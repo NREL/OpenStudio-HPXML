@@ -23,7 +23,7 @@ class HPXMLTest < MiniTest::Test
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
-      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/*outage*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
         xmls << File.absolute_path(xml)
@@ -1282,8 +1282,10 @@ class HPXMLTest < MiniTest::Test
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
     elsif hpxml_path.include? 'outage'
-      assert_operator(unmet_hours_htg, :>, 4500) if hpxml_path.include? 'full-year'
-      assert_operator(unmet_hours_clg, :>, 2400) if hpxml_path.include? 'full-year'
+      assert_operator(unmet_hours_htg, :>, 4500) if hpxml_path.include? 'full-year.xml'
+      assert_operator(unmet_hours_clg, :>, 2400) if hpxml_path.include? 'full-year.xml'
+      assert_operator(unmet_hours_htg, :>, 4500) if hpxml_path.include? 'full-year2.xml'
+      assert_operator(unmet_hours_clg, :<, 350) if hpxml_path.include? 'full-year2.xml'
       assert_operator(unmet_hours_htg, :<, 350) if hpxml_path.include? 'summer'
       assert_operator(unmet_hours_clg, :>, 100) if hpxml_path.include? 'summer'
       assert_operator(unmet_hours_htg, :>, 150) if hpxml_path.include? 'winter'
