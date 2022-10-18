@@ -1417,7 +1417,7 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? ColumnVacancy
     return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
-    col_names = SchedulesFile.ColumnNames
+    col_names = @tmp_schedules.keys
 
     @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
       col_names.each do |col_name|

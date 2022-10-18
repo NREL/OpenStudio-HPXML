@@ -42,18 +42,9 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
   def test_stochastic_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic.xml'))
-    model, hpxml = _test_measure(args_hash)
+    model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 9
-    schedule_rulesets = 5
-    schedule_fixed_intervals = 1
-    schedule_files = 13
-
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
-    assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
-    assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
-    assert_equal(schedule_files, model.getScheduleFiles.size)
-    assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
+    assert_equal(11, model.getScheduleFiles.size)
 
     schedule_file_names = []
     model.getScheduleFiles.each do |schedule_file|
@@ -65,48 +56,14 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     assert(!schedule_file_names.include?(SchedulesFile::ColumnLightingGarage))
     assert(!schedule_file_names.include?(SchedulesFile::ColumnLightingExteriorHoliday))
     assert(schedule_file_names.include?(SchedulesFile::ColumnCookingRange))
-    assert(schedule_file_names.include?(SchedulesFile::ColumnRefrigerator))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnExtraRefrigerator))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnFreezer))
     assert(schedule_file_names.include?(SchedulesFile::ColumnDishwasher))
     assert(schedule_file_names.include?(SchedulesFile::ColumnClothesWasher))
     assert(schedule_file_names.include?(SchedulesFile::ColumnClothesDryer))
     assert(!schedule_file_names.include?(SchedulesFile::ColumnCeilingFan))
     assert(schedule_file_names.include?(SchedulesFile::ColumnPlugLoadsOther))
-    assert(schedule_file_names.include?(SchedulesFile::ColumnPlugLoadsTV))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnPlugLoadsVehicle))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnPlugLoadsWellPump))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnFuelLoadsGrill))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnFuelLoadsLighting))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnFuelLoadsFireplace))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnPoolPump))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnPoolHeater))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnHotTubPump))
-    assert(!schedule_file_names.include?(SchedulesFile::ColumnHotTubHeater))
     assert(schedule_file_names.include?(SchedulesFile::ColumnHotWaterClothesWasher))
     assert(schedule_file_names.include?(SchedulesFile::ColumnHotWaterDishwasher))
     assert(schedule_file_names.include?(SchedulesFile::ColumnHotWaterFixtures))
-
-    # add a pool
-    hpxml.pools.add(id: 'Pool',
-                    type: HPXML::TypeUnknown,
-                    pump_type: HPXML::TypeUnknown,
-                    pump_kwh_per_year: 2700,
-                    heater_type: HPXML::HeaterTypeGas,
-                    heater_load_units: HPXML::UnitsThermPerYear,
-                    heater_load_value: 500)
-
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    model, _hpxml = _test_measure(args_hash)
-
-    schedule_file_names = []
-    model.getScheduleFiles.each do |schedule_file|
-      schedule_file_names << "#{schedule_file.name}"
-    end
-    assert(schedule_file_names.include?(SchedulesFile::ColumnPoolPump))
-    assert(schedule_file_names.include?(SchedulesFile::ColumnPoolHeater))
   end
 
   def test_stochastic_vacancy_schedules
@@ -114,33 +71,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 9
-    schedule_rulesets = 5
-    schedule_fixed_intervals = 1
-    schedule_files = 13
-
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
-    assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
-    assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
-    assert_equal(schedule_files, model.getScheduleFiles.size)
-    assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
-  end
-
-  def test_smooth_schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-smooth.xml'))
-    model, _hpxml = _test_measure(args_hash)
-
-    schedule_constants = 9
-    schedule_rulesets = 5
-    schedule_fixed_intervals = 1
-    schedule_files = 13
-
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
-    assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
-    assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
-    assert_equal(schedule_files, model.getScheduleFiles.size)
-    assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
+    assert_equal(11, model.getScheduleFiles.size)
   end
 
   def _test_measure(args_hash)

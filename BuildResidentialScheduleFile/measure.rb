@@ -29,7 +29,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return "Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
+    return 'Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Stochastic schedules are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.'
   end
 
   # define the arguments that the user will input
@@ -39,16 +39,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
     arg.setDisplayName('HPXML File Path')
     arg.setDescription('Absolute/relative path of the HPXML file.')
-    args << arg
-
-    schedules_type_choices = OpenStudio::StringVector.new
-    schedules_type_choices << 'smooth'
-    schedules_type_choices << 'stochastic'
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
-    arg.setDisplayName('Schedules: Type')
-    arg.setDescription('The type of occupant-related schedules to use.')
-    arg.setDefaultValue('smooth')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
@@ -162,7 +152,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
     info_msgs << "VacancyPeriod=#{args[:schedules_vacancy_period].get}" if args[:schedules_vacancy_period].is_initialized
 
-    runner.registerInfo("Created #{args[:schedules_type]} schedule with #{info_msgs.join(', ')}")
+    runner.registerInfo("Created stochastic schedule with #{info_msgs.join(', ')}")
 
     return true
   end
@@ -194,10 +184,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     else
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
     end
-    # Stochastic occupancy required integer number of occupants
-    if args[:schedules_type] == 'stochastic'
-      args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
-    end
+    args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
 
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
@@ -208,7 +195,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
 
     debug = false
-    if args[:schedules_type] == 'stochastic' && args[:debug].is_initialized
+    if args[:debug].is_initialized
       debug = args[:debug].get
     end
     args[:debug] = debug
