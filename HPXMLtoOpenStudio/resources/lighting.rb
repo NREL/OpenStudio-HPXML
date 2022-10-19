@@ -30,7 +30,7 @@ class Lighting
 
       # Create schedule
       interior_sch = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnLightingInterior)
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnLightingInterior, annual_kwh: int_kwh)
         interior_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnLightingInterior)
       end
@@ -73,7 +73,7 @@ class Lighting
 
       # Create schedule
       garage_sch = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnLightingGarage)
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnLightingGarage, annual_kwh: grg_kwh)
         garage_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnLightingGarage)
       end
@@ -105,7 +105,7 @@ class Lighting
 
       # Create schedule
       exterior_sch = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnLightingExterior)
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnLightingExterior, annual_kwh: ext_kwh)
         exterior_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnLightingExterior)
       end
@@ -133,7 +133,7 @@ class Lighting
 
       # Create schedule
       exterior_holiday_sch = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnLightingExteriorHoliday)
         design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnLightingExteriorHoliday, daily_kwh: lighting.holiday_kwh_per_day)
         exterior_holiday_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnLightingExteriorHoliday)
       end

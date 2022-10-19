@@ -1110,16 +1110,6 @@ class Schedule
 
     return begin_month, begin_day, end_month, end_day
   end
-
-  def self.schedules_file_includes_col_name(schedules_file, col_name)
-    schedules_file_includes_col_name = false
-    if not schedules_file.nil?
-      if schedules_file.schedules.keys.include?(col_name)
-        schedules_file_includes_col_name = true
-      end
-    end
-    return schedules_file_includes_col_name
-  end
 end
 
 class SchedulesFile
@@ -1162,7 +1152,7 @@ class SchedulesFile
                  model: nil,
                  schedules_paths:,
                  year:,
-                 vacancy_periods:)
+                 vacancy_periods: [])
     return if schedules_paths.empty?
 
     @runner = runner
@@ -1188,6 +1178,14 @@ class SchedulesFile
 
   def nil?
     if @schedules.nil?
+      return true
+    end
+
+    return false
+  end
+
+  def includes_col_name(col_name)
+    if @schedules.keys.include?(col_name)
       return true
     end
 

@@ -45,7 +45,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       power_cw_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnClothesWasher)
         cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnClothesWasher, daily_kwh: cw_annual_kwh / 365.0)
         power_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesWasher)
       end
@@ -73,7 +73,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       cd_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnClothesDryer)
         cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnClothesDryer, annual_kwh: cd_annual_kwh)
         cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: SchedulesFile::ColumnClothesDryer, annual_therm: cd_annual_therm)
         cd_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesDryer)
@@ -104,7 +104,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       power_dw_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnDishwasher)
         dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnDishwasher, daily_kwh: dw_annual_kwh / 365.0)
         power_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnDishwasher)
       end
@@ -132,8 +132,8 @@ class HotWaterAndAppliances
 
       # Create schedule
       fridge_schedule = nil
-      if not schedules_file.nil?
-        fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::ColumnRefrigerator : SchedulesFile::ColumnExtraRefrigerator
+      fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::ColumnRefrigerator : SchedulesFile::ColumnExtraRefrigerator
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(fridge_col_name)
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
       end
@@ -161,7 +161,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       freezer_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnFreezer)
         freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnFreezer, annual_kwh: fz_annual_kwh)
         freezer_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnFreezer)
       end
@@ -189,7 +189,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       cook_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnCookingRange)
         cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnCookingRange, annual_kwh: cook_annual_kwh)
         cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: SchedulesFile::ColumnCookingRange, annual_therm: cook_annual_therm)
         cook_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCookingRange)
@@ -250,7 +250,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       fixtures_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterFixtures)
         fixtures_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterFixtures)
       end
       if fixtures_schedule.nil?
@@ -276,7 +276,7 @@ class HotWaterAndAppliances
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
-        if not schedules_file.nil?
+        if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterFixtures)
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: fx_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: w_gpd)
         end
@@ -294,7 +294,7 @@ class HotWaterAndAppliances
         # Recirculation pump
         dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier)
         if dist_pump_annual_kwh > 0
-          if not schedules_file.nil?
+          if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterFixtures)
             dist_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: dist_pump_annual_kwh / 365.0)
           else
             dist_pump_design_level = fixtures_schedule_obj.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
@@ -319,7 +319,7 @@ class HotWaterAndAppliances
         if not gpd_frac.nil?
           # Create schedule
           water_cw_schedule = nil
-          if not schedules_file.nil?
+          if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterClothesWasher)
             cw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterClothesWasher, daily_water: cw_gpd)
             water_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterClothesWasher)
           end
@@ -346,7 +346,7 @@ class HotWaterAndAppliances
 
       # Create schedule
       water_dw_schedule = nil
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterDishwasher)
         dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterDishwasher, daily_water: dw_gpd)
         water_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterDishwasher)
       end
@@ -362,7 +362,7 @@ class HotWaterAndAppliances
       # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
       water_design_level_sens = nil
       water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds, fixtures_usage_multiplier)
-      if not schedules_file.nil?
+      if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterFixtures)
         water_design_level_sens = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
         water_design_level_lat = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       end

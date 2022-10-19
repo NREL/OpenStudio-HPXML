@@ -104,7 +104,7 @@ class Waterheater
     water_heater_offset = 9.0 # deg-C
 
     setpoint_schedule = nil
-    if not schedules_file.nil?
+    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnWaterHeaterSetpoint)
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
       # Sensed schedule
       setpoint_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
@@ -1009,7 +1009,7 @@ class Waterheater
     t_set_sensor.setKeyName(setpoint_schedule.name.to_s)
 
     op_mode_schedule = nil
-    if not schedules_file.nil?
+    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnWaterHeaterOperatingMode)
       op_mode_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterOperatingMode)
     end
 
@@ -1775,7 +1775,7 @@ class Waterheater
 
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, set_temp_c, model, runner)
     new_schedule = nil
-    if not schedules_file.nil?
+    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnWaterHeaterSetpoint)
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
@@ -1793,7 +1793,7 @@ class Waterheater
 
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, set_temp_c, model, runner)
     new_schedule = nil
-    if not schedules_file.nil?
+    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnWaterHeaterSetpoint)
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
