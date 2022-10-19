@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9ed29003-9aa8-434d-a2fc-f4530ffe312f</version_id>
-  <version_modified>20221019T201659Z</version_modified>
+  <version_id>4c90dc1f-73b9-4492-a5b2-a1523ff3df4b</version_id>
+  <version_modified>20221019T205457Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -482,12 +482,6 @@
       <checksum>CEA9E398</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>65181200</checksum>
-    </file>
-    <file>
       <filename>hpxml_schema/HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -528,18 +522,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>A673B23D</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CB87BFFE</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8698AB34</checksum>
     </file>
     <file>
       <version>
@@ -589,12 +571,6 @@
       <checksum>5B40593B</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D7B1CC89</checksum>
-    </file>
-    <file>
       <filename>hpxml_schema/HPXMLBaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -605,6 +581,18 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C74A2271</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D52B655</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FD698C59</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
