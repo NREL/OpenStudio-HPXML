@@ -213,7 +213,7 @@
             <ExteriorAdjacentTo>basement - unconditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>1350.0</Area>
             <Insulation>
@@ -226,7 +226,7 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>

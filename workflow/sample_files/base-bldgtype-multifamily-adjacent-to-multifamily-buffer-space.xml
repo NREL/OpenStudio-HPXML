@@ -144,7 +144,7 @@
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>900.0</Area>
             <Insulation>
@@ -160,7 +160,7 @@
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>

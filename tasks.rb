@@ -578,7 +578,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 3
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
-    args['floor_type'] = HPXML::FloorTypeWoodStud
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 8.0
     args['foundation_wall_insulation_r'] = 8.9
     args['foundation_wall_insulation_distance_to_top'] = 0.0
@@ -845,7 +845,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 0
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
-    args['floor_type'] = HPXML::FloorTypeWoodStud
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 6.0
     args['foundation_wall_insulation_r'] = 0
     args['foundation_wall_insulation_distance_to_top'] = 0
@@ -2816,21 +2816,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
                      other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
@@ -2939,7 +2939,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationAtticUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                      insulation_assembly_r_value: 39.3)
@@ -3185,7 +3185,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 675,
                      insulation_assembly_r_value: 18.7)
     hpxml.slabs[0].area = 675
@@ -3327,7 +3327,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationGarage,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
-                     floor_type: HPXML::FloorTypeWoodStud,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 400,
                      insulation_assembly_r_value: 39.3)
     hpxml.slabs[0].area -= 400

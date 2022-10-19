@@ -145,7 +145,7 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>900.0</Area>
             <Insulation>
@@ -161,7 +161,7 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>

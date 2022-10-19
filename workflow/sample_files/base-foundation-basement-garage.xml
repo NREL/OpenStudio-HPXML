@@ -247,7 +247,7 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
@@ -263,7 +263,7 @@
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>400.0</Area>
             <Insulation>

@@ -1966,7 +1966,7 @@ class Constructions
       fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
     end
 
-    if floor_type == HPXML::FloorTypeWoodStud
+    if floor_type == HPXML::FloorTypeWoodFrame
       install_grade = 1
       if is_ceiling
         constr_sets = [

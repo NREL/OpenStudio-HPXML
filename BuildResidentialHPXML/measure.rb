@@ -455,7 +455,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     floor_type_choices = OpenStudio::StringVector.new
-    floor_type_choices << HPXML::FloorTypeWoodStud
+    floor_type_choices << HPXML::FloorTypeWoodFrame
     floor_type_choices << HPXML::FloorTypeSIP
     floor_type_choices << HPXML::FloorTypeConcrete
     floor_type_choices << HPXML::FloorTypeSteelStud
@@ -463,7 +463,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
     arg.setDisplayName('Floor: Type')
     arg.setDescription('The type of floors.')
-    arg.setDefaultValue(HPXML::FloorTypeWoodStud)
+    arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
     args << arg
 
     foundation_wall_type_choices = OpenStudio::StringVector.new

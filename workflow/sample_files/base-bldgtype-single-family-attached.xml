@@ -283,7 +283,7 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorType>
-              <WoodStud/>
+              <WoodFrame/>
             </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>
