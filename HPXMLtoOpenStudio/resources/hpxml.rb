@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'ostruct'
+
 '''
 Example Usage:
 
@@ -42,9 +44,6 @@ XMLHelper.write_file(hpxml.to_oga, "out.xml")
 
 '''
 
-require_relative 'version'
-require 'ostruct'
-
 # FUTURE: Remove all idref attributes, make object attributes instead
 #         E.g., in class Window, :wall_idref => :wall
 
@@ -81,6 +80,9 @@ class HPXML < Object
   CertificationEnergyStar = 'Energy Star'
   ClothesDryerControlTypeMoisture = 'moisture'
   ClothesDryerControlTypeTimer = 'timer'
+  CFISModeAirHandler = 'air handler fan'
+  CFISModeNone = 'none'
+  CFISModeSupplementalFan = 'supplemental fan'
   ColorDark = 'dark'
   ColorLight = 'light'
   ColorMedium = 'medium'
@@ -305,10 +307,12 @@ class HPXML < Object
   UnitsACHNatural = 'ACHnatural'
   UnitsAFUE = 'AFUE'
   UnitsAh = 'Ah'
+  UnitsBtuPerHour = 'Btu/hr'
   UnitsCFM = 'CFM'
   UnitsCFM25 = 'CFM25'
   UnitsCFM50 = 'CFM50'
   UnitsCOP = 'COP'
+  UnitsDegFPerHour = 'F/hr'
   UnitsDollars = '$'
   UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
@@ -320,6 +324,7 @@ class HPXML < Object
   UnitsKwhPerDay = 'kWh/day'
   UnitsKwPerTon = 'kW/ton'
   UnitsPercent = 'Percent'
+  UnitsPercentPerHour = '%/hr'
   UnitsSEER = 'SEER'
   UnitsSEER2 = 'SEER2'
   UnitsSLA = 'SLA'
@@ -335,7 +340,7 @@ class HPXML < Object
   WallTypeDoubleWoodStud = 'DoubleWoodStud'
   WallTypeICF = 'InsulatedConcreteForms'
   WallTypeLog = 'LogWall'
-  WallTypeSIP = 'StructurallyInsulatedPanel'
+  WallTypeSIP = 'StructuralInsulatedPanel'
   WallTypeSteelStud = 'SteelFrame'
   WallTypeStone = 'Stone'
   WallTypeStrawBale = 'StrawBale'
@@ -3966,7 +3971,9 @@ class HPXML < Object
                       cdl_lat_ducts: 'Ducts',
                       cdl_lat_infilvent: 'InfilVent',
                       cdl_lat_intgains: 'InternalGains' }
-    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
+    TEMPERATURE_ATTRS = { temp_heating: 'Heating',
+                          temp_cooling: 'Cooling' }
+    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys + TEMPERATURE_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -3978,6 +3985,13 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      if not @temp_heating.nil?
+        dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignTemperatures'])
+        XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
+        TEMPERATURE_ATTRS.each do |attr, element_name|
+          XMLHelper.add_element(dl_extension, element_name, send(attr), :float)
+        end
+      end
       if not @hdl_total.nil?
         dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignLoads'])
         XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
@@ -4002,6 +4016,9 @@ class HPXML < Object
       hvac_plant = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant')
       return if hvac_plant.nil?
 
+      TEMPERATURE_ATTRS.each do |attr, element_name|
+        send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignTemperatures/#{element_name}", :float))
+      end
       HDL_ATTRS.each do |attr, element_name|
         send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/Heating/#{element_name}", :float))
       end
@@ -4414,7 +4431,8 @@ class HPXML < Object
              :is_shared_system, :in_unit_flow_rate, :fraction_recirculation, :used_for_garage_ventilation,
              :preheating_fuel, :preheating_efficiency_cop, :preheating_fraction_load_served, :precooling_fuel,
              :precooling_efficiency_cop, :precooling_fraction_load_served, :calculated_flow_rate,
-             :delivered_ventilation, :cfis_vent_mode_airflow_fraction]
+             :delivered_ventilation, :cfis_vent_mode_airflow_fraction, :cfis_addtl_runtime_operating_mode,
+             :cfis_supplemental_fan_idref]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -4530,6 +4548,41 @@ class HPXML < Object
       return false
     end
 
+    def cfis_supplemental_fan
+      return if @cfis_supplemental_fan_idref.nil?
+      return unless @fan_type == MechVentTypeCFIS
+
+      @hpxml_object.ventilation_fans.each do |ventilation_fan|
+        next unless ventilation_fan.id == @cfis_supplemental_fan_idref
+
+        if not [MechVentTypeSupply, MechVentTypeExhaust].include? ventilation_fan.fan_type
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' must be of type '#{MechVentTypeSupply}' or '#{MechVentTypeExhaust}'."
+        end
+        if not ventilation_fan.used_for_whole_building_ventilation
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' must be set as used for whole building ventilation."
+        end
+        if ventilation_fan.is_shared_system
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' cannot be a shared system."
+        end
+        if not ventilation_fan.hours_in_operation.nil?
+          fail "CFIS supplemental fan '#{ventilation_fan.id}' cannot have HoursInOperation specified."
+        end
+
+        return ventilation_fan
+      end
+      fail "CFIS Supplemental Fan '#{@cfis_supplemental_fan_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def is_cfis_supplemental_fan?
+      @hpxml_object.ventilation_fans.each do |ventilation_fan|
+        next unless ventilation_fan.fan_type == MechVentTypeCFIS
+        next unless ventilation_fan.cfis_supplemental_fan_idref == @id
+
+        return true
+      end
+      return false
+    end
+
     def delete
       @hpxml_object.ventilation_fans.delete(self)
     end
@@ -4539,6 +4592,7 @@ class HPXML < Object
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; oa_unit_flow_rate; rescue StandardError => e; errors << e.message; end
       begin; unit_flow_rate_ratio; rescue StandardError => e; errors << e.message; end
+      begin; cfis_supplemental_fan; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -4551,6 +4605,14 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(ventilation_fan, 'Quantity', @quantity, :integer, @quantity_isdefaulted) unless @quantity.nil?
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type, :string) unless @fan_type.nil?
+      if (not @cfis_addtl_runtime_operating_mode.nil?) || (not @cfis_supplemental_fan_idref.nil?)
+        cfis_controls = XMLHelper.add_element(ventilation_fan, 'CFISControls')
+        XMLHelper.add_element(cfis_controls, 'AdditionalRuntimeOperatingMode', @cfis_addtl_runtime_operating_mode, :string, @cfis_addtl_runtime_operating_mode_isdefaulted) unless @cfis_addtl_runtime_operating_mode.nil?
+        if not @cfis_supplemental_fan_idref.nil?
+          supplemental_fan = XMLHelper.add_element(cfis_controls, 'SupplementalFan')
+          XMLHelper.add_attribute(supplemental_fan, 'idref', @cfis_supplemental_fan_idref)
+        end
+      end
       XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', @rated_flow_rate, :float, @rated_flow_rate_isdefaulted) unless @rated_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'CalculatedFlowRate', @calculated_flow_rate, :float, @calculated_flow_rate_isdefaulted) unless @calculated_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', @tested_flow_rate, :float, @tested_flow_rate_isdefaulted) unless @tested_flow_rate.nil?
@@ -4630,6 +4692,8 @@ class HPXML < Object
       @flow_rate_not_tested = XMLHelper.get_value(ventilation_fan, 'extension/FlowRateNotTested', :boolean)
       @fan_power_defaulted = XMLHelper.get_value(ventilation_fan, 'extension/FanPowerDefaulted', :boolean)
       @cfis_vent_mode_airflow_fraction = XMLHelper.get_value(ventilation_fan, 'extension/VentilationOnlyModeAirflowFraction', :float)
+      @cfis_addtl_runtime_operating_mode = XMLHelper.get_value(ventilation_fan, 'CFISControls/AdditionalRuntimeOperatingMode', :string)
+      @cfis_supplemental_fan_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'CFISControls/SupplementalFan'))
     end
   end
 
@@ -4651,8 +4715,8 @@ class HPXML < Object
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
-             :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served, :tank_model_type, :operating_mode]
+             :related_hvac_idref, :third_party_certification, :standby_loss_units, :standby_loss_value,
+             :temperature, :is_shared_system, :number_of_units_served, :tank_model_type, :operating_mode]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -4709,7 +4773,11 @@ class HPXML < Object
         jacket = XMLHelper.add_element(water_heater_insulation, 'Jacket')
         XMLHelper.add_element(jacket, 'JacketRValue', @jacket_r_value, :float)
       end
-      XMLHelper.add_element(water_heating_system, 'StandbyLoss', @standby_loss, :float, @standby_loss_isdefaulted) unless @standby_loss.nil?
+      if (not @standby_loss_units.nil?) && (not @standby_loss_value.nil?)
+        standby_loss = XMLHelper.add_element(water_heating_system, 'StandbyLoss')
+        XMLHelper.add_element(standby_loss, 'Units', @standby_loss_units, :string, @standby_loss_units_isdefaulted)
+        XMLHelper.add_element(standby_loss, 'Value', @standby_loss_value, :float, @standby_loss_value_isdefaulted)
+      end
       XMLHelper.add_element(water_heating_system, 'HotWaterTemperature', @temperature, :float, @temperature_isdefaulted) unless @temperature.nil?
       XMLHelper.add_element(water_heating_system, 'UsesDesuperheater', @uses_desuperheater, :boolean) unless @uses_desuperheater.nil?
       if not @related_hvac_idref.nil?
@@ -4744,7 +4812,8 @@ class HPXML < Object
       @usage_bin = XMLHelper.get_value(water_heating_system, 'UsageBin', :string)
       @recovery_efficiency = XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency', :float)
       @jacket_r_value = XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue', :float)
-      @standby_loss = XMLHelper.get_value(water_heating_system, 'StandbyLoss', :float)
+      @standby_loss_units = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Units', :string)
+      @standby_loss_value = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Value', :float)
       @temperature = XMLHelper.get_value(water_heating_system, 'HotWaterTemperature', :float)
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
@@ -4801,7 +4870,7 @@ class HPXML < Object
           recirculation = XMLHelper.add_element(system_type_el, @system_type)
           XMLHelper.add_element(recirculation, 'ControlType', @recirculation_control_type, :string) unless @recirculation_control_type.nil?
           XMLHelper.add_element(recirculation, 'RecirculationPipingLoopLength', @recirculation_piping_length, :float, @recirculation_piping_length_isdefaulted) unless @recirculation_piping_length.nil?
-          XMLHelper.add_element(recirculation, 'BranchPipingLoopLength', @recirculation_branch_piping_length, :float, @recirculation_branch_piping_length_isdefaulted) unless @recirculation_branch_piping_length.nil?
+          XMLHelper.add_element(recirculation, 'BranchPipingLength', @recirculation_branch_piping_length, :float, @recirculation_branch_piping_length_isdefaulted) unless @recirculation_branch_piping_length.nil?
           XMLHelper.add_element(recirculation, 'PumpPower', @recirculation_pump_power, :float, @recirculation_pump_power_isdefaulted) unless @recirculation_pump_power.nil?
         else
           fail "Unhandled hot water distribution type '#{@system_type}'."
@@ -4837,7 +4906,7 @@ class HPXML < Object
       elsif @system_type == 'Recirculation'
         @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType', :string)
         @recirculation_piping_length = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength', :float)
-        @recirculation_branch_piping_length = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength', :float)
+        @recirculation_branch_piping_length = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLength', :float)
         @recirculation_pump_power = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower', :float)
       end
       @pipe_r_value = XMLHelper.get_value(hot_water_distribution, 'PipeInsulation/PipeRValue', :float)
