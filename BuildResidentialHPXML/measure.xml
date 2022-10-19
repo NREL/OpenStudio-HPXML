@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>fc1210d6-9b24-463b-8460-787306e608dd</version_id>
-  <version_modified>20220927T235210Z</version_modified>
+  <version_id>f226ff8a-412a-4633-a7b1-53297ecc40dc</version_id>
+  <version_modified>20221019T201655Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1431,8 +1431,8 @@
           <display_name>LogWall</display_name>
         </choice>
         <choice>
-          <value>StructurallyInsulatedPanel</value>
-          <display_name>StructurallyInsulatedPanel</display_name>
+          <value>StructuralInsulatedPanel</value>
+          <display_name>StructuralInsulatedPanel</display_name>
         </choice>
         <choice>
           <value>SolidConcrete</value>
@@ -6440,7 +6440,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E2FDCF34</checksum>
+      <checksum>17D78430</checksum>
     </file>
   </files>
 </measure>
