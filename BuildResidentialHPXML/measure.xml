@@ -6440,7 +6440,11 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
+<<<<<<< HEAD
       <checksum>17D78430</checksum>
+=======
+      <checksum>959A3C05</checksum>
+>>>>>>> 45aacfa870089762f2f170a671a8a6186c0da641
     </file>
   </files>
 </measure>
