@@ -1059,15 +1059,15 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>WoodStud</default_value>
+      <default_value>WoodFrame</default_value>
       <choices>
         <choice>
-          <value>WoodStud</value>
-          <display_name>WoodStud</display_name>
+          <value>WoodFrame</value>
+          <display_name>WoodFrame</display_name>
         </choice>
         <choice>
-          <value>StructurallyInsulatedPanel</value>
-          <display_name>StructurallyInsulatedPanel</display_name>
+          <value>StructuralInsulatedPanel</value>
+          <display_name>StructuralInsulatedPanel</display_name>
         </choice>
         <choice>
           <value>SolidConcrete</value>
@@ -6440,11 +6440,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-<<<<<<< HEAD
       <checksum>17D78430</checksum>
-=======
-      <checksum>959A3C05</checksum>
->>>>>>> 45aacfa870089762f2f170a671a8a6186c0da641
     </file>
   </files>
 </measure>
