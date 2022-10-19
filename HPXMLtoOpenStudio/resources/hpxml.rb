@@ -125,7 +125,7 @@ class HPXML < Object
   FloorOtherSpaceAbove = 'above'
   FloorOtherSpaceBelow = 'below'
   FloorTypeWoodStud = 'WoodStud'
-  FloorTypeSIP = 'StructurallyInsulatedPanel'
+  FloorTypeSIP = 'StructuralInsulatedPanel'
   FloorTypeSteelStud = 'SteelFrame'
   FloorTypeConcrete = 'SolidConcrete'
   FuelLoadTypeGrill = 'grill'
