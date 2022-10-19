@@ -400,6 +400,7 @@ def create_hpxmls
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
+    'base-schedules-simple-vacancy.xml' => 'base-schedules-simple.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
@@ -2614,7 +2615,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.egrid_region = 'Western'
     hpxml.header.egrid_subregion = 'RMPA'
     hpxml.header.cambium_region_gea = 'RMPAc'
-  elsif ['base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
+  elsif ['base-schedules-simple-vacancy.xml',
+         'base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
     hpxml.header.vacancy_periods.add(begin_month: 12,
                                      begin_day: 1,
                                      end_month: 1,
