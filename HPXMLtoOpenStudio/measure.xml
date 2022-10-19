@@ -600,5 +600,17 @@
       <usage_type>resource</usage_type>
       <checksum>12DEE90E</checksum>
     </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C74A2271</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>51B67182</checksum>
+    </file>
   </files>
 </measure>
