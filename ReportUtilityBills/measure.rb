@@ -498,8 +498,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       timeseries_freq = 'monthly'
       timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
-      timestamps, _, _ = OutputMethods.get_timestamps(@msgpackData, @hpxml)
-      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timestamps, timeseries_freq)
+      num_timestamps = OutputMethods.get_timestamps(@msgpackData, @hpxml, false)[0].size
+      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, num_timestamps, timeseries_freq)
     end
   end
 
@@ -512,8 +512,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     }
   end
 
-  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timestamps, timeseries_freq)
-    return [0.0] * timestamps.size if meter_names.empty?
+  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, num_timestamps, timeseries_freq)
+    return [0.0] * num_timestamps if meter_names.empty?
 
     msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_freq]
     cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
