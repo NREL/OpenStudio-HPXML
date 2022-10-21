@@ -332,12 +332,12 @@
                 <Value>8.5</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
-              <AttachedHeatingSystemFuel>electricity</AttachedHeatingSystemFuel>
-              <AttachedHeatingSystemAnnualEfficiency>
+              <IntegratedHeatingSystemFuel>electricity</IntegratedHeatingSystemFuel>
+              <IntegratedHeatingSystemAnnualEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
-              </AttachedHeatingSystemAnnualEfficiency>
-              <AttachedHeatingSystemFractionHeatLoadServed>1.0</AttachedHeatingSystemFractionHeatLoadServed>
+              </IntegratedHeatingSystemAnnualEfficiency>
+              <IntegratedHeatingSystemFractionHeatLoadServed>1.0</IntegratedHeatingSystemFractionHeatLoadServed>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>

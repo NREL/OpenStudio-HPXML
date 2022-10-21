@@ -1127,9 +1127,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_shr = 0.75
     hpxml.cooling_systems[0].cooling_capacity = 12345
     hpxml.cooling_systems[0].cooling_efficiency_eer = 12.5
-    hpxml.cooling_systems[0].attached_heating_system_fuel = HPXML::FuelTypeElectricity
-    hpxml.cooling_systems[0].attached_heating_system_fraction_heat_load_served = 1.0
-    hpxml.cooling_systems[0].attached_heating_system_efficiency = 0.98
+    hpxml.cooling_systems[0].integrated_heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = 1.0
+    hpxml.cooling_systems[0].integrated_heating_system_efficiency = 0.98
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.75, 12345, 12.5, 0.98)
@@ -1137,7 +1137,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
-    hpxml.cooling_systems[0].attached_heating_system_efficiency = nil
+    hpxml.cooling_systems[0].integrated_heating_system_efficiency = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil, 12.5, 1.0)
@@ -3677,7 +3677,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity, cooling_efficiency_eer, attached_heating_system_efficiency = nil)
+  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity, cooling_efficiency_eer, integrated_heating_system_efficiency = nil)
     assert_equal(shr, cooling_system.cooling_shr)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
@@ -3689,10 +3689,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(cooling_system.cooling_efficiency_eer, cooling_efficiency_eer)
     end
-    if attached_heating_system_efficiency.nil?
-      assert_nil(cooling_system.attached_heating_system_efficiency)
+    if integrated_heating_system_efficiency.nil?
+      assert_nil(cooling_system.integrated_heating_system_efficiency)
     else
-      assert_equal(cooling_system.attached_heating_system_efficiency, attached_heating_system_efficiency)
+      assert_equal(cooling_system.integrated_heating_system_efficiency, integrated_heating_system_efficiency)
     end
   end
 

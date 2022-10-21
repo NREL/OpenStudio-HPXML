@@ -11,8 +11,11 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <HVACSizingControl>
+        <HeatPumpSizingMethodology>MaxLoad</HeatPumpSizingMethodology>
+      </HVACSizingControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-pthp.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-ac-with-reverse-cycle.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -325,10 +328,8 @@
             </PrimarySystems>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
-              <HeatPumpType>room heat pump</HeatPumpType>
+              <HeatPumpType>room air conditioner with reverse cycle</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
-              <CoolingCapacity>36000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -336,7 +337,6 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

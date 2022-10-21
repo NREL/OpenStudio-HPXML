@@ -1042,9 +1042,9 @@ class HPXMLDefaults
       cooling_system_type = cooling_system.cooling_system_type
       cooling_system_fuel = HPXML::FuelTypeElectricity
 
-      if cooling_system.has_attached_heating && cooling_system.attached_heating_system_efficiency.nil?
-        cooling_system.attached_heating_system_efficiency = 1.0
-        cooling_system.attached_heating_system_efficiency_isdefaulted = true
+      if cooling_system.has_integrated_heating && cooling_system.integrated_heating_system_efficiency.nil?
+        cooling_system.integrated_heating_system_efficiency = 1.0
+        cooling_system.integrated_heating_system_efficiency_isdefaulted = true
       end
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.cooling_efficiency_seer.nil?
@@ -2738,14 +2738,14 @@ class HPXMLDefaults
         clg_sys.cooling_capacity = hvac_sizing_values.Cool_Capacity.round
         clg_sys.cooling_capacity_isdefaulted = true
       end
-      # Attached heating system capacities
-      if (clg_sys.is_a? HPXML::CoolingSystem) && clg_sys.has_attached_heating
-        if clg_sys.attached_heating_system_capacity.nil? || ((clg_sys.attached_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
-          clg_sys.attached_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
-          clg_sys.attached_heating_system_capacity_isdefaulted = true
+      # Integrated heating system capacities
+      if (clg_sys.is_a? HPXML::CoolingSystem) && clg_sys.has_integrated_heating
+        if clg_sys.integrated_heating_system_capacity.nil? || ((clg_sys.integrated_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
+          clg_sys.integrated_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
+          clg_sys.integrated_heating_system_capacity_isdefaulted = true
         end
-        clg_sys.attached_heating_system_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
-        clg_sys.attached_heating_system_airflow_cfm_isdefaulted = true
+        clg_sys.integrated_heating_system_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
+        clg_sys.integrated_heating_system_airflow_cfm_isdefaulted = true
       end
       clg_sys.additional_properties.cooling_capacity_sensible = hvac_sizing_values.Cool_Capacity_Sens.round
 

@@ -5,7 +5,7 @@ class HVAC
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          control_zone)
     is_heatpump = false
-    has_attached_heating = false # only for ptac and room ac where electric heater info can be attached to cooling system
+    has_integrated_heating = false # only for ptac and room ac where electric heater info can be attached to cooling system
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -40,8 +40,8 @@ class HVAC
           else
             obj_name = Constants.ObjectNamePTAC
           end
-          if cooling_system.has_attached_heating
-            has_attached_heating = true
+          if cooling_system.has_integrated_heating
+            has_integrated_heating = true
           end
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
@@ -67,13 +67,13 @@ class HVAC
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
       end
-      if has_attached_heating
+      if has_integrated_heating
         htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
-        htg_coil.setEfficiency(cooling_system.attached_heating_system_efficiency)
-        htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.attached_heating_system_capacity, 'Btu/hr', 'W'))
+        htg_coil.setEfficiency(cooling_system.integrated_heating_system_efficiency)
+        htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W'))
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
-        htg_cfm = cooling_system.attached_heating_system_airflow_cfm
+        htg_cfm = cooling_system.integrated_heating_system_airflow_cfm
         fan_cfms << htg_cfm
       end
     end
@@ -128,7 +128,7 @@ class HVAC
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        if has_attached_heating
+        if has_integrated_heating
           disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, nil, cooling_system)
         else
           disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)

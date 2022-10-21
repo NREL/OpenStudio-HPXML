@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_hpxml_output</name>
   <uid>9561a0d7-60ad-48c5-8337-2461df044d80</uid>
-  <version_id>ffab21c9-58df-465d-adae-81aa4a02b020</version_id>
-  <version_modified>20220620T154620Z</version_modified>
+  <version_id>5655745e-724e-472c-8dc7-a11172c9d4d5</version_id>
+  <version_modified>20221021T100053Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportHPXMLOutput</class_name>
   <display_name>HPXML Output Report</display_name>
@@ -16,6 +16,7 @@
       <display_name>Output Format</display_name>
       <description>The file format of the annual (and timeseries, if requested) outputs.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>csv</default_value>
@@ -33,6 +34,8 @@
           <display_name>msgpack</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -58,18 +61,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>66ADF65A</checksum>
-    </file>
-    <file>
-      <filename>hpxml_output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>789AD0D9</checksum>
-    </file>
     <file>
       <version>
         <software_program>OpenStudio</software_program>

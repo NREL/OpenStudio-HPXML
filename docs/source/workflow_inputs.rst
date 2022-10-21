@@ -1165,7 +1165,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
 
 Electric Resistance
@@ -1363,22 +1363,22 @@ Room Air Conditioner
 
 If a room air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
-  ===================================================================================  =================  ===========  ===============  ========  =========  ==========================================
+  ===================================================================================  =================  ===========  ===============  ========  =========  ============================================
   Element                                                                              Type               Units        Constraints      Required  Default    Notes
-  ===================================================================================  =================  ===========  ===============  ========  =========  ==========================================
+  ===================================================================================  =================  ===========  ===============  ========  =========  ============================================
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
   ``CoolingCapacity``                                                                  double             Btu/hr       >= 0             No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                                                             double             frac         0 - 1            No                   Sensible heat fraction
-  ``AttachedHeatingSystemFuel``                                                        string                          See [#]_         No                   Fuel type of attached heater
-  ``AttachedHeatingSystemCapacity``                                                    double             Btu/hr       >= 0             No        autosized  Heating output capacity of attached heater
-  ``AttachedHeatingSystemAnnualEfficiency[Units="Percent"]/Value``                     double             frac         0 - 1            No        1.0        Efficiency of attached heater
-  ``AttachedHeatingSystemFractionHeatLoadServed``                                      double             frac         0 - 1 [#]_       No                   Fraction of heating load served
-  ===================================================================================  =================  ===========  ===============  ========  =========  ==========================================
+  ``IntegratedHeatingSystemFuel``                                                      string                          See [#]_         No                   Fuel type of integrated heater
+  ``IntegratedHeatingSystemCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Heating output capacity of integrated heater
+  ``IntegratedHeatingSystemAnnualEfficiency[Units="Percent"]/Value``                   double             frac         0 - 1            No        1.0        Efficiency of integrated heater
+  ``IntegratedHeatingSystemFractionHeatLoadServed``                                    double             frac         0 - 1 [#]_       No                   Fraction of heating load served
+  ===================================================================================  =================  ===========  ===============  ========  =========  ============================================
 
   .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
-  .. [#] “electricity” is currently the only choice for attached heating system. If there's an attached heating system, ``AttachedHeatingSystemFuel`` is required to be specified.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1. 
-         If there's an attached heating system, ``AttachedHeatingSystemFractionHeatLoadServed`` is required to be specified.
+  .. [#] “electricity” is currently the only choice for integrated heating system. If there's an integrated heating system, ``IntegratedHeatingSystemFuel`` is required to be specified.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1. 
+         If there's an integrated heating system, ``IntegratedHeatingSystemFractionHeatLoadServed`` is required to be specified.
 
 Packaged Terminal Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1392,15 +1392,15 @@ If a PTAC is specified, additional information is entered in ``CoolingSystem``.
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``       double             Btu/Wh       > 0              Yes                  Rated efficiency
   ``CoolingCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                                             double             frac         0 - 1            No                   Sensible heat fraction
-  ``AttachedHeatingSystemFuel``                                        string                          See [#]_         No                   Fuel type of attached heater
-  ``AttachedHeatingSystemCapacity``                                    double             Btu/hr       >= 0             No        autosized  Heating output capacity of attached heater
-  ``AttachedHeatingSystemAnnualEfficiency[Units="Percent"]/Value``     double             frac         0 - 1            No        1.0        Efficiency of attached heater
-  ``AttachedHeatingSystemFractionHeatLoadServed``                      double             frac         0 - 1 [#]_       No                   Fraction of heating load served
+  ``IntegratedHeatingSystemFuel``                                      string                          See [#]_         No                   Fuel type of integrated heater
+  ``IntegratedHeatingSystemCapacity``                                  double             Btu/hr       >= 0             No        autosized  Heating output capacity of integrated heater
+  ``IntegratedHeatingSystemAnnualEfficiency[Units="Percent"]/Value``   double             frac         0 - 1            No        1.0        Efficiency of integrated heater
+  ``IntegratedHeatingSystemFractionHeatLoadServed``                    double             frac         0 - 1 [#]_       No                   Fraction of heating load served
   ===================================================================  =================  ===========  ===============  ========  =========  ==========================================
 
-  .. [#] “electricity” is currently the only choice for attached heating system. If there's an attached heating system, ``AttachedHeatingSystemFuel`` is required to be specified.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1. 
-         If there's an attached heating system, ``AttachedHeatingSystemFractionHeatLoadServed`` is required to be specified.
+  .. [#] “electricity” is currently the only choice for integrated heating system. If there's an integrated heating system, ``IntegratedHeatingSystemFuel`` is required to be specified.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1. 
+         If there's an integrated heating system, ``IntegratedHeatingSystemFractionHeatLoadServed`` is required to be specified.
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
@@ -1581,7 +1581,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] If AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] If AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value not provided, defaults to HSPF from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
@@ -1615,7 +1615,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ================================================================  ========  ======  ========================  ========  =========  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -1646,7 +1646,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                  Rated heating efficiency
   ===============================================================  ========  ======  ===========  ========  =========  ==============================================
 
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   
 Room Heat Pump
@@ -1666,7 +1666,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                  Rated heating efficiency
   ===============================================================  ========  ======  ===========  ========  =========  ==============================================
 
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
 
 Ground-to-Air Heat Pump
@@ -1696,7 +1696,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
 
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and attached heating systems in CoolingSystems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.

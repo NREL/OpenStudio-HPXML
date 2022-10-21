@@ -1441,9 +1441,9 @@ class OSModel
       if not heating_system.nil?
         sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
         @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
-      elsif cooling_system.has_attached_heating
-        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.attached_heating_system_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
-        @remaining_heat_load_frac -= cooling_system.attached_heating_system_fraction_heat_load_served
+      elsif cooling_system.has_integrated_heating
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.integrated_heating_system_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= cooling_system.integrated_heating_system_fraction_heat_load_served
       else
         sequential_heat_load_fracs = [0]
       end

@@ -303,7 +303,7 @@ class Constants
   end
 
   def self.ObjectNameRoomHP
-    return 'room heat pump'
+    return 'room ac with reverse cycle'
   end
 
   def self.ObjectNamePTAC

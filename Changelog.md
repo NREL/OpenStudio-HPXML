@@ -26,7 +26,7 @@ __New Features__
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
 - Allows modeling room/window heat pump and room air conditioner with heating.
-- **Breaking change**: For PTAC with electric resistence, eliminates HeatingSystemType `PackagedTerminalAirConditionerHeating`. Instead, uses `AttachedHeatingSystemFuel`, `AttachedHeatingSystemCapacity`, `AttachedHeatingSystemAnnualEfficiency` and `AttachedHeatingSystemFractionHeatLoadServed` under `CoolingSystem` to describe the attached heating system.
+- **Breaking change**: For PTAC with electric resistence, eliminates HeatingSystemType `PackagedTerminalAirConditionerHeating`. Instead, uses `IntegratedHeatingSystemFuel`, `IntegratedHeatingSystemCapacity`, `IntegratedHeatingSystemAnnualEfficiency` and `IntegratedHeatingSystemFractionHeatLoadServed` under `CoolingSystem` to describe the attached heating system.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
