@@ -1260,9 +1260,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     require 'zip'
     require 'tempfile'
 
+    fuels = nil
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
-      fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario)
-
       Zip.on_exists_proc = true
       Zip::File.open(File.join(File.dirname(__FILE__), '../resources/data/detailed_rates/rates.zip')) do |zip_file|
         zip_file.each do |entry|
@@ -1276,6 +1275,7 @@ class ReportUtilityBillsTest < MiniTest::Test
             f.print entry.get_input_stream.read
 
             utility_bill_scenario.elec_tariff_filepath = tmp_path
+            fuels = _load_timeseries('../tests/PV_None.csv', utility_bill_scenario) if fuels.nil?
             utility_rates, utility_bills = @measure.setup_utility_outputs()
             File.delete(@bills_csv) if File.exist? @bills_csv
             actual_bills = _bill_calcs(fuels, utility_rates, utility_bills, @hpxml.header, [], utility_bill_scenario)
@@ -1283,7 +1283,12 @@ class ReportUtilityBillsTest < MiniTest::Test
               puts entry.name
               assert(false)
             end
-            assert_operator(actual_bills['Test: Total (USD)'], :>, 0)
+            if entry.name.include? 'North Slope Borough Power Light - Aged or Handicappedseniors over 60'
+              # No cost if < 600 kWh/month, which is the case for PV_None.csv
+              assert_nil(actual_bills['Test: Electricity: Total (USD)'])
+            else
+              assert_operator(actual_bills['Test: Electricity: Total (USD)'], :>, 0)
+            end
           end
         end
       end

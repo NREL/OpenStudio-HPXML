@@ -106,6 +106,11 @@ class CalculateUtilityBill
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
     net_elec_energy_ann = 0
 
+    if fuel_time_series.size < 24 || pv_fuel_time_series.size < 24
+      # Must be at least 24 hours worth of simulation data
+      fail 'Incorrect fuel data.'
+    end
+
     num_energyrate_periods = rate.energyratestructure.size
     has_periods = false
     if num_energyrate_periods > 1
@@ -137,6 +142,7 @@ class CalculateUtilityBill
     bill.monthly_energy_charge = [0] * 12
     net_monthly_energy_charge = [0] * 12
     production_fit_month = [0] * 12
+    has_pv = (pv_fuel_time_series.sum != 0)
 
     tier = 0
     net_tier = 0
@@ -145,7 +151,7 @@ class CalculateUtilityBill
       elec_period = [0] * num_energyrate_periods
       elec_tier = [0] * length_tiers.max
 
-      if pv_fuel_time_series.sum != 0 # has PV
+      if has_pv
         net_elec_period = [0] * num_energyrate_periods
         net_elec_tier = [0] * length_tiers.max
       end
@@ -166,7 +172,7 @@ class CalculateUtilityBill
         elec_hour = fuel_time_series[hour]
         elec_month[month] += elec_hour
 
-        if pv_fuel_time_series.sum != 0 # has PV
+        if has_pv
           pv_hour = pv_fuel_time_series[hour]
           net_elec_hour = elec_hour - pv_hour
           net_elec_month[month] += net_elec_hour
@@ -230,7 +236,7 @@ class CalculateUtilityBill
 
         end
 
-        if pv_fuel_time_series.sum != 0 # has PV
+        if has_pv
           if rate.feed_in_tariff_rate
             production_fit_month[month] += pv_hour * rate.feed_in_tariff_rate
           else
@@ -329,7 +335,7 @@ class CalculateUtilityBill
             tier = 0
           end
 
-          if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # has PV
+          if has_pv && !rate.feed_in_tariff_rate # has PV
             if (num_energyrate_periods > 1) || (num_energyrate_tiers > 1) # tiered or TOU
 
               if has_periods && has_tiered # tiered and TOU
@@ -352,7 +358,7 @@ class CalculateUtilityBill
             end
           end
 
-          if pv_fuel_time_series.sum != 0 # has PV
+          if has_pv
             if rate.feed_in_tariff_rate
               bill.monthly_production_credit[month] = production_fit_month[month]
             else
@@ -370,7 +376,7 @@ class CalculateUtilityBill
       annual_total_charge = annual_energy_charge + annual_fixed_charge
       true_up_month = 12
 
-      if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+      if has_pv && !rate.feed_in_tariff_rate # Net metering calculations
 
         annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
         end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_energy_ann)
@@ -465,6 +471,11 @@ class CalculateUtilityBill
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
     net_elec = 0
 
+    if fuel_time_series.size < 24 || pv_fuel_time_series.size < 24
+      # Must be at least 24 hours worth of simulation data
+      fail 'Incorrect fuel data.'
+    end
+
     year = header.sim_calendar_year
     start_day = DateTime.new(year, header.sim_begin_month, header.sim_begin_day)
     today = start_day
@@ -474,6 +485,7 @@ class CalculateUtilityBill
     bill.monthly_energy_charge = [0] * 12
     net_monthly_energy_charge = [0] * 12
     production_fit_month = [0] * 12
+    has_pv = (pv_fuel_time_series.sum != 0)
 
     (0...fuel_time_series.size).to_a.each do |hour|
       hour_day = hour % 24 # calculate hour of the day
@@ -481,8 +493,7 @@ class CalculateUtilityBill
       month = today.month - 1
 
       elec_hour = fuel_time_series[hour]
-
-      if pv_fuel_time_series.sum != 0 # has PV
+      if has_pv
         pv_hour = pv_fuel_time_series[hour]
         net_elec_hour = elec_hour - pv_hour
         net_elec += net_elec_hour
@@ -492,7 +503,7 @@ class CalculateUtilityBill
       hourly_fuel_cost[hour] = elec_hour * elec_rate
       bill.monthly_energy_charge[month] += hourly_fuel_cost[hour]
 
-      if pv_fuel_time_series.sum != 0 # has PV
+      if has_pv
         if rate.feed_in_tariff_rate
           production_fit_month[month] += pv_hour * rate.feed_in_tariff_rate
         else
@@ -511,7 +522,7 @@ class CalculateUtilityBill
           bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
         end
 
-        if pv_fuel_time_series.sum != 0 # has PV
+        if has_pv
           if rate.feed_in_tariff_rate
             bill.monthly_production_credit[month] = production_fit_month[month]
           else
@@ -530,7 +541,7 @@ class CalculateUtilityBill
     annual_total_charge = annual_energy_charge + annual_fixed_charge
     true_up_month = 12
 
-    if pv_fuel_time_series.sum != 0 && !rate.feed_in_tariff_rate # Net metering calculations
+    if has_pv && !rate.feed_in_tariff_rate # Net metering calculations
 
       annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
       end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec)
@@ -707,13 +718,14 @@ def process_usurdb(filepath)
     # ignore rates without a "rate" key
     next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('rate') } }.flatten.any? { |t| !t }
 
+    # ignore rates with negative "rate" value
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['rate'] >= 0 } }.flatten.any? { |t| !t }
+
     # ignore rates with a "sell" key
     next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?('sell')
 
-    # ignore rates with units other than "kWh"
-    # next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('unit') } }.flatten.any? { |t| !t }
-    # next if rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] == 'kWh' } }.flatten.any? { |t| !t }
-    rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] = 'kWh' } } # this field is suddenly gone, so assume kWh?
+    # set rate units to 'kWh'
+    rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] = 'kWh' } }
 
     residential_rates << { 'items' => [rate] }
   end
@@ -723,6 +735,7 @@ def process_usurdb(filepath)
   puts 'Exporting residential rates...'
   rates_dir = File.dirname(filepath)
   zippath = File.join(rates_dir, 'rates.zip')
+  FileUtils.rm(zippath)
   zipcontents = []
   Zip::File.open(zippath, create: true) do |zipfile|
     residential_rates.each do |residential_rate|

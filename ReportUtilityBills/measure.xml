@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>e32b37c4-c4f1-4fd4-a695-544317b4c13f</version_id>
-  <version_modified>20221020T185550Z</version_modified>
+  <version_id>6f5a7b7a-ac14-446c-890c-ec24d93aba29</version_id>
+  <version_modified>20221021T001333Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -205,18 +205,6 @@
       <checksum>953EE2AC</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B210B3A6</checksum>
-    </file>
-    <file>
-      <filename>data/detailed_rates/rates.zip</filename>
-      <filetype>zip</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6CBD0C70</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -228,10 +216,22 @@
       <checksum>7604DF71</checksum>
     </file>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>892B31B7</checksum>
+    </file>
+    <file>
+      <filename>data/detailed_rates/rates.zip</filename>
+      <filetype>zip</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>56DDA6EC</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F0F60472</checksum>
+      <checksum>DBAEA800</checksum>
     </file>
   </files>
 </measure>
