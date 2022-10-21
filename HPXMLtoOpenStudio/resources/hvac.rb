@@ -841,7 +841,7 @@ class HVAC
 
     num_days = Constants.NumDaysInYear(year)
     warning = false
-    (0..(num_days - 1)).to_a.each do |i|
+    for i in 0..(num_days - 1)
       if (heating_days[i] == cooling_days[i]) # both (or neither) heating/cooling seasons
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
         htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -2929,7 +2929,7 @@ class HVAC
     clg_ap = cooling_system.additional_properties
 
     clg_ap.cool_rated_eirs = []
-    (0...clg_ap.num_speeds).to_a.each do |speed|
+    for speed in 0..clg_ap.num_speeds - 1
       clg_ap.cool_rated_eirs << calc_eir_from_eer(clg_ap.cool_eers[speed], clg_ap.fan_power_rated)
     end
   end
@@ -2938,7 +2938,7 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     htg_ap.heat_rated_eirs = []
-    (0...htg_ap.num_speeds).to_a.each do |speed|
+    for speed in 0..htg_ap.num_speeds - 1
       htg_ap.heat_rated_eirs << calc_eir_from_cop(htg_ap.heat_cops[speed], htg_ap.fan_power_rated)
     end
   end
@@ -2952,7 +2952,7 @@ class HVAC
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
       clg_ap.cool_rated_shrs_gross = []
-      (0...clg_ap.num_speeds).to_a.each do |speed|
+      for speed in 0..clg_ap.num_speeds - 1
         qtot_net_nominal = 12000.0
         qsens_net_nominal = qtot_net_nominal * clg_ap.cool_rated_shrs_net[speed]
         qtot_gross_nominal = qtot_net_nominal + UnitConversions.convert(clg_ap.cool_rated_cfm_per_ton[speed] * clg_ap.fan_power_rated, 'Wh', 'Btu')

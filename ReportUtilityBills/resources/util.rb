@@ -54,7 +54,7 @@ class CalculateUtilityBill
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     sum_fuel_time_series = fuel_time_series.sum
     monthly_fuel_cost = [0] * 12
-    (0...fuel_time_series.size).to_a.each do |month|
+    for month in 0..fuel_time_series.size - 1
       if is_production && fuel_type == FT::Elec && rate.feed_in_tariff_rate
         monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff_rate
       else
@@ -156,7 +156,7 @@ class CalculateUtilityBill
         net_elec_tier = [0] * length_tiers.max
       end
 
-      (0...fuel_time_series.size).to_a.each do |hour|
+      for hour in 0..fuel_time_series.size - 1
         hour_day = hour % 24 # calculate hour of the day
 
         month = today.month - 1
@@ -369,7 +369,7 @@ class CalculateUtilityBill
         end
 
         today += 1 # next day
-      end # (0...fuel_time_series.size).to_a.each do |hour|
+      end # for hour in 0..fuel_time_series.size-1
 
       annual_fixed_charge = bill.monthly_fixed_charge.sum
       annual_energy_charge = bill.monthly_energy_charge.sum
@@ -388,7 +388,7 @@ class CalculateUtilityBill
         if rate.minannualcharge.nil?
 
           monthly_bill = [0] * 12
-          (0..11).to_a.each do |m|
+          for m in 0..11
             monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
             if monthly_bill[m] < rate.minmonthlycharge
               bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])
@@ -487,7 +487,7 @@ class CalculateUtilityBill
     production_fit_month = [0] * 12
     has_pv = (pv_fuel_time_series.sum != 0)
 
-    (0...fuel_time_series.size).to_a.each do |hour|
+    for hour in 0..fuel_time_series.size - 1
       hour_day = hour % 24 # calculate hour of the day
 
       month = today.month - 1
@@ -553,7 +553,7 @@ class CalculateUtilityBill
       if rate.minannualcharge.nil?
 
         monthly_bill = [0] * 12
-        (0..11).to_a.each do |m|
+        for m in 0..11
           monthly_bill[m] = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
           if monthly_bill[m] < rate.minmonthlycharge
             bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill[m])

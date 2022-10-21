@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>63e88e91-106d-4177-9c73-8c0bc5336e2e</version_id>
-  <version_modified>20221020T185548Z</version_modified>
+  <version_id>4c8f0ba3-2844-4e26-85ed-0a83cf1b75ee</version_id>
+  <version_modified>20221021T161906Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -374,12 +374,6 @@
       <checksum>93E95B59</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DF9CC863</checksum>
-    </file>
-    <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -440,12 +434,6 @@
       <checksum>B13FEA8C</checksum>
     </file>
     <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>84489603</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -456,12 +444,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>24DCB986</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>41063A6B</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>
@@ -593,6 +575,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>BEED675F</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F0BA56DB</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3C3A39AE</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>56C27A3D</checksum>
     </file>
   </files>
 </measure>

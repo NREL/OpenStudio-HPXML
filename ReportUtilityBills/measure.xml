@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>95245705-e0ce-4558-be38-fbf34e8f0226</version_id>
-  <version_modified>20221021T153729Z</version_modified>
+  <version_id>0bda4a77-d0fb-4af6-a5ca-7c2cc3180d78</version_id>
+  <version_modified>20221021T193527Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -187,6 +187,18 @@
       <checksum>953EE2AC</checksum>
     </file>
     <file>
+      <filename>data/detailed_rates/rates.zip</filename>
+      <filetype>zip</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>56DDA6EC</checksum>
+    </file>
+    <file>
+      <filename>data.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F96CB80F</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -195,31 +207,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7604DF71</checksum>
+      <checksum>5BA4F0A9</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>892B31B7</checksum>
-    </file>
-    <file>
-      <filename>data/detailed_rates/rates.zip</filename>
-      <filetype>zip</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>56DDA6EC</checksum>
+      <checksum>9B78D53D</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3C96AE2E</checksum>
-    </file>
-    <file>
-      <filename>data.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F96CB80F</checksum>
+      <checksum>0B4BD5F0</checksum>
     </file>
   </files>
 </measure>

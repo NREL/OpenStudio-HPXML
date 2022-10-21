@@ -432,7 +432,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   def get_annual_bills(utility_bills)
     utility_bills.values.each do |bill|
-      if bill.annual_production_credit > 0
+      if bill.annual_production_credit != 0
         bill.annual_production_credit *= -1
       end
 
