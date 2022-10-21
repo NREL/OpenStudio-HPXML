@@ -419,11 +419,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       rate = utility_rates[FT::Elec]
       bill = utility_bills[FT::Elec]
 
-      if rate.realtimeprice.empty?
-        CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
-      else
-        CalculateUtilityBill.real_time_pricing(header, fuels, rate, bill)
-      end
+      CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
     end
 
     # Annual true up
