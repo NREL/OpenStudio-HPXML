@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>6f5a7b7a-ac14-446c-890c-ec24d93aba29</version_id>
-  <version_modified>20221021T001333Z</version_modified>
+  <version_id>95245705-e0ce-4558-be38-fbf34e8f0226</version_id>
+  <version_modified>20221021T153729Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -48,24 +48,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>PV_10kW.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DF3BB729</checksum>
-    </file>
-    <file>
-      <filename>PV_1kW.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E9D8698</checksum>
-    </file>
-    <file>
-      <filename>PV_None.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0D33F8C0</checksum>
-    </file>
     <file>
       <filename>Contains Demand Charges.json</filename>
       <filetype>json</filetype>
@@ -231,7 +213,13 @@
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DBAEA800</checksum>
+      <checksum>3C96AE2E</checksum>
+    </file>
+    <file>
+      <filename>data.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F96CB80F</checksum>
     </file>
   </files>
 </measure>
