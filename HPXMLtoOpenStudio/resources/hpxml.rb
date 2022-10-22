@@ -338,7 +338,7 @@ class HPXML < Object
   WallTypeDoubleWoodStud = 'DoubleWoodStud'
   WallTypeICF = 'InsulatedConcreteForms'
   WallTypeLog = 'LogWall'
-  WallTypeSIP = 'StructurallyInsulatedPanel'
+  WallTypeSIP = 'StructuralInsulatedPanel'
   WallTypeSteelStud = 'SteelFrame'
   WallTypeStone = 'Stone'
   WallTypeStrawBale = 'StrawBale'

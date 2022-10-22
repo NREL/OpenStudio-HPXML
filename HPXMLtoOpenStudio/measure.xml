@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c09977a8-c66d-4903-9668-39a7e3879a1b</version_id>
-  <version_modified>20221014T143314Z</version_modified>
+  <version_id>f805eb5c-113c-42e7-a412-77b49c4981f6</version_id>
+  <version_modified>20221022T181407Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -386,12 +386,6 @@
       <checksum>03FE784E</checksum>
     </file>
     <file>
-      <filename>test_simcontrols.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C198979C</checksum>
-    </file>
-    <file>
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -420,12 +414,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>89B1B71D</checksum>
-    </file>
-    <file>
-      <filename>output.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D0399FA</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -500,12 +488,6 @@
       <checksum>E26F31D2</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D4ECAC7C</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -548,12 +530,6 @@
       <checksum>A46C5C55</checksum>
     </file>
     <file>
-      <filename>hpxml_schema/HPXMLBaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AA9487CE</checksum>
-    </file>
-    <file>
       <filename>hpxml_schema/HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -566,24 +542,6 @@
       <checksum>9905D1E0</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D7B1CC89</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BE0CBB8E</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>857A2B0A</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -593,6 +551,48 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>BDF4C3E9</checksum>
+    </file>
+    <file>
+      <filename>test_simcontrols.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CF8094A4</checksum>
+    </file>
+    <file>
+      <filename>output.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A5AF01C9</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9BA832F0</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schema/HPXMLBaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>12DEE90E</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>51B67182</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E5921F31</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>359E447F</checksum>
     </file>
   </files>
 </measure>
