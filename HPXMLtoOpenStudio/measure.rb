@@ -211,7 +211,7 @@ class OSModel
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
     add_floors(runner, model, spaces)
-    add_foundation_walls_slabs(runner, model, spaces)
+    add_foundation_walls_slabs(runner, model, weather, spaces)
     add_shading_schedule(model, weather)
     add_windows(model, spaces)
     add_doors(model, spaces)
@@ -247,7 +247,7 @@ class OSModel
 
     # Other
 
-    add_airflow(model, weather, spaces, airloop_map)
+    add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(model, spaces)
@@ -719,7 +719,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_walls_slabs(runner, model, spaces)
+  def self.add_foundation_walls_slabs(runner, model, weather, spaces)
     foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
@@ -798,7 +798,7 @@ class OSModel
         else
           z_origin = -1 * slab.depth_below_grade
         end
-        add_foundation_slab(model, spaces, slab, slab_exp_perim,
+        add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                             slab_area, z_origin, kiva_foundation)
       end
 
@@ -808,7 +808,7 @@ class OSModel
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
+        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
                             slab_area, z_origin, nil)
       end
 
@@ -955,7 +955,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(model, spaces, slab, slab_exp_perim,
+  def self.add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                                slab_area, z_origin, kiva_foundation)
 
     slab_tot_perim = slab_exp_perim
@@ -1016,7 +1016,36 @@ class OSModel
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
-    return surface.adjacentFoundation.get
+    kiva_foundation = surface.adjacentFoundation.get
+
+    foundation_walls_insulated = false
+    foundation_ceiling_insulated = false
+    @hpxml.foundation_walls.each do |fnd_wall|
+      next unless fnd_wall.interior_adjacent_to == slab.interior_adjacent_to
+      next unless fnd_wall.exterior_adjacent_to == HPXML::LocationGround
+
+      if fnd_wall.insulation_assembly_r_value.to_f > 5
+        foundation_walls_insulated = true
+      elsif fnd_wall.insulation_exterior_r_value.to_f + fnd_wall.insulation_interior_r_value.to_f > 0
+        foundation_walls_insulated = true
+      end
+    end
+    @hpxml.floors.each do |floor|
+      next unless floor.interior_adjacent_to == HPXML::LocationLivingSpace
+      next unless floor.exterior_adjacent_to == slab.interior_adjacent_to
+
+      if floor.insulation_assembly_r_value > 5
+        foundation_ceiling_insulated = true
+      end
+    end
+
+    Constructions.apply_kiva_initial_temp(kiva_foundation, slab, weather,
+                                          spaces[HPXML::LocationLivingSpace].thermalZone.get,
+                                          @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day,
+                                          @hpxml.header.sim_calendar_year,
+                                          foundation_walls_insulated, foundation_ceiling_insulated)
+
+    return kiva_foundation
   end
 
   def self.add_conditioned_floor_area(model, spaces)
@@ -1703,7 +1732,7 @@ class OSModel
     end
   end
 
-  def self.add_airflow(model, weather, spaces, airloop_map)
+  def self.add_airflow(runner, model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -1734,7 +1763,7 @@ class OSModel
       end
     end
 
-    Airflow.apply(model, weather, spaces, @hpxml, @cfa, @nbeds,
+    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
   end
