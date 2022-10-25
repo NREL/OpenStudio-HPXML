@@ -60,6 +60,8 @@ class HPXML < Object
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
+  NameSpace = 'http://hpxmlonline.com/2019/10'
+
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AirTypeFanCoil = 'fan coil'
@@ -383,7 +385,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
 
-  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true, building_id: nil)
+  def initialize(hpxml_path: nil, schema_path: nil, schematron_path: nil, collapse_enclosure: true, building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -393,13 +395,23 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
 
+      if not schema_path.nil?
+        xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+        @errors += xsd_errors
+        @warnings += xsd_warnings
+        return unless @errors.empty?
+      end
+
       # Check HPXML version
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
 
-      # Validate against Schematron docs
-      @errors, @warnings = validate_against_schematron(schematron_validators: schematron_validators)
-      return unless @errors.empty?
+      if not schematron_path.nil?
+        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml)
+        @errors += sct_errors
+        @warnings += sct_warnings
+        return unless @errors.empty?
+      end
 
       # Handle multiple buildings
       if XMLHelper.get_elements(hpxml, 'Building').size > 1
@@ -6483,9 +6495,9 @@ class HPXML < Object
   def _create_oga_document()
     doc = XMLHelper.create_doc('1.0', 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
-    XMLHelper.add_attribute(hpxml, 'xmlns', 'http://hpxmlonline.com/2019/10')
+    XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
     XMLHelper.add_attribute(hpxml, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-    XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', 'http://hpxmlonline.com/2019/10')
+    XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
     return doc
   end
@@ -6590,24 +6602,6 @@ class HPXML < Object
     end
   end
 
-  def validate_against_schematron(schematron_validators: [])
-    # ----------------------------- #
-    # Perform Schematron validation #
-    # ----------------------------- #
-
-    if not schematron_validators.empty?
-      errors, warnings = Validator.run_validators(@doc, schematron_validators)
-    else
-      errors = []
-      warnings = []
-    end
-
-    errors.map! { |e| "#{@hpxml_path}: #{e}" }
-    warnings.map! { |w| "#{@hpxml_path}: #{w}" }
-
-    return errors, warnings
-  end
-
   def check_for_errors()
     errors = []
 
@@ -6628,27 +6622,6 @@ class HPXML < Object
     # ------------------------------- #
     # Check for errors across objects #
     # ------------------------------- #
-
-    # FUTURE: Move these to EPvalidator.xml where possible
-
-    # Check for globally unique SystemIdentifier IDs and empty IDs
-    sys_ids = {}
-    self.class::HPXML_ATTRS.each do |attribute|
-      hpxml_obj = send(attribute)
-      next unless hpxml_obj.is_a? HPXML::BaseArrayElement
-
-      hpxml_obj.each do |obj|
-        next unless obj.respond_to? :id
-
-        sys_ids[obj.id] = 0 if sys_ids[obj.id].nil?
-        sys_ids[obj.id] += 1
-
-        errors << "Empty SystemIdentifier ID ('#{obj.id}') detected for #{attribute}." if !obj.id || obj.id.size == 0
-      end
-    end
-    sys_ids.each do |sys_id, cnt|
-      errors << "Duplicate SystemIdentifier IDs detected for '#{sys_id}'." if cnt > 1
-    end
 
     # Check for HVAC systems referenced by multiple water heating systems
     hvac_systems.each do |hvac_system|
