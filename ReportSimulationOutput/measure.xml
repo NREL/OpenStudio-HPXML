@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>06b7b688-5d3d-4db9-963b-9465cb3cedcc</version_id>
-  <version_modified>20220930T150436Z</version_modified>
+  <version_id>9b50e28d-c506-4868-95c0-d3f6462b2141</version_id>
+  <version_modified>20221025T185648Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -313,6 +313,25 @@
         <choice>
           <value>false</value>
           <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>timeseries_timestamp_convention</name>
+      <display_name>Generate Timeseries Output: Timestamp Convention</display_name>
+      <description>Determines whether timeseries timestamps use the start-of-timestep or end-of-timestep convention. Doesn't apply if the output format is 'csv_dview'.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>start</default_value>
+      <choices>
+        <choice>
+          <value>start</value>
+          <display_name>start</display_name>
+        </choice>
+        <choice>
+          <value>end</value>
+          <display_name>end</display_name>
         </choice>
       </choices>
     </argument>
@@ -1503,7 +1522,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E1232FF6</checksum>
+      <checksum>CB50DC03</checksum>
     </file>
     <file>
       <version>
@@ -1514,7 +1533,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9C1831DB</checksum>
+      <checksum>625085FD</checksum>
     </file>
   </files>
 </measure>

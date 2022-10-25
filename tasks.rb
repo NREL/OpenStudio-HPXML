@@ -331,7 +331,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
-    'base-hvac-none.xml' => 'base.xml',
+    'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-ptac.xml' => 'base.xml',
     'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
@@ -368,6 +368,8 @@ def create_hpxmls
     'base-mechvent-cfis-airflow-fraction-zero.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
+    'base-mechvent-cfis-supplemental-fan-exhaust.xml' => 'base-mechvent-cfis.xml',
+    'base-mechvent-cfis-supplemental-fan-supply.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-erv.xml' => 'base.xml',
     'base-mechvent-erv-atre-asre.xml' => 'base.xml',
     'base-mechvent-exhaust.xml' => 'base.xml',
@@ -413,7 +415,8 @@ def create_hpxmls
     'base-simcontrol-temperature-capacitance-multiplier.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
-    'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml'
+    'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
+    'base-simcontrol-timestep-30-mins.xml' => 'base.xml',
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2388,7 +2391,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
     args['simulation_control_daylight_saving_enabled'] = false
   elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
-    args['simulation_control_run_period'] = 'Jan 1 - Jan 31'
+    args['simulation_control_run_period'] = 'Feb 1 - Feb 28'
   elsif ['base-simcontrol-temperature-capacitance-multiplier.xml'].include? hpxml_file
     args['simulation_control_temperature_capacitance_multiplier'] = 7.0
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
@@ -2397,6 +2400,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
   elsif ['base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
+  elsif ['base-simcontrol-timestep-30-mins.xml'].include? hpxml_file
+    args['simulation_control_timestep'] = 30
   end
 
   # Occupancy Schedules
@@ -4280,6 +4285,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                hours_in_operation: 8,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
+                               cfis_addtl_runtime_operating_mode: HPXML::CFISModeAirHandler,
                                distribution_system_idref: 'HVACDistribution1')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
@@ -4288,15 +4294,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                used_for_seasonal_cooling_load_reduction: true)
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
-                               tested_flow_rate: 27.5,
-                               hours_in_operation: 24,
-                               fan_power: 7.5,
-                               used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
-                               fan_type: HPXML::MechVentTypeExhaust,
                                tested_flow_rate: 12.5,
                                hours_in_operation: 14,
                                fan_power: 2.5,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               tested_flow_rate: 30.0,
+                               fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeBalanced,
@@ -4334,6 +4339,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                hours_in_operation: 8,
                                fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
+                               cfis_addtl_runtime_operating_mode: HPXML::CFISModeAirHandler,
                                distribution_system_idref: 'HVACDistribution1')
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeCFIS,
@@ -4341,6 +4347,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                hours_in_operation: 8,
                                fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
+                               cfis_addtl_runtime_operating_mode: HPXML::CFISModeSupplementalFan,
+                               cfis_supplemental_fan_idref: hpxml.ventilation_fans.select { |f| f.fan_type == HPXML::MechVentTypeExhaust }[0].id,
                                distribution_system_idref: 'HVACDistribution2')
     # Test ventilation system w/ zero airflow and hours
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
@@ -4359,6 +4367,19 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-cfis-airflow-fraction-zero.xml'].include? hpxml_file
     hpxml.ventilation_fans[0].cfis_vent_mode_airflow_fraction = 0.0
+  elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
+         'base-mechvent-cfis-supplemental-fan-supply.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
+                               tested_flow_rate: 120,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    if hpxml_file == 'base-mechvent-cfis-supplemental-fan-exhaust.xml'
+      hpxml.ventilation_fans[-1].fan_type = HPXML::MechVentTypeExhaust
+    else
+      hpxml.ventilation_fans[-1].fan_type = HPXML::MechVentTypeSupply
+    end
+    hpxml.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
+    hpxml.ventilation_fans[0].cfis_supplemental_fan_idref = hpxml.ventilation_fans[1].id
   end
 
   # ---------------- #
@@ -4816,8 +4837,6 @@ if ARGV[0].to_sym == :create_release_zips
            'BuildResidentialScheduleFile/resources/**/*.*',
            'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/**/*.*',
-           'ReportHPXMLOutput/measure.*',
-           'ReportHPXMLOutput/resources/**/*.*',
            'ReportSimulationOutput/measure.*',
            'ReportSimulationOutput/resources/**/*.*',
            'ReportUtilityBills/measure.*',
