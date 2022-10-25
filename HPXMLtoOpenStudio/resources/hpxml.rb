@@ -6638,10 +6638,9 @@ class HPXML < Object
     if surface.exterior_adjacent_to == surface.interior_adjacent_to
       # E.g., wall between unit crawlspace and neighboring unit crawlspace
       return true
-    elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
-          conditioned_locations.include?(surface.exterior_adjacent_to)
-      # E.g., floor between living space and conditioned basement, or
-      # wall between living space and "other housing unit"
+    elsif HPXML::conditioned_finished_locations.include?(surface.interior_adjacent_to)
+      surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+      # E.g., wall between living space and "other housing unit"
       return true
     end
 

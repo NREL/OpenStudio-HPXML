@@ -1048,35 +1048,35 @@ class OSModel
   end
 
   def self.add_conditioned_floor_area(model, spaces)
-    # Check if we need to add floors between conditioned spaces (e.g., between first
-    # and second story or conditioned basement ceiling).
-    # This ensures that the E+ reported Conditioned Floor Area is correct.
+    # Check if we need to add floors between conditioned spaces.
 
-    sum_cfa = 0.0
-    @hpxml.floors.each do |floor|
-      next unless floor.is_floor
-      next unless HPXML::conditioned_finished_locations.include?(floor.interior_adjacent_to) ||
-                  HPXML::conditioned_finished_locations.include?(floor.exterior_adjacent_to)
+    # Add floor area between conditioned basement/crawlspace and living space?
+    addtl_fnd_ceiling_area = 0.0
+    [HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceConditioned].each do |loc|
+      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == loc }.map { |s| s.area }.sum(0.0)
+      ceiling_area = @hpxml.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? loc }.map { |f| f.area }.sum(0.0)
+      addtl_ceiling_area = floor_area - ceiling_area
+      next unless addtl_ceiling_area > 1.0 # Allow some rounding
 
-      sum_cfa += floor.area
-    end
-    @hpxml.slabs.each do |slab|
-      next unless HPXML::conditioned_finished_locations.include? slab.interior_adjacent_to
-
-      sum_cfa += slab.area
+      # Add floor area above foundation and below living space
+      addtl_fnd_ceiling_area += addtl_ceiling_area
+      add_conditioned_floor_area_by_type(model, spaces, loc, addtl_ceiling_area, @foundation_top)
     end
 
-    addtl_cfa = @cfa - sum_cfa
+    # Add floor area between living space and living space?
+    sum_cfa = @hpxml.slabs.select { |s| HPXML::conditioned_finished_locations.include? s.interior_adjacent_to }.map { |s| s.area }.sum(0.0)
+    sum_cfa += @hpxml.floors.select { |f| f.is_floor && HPXML::conditioned_finished_locations.include?(f.interior_adjacent_to) || HPXML::conditioned_finished_locations.include?(f.exterior_adjacent_to) }.map { |f| f.area }.sum(0.0)
+    addtl_liv_cfa = @cfa - sum_cfa - addtl_fnd_ceiling_area
+    fail if addtl_liv_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
 
-    fail if addtl_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
+    if addtl_liv_cfa > 1.0 # Allow some rounding
+      add_conditioned_floor_area_by_type(model, spaces, HPXML::LocationLivingSpace, addtl_liv_cfa, @foundation_top + 8.0 * (@ncfl_ag - 1))
+    end
+  end
 
-    return unless addtl_cfa > 1.0 # Allow some rounding
-
-    # FIXME: Need to differentiate ceiling of living space (i.e., 2 story building) from ceiling of conditioned basement/crawlspace
-
-    floor_width = Math::sqrt(addtl_cfa)
-    floor_length = addtl_cfa / floor_width
-    z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
+  def self.add_conditioned_floor_area_by_type(model, spaces, location_below, floor_area, z_origin)
+    floor_width = Math::sqrt(floor_area)
+    floor_length = floor_area / floor_width
 
     # Add floor surface
     vertices = Geometry.create_floor_vertices(floor_length, floor_width, z_origin, @default_azimuths)
@@ -1084,10 +1084,9 @@ class OSModel
 
     floor_surface.setSunExposure('NoSun')
     floor_surface.setWindExposure('NoWind')
-    floor_surface.setName('inferred conditioned floor')
+    floor_surface.setName("inferred floor above #{location_below}")
     floor_surface.setSurfaceType('Floor')
     floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    floor_surface.setOutsideBoundaryCondition('Adiabatic')
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
     floor_surface.additionalProperties.setFeature('Tilt', 0.0)
 
@@ -1097,12 +1096,21 @@ class OSModel
 
     ceiling_surface.setSunExposure('NoSun')
     ceiling_surface.setWindExposure('NoWind')
-    ceiling_surface.setName('inferred conditioned ceiling')
+    ceiling_surface.setName("inferred ceiling above #{location_below}")
     ceiling_surface.setSurfaceType('RoofCeiling')
-    ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
+    ceiling_surface.setSpace(create_or_get_space(model, spaces, location_below))
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
     ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
+
+    if location_below != HPXML::LocationLivingSpace
+      # Other side of surface is in a different space: set as adjacent surfaces
+      ceiling_surface.setAdjacentSurface(floor_surface)
+    else
+      # Other side of surface is in the same space: setting as adjacent surfaces will cause
+      # EnergyPlus to issue a warning, so we use Adiabatic instead
+      floor_surface.setOutsideBoundaryCondition('Adiabatic')
+      ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
+    end
 
     # Apply Construction
     apply_adiabatic_construction(model, [floor_surface, ceiling_surface], 'floor')
@@ -2428,9 +2436,6 @@ class OSModel
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model)
-    elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
-      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
       adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
       adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
