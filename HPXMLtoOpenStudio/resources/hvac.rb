@@ -755,7 +755,7 @@ class HVAC
     # Create schedule
     ceiling_fan_sch = nil
     ceiling_fan_col_name = SchedulesFile::ColumnCeilingFan
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(ceiling_fan_col_name)
+    if not schedules_file.nil?
       annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
       ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: ceiling_fan_col_name, annual_kwh: annual_kwh)
       ceiling_fan_sch = schedules_file.create_schedule_file(col_name: ceiling_fan_col_name)
@@ -791,10 +791,10 @@ class HVAC
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
     heating_sch = nil
     cooling_sch = nil
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnHeatingSetpoint)
+    if not schedules_file.nil?
       heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
     end
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(SchedulesFile::ColumnCoolingSetpoint)
+    if not schedules_file.nil?
       cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
 

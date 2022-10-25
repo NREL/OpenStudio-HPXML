@@ -525,7 +525,7 @@ class Geometry
     # Create schedule
     people_sch = nil
     people_col_name = SchedulesFile::ColumnOccupants
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(people_col_name)
+    if not schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: people_col_name)
     end
     if people_sch.nil?

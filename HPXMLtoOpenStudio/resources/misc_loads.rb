@@ -20,7 +20,7 @@ class MiscLoads
     elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
       col_name = SchedulesFile::ColumnPlugLoadsWellPump
     end
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+    if not schedules_file.nil?
       space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: kwh)
       sch = schedules_file.create_schedule_file(col_name: col_name)
     end
@@ -74,7 +74,7 @@ class MiscLoads
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         col_name = SchedulesFile::ColumnFuelLoadsFireplace
       end
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+      if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_therm(col_name: col_name, annual_therm: therm)
         sch = schedules_file.create_schedule_file(col_name: col_name)
       end
@@ -119,7 +119,7 @@ class MiscLoads
     # Create schedule
     heater_sch = nil
     col_name = (obj_name.include?('pool') ? 'pool_heater' : 'hot_tub_heater')
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+    if not schedules_file.nil?
       heater_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if heater_sch.nil?
@@ -138,7 +138,7 @@ class MiscLoads
     end
 
     if heater_kwh > 0
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+      if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: heater_kwh)
       else
         space_design_level = heater_sch.calcDesignLevelFromDailykWh(heater_kwh / 365.0)
@@ -159,7 +159,7 @@ class MiscLoads
     end
 
     if heater_therm > 0
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+      if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_therm(col_name: col_name, annual_therm: heater_therm)
       else
         space_design_level = heater_sch.calcDesignLevelFromDailyTherm(heater_therm / 365.0)
@@ -187,7 +187,7 @@ class MiscLoads
     # Create schedule
     pump_sch = nil
     col_name = (obj_name.include?('pool') ? 'pool_pump' : 'hot_tub_pump')
-    if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+    if not schedules_file.nil?
       pump_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if pump_sch.nil?
@@ -204,7 +204,7 @@ class MiscLoads
     end
 
     if pump_kwh > 0
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(col_name)
+      if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: pump_kwh)
       else
         space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)

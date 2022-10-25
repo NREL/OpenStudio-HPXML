@@ -31,7 +31,7 @@ class Lighting
       # Create schedule
       interior_sch = nil
       interior_col_name = SchedulesFile::ColumnLightingInterior
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(interior_col_name)
+      if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: interior_col_name, annual_kwh: int_kwh)
         interior_sch = schedules_file.create_schedule_file(col_name: interior_col_name)
       end
@@ -76,7 +76,7 @@ class Lighting
       # Create schedule
       garage_sch = nil
       garage_col_name = SchedulesFile::ColumnLightingGarage
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(garage_col_name)
+      if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: garage_col_name, annual_kwh: grg_kwh)
         garage_sch = schedules_file.create_schedule_file(col_name: garage_col_name)
       end
@@ -110,7 +110,7 @@ class Lighting
       # Create schedule
       exterior_sch = nil
       exterior_col_name = SchedulesFile::ColumnLightingExterior
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(exterior_col_name)
+      if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: exterior_col_name, annual_kwh: ext_kwh)
         exterior_sch = schedules_file.create_schedule_file(col_name: exterior_col_name)
       end
@@ -140,7 +140,7 @@ class Lighting
       # Create schedule
       exterior_holiday_sch = nil
       exterior_holiday_col_name = SchedulesFile::ColumnLightingExteriorHoliday
-      if (not schedules_file.nil?) && schedules_file.includes_col_name(exterior_holiday_col_name)
+      if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: exterior_holiday_col_name, daily_kwh: lighting.holiday_kwh_per_day)
         exterior_holiday_sch = schedules_file.create_schedule_file(col_name: exterior_holiday_col_name)
       end
