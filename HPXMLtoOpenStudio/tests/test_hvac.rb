@@ -146,7 +146,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.001)
+    assert_in_epsilon(cop, clg_coil.ratedCOP, 0.001)
     assert_in_epsilon(cool_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
@@ -243,7 +243,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_room_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-with-reverse-cycle.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -259,7 +259,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(cop_cool, clg_coil.ratedCOP.get, 0.01)
+    assert_in_epsilon(cop_cool, clg_coil.ratedCOP, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
