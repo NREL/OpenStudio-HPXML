@@ -644,7 +644,7 @@ class Waterheater
     availability_manager.setColdNode(storage_tank.demandOutletModelObject.get.to_Node.get)
     availability_manager.setTemperatureDifferenceOnLimit(0)
     availability_manager.setTemperatureDifferenceOffLimit(0)
-    plant_loop.setAvailabilityManager(availability_manager)
+    plant_loop.addAvailabilityManager(availability_manager)
 
     # Add EMS code for SWH control (keeps the WH for the last hour if there's useful energy that can be delivered, E+ wouldn't always do this by default)
     # Sensors
