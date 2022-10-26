@@ -27,8 +27,8 @@ __New Features__
   - Allows generating timeseries unmet hours for heating and cooling.
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
-- Allows modeling room air conditioners with heating or reverse cycle..
-- **Breaking change**: For PTAC with electric resistence, eliminates HeatingSystemType `PackagedTerminalAirConditionerHeating`. Instead, uses `IntegratedHeatingSystemFuel`, `IntegratedHeatingSystemCapacity`, `IntegratedHeatingSystemAnnualEfficiency` and `IntegratedHeatingSystemFractionHeatLoadServed` under `CoolingSystem` to describe the attached heating system.
+- Allows modeling room air conditioners with heating or reverse cycle.
+- **Breaking change**: For PTAC with heating, replaces `HeatingSystem` of type PackagedTerminalAirConditionerHeating with `CoolingSystem/IntegratedHeating*` elements.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.

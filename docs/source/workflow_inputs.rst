@@ -1508,7 +1508,7 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
-  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room heat pump".
+  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -1645,10 +1645,10 @@ If a packaged terminal heat pump is specified, additional information is entered
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HeatingSystems, HeatPumps and integrated heating systems in CoolingSystems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   
-Room Heat Pump
+Room Air Conditioner w/ Reverse Cycle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a packaged terminal heat pump is specified, additional information is entered in ``HeatPump``.
+If a room air conditioner with reverse cycle is specified, additional information is entered in ``HeatPump``.
 
   ===============================================================  ========  ======  ===========  ========  =========  ==============================================
   Element                                                          Type      Units   Constraints  Required  Default    Notes
