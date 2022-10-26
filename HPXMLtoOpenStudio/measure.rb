@@ -1056,6 +1056,8 @@ class OSModel
       floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == loc }.map { |s| s.area }.sum(0.0)
       ceiling_area = @hpxml.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? loc }.map { |f| f.area }.sum(0.0)
       addtl_ceiling_area = floor_area - ceiling_area
+      fail if addtl_ceiling_area < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
+
       next unless addtl_ceiling_area > 1.0 # Allow some rounding
 
       # Add floor area above foundation and below living space
@@ -1066,9 +1068,10 @@ class OSModel
     # Add floor area between living space and living space?
     sum_cfa = @hpxml.slabs.select { |s| HPXML::conditioned_finished_locations.include? s.interior_adjacent_to }.map { |s| s.area }.sum(0.0)
     sum_cfa += @hpxml.floors.select { |f| f.is_floor && HPXML::conditioned_finished_locations.include?(f.interior_adjacent_to) || HPXML::conditioned_finished_locations.include?(f.exterior_adjacent_to) }.map { |f| f.area }.sum(0.0)
-    addtl_liv_cfa = @cfa - sum_cfa - addtl_fnd_ceiling_area
-    fail if addtl_liv_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
+    addtl_cfa = @cfa - sum_cfa
+    fail if addtl_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
 
+    addtl_liv_cfa = addtl_cfa - addtl_fnd_ceiling_area
     if addtl_liv_cfa > 1.0 # Allow some rounding
       add_conditioned_floor_area_by_type(model, spaces, HPXML::LocationLivingSpace, addtl_liv_cfa, @foundation_top + 8.0 * (@ncfl_ag - 1))
     end
