@@ -1058,7 +1058,7 @@ class OSModel
     [HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceConditioned].each do |loc|
       floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == loc }.map { |s| s.area }.sum(0.0)
       ceiling_area = @hpxml.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? loc }.map { |f| f.area }.sum(0.0)
-      addtl_ceiling_area = floor_area - ceiling_area
+      addtl_ceiling_area = [floor_area - ceiling_area, addtl_cfa].min
       next unless addtl_ceiling_area > 1.0 # Allow some rounding
 
       addtl_cfa -= addtl_ceiling_area
