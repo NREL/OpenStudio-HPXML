@@ -1611,7 +1611,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
       hvac_sizing_values.Heat_Airflow_Supp = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity_Supp, (hvac.BackupSupplyAirTemp - @heat_setpoint))
 
-    elsif [HPXML::HVACTypeFurnace, HPXML::HVACTypeIntegratedHeating].include? hvac.HeatType
+    elsif (hvac.HeatType == HPXML::HVACTypeFurnace) || hvac.HasIntegratedHeating
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
@@ -2345,7 +2345,7 @@ class HVACSizing
 
       # Integrated heating systems
       if hpxml_hvac.is_a?(HPXML::CoolingSystem) && hpxml_hvac.has_integrated_heating
-        hvac.HeatType = HPXML::HVACTypeIntegratedHeating
+        hvac.HasIntegratedHeating = true
         hvac.HeatingLoadFraction = hpxml_hvac.integrated_heating_system_fraction_heat_load_served
         hvac.FixedHeatingCapacity = hpxml_hvac.integrated_heating_system_capacity
       end
@@ -3439,7 +3439,7 @@ class HVACInfo
                 :GSHP_SpacingType, :EvapCoolerEffectiveness, :SwitchoverTemperature, :LeavingAirTemp,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :BackupSupplyAirTemp,
                 :GSHP_design_chw, :GSHP_design_delta_t, :GSHP_design_hw, :GSHP_bore_d,
-                :GSHP_pipe_od, :GSHP_pipe_id, :GSHP_pipe_cond, :GSHP_grout_k)
+                :GSHP_pipe_od, :GSHP_pipe_id, :GSHP_pipe_cond, :GSHP_grout_k, :HasIntegratedHeating)
 end
 
 class DuctInfo

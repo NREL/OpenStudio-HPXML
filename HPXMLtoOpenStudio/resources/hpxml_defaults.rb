@@ -1042,9 +1042,9 @@ class HPXMLDefaults
       cooling_system_type = cooling_system.cooling_system_type
       cooling_system_fuel = HPXML::FuelTypeElectricity
 
-      if cooling_system.has_integrated_heating && cooling_system.integrated_heating_system_efficiency.nil?
-        cooling_system.integrated_heating_system_efficiency = 1.0
-        cooling_system.integrated_heating_system_efficiency_isdefaulted = true
+      if cooling_system.has_integrated_heating && cooling_system.integrated_heating_system_efficiency_percent.nil?
+        cooling_system.integrated_heating_system_efficiency_percent = 1.0
+        cooling_system.integrated_heating_system_efficiency_percent_isdefaulted = true
       end
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.cooling_efficiency_seer.nil?

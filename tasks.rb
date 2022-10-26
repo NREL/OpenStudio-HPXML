@@ -262,7 +262,7 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
-    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
+    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating-electricity.xml',
     'base-hvac-autosize-pthp-sizing-methodology-acca.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-hers.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-maxload.xml' => 'base-hvac-pthp.xml',
@@ -338,7 +338,8 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-ptac.xml' => 'base.xml',
-    'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-electricity.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-natural-gas.xml' => 'base-hvac-ptac.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
@@ -1988,11 +1989,16 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['cooling_system_fraction_cool_load_served'] = 0.33
     args['cooling_system_cooling_capacity'] = 8000.0
   elsif ['base-hvac-room-ac-with-heating.xml',
-         'base-hvac-ptac-with-heating.xml'].include? hpxml_file
-    args['cooling_system_integrated_heating_system_efficiency'] = 1.0
+         'base-hvac-ptac-with-heating-electricity.xml',
+         'base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+    args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
     args['cooling_system_integrated_heating_system_capacity'] = 36000.0
     args['cooling_system_integrated_heating_system_fraction_heat_load_served'] = 1.0
-    args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
+    if ['base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
+    else
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
+    end
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60

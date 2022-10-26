@@ -138,7 +138,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     cool_capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
-    heat_efficiency = cooling_system.integrated_heating_system_efficiency
+    heat_efficiency = cooling_system.integrated_heating_system_efficiency_percent
     heat_efficiency = 1.0 if heat_efficiency.nil?
     heat_capacity = UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W')
 
@@ -188,7 +188,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     cool_capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
-    heat_efficiency = cooling_system.integrated_heating_system_efficiency
+    heat_efficiency = cooling_system.integrated_heating_system_efficiency_percent
     heat_efficiency = 1.0 if heat_efficiency.nil?
     heat_capacity = UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W')
 

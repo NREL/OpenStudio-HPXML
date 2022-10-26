@@ -5,7 +5,6 @@ class HVAC
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          control_zone)
     is_heatpump = false
-    has_integrated_heating = false # only for ptac and room ac where electric heater info can be attached to cooling system
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -40,9 +39,6 @@ class HVAC
           else
             obj_name = Constants.ObjectNamePTAC
           end
-          if cooling_system.has_integrated_heating
-            has_integrated_heating = true
-          end
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
         else
@@ -67,9 +63,17 @@ class HVAC
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
       end
-      if has_integrated_heating
-        htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
-        htg_coil.setEfficiency(cooling_system.integrated_heating_system_efficiency)
+      if cooling_system.has_integrated_heating
+        if cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeElectricity
+          htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
+          htg_coil.setEfficiency(cooling_system.integrated_heating_system_efficiency_percent)
+        else
+          htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+          htg_coil.setGasBurnerEfficiency(cooling_system.integrated_heating_system_efficiency_percent)
+          htg_coil.setParasiticElectricLoad(0)
+          htg_coil.setParasiticGasLoad(0)
+          htg_coil.setFuelType(EPlus.fuel_type(cooling_system.integrated_heating_system_fuel))
+        end
         htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W'))
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
@@ -128,7 +132,7 @@ class HVAC
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        if has_integrated_heating
+        if cooling_system.has_integrated_heating
           disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, nil, cooling_system)
         else
           disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
@@ -3013,7 +3017,6 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     # Degradation coefficient for heating
-    # FIXME: Here I am using COP method to make it more consistent with cooling property. Is it a fair assumption?
     if (heating_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heating_system.heat_pump_type)
       htg_ap.heat_c_d = 0.22
     elsif num_speeds == 1
