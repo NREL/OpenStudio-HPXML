@@ -167,6 +167,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-timezone-utcoffset-low' => ["Element 'UTCOffset': [facet 'minInclusive'] The value '-13.0' is less than the minimum value allowed ('-12')."],
                             'invalid-timezone-utcoffset-high' => ["Element 'UTCOffset': [facet 'maxInclusive'] The value '15.0' is greater than the maximum value allowed ('14')."],
                             'invalid-ventilation-fan' => ['Expected 1 element(s) for xpath: UsedForWholeBuildingVentilation[text()="true"] | UsedForLocalVentilation[text()="true"] | UsedForSeasonalCoolingLoadReduction[text()="true"] | UsedForGarageVentilation[text()="true"]'],
+                            'invalid-ventilation-recovery' => ['Expected 0 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency',
+                                                               'Expected 0 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting]'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
@@ -441,6 +443,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['invalid-ventilation-fan'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-exhaust.xml'))
         hpxml.ventilation_fans[0].used_for_garage_ventilation = true
+      elsif ['invalid-ventilation-recovery'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-exhaust.xml'))
+        hpxml.ventilation_fans[0].sensible_recovery_efficiency = 0.72
+        hpxml.ventilation_fans[0].total_recovery_efficiency = 0.48
       elsif ['invalid-window-height'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-overhangs.xml'))
         hpxml.windows[1].overhangs_distance_to_bottom_of_window = 1.0
