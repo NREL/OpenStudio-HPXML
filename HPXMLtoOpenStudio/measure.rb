@@ -1066,8 +1066,8 @@ class OSModel
     end
 
     # Add floor area between living space and living space?
-    if addtl_liv_cfa > 1.0 # Allow some rounding
-      add_conditioned_floor_area_by_type(model, spaces, HPXML::LocationLivingSpace, addtl_liv_cfa, @foundation_top + 8.0 * (@ncfl_ag - 1))
+    if addtl_cfa > 1.0 # Allow some rounding
+      add_conditioned_floor_area_by_type(model, spaces, HPXML::LocationLivingSpace, addtl_cfa, @foundation_top + 8.0 * (@ncfl_ag - 1))
     end
   end
 
