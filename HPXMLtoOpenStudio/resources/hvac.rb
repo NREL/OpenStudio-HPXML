@@ -790,6 +790,9 @@ class HVAC
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
+      if hvac_control.onoff_thermostat_deadband > 0.0
+        schedules_file.convert_setpoints_onoffthermostat_offset(hvac_control.onoff_thermostat_deadband)
+      end
       heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
       cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
@@ -3007,9 +3010,10 @@ class HVAC
     tin_sensor.setName('zone air temp')
     tin_sensor.setKeyName(control_zone.name.to_s)
 
+    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     htg_sp_ss.setName('htg_setpoint')
-    htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
+    htg_sp_ss.setKeyName(htg_sch.name.to_s)
 
     supp_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
     supp_coil_energy.setName('supp coil electric energy')

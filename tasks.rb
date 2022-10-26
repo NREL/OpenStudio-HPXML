@@ -334,6 +334,7 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-onoff-thermostat-deadband.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-ptac.xml' => 'base.xml',
     'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
@@ -3821,12 +3822,18 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_temp = 80
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
-  elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+  elsif ['base-hvac-onoff-thermostat-deadband.xml',
+         'base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml'].include? hpxml_file
     hpxml.header.timestep = 1
     hpxml.header.temperature_capacitance_multiplier = 4.0
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     hpxml.heat_pumps[0].heating_capacity = 10000
     hpxml.heat_pumps[0].heating_capacity_17F = 5900.0
+    if ['base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml'].include? hpxml_file
+      hpxml.hvac_controls[0].heating_setpoint_temp = nil
+      hpxml.hvac_controls[0].cooling_setpoint_temp = nil
+      hpxml.header.schedules_filepaths = ['../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv']
+    end
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml',
          'base-mechvent-cfis-dse.xml'].include? hpxml_file

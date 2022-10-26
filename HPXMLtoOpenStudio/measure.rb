@@ -1918,6 +1918,7 @@ class OSModel
       htg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
       clg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
       clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+      onoff_thermostat_deadband = hvac_control.onoff_thermostat_deadband
     end
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
@@ -1930,6 +1931,22 @@ class OSModel
     clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Cooling Setpoint Not Met Time')
     clg_sensor.setName('zone clg unmet s')
     clg_sensor.setKeyName(living_zone.name.to_s)
+
+    if onoff_thermostat_deadband > 0.0
+      zone_air_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+      zone_air_temp_sensor.setName('living_space_temp')
+      zone_air_temp_sensor.setKeyName(spaces[HPXML::LocationLivingSpace].thermalZone.get.name.to_s)
+
+      htg_sch = spaces[HPXML::LocationLivingSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+      sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      sensor_htg_spt.setName('htg_spt_sch_value')
+      sensor_htg_spt.setKeyName(htg_sch.name.to_s)
+
+      clg_sch = spaces[HPXML::LocationLivingSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
+      sensor_clg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      sensor_clg_spt.setName('clg_spt_sch_value')
+      sensor_clg_spt.setKeyName(clg_sch.name.to_s)
+    end
 
     # EMS program
     clg_hrs = 'clg_unmet_hours'
@@ -1944,7 +1961,13 @@ class OSModel
       else
         program.addLine("If (DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day})")
       end
-      program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
+      if onoff_thermostat_deadband > 0.0
+        program.addLine("  If #{zone_air_temp_sensor.name} < (#{sensor_htg_spt.name} - #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
+        program.addLine("    Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
+        program.addLine('  EndIf')
+      else
+        program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
+      end
       program.addLine('EndIf')
     end
     if @hpxml.total_fraction_cool_load_served > 0
@@ -1953,7 +1976,13 @@ class OSModel
       else
         program.addLine("If (DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day})")
       end
-      program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
+      if onoff_thermostat_deadband > 0.0
+        program.addLine("  If #{zone_air_temp_sensor.name} > (#{sensor_clg_spt.name} + #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
+        program.addLine("    Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
+        program.addLine('  EndIf')
+      else
+        program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
+      end
       program.addLine('EndIf')
     end
 
