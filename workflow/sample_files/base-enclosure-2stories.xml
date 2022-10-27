@@ -407,14 +407,14 @@
                   <DuctSurfaceArea>37.5</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
+                  <SystemIdentifier id='Ducts3'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>exterior wall</DuctLocation>
                   <DuctSurfaceArea>37.5</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
+                  <SystemIdentifier id='Ducts4'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>

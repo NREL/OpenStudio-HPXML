@@ -501,6 +501,13 @@ def create_hpxmls
       end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
+
+      schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+      errors, _ = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+      if errors.size > 0
+        puts "\nError: Did not successfully validate #{hpxml_file}."
+        exit!
+      end
     rescue Exception => e
       puts "\n#{e}\n#{e.backtrace.join('\n')}"
       puts "\nError: Did not successfully generate #{hpxml_file}."
@@ -534,7 +541,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   else
     args['hpxml_path'] = "workflow/sample_files/#{hpxml_file}"
   end
-  args['apply_validation'] = false # It's faster not to validate and the CI tests will catch issues
+  args['apply_validation'] = false
 
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
@@ -3870,7 +3877,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
          'base-enclosure-2stories-garage.xml',
          'base-hvac-ducts-area-fractions.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
+    hpxml.hvac_distributions[0].ducts[-1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size}"
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
+    hpxml.hvac_distributions[0].ducts[-1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size}"
     hpxml.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
     hpxml.hvac_distributions[0].ducts[2].duct_surface_area = 37.5
     hpxml.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationLivingSpace
@@ -3894,14 +3903,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  air_type: HPXML::AirTypeRegularVelocity)
-    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75,
-                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25,
-                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 75,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 25,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
                                           duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
@@ -3922,18 +3931,39 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 25)
-    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
-    hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[1].dup
+    for i in 0..3
+      hpxml.hvac_distributions[-1].ducts << hpxml.hvac_distributions[0].ducts[i].dup
+      hpxml.hvac_distributions[-1].ducts[-1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size + i + 1}"
+    end
     hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                  hydronic_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                  hydronic_type: HPXML::HydronicTypeBaseboard)
-    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
-    hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
-    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
-    hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[1].dup
+    for i in 0..3
+      hpxml.hvac_distributions[-1].ducts << hpxml.hvac_distributions[0].ducts[i].dup
+      hpxml.hvac_distributions[-1].ducts[-1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size * 2 + i + 1}"
+    end
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[-1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[1].dup
+    for i in 0..3
+      hpxml.hvac_distributions[-1].ducts << hpxml.hvac_distributions[0].ducts[i].dup
+      hpxml.hvac_distributions[-1].ducts[-1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size * 3 + i + 1}"
+    end
     hpxml.heating_systems.reverse_each do |heating_system|
       heating_system.delete
     end
@@ -4056,8 +4086,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          primary_heating_system: true)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
-    hpxml.hvac_distributions[1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
+    hpxml.hvac_distributions[1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[0].dup
+    hpxml.hvac_distributions[1].duct_leakage_measurements << hpxml.hvac_distributions[0].duct_leakage_measurements[1].dup
+    hpxml.hvac_distributions[1].ducts << hpxml.hvac_distributions[0].ducts[0].dup
+    hpxml.hvac_distributions[1].ducts << hpxml.hvac_distributions[0].ducts[1].dup
+    hpxml.hvac_distributions[1].ducts[0].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}"
+    hpxml.hvac_distributions[1].ducts[1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size + 2}"
     hpxml.heating_systems[0].heating_capacity /= 2.0
     hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
     hpxml.heating_systems[0].primary_system = false
@@ -4104,6 +4141,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements << hpxml.hvac_distributions[1].duct_leakage_measurements[1].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[1].ducts[1].dup
+    hpxml.hvac_distributions[1].ducts[0].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}"
+    hpxml.hvac_distributions[1].ducts[1].id = "Ducts#{hpxml.hvac_distributions[0].ducts.size + 2}"
   end
   if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
