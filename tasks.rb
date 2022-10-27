@@ -2807,19 +2807,19 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
-                     other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
+                     floor_or_ceiling: HPXML::FloorTypeFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
-                     other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
+                     floor_or_ceiling: HPXML::FloorTypeFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
-                     other_space_above_or_below: HPXML::FloorOtherSpaceBelow)
+                     floor_or_ceiling: HPXML::FloorTypeFloor)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
@@ -2927,7 +2927,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
-                     insulation_assembly_r_value: 39.3)
+                     insulation_assembly_r_value: 39.3,
+                     floor_or_ceiling: HPXML::FloorTypeCeiling)
     hpxml.slabs[0].area = 1350
     hpxml.slabs[0].exposed_perimeter = 150
     hpxml.windows[1].area = 108
@@ -3171,7 +3172,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 675,
-                     insulation_assembly_r_value: 18.7)
+                     insulation_assembly_r_value: 18.7,
+                     floor_or_ceiling: HPXML::FloorTypeFloor)
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3312,7 +3314,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      exterior_adjacent_to: HPXML::LocationGarage,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      area: 400,
-                     insulation_assembly_r_value: 39.3)
+                     insulation_assembly_r_value: 39.3,
+                     floor_or_ceiling: HPXML::FloorTypeFloor)
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3749,11 +3752,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                                                  duct_leakage_units: HPXML::UnitsCFM25,
                                                                  duct_leakage_value: 10,
                                                                  duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-      hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
+      hpxml.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml.hvac_distributions[-1].ducts.size + 1}",
+                                             duct_type: HPXML::DuctTypeSupply,
                                              duct_insulation_r_value: 0,
                                              duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
                                              duct_surface_area: 50)
-      hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
+      hpxml.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml.hvac_distributions[-1].ducts.size + 1}",
+                                             duct_type: HPXML::DuctTypeReturn,
                                              duct_insulation_r_value: 0,
                                              duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
                                              duct_surface_area: 20)
@@ -3897,19 +3902,23 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 25,
                                                                duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 75)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 75)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 25)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 25)
@@ -4065,11 +4074,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.cooling_systems[1].primary_system = true
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 150)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
+    hpxml.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml.hvac_distributions[0].ducts.size + 1}",
+                                          duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
