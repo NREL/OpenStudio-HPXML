@@ -52,6 +52,11 @@ end
 
 class CalculateUtilityBill
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
+    if fuel_time_series.size > 12
+      # Must be no more than 12 months worth of simulation data
+      fail 'Incorrect timeseries data.'
+    end
+
     sum_fuel_time_series = fuel_time_series.sum
     monthly_fuel_cost = [0] * 12
     for month in 0..fuel_time_series.size - 1
@@ -108,7 +113,7 @@ class CalculateUtilityBill
 
     if fuel_time_series.size < 24 || pv_fuel_time_series.size < 24
       # Must be at least 24 hours worth of simulation data
-      fail 'Incorrect fuel data.'
+      fail 'Incorrect timeseries data.'
     end
 
     year = header.sim_calendar_year
