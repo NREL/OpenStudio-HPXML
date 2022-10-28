@@ -138,7 +138,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     timestamp_chs << 'end'
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_timestamp_convention', timestamp_chs, false)
     arg.setDisplayName('Generate Timeseries Output: Timestamp Convention')
-    arg.setDescription("Determines whether timeseries timestamps use the start-of-timestep or end-of-timestep convention. Doesn't apply if the output format is 'csv_dview'.")
+    arg.setDescription("Determines whether timeseries timestamps use the start-of-period or end-of-period convention. Doesn't apply if the output format is 'csv_dview'.")
     arg.setDefaultValue('start')
     args << arg
 
