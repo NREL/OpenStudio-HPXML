@@ -2682,19 +2682,10 @@ class HPXML < Object
         ceiling_locations = [LocationAtticUnconditioned,
                              LocationAtticVented,
                              LocationAtticUnvented]
-        foundation_locations = [LocationBasementConditioned,
-                                LocationBasementUnconditioned,
-                                LocationCrawlspaceConditioned,
-                                LocationCrawlspaceUnvented,
-                                LocationCrawlspaceVented]
         if (ceiling_locations.include? @interior_adjacent_to) || (ceiling_locations.include? @exterior_adjacent_to)
           return true
-        elsif (foundation_locations.include? @interior_adjacent_to) || (foundation_locations.include? @exterior_adjacent_to)
+        else # If we don't explicitly know that it's a ceiling, assume a floor
           return false
-        elsif (@interior_adjacent_to == LocationLivingSpace) && ([LocationGarage, LocationOutside].include? @exterior_adjacent_to)
-          return false
-        else
-          return # Unknown
         end
       else
         return @floor_or_ceiling == FloorTypeCeiling
@@ -2702,8 +2693,6 @@ class HPXML < Object
     end
 
     def is_floor
-      return if is_ceiling.nil?
-
       return !is_ceiling
     end
 
