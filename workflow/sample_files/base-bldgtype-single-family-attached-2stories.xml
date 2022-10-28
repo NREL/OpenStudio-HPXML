@@ -282,7 +282,6 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>900.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

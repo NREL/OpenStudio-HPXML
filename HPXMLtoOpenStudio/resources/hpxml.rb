@@ -2682,16 +2682,16 @@ class HPXML < Object
         ceiling_locations = [LocationAtticUnconditioned,
                              LocationAtticVented,
                              LocationAtticUnvented]
-        floor_locations = [LocationBasementConditioned,
-                           LocationBasementUnconditioned,
-                           LocationCrawlspaceConditioned,
-                           LocationCrawlspaceUnvented,
-                           LocationCrawlspaceVented,
-                           LocationGarage,
-                           LocationOutside] # Outside included for floor over ambient
-        if (@interior_adjacent_to == LocationLivingSpace) && (ceiling_locations.include? @exterior_adjacent_to)
+        foundation_locations = [LocationBasementConditioned,
+                                LocationBasementUnconditioned,
+                                LocationCrawlspaceConditioned,
+                                LocationCrawlspaceUnvented,
+                                LocationCrawlspaceVented]
+        if (ceiling_locations.include? @interior_adjacent_to) && (ceiling_locations.include? @exterior_adjacent_to)
           return true
-        elsif (@interior_adjacent_to == LocationLivingSpace) && (floor_locations.include? @exterior_adjacent_to)
+        elsif (foundation_locations.include? @interior_adjacent_to) && (foundation_locations.include? @exterior_adjacent_to)
+          return false
+        elsif (@interior_adjacent_to == LocationLivingSpace) && ([LocationGarage, LocationOutside].include? @exterior_adjacent_to)
           return false
         else
           return # Unknown
