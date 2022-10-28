@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.5.0
 
 __New Features__
+- Updates to OpenStudio 3.5.0/EnergyPlus 22.2.
+- **Breaking Change**: Now performs full HPXML XSD schema validation (previously just limited checks); yields runtime speed improvements.
 - **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 - **Breaking Change**: Replaces `WallType/StructurallyInsulatedPanel` with `WallType/StructuralInsulatedPanel`.
 - **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
@@ -20,6 +22,7 @@ __New Features__
 - EnergyPlus modeling changes:
   - Switches Kiva foundation model timestep from 'Hourly' to 'Timestep'; small increase in runtime for sub-hourly simulations.
 - Annual/timeseries outputs:
+  - Allows timeseries timestamps to be start or end of timestep convention; **Breaking change**: now defaults to start of timestep.
   - Adds annual emission outputs disaggregated by end use; timeseries emission outputs disaggregated by end use can be requested.
   - Allows generating timeseries unmet hours for heating and cooling.
   - Allows CSV timeseries output to be formatted for use with the DView application.
@@ -52,6 +55,7 @@ __Bugfixes__
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
 - Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
 - Fixes possible "Could not identify surface type for surface" error.
+- Fixes possible ruby error when defaulting water heater location.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 

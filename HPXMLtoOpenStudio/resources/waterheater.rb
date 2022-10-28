@@ -644,7 +644,7 @@ class Waterheater
     availability_manager.setColdNode(storage_tank.demandOutletModelObject.get.to_Node.get)
     availability_manager.setTemperatureDifferenceOnLimit(0)
     availability_manager.setTemperatureDifferenceOffLimit(0)
-    plant_loop.setAvailabilityManager(availability_manager)
+    plant_loop.addAvailabilityManager(availability_manager)
 
     # Add EMS code for SWH control (keeps the WH for the last hour if there's useful energy that can be delivered, E+ wouldn't always do this by default)
     # Sensors
@@ -1438,7 +1438,8 @@ class Waterheater
     end
   end
 
-  def self.get_default_location(hpxml, iecc_zone)
+  def self.get_default_location(hpxml, climate_zone_iecc)
+    iecc_zone = (climate_zone_iecc.nil? ? nil : climate_zone_iecc.zone)
     if ['1A', '1B', '1C', '2A', '2B', '2C', '3B', '3C'].include? iecc_zone
       location_hierarchy = [HPXML::LocationGarage,
                             HPXML::LocationLivingSpace]
