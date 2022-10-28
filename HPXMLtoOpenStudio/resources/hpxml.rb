@@ -2687,9 +2687,9 @@ class HPXML < Object
                                 LocationCrawlspaceConditioned,
                                 LocationCrawlspaceUnvented,
                                 LocationCrawlspaceVented]
-        if (ceiling_locations.include? @interior_adjacent_to) && (ceiling_locations.include? @exterior_adjacent_to)
+        if (ceiling_locations.include? @interior_adjacent_to) || (ceiling_locations.include? @exterior_adjacent_to)
           return true
-        elsif (foundation_locations.include? @interior_adjacent_to) && (foundation_locations.include? @exterior_adjacent_to)
+        elsif (foundation_locations.include? @interior_adjacent_to) || (foundation_locations.include? @exterior_adjacent_to)
           return false
         elsif (@interior_adjacent_to == LocationLivingSpace) && ([LocationGarage, LocationOutside].include? @exterior_adjacent_to)
           return false

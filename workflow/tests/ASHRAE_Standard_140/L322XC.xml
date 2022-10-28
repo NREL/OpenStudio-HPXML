@@ -391,7 +391,12 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>1539.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>18.45</AssemblyEffectiveRValue>
