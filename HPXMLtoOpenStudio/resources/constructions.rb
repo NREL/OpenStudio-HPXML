@@ -886,7 +886,7 @@ class Constructions
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(model, furniture_mass, cfa, ubfa, gfa, spaces)
+  def self.apply_furniture(model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
       mat = BaseMaterial.FurnitureLightWeight
@@ -908,15 +908,12 @@ class Constructions
       if location == HPXML::LocationLivingSpace
         furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
-        floor_area = cfa
       elsif location == HPXML::LocationBasementUnconditioned
         furnAreaFraction = 0.4
         furnMass = mass_lb_per_sqft
-        floor_area = ubfa
       elsif location == HPXML::LocationGarage
         furnAreaFraction = 0.1
         furnMass = 2.0
-        floor_area = gfa
       end
 
       next if furnAreaFraction.nil?

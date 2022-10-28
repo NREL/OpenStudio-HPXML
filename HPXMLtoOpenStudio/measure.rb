@@ -314,8 +314,6 @@ class OSModel
 
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
-    @gfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.map { |s| s.area }.sum(0.0)
-    @ubfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementUnconditioned }.map { |s| s.area }.sum(0.0)
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
@@ -1118,7 +1116,7 @@ class OSModel
       partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
 
-      Constructions.apply_furniture(model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa, spaces)
+      Constructions.apply_furniture(model, @hpxml.furniture_mass, spaces)
     end
   end
 
@@ -1704,7 +1702,7 @@ class OSModel
 
   def self.add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting, @eri_version, @schedules_file, @cfa, @gfa)
+                   @hpxml.lighting, @eri_version, @schedules_file, @cfa)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
