@@ -351,7 +351,7 @@ class HVAC
       equip_def.setName(Constants.ObjectNameGSHPSharedPump)
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(equip_def.name.to_s)
-      equip.setSpace(control_zone.spaces[0])
+      equip.setSpace(control_zone.spaces[0]) # no heat gain, so assign the equipment to an arbitrary space
       equip_def.setDesignLevel(shared_pump_w)
       equip_def.setFractionRadiant(0)
       equip_def.setFractionLatent(0)
