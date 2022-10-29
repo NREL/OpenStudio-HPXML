@@ -455,19 +455,19 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_nil(get_wu_gpd(model, Constants.ObjectNameDishwasher))
 
     # electric equipment
-    ssert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher))
+    assert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher))
     assert(get_ee_fractions(model, Constants.ObjectNameClothesWasher).empty?)
 
-    ssert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher))
+    assert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher))
     assert(get_ee_fractions(model, Constants.ObjectNameDishwasher).empty?)
 
-    ssert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer))
+    assert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer))
     assert(get_ee_fractions(model, Constants.ObjectNameClothesDryer).empty?)
 
-    ssert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameRefrigerator))
+    assert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameRefrigerator))
     assert(get_ee_fractions(model, Constants.ObjectNameRefrigerator).empty?)
 
-    ssert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameCookingRange))
+    assert_equal(0.0, get_ee_kwh_per_year(model, Constants.ObjectNameCookingRange))
     assert(get_ee_fractions(model, Constants.ObjectNameCookingRange).empty?)
 
     # other equipment

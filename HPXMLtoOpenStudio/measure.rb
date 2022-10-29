@@ -2588,6 +2588,10 @@ class OSModel
                HPXML::LocationOtherMultifamilyBufferSpace,
                HPXML::LocationOtherNonFreezingSpace].include? location
 
+    if HPXML::conditioned_locations.include? location
+      location = HPXML::LocationLivingSpace
+    end
+
     return spaces[location]
   end
 
