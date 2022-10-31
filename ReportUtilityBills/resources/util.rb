@@ -89,14 +89,9 @@ class CalculateUtilityBill
         bill.annual_fixed_charge += bill.monthly_fixed_charge[month]
       end
     end
-    return net_elec
-  end
-
-  def self.annual_true_up(utility_rates, utility_bills, net_elec)
-    rate = utility_rates[FT::Elec]
-    bill = utility_bills[FT::Elec]
-    # Only make changes for cases where there's a user specified annual excess sellback rate
-    if rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
+    if is_production && rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
+      # Annual True-Up
+      # Only make changes for cases where there's a user specified annual excess sellback rate
       if bill.annual_production_credit > bill.annual_energy_charge
         bill.annual_production_credit = bill.annual_energy_charge
       end
@@ -104,6 +99,7 @@ class CalculateUtilityBill
         bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
       end
     end
+    return net_elec
   end
 
   def self.detailed_electric(header, fuels, rate, bill)
@@ -305,11 +301,9 @@ class CalculateUtilityBill
 
           if has_periods && has_tiered # tiered and TOU
             frac_elec_period = [0] * num_energyrate_periods
-            (0...num_energyrate_periods).each do |period|
-              next unless elec_month[month] > 0
-
+            for period in 0..num_energyrate_periods - 1
               frac_elec_period[period] = elec_period[period] / elec_month[month]
-              (0...rate.energyratestructure[period].size).each do |t|
+              for t in 0..rate.energyratestructure[period].size - 1
                 if t < elec_tier.size
                   bill.monthly_energy_charge[month] += rate.energyratestructure[period][t][:rate] * frac_elec_period[period] * elec_tier[t]
                 end
@@ -327,11 +321,9 @@ class CalculateUtilityBill
 
             if has_periods && has_tiered # tiered and TOU
               net_frac_elec_period = [0] * num_energyrate_periods
-              (0...num_energyrate_periods).each do |period|
-                next unless net_elec_month[month] > 0
-
+              for period in 0..num_energyrate_periods - 1
                 net_frac_elec_period[period] = net_elec_period[period] / net_elec_month[month]
-                (0...rate.energyratestructure[period].size).each do |t|
+                for t in 0..rate.energyratestructure[period].size - 1
                   if t < net_elec_tier.size
                     net_monthly_energy_charge[month] += rate.energyratestructure[period][t][:rate] * net_frac_elec_period[period] * net_elec_tier[t]
                   end
@@ -358,9 +350,7 @@ class CalculateUtilityBill
       today += 1 # next day
     end # for hour in 0..fuel_time_series.size-1
 
-    annual_fixed_charge = bill.monthly_fixed_charge.sum
-    annual_energy_charge = bill.monthly_energy_charge.sum
-    annual_total_charge = annual_energy_charge + annual_fixed_charge
+    annual_total_charge = bill.monthly_energy_charge.sum + bill.monthly_fixed_charge.sum
     true_up_month = 12
 
     if has_pv && !rate.feed_in_tariff_rate # Net metering calculations
@@ -370,7 +360,7 @@ class CalculateUtilityBill
       annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
       bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
-    else # Either no PV or PV with FIT (Assume minimum charge does not apply to FIT systems)
+    else # Either no PV or PV with FIT
       if rate.minannualcharge.nil?
         for m in 0..11
           monthly_bill = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
@@ -378,20 +368,15 @@ class CalculateUtilityBill
             bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill)
           end
         end
-
-        annual_energy_charge = bill.monthly_energy_charge.sum
-
       else # California-style annual minimum
         if annual_total_charge < rate.minannualcharge
-          increase_amount = rate.minannualcharge - annual_total_charge
-          annual_energy_charge += increase_amount
-          bill.monthly_energy_charge[true_up_month - 1] += increase_amount
+          bill.monthly_energy_charge[true_up_month - 1] += (rate.minannualcharge - annual_total_charge)
         end
       end
     end
 
-    bill.annual_energy_charge = annual_energy_charge
-    bill.annual_fixed_charge = annual_fixed_charge
+    bill.annual_fixed_charge = bill.monthly_fixed_charge.sum
+    bill.annual_energy_charge = bill.monthly_energy_charge.sum
   end
 
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge, true_up_month)
@@ -399,21 +384,13 @@ class CalculateUtilityBill
     if annual_min_charge.nil?
       payments = [0] * 12
       rollover = [0] * 12
-      months_loop = (true_up_month...12).to_a + (0...true_up_month).to_a
+      months_loop = (true_up_month..11).to_a + (0..true_up_month - 1).to_a
       months_loop.to_a.each_with_index do |m, i|
         net_monthly_bill = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
-        # Pay bill if rollover can't cover it, or just pay min charge.
-        payments[i] = [net_monthly_bill + rollover[i - 1], monthly_min_charge].max
-
-        if net_monthly_bill <= 0
-          # Surplus this month, add to rollover total
-          rollover[i] += (rollover[i - 1] + net_monthly_bill - payments[i] + [monthly_min_charge - monthly_fixed_charge[m], 0].max)
-
-        elsif rollover[i - 1] < 0
-          # Use previous month's bill credit to pay this bill; subtract from rollover total
-          rollover[i] += (rollover[i - 1] + net_monthly_bill - payments[i])
-
-        end
+        # Pay bill if rollover can't cover it, or just pay min.
+        min_payment = [monthly_min_charge, monthly_fixed_charge[m]].max
+        payments[i] = [net_monthly_bill + rollover[i - 1], min_payment].max
+        rollover[i] += (rollover[i - 1] + net_monthly_bill - payments[i])
       end
       annual_payments = payments.sum
       end_of_year_bill_credit = rollover[-1]

@@ -3077,7 +3077,7 @@ class HVAC
     hp_ap.cool_rated_cfm_per_ton = []
     hp_ap.cool_rated_shrs_gross = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.cool_capacity_ratios << hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)
       hp_ap.cool_rated_cfm_per_ton << (hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_cfm_per_ton * hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.cool_capacity_ratios[-1]
       # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
@@ -3096,7 +3096,7 @@ class HVAC
     fan_powers_rated = []
     eers_rated = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       fan_powers_rated << clg_ap.fan_power_rated * fan_powers_norm[i]
       eers_rated << UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i]
     end
@@ -3111,9 +3111,9 @@ class HVAC
     cvg = false
     final_n = nil
 
-    (1...itmax + 1).each do |n|
+    for n in 1..itmax + 1
       final_n = n
-      (0...num_speeds).each do |i|
+      for i in 0..num_speeds - 1
         eers_rated[i] = UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i]
       end
 
@@ -3132,7 +3132,7 @@ class HVAC
 
     clg_ap.cool_rated_eirs = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       clg_ap.cool_rated_eirs << calc_eir_from_eer(UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i], fan_powers_rated[i])
     end
   end
@@ -3252,7 +3252,7 @@ class HVAC
     t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
     frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]
 
-    (0...8).each do |i|
+    for i in 0..7
       bL = ((t_bins[i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
       q_k1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_bins[i] - 67.0)
       p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[i] - 67)
@@ -3286,7 +3286,7 @@ class HVAC
     hp_ap.heat_capacity_ratios = []
     hp_ap.heat_rated_cfm_per_ton = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.heat_capacity_ratios << hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)
       hp_ap.heat_rated_cfm_per_ton << (hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_cfm_per_ton * hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.heat_capacity_ratios[-1]
     end
@@ -3303,7 +3303,7 @@ class HVAC
     fan_powers_rated = []
     cops_rated = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       fan_powers_rated << hp_ap.fan_power_rated * fan_powers_norm[i]
       cops_rated << cop_max_speed * cops_norm[i]
     end
@@ -3319,9 +3319,9 @@ class HVAC
     cvg = false
     final_n = nil
 
-    (1...itmax + 1).each do |n|
+    for n in 1..itmax
       final_n = n
-      (0...num_speeds).each do |i|
+      for i in 0..num_speeds - 1
         cops_rated[i] = cop_max_speed * cops_norm[i]
       end
 
@@ -3339,7 +3339,7 @@ class HVAC
     end
 
     hp_ap.heat_rated_eirs = []
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.heat_rated_eirs << calc_eir_from_cop(cop_max_speed * cops_norm[i], fan_powers_rated[i])
     end
   end
@@ -3476,7 +3476,7 @@ class HVAC
     etot = 0
     bLtot = 0
 
-    (0...15).each do |i|
+    for i in 0..14
       bL = ((65.0 - t_bins[i]) / (65.0 - t_OD)) * 0.77 * dHR
 
       q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[i] - 47.0)

@@ -213,9 +213,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Calculate utility bills
       get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
-      # Calculate annual bills
-      get_annual_bills(utility_bills)
-
       # Write/report results
       report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
     end
@@ -422,11 +419,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       CalculateUtilityBill.detailed_electric(header, fuels, rate, bill)
     end
 
-    # Annual true up
-    CalculateUtilityBill.annual_true_up(utility_rates, utility_bills, net_elec)
-  end
-
-  def get_annual_bills(utility_bills)
+    # Calculate totals
     utility_bills.values.each do |bill|
       if bill.annual_production_credit != 0
         bill.annual_production_credit *= -1
