@@ -4166,9 +4166,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          other_space_above_or_below = HPXML::FloorOtherSpaceBelow
+          floor_or_ceiling = HPXML::FloorTypeFloor
         elsif surface.surfaceType == 'RoofCeiling'
-          other_space_above_or_below = HPXML::FloorOtherSpaceAbove
+          floor_or_ceiling = HPXML::FloorTypeCeiling
         end
       end
 
@@ -4182,7 +4182,14 @@ class HPXMLFile
                        exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: interior_adjacent_to,
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
-                       other_space_above_or_below: other_space_above_or_below)
+                       floor_or_ceiling: floor_or_ceiling)
+      if hpxml.floors[-1].floor_or_ceiling.nil?
+        if hpxml.floors[-1].is_floor
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeFloor
+        elsif hpxml.floors[-1].is_ceiling
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeCeiling
+        end
+      end
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id
 
       if hpxml.floors[-1].is_thermal_boundary
@@ -4879,13 +4886,15 @@ class HPXMLFile
       ducts_return_surface_area = args[:ducts_return_surface_area].get
     end
 
-    hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeSupply,
+    hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
+                                duct_type: HPXML::DuctTypeSupply,
                                 duct_insulation_r_value: args[:ducts_supply_insulation_r],
                                 duct_location: ducts_supply_location,
                                 duct_surface_area: ducts_supply_surface_area)
 
     if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
-      hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeReturn,
+      hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
+                                  duct_type: HPXML::DuctTypeReturn,
                                   duct_insulation_r_value: args[:ducts_return_insulation_r],
                                   duct_location: ducts_return_location,
                                   duct_surface_area: ducts_return_surface_area)

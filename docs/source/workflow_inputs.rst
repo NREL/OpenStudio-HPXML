@@ -873,10 +873,10 @@ For floors adjacent to "other housing unit", "other heated space", "other multif
   ======================================  ========  =====  ==============  ========  =======  ==========================================
   Element                                 Type      Units  Constraints     Required  Default  Notes
   ======================================  ========  =====  ==============  ========  =======  ==========================================
-  ``extension/OtherSpaceAboveOrBelow``    string           See [#]_        Yes                Specifies if above/below the MF space type
+  ``FloorOrCeiling``                      string           See [#]_        Yes                Specifies whether a floor or ceiling from the perspective of the conditioned space
   ======================================  ========  =====  ==============  ========  =======  ==========================================
 
-  .. [#] OtherSpaceAboveOrBelow choices are "above" or "below".
+  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
 
 HPXML Slabs
 ***********
@@ -1888,6 +1888,7 @@ Additional information is entered in each ``Ducts``.
   ===============================================  =======  ============  ================  ========  =========  ======================================
   Element                                          Type     Units         Constraints       Required  Default    Notes
   ===============================================  =======  ============  ================  ========  =========  ======================================
+  ``SystemIdentifier``                             id                                       Yes                  Unique identifier
   ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                  R-value of duct insulation [#]_
   ``DuctLocation``                                 string                 See [#]_          No        See [#]_   Duct location
   ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_   Duct fraction/surface area in location
