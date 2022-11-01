@@ -1923,7 +1923,7 @@ class OSModel
     clg_sensor.setName('zone clg unmet s')
     clg_sensor.setKeyName(living_zone.name.to_s)
 
-    if onoff_thermostat_deadband > 0.0
+    if onoff_thermostat_deadband.to_f > 0.0
       zone_air_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
       zone_air_temp_sensor.setName('living_space_temp')
       zone_air_temp_sensor.setKeyName(spaces[HPXML::LocationLivingSpace].thermalZone.get.name.to_s)
