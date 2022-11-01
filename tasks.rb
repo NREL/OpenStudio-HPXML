@@ -414,6 +414,7 @@ def create_hpxmls
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year2.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-outage-full-year3.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-summer.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-winter.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
@@ -2457,6 +2458,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heating_system_fuel'] = HPXML::FuelTypeElectricity
     args['heating_system_heating_efficiency'] = 1.0
     args['cooling_system_type'] = 'none'
+    args.delete('water_heater_setpoint_temperature')
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['schedules_outage_period'] = 'Jan 1 12am - Dec 31 12am'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-outage-full-year3.xml'].include? hpxml_file
+    args['weather_station_epw_filepath'] = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
+    args['cooling_system_fraction_cool_load_served'] = 0.2
     args.delete('water_heater_setpoint_temperature')
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'

@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage-summer.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage.csv</SchedulesFilePath>
       <AdditionalProperties>
         <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>
@@ -66,9 +66,9 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>USA_CO_Denver.Intl.AP.725650_TMY3</Name>
+          <Name>USA_FL_Miami.Intl.AP.722020_TMY3</Name>
           <extension>
-            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_FL_Miami.Intl.AP.722020_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
@@ -346,7 +346,7 @@
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
