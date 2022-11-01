@@ -317,36 +317,39 @@ Electricity Rates
 ~~~~~~~~~~~~~~~~~
 
 For each scenario, electricity rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
+Electricity rates can be entered using Simple inputs or Detailed inputs.
 
 **Simple**
 
-If the utility rate type is simple, utility bills are calculated based on fixed charges and a marginal rate.
+For simple utility rate structures, inputs can be entered using a fixed charge and a marginal rate.
 
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
   ``FuelType``                      string             electricity  Yes                 Fuel type
   ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
-  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
 **Detailed**
 
-If the utility rate type is detailed, utility bills are calculated using a tariff file.
-
+For detailed utility rate structures, inputs can be entered using a tariff JSON file.
 
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
   ``FuelType``                      string             electricity  Yes                 Fuel type
-  ``TariffFilePath``                string             See [#]_     No                  Tariff file with utility rate structure information
+  ``TariffFilePath``                string                          Yes                 Path to tariff JSON file [#]_
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
   .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
-         Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_.
-         Tariff file must be formatted to `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
+         Tariff files can describe flat, tiered, time-of-use, tiered time-of-use, or real-time pricing rates.
+         Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_;
+         a large set of residential OpenEI URDB rates for U.S. utilities are included at ``ReportUtilityBills/resources/data/detailed_rates/rates.zip``.
+         Additional sample tariff files can be found in ``ReportUtilityBills/resources/data/detailed_rates``.
+         Tariff files are formatted based on `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
 
 Fuel Rates
 ~~~~~~~~~~

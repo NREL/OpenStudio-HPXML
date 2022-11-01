@@ -22,7 +22,7 @@
           <Name>Detailed</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/tests/Sample Tiered Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/data/detailed_rates/Sample Tiered Rate.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>
