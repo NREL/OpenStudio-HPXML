@@ -346,11 +346,14 @@ class CalculateUtilityBill
     true_up_month = 12
 
     if has_pv && !rate.feed_in_tariff_rate # Net metering calculations
-      annual_payments, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
+      annual_payments, monthly_min_charges, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
       end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_month.sum(0.0))
 
       annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
       bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
+      for m in 0..11
+        bill.monthly_energy_charge[m] += monthly_min_charges[m]
+      end
 
     else # Either no PV or PV with FIT
       if rate.minannualcharge.nil?
@@ -360,7 +363,7 @@ class CalculateUtilityBill
             bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill)
           end
         end
-      else # California-style annual minimum
+      else
         if annual_total_charge < rate.minannualcharge
           bill.monthly_energy_charge[true_up_month - 1] += (rate.minannualcharge - annual_total_charge)
         end
@@ -373,37 +376,35 @@ class CalculateUtilityBill
 
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge, true_up_month)
     # Calculate monthly payments, rollover, and min charges
+    monthly_min_charges = [0] * 12
     if annual_min_charge.nil?
-      payments = [0] * 12
-      rollover = [0] * 12
+      monthly_payments = [0] * 12
+      monthly_rollover = [0] * 12
       months_loop = (true_up_month..11).to_a + (0..true_up_month - 1).to_a
       months_loop.to_a.each_with_index do |m, i|
         net_monthly_bill = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
         # Pay bill if rollover can't cover it, or just pay min.
-        min_payment = [monthly_min_charge, monthly_fixed_charge[m]].max
-        payments[i] = [net_monthly_bill + rollover[i - 1], min_payment].max
-        rollover[i] += (rollover[i - 1] + net_monthly_bill - payments[i])
+        monthly_payments[i] = [net_monthly_bill + monthly_rollover[i - 1], monthly_fixed_charge[m]].max
+        if monthly_payments[i] < monthly_min_charge
+          monthly_min_charges[i] += monthly_min_charge - monthly_payments[i]
+        end
+        monthly_rollover[i] += (monthly_rollover[i - 1] + net_monthly_bill - monthly_payments[i])
       end
-      annual_payments = payments.sum
-      end_of_year_bill_credit = rollover[-1]
+      annual_payments = monthly_payments.sum
+      end_of_year_bill_credit = monthly_rollover[-1]
 
-    else # California-style Annual True-Up
+    else
       annual_fixed_charge = monthly_fixed_charge.sum
-      net_annual_energy_charge = net_monthly_energy_charge.sum
-      net_annual_total_charge = net_annual_energy_charge + annual_fixed_charge
+      net_annual_bill = net_monthly_energy_charge.sum + annual_fixed_charge
+      annual_payments = [net_annual_bill, annual_fixed_charge].max
 
-      if net_annual_total_charge < annual_min_charge
-        end_of_year_bill_credit = [net_annual_energy_charge + [monthly_fixed_charge.sum - annual_min_charge, 0].max, 0].min
-        net_annual_energy_charge += (annual_min_charge - net_annual_total_charge)
-        net_annual_total_charge = net_annual_energy_charge + annual_fixed_charge
-        annual_payments = net_annual_total_charge
-      else
-        annual_payments = net_annual_total_charge
-        end_of_year_bill_credit = 0
+      if annual_payments < annual_min_charge
+        monthly_min_charges[true_up_month - 1] = annual_min_charge - annual_payments
       end
+      end_of_year_bill_credit = [net_annual_bill - annual_payments, 0.0].max
     end
 
-    return annual_payments, end_of_year_bill_credit
+    return annual_payments, monthly_min_charges, end_of_year_bill_credit
   end
 
   def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec)
