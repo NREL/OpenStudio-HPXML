@@ -984,6 +984,7 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -997,6 +998,7 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1010,6 +1012,7 @@
             <SystemIdentifier id='Floor3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1023,6 +1026,7 @@
             <SystemIdentifier id='Floor4'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1036,6 +1040,7 @@
             <SystemIdentifier id='Floor5'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1049,6 +1054,7 @@
             <SystemIdentifier id='Floor6'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1062,6 +1068,7 @@
             <SystemIdentifier id='Floor7'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1075,6 +1082,7 @@
             <SystemIdentifier id='Floor8'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1088,6 +1096,7 @@
             <SystemIdentifier id='Floor9'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1101,6 +1110,7 @@
             <SystemIdentifier id='Floor10'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <Area>0.1</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -2268,12 +2278,14 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
+                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
+                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
