@@ -871,41 +871,22 @@ class Constructions
     apply_window_skylight(model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area,
-                                 basement_frac_of_cfa, living_space)
+  def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area, spaces)
+    return if partition_wall_area <= 0
 
-    imdefs = []
+    # Add remaining partition walls within spaces (those without geometric representation)
+    # as internal mass object.
+    obj_name = 'partition wall mass'
+    imdef = create_os_int_mass_and_def(model, obj_name, spaces[HPXML::LocationLivingSpace], partition_wall_area)
 
-    # Determine additional partition wall mass required
-    addtl_surface_area_base = partition_wall_area * basement_frac_of_cfa
-    addtl_surface_area_lv = partition_wall_area * (1.0 - basement_frac_of_cfa)
-
-    if addtl_surface_area_lv > 0
-      # Add remaining partition walls within spaces (those without geometric representation)
-      # as internal mass object.
-      obj_name = 'partition wall mass above grade'
-      imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_lv)
-      imdefs << imdef
-    end
-
-    if addtl_surface_area_base > 0
-      # Add remaining partition walls within spaces (those without geometric representation)
-      # as internal mass object.
-      obj_name = 'partition wall mass below grade'
-      imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_base)
-      imdefs << imdef
-    end
-
-    apply_wood_stud_wall(model, imdefs, constr_name,
+    apply_wood_stud_wall(model, [imdef], constr_name,
                          0, 1, 3.5, false, 0.16,
                          mat_int_finish, 0, 0, mat_int_finish,
                          Material.AirFilmVertical,
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(model, furniture_mass, cfa, ubfa, gfa,
-                           basement_frac_of_cfa, living_space)
-
+  def self.apply_furniture(model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
       mat = BaseMaterial.FurnitureLightWeight
@@ -915,29 +896,28 @@ class Constructions
     end
 
     # Add user-specified furniture mass
-    model.getSpaces.each do |space|
+    spaces.each do |location, space|
+      floor_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
+      next if floor_area <= 0
+
       furnAreaFraction = nil # Fraction of conditioned floor area
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = mat.rho
-      if space == living_space
+      if location == HPXML::LocationLivingSpace
         furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
-        floor_area = cfa
-      elsif Geometry.is_unconditioned_basement(space)
+      elsif location == HPXML::LocationBasementUnconditioned
         furnAreaFraction = 0.4
         furnMass = mass_lb_per_sqft
-        floor_area = ubfa
-      elsif Geometry.is_garage(space)
+      elsif location == HPXML::LocationGarage
         furnAreaFraction = 0.1
         furnMass = 2.0
-        floor_area = gfa
       end
 
       next if furnAreaFraction.nil?
       next if furnAreaFraction <= 0
-      next if space.floorArea <= 0
 
       mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name}"
       constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name}"
@@ -955,30 +935,11 @@ class Constructions
       constr = Construction.new(constr_obj_name_space, path_fracs)
       constr.add_layer(mat_fm)
 
-      imdefs = []
-      if space == living_space
-        # if living space, judge if includes conditioned basement, create furniture independently
-        living_surface_area = furnAreaFraction * floor_area * (1 - basement_frac_of_cfa)
-        base_surface_area = furnAreaFraction * floor_area * basement_frac_of_cfa
-        # living furniture mass
-        if living_surface_area > 0
-          living_obj_name = mass_obj_name_space + ' above grade'
-          imdef = create_os_int_mass_and_def(model, living_obj_name, space, living_surface_area)
-          imdefs << imdef
-        end
-        # basement furniture mass
-        if base_surface_area > 0
-          base_obj_name = mass_obj_name_space + ' below grade'
-          imdef = create_os_int_mass_and_def(model, base_obj_name, space, base_surface_area)
-          imdefs << imdef
-        end
-      else
-        surface_area = furnAreaFraction * floor_area
-        imdef = create_os_int_mass_and_def(model, mass_obj_name_space, space, surface_area)
-        imdefs << imdef
-      end
+      surface_area = furnAreaFraction * floor_area
+      imdef = create_os_int_mass_and_def(model, mass_obj_name_space, space, surface_area)
+
       # Create and assign construction to surfaces
-      constr.create_and_assign_constructions(imdefs, model)
+      constr.create_and_assign_constructions([imdef], model)
     end
   end
 
