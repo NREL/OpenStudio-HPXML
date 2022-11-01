@@ -401,7 +401,7 @@ class CalculateUtilityBill
       if annual_payments < annual_min_charge
         monthly_min_charges[true_up_month - 1] = annual_min_charge - annual_payments
       end
-      end_of_year_bill_credit = [net_annual_bill - annual_payments, 0.0].max
+      end_of_year_bill_credit = net_annual_bill - annual_payments
     end
 
     return annual_payments, monthly_min_charges, end_of_year_bill_credit
