@@ -351,7 +351,7 @@ class HVAC
       equip_def.setName(Constants.ObjectNameGSHPSharedPump)
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(equip_def.name.to_s)
-      equip.setSpace(control_zone.spaces[0])
+      equip.setSpace(control_zone.spaces[0]) # no heat gain, so assign the equipment to an arbitrary space
       equip_def.setDesignLevel(shared_pump_w)
       equip_def.setFractionRadiant(0)
       equip_def.setFractionLatent(0)
@@ -4215,8 +4215,17 @@ class HVAC
         # Convert "fan coil" air distribution system to "regular velocity"
         if distribution_system.hvac_systems.size > 1
           # Has attached heating system, so create a copy specifically for the cooling system
-          hpxml.hvac_distributions << distribution_system.dup
-          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          hpxml.hvac_distributions.add(id: "#{distribution_system.id}_#{cooling_system.id}",
+                                       distribution_system_type: distribution_system.distribution_system_type,
+                                       air_type: distribution_system.air_type,
+                                       number_of_return_registers: distribution_system.number_of_return_registers,
+                                       conditioned_floor_area_served: distribution_system.conditioned_floor_area_served)
+          distribution_system.duct_leakage_measurements.each do |lm|
+            hpxml.hvac_distributions[-1].duct_leakage_measurements << lm.dup
+          end
+          distribution_system.ducts.each do |d|
+            hpxml.hvac_distributions[-1].ducts << d.dup
+          end
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
         end
         hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
@@ -4233,6 +4242,9 @@ class HVAC
                                                                      duct_leakage_units: HPXML::UnitsCFM25,
                                                                      duct_leakage_value: 0,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        hpxml.hvac_distributions[-1].ducts.each do |d|
+          d.id = "#{d.id}_#{cooling_system.id}"
         end
       end
     end

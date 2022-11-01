@@ -36,7 +36,7 @@ The OpenStudio-HPXML workflow is used by a number of other residential projects,
 - [ResStock](https://resstock.nrel.gov/)
 - [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)
 - [BEopt](https://beopt.nrel.gov) (pending)
-- [Weatherization Assistant](https://weatherization.ornl.gov/obtain) (pending)
+- [Weatherization Assistant](https://weatherization.ornl.gov/softwaredescription/) (pending)
 
 ## License
 
