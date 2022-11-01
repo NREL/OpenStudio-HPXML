@@ -44,6 +44,12 @@ class Battery
     minimum_storage_state_of_charge_fraction = 0.75 * unusable_fraction
     maximum_storage_state_of_charge_fraction = 1.0 - 0.25 * unusable_fraction
 
+    #disable voltage dependency unless lifetime model is requested: this prevents some scenarios where changes to SoC didn't seem to reflect charge rate due to voltage dependency and constant current
+    voltage_dependence = false
+    if battery.lifetime_model == 'KandlerSmith'
+      voltage_dependence = true
+    end
+
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
     unless is_outside
@@ -61,6 +67,12 @@ class Battery
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
+    if voltage_dependence == false
+      elcs.setBatteryCellInternalElectricalResistance(0.0)
+      elcs.setFullyChargedCellVoltage(3.342)
+      elcs.setCellVoltageatEndofExponentialZone(3.342)
+      elcs.setCellVoltageatEndofNominalZone(3.342)
+    end
 
     elcds = model.getElectricLoadCenterDistributions
     elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
