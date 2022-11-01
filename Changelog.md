@@ -34,6 +34,7 @@ __New Features__
   - Adds optional arguments for utility bill scenarios.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
+  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
 - Improves Kiva foundation model heat transfer by providing better initial temperature assumptions based on foundation type and insulation levels.
 
 __Bugfixes__
