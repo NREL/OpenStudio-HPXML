@@ -343,10 +343,9 @@ class CalculateUtilityBill
     end # for hour in 0..fuel_time_series.size-1
 
     annual_total_charge = bill.monthly_energy_charge.sum + bill.monthly_fixed_charge.sum
-    true_up_month = 12
 
     if has_pv && !rate.feed_in_tariff_rate # Net metering calculations
-      annual_payments, monthly_min_charges, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge, true_up_month)
+      annual_payments, monthly_min_charges, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge)
       end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_month.sum(0.0))
 
       annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
@@ -365,7 +364,7 @@ class CalculateUtilityBill
         end
       else
         if annual_total_charge < rate.minannualcharge
-          bill.monthly_energy_charge[true_up_month - 1] += (rate.minannualcharge - annual_total_charge)
+          bill.monthly_energy_charge[11] += (rate.minannualcharge - annual_total_charge)
         end
       end
     end
@@ -374,21 +373,20 @@ class CalculateUtilityBill
     bill.annual_energy_charge = bill.monthly_energy_charge.sum
   end
 
-  def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge, true_up_month)
+  def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge)
     # Calculate monthly payments, rollover, and min charges
     monthly_min_charges = [0] * 12
     if annual_min_charge.nil?
       monthly_payments = [0] * 12
       monthly_rollover = [0] * 12
-      months_loop = (true_up_month..11).to_a + (0..true_up_month - 1).to_a
-      months_loop.to_a.each_with_index do |m, i|
+      for m in 0..11
         net_monthly_bill = net_monthly_energy_charge[m] + monthly_fixed_charge[m]
         # Pay bill if rollover can't cover it, or just pay min.
-        monthly_payments[i] = [net_monthly_bill + monthly_rollover[i - 1], monthly_fixed_charge[m]].max
-        if monthly_payments[i] < monthly_min_charge
-          monthly_min_charges[i] += monthly_min_charge - monthly_payments[i]
+        monthly_payments[m] = [net_monthly_bill + monthly_rollover[m - 1], monthly_fixed_charge[m]].max
+        if monthly_payments[m] < monthly_min_charge
+          monthly_min_charges[m] += monthly_min_charge - monthly_payments[m]
         end
-        monthly_rollover[i] += (monthly_rollover[i - 1] + net_monthly_bill - monthly_payments[i])
+        monthly_rollover[m] += (monthly_rollover[m - 1] + net_monthly_bill - monthly_payments[m])
       end
       annual_payments = monthly_payments.sum
       end_of_year_bill_credit = monthly_rollover[-1]
@@ -399,7 +397,7 @@ class CalculateUtilityBill
       annual_payments = [net_annual_bill, annual_fixed_charge].max
 
       if annual_payments < annual_min_charge
-        monthly_min_charges[true_up_month - 1] = annual_min_charge - annual_payments
+        monthly_min_charges[11] = annual_min_charge - annual_payments
       end
       end_of_year_bill_credit = net_annual_bill - annual_payments
     end
@@ -408,6 +406,7 @@ class CalculateUtilityBill
   end
 
   def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec)
+    # Note: Annual excess sellback can only be calculated at the end of the year on the net electricity consumption.
     if net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
       excess_sellback = 0
     else
