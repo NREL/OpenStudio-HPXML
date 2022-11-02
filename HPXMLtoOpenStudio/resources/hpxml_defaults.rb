@@ -284,7 +284,7 @@ class HPXMLDefaults
     hpxml.header.utility_bill_scenarios.each do |scenario|
       hpxml_doc = hpxml.to_oga if hpxml_doc.nil?
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeElectricity)
+      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeElectricity) && scenario.elec_tariff_filepath.nil?
         if scenario.elec_fixed_charge.nil?
           scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
           scenario.elec_fixed_charge_isdefaulted = true
