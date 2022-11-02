@@ -395,21 +395,14 @@ If the PV compensation type is net-metering, additional information can be enter
   Element                           Type      Units    Constraints  Required  Default         Notes
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   ``AnnualExcessSellbackRateType``  string             See [#]_     No        User-Specified  Net metering annual excess sellback rate type [#]_
+  ``AnnualExcessSellbackRate``      double    $/kWh                 No [#]_   0.03            User-specified net metering annual excess sellback rate [#]_
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   
   .. [#] AnnualExcessSellbackRateType choices are "User-Specified" and "Retail Electricity Cost".
   .. [#] When annual PV production exceeds the annual building electricity consumption, this rate, which is often significantly below the retail rate, determines the value of the excess electricity sold back to the utility.
          This may happen to offset gas consumption, for example.
-
-  If the net-metering annual excess sellback rate type is user-specified, additional information can be entered in ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/PVCompensation/CompensationType/NetMetering``.
-
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    Element                       Type      Units    Constraints  Required  Default         Notes
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    ``AnnualExcessSellbackRate``  double    $/kWh                 No        0.03            User-specified net metering annual excess sellback rate [#]_
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-
-    .. [#] Since there are very few cases where modeled electricity consumption will increase from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting this to "User-Specified" and entering a rate of zero.
+  .. [#] AnnualExcessSellbackRate is only used when AnnualExcessSellbackRateType="User-Specified".
+  .. [#] Since modeled electricity consumption will not change from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting "User-Specified" and entering a rate of zero.
 
 **Feed-in Tariff**
 
