@@ -3019,16 +3019,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
-    hpxml_path = args[:hpxml_path]
-    unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(hpxml_path)
-    end
-
     # Create HPXML file
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file, hpxml_path)
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
+    end
+
+    hpxml_path = args[:hpxml_path]
+    unless (Pathname.new hpxml_path).absolute?
+      hpxml_path = File.expand_path(hpxml_path)
     end
 
     XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -3253,7 +3253,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_file, hpxml_path)
+  def self.create(runner, model, args, epw_file)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults].is_initialized && args[:apply_defaults].get)
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
@@ -3270,7 +3270,7 @@ class HPXMLFile
 
     hpxml = HPXML.new
 
-    set_header(hpxml, args, hpxml_path)
+    set_header(hpxml, args)
     set_site(hpxml, args)
     set_neighbor_buildings(hpxml, args)
     set_building_occupancy(hpxml, args)
@@ -3409,7 +3409,7 @@ class HPXMLFile
     return true
   end
 
-  def self.set_header(hpxml, args, hpxml_path)
+  def self.set_header(hpxml, args)
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
@@ -3564,15 +3564,6 @@ class HPXMLFile
 
       if args[:utility_bill_electricity_filepaths].is_initialized
         bills_electricity_filepaths = args[:utility_bill_electricity_filepaths].get.split(',').map(&:strip)
-        bills_electricity_filepaths.each_with_index do |bills_electricity_filepath, i|
-          begin
-            FilePath.check_path(bills_electricity_filepath,
-                                File.dirname(hpxml_path),
-                                'Tariff File')
-          rescue
-            bills_electricity_filepaths[i] = nil
-          end
-        end
       else
         bills_electricity_filepaths = [nil] * bills_scenario_names.size
       end
@@ -3659,6 +3650,7 @@ class HPXMLFile
 
       bills_scenarios.each do |bills_scenario|
         name, elec_tariff_filepath, elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        elec_tariff_filepath = (elec_tariff_filepath.to_s.include?('.') ? elec_tariff_filepath : nil)
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
         propane_fixed_charge = Float(propane_fixed_charge) rescue nil

@@ -1232,23 +1232,19 @@ class HPXML < Object
       utility_bill_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'UtilityBillScenarios'])
       utility_bill_scenario = XMLHelper.add_element(utility_bill_scenarios, 'UtilityBillScenario')
       XMLHelper.add_element(utility_bill_scenario, 'Name', @name, :string) unless @name.nil?
-      if not @elec_tariff_filepath.nil?
-        utility_rate = XMLHelper.add_element(utility_bill_scenario, 'UtilityRate')
-        XMLHelper.add_element(utility_rate, 'FuelType', HPXML::FuelTypeElectricity, :string)
-        XMLHelper.add_element(utility_rate, 'TariffFilePath', @elec_tariff_filepath, :string)
-      end
-      { HPXML::FuelTypeElectricity => [@elec_fixed_charge, @elec_fixed_charge_isdefaulted, @elec_marginal_rate, @elec_marginal_rate_isdefaulted],
-        HPXML::FuelTypeNaturalGas => [@natural_gas_fixed_charge, @natural_gas_fixed_charge_isdefaulted, @natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted],
-        HPXML::FuelTypePropane => [@propane_fixed_charge, @propane_fixed_charge_isdefaulted, @propane_marginal_rate, @propane_marginal_rate_isdefaulted],
-        HPXML::FuelTypeOil => [@fuel_oil_fixed_charge, @fuel_oil_fixed_charge_isdefaulted, @fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted],
-        HPXML::FuelTypeCoal => [@coal_fixed_charge, @coal_fixed_charge_isdefaulted, @coal_marginal_rate, @coal_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodCord => [@wood_fixed_charge, @wood_fixed_charge_isdefaulted, @wood_marginal_rate, @wood_marginal_rate_isdefaulted],
-        HPXML::FuelTypeWoodPellets => [@wood_pellets_fixed_charge, @wood_pellets_fixed_charge_isdefaulted, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted] }.each do |fuel, vals|
-        fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted = vals
-        next if fixed_charge.nil? && marginal_rate.nil?
+      { HPXML::FuelTypeElectricity => [@elec_fixed_charge, @elec_fixed_charge_isdefaulted, @elec_marginal_rate, @elec_marginal_rate_isdefaulted, @elec_tariff_filepath],
+        HPXML::FuelTypeNaturalGas => [@natural_gas_fixed_charge, @natural_gas_fixed_charge_isdefaulted, @natural_gas_marginal_rate, @natural_gas_marginal_rate_isdefaulted, nil],
+        HPXML::FuelTypePropane => [@propane_fixed_charge, @propane_fixed_charge_isdefaulted, @propane_marginal_rate, @propane_marginal_rate_isdefaulted, nil],
+        HPXML::FuelTypeOil => [@fuel_oil_fixed_charge, @fuel_oil_fixed_charge_isdefaulted, @fuel_oil_marginal_rate, @fuel_oil_marginal_rate_isdefaulted, nil],
+        HPXML::FuelTypeCoal => [@coal_fixed_charge, @coal_fixed_charge_isdefaulted, @coal_marginal_rate, @coal_marginal_rate_isdefaulted, nil],
+        HPXML::FuelTypeWoodCord => [@wood_fixed_charge, @wood_fixed_charge_isdefaulted, @wood_marginal_rate, @wood_marginal_rate_isdefaulted, nil],
+        HPXML::FuelTypeWoodPellets => [@wood_pellets_fixed_charge, @wood_pellets_fixed_charge_isdefaulted, @wood_pellets_marginal_rate, @wood_pellets_marginal_rate_isdefaulted, nil] }.each do |fuel, vals|
+        fixed_charge, fixed_charge_isdefaulted, marginal_rate, marginal_rate_isdefaulted, tariff_filepath = vals
+        next if fixed_charge.nil? && marginal_rate.nil? && tariff_filepath.nil?
 
         utility_rate = XMLHelper.add_element(utility_bill_scenario, 'UtilityRate')
         XMLHelper.add_element(utility_rate, 'FuelType', fuel, :string)
+        XMLHelper.add_element(utility_rate, 'TariffFilePath', tariff_filepath, :string) unless tariff_filepath.nil?
         XMLHelper.add_element(utility_rate, 'FixedCharge', fixed_charge, :float, fixed_charge_isdefaulted) unless fixed_charge.nil?
         XMLHelper.add_element(utility_rate, 'MarginalRate', marginal_rate, :float, marginal_rate_isdefaulted) unless marginal_rate.nil?
       end
