@@ -40,6 +40,7 @@ __New Features__
   - Detailed dehumidifier availability.
   - Detailed whole/local ventilation and whole house fan availability.
 - BuildResidentialScheduleFile measure:
+  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
   - Adds optional argument for specifying a power outage period.
   - Adds optional argument for controlling natural ventilation availability during a power outage period.
 - Improves Kiva foundation model heat transfer by providing better initial temperature assumptions based on foundation type and insulation levels.
