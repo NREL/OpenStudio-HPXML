@@ -7,7 +7,7 @@
       "fixedchargeunits": "$/month",
       "fixedchargefirstmeter": 9,
       "minchargeunits": "$/year",
-      "mincharge": 10000,
+      "mincharge": 200,
       "energyweekdayschedule": [
         [
           0,

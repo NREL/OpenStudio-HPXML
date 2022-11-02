@@ -347,7 +347,7 @@ For detailed utility rate structures, inputs can be entered using a tariff JSON 
   .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
          Tariff files can describe flat, tiered, time-of-use, tiered time-of-use, or real-time pricing rates.
          Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_;
-         a large set of residential OpenEI URDB rates for U.S. utilities are included at ``ReportUtilityBills/resources/detailed_rates/rates.zip``.
+         a large set of residential OpenEI URDB rates for U.S. utilities are included at ``ReportUtilityBills/resources/detailed_rates/openei_rates.zip``.
          Additional sample tariff files can be found in ``ReportUtilityBills/resources/detailed_rates``.
          Tariff files are formatted based on `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
 

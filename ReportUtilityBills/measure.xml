@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>c8bb3e47-49dd-4687-92a3-85e013cff595</version_id>
-  <version_modified>20221102T174535Z</version_modified>
+  <version_id>5fb6c411-30ab-4c55-a903-8ef22f7622e2</version_id>
+  <version_modified>20221102T180650Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -102,28 +102,10 @@
       <checksum>041AE7DE</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E93F45CE</checksum>
-    </file>
-    <file>
       <filename>detailed_rates/openei_rates.zip</filename>
       <filetype>zip</filetype>
       <usage_type>resource</usage_type>
       <checksum>56DDA6EC</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E1898823</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Flat Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D2D3F86D</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate.json</filename>
@@ -132,34 +114,10 @@
       <checksum>C0FCBE3B</checksum>
     </file>
     <file>
-      <filename>detailed_rates/Sample Real-Time Pricing Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FF24B8B5</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>947DF0DF</checksum>
-    </file>
-    <file>
       <filename>detailed_rates/Sample Real-Time Pricing Rate.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>40D684ED</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Tiered Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1451047C</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Tiered Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1E16A054</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Tiered Rate.json</filename>
@@ -168,34 +126,10 @@
       <checksum>27936FC1</checksum>
     </file>
     <file>
-      <filename>detailed_rates/Sample Tiered Time-of-Use Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>179FE464</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Tiered Time-of-Use Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F8BA7E1A</checksum>
-    </file>
-    <file>
       <filename>detailed_rates/Sample Tiered Time-of-Use Rate.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>4508028D</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Time-of-Use Rate Min Annual Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AABBA8AA</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Sample Time-of-Use Rate Min Monthly Charge.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9B08E1EE</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Time-of-Use Rate.json</filename>
@@ -238,6 +172,72 @@
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
       <checksum>D9D25D07</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>165C1A67</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>453ED6BD</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Flat Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A39362E3</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Real-Time Pricing Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>12C12981</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Real-Time Pricing Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DE28BDA1</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Tiered Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>05C5F7BD</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Tiered Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9177D651</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Tiered Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E59E9AEE</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Tiered Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>75AD92DF</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Time-of-Use Rate Min Annual Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2CC2386E</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Time-of-Use Rate Min Monthly Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>387337AD</checksum>
     </file>
   </files>
 </measure>

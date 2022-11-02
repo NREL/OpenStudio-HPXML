@@ -5,7 +5,7 @@
       "fixedchargeunits": "$/month",
       "fixedchargefirstmeter": 9,
       "minchargeunits": "$/year",
-      "mincharge": 10000,
+      "mincharge": 200,
       "name": "Sample Real-Time Pricing Rate",
       "realtimepricing": [
         0.04625,
