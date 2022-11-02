@@ -319,16 +319,39 @@ Electricity Rates
 ~~~~~~~~~~~~~~~~~
 
 For each scenario, electricity rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
+Electricity rates can be entered using Simple inputs or Detailed inputs.
+
+**Simple**
+
+For simple utility rate structures, inputs can be entered using a fixed charge and a marginal rate.
 
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
   ``FuelType``                      string             electricity  Yes                 Fuel type
   ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
-  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+
+**Detailed**
+
+For detailed utility rate structures, inputs can be entered using a tariff JSON file.
+
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  Element                           Type      Units    Constraints  Required  Default   Notes
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ``FuelType``                      string             electricity  Yes                 Fuel type
+  ``TariffFilePath``                string                          Yes                 Path to tariff JSON file [#]_
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+
+  .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
+         Tariff files can describe flat, tiered, time-of-use, tiered time-of-use, or real-time pricing rates.
+         Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_;
+         a large set of residential OpenEI URDB rates for U.S. utilities are included at ``ReportUtilityBills/resources/detailed_rates/openei_rates.zip``.
+         Additional sample tariff files can be found in ``ReportUtilityBills/resources/detailed_rates``.
+         Tariff files are formatted based on `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
 
 Fuel Rates
 ~~~~~~~~~~
@@ -340,7 +363,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   ================================  ========  ========  ===========  ========  ========  ============================================================
   ``FuelType``                      string              See [#]_     Yes                 Fuel type
   ``FixedCharge``                   double    $/month                No        See [#]_  Monthly fixed charge
-  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal flat rate
   ================================  ========  ========  ===========  ========  ========  ============================================================
 
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
@@ -374,21 +397,14 @@ If the PV compensation type is net-metering, additional information can be enter
   Element                           Type      Units    Constraints  Required  Default         Notes
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   ``AnnualExcessSellbackRateType``  string             See [#]_     No        User-Specified  Net metering annual excess sellback rate type [#]_
+  ``AnnualExcessSellbackRate``      double    $/kWh                 No [#]_   0.03            User-specified net metering annual excess sellback rate [#]_
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   
   .. [#] AnnualExcessSellbackRateType choices are "User-Specified" and "Retail Electricity Cost".
   .. [#] When annual PV production exceeds the annual building electricity consumption, this rate, which is often significantly below the retail rate, determines the value of the excess electricity sold back to the utility.
          This may happen to offset gas consumption, for example.
-
-  If the net-metering annual excess sellback rate type is user-specified, additional information can be entered in ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/PVCompensation/CompensationType/NetMetering``.
-
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    Element                       Type      Units    Constraints  Required  Default         Notes
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    ``AnnualExcessSellbackRate``  double    $/kWh                 No        0.03            User-specified net metering annual excess sellback rate [#]_
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-
-    .. [#] Since there are very few cases where modeled electricity consumption will increase from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting this to "User-Specified" and entering a rate of zero.
+  .. [#] AnnualExcessSellbackRate is only used when AnnualExcessSellbackRateType="User-Specified".
+  .. [#] Since modeled electricity consumption will not change from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting "User-Specified" and entering a rate of zero.
 
 **Feed-in Tariff**
 
