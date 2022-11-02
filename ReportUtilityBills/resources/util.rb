@@ -351,7 +351,7 @@ class CalculateUtilityBill
       annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
       bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
       for m in 0..11
-        bill.monthly_energy_charge[m] += monthly_min_charges[m]
+        bill.monthly_fixed_charge[m] += monthly_min_charges[m]
       end
 
     else # Either no PV or PV with FIT
@@ -359,12 +359,12 @@ class CalculateUtilityBill
         for m in 0..11
           monthly_bill = bill.monthly_energy_charge[m] + bill.monthly_fixed_charge[m]
           if monthly_bill < rate.minmonthlycharge
-            bill.monthly_energy_charge[m] += (rate.minmonthlycharge - monthly_bill)
+            bill.monthly_fixed_charge[m] += (rate.minmonthlycharge - monthly_bill)
           end
         end
       else
         if annual_total_charge < rate.minannualcharge
-          bill.monthly_energy_charge[11] += (rate.minannualcharge - annual_total_charge)
+          bill.monthly_fixed_charge[11] += (rate.minannualcharge - annual_total_charge)
         end
       end
     end

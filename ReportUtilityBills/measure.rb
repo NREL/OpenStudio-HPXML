@@ -235,7 +235,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)] if bill.annual_fixed_charge != 0
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Marginal (USD)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)] if bill.annual_energy_charge != 0
       results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type) && bill.annual_production_credit != 0
       results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)] if bill.annual_total != 0
     end

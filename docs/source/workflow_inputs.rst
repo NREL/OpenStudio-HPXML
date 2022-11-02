@@ -361,7 +361,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   ================================  ========  ========  ===========  ========  ========  ============================================================
   ``FuelType``                      string              See [#]_     Yes                 Fuel type
   ``FixedCharge``                   double    $/month                No        See [#]_  Monthly fixed charge
-  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal flat rate
   ================================  ========  ========  ===========  ========  ========  ============================================================
 
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
