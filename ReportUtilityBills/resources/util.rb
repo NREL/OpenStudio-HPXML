@@ -576,7 +576,7 @@ def process_usurdb(filepath)
 
   puts 'Exporting residential rates...'
   rates_dir = File.dirname(filepath)
-  zippath = File.join(rates_dir, 'rates.zip')
+  zippath = File.join(rates_dir, 'openei_rates.zip')
   FileUtils.rm(zippath)
   zipcontents = []
   Zip::File.open(zippath, create: true) do |zipfile|
