@@ -5,10 +5,12 @@ __New Features__
 - **Breaking Change**: Now performs full HPXML XSD schema validation (previously just limited checks); yields runtime speed improvements.
 - **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
 - **Breaking change**: `FloorType` is now a required input for floors; can be "WoodFrame" or "StructuralInsulatedPanel" or "SteelFrame" or "SolidConcrete".
+- **Breaking Change**: All `Ducts` must now have a `SystemIdentifier`.
 - **Breaking Change**: Replaces `WallType/StructurallyInsulatedPanel` with `WallType/StructuralInsulatedPanel`.
 - **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
 - **Breaking Change**: Replaces `StandbyLoss` with `StandbyLoss[Units="F/hr"]/Value` for an indirect water heater.
 - **Breaking Change**: Replaces `BranchPipingLoopLength` with `BranchPipingLength` for a hot water recirculation system.
+- **Breaking Change**: Replaces `Floor/extension/OtherSpaceAboveOrBelow` with `Floor/FloorOrCeiling`.
 - **Breaking Change**: Deprecates ReportHPXMLOutput measure; HVAC autosized capacities & design loads moved to `results_annual.csv`.
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
 - Allows heating/cooling seasons that don't span the entire year.

@@ -505,18 +505,21 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
+                  <SystemIdentifier id='Duct1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>15.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <FractionDuctArea>0.2</FractionDuctArea>
                 </Ducts>
                 <Ducts>
+                  <SystemIdentifier id='Duct2'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>0.8</FractionDuctArea>
                 </Ducts>
                 <Ducts>
+                  <SystemIdentifier id='Duct3'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>living space</DuctLocation>

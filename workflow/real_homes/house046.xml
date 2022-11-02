@@ -164,14 +164,12 @@
             <FloorType>
               <WoodFrame/>
             </FloorType>
+            <FloorOrCeiling>floor</FloorOrCeiling>
             <Area>870.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
               <AssemblyEffectiveRValue>11.81</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </Floor>
         </Floors>
         <Windows>
@@ -290,12 +288,14 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
+                  <SystemIdentifier id='Duct1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>234.9</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
+                  <SystemIdentifier id='Duct2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>6.1</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
