@@ -3026,15 +3026,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(hpxml_path)
     end
 
+    XMLHelper.write_file(hpxml_doc, hpxml_path)
+    runner.registerInfo("Wrote file: #{hpxml_path}")
+
     # Check for invalid HPXML file
     if args[:apply_validation].is_initialized && args[:apply_validation].get
       if not validate_hpxml(runner, hpxml_path, hpxml_doc)
         return false
       end
     end
-
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
-    runner.registerInfo("Wrote file: #{hpxml_path}")
 
     # Uncomment for debugging purposes
     # File.write(hpxml_path.gsub('.xml', '.osm'), model.to_s)
@@ -3222,27 +3222,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
-    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
-
     is_valid = true
 
     # Validate input HPXML against schema
-    XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
+    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
+    schema_path = File.join(schema_dir, 'HPXML.xsd')
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
 
     # Validate input HPXML against schematron docs
-    stron_paths = [File.join(schematron_dir, 'HPXMLvalidator.xml'),
-                   File.join(schematron_dir, 'EPvalidator.xml')]
-    errors, warnings = Validator.run_validators(hpxml_doc, stron_paths)
-    errors.each do |error|
+    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
+    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
+
+    # Handle errors/warnings
+    (xsd_errors + sct_errors).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-    warnings.each do |warning|
-      runner.registerWarning("#{warning}")
+    (xsd_warnings + sct_warnings).each do |warning|
+      runner.registerWarning("#{hpxml_path}: #{warning}")
     end
 
     return is_valid
@@ -4146,9 +4144,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          other_space_above_or_below = HPXML::FloorOtherSpaceBelow
+          floor_or_ceiling = HPXML::FloorTypeFloor
         elsif surface.surfaceType == 'RoofCeiling'
-          other_space_above_or_below = HPXML::FloorOtherSpaceAbove
+          floor_or_ceiling = HPXML::FloorTypeCeiling
         end
       end
 
@@ -4162,7 +4160,14 @@ class HPXMLFile
                        exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: interior_adjacent_to,
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
-                       other_space_above_or_below: other_space_above_or_below)
+                       floor_or_ceiling: floor_or_ceiling)
+      if hpxml.floors[-1].floor_or_ceiling.nil?
+        if hpxml.floors[-1].is_floor
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeFloor
+        elsif hpxml.floors[-1].is_ceiling
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeCeiling
+        end
+      end
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id
 
       if hpxml.floors[-1].is_thermal_boundary
@@ -4859,13 +4864,15 @@ class HPXMLFile
       ducts_return_surface_area = args[:ducts_return_surface_area].get
     end
 
-    hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeSupply,
+    hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
+                                duct_type: HPXML::DuctTypeSupply,
                                 duct_insulation_r_value: args[:ducts_supply_insulation_r],
                                 duct_location: ducts_supply_location,
                                 duct_surface_area: ducts_supply_surface_area)
 
     if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
-      hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeReturn,
+      hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
+                                  duct_type: HPXML::DuctTypeReturn,
                                   duct_insulation_r_value: args[:ducts_return_insulation_r],
                                   duct_location: ducts_return_location,
                                   duct_surface_area: ducts_return_surface_area)

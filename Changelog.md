@@ -1,11 +1,15 @@
 ## OpenStudio-HPXML v1.5.0
 
 __New Features__
+- Updates to OpenStudio 3.5.0/EnergyPlus 22.2.
+- **Breaking Change**: Now performs full HPXML XSD schema validation (previously just limited checks); yields runtime speed improvements.
 - **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
+- **Breaking Change**: All `Ducts` must now have a `SystemIdentifier`.
 - **Breaking Change**: Replaces `WallType/StructurallyInsulatedPanel` with `WallType/StructuralInsulatedPanel`.
 - **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
 - **Breaking Change**: Replaces `StandbyLoss` with `StandbyLoss[Units="F/hr"]/Value` for an indirect water heater.
 - **Breaking Change**: Replaces `BranchPipingLoopLength` with `BranchPipingLength` for a hot water recirculation system.
+- **Breaking Change**: Replaces `Floor/extension/OtherSpaceAboveOrBelow` with `Floor/FloorOrCeiling`.
 - **Breaking Change**: Deprecates ReportHPXMLOutput measure; HVAC autosized capacities & design loads moved to `results_annual.csv`.
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
 - Allows heating/cooling seasons that don't span the entire year.
@@ -49,6 +53,7 @@ __Bugfixes__
 - Fixes how relative paths are treated when using an OpenStudio Workflow.
 - Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
 - Fixes possible "Could not identify surface type for surface" error.
+- Fixes possible ruby error when defaulting water heater location.
 - BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 

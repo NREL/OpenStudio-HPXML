@@ -60,6 +60,8 @@ class HPXML < Object
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
+  NameSpace = 'http://hpxmlonline.com/2019/10'
+
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AirTypeFanCoil = 'fan coil'
@@ -122,8 +124,8 @@ class HPXML < Object
   FoundationWallTypeDoubleBrick = 'double brick'
   FoundationWallTypeSolidConcrete = 'solid concrete'
   FoundationWallTypeWood = 'wood'
-  FloorOtherSpaceAbove = 'above'
-  FloorOtherSpaceBelow = 'below'
+  FloorTypeCeiling = 'ceiling'
+  FloorTypeFloor = 'floor'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -383,7 +385,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
 
-  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true, building_id: nil)
+  def initialize(hpxml_path: nil, schema_path: nil, schematron_path: nil, collapse_enclosure: true, building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -393,13 +395,23 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
 
+      if not schema_path.nil?
+        xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+        @errors += xsd_errors
+        @warnings += xsd_warnings
+        return unless @errors.empty?
+      end
+
       # Check HPXML version
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
 
-      # Validate against Schematron docs
-      @errors, @warnings = validate_against_schematron(schematron_validators: schematron_validators)
-      return unless @errors.empty?
+      if not schematron_path.nil?
+        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml)
+        @errors += sct_errors
+        @warnings += sct_warnings
+        return unless @errors.empty?
+      end
 
       # Handle multiple buildings
       if XMLHelper.get_elements(hpxml, 'Building').size > 1
@@ -1414,7 +1426,7 @@ class HPXML < Object
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
-             :has_flue_or_chimney]
+             :building_footprint_area, :has_flue_or_chimney]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1433,6 +1445,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'AverageCeilingHeight', @average_ceiling_height, :float, @average_ceiling_height_isdefaulted) unless @average_ceiling_height.nil?
       XMLHelper.add_element(building_construction, 'NumberofBedrooms', @number_of_bedrooms, :integer) unless @number_of_bedrooms.nil?
       XMLHelper.add_element(building_construction, 'NumberofBathrooms', @number_of_bathrooms, :integer, @number_of_bathrooms_isdefaulted) unless @number_of_bathrooms.nil?
+      XMLHelper.add_element(building_construction, 'BuildingFootprintArea', @building_footprint_area, :float, @building_footprint_area_isdefaulted) unless @building_footprint_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', @conditioned_floor_area, :float) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', @conditioned_building_volume, :float, @conditioned_building_volume_isdefaulted) unless @conditioned_building_volume.nil?
       XMLHelper.add_extension(building_construction, 'HasFlueOrChimney', @has_flue_or_chimney, :boolean, @has_flue_or_chimney_isdefaulted) unless @has_flue_or_chimney.nil?
@@ -1451,6 +1464,7 @@ class HPXML < Object
       @average_ceiling_height = XMLHelper.get_value(building_construction, 'AverageCeilingHeight', :float)
       @number_of_bedrooms = XMLHelper.get_value(building_construction, 'NumberofBedrooms', :integer)
       @number_of_bathrooms = XMLHelper.get_value(building_construction, 'NumberofBathrooms', :integer)
+      @building_footprint_area = XMLHelper.get_value(building_construction, 'BuildingFootprintArea', :float)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
       @has_flue_or_chimney = XMLHelper.get_value(building_construction, 'extension/HasFlueOrChimney', :boolean)
@@ -2659,23 +2673,27 @@ class HPXML < Object
   class Floor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :other_space_above_or_below, :interior_finish_type, :interior_finish_thickness]
+             :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
     def is_ceiling
-      if [LocationAtticVented, LocationAtticUnvented].include? @interior_adjacent_to
-        return true
-      elsif [LocationAtticVented, LocationAtticUnvented].include? @exterior_adjacent_to
-        return true
-      elsif [LocationOtherHousingUnit, LocationOtherHeatedSpace, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include?(@exterior_adjacent_to) && (@other_space_above_or_below == FloorOtherSpaceAbove)
-        return true
+      # From the perspective of the living space
+      if @floor_or_ceiling.nil?
+        ceiling_locations = [LocationAtticUnconditioned,
+                             LocationAtticVented,
+                             LocationAtticUnvented]
+        if (ceiling_locations.include? @interior_adjacent_to) || (ceiling_locations.include? @exterior_adjacent_to)
+          return true
+        else # If we don't explicitly know that it's a ceiling, assume a floor
+          return false
+        end
+      else
+        return @floor_or_ceiling == FloorTypeCeiling
       end
-
-      return false
     end
 
     def is_floor
-      !is_ceiling
+      return !is_ceiling
     end
 
     def is_exterior
@@ -2733,6 +2751,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
+      XMLHelper.add_element(floor, 'FloorOrCeiling', @floor_or_ceiling, :string, @floor_or_ceiling_isdefaulted) unless @floor_or_ceiling.nil?
       XMLHelper.add_element(floor, 'Area', @area, :float) unless @area.nil?
       if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
         interior_finish = XMLHelper.add_element(floor, 'InteriorFinish')
@@ -2757,7 +2776,6 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
       end
-      XMLHelper.add_extension(floor, 'OtherSpaceAboveOrBelow', @other_space_above_or_below, :string) unless @other_space_above_or_below.nil?
     end
 
     def from_oga(floor)
@@ -2766,6 +2784,7 @@ class HPXML < Object
       @id = HPXML::get_id(floor)
       @exterior_adjacent_to = XMLHelper.get_value(floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(floor, 'InteriorAdjacentTo', :string)
+      @floor_or_ceiling = XMLHelper.get_value(floor, 'FloorOrCeiling', :string)
       @area = XMLHelper.get_value(floor, 'Area', :float)
       interior_finish = XMLHelper.get_element(floor, 'InteriorFinish')
       if not interior_finish.nil?
@@ -2779,7 +2798,6 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
-      @other_space_above_or_below = XMLHelper.get_value(floor, 'extension/OtherSpaceAboveOrBelow', :string)
     end
   end
 
@@ -4355,7 +4373,7 @@ class HPXML < Object
   end
 
   class Duct < BaseElement
-    ATTRS = [:duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
+    ATTRS = [:id, :duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area, :duct_surface_area_multiplier]
     attr_accessor(*ATTRS)
 
@@ -4374,6 +4392,8 @@ class HPXML < Object
 
     def to_oga(air_distribution)
       ducts_el = XMLHelper.add_element(air_distribution, 'Ducts')
+      sys_id = XMLHelper.add_element(ducts_el, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(ducts_el, 'DuctType', @duct_type, :string) unless @duct_type.nil?
       if not @duct_insulation_material.nil?
         ins_material_el = XMLHelper.add_element(ducts_el, 'DuctInsulationMaterial')
@@ -4389,6 +4409,7 @@ class HPXML < Object
     def from_oga(duct)
       return if duct.nil?
 
+      @id = HPXML::get_id(duct)
       @duct_type = XMLHelper.get_value(duct, 'DuctType', :string)
       @duct_insulation_material = XMLHelper.get_child_name(duct, 'DuctInsulationMaterial')
       @duct_insulation_r_value = XMLHelper.get_value(duct, 'DuctInsulationRValue', :float)
@@ -6379,9 +6400,9 @@ class HPXML < Object
   def _create_oga_document()
     doc = XMLHelper.create_doc('1.0', 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
-    XMLHelper.add_attribute(hpxml, 'xmlns', 'http://hpxmlonline.com/2019/10')
+    XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
     XMLHelper.add_attribute(hpxml, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-    XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', 'http://hpxmlonline.com/2019/10')
+    XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
     return doc
   end
@@ -6486,24 +6507,6 @@ class HPXML < Object
     end
   end
 
-  def validate_against_schematron(schematron_validators: [])
-    # ----------------------------- #
-    # Perform Schematron validation #
-    # ----------------------------- #
-
-    if not schematron_validators.empty?
-      errors, warnings = Validator.run_validators(@doc, schematron_validators)
-    else
-      errors = []
-      warnings = []
-    end
-
-    errors.map! { |e| "#{@hpxml_path}: #{e}" }
-    warnings.map! { |w| "#{@hpxml_path}: #{w}" }
-
-    return errors, warnings
-  end
-
   def check_for_errors()
     errors = []
 
@@ -6524,27 +6527,6 @@ class HPXML < Object
     # ------------------------------- #
     # Check for errors across objects #
     # ------------------------------- #
-
-    # FUTURE: Move these to EPvalidator.xml where possible
-
-    # Check for globally unique SystemIdentifier IDs and empty IDs
-    sys_ids = {}
-    self.class::HPXML_ATTRS.each do |attribute|
-      hpxml_obj = send(attribute)
-      next unless hpxml_obj.is_a? HPXML::BaseArrayElement
-
-      hpxml_obj.each do |obj|
-        next unless obj.respond_to? :id
-
-        sys_ids[obj.id] = 0 if sys_ids[obj.id].nil?
-        sys_ids[obj.id] += 1
-
-        errors << "Empty SystemIdentifier ID ('#{obj.id}') detected for #{attribute}." if !obj.id || obj.id.size == 0
-      end
-    end
-    sys_ids.each do |sys_id, cnt|
-      errors << "Duplicate SystemIdentifier IDs detected for '#{sys_id}'." if cnt > 1
-    end
 
     # Check for HVAC systems referenced by multiple water heating systems
     hvac_systems.each do |hvac_system|

@@ -759,6 +759,16 @@ class HPXMLDefaults
 
   def self.apply_floors(hpxml)
     hpxml.floors.each do |floor|
+      if floor.floor_or_ceiling.nil?
+        if floor.is_ceiling
+          floor.floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor.floor_or_ceiling_isdefaulted = true
+        elsif floor.is_floor
+          floor.floor_or_ceiling = HPXML::FloorTypeFloor
+          floor.floor_or_ceiling_isdefaulted = true
+        end
+      end
+
       if floor.interior_finish_type.nil?
         if floor.is_floor
           floor.interior_finish_type = HPXML::InteriorFinishNone
@@ -1502,7 +1512,8 @@ class HPXMLDefaults
               duct.duct_location_isdefaulted = true
 
               if secondary_duct_area > 0
-                hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                hvac_distribution.ducts.add(id: "#{duct.id}_secondary",
+                                            duct_type: duct.duct_type,
                                             duct_insulation_r_value: duct.duct_insulation_r_value,
                                             duct_location: secondary_duct_location,
                                             duct_location_isdefaulted: true,
@@ -1710,7 +1721,7 @@ class HPXMLDefaults
         end
       end
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone)
+        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0])
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF

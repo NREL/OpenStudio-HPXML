@@ -44,7 +44,7 @@ class Battery
     minimum_storage_state_of_charge_fraction = 0.75 * unusable_fraction
     maximum_storage_state_of_charge_fraction = 1.0 - 0.25 * unusable_fraction
 
-    #disable voltage dependency unless lifetime model is requested: this prevents some scenarios where changes to SoC didn't seem to reflect charge rate due to voltage dependency and constant current
+    # disable voltage dependency unless lifetime model is requested: this prevents some scenarios where changes to SoC didn't seem to reflect charge rate due to voltage dependency and constant current
     voltage_dependence = false
     if battery.lifetime_model == 'KandlerSmith'
       voltage_dependence = true
@@ -53,9 +53,7 @@ class Battery
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
     unless is_outside
-      space = battery.additional_properties.space
-      thermal_zone = space.thermalZone.get
-      elcs.setThermalZone(thermal_zone)
+      elcs.setThermalZone(battery.additional_properties.space.thermalZone.get)
     end
     elcs.setRadiativeFraction(0.9 * frac_sens)
     elcs.setLifetimeModel(battery.lifetime_model)
@@ -65,13 +63,14 @@ class Battery
     elcs.setBatteryMass(battery_mass)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
-    elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
-    if voltage_dependence == false
+    if not voltage_dependence
       elcs.setBatteryCellInternalElectricalResistance(0.0)
       elcs.setFullyChargedCellVoltage(3.342)
       elcs.setCellVoltageatEndofExponentialZone(3.342)
       elcs.setCellVoltageatEndofNominalZone(3.342)
+    else
+      elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     end
 
     elcds = model.getElectricLoadCenterDistributions
