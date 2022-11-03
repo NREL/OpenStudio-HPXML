@@ -1131,9 +1131,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil)
   end
 
-  def test_ptac
+  def test_ptac_with_heating_electricity
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-ptac-with-heating.xml')
+    hpxml = _create_hpxml('base-hvac-ptac-with-heating-electricity.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.75
     hpxml.cooling_systems[0].cooling_capacity = 12345
     hpxml.cooling_systems[0].cooling_efficiency_eer = 12.5
@@ -1151,6 +1151,28 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil, 12.5, 1.0)
+  end
+
+  def test_ptac_with_heating_natural_gas
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-hvac-ptac-with-heating-natural-gas.xml')
+    hpxml.cooling_systems[0].cooling_shr = 0.75
+    hpxml.cooling_systems[0].cooling_capacity = 12345
+    hpxml.cooling_systems[0].cooling_efficiency_eer = 12.5
+    hpxml.cooling_systems[0].integrated_heating_system_fuel = HPXML::FuelTypeNaturalGas
+    hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = 1.0
+    hpxml.cooling_systems[0].integrated_heating_system_efficiency_percent = 0.78
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.75, 12345, 12.5, 0.78)
+
+    # Test defaults
+    hpxml.cooling_systems[0].cooling_shr = nil
+    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].integrated_heating_system_efficiency_percent = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil, 12.5, 0.81)
   end
 
   def test_elec_resistance

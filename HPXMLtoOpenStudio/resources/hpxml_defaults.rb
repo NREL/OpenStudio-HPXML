@@ -1053,7 +1053,15 @@ class HPXMLDefaults
       cooling_system_fuel = HPXML::FuelTypeElectricity
 
       if cooling_system.has_integrated_heating && cooling_system.integrated_heating_system_efficiency_percent.nil?
-        cooling_system.integrated_heating_system_efficiency_percent = 1.0
+        if cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeElectricity
+          cooling_system.integrated_heating_system_efficiency_percent = 1.0
+        elsif cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeWoodCord
+          cooling_system.integrated_heating_system_efficiency_percent = 0.60  # HEScore assumption
+        elsif cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeWoodPellets
+          cooling_system.integrated_heating_system_efficiency_percent = 0.78  # HEScore assumption
+        else
+          cooling_system.integrated_heating_system_efficiency_percent = 0.81  # https://www.lopistoves.com/products/ and https://www.kozyheat.com/products/
+        end
         cooling_system.integrated_heating_system_efficiency_percent_isdefaulted = true
       end
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
