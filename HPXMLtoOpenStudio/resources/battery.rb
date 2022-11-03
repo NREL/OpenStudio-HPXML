@@ -46,7 +46,7 @@ class Battery
 
     # disable voltage dependency unless lifetime model is requested: this prevents some scenarios where changes to SoC didn't seem to reflect charge rate due to voltage dependency and constant current
     voltage_dependence = false
-    if battery.lifetime_model == 'KandlerSmith'
+    if battery.lifetime_model == HPXML::BatteryLifetimeModelKandlerSmith
       voltage_dependence = true
     end
 
@@ -64,13 +64,11 @@ class Battery
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
+    elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     if not voltage_dependence
-      elcs.setBatteryCellInternalElectricalResistance(0.0)
-      elcs.setFullyChargedCellVoltage(3.342)
-      elcs.setCellVoltageatEndofExponentialZone(3.342)
-      elcs.setCellVoltageatEndofNominalZone(3.342)
-    else
-      elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
+      elcs.setBatteryCellInternalElectricalResistance(0.0001)
+      elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
+      elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
     end
 
     elcds = model.getElectricLoadCenterDistributions
