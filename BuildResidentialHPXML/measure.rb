@@ -2912,6 +2912,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('utility_bill_electricity_filepaths', false)
+    arg.setDisplayName('Utility Bills: Electricity File Paths')
+    arg.setDescription('Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
     ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
@@ -3569,6 +3574,12 @@ class HPXMLFile
     if args[:utility_bill_scenario_names].is_initialized
       bills_scenario_names = args[:utility_bill_scenario_names].get.split(',').map(&:strip)
 
+      if args[:utility_bill_electricity_filepaths].is_initialized
+        bills_electricity_filepaths = args[:utility_bill_electricity_filepaths].get.split(',').map(&:strip)
+      else
+        bills_electricity_filepaths = [nil] * bills_scenario_names.size
+      end
+
       fixed_charges = {}
       ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
@@ -3627,7 +3638,8 @@ class HPXMLFile
         bills_pv_monthly_grid_connection_fees = [nil] * bills_scenario_names.size
       end
 
-      bills_scenarios = bills_scenario_names.zip(fixed_charges[HPXML::FuelTypeElectricity],
+      bills_scenarios = bills_scenario_names.zip(bills_electricity_filepaths,
+                                                 fixed_charges[HPXML::FuelTypeElectricity],
                                                  fixed_charges[HPXML::FuelTypeNaturalGas],
                                                  fixed_charges[HPXML::FuelTypePropane],
                                                  fixed_charges[HPXML::FuelTypeOil],
@@ -3649,7 +3661,8 @@ class HPXMLFile
                                                  bills_pv_monthly_grid_connection_fees)
 
       bills_scenarios.each do |bills_scenario|
-        name, elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        name, elec_tariff_filepath, elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
+        elec_tariff_filepath = (elec_tariff_filepath.to_s.include?('.') ? elec_tariff_filepath : nil)
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
         propane_fixed_charge = Float(propane_fixed_charge) rescue nil
@@ -3685,6 +3698,7 @@ class HPXMLFile
         end
 
         hpxml.header.utility_bill_scenarios.add(name: name,
+                                                elec_tariff_filepath: elec_tariff_filepath,
                                                 elec_fixed_charge: elec_fixed_charge,
                                                 natural_gas_fixed_charge: natural_gas_fixed_charge,
                                                 propane_fixed_charge: propane_fixed_charge,
