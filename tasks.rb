@@ -390,6 +390,8 @@ def create_hpxmls
     'base-misc-bills.xml' => 'base.xml',
     'base-misc-bills-none.xml' => 'base.xml',
     'base-misc-bills-pv.xml' => 'base-pv.xml',
+    'base-misc-bills-pv-detailed-only.xml' => 'base-pv.xml',
+    'base-misc-bills-pv-mixed.xml' => 'base-pv.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -2198,6 +2200,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, NA, 0.13'
     args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollars}"
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 2.5, 7.5'
+  elsif ['base-misc-bills-pv-detailed-only.xml'].include? hpxml_file
+    args['utility_bill_scenario_names'] = 'Tiered, TOU, Tiered and TOU, Real-Time Pricing'
+    args['utility_bill_electricity_filepaths'] = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
+  elsif ['base-misc-bills-pv-mixed.xml'].include? hpxml_file
+    args['utility_bill_scenario_names'] = 'Simple, Detailed'
+    args['utility_bill_electricity_filepaths'] = 'NA, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
@@ -4738,7 +4746,37 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather]
+def download_utility_rates
+  require_relative 'HPXMLtoOpenStudio/resources/util'
+  require_relative 'ReportUtilityBills/resources/util'
+
+  rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/detailed_rates')
+  FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
+  filepath = File.join(rates_dir, 'usurdb.csv')
+
+  if !File.exist?(filepath)
+    require 'tempfile'
+    tmpfile = Tempfile.new('rates')
+
+    UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.csv.gz', tmpfile)
+
+    puts 'Extracting utility rates...'
+    require 'zlib'
+    Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
+      File.open(filepath, 'w') do |output_stream|
+        IO.copy_stream(input_stream, output_stream)
+      end
+    end
+  end
+
+  num_rates_actual = process_usurdb(filepath)
+
+  puts "#{num_rates_actual} rate files are available in openei_rates.zip."
+  puts 'Completed.'
+  exit!
+end
+
+command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather, :download_utility_rates]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4873,6 +4911,10 @@ end
 
 if ARGV[0].to_sym == :download_weather
   download_epws
+end
+
+if ARGV[0].to_sym == :download_utility_rates
+  download_utility_rates
 end
 
 if ARGV[0].to_sym == :create_release_zips
