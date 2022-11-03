@@ -66,7 +66,7 @@ class Battery
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     if not voltage_dependence
-      elcs.setBatteryCellInternalElectricalResistance(0.0001)
+      elcs.setBatteryCellInternalElectricalResistance(0.0002)
       elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
       elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
     end
