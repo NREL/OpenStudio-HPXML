@@ -1662,7 +1662,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
   
 Room Air Conditioner w/ Reverse Cycle
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a room air conditioner with reverse cycle is specified, additional information is entered in ``HeatPump``.
 
