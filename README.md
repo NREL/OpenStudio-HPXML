@@ -25,18 +25,18 @@ This repository contains several OpenStudio measures:
 - `BuildResidentialHPXML`: A measure that generates an HPXML file from a set of building description inputs (including, e.g., simplified geometry inputs).
 - `BuildResidentialScheduleFile`: A measure that generates a CSV of detailed schedules (e.g., stochastic occupancy) for use in the simulation.
 - `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
-- `ReportSimulationOutput`: A reporting measure that generates a variety of simulation-based annual/timeseries outputs in CSV or JSON format.
-- `ReportHPXMLOutput`: A reporting measure that generates a variety of HPXML-based outputs (including defaults like autosized HVAC capacities) in CSV or JSON format.
+- `ReportSimulationOutput`: A reporting measure that generates a variety of simulation-based annual/timeseries outputs in CSV/JSON/MessagePack format.
+- `ReportUtilityBills`: A reporting measure that generates utility bill outputs in CSV/JSON/MessagePack format.
 
 ## Projects
 
 The OpenStudio-HPXML workflow is used by a number of other residential projects, including:
-- [Energy Rating Index (ERI) and ENERGY STAR](https://github.com/NREL/OpenStudio-ERI)
+- [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://betterbuildingssolutioncenter.energy.gov/home-energy-score)
 - [ResStock](https://resstock.nrel.gov/)
 - [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)
 - [BEopt](https://beopt.nrel.gov) (pending)
-- [Weatherization Assistant](https://weatherization.ornl.gov/obtain) (pending)
+- [Weatherization Assistant](https://weatherization.ornl.gov/softwaredescription/) (pending)
 
 ## License
 

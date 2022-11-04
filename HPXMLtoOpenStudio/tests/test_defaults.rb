@@ -31,7 +31,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_header
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
     hpxml.header.timestep = 30
     hpxml.header.sim_begin_month = 2
     hpxml.header.sim_begin_day = 2
@@ -43,13 +43,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_begin_day = 3
     hpxml.header.dst_end_month = 10
     hpxml.header.dst_end_day = 10
-    hpxml.header.use_max_load_for_heat_pumps = false
+    hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingMaxLoad
     hpxml.header.allow_increased_fixed_capacities = true
     hpxml.header.state_code = 'CA'
     hpxml.header.time_zone_utc_offset = -8
+    hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeOperational
+    hpxml.header.temperature_capacitance_multiplier = 1.5
+    hpxml.header.natvent_days_per_week = 7
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, false, true, 'CA', -8)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, HPXML::HeatPumpSizingMaxLoad,
+                                true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5, 7)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -63,13 +67,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_begin_day = nil
     hpxml.header.dst_end_month = nil
     hpxml.header.dst_end_day = nil
-    hpxml.header.use_max_load_for_heat_pumps = nil
+    hpxml.header.heat_pump_sizing_methodology = nil
     hpxml.header.allow_increased_fixed_capacities = nil
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
+    hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
+    hpxml.header.natvent_days_per_week = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, 'CO', -7)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -84,13 +92,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_begin_day = nil
     hpxml.header.dst_end_month = nil
     hpxml.header.dst_end_day = nil
-    hpxml.header.use_max_load_for_heat_pumps = nil
+    hpxml.header.heat_pump_sizing_methodology = nil
     hpxml.header.allow_increased_fixed_capacities = nil
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
+    hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO', -7)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
+
+    # Test defaults - calendar year override by AMY year
+    hpxml.header.sim_calendar_year = 2020
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
+                                false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
 
     # Test defaults - invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -105,13 +123,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_begin_day = nil
     hpxml.header.dst_end_month = nil
     hpxml.header.dst_end_day = nil
-    hpxml.header.use_max_load_for_heat_pumps = nil
+    hpxml.header.heat_pump_sizing_methodology = nil
     hpxml.header.allow_increased_fixed_capacities = nil
     hpxml.header.state_code = nil
     hpxml.header.time_zone_utc_offset = nil
+    hpxml.header.occupancy_calculation_type = nil
+    hpxml.header.temperature_capacitance_multiplier = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, nil, 2)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
+                                false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0, 3)
   end
 
   def test_emissions_factors
@@ -187,21 +208,95 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
+  def test_utility_bills
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-pv.xml')
+    hpxml.header.utility_bill_scenarios.clear
+    for pv_compensation_type in [HPXML::PVCompensationTypeNetMetering, HPXML::PVCompensationTypeFeedInTariff]
+      hpxml.header.utility_bill_scenarios.add(name: pv_compensation_type,
+                                              elec_fixed_charge: 8,
+                                              natural_gas_fixed_charge: 9,
+                                              propane_fixed_charge: 10,
+                                              fuel_oil_fixed_charge: 11,
+                                              coal_fixed_charge: 12,
+                                              wood_fixed_charge: 13,
+                                              wood_pellets_fixed_charge: 14,
+                                              elec_marginal_rate: 0.2,
+                                              natural_gas_marginal_rate: 0.3,
+                                              propane_marginal_rate: 0.4,
+                                              fuel_oil_marginal_rate: 0.5,
+                                              coal_marginal_rate: 0.6,
+                                              wood_marginal_rate: 0.7,
+                                              wood_pellets_marginal_rate: 0.8,
+                                              pv_compensation_type: pv_compensation_type,
+                                              pv_net_metering_annual_excess_sellback_rate_type: HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost,
+                                              pv_net_metering_annual_excess_sellback_rate: 0.04,
+                                              pv_feed_in_tariff_rate: 0.15,
+                                              pv_monthly_grid_connection_fee_dollars: 3)
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    scenarios = hpxml_default.header.utility_bill_scenarios
+    _test_default_bills_values(scenarios[0], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost, nil, nil, nil, 3)
+    _test_default_bills_values(scenarios[1], 8, 9, 10, 11, 12, 13, 14, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, HPXML::PVCompensationTypeFeedInTariff, nil, nil, 0.15, nil, 3)
+
+    # Test defaults
+    hpxml.header.utility_bill_scenarios.each do |scenario|
+      scenario.elec_fixed_charge = nil
+      scenario.natural_gas_fixed_charge = nil
+      scenario.propane_fixed_charge = nil
+      scenario.fuel_oil_fixed_charge = nil
+      scenario.coal_fixed_charge = nil
+      scenario.wood_fixed_charge = nil
+      scenario.wood_pellets_fixed_charge = nil
+      scenario.elec_marginal_rate = nil
+      scenario.natural_gas_marginal_rate = nil
+      scenario.propane_marginal_rate = nil
+      scenario.fuel_oil_marginal_rate = nil
+      scenario.coal_marginal_rate = nil
+      scenario.wood_marginal_rate = nil
+      scenario.wood_pellets_marginal_rate = nil
+      scenario.pv_compensation_type = nil
+      scenario.pv_net_metering_annual_excess_sellback_rate_type = nil
+      scenario.pv_net_metering_annual_excess_sellback_rate = nil
+      scenario.pv_feed_in_tariff_rate = nil
+      scenario.pv_monthly_grid_connection_fee_dollars_per_kw = nil
+      scenario.pv_monthly_grid_connection_fee_dollars = nil
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    hpxml_default.header.utility_bill_scenarios.each do |scenario|
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+    end
+
+    # Test defaults w/ electricity JSON file
+    hpxml.header.utility_bill_scenarios.each do |scenario|
+      scenario.elec_tariff_filepath = File.join(File.dirname(__FILE__), '..', '..', 'ReportUtilityBills', 'resources', 'detailed_rates', 'Sample Tiered Rate.json')
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    hpxml_default.header.utility_bill_scenarios.each do |scenario|
+      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+    end
+  end
+
   def test_site
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.site.site_type = HPXML::SiteTypeRural
     hpxml.site.shielding_of_home = HPXML::ShieldingExposed
+    hpxml.site.ground_conductivity = 0.8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8)
 
     # Test defaults
     hpxml.site.site_type = nil
     hpxml.site.shielding_of_home = nil
+    hpxml.site.ground_conductivity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0)
   end
 
   def test_neighbor_buildings
@@ -306,23 +401,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_climate_and_risk_zones
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    hpxml.climate_and_risk_zones.iecc_year = 2009
-    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].year = 2009
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone = '2B'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, 2009, '2B')
 
     # Test defaults
-    hpxml.climate_and_risk_zones.iecc_year = nil
-    hpxml.climate_and_risk_zones.iecc_zone = nil
+    hpxml.climate_and_risk_zones.climate_zone_ieccs[0].delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, 2006, '5B')
 
     # Test defaults - invalid IECC zone
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
-    hpxml.climate_and_risk_zones.iecc_year = nil
-    hpxml.climate_and_risk_zones.iecc_zone = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, nil, nil)
@@ -370,6 +462,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_attic_values(hpxml_default.attics[0], 1.0 / 300.0)
+
+    # Test defaults w/o Attic element
+    hpxml.attics[0].delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_attic_values(hpxml_default.attics[0], 1.0 / 300.0)
   end
 
   def test_foundations
@@ -382,6 +480,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     hpxml.foundations[0].vented_crawlspace_sla = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_foundation_values(hpxml_default.foundations[0], 1.0 / 150.0)
+
+    # Test defaults w/o Foundation element
+    hpxml.foundations[0].delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_foundation_values(hpxml_default.foundations[0], 1.0 / 150.0)
@@ -532,7 +636,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.walls[1].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, nil, 180)
+    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, nil, nil)
   end
 
   def test_foundation_walls
@@ -590,29 +694,29 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                          1000, 0.0, 10.0, 0.0, 10.0, HPXML::FoundationWallTypeSolidConcrete)
   end
 
-  def test_frame_floors
+  def test_floors
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    hpxml.frame_floors[0].interior_finish_type = HPXML::InteriorFinishWood
-    hpxml.frame_floors[0].interior_finish_thickness = 0.375
+    hpxml.floors[0].interior_finish_type = HPXML::InteriorFinishWood
+    hpxml.floors[0].interior_finish_thickness = 0.375
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishWood, 0.375)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishWood, 0.375)
 
     # Test defaults w/ ceiling
-    hpxml.frame_floors[0].interior_finish_type = nil
-    hpxml.frame_floors[0].interior_finish_thickness = nil
+    hpxml.floors[0].interior_finish_type = nil
+    hpxml.floors[0].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishGypsumBoard, 0.5)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishGypsumBoard, 0.5)
 
     # Test defaults w/ floor
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
-    hpxml.frame_floors[0].interior_finish_type = nil
-    hpxml.frame_floors[0].interior_finish_thickness = nil
+    hpxml.floors[0].interior_finish_type = nil
+    hpxml.floors[0].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[0], HPXML::InteriorFinishNone, nil)
+    _test_default_floor_values(hpxml_default.floors[0], HPXML::InteriorFinishNone, nil)
   end
 
   def test_slabs
@@ -676,7 +780,47 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_windows_properties
-    # [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
+    # Test defaults w/ single pane, aluminum frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeAluminum
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersSinglePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(false, hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.windows[0].glass_type)
+    assert_nil(hpxml_default.windows[0].gas_fill)
+
+    # Test defaults w/ double pane, metal frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersDoublePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(true, hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.windows[0].glass_type)
+    assert_equal(HPXML::WindowGasAir, hpxml_default.windows[0].gas_fill)
+
+    # Test defaults w/ single pane, wood frame
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows[0].ufactor = nil
+    hpxml.windows[0].shgc = nil
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersTriplePane
+    hpxml.windows[0].glass_type = HPXML::WindowGlassTypeLowE
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_nil(hpxml_default.windows[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeLowE, hpxml_default.windows[0].glass_type)
+    assert_equal(HPXML::WindowGasArgon, hpxml_default.windows[0].gas_fill)
+
+    # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.27, 0.64],
@@ -747,7 +891,47 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_skylights_properties
-    # [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
+    # Test defaults w/ single pane, aluminum frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeAluminum
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersSinglePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(false, hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.skylights[0].glass_type)
+    assert_nil(hpxml_default.skylights[0].gas_fill)
+
+    # Test defaults w/ double pane, metal frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersDoublePane
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_equal(true, hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeClear, hpxml_default.skylights[0].glass_type)
+    assert_equal(HPXML::WindowGasAir, hpxml_default.skylights[0].gas_fill)
+
+    # Test defaults w/ single pane, wood frame
+    hpxml = _create_hpxml('base-enclosure-skylights.xml')
+    hpxml.skylights[0].ufactor = nil
+    hpxml.skylights[0].shgc = nil
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersTriplePane
+    hpxml.skylights[0].glass_type = HPXML::WindowGlassTypeLowE
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+
+    assert_nil(hpxml_default.skylights[0].thermal_break)
+    assert_equal(HPXML::WindowGlassTypeLowE, hpxml_default.skylights[0].glass_type)
+    assert_equal(HPXML::WindowGasArgon, hpxml_default.skylights[0].gas_fill)
+
+    # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.98, 0.64],
@@ -855,11 +1039,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = -0.11
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml.cooling_systems[0].cooling_capacity = 12345
-    hpxml.cooling_systems[0].cooling_efficiency_seer = 12.5
+    hpxml.cooling_systems[0].cooling_efficiency_seer = 12.0
     hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.5)
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
+
+    # Test defaults - SEER2
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer2 = 11.4
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -868,7 +1059,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = nil
     hpxml.cooling_systems[0].airflow_defect_ratio = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
-    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer2 = nil
     hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1112,6 +1303,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, 0.81)
+
+    # Test defaults w/ wood pellets
+    hpxml.heating_systems[0].year_installed = nil
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodPellets
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, 0.78)
   end
 
   def test_portable_heaters
@@ -1202,9 +1400,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].cooling_efficiency_seer = 14.0
     hpxml.heat_pumps[0].heating_efficiency_hspf = 8.0
     hpxml.heat_pumps[0].year_installed = 2010
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = 20.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, 20.0)
+
+    # Test defaults - SEER2/HSPF2
+    hpxml.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer2 = 13.3
+    hpxml.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml.heat_pumps[0].heating_efficiency_hspf2 = 6.8
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, 20.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
@@ -1216,12 +1424,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
-    hpxml.heat_pumps[0].cooling_efficiency_seer = nil
-    hpxml.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer2 = nil
+    hpxml.heat_pumps[0].heating_efficiency_hspf2 = nil
     hpxml.heat_pumps[0].year_installed = 2010
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 13.76, 7.9)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 13.76, 7.9, 40.0)
   end
 
   def test_pthp
@@ -1230,18 +1439,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].cooling_shr = 0.88
     hpxml.heat_pumps[0].cooling_capacity = 12345
     hpxml.heat_pumps[0].heating_capacity = 23456
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = 20.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.88, 12345, 23456)
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.88, 12345, 23456, 20.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil)
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil, 40.0)
   end
 
   def test_mini_split_heat_pumps
@@ -1255,9 +1466,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = 23456
     hpxml.heat_pumps[0].heating_capacity_17F = 9876
     hpxml.heat_pumps[0].backup_heating_capacity = 34567
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = 20.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 20.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
@@ -1268,15 +1480,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil, 40.0)
 
     # Test defaults w/ ductless
     hpxml.heat_pumps[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 40.0)
   end
 
   def test_ground_source_heat_pumps
@@ -1335,6 +1548,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_hvac_controls
     # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    # Use 1.0 min for onoff_thermostat_deadband tests
+    hpxml.header.timestep = 1.0
+    hpxml.hvac_controls[0].heating_setpoint_temp = 71.5
+    hpxml.hvac_controls[0].cooling_setpoint_temp = 77.5
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 71.5, 77.5, 2.0)
+
+    # Test defaults
+    hpxml.hvac_controls[0].heating_setpoint_temp = nil
+    hpxml.hvac_controls[0].cooling_setpoint_temp = nil
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0)
+
+    # Test inputs not overridden by defaults (w/ setbacks)
     hpxml = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')
     hpxml.hvac_controls[0].heating_setback_start_hour = 12
     hpxml.hvac_controls[0].cooling_setup_start_hour = 12
@@ -1346,11 +1578,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
     hpxml.hvac_controls[0].seasons_cooling_end_month = 12
     hpxml.hvac_controls[0].seasons_cooling_end_day = 31
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_values(hpxml_default.hvac_controls[0], 12, 12, 1, 1, 6, 30, 7, 1, 12, 31)
+    _test_default_hvac_control_setback_values(hpxml_default.hvac_controls[0], 12, 12, 2.0)
+    _test_default_hvac_control_season_values(hpxml_default.hvac_controls[0], 1, 1, 6, 30, 7, 1, 12, 31)
 
-    # Test defaults
+    # Test defaults w/ setbacks
     hpxml.hvac_controls[0].heating_setback_start_hour = nil
     hpxml.hvac_controls[0].cooling_setup_start_hour = nil
     hpxml.hvac_controls[0].seasons_heating_begin_month = nil
@@ -1361,9 +1595,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_controls[0].seasons_cooling_begin_day = nil
     hpxml.hvac_controls[0].seasons_cooling_end_month = nil
     hpxml.hvac_controls[0].seasons_cooling_end_day = nil
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_values(hpxml_default.hvac_controls[0], 23, 9, 1, 1, 12, 31, 1, 1, 12, 31)
+    _test_default_hvac_control_setback_values(hpxml_default.hvac_controls[0], 23, 9, 0.0)
+    _test_default_hvac_control_season_values(hpxml_default.hvac_controls[0], 1, 1, 12, 31, 1, 1, 12, 31)
   end
 
   def test_hvac_distribution
@@ -1371,6 +1607,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     hpxml.hvac_distributions[0].number_of_return_registers = 2
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['attic - unvented']
@@ -1379,15 +1617,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [50.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [0.5]
+    expected_return_area_mults = [1.5]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ conditioned basement
     hpxml.hvac_distributions[0].number_of_return_registers = nil
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1397,9 +1638,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [270.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ multiple foundations
     hpxml = _create_hpxml('base-foundation-multiple.xml')
@@ -1408,6 +1651,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1417,9 +1661,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [67.5]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ foundation exposed to ambient
     hpxml = _create_hpxml('base-foundation-ambient.xml')
@@ -1428,6 +1674,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1437,9 +1684,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [67.5]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ building/unit adjacent to other housing unit
     hpxml = _create_hpxml('base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml')
@@ -1448,6 +1697,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1457,9 +1707,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [45.0]
     expected_supply_fracs = [1.0]
     expected_return_fracs = [1.0]
+    expected_supply_area_mults = [1.0]
+    expected_return_area_mults = [1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building
     hpxml = _create_hpxml('base-enclosure-2stories.xml')
@@ -1468,6 +1720,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
+      duct.duct_surface_area_multiplier = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1477,9 +1730,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [227.82, 227.82, 75.94, 75.94]
     expected_supply_fracs = [0.375, 0.375, 0.125, 0.125]
     expected_return_fracs = [0.375, 0.375, 0.125, 0.125]
+    expected_supply_area_mults = [1.0, 1.0, 1.0, 1.0]
+    expected_return_area_mults = [1.0, 1.0, 1.0, 1.0]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 1-story building & multiple HVAC systems
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1491,6 +1746,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1501,9 +1757,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [13.5, 13.5] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building & multiple HVAC systems
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1516,6 +1774,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1526,9 +1785,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [10.125, 10.125, 3.375, 3.375] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.375, 0.375, 0.125, 0.125] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.375, 0.375, 0.125, 0.125] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0, 1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0, 1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
 
     # Test defaults w/ 2-story building & multiple HVAC systems & duct area fractions
     hpxml = _create_hpxml('base-hvac-multiple.xml')
@@ -1546,6 +1807,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_distribution.ducts.each do |duct|
         duct.duct_surface_area = nil
+        duct.duct_surface_area_multiplier = nil
       end
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1556,9 +1818,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     expected_return_areas = [13.5, 13.5] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.75, 0.25] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
+    expected_supply_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
+    expected_return_area_mults = [1.0, 1.0] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers)
+                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults)
   end
 
   def test_mech_ventilation_fans
@@ -1683,17 +1947,40 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
+    vent_fan.rated_flow_rate = 222.0
+    vent_fan.cfis_vent_mode_airflow_fraction = 0.5
+    vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
+                               tested_flow_rate: 79.0,
+                               fan_power: 9.0,
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               is_shared_system: false,
+                               used_for_whole_building_ventilation: true)
+    suppl_vent_fan = hpxml.ventilation_fans[-1]
+    vent_fan.cfis_supplemental_fan_idref = suppl_vent_fan.id
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 330)
+    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5, 222.0, 0.5, HPXML::CFISModeSupplementalFan)
+    _test_default_mech_vent_suppl_values(hpxml_default, false, nil, 9.0, 79.0)
+
+    # Test defaults w/ CFIS supplemental fan
+    suppl_vent_fan.tested_flow_rate = nil
+    suppl_vent_fan.is_shared_system = nil
+    suppl_vent_fan.fan_power = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_suppl_values(hpxml_default, false, nil, 35.0, 100.0)
 
     # Test defaults w/ CFIS
     vent_fan.is_shared_system = nil
     vent_fan.hours_in_operation = nil
     vent_fan.fan_power = nil
+    vent_fan.rated_flow_rate = nil
+    vent_fan.cfis_vent_mode_airflow_fraction = nil
+    vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 8.0, 165.0, 330)
+    _test_default_mech_vent_values(hpxml_default, false, 8.0, 150.0, 300.0, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml = _create_hpxml('base-mechvent-erv.xml')
@@ -1783,11 +2070,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = 111
       wh.energy_factor = 0.90
       wh.year_installed = 2003
+      wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationLivingSpace, 111, 0.90])
+                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationLivingSpace, 111, 0.90, HPXML::WaterHeaterTankModelTypeStratified])
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml.water_heating_systems.each do |wh|
@@ -1799,11 +2087,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2003
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.857])
+                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.857, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml = _create_hpxml('base-enclosure-beds-5.xml')
@@ -1816,11 +2105,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2010
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90])
+                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml = _create_hpxml('base-dhw-multiple.xml')
@@ -1835,43 +2125,50 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2010
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90],
-                                              [false, 36000.0, 40.0, 0.746, HPXML::LocationBasementConditioned, 125, 0.55])
+                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90, HPXML::WaterHeaterTankModelTypeMixed],
+                                              [false, 36000.0, 40.0, 0.746, HPXML::LocationBasementConditioned, 125, 0.55, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test inputs not overridden by defaults w/ UEF
     hpxml = _create_hpxml('base-dhw-tank-gas-uef.xml')
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = nil
       wh.usage_bin = HPXML::WaterHeaterUsageBinVerySmall
+      wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_nil(hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinVerySmall, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeStratified, hpxml_default.water_heating_systems[0].tank_model_type)
 
     # Test defaults w/ UEF & FHR
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = 40
       wh.usage_bin = nil
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_equal(40, hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinLow, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeMixed, hpxml_default.water_heating_systems[0].tank_model_type)
 
     # Test defaults w/ UEF & no FHR
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = nil
       wh.usage_bin = nil
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_nil(hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinMedium, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeMixed, hpxml_default.water_heating_systems[0].tank_model_type)
   end
 
   def test_tankless_water_heaters
@@ -1895,6 +2192,38 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_tankless_water_heater_values(hpxml_default, [0.94])
+  end
+
+  def test_heat_pump_water_heaters
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-dhw-tank-heat-pump.xml')
+    hpxml.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_water_heater_values(hpxml_default, [HPXML::WaterHeaterOperatingModeHeatPumpOnly])
+
+    # Test defaults
+    hpxml.water_heating_systems[0].operating_mode = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_water_heater_values(hpxml_default, [HPXML::WaterHeaterOperatingModeStandard])
+  end
+
+  def test_indirect_water_heaters
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-dhw-indirect.xml')
+    hpxml.water_heating_systems[0].standby_loss_value = 0.99
+    hpxml.water_heating_systems[0].standby_loss_units = HPXML::UnitsDegFPerHour
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_indirect_water_heater_values(hpxml_default, [HPXML::UnitsDegFPerHour, 0.99])
+
+    # Test defaults
+    hpxml.water_heating_systems[0].standby_loss_value = nil
+    hpxml.water_heating_systems[0].standby_loss_units = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_indirect_water_heater_values(hpxml_default, [HPXML::UnitsDegFPerHour, 0.843])
   end
 
   def test_hot_water_distribution
@@ -2075,42 +2404,85 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-pv-battery.xml')
     hpxml.batteries[0].nominal_capacity_kwh = 45.0
     hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = 34.0
+    hpxml.batteries[0].usable_capacity_ah = nil
     hpxml.batteries[0].rated_power_output = 1234.0
     hpxml.batteries[0].location = HPXML::LocationBasementConditioned
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 45.0, nil, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
+    _test_default_battery_values(hpxml_default, 45.0, nil, 34.0, nil, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
 
     # Test w/ Ah instead of kWh
     hpxml.batteries[0].nominal_capacity_kwh = nil
     hpxml.batteries[0].nominal_capacity_ah = 987.0
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = 876.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 987.0, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
+    _test_default_battery_values(hpxml_default, nil, 987.0, nil, 876.0, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
 
     # Test defaults
     hpxml.batteries[0].nominal_capacity_kwh = nil
     hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
     hpxml.batteries[0].rated_power_output = nil
     hpxml.batteries[0].location = nil
     hpxml.batteries[0].lifetime_model = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 10.0, nil, 5000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
 
-    # Test defaults w/ kWh
+    # Test defaults w/ nominal kWh
     hpxml.batteries[0].nominal_capacity_kwh = 14.0
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 14.0, nil, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 14.0, nil, 12.6, nil, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
 
-    # Test defaults w/ Ah
+    # Test defaults w/ usable kWh
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = 12.0
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_battery_values(hpxml_default, 13.33, nil, 12.0, nil, 6665.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+
+    # Test defaults w/ nominal Ah
     hpxml.batteries[0].nominal_capacity_kwh = nil
     hpxml.batteries[0].nominal_capacity_ah = 280.0
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 280.0, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, nil, 280.0, nil, 252.0, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+
+    # Test defaults w/ usable Ah
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = 240.0
+    hpxml.batteries[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_battery_values(hpxml_default, nil, 266.67, nil, 240.0, 6667.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+
+    # Test defaults w/ rated power output
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = 10000.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_battery_values(hpxml_default, 20.0, nil, 18.0, nil, 10000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
   end
 
   def test_generators
@@ -2470,7 +2842,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.lighting.garage_monthly_multipliers = ConstantMonthSchedule
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 0.7
-    hpxml.lighting.holiday_period_begin_month = 11
+    hpxml.lighting.holiday_period_begin_month = 10
     hpxml.lighting.holiday_period_begin_day = 19
     hpxml.lighting.holiday_period_end_month = 12
     hpxml.lighting.holiday_period_end_day = 31
@@ -2489,7 +2861,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     grg_wknd_sch: ConstantDaySchedule,
                                     grg_month_mult: ConstantMonthSchedule,
                                     hol_kwh_per_day: 0.7,
-                                    hol_begin_month: 11,
+                                    hol_begin_month: 10,
                                     hol_begin_day: 19,
                                     hol_end_month: 12,
                                     hol_end_day: 31,
@@ -2517,6 +2889,28 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
                                     ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
 
+    # Test defaults w/ holiday lighting
+    hpxml.lighting.holiday_exists = true
+    hpxml.lighting.holiday_kwh_per_day = nil
+    hpxml.lighting.holiday_period_begin_month = nil
+    hpxml.lighting.holiday_period_begin_day = nil
+    hpxml.lighting.holiday_period_end_month = nil
+    hpxml.lighting.holiday_period_end_day = nil
+    hpxml.lighting.holiday_weekday_fractions = nil
+    hpxml.lighting.holiday_weekend_fractions = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
+                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                    ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
+                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers,
+                                    hol_kwh_per_day: 1.1,
+                                    hol_begin_month: 11,
+                                    hol_begin_day: 24,
+                                    hol_end_month: 1,
+                                    hol_end_day: 6,
+                                    hol_wk_sch: Schedule.LightingExteriorHolidayWeekdayFractions,
+                                    hol_wknd_sch: Schedule.LightingExteriorHolidayWeekendFractions })
     # Test defaults w/ garage
     hpxml = _create_hpxml('base-enclosure-garage.xml')
     hpxml.lighting.interior_usage_multiplier = nil
@@ -2908,8 +3302,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
-                                  dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day,
-                                  use_max_load_for_heat_pumps, allow_increased_fixed_capacities, state_code, time_zone_utc_offset)
+                                  dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, heat_pump_sizing_methodology,
+                                  allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
+                                  temperature_capacitance_multiplier, natvent_days_per_week)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -2921,7 +3316,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(dst_begin_day, hpxml.header.dst_begin_day)
     assert_equal(dst_end_month, hpxml.header.dst_end_month)
     assert_equal(dst_end_day, hpxml.header.dst_end_day)
-    assert_equal(use_max_load_for_heat_pumps, hpxml.header.use_max_load_for_heat_pumps)
+    if heat_pump_sizing_methodology.nil?
+      assert_nil(hpxml.header.heat_pump_sizing_methodology)
+    else
+      assert_equal(heat_pump_sizing_methodology, hpxml.header.heat_pump_sizing_methodology)
+    end
     assert_equal(allow_increased_fixed_capacities, hpxml.header.allow_increased_fixed_capacities)
     if state_code.nil?
       assert_nil(hpxml.header.state_code)
@@ -2929,6 +3328,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_equal(state_code, hpxml.header.state_code)
     end
     assert_equal(time_zone_utc_offset, hpxml.header.time_zone_utc_offset)
+    assert_equal(occupancy_calculation_type, hpxml.header.occupancy_calculation_type)
+    assert_equal(temperature_capacitance_multiplier, hpxml.header.temperature_capacitance_multiplier)
+    assert_equal(natvent_days_per_week, hpxml.header.natvent_days_per_week)
   end
 
   def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,
@@ -2981,9 +3383,117 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_site_values(hpxml, site_type, shielding_of_home)
+  def _test_default_bills_values(scenario,
+                                 elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge,
+                                 elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate,
+                                 pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate,
+                                 pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_dollars_per_kw, pv_monthly_grid_connection_fee_dollars)
+    if elec_fixed_charge.nil?
+      assert_nil(scenario.elec_fixed_charge)
+    else
+      assert_equal(elec_fixed_charge, scenario.elec_fixed_charge)
+    end
+    if natural_gas_fixed_charge.nil?
+      assert_nil(scenario.natural_gas_fixed_charge)
+    else
+      assert_equal(natural_gas_fixed_charge, scenario.natural_gas_fixed_charge)
+    end
+    if propane_fixed_charge.nil?
+      assert_nil(scenario.propane_fixed_charge)
+    else
+      assert_equal(propane_fixed_charge, scenario.propane_fixed_charge)
+    end
+    if fuel_oil_fixed_charge.nil?
+      assert_nil(scenario.fuel_oil_fixed_charge)
+    else
+      assert_equal(fuel_oil_fixed_charge, scenario.fuel_oil_fixed_charge)
+    end
+    if coal_fixed_charge.nil?
+      assert_nil(scenario.coal_fixed_charge)
+    else
+      assert_equal(coal_fixed_charge, scenario.coal_fixed_charge)
+    end
+    if wood_fixed_charge.nil?
+      assert_nil(scenario.wood_fixed_charge)
+    else
+      assert_equal(wood_fixed_charge, scenario.wood_fixed_charge)
+    end
+    if wood_pellets_fixed_charge.nil?
+      assert_nil(scenario.wood_pellets_fixed_charge)
+    else
+      assert_equal(wood_pellets_fixed_charge, scenario.wood_pellets_fixed_charge)
+    end
+    if elec_marginal_rate.nil?
+      assert_nil(scenario.elec_marginal_rate)
+    else
+      assert_equal(elec_marginal_rate, scenario.elec_marginal_rate)
+    end
+    if natural_gas_marginal_rate.nil?
+      assert_nil(scenario.natural_gas_marginal_rate)
+    else
+      assert_equal(natural_gas_marginal_rate, scenario.natural_gas_marginal_rate)
+    end
+    if propane_marginal_rate.nil?
+      assert_nil(scenario.propane_marginal_rate)
+    else
+      assert_equal(propane_marginal_rate, scenario.propane_marginal_rate)
+    end
+    if fuel_oil_marginal_rate.nil?
+      assert_nil(scenario.fuel_oil_marginal_rate)
+    else
+      assert_equal(fuel_oil_marginal_rate, scenario.fuel_oil_marginal_rate)
+    end
+    if coal_marginal_rate.nil?
+      assert_nil(scenario.coal_marginal_rate)
+    else
+      assert_equal(coal_marginal_rate, scenario.coal_marginal_rate)
+    end
+    if wood_marginal_rate.nil?
+      assert_nil(scenario.wood_marginal_rate)
+    else
+      assert_equal(wood_marginal_rate, scenario.wood_marginal_rate)
+    end
+    if wood_pellets_marginal_rate.nil?
+      assert_nil(scenario.wood_pellets_marginal_rate)
+    else
+      assert_equal(wood_pellets_marginal_rate, scenario.wood_pellets_marginal_rate)
+    end
+    if pv_compensation_type.nil?
+      assert_nil(scenario.pv_compensation_type)
+    else
+      assert_equal(pv_compensation_type, scenario.pv_compensation_type)
+    end
+    if pv_net_metering_annual_excess_sellback_rate_type.nil?
+      assert_nil(scenario.pv_net_metering_annual_excess_sellback_rate_type)
+    else
+      assert_equal(pv_net_metering_annual_excess_sellback_rate_type, scenario.pv_net_metering_annual_excess_sellback_rate_type)
+    end
+    if pv_net_metering_annual_excess_sellback_rate.nil?
+      assert_nil(scenario.pv_net_metering_annual_excess_sellback_rate)
+    else
+      assert_equal(pv_net_metering_annual_excess_sellback_rate, scenario.pv_net_metering_annual_excess_sellback_rate)
+    end
+    if pv_feed_in_tariff_rate.nil?
+      assert_nil(scenario.pv_feed_in_tariff_rate)
+    else
+      assert_equal(pv_feed_in_tariff_rate, scenario.pv_feed_in_tariff_rate)
+    end
+    if pv_monthly_grid_connection_fee_dollars_per_kw.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
+    else
+      assert_equal(pv_monthly_grid_connection_fee_dollars_per_kw, scenario.pv_monthly_grid_connection_fee_dollars_per_kw)
+    end
+    if pv_monthly_grid_connection_fee_dollars.nil?
+      assert_nil(scenario.pv_monthly_grid_connection_fee_dollars)
+    else
+      assert_equal(pv_monthly_grid_connection_fee_dollars, scenario.pv_monthly_grid_connection_fee_dollars)
+    end
+  end
+
+  def _test_default_site_values(hpxml, site_type, shielding_of_home, ground_conductivity)
     assert_equal(site_type, hpxml.site.site_type)
     assert_equal(shielding_of_home, hpxml.site.shielding_of_home)
+    assert_equal(ground_conductivity, hpxml.site.ground_conductivity)
   end
 
   def _test_default_neighbor_building_values(hpxml, azimuths)
@@ -3014,14 +3524,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_climate_and_risk_zones_values(hpxml, iecc_year, iecc_zone)
     if iecc_year.nil?
-      assert_nil(hpxml.climate_and_risk_zones.iecc_year)
+      assert_equal(0, hpxml.climate_and_risk_zones.climate_zone_ieccs.size)
     else
-      assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
+      assert_equal(iecc_year, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].year)
     end
     if iecc_zone.nil?
-      assert_nil(hpxml.climate_and_risk_zones.iecc_zone)
+      assert_equal(0, hpxml.climate_and_risk_zones.climate_zone_ieccs.size)
     else
-      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
+      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone)
     end
   end
 
@@ -3084,6 +3594,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_nil(wall.interior_finish_thickness)
     end
+    if not azimuth.nil?
+      assert_equal(azimuth, wall.azimuth)
+    else
+      assert_nil(wall.azimuth)
+    end
   end
 
   def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness, azimuth, area,
@@ -3104,12 +3619,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(type, foundation_wall.type)
   end
 
-  def _test_default_frame_floor_values(frame_floor, int_finish_type, int_finish_thickness)
-    assert_equal(int_finish_type, frame_floor.interior_finish_type)
+  def _test_default_floor_values(floor, int_finish_type, int_finish_thickness)
+    assert_equal(int_finish_type, floor.interior_finish_type)
     if not int_finish_thickness.nil?
-      assert_equal(int_finish_thickness, frame_floor.interior_finish_thickness)
+      assert_equal(int_finish_thickness, floor.interior_finish_thickness)
     else
-      assert_nil(frame_floor.interior_finish_thickness)
+      assert_nil(floor.interior_finish_thickness)
     end
   end
 
@@ -3338,7 +3853,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_air_to_air_heat_pump_values(heat_pump, shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio,
                                                 airflow_defect_ratio, cooling_capacity, heating_capacity,
                                                 heating_capacity_17F, backup_heating_capacity,
-                                                cooling_efficiency_seer, heating_efficiency_hspf)
+                                                cooling_efficiency_seer, heating_efficiency_hspf,
+                                                backup_heating_lockout_temp)
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(compressor_type, heat_pump.compressor_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
@@ -3374,9 +3890,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heat_pump.heating_efficiency_hspf, heating_efficiency_hspf)
     end
+    assert_equal(heat_pump.backup_heating_lockout_temp, backup_heating_lockout_temp)
   end
 
-  def _test_default_pthp_values(heat_pump, shr, cooling_capacity, heating_capacity)
+  def _test_default_pthp_values(heat_pump, shr, cooling_capacity, heating_capacity,
+                                backup_heating_lockout_temp)
     assert_equal(shr, heat_pump.cooling_shr)
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
@@ -3388,11 +3906,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heat_pump.heating_capacity, heating_capacity)
     end
+    assert_equal(heat_pump.backup_heating_lockout_temp, backup_heating_lockout_temp)
   end
 
   def _test_default_mini_split_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, charge_defect_ratio,
                                                 airflow_defect_ratio, cooling_capacity, heating_capacity,
-                                                heating_capacity_17F, backup_heating_capacity)
+                                                heating_capacity_17F, backup_heating_capacity,
+                                                backup_heating_lockout_temp)
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
@@ -3417,6 +3937,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heat_pump.backup_heating_capacity, backup_heating_capacity)
     end
+    assert_equal(heat_pump.backup_heating_lockout_temp, backup_heating_lockout_temp)
   end
 
   def _test_default_ground_to_air_heat_pump_values(heat_pump, pump_watts_per_ton, fan_watts_per_cfm,
@@ -3442,9 +3963,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_hvac_control_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr, htg_season_begin_month, htg_season_begin_day, htg_season_end_month, htg_season_end_day, clg_season_begin_month, clg_season_begin_day, clg_season_end_month, clg_season_end_day)
+  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp, onoff_thermostat_deadband)
+    assert_equal(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
+    assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
+    assert_equal(onoff_thermostat_deadband, hvac_control.onoff_thermostat_deadband)
+  end
+
+  def _test_default_hvac_control_setback_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr, onoff_thermostat_deadband)
     assert_equal(htg_setback_start_hr, hvac_control.heating_setback_start_hour)
     assert_equal(clg_setup_start_hr, hvac_control.cooling_setup_start_hour)
+    assert_equal(onoff_thermostat_deadband, hvac_control.onoff_thermostat_deadband)
+  end
+
+  def _test_default_hvac_control_season_values(hvac_control, htg_season_begin_month, htg_season_begin_day, htg_season_end_month, htg_season_end_day, clg_season_begin_month, clg_season_begin_day, clg_season_end_month, clg_season_end_day)
     assert_equal(htg_season_begin_month, hvac_control.seasons_heating_begin_month)
     assert_equal(htg_season_begin_day, hvac_control.seasons_heating_begin_day)
     assert_equal(htg_season_end_month, hvac_control.seasons_heating_end_month)
@@ -3456,7 +3987,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas,
-                                supply_fracs, return_fracs, n_return_registers)
+                                supply_fracs, return_fracs, n_return_registers, supply_area_mults, return_area_mults)
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
@@ -3468,22 +3999,48 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
           assert_equal(supply_locations[supply_duct_idx], duct.duct_location)
           assert_in_epsilon(supply_areas[supply_duct_idx], duct.duct_surface_area, 0.01)
           assert_in_epsilon(supply_fracs[supply_duct_idx], duct.duct_fraction_area, 0.01)
+          assert_in_epsilon(supply_area_mults[supply_duct_idx], duct.duct_surface_area_multiplier, 0.01)
           supply_duct_idx += 1
         elsif duct.duct_type == HPXML::DuctTypeReturn
           assert_equal(return_locations[return_duct_idx], duct.duct_location)
           assert_in_epsilon(return_areas[return_duct_idx], duct.duct_surface_area, 0.01)
           assert_in_epsilon(return_fracs[return_duct_idx], duct.duct_fraction_area, 0.01)
+          assert_in_epsilon(return_area_mults[return_duct_idx], duct.duct_surface_area_multiplier, 0.01)
           return_duct_idx += 1
         end
       end
     end
   end
 
-  def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate)
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+  def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate,
+                                     cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }[0]
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
+    assert_in_epsilon(fan_power, vent_fan.fan_power, 0.01)
+    assert_in_epsilon(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.01)
+    if cfis_vent_mode_airflow_fraction.nil?
+      assert_nil(vent_fan.cfis_vent_mode_airflow_fraction)
+    else
+      assert_equal(cfis_vent_mode_airflow_fraction, vent_fan.cfis_vent_mode_airflow_fraction)
+    end
+    if cfis_addtl_runtime_operating_mode.nil?
+      assert_nil(vent_fan.cfis_addtl_runtime_operating_mode)
+    else
+      assert_equal(cfis_addtl_runtime_operating_mode, vent_fan.cfis_addtl_runtime_operating_mode)
+    end
+  end
+
+  def _test_default_mech_vent_suppl_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate)
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }[0]
+
+    assert_equal(is_shared_system, vent_fan.is_shared_system)
+    if hours_in_operation.nil?
+      assert_nil(hours_in_operation, vent_fan.hours_in_operation)
+    else
+      assert_equal(hours_in_operation, vent_fan.hours_in_operation)
+    end
     assert_in_epsilon(fan_power, vent_fan.fan_power, 0.01)
     assert_in_epsilon(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.01)
   end
@@ -3519,7 +4076,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     storage_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }
     assert_equal(expected_wh_values.size, storage_water_heaters.size)
     storage_water_heaters.each_with_index do |wh_system, idx|
-      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor = expected_wh_values[idx]
+      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor, tank_model_type = expected_wh_values[idx]
 
       assert_equal(is_shared, wh_system.is_shared_system)
       assert_in_epsilon(heating_capacity, wh_system.heating_capacity, 0.01)
@@ -3532,6 +4089,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       else
         assert_equal(energy_factor, wh_system.energy_factor)
       end
+      assert_equal(tank_model_type, wh_system.tank_model_type)
     end
   end
 
@@ -3542,6 +4100,27 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       performance_adjustment, = expected_wh_values[idx]
 
       assert_equal(performance_adjustment, wh_system.performance_adjustment)
+    end
+  end
+
+  def _test_default_heat_pump_water_heater_values(hpxml, *expected_wh_values)
+    heat_pump_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeHeatPump }
+    assert_equal(expected_wh_values.size, heat_pump_water_heaters.size)
+    heat_pump_water_heaters.each_with_index do |wh_system, idx|
+      operating_mode, = expected_wh_values[idx]
+
+      assert_equal(operating_mode, wh_system.operating_mode)
+    end
+  end
+
+  def _test_default_indirect_water_heater_values(hpxml, *expected_wh_values)
+    indirect_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeCombiStorage }
+    assert_equal(expected_wh_values.size, indirect_water_heaters.size)
+    indirect_water_heaters.each_with_index do |wh_system, idx|
+      standby_loss_units, standby_loss_value, = expected_wh_values[idx]
+
+      assert_equal(standby_loss_units, wh_system.standby_loss_units)
+      assert_equal(standby_loss_value, wh_system.standby_loss_value)
     end
   end
 
@@ -3586,7 +4165,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system, location, tracking, module_type, azimuth)
-    hpxml.pv_systems.each_with_index do |pv, idx|
+    hpxml.pv_systems.each do |pv|
       assert_equal(is_shared_system, pv.is_shared_system)
       assert_equal(interver_efficiency, pv.inverter_efficiency)
       assert_in_epsilon(system_loss_frac, pv.system_losses_fraction, 0.01)
@@ -3597,7 +4176,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_battery_values(hpxml, nominal_capacity_kwh, nominal_capacity_ah, rated_power_output, location, lifetime_model)
+  def _test_default_battery_values(hpxml, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah,
+                                   rated_power_output, location, lifetime_model)
     if nominal_capacity_kwh.nil?
       assert_nil(hpxml.batteries[0].nominal_capacity_kwh)
     else
@@ -3608,13 +4188,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(nominal_capacity_ah, hpxml.batteries[0].nominal_capacity_ah)
     end
+    if usable_capacity_kwh.nil?
+      assert_nil(hpxml.batteries[0].usable_capacity_kwh)
+    else
+      assert_equal(usable_capacity_kwh, hpxml.batteries[0].usable_capacity_kwh)
+    end
+    if usable_capacity_ah.nil?
+      assert_nil(hpxml.batteries[0].usable_capacity_ah)
+    else
+      assert_equal(usable_capacity_ah, hpxml.batteries[0].usable_capacity_ah)
+    end
     assert_equal(rated_power_output, hpxml.batteries[0].rated_power_output)
     assert_equal(location, hpxml.batteries[0].location)
     assert_equal(lifetime_model, hpxml.batteries[0].lifetime_model)
   end
 
   def _test_default_generator_values(hpxml, is_shared_system)
-    hpxml.generators.each_with_index do |generator, idx|
+    hpxml.generators.each do |generator|
       assert_equal(is_shared_system, generator.is_shared_system)
     end
   end

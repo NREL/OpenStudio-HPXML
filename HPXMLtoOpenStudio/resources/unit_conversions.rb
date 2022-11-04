@@ -23,6 +23,7 @@ class UnitConversions
     ['kwh', 'mwh'] => 1.0 / 1000.0,
     ['kwh', 'wh'] => 1000.0,
     ['mbtu', 'kwh'] => 293.0710701722222,
+    ['kbtu', 'kwh'] => 293.0710701722222 / 1000.0,
     ['mbtu', 'therm'] => 10.0,
     ['mbtu', 'wh'] => 293071.0701722222,
     ['therm', 'btu'] => 100000.0,
@@ -50,6 +51,7 @@ class UnitConversions
 
     # Temperature
     ['k', 'r'] => 1.8,
+    ['deltac', 'deltaf'] => 1.8,
 
     # Specific Heat
     ['btu/(lbm*r)', 'j/(kg*k)'] => 4187.0, # by mass

@@ -4,12 +4,13 @@ class HotWaterAndAppliances
   def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map)
 
+    @runner = runner
     cfa = hpxml.building_construction.conditioned_floor_area
-    nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
+    nbeds = HPXMLDefaults.get_nbeds_adjusted_for_operational_calculation(hpxml)
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -225,7 +226,9 @@ class HotWaterAndAppliances
       t_mix = 105.0 # F, Temperature of mixed water at fixtures
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
       hpxml.water_heating_systems.each do |water_heating_system|
-        avg_setpoint_temp += water_heating_system.temperature * water_heating_system.fraction_dhw_load_served
+        wh_setpoint = water_heating_system.temperature
+        wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
+        avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
@@ -272,10 +275,12 @@ class HotWaterAndAppliances
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
 
+        fx_peak_flow = nil
         if not schedules_file.nil?
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: fx_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: w_gpd)
-        else
+        end
+        if fx_peak_flow.nil?
           fx_peak_flow = fixtures_schedule_obj.calcPeakFlowFromDailygpm(fx_gpd)
           dist_water_peak_flow = fixtures_schedule_obj.calcPeakFlowFromDailygpm(w_gpd)
         end
@@ -304,7 +309,9 @@ class HotWaterAndAppliances
       # Clothes washer
       if not clothes_washer.nil?
         gpd_frac = nil
-        if clothes_washer.is_shared_appliance && clothes_washer.water_heating_system.id == water_heating_system.id
+        if clothes_washer.is_shared_appliance && (not clothes_washer.hot_water_distribution.nil?)
+          gpd_frac = 1.0 / hpxml.water_heating_systems.size # Apportion load to each water heater on distribution system
+        elsif clothes_washer.is_shared_appliance && clothes_washer.water_heating_system.id == water_heating_system.id
           gpd_frac = 1.0 # Shared water heater sees full appliance load
         elsif not clothes_washer.is_shared_appliance
           gpd_frac = water_heating_system.fraction_dhw_load_served
@@ -328,7 +335,9 @@ class HotWaterAndAppliances
       next unless not dishwasher.nil?
 
       gpd_frac = nil
-      if dishwasher.is_shared_appliance && dishwasher.water_heating_system.id == water_heating_system.id
+      if dishwasher.is_shared_appliance && (not dishwasher.hot_water_distribution.nil?)
+        gpd_frac = 1.0 / hpxml.water_heating_systems.size # Apportion load to each water heater on distribution system
+      elsif dishwasher.is_shared_appliance && dishwasher.water_heating_system.id == water_heating_system.id
         gpd_frac = 1.0 # Shared water heater sees full appliance load
       elsif not dishwasher.is_shared_appliance
         gpd_frac = water_heating_system.fraction_dhw_load_served
@@ -351,11 +360,13 @@ class HotWaterAndAppliances
     if not hot_water_distribution.nil?
       # General water use internal gains
       # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
+      water_design_level_sens = nil
       water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds, fixtures_usage_multiplier)
       if not schedules_file.nil?
         water_design_level_sens = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
         water_design_level_lat = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
-      else
+      end
+      if water_design_level_sens.nil?
         water_design_level_sens = fixtures_schedule_obj.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
         water_design_level_lat = fixtures_schedule_obj.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       end
@@ -407,12 +418,10 @@ class HotWaterAndAppliances
     end
 
     if not @runner.nil?
-      if (annual_kwh < 0) || (annual_therm < 0)
-        @runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.')
-        annual_kwh = 0.0 if annual_kwh < 0
-        annual_therm = 0.0 if annual_therm < 0
-      end
+      @runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
     end
+    annual_kwh = 0.0 if annual_kwh < 0
+    annual_therm = 0.0 if annual_therm < 0
 
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
@@ -473,15 +482,11 @@ class HotWaterAndAppliances
     end
 
     if not @runner.nil?
-      if annual_kwh < 0
-        @runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.')
-        annual_kwh = 0.0
-      end
-      if gpd < 0
-        @runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.')
-        gpd = 0.0
-      end
+      @runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
     end
+    annual_kwh = 0.0 if annual_kwh < 0
+    gpd = 0.0 if gpd < 0
 
     return annual_kwh, frac_sens, frac_lat, gpd
   end
@@ -581,12 +586,10 @@ class HotWaterAndAppliances
     end
 
     if not @runner.nil?
-      if (annual_kwh < 0) || (annual_therm < 0)
-        @runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.')
-        annual_kwh = 0.0 if annual_kwh < 0
-        annual_therm = 0.0 if annual_therm < 0
-      end
+      @runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
     end
+    annual_kwh = 0.0 if annual_kwh < 0
+    annual_therm = 0.0 if annual_therm < 0
 
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
@@ -654,15 +657,11 @@ class HotWaterAndAppliances
     end
 
     if not @runner.nil?
-      if annual_kwh < 0
-        @runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.')
-        annual_kwh = 0.0
-      end
-      if gpd < 0
-        @runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.')
-        gpd = 0.0
-      end
+      @runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
     end
+    annual_kwh = 0.0 if annual_kwh < 0
+    gpd = 0.0 if gpd < 0
 
     return annual_kwh, frac_sens, frac_lat, gpd
   end
@@ -688,11 +687,9 @@ class HotWaterAndAppliances
     end
 
     if not @runner.nil?
-      if annual_kwh < 0
-        @runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.')
-        annual_kwh = 0.0
-      end
+      @runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
     end
+    annual_kwh = 0.0 if annual_kwh < 0
 
     return annual_kwh, frac_sens, frac_lat
   end
@@ -774,7 +771,7 @@ class HotWaterAndAppliances
   end
 
   def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
-    return if design_level_w == 0.0
+    return if design_level_w == 0.0 # Negative values intentionally allowed, e.g. for water sensible
 
     oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     oe = OpenStudio::Model::OtherEquipment.new(oe_def)
