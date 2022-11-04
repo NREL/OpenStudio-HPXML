@@ -1157,6 +1157,7 @@ class SchedulesFile
   ColumnCoolingSetpoint = 'cooling_setpoint'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
+  ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
 
@@ -1170,8 +1171,9 @@ class SchedulesFile
     @schedules_paths = schedules_paths
 
     import()
-
+    battery_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+
     set_vacancy
     convert_setpoints
 
@@ -1283,12 +1285,8 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = []
-    @schedules_paths.each do |schedules_path|
-      next if schedules_path.nil?
+    headers = @tmp_schedules.keys
 
-      headers += CSV.open(schedules_path, 'r') { |csv| csv.first }
-    end
     col_num = headers.index(col_name)
     return col_num
   end
@@ -1441,6 +1439,26 @@ class SchedulesFile
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
       end
     end
+  end
+
+  def battery_schedules
+    return if !@schedules.keys.include?(SchedulesFile::ColumnBattery)
+
+    @schedules[SchedulesFile::ColumnBatteryCharging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
+    @schedules[SchedulesFile::ColumnBatteryDischarging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
+    @schedules[SchedulesFile::ColumnBattery].each_with_index do |_ts, i|
+      if @schedules[SchedulesFile::ColumnBattery][i] > 0
+        @schedules[SchedulesFile::ColumnBatteryCharging][i] = @schedules[SchedulesFile::ColumnBattery][i]
+        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = 0
+      elsif @schedules[SchedulesFile::ColumnBattery][i] < 0
+        @schedules[SchedulesFile::ColumnBatteryCharging][i] = 0
+        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = -1 * @schedules[SchedulesFile::ColumnBattery][i]
+      else
+        @schedules[SchedulesFile::ColumnBatteryCharging][i] = 0
+        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = 0
+      end
+    end
+    @schedules.delete(SchedulesFile::ColumnBattery)
   end
 
   def self.ColumnNames

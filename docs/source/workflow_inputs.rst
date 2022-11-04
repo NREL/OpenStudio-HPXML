@@ -181,8 +181,7 @@ The column names available in the schedule CSV files are:
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                           No
   ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                 No
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No
-  ``battery_charging``             frac   Battery charging schedule.                                                      No
-  ``battery_discharging``          frac   Battery discharging schedule.                                                   No
+  ``battery``                      frac   Battery charging/discharging schedule.                                          No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A
   ===============================  =====  ==============================================================================  ===================
 
