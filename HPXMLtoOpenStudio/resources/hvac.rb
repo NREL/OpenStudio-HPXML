@@ -3232,17 +3232,19 @@ class HVAC
       supp_coil_avail_actuator.setName(htg_supp_coil.name.get.gsub('-', '_') + ' avail')
     end
 
+    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+    clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     living_temp_ss.setName('living temp')
     living_temp_ss.setKeyName(HPXML::LocationLivingSpace)
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     htg_sp_ss.setName('htg_setpoint')
-    htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
+    htg_sp_ss.setKeyName(htg_sch.name.to_s)
 
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     clg_sp_ss.setName('clg_setpoint')
-    clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
+    clg_sp_ss.setKeyName(clg_sch.name.to_s)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
 
