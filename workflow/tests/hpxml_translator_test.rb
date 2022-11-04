@@ -502,6 +502,17 @@ class HPXMLTest < MiniTest::Test
       end
       return skip_warning
     end
+
+    def skip_electricity_production_warning(err_line)
+      elec_prod_warnings = ['Photovoltaic:ElectricityProduced'.upcase,
+                            'Photovoltaic:Inverter'.upcase,
+                            'Cogeneration:ElectricityProduced'.upcase]
+      skip_warning = false
+      elec_prod_warnings.each do |elec_prod_warning|
+        skip_warning = true if err_line.include? elec_prod_warning
+      end
+      return skip_warning
+    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
@@ -547,6 +558,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
+      end
+      if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
+        next if log_line.include? 'Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
@@ -603,12 +617,8 @@ class HPXMLTest < MiniTest::Test
 
       if err_line.include? 'Output:Meter: invalid Key Name'
         next if skip_utility_bill_warning(err_line)
+        next if skip_electricity_production_warning(err_line)
       end
-
-      next if err_line.include? 'PHOTOVOLTAIC:INVERTER' # FIXME: don't need for base-misc-generators.xml
-      next if err_line.include? 'PHOTOVOLTAIC:ELECTRICITYPRODUCED' # FIXME: don't need for base-misc-generators.xml
-      next if err_line.include? 'COGENERATION:ELECTRICITYPRODUCED' # FIXME: don't need for base-pv.xml
-      next if err_line.include? 'ELECTRICSTORAGE:CONVERTER' # FIXME: don't need for base-battery.xml
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -677,10 +687,7 @@ class HPXMLTest < MiniTest::Test
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
         next if skip_utility_bill_warning(err_line)
-        next if err_line.include? 'PHOTOVOLTAIC:INVERTER' # FIXME
-        next if err_line.include? 'PHOTOVOLTAIC:ELECTRICITYPRODUCED' # FIXME
-        next if err_line.include? 'COGENERATION:ELECTRICITYPRODUCED' # FIXME
-        next if err_line.include? 'ELECTRICSTORAGE:CONVERTER' # FIXME
+        next if skip_electricity_production_warning(err_line)
 
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')

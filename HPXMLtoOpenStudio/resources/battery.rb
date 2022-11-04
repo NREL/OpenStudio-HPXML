@@ -1,7 +1,23 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(model, battery, schedules_file)
+  def self.apply(runner, model, pv_systems, battery, schedules_file)
+    charging_schedule = nil
+    discharging_schedule = nil
+    if not schedules_file.nil?
+      charging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryCharging)
+      discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
+    end
+
+    if (charging_schedule.nil? && (not discharging_schedule.nil?)) || ((not charging_schedule.nil?) && discharging_schedule.nil?)
+      fail 'Must specify both a charging and discharging battery schedule.'
+    end
+
+    if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
+      runner.registerWarning('Battery without PV specified; battery is assumed to operate as backup and will not be modeled.')
+      return
+    end
+
     obj_name = battery.id
 
     rated_power_output = battery.rated_power_output # W
@@ -90,28 +106,23 @@ class Battery
     elcd.setDesignStorageControlDischargePower(rated_power_output)
     elcd.setDesignStorageControlChargePower(rated_power_output)
 
-    if not schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryCharging)
-      discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
-
-      if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
-        charging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryCharging]
-        discharging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryDischarging]
-        values = charging_schedule_values.zip(discharging_schedule_values)
-        if values.any? { |v| v[0] > 0 && v[1] > 0 }
-          fail 'Cannot simultaneously charge and discharge the battery.'
-        end
-
-        elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
-        elcd.setStorageChargePowerFractionSchedule(charging_schedule)
-        elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
-
-        elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
-        elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
-        elcd.setStorageConverter(elcsc)
-      elsif (not charging_schedule.nil?) || (not discharging_schedule.nil?)
-        fail 'Must specify both a charging and discharging battery schedule.'
+    if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
+      charging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryCharging]
+      discharging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryDischarging]
+      values = charging_schedule_values.zip(discharging_schedule_values)
+      if values.any? { |v| v[0] > 0 && v[1] > 0 }
+        fail 'Cannot simultaneously charge and discharge the battery.'
       end
+
+      elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
+      elcd.setStorageChargePowerFractionSchedule(charging_schedule)
+      elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
+
+      elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+      elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
+      elcd.setStorageConverter(elcsc)
+    elsif (not charging_schedule.nil?) || (not discharging_schedule.nil?)
+      fail 'Must specify both a charging and discharging battery schedule.'
     end
   end
 

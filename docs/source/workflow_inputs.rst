@@ -2556,6 +2556,8 @@ If not entered, the simulation will not include batteries.
 
   A battery can alternatively be controlled using :ref:`detailedschedules`, where charging and discharging schedules are defined.
 
+  A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
+
 HPXML Generators
 ****************
 
