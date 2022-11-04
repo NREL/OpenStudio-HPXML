@@ -1271,7 +1271,7 @@
   <sch:pattern>
     <sch:title>[TwospeedRealisticStaging=true]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:extension[h:TwospeedRealisticStaging="true"]'>
-      <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadband) = 1'>Expected 1 element(s) for xpath: OnOffThermostatDeadband</sch:assert>
+      <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadbandTemperature) = 1'>Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature</sch:assert>
     </sch:rule>
   </sch:pattern>
 
