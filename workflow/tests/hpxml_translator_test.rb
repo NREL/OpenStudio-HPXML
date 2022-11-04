@@ -1183,6 +1183,11 @@ class HPXMLTest < MiniTest::Test
         htg_fuels << heating_system.heating_system_fuel
       end
     end
+    hpxml.cooling_systems.each do |cooling_system|
+      if cooling_system.has_integrated_heating
+        htg_fuels << cooling_system.integrated_heating_system_fuel
+      end
+    end
     hpxml.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
         htg_backup_fuels << heat_pump.backup_heating_fuel
