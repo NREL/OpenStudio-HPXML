@@ -2000,13 +2000,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-room-ac-with-heating.xml',
          'base-hvac-ptac-with-heating-electricity.xml',
          'base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
-    args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
     args['cooling_system_integrated_heating_system_capacity'] = 36000.0
     args['cooling_system_integrated_heating_system_fraction_heat_load_served'] = 1.0
     if ['base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
       args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 0.8
     else
       args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
     end
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60

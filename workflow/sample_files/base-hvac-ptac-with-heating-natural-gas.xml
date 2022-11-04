@@ -338,7 +338,7 @@
               <IntegratedHeatingSystemCapacity>36000.0</IntegratedHeatingSystemCapacity>
               <IntegratedHeatingSystemAnnualEfficiency>
                 <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Value>0.8</Value>
               </IntegratedHeatingSystemAnnualEfficiency>
               <IntegratedHeatingSystemFractionHeatLoadServed>1.0</IntegratedHeatingSystemFractionHeatLoadServed>
             </CoolingSystem>
