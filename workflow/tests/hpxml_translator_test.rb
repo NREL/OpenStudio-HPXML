@@ -615,7 +615,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
-      if err_line.include? 'Output:Meter: invalid Key Name'
+      if err_line.include?('Output:Meter: invalid Key Name') || err_line.include?('Meter:Custom')
         next if skip_utility_bill_warning(err_line)
         next if skip_electricity_production_warning(err_line)
       end
