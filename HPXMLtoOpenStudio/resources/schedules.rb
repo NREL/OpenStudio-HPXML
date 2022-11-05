@@ -1243,6 +1243,12 @@ class SchedulesFile
           end
         end
 
+        if min_value_neg_one[col_name]
+          if values.min < -1
+            fail "Schedule min value for column '#{col_name}' must be -1. [context: #{schedules_path}]"
+          end
+        end
+
         if only_zeros_and_ones[col_name]
           if values.any? { |v| v != 0 && v != 1 }
             fail "Schedule value for column '#{col_name}' must be either 0 or 1. [context: #{schedules_path}]"
@@ -1527,6 +1533,7 @@ class SchedulesFile
 
   def self.BatteryColumnNames
     return [
+      ColumnBattery,
       ColumnBatteryCharging,
       ColumnBatteryDischarging
     ]
@@ -1568,11 +1575,23 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name)
         min_value_zero[column_name] = false
       end
     end
     return min_value_zero
+  end
+
+  def min_value_neg_one
+    min_value_neg_one = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      min_value_neg_one[column_name] = false
+      if column_name == SchedulesFile::ColumnBattery
+        min_value_neg_one[column_name] = true
+      end
+    end
+    return min_value_neg_one
   end
 
   def only_zeros_and_ones

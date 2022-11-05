@@ -107,13 +107,6 @@ class Battery
     elcd.setDesignStorageControlChargePower(rated_power_output)
 
     if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
-      charging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryCharging]
-      discharging_schedule_values = schedules_file.schedules[SchedulesFile::ColumnBatteryDischarging]
-      values = charging_schedule_values.zip(discharging_schedule_values)
-      if values.any? { |v| v[0] > 0 && v[1] > 0 }
-        fail 'Cannot simultaneously charge and discharge the battery.'
-      end
-
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
       elcd.setStorageChargePowerFractionSchedule(charging_schedule)
       elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
@@ -121,8 +114,6 @@ class Battery
       elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
       elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
       elcd.setStorageConverter(elcsc)
-    elsif (not charging_schedule.nil?) || (not discharging_schedule.nil?)
-      fail 'Must specify both a charging and discharging battery schedule.'
     end
   end
 

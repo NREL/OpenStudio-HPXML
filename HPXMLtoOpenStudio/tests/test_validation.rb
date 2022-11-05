@@ -695,10 +695,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def test_ruby_error_messages
     # Test case => Error message
-    all_expected_errors = { 'battery-missing-schedule' => ['Must specify both a charging and discharging battery schedule.'],
-                            'battery-coincident-charging-discharging' => ['Cannot simultaneously charge and discharge the battery.'],
-                            'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery_discharging' must be 1."],
-                            'battery-bad-values-negative' => ["Schedule min value for column 'battery_discharging' must be non-negative."],
+    all_expected_errors = { 'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery' must be 1."],
+                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be -1."],
                             'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
                             'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],
@@ -772,29 +770,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
-      if ['battery-missing-schedule'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
-        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0])).transpose
-        csv_data.delete_at(1) # delete the second column
-        File.write(@tmp_csv_path, csv_data.transpose.map(&:to_csv).join)
-        hpxml.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-coincident-charging-discharging'].include? error_case
+      if ['battery-bad-values-max-not-one'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
-        csv_data[1][0] = 0.1
-        csv_data[1][1] = 0.2
+        csv_data[1][0] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-bad-values-max-not-one'].include? error_case
+      elsif ['battery-bad-values-min-not-neg-one'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
-        csv_data[1][1] = 1.1
-        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxml.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-bad-values-negative'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
-        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
-        csv_data[1][1] = -0.5
+        csv_data[1][0] = -1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['cfis-with-hydronic-distribution'].include? error_case
