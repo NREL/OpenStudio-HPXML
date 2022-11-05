@@ -181,11 +181,12 @@ The column names available in the schedule CSV files are:
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                           No
   ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                 No
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No
-  ``battery``                      frac   Battery charging/discharging schedule.                                          No
+  ``battery``                      -1:1   Battery charging/discharging schedule.                                          No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A
   ===============================  =====  ==============================================================================  ===================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
+The ``battery`` column units of `-1:1` means fractional schedule values can range from -1 to 1. Battery is charging power when values are positive and discharging power when values are negative.
 Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 The schedule file must have a full year of data even if the simulation is not an entire year.
@@ -2551,9 +2552,9 @@ If not entered, the simulation will not include batteries.
 
  .. note::
 
-  A battery in a home with photovoltaics (PV) will be controlled using a simple control strategy. The battery will charge if PV production is greater than the building load and the battery is below its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is above its minimum capacity.
+  An unscheduled battery in a home with photovoltaics (PV) will be controlled using a simple control strategy. The battery will charge if PV production is greater than the building load and the battery is below its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is above its minimum capacity.
 
-  A battery can alternatively be controlled using :ref:`detailedschedules`, where charging and discharging schedules are defined.
+  A battery can alternatively be controlled using :ref:`detailedschedules`, where charging and discharging schedules are defined. Positive schedule values control timing and magnitude of charging storage. Negative schedule values control timing and magnitude of discharging storage.
 
   A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
 

@@ -1877,7 +1877,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return 0.0 if variables.empty?
 
     neg = is_negative ? -1.0 : 1.0
-    # sto = is_storage ? -1.0 : 1.0
     keys_vars = key_values.zip(variables).map { |k, v| "#{k}:#{v}" }
     cols = @msgpackDataRunPeriod['Cols']
     timestamp = @msgpackDataRunPeriod['Rows'][0].keys[0]

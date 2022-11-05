@@ -9,10 +9,6 @@ class Battery
       discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
     end
 
-    if (charging_schedule.nil? && (not discharging_schedule.nil?)) || ((not charging_schedule.nil?) && discharging_schedule.nil?)
-      fail 'Must specify both a charging and discharging battery schedule.'
-    end
-
     if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Battery without PV specified; battery is assumed to operate as backup and will not be modeled.')
       return
