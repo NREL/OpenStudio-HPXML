@@ -1899,7 +1899,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_resilience_hours(batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load)
     resilience_hours = Array.new(crit_load.size, 0)
     n_timesteps = crit_load.size
-    (0...1).each do |init_time_step|
+    (0...n_timesteps).each do |init_time_step|
       (0...n_timesteps).each do |i|
         t = (init_time_step + i) % n_timesteps # for wrapping around end of year
         load_kw = crit_load[t]
