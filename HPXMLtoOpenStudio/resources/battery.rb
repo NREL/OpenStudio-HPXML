@@ -10,7 +10,7 @@ class Battery
     end
 
     if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
-      runner.registerWarning('Battery without PV specified; battery is assumed to operate as backup and will not be modeled.')
+      runner.registerWarning('Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
       return
     end
 

@@ -317,11 +317,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load('Output:Meter,Cogeneration:ElectricityProduced,runperiod;').get # Used for error checking
       result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:Inverter,runperiod;').get # Used for error checking
       result << OpenStudio::IdfObject.load('Meter:Custom,Photovoltaic:Inverter,electricity,*,Inverter Conversion Loss Decrement Energy;').get
-      if include_timeseries_fuel_consumptions
-        result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:ElectricityProduced,#{timeseries_frequency};").get
-        result << OpenStudio::IdfObject.load("Output:Meter,Cogeneration:ElectricityProduced,#{timeseries_frequency};").get
-        result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:Inverter,#{timeseries_frequency};").get
-      end
     end
     if has_electricity_storage
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get

@@ -1455,13 +1455,8 @@ class SchedulesFile
     @schedules[SchedulesFile::ColumnBattery].each_with_index do |_ts, i|
       if @schedules[SchedulesFile::ColumnBattery][i] > 0
         @schedules[SchedulesFile::ColumnBatteryCharging][i] = @schedules[SchedulesFile::ColumnBattery][i]
-        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = 0
       elsif @schedules[SchedulesFile::ColumnBattery][i] < 0
-        @schedules[SchedulesFile::ColumnBatteryCharging][i] = 0
         @schedules[SchedulesFile::ColumnBatteryDischarging][i] = -1 * @schedules[SchedulesFile::ColumnBattery][i]
-      else
-        @schedules[SchedulesFile::ColumnBatteryCharging][i] = 0
-        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = 0
       end
     end
     @schedules.delete(SchedulesFile::ColumnBattery)

@@ -181,12 +181,11 @@ The column names available in the schedule CSV files are:
   ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                           No
   ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                 No
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No
-  ``battery``                      -1:1   Battery charging/discharging schedule.                                          No
+  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.              No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A
   ===============================  =====  ==============================================================================  ===================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
-The ``battery`` column units of `-1:1` means fractional schedule values can range from -1 to 1. Battery is charging power when values are positive and discharging power when values are negative.
 Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 The schedule file must have a full year of data even if the simulation is not an entire year.
