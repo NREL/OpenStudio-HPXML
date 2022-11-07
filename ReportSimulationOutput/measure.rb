@@ -193,6 +193,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     all_outputs << @peak_loads
     all_outputs << @component_loads
     all_outputs << @hot_water_uses
+    all_outputs << @average_resilience
 
     output_names = []
     all_outputs.each do |outputs|
@@ -2149,6 +2150,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:ems_variable)
   end
 
+  class AverageResilience < BaseOutput
+    def initialize
+      super()
+    end
+    attr_accessor()
+  end
+
   class IdealLoad < BaseOutput
     def initialize(variables: [])
       super()
@@ -2456,6 +2464,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       comp_load.name = "Component Load: #{load_type.gsub(': Delivered', '')}: #{comp_load_type}"
       comp_load.annual_units = 'MBtu'
       comp_load.timeseries_units = 'kBtu'
+    end
+
+    # Average Resilience
+    @average_resilience = {}
+    [AR::Battery].each do |type|
+      @average_resilience[type] = AverageResilience.new
+      @average_resilience[type].name = "Average Resilience: #{type}"
+      @average_resilience[type].annual_units = 'hr'
     end
 
     # Unmet Hours

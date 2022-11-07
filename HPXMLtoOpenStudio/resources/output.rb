@@ -139,6 +139,11 @@ class WT
   DirectSolar = 'Direct Solar Radiation'
 end
 
+class AR
+  # Average Resilience
+  Battery = 'Battery'
+end
+
 class OutputMethods
   def self.get_timestamps(msgpackData, hpxml, use_timestamp_start_convention, add_dst_column = false, add_utc_column = false,
                           use_dview_format = false, timeseries_frequency = nil)
