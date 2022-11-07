@@ -1160,7 +1160,8 @@ class SchedulesFile
 
   def initialize(runner: nil,
                  model: nil,
-                 schedules_paths:)
+                 schedules_paths:,
+                 offset_db: nil)
     return if schedules_paths.empty?
 
     @runner = runner
@@ -1171,16 +1172,16 @@ class SchedulesFile
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
-    convert_setpoints
+    convert_setpoints(offset_db)
 
     tmpdir = Dir.tmpdir
     tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
     tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
-    @tmp_schedules_path = tmpfile.path.to_s
+    tmp_schedules_path = tmpfile.path.to_s
 
-    export
+    export(tmp_schedules_path)
 
-    get_external_file
+    get_external_file(tmp_schedules_path)
   end
 
   def nil?
@@ -1254,10 +1255,10 @@ class SchedulesFile
     end
   end
 
-  def export
-    return false if @tmp_schedules_path.nil?
+  def export(tmp_schedules_path)
+    return false if tmp_schedules_path.nil?
 
-    CSV.open(@tmp_schedules_path, 'wb') do |csv|
+    CSV.open(tmp_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
       rows.each do |row|
@@ -1397,24 +1398,18 @@ class SchedulesFile
     return peak_flow
   end
 
-  def get_external_file
-    if File.exist? @tmp_schedules_path
-      if @external_file.nil?
-        @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @tmp_schedules_path)
-      else
-        # Re-read file contents
-        @external_file.remove
-        @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @tmp_schedules_path)
-      end
+  def get_external_file(tmp_schedules_path)
+    if File.exist? tmp_schedules_path
+      @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
       if @external_file.is_initialized
         @external_file = @external_file.get
         # ExternalFile creates a new file, so delete our temporary one immediately if we can
         begin
-          File.delete(@tmp_schedules_path)
+          File.delete(tmp_schedules_path)
         rescue
         end
       else
-        fail "Could not get external file for path '#{@tmp_schedules_path}'."
+        fail "Could not get external file for path '#{tmp_schedules_path}'."
       end
     end
   end
@@ -1434,7 +1429,7 @@ class SchedulesFile
     end
   end
 
-  def convert_setpoints
+  def convert_setpoints(offset_db)
     return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
 
     col_names = @tmp_schedules.keys
@@ -1445,28 +1440,15 @@ class SchedulesFile
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
       end
-    end
-  end
-  
-  def convert_setpoints_onoffthermostat_offset(offset_db)
-    return if @tmp_schedules.keys.none? { |k| SchedulesFile.HVACSetpointColumnNames.include?(k) }
-
-    col_names = @tmp_schedules.keys
-
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
-      SchedulesFile.HVACSetpointColumnNames.each do |setpoint_col_name|
-        next unless col_names.include?(setpoint_col_name)
-        if setpoint_col_name == ColumnHeatingSetpoint
-          @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] - UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
-        elsif setpoint_col_name == ColumnCoolingSetpoint
-          @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] + UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
+      SchedulesFile.HVACSetpointColumnNames.each do |hvac_setpoint_col_name|
+        next unless col_names.include?(hvac_setpoint_col_name)
+        if hvac_setpoint_col_name == ColumnHeatingSetpoint
+          @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] - UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
+        elsif hvac_setpoint_col_name == ColumnCoolingSetpoint
+          @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] + UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
         end
       end
     end
-    
-    export
-
-    get_external_file
   end
 
   def self.ColumnNames

@@ -790,9 +790,6 @@ class HVAC
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
-      if hvac_control.onoff_thermostat_deadband > 0.0
-        schedules_file.convert_setpoints_onoffthermostat_offset(hvac_control.onoff_thermostat_deadband)
-      end
       heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
       cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
