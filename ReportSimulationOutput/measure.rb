@@ -309,20 +309,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
-    if has_electricity_production
-      # We don't use ElectricityProduced:Facility because it includes Electric Storage, and we're metering Battery separately
-      # So instead we grab everything BUT Electric Storage
-      # Photovoltaic:ElectricityProduced and Cogeneration:ElectricityProduced already metered, so no problem there
-      # Photovoltaic:Inverter, however, not yet metered
-      result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:ElectricityProduced,runperiod;').get # Used for error checking
-      result << OpenStudio::IdfObject.load('Output:Meter,Cogeneration:ElectricityProduced,runperiod;').get # Used for error checking
-      result << OpenStudio::IdfObject.load('Output:Meter,Photovoltaic:Inverter,runperiod;').get # Used for error checking
-      result << OpenStudio::IdfObject.load('Meter:Custom,Photovoltaic:Inverter,electricity,*,Inverter Conversion Loss Decrement Energy;').get
-      if include_timeseries_fuel_consumptions
-        result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:ElectricityProduced,#{timeseries_frequency};").get
-        result << OpenStudio::IdfObject.load("Output:Meter,Cogeneration:ElectricityProduced,#{timeseries_frequency};").get
-        result << OpenStudio::IdfObject.load("Output:Meter,Photovoltaic:Inverter,#{timeseries_frequency};").get
-      end
+    if has_electricity_production || has_electricity_storage
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
     end
     if has_electricity_storage
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
@@ -1131,10 +1119,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    meter_elec_produced = 0.0
-    meter_elec_produced -= get_report_meter_data_annual(['Photovoltaic:ElectricityProduced'])
-    meter_elec_produced -= get_report_meter_data_annual(['Cogeneration:ElectricityProduced'])
-    meter_elec_produced -= get_report_meter_data_annual(['PHOTOVOLTAIC:INVERTER'])
+    meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -1148,7 +1133,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check sum of electricity produced end use outputs match total output from meter
-    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > 0.1
+    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > 0.0001
       runner.registerError("#{FT::Elec} produced category end uses (#{outputs[:elec_prod_annual].round(3)}) do not sum to total (#{meter_elec_produced.round(3)}).")
       return false
     end
