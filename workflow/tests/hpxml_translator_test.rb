@@ -502,17 +502,6 @@ class HPXMLTest < MiniTest::Test
       end
       return skip_warning
     end
-
-    def skip_electricity_production_warning(err_line)
-      elec_prod_warnings = ['Photovoltaic:ElectricityProduced'.upcase,
-                            'Photovoltaic:Inverter'.upcase,
-                            'Cogeneration:ElectricityProduced'.upcase]
-      skip_warning = false
-      elec_prod_warnings.each do |elec_prod_warning|
-        skip_warning = true if err_line.include? elec_prod_warning
-      end
-      return skip_warning
-    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
@@ -615,9 +604,8 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
-      if err_line.include?('Output:Meter: invalid Key Name') || err_line.include?('Meter:Custom')
+      if err_line.include?('Output:Meter: invalid Key Name')
         next if skip_utility_bill_warning(err_line)
-        next if skip_electricity_production_warning(err_line)
       end
 
       # HPWHs
@@ -687,7 +675,6 @@ class HPXMLTest < MiniTest::Test
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
         next if skip_utility_bill_warning(err_line)
-        next if skip_electricity_production_warning(err_line)
 
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
