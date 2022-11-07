@@ -193,7 +193,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     all_outputs << @peak_loads
     all_outputs << @component_loads
     all_outputs << @hot_water_uses
-    all_outputs << @average_resilience
+    all_outputs << @resilience_hours
 
     output_names = []
     all_outputs.each do |outputs|
@@ -871,6 +871,25 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @totals[TE::Net].timeseries_output = @totals[TE::Total].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x + y * unit_conv }
     end
 
+    # Resilience Hours
+    @resilience_hours.each do |key, resilience_hour|
+      next unless key == RHT::Battery
+
+      resilience_hour.variables.map { |v| v[0] }.uniq.each do |sys_id|
+        keys = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
+        vars = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
+
+        batt_kwh = @hpxml.batteries[0].usable_capacity_kwh
+        batt_kw = @hpxml.batteries[0].rated_power_output
+        batt_roundtrip_efficiency = 0.95
+        batt_soc_kwh = get_report_variable_data_timeseries(keys, vars, 1, 0, timeseries_frequency)
+        crit_load = outputs[:elec_net_timeseries]
+
+        resilience_hours = get_resilience_hours(batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load)
+        resilience_hour.annual_output = resilience_hours.sum / resilience_hours.size
+      end
+    end
+
     # Zone temperatures
     if include_timeseries_zone_temperatures
       zone_names = []
@@ -1237,6 +1256,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     results_out << [line_break]
     @hot_water_uses.each do |_hot_water_type, hot_water|
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(n_digits - 2)]
+    end
+    results_out << [line_break]
+    @resilience_hours.each do |_type, resilience_hour|
+      results_out << ["#{resilience_hour.name} (#{resilience_hour.annual_units})", resilience_hour.annual_output.to_f.round(n_digits)]
     end
 
     results_out = append_sizing_results(results_out, line_break)
@@ -1873,6 +1896,39 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
+  def get_resilience_hours(batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load)
+    resilience_hours = Array.new(crit_load.size, 0)
+    n_timesteps = crit_load.size
+    (0...1).each do |init_time_step|
+      (0...n_timesteps).each do |i|
+        t = (init_time_step + i) % n_timesteps # for wrapping around end of year
+        load_kw = crit_load[t]
+
+        if load_kw < 0 # load is met
+          if batt_soc_kwh[i] < batt_kwh # charge battery if there's room in the battery
+            batt_soc_kwh[i] += [
+              batt_kwh - batt_soc_kwh[i], # room available
+              batt_kw * batt_roundtrip_efficiency, # inverter capacity
+              -load_kw * batt_roundtrip_efficiency, # excess energy
+            ].min
+          end
+        else # check if we can meet load with generator then storage
+          if [batt_kw, batt_soc_kwh[i]].min >= load_kw # battery can carry balance
+            # prevent battery charge from going negative
+            batt_soc_kwh[i] = [0, batt_soc_kwh[i] - load_kw].max
+            load_kw = 0
+          end
+        end
+
+        if load_kw > 0 # failed to meet load in this time step
+          resilience_hours[init_time_step] = i
+        end
+      end
+    end
+
+    return resilience_hours
+  end
+
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
@@ -2002,7 +2058,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @model.getModelObjects.each do |object|
       next if object.to_AdditionalProperties.is_initialized
 
-      [EUT, HWT, LT, ILT].each do |class_name|
+      [EUT, HWT, LT, ILT, RHT].each do |class_name|
         vars_by_key = get_object_output_variables_by_key(@model, object, class_name)
         next if vars_by_key.size == 0
 
@@ -2098,6 +2154,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:variables, :annual_output_by_system, :timeseries_output_by_system)
   end
 
+  class ResilienceHours < BaseOutput
+    def initialize(variables: [])
+      super()
+      @variables = variables
+    end
+    attr_accessor(:variables)
+  end
+
   class PeakFuel < BaseOutput
     def initialize(meters:, report:)
       super()
@@ -2133,13 +2197,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @ems_variable = ems_variable
     end
     attr_accessor(:ems_variable)
-  end
-
-  class AverageResilience < BaseOutput
-    def initialize
-      super()
-    end
-    attr_accessor()
   end
 
   class IdealLoad < BaseOutput
@@ -2376,6 +2433,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       hot_water.timeseries_units = 'gal'
     end
 
+    # Resilience Hours
+    @resilience_hours = {}
+    @resilience_hours[RHT::Battery] = ResilienceHours.new(variables: get_object_variables(RHT, RHT::Battery))
+
+    @resilience_hours.each do |resilience_hours_type, resilience_hour|
+      resilience_hour.name = "Resilience Hours: #{resilience_hours_type}"
+      resilience_hour.annual_units = 'hr'
+    end
+
     # Peak Fuels
     # Using meters for energy transferred in conditioned space only (i.e., excluding ducts) to determine winter vs summer.
     @peak_fuels = {}
@@ -2449,14 +2515,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       comp_load.name = "Component Load: #{load_type.gsub(': Delivered', '')}: #{comp_load_type}"
       comp_load.annual_units = 'MBtu'
       comp_load.timeseries_units = 'kBtu'
-    end
-
-    # Average Resilience
-    @average_resilience = {}
-    [AR::Battery].each do |type|
-      @average_resilience[type] = AverageResilience.new
-      @average_resilience[type].name = "Average Resilience: #{type}"
-      @average_resilience[type].annual_units = 'hr'
     end
 
     # Unmet Hours
@@ -2807,6 +2865,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       end
 
+    elsif class_name == RHT
+
+      # Resilience Hours
+
+      if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        return { RHT::Battery => ['Electric Storage Charge Fraction'] }
+      end
     end
 
     return {}

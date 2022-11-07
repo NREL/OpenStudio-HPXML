@@ -103,6 +103,11 @@ class UHT
   Cooling = 'Cooling'
 end
 
+class RHT
+  # Resilience Hours Types
+  Battery = 'Battery'
+end
+
 class ILT
   # Ideal Load Types
   Heating = 'Heating'
@@ -137,11 +142,6 @@ class WT
   WindSpeed = 'Wind Speed'
   DiffuseSolar = 'Diffuse Solar Radiation'
   DirectSolar = 'Direct Solar Radiation'
-end
-
-class AR
-  # Average Resilience
-  Battery = 'Battery'
 end
 
 class OutputMethods
