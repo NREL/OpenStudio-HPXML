@@ -204,7 +204,7 @@ class HVAC
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                         control_zone)
+                                         control_zone, ground_conductivity)
 
     obj_name = Constants.ObjectNameGroundSourceHeatPump
 
@@ -252,8 +252,8 @@ class HVAC
     ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
     ground_heat_exch_vert.setName(obj_name + ' exchanger')
     ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(hp_ap.bore_diameter / 2.0, 'in', 'm'))
-    ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(hp_ap.ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(hp_ap.ground_conductivity / hp_ap.ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
+    ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / hp_ap.ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
     ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C'))
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(hp_ap.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(hp_ap.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
@@ -351,7 +351,7 @@ class HVAC
       equip_def.setName(Constants.ObjectNameGSHPSharedPump)
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(equip_def.name.to_s)
-      equip.setSpace(control_zone.spaces[0])
+      equip.setSpace(control_zone.spaces[0]) # no heat gain, so assign the equipment to an arbitrary space
       equip_def.setDesignLevel(shared_pump_w)
       equip_def.setFractionRadiant(0)
       equip_def.setFractionLatent(0)
@@ -841,7 +841,7 @@ class HVAC
 
     num_days = Constants.NumDaysInYear(year)
     warning = false
-    (0..(num_days - 1)).to_a.each do |i|
+    for i in 0..(num_days - 1)
       if (heating_days[i] == cooling_days[i]) # both (or neither) heating/cooling seasons
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
         htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -2929,7 +2929,7 @@ class HVAC
     clg_ap = cooling_system.additional_properties
 
     clg_ap.cool_rated_eirs = []
-    (0...clg_ap.num_speeds).to_a.each do |speed|
+    for speed in 0..clg_ap.num_speeds - 1
       clg_ap.cool_rated_eirs << calc_eir_from_eer(clg_ap.cool_eers[speed], clg_ap.fan_power_rated)
     end
   end
@@ -2938,7 +2938,7 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     htg_ap.heat_rated_eirs = []
-    (0...htg_ap.num_speeds).to_a.each do |speed|
+    for speed in 0..htg_ap.num_speeds - 1
       htg_ap.heat_rated_eirs << calc_eir_from_cop(htg_ap.heat_cops[speed], htg_ap.fan_power_rated)
     end
   end
@@ -2952,7 +2952,7 @@ class HVAC
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
       clg_ap.cool_rated_shrs_gross = []
-      (0...clg_ap.num_speeds).to_a.each do |speed|
+      for speed in 0..clg_ap.num_speeds - 1
         qtot_net_nominal = 12000.0
         qsens_net_nominal = qtot_net_nominal * clg_ap.cool_rated_shrs_net[speed]
         qtot_gross_nominal = qtot_net_nominal + UnitConversions.convert(clg_ap.cool_rated_cfm_per_ton[speed] * clg_ap.fan_power_rated, 'Wh', 'Btu')
@@ -3077,7 +3077,7 @@ class HVAC
     hp_ap.cool_rated_cfm_per_ton = []
     hp_ap.cool_rated_shrs_gross = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.cool_capacity_ratios << hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)
       hp_ap.cool_rated_cfm_per_ton << (hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_cfm_per_ton * hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.cool_capacity_ratios[-1]
       # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
@@ -3096,7 +3096,7 @@ class HVAC
     fan_powers_rated = []
     eers_rated = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       fan_powers_rated << clg_ap.fan_power_rated * fan_powers_norm[i]
       eers_rated << UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i]
     end
@@ -3111,9 +3111,9 @@ class HVAC
     cvg = false
     final_n = nil
 
-    (1...itmax + 1).each do |n|
+    for n in 1..itmax + 1
       final_n = n
-      (0...num_speeds).each do |i|
+      for i in 0..num_speeds - 1
         eers_rated[i] = UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i]
       end
 
@@ -3132,7 +3132,7 @@ class HVAC
 
     clg_ap.cool_rated_eirs = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       clg_ap.cool_rated_eirs << calc_eir_from_eer(UnitConversions.convert(cop_max_speed, 'W', 'Btu/hr') * cops_norm[i], fan_powers_rated[i])
     end
   end
@@ -3252,7 +3252,7 @@ class HVAC
     t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
     frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]
 
-    (0...8).each do |i|
+    for i in 0..7
       bL = ((t_bins[i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
       q_k1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_bins[i] - 67.0)
       p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[i] - 67)
@@ -3286,7 +3286,7 @@ class HVAC
     hp_ap.heat_capacity_ratios = []
     hp_ap.heat_rated_cfm_per_ton = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.heat_capacity_ratios << hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)
       hp_ap.heat_rated_cfm_per_ton << (hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_cfm_per_ton * hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.heat_capacity_ratios[-1]
     end
@@ -3303,7 +3303,7 @@ class HVAC
     fan_powers_rated = []
     cops_rated = []
 
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       fan_powers_rated << hp_ap.fan_power_rated * fan_powers_norm[i]
       cops_rated << cop_max_speed * cops_norm[i]
     end
@@ -3319,9 +3319,9 @@ class HVAC
     cvg = false
     final_n = nil
 
-    (1...itmax + 1).each do |n|
+    for n in 1..itmax
       final_n = n
-      (0...num_speeds).each do |i|
+      for i in 0..num_speeds - 1
         cops_rated[i] = cop_max_speed * cops_norm[i]
       end
 
@@ -3339,7 +3339,7 @@ class HVAC
     end
 
     hp_ap.heat_rated_eirs = []
-    (0...num_speeds).each do |i|
+    for i in 0..num_speeds - 1
       hp_ap.heat_rated_eirs << calc_eir_from_cop(cop_max_speed * cops_norm[i], fan_powers_rated[i])
     end
   end
@@ -3356,7 +3356,6 @@ class HVAC
     else
       hp_ap.design_hw = [35.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].min # Temperature of fluid entering indoor coil, use 35F as upper bound
     end
-    hp_ap.ground_conductivity = 0.6 # Btu/h-ft-R
     hp_ap.ground_diffusivity = 0.0208
     hp_ap.grout_conductivity = 0.4 # Btu/h-ft-R
     hp_ap.bore_diameter = 5.0 # in
@@ -3477,7 +3476,7 @@ class HVAC
     etot = 0
     bLtot = 0
 
-    (0...15).each do |i|
+    for i in 0..14
       bL = ((65.0 - t_bins[i]) / (65.0 - t_OD)) * 0.77 * dHR
 
       q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[i] - 47.0)
@@ -4002,8 +4001,17 @@ class HVAC
         # Convert "fan coil" air distribution system to "regular velocity"
         if distribution_system.hvac_systems.size > 1
           # Has attached heating system, so create a copy specifically for the cooling system
-          hpxml.hvac_distributions << distribution_system.dup
-          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          hpxml.hvac_distributions.add(id: "#{distribution_system.id}_#{cooling_system.id}",
+                                       distribution_system_type: distribution_system.distribution_system_type,
+                                       air_type: distribution_system.air_type,
+                                       number_of_return_registers: distribution_system.number_of_return_registers,
+                                       conditioned_floor_area_served: distribution_system.conditioned_floor_area_served)
+          distribution_system.duct_leakage_measurements.each do |lm|
+            hpxml.hvac_distributions[-1].duct_leakage_measurements << lm.dup
+          end
+          distribution_system.ducts.each do |d|
+            hpxml.hvac_distributions[-1].ducts << d.dup
+          end
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
         end
         hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
@@ -4020,6 +4028,9 @@ class HVAC
                                                                      duct_leakage_units: HPXML::UnitsCFM25,
                                                                      duct_leakage_value: 0,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        hpxml.hvac_distributions[-1].ducts.each do |d|
+          d.id = "#{d.id}_#{cooling_system.id}"
         end
       end
     end

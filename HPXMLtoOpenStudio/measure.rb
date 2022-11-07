@@ -6,34 +6,11 @@
 require 'pathname'
 require 'csv'
 require 'oga'
-require_relative 'resources/airflow'
-require_relative 'resources/battery'
-require_relative 'resources/utility_bills'
-require_relative 'resources/constants'
-require_relative 'resources/constructions'
-require_relative 'resources/energyplus'
-require_relative 'resources/generator'
-require_relative 'resources/geometry'
-require_relative 'resources/hotwater_appliances'
-require_relative 'resources/hpxml'
-require_relative 'resources/hpxml_defaults'
-require_relative 'resources/hvac'
-require_relative 'resources/hvac_sizing'
-require_relative 'resources/lighting'
-require_relative 'resources/location'
-require_relative 'resources/materials'
-require_relative 'resources/misc_loads'
-require_relative 'resources/psychrometrics'
-require_relative 'resources/pv'
-require_relative 'resources/schedules'
-require_relative 'resources/simcontrols'
-require_relative 'resources/unit_conversions'
-require_relative 'resources/util'
-require_relative 'resources/version'
-require_relative 'resources/waterheater'
-require_relative 'resources/weather'
-require_relative 'resources/xmlhelper'
-require_relative 'resources/xmlvalidator'
+Dir["#{File.dirname(__FILE__)}/resources/*.rb"].each do |resource_file|
+  next if resource_file.include? 'minitest_helper.rb'
+
+  require resource_file
+end
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -234,7 +211,7 @@ class OSModel
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
     add_floors(runner, model, spaces)
-    add_foundation_walls_slabs(runner, model, spaces)
+    add_foundation_walls_slabs(runner, model, weather, spaces)
     add_shading_schedule(model, weather)
     add_windows(model, spaces)
     add_doors(model, spaces)
@@ -270,7 +247,7 @@ class OSModel
 
     # Other
 
-    add_airflow(model, weather, spaces, airloop_map)
+    add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(model, spaces)
@@ -337,8 +314,6 @@ class OSModel
 
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
-    @gfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.map { |s| s.area }.sum(0.0)
-    @ubfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementUnconditioned }.map { |s| s.area }.sum(0.0)
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
@@ -742,7 +717,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_walls_slabs(runner, model, spaces)
+  def self.add_foundation_walls_slabs(runner, model, weather, spaces)
     foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
@@ -821,7 +796,7 @@ class OSModel
         else
           z_origin = -1 * slab.depth_below_grade
         end
-        add_foundation_slab(model, spaces, slab, slab_exp_perim,
+        add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                             slab_area, z_origin, kiva_foundation)
       end
 
@@ -831,7 +806,7 @@ class OSModel
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        add_foundation_slab(model, spaces, slab, no_wall_slab_exp_perim[slab],
+        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
                             slab_area, z_origin, nil)
       end
 
@@ -964,9 +939,12 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
+                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag,
+                                        soil_k_in)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -975,7 +953,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(model, spaces, slab, slab_exp_perim,
+  def self.add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
                                slab_area, z_origin, kiva_foundation)
 
     slab_tot_perim = slab_exp_perim
@@ -1029,13 +1007,43 @@ class OSModel
       mat_carpet = Material.CoveringBare(slab.carpet_fraction,
                                          slab.carpet_r_value)
     end
+    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab_exp_perim, mat_carpet, kiva_foundation)
+                                        slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
 
-    return surface.adjacentFoundation.get
+    kiva_foundation = surface.adjacentFoundation.get
+
+    foundation_walls_insulated = false
+    foundation_ceiling_insulated = false
+    @hpxml.foundation_walls.each do |fnd_wall|
+      next unless fnd_wall.interior_adjacent_to == slab.interior_adjacent_to
+      next unless fnd_wall.exterior_adjacent_to == HPXML::LocationGround
+
+      if fnd_wall.insulation_assembly_r_value.to_f > 5
+        foundation_walls_insulated = true
+      elsif fnd_wall.insulation_exterior_r_value.to_f + fnd_wall.insulation_interior_r_value.to_f > 0
+        foundation_walls_insulated = true
+      end
+    end
+    @hpxml.floors.each do |floor|
+      next unless floor.interior_adjacent_to == HPXML::LocationLivingSpace
+      next unless floor.exterior_adjacent_to == slab.interior_adjacent_to
+
+      if floor.insulation_assembly_r_value > 5
+        foundation_ceiling_insulated = true
+      end
+    end
+
+    Constructions.apply_kiva_initial_temp(kiva_foundation, slab, weather,
+                                          spaces[HPXML::LocationLivingSpace].thermalZone.get,
+                                          @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day,
+                                          @hpxml.header.sim_calendar_year,
+                                          foundation_walls_insulated, foundation_ceiling_insulated)
+
+    return kiva_foundation
   end
 
   def self.add_conditioned_floor_area(model, spaces)
@@ -1098,22 +1106,17 @@ class OSModel
   end
 
   def self.add_thermal_mass(model, spaces)
-    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
-    basement_frac_of_cfa = cfa_basement / @cfa
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
-                                          basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
     else
       mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
       partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
-                                          basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
 
-      Constructions.apply_furniture(model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
-                                    basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_furniture(model, @hpxml.furniture_mass, spaces)
     end
   end
 
@@ -1338,22 +1341,22 @@ class OSModel
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
-      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, model, spaces)
+      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
     end
     @hpxml.clothes_dryers.each do |clothes_dryer|
-      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, model, spaces)
+      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, spaces)
     end
     @hpxml.dishwashers.each do |dishwasher|
-      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, model, spaces)
+      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
     end
     @hpxml.refrigerators.each do |refrigerator|
-      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, model, spaces)
+      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, spaces)
     end
     @hpxml.freezers.each do |freezer|
-      freezer.additional_properties.space = get_space_from_location(freezer.location, model, spaces)
+      freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
     end
     @hpxml.cooking_ranges.each do |cooking_range|
-      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, model, spaces)
+      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
     end
 
     # Distribution
@@ -1549,7 +1552,7 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 living_zone)
+                                                                 living_zone, @hpxml.site.ground_conductivity)
 
       end
 
@@ -1690,7 +1693,7 @@ class OSModel
 
   def self.add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting, @eri_version, @schedules_file, @cfa, @gfa)
+                   @hpxml.lighting, @eri_version, @schedules_file, @cfa)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
@@ -1713,7 +1716,7 @@ class OSModel
     end
   end
 
-  def self.add_airflow(model, weather, spaces, airloop_map)
+  def self.add_airflow(runner, model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -1744,7 +1747,7 @@ class OSModel
       end
     end
 
-    Airflow.apply(model, weather, spaces, @hpxml, @cfa, @nbeds,
+    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
   end
@@ -1848,9 +1851,7 @@ class OSModel
 
     @hpxml.batteries.each do |battery|
       # Assign space
-      if battery.location != HPXML::LocationOutside
-        battery.additional_properties.space = get_space_from_location(battery.location, model, spaces)
-      end
+      battery.additional_properties.space = get_space_from_location(battery.location, spaces)
       Battery.apply(model, battery)
     end
   end
@@ -2441,19 +2442,22 @@ class OSModel
   end
 
   def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    if spaces[exterior_adjacent_to].nil?
+    otherside_coeffs = nil
+    model.getSurfacePropertyOtherSideCoefficientss.each do |c|
+      next unless c.name.to_s == exterior_adjacent_to
+
+      otherside_coeffs = c
+    end
+    if otherside_coeffs.nil?
       # Create E+ other side coefficient object
-      otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_object.setName(exterior_adjacent_to)
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      otherside_coeffs = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
+      otherside_coeffs.setName(exterior_adjacent_to)
+      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       # Schedule of space temperature, can be shared with water heater/ducts
       sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
-      otherside_object.setConstantTemperatureSchedule(sch)
-      surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
-      spaces[exterior_adjacent_to] = otherside_object
-    else
-      surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
+      otherside_coeffs.setConstantTemperatureSchedule(sch)
     end
+    surface.setSurfacePropertyOtherSideCoefficients(otherside_coeffs)
     surface.setSunExposure('NoSun')
     surface.setWindExposure('NoWind')
   end
@@ -2559,32 +2563,27 @@ class OSModel
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
       sch = get_space_temperature_schedule(model, location, spaces)
     else
-      space = get_space_from_location(location, model, spaces)
+      space = get_space_from_location(location, spaces)
     end
 
     return space, sch
   end
 
-  # Returns an OS:Space, or nil if a MF space
+  # Returns an OS:Space, or nil if a MF space or outside
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
-  def self.get_space_from_location(location, model, spaces)
-    return if [HPXML::LocationOtherHeatedSpace,
+  def self.get_space_from_location(location, spaces)
+    return if [HPXML::LocationOutside,
+               HPXML::LocationOtherHeatedSpace,
                HPXML::LocationOtherHousingUnit,
                HPXML::LocationOtherMultifamilyBufferSpace,
                HPXML::LocationOtherNonFreezingSpace].include? location
 
-    num_orig_spaces = spaces.size
-
     if HPXML::conditioned_locations.include? location
-      space = create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    else
-      space = create_or_get_space(model, spaces, location)
+      location = HPXML::LocationLivingSpace
     end
 
-    fail if spaces.size != num_orig_spaces # EPvalidator.xml should prevent this
-
-    return space
+    return spaces[location]
   end
 
   def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)

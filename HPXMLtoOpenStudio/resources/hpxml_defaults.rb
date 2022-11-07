@@ -3,8 +3,8 @@
 class HPXMLDefaults
   # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
   # child object where custom information can be attached to the object without
-  # being written to the HPXML file. This is useful to associate additional values
-  # with the HPXML objects that will ultimately get passed around.
+  # being written to the HPXML file. This will allow the custom information to
+  # be used by subsequent calculations/logic.
 
   def self.apply(runner, hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
@@ -284,7 +284,7 @@ class HPXMLDefaults
     hpxml.header.utility_bill_scenarios.each do |scenario|
       hpxml_doc = hpxml.to_oga if hpxml_doc.nil?
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeElectricity)
+      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeElectricity) && scenario.elec_tariff_filepath.nil?
         if scenario.elec_fixed_charge.nil?
           scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
           scenario.elec_fixed_charge_isdefaulted = true
@@ -403,6 +403,12 @@ class HPXMLDefaults
       hpxml.site.shielding_of_home = HPXML::ShieldingNormal
       hpxml.site.shielding_of_home_isdefaulted = true
     end
+
+    if hpxml.site.ground_conductivity.nil?
+      hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
+      hpxml.site.ground_conductivity_isdefaulted = true
+    end
+
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
   end
 
@@ -753,6 +759,16 @@ class HPXMLDefaults
 
   def self.apply_floors(hpxml)
     hpxml.floors.each do |floor|
+      if floor.floor_or_ceiling.nil?
+        if floor.is_ceiling
+          floor.floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor.floor_or_ceiling_isdefaulted = true
+        elsif floor.is_floor
+          floor.floor_or_ceiling = HPXML::FloorTypeFloor
+          floor.floor_or_ceiling_isdefaulted = true
+        end
+      end
+
       if floor.interior_finish_type.nil?
         if floor.is_floor
           floor.interior_finish_type = HPXML::InteriorFinishNone
@@ -1496,7 +1512,8 @@ class HPXMLDefaults
               duct.duct_location_isdefaulted = true
 
               if secondary_duct_area > 0
-                hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                hvac_distribution.ducts.add(id: "#{duct.id}_secondary",
+                                            duct_type: duct.duct_type,
                                             duct_insulation_r_value: duct.duct_insulation_r_value,
                                             duct_location: secondary_duct_location,
                                             duct_location_isdefaulted: true,
@@ -1553,12 +1570,12 @@ class HPXMLDefaults
         vent_fan.is_shared_system = false
         vent_fan.is_shared_system_isdefaulted = true
       end
-      if vent_fan.hours_in_operation.nil?
+      if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan?
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
       if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
-        if hpxml.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation }.size > 1
+        if hpxml.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan? }.size > 1
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
@@ -1569,9 +1586,15 @@ class HPXMLDefaults
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)).round(1)
         vent_fan.fan_power_isdefaulted = true
       end
-      if vent_fan.cfis_vent_mode_airflow_fraction.nil? && (vent_fan.fan_type == HPXML::MechVentTypeCFIS)
+      next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
+
+      if vent_fan.cfis_vent_mode_airflow_fraction.nil?
         vent_fan.cfis_vent_mode_airflow_fraction = 1.0
         vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
+      end
+      if vent_fan.cfis_addtl_runtime_operating_mode.nil?
+        vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
+        vent_fan.cfis_addtl_runtime_operating_mode_isdefaulted = true
       end
     end
 
@@ -1657,14 +1680,16 @@ class HPXMLDefaults
         water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
         water_heating_system.performance_adjustment_isdefaulted = true
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss_value.nil?
         # Use equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
         act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
         surface_area = Waterheater.calc_tank_areas(act_vol)[0]
         sqft_by_gal = surface_area / act_vol # sqft/gal
-        water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
-        water_heating_system.standby_loss_isdefaulted = true
+        water_heating_system.standby_loss_value = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
+        water_heating_system.standby_loss_value_isdefaulted = true
+        water_heating_system.standby_loss_units = HPXML::UnitsDegFPerHour
+        water_heating_system.standby_loss_units_isdefaulted = true
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
@@ -1696,7 +1721,7 @@ class HPXMLDefaults
         end
       end
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0].zone)
+        water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0])
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF
@@ -2596,7 +2621,7 @@ class HPXMLDefaults
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh
 
-    # Assign heating design loads back to HPXML object
+    # Assign heating design loads to HPXML object
     hvacpl.hdl_total = bldg_design_loads.Heat_Tot.round
     hvacpl.hdl_walls = bldg_design_loads.Heat_Walls.round
     hvacpl.hdl_ceilings = bldg_design_loads.Heat_Ceilings.round
@@ -2616,7 +2641,7 @@ class HPXMLDefaults
       fail 'Heating design loads do not sum to total.'
     end
 
-    # Cooling sensible design loads back to HPXML object
+    # Assign cooling sensible design loads to HPXML object
     hvacpl.cdl_sens_total = bldg_design_loads.Cool_Sens.round
     hvacpl.cdl_sens_walls = bldg_design_loads.Cool_Walls.round
     hvacpl.cdl_sens_ceilings = bldg_design_loads.Cool_Ceilings.round
@@ -2639,7 +2664,7 @@ class HPXMLDefaults
       fail 'Cooling sensible design loads do not sum to total.'
     end
 
-    # Cooling latent design loads back to HPXML object
+    # Assign cooling latent design loads to HPXML object
     hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
     hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
     hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infil_Lat.round
@@ -2650,7 +2675,11 @@ class HPXMLDefaults
       fail 'Cooling latent design loads do not sum to total.'
     end
 
-    # Assign sizing values back to HPXML objects
+    # Assign design temperatures to HPXML object
+    hvacpl.temp_heating = weather.design.HeatingDrybulb.round(2)
+    hvacpl.temp_cooling = weather.design.CoolingDrybulb.round(2)
+
+    # Assign sizing values to HPXML objects
     all_hvac_sizing_values.each do |hvac_system, hvac_sizing_values|
       htg_sys = hvac_system[:heating]
       clg_sys = hvac_system[:cooling]

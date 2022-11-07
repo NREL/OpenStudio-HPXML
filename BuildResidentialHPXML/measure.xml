@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>d12e7899-9793-40c9-86d1-aeb1ef1f54a5</version_id>
-  <version_modified>20220927T182801Z</version_modified>
+  <version_id>2b4e5261-8121-487d-891f-cb70dcdeace2</version_id>
+  <version_modified>20221107T161231Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -164,6 +164,15 @@
           <display_name>well-shielded</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>site_ground_conductivity</name>
+      <display_name>Site: Ground Conductivity</display_name>
+      <description>Conductivity of the ground soil. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>Btu/hr-ft-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>site_zip_code</name>
@@ -1395,8 +1404,8 @@
           <display_name>LogWall</display_name>
         </choice>
         <choice>
-          <value>StructurallyInsulatedPanel</value>
-          <display_name>StructurallyInsulatedPanel</display_name>
+          <value>StructuralInsulatedPanel</value>
+          <display_name>StructuralInsulatedPanel</display_name>
         </choice>
         <choice>
           <value>SolidConcrete</value>
@@ -6164,6 +6173,14 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>utility_bill_electricity_filepaths</name>
+      <display_name>Utility Bills: Electricity File Paths</display_name>
+      <description>Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>utility_bill_electricity_fixed_charges</name>
       <display_name>Utility Bills: Electricity Fixed Charges</display_name>
       <description>Electricity utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.</description>
@@ -6384,10 +6401,16 @@
   </attributes>
   <files>
     <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CB987FCD</checksum>
+    </file>
+    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>80E1626B</checksum>
+      <checksum>D9E75C2E</checksum>
     </file>
     <file>
       <version>
@@ -6398,13 +6421,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B3FCE1F4</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CB987FCD</checksum>
+      <checksum>634BF615</checksum>
     </file>
   </files>
 </measure>

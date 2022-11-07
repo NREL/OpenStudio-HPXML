@@ -317,16 +317,39 @@ Electricity Rates
 ~~~~~~~~~~~~~~~~~
 
 For each scenario, electricity rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
+Electricity rates can be entered using Simple inputs or Detailed inputs.
+
+**Simple**
+
+For simple utility rate structures, inputs can be entered using a fixed charge and a marginal rate.
 
   ================================  ========  =======  ===========  ========  ========  ============================================================
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ============================================================
   ``FuelType``                      string             electricity  Yes                 Fuel type
   ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
-  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ============================================================
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+
+**Detailed**
+
+For detailed utility rate structures, inputs can be entered using a tariff JSON file.
+
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  Element                           Type      Units    Constraints  Required  Default   Notes
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ``FuelType``                      string             electricity  Yes                 Fuel type
+  ``TariffFilePath``                string                          Yes                 Path to tariff JSON file [#]_
+  ================================  ========  =======  ===========  ========  ========  ============================================================
+
+  .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
+         Tariff files can describe flat, tiered, time-of-use, tiered time-of-use, or real-time pricing rates.
+         Sources of tariff files include `OpenEI's U.S. Utility Rate Database (URDB) <https://openei.org/wiki/Utility_Rate_Database>`_;
+         a large set of residential OpenEI URDB rates for U.S. utilities are included at ``ReportUtilityBills/resources/detailed_rates/openei_rates.zip``.
+         Additional sample tariff files can be found in ``ReportUtilityBills/resources/detailed_rates``.
+         Tariff files are formatted based on `OpenEI API version 7 <https://openei.org/services/doc/rest/util_rates/?version=7#response-fields>`_.
 
 Fuel Rates
 ~~~~~~~~~~
@@ -338,7 +361,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   ================================  ========  ========  ===========  ========  ========  ============================================================
   ``FuelType``                      string              See [#]_     Yes                 Fuel type
   ``FixedCharge``                   double    $/month                No        See [#]_  Monthly fixed charge
-  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal rate
+  ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal flat rate
   ================================  ========  ========  ===========  ========  ========  ============================================================
 
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
@@ -372,21 +395,14 @@ If the PV compensation type is net-metering, additional information can be enter
   Element                           Type      Units    Constraints  Required  Default         Notes
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   ``AnnualExcessSellbackRateType``  string             See [#]_     No        User-Specified  Net metering annual excess sellback rate type [#]_
+  ``AnnualExcessSellbackRate``      double    $/kWh                 No [#]_   0.03            User-specified net metering annual excess sellback rate [#]_
   ================================  ========  =======  ===========  ========  ==============  =============================================================
   
   .. [#] AnnualExcessSellbackRateType choices are "User-Specified" and "Retail Electricity Cost".
   .. [#] When annual PV production exceeds the annual building electricity consumption, this rate, which is often significantly below the retail rate, determines the value of the excess electricity sold back to the utility.
          This may happen to offset gas consumption, for example.
-
-  If the net-metering annual excess sellback rate type is user-specified, additional information can be entered in ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/PVCompensation/CompensationType/NetMetering``.
-
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    Element                       Type      Units    Constraints  Required  Default         Notes
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-    ``AnnualExcessSellbackRate``  double    $/kWh                 No        0.03            User-specified net metering annual excess sellback rate [#]_
-    ============================  ========  =======  ===========  ========  ==============  =============================================================
-
-    .. [#] Since there are very few cases where modeled electricity consumption will increase from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting this to "User-Specified" and entering a rate of zero.
+  .. [#] AnnualExcessSellbackRate is only used when AnnualExcessSellbackRateType="User-Specified".
+  .. [#] Since modeled electricity consumption will not change from one year to the next, "indefinite rollover" of annual excess generation credit is best approximated by setting "User-Specified" and entering a rate of zero.
 
 **Feed-in Tariff**
 
@@ -446,16 +462,18 @@ HPXML Site
 
 Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/Site``.
 
-  ================================  ========  =====  ===========  ========  ========  ============================================================
-  Element                           Type      Units  Constraints  Required  Default   Notes
-  ================================  ========  =====  ===========  ========  ========  ============================================================
-  ``SiteType``                      string           See [#]_     No        suburban  Terrain type for infiltration model
-  ``ShieldingofHome``               string           See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
-  ``extension/Neighbors``           element          >= 0         No        <none>    Presence of neighboring buildings for solar shading
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
+  Element                           Type      Units        Constraints  Required  Default   Notes
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
+  ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
+  ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
+  ``extension/GroundConductivity``  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
+  ``extension/Neighbors``           element                >= 0         No        <none>    Presence of neighboring buildings for solar shading
+  ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+  .. [#] GroundConductivity used for foundation heat transfer and ground source heat pumps.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -742,7 +760,7 @@ Each wall that has no contact with the ground and bounds a space type is entered
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
+  .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructuralInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, and it's an *exterior* wall, modeled as four surfaces of equal area facing every direction.
          Azimuth/Orientation is irrelevant for *interior* walls (e.g., between living space and garage).
@@ -851,10 +869,10 @@ For floors adjacent to "other housing unit", "other heated space", "other multif
   ======================================  ========  =====  ==============  ========  =======  ==========================================
   Element                                 Type      Units  Constraints     Required  Default  Notes
   ======================================  ========  =====  ==============  ========  =======  ==========================================
-  ``extension/OtherSpaceAboveOrBelow``    string           See [#]_        Yes                Specifies if above/below the MF space type
+  ``FloorOrCeiling``                      string           See [#]_        Yes                Specifies whether a floor or ceiling from the perspective of the conditioned space
   ======================================  ========  =====  ==============  ========  =======  ==========================================
 
-  .. [#] OtherSpaceAboveOrBelow choices are "above" or "below".
+  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
 
 HPXML Slabs
 ***********
@@ -872,7 +890,7 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   ``DepthBelowGrade``                                      double    ft            >= 0         See [#]_             Depth from the top of the slab surface to grade
   ``PerimeterInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
   ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
-  ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from grade to bottom of vertical insulation
+  ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
   ``UnderSlabInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
   ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation
   ``UnderSlabInsulation/Layer/InsulationWidth``            double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
@@ -1866,6 +1884,7 @@ Additional information is entered in each ``Ducts``.
   ===============================================  =======  ============  ================  ========  =========  ======================================
   Element                                          Type     Units         Constraints       Required  Default    Notes
   ===============================================  =======  ============  ================  ========  =========  ======================================
+  ``SystemIdentifier``                             id                                       Yes                  Unique identifier
   ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                  R-value of duct insulation [#]_
   ``DuctLocation``                                 string                 See [#]_          No        See [#]_   Duct location
   ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_   Duct fraction/surface area in location
@@ -1954,7 +1973,7 @@ If not entered, the simulation will not include mechanical ventilation.
   ``IsSharedSystem``                                                                             boolean            See [#]_     No        false      Whether it serves multiple dwelling units
   ``FanType``                                                                                    string             See [#]_     Yes                  Type of ventilation system
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate [#]_
-  ``HoursInOperation``                                                                           double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
+  ``HoursInOperation``                                                                           double    hrs/day  0 - 24       See [#]_  See [#]_   Hours per day of operation
   ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
   =============================================================================================  ========  =======  ===========  ========  =========  =========================================
 
@@ -1962,7 +1981,10 @@ If not entered, the simulation will not include mechanical ventilation.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
   .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_, including adjustments for A) infiltration credit, B) balanced vs imbalanced systems, and C) adiabatic surfaces for SFA/MF buildings.
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a CFIS system, in which case it is not allowed.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
+         For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
+         For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          
          - "energy recovery ventilator", "heat recovery ventilator", or shared system: 1.0 W/cfm
@@ -2001,20 +2023,30 @@ If an energy recovery ventilator system is specified, additional information is 
 
 **Central Fan Integrated Supply**
 
-If a central fan integrated supply system is specified, additional information is entered in ``VentilationFan``.
+If a central fan integrated supply (CFIS) system is specified, additional information is entered in ``VentilationFan``.
 
-  ================================================  ======  =====  ===========  ========  =======  ==================================
-  Element                                           Type    Units  Constraints  Required  Default  Notes
-  ================================================  ======  =====  ===========  ========  =======  ==================================
-  ``AttachedToHVACDistributionSystem``              idref          See [#]_     Yes                ID of attached distribution system
-  ``extension/VentilationOnlyModeAirflowFraction``  double         0 - 1        No        1.0      Blower airflow rate fraction during ventilation only mode [#]_
-  ================================================  ======  =====  ===========  ========  =======  ==================================
+  ================================================  ======  =====  ===========  ========  ===============  ==================================
+  Element                                           Type    Units  Constraints  Required  Default          Notes
+  ================================================  ======  =====  ===========  ========  ===============  ==================================
+  ``CFISControls/AdditionalRuntimeOperatingMode``   string         See [#]_     No        air handler fan  How additional ventilation is provided (beyond when the HVAC system is running)
+  ``CFISControls/SupplementalFan``                  idref          See [#]_     See [#]_                   The supplemental fan providing additional ventilation
+  ``AttachedToHVACDistributionSystem``              idref          See [#]_     Yes                        ID of attached distribution system
+  ``extension/VentilationOnlyModeAirflowFraction``  double         0 - 1        No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
+  ================================================  ======  =====  ===========  ========  ===============  ==================================
 
+  .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
+  .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
+  .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
   .. [#] HVACDistribution type cannot be HydronicDistribution.
   .. [#] Blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.
          This value will depend on whether the blower fan can operate at reduced airflow rates during ventilation only operation.
          It is used to determine how much conditioned air is recirculated through ducts during ventilation only operation, resulting in additional duct losses.
          A value of zero will result in no conditioned air recirculation, and thus no additional duct losses.
+
+.. note::
+
+  CFIS systems are automated controllers that use the HVAC system's air handler fan to draw in outdoor air to meet an hourly ventilation target.
+  CFIS systems are modeled as assuming they A) maximize the use of normal heating/cooling runtime operation to meet the hourly ventilation target, B) block the flow of outdoor air when the hourly ventilation target has been met, and C) provide additional runtime operation (via air handler fan or supplemental fan) to meet the remainder of the hourly ventilation target when space heating/cooling runtime alone is not sufficient.
 
 **Shared System**
 
@@ -2226,7 +2258,7 @@ If a combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``RelatedHVACSystem``                          idref                  See [#]_     Yes                     ID of boiler
   ``TankVolume``                                 double   gal           > 0          Yes                     Nominal volume of the storage tank
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No            0         R-value of additional storage tank insulation wrap
-  ``StandbyLoss``                                double   F/hr          > 0          No            See [#]_  Storage tank standby losses
+  ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0          No            See [#]_  Storage tank standby losses
   =============================================  =======  ============  ===========  ============  ========  ==================================================
 
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
@@ -2311,7 +2343,7 @@ If the in-unit distribution system is specified as recirculation, additional inf
   =================================  =======  =====  ===========  ========  ========  =====================================
   ``ControlType``                    string          See [#]_     Yes                 Recirculation control type
   ``RecirculationPipingLoopLength``  double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
-  ``BranchPipingLoopLength``         double   ft     > 0          No        10        Branch piping loop length [#]_
+  ``BranchPipingLength``             double   ft     > 0          No        10        Branch piping length [#]_
   ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
   =================================  =======  =====  ===========  ========  ========  =====================================
 
@@ -2323,7 +2355,7 @@ If the in-unit distribution system is specified as recirculation, additional inf
          | NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
          | Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
   .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
-  .. [#] BranchPipingLoopLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
+  .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 Shared Recirculation
