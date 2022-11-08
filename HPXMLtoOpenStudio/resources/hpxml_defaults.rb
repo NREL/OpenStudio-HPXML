@@ -1449,12 +1449,13 @@ class HPXMLDefaults
         hvac_control.cooling_setup_start_hour_isdefaulted = true
       end
 
+      if hvac_control.onoff_thermostat_deadband.nil?
+        hvac_control.onoff_thermostat_deadband = 0.0
+      end
+
       # Do not apply on off thermostat if timestep is >= 2
       # Only availabe with 1 min time step
       if hpxml.header.timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
-        hvac_control.onoff_thermostat_deadband = 0.0
-      end
-      if hvac_control.onoff_thermostat_deadband.nil?
         hvac_control.onoff_thermostat_deadband = 0.0
       end
 
