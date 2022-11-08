@@ -2398,7 +2398,7 @@ class OSModel
     end
     program.addLine("  If #{tin_sensor.name} > Tmid_setpoint")
     program.addLine('    Set clg_mode = 1')
-    program.addLine('  Else') # No load, assign hour to heating if not in cooling season definition
+    program.addLine('  Else')
     program.addLine('    Set htg_mode = 1')
     program.addLine('  EndIf')
     program.addLine('EndIf')
