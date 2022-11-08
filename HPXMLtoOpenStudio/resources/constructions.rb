@@ -658,7 +658,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_wood_stud_ceiling(model, surfaces, constr_name,
+  def self.apply_wood_frame_ceiling(model, surfaces, constr_name,
                                    cavity_r, install_grade, addtl_r,
                                    framing_factor, joist_height_in,
                                    mat_int_finish, inside_film, outside_film)
@@ -705,7 +705,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_steel_stud_ceiling(model, surfaces, constr_name,
+  def self.apply_steel_frame_ceiling(model, surfaces, constr_name,
                                     cavity_r, install_grade, addtl_r,
                                     framing_factor, correction_factor, joist_height_in,
                                     mat_int_finish, inside_film, outside_film)
@@ -752,7 +752,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_wood_stud_floor(model, surfaces, constr_name,
+  def self.apply_wood_frame_floor(model, surfaces, constr_name,
                                  cavity_r, install_grade,
                                  framing_factor, joist_height_in,
                                  plywood_thick_in, rigid_r, mat_floor_covering,
@@ -802,7 +802,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_steel_stud_floor(model, surfaces, constr_name,
+  def self.apply_steel_frame_floor(model, surfaces, constr_name,
                                   cavity_r, install_grade,
                                   framing_factor, correction_factor, joist_height_in,
                                   plywood_thick_in, rigid_r, mat_floor_covering,
@@ -1917,7 +1917,7 @@ class Constructions
         ]
         match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-        apply_wood_stud_ceiling(model, surface, "#{floor_id} construction",
+        apply_wood_frame_ceiling(model, surface, "#{floor_id} construction",
                                 cavity_r, install_grade, constr_set.rigid_r,
                                 constr_set.framing_factor, constr_set.stud.thick_in,
                                 constr_set.mat_int_finish, inside_film, outside_film)
@@ -1931,7 +1931,7 @@ class Constructions
         ]
         match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-        apply_wood_stud_floor(model, surface, "#{floor_id} construction",
+        apply_wood_frame_floor(model, surface, "#{floor_id} construction",
                               cavity_r, install_grade,
                               constr_set.framing_factor, constr_set.stud.thick_in,
                               constr_set.osb_thick_in, constr_set.rigid_r, constr_set.mat_ext_finish,
@@ -1953,7 +1953,7 @@ class Constructions
         ]
         match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-        apply_steel_stud_ceiling(model, surface, "#{floor_id} construction",
+        apply_steel_frame_ceiling(model, surface, "#{floor_id} construction",
                                  cavity_r, install_grade, constr_set.rigid_r,
                                  constr_set.framing_factor, constr_set.corr_factor, constr_set.cavity_thick_in,
                                  constr_set.mat_int_finish, inside_film, outside_film)
@@ -1967,7 +1967,7 @@ class Constructions
         ]
         match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-        apply_steel_stud_floor(model, surface, "#{floor_id} construction",
+        apply_steel_frame_floor(model, surface, "#{floor_id} construction",
                                cavity_r, install_grade,
                                constr_set.framing_factor, constr_set.corr_factor, constr_set.cavity_thick_in,
                                constr_set.osb_thick_in, constr_set.rigid_r, constr_set.mat_ext_finish,

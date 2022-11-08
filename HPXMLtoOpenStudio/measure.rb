@@ -1290,7 +1290,7 @@ class OSModel
                                          0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
                                          Material.AirFilmVertical, Material.AirFilmVertical)
     elsif type == 'floor'
-      Constructions.apply_wood_stud_floor(model, surfaces, 'AdiabaticFloorConstruction',
+      Constructions.apply_wood_frame_floor(model, surfaces, 'AdiabaticFloorConstruction',
                                           0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare,
                                           Material.AirFilmFloorReduced, Material.AirFilmFloorReduced)
     elsif type == 'roof'
