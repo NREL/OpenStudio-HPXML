@@ -1440,12 +1440,14 @@ class SchedulesFile
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
       end
-      SchedulesFile.HVACSetpointColumnNames.each do |hvac_setpoint_col_name|
-        next unless col_names.include?(hvac_setpoint_col_name)
-        if hvac_setpoint_col_name == ColumnHeatingSetpoint
-          @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] - UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
-        elsif hvac_setpoint_col_name == ColumnCoolingSetpoint
-          @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] + UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
+      if offset_db.to_f > 0.0
+        SchedulesFile.HVACSetpointColumnNames.each do |hvac_setpoint_col_name|
+          next unless col_names.include?(hvac_setpoint_col_name)
+          if hvac_setpoint_col_name == ColumnHeatingSetpoint
+            @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] - UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
+          elsif hvac_setpoint_col_name == ColumnCoolingSetpoint
+            @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] + UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
+          end
         end
       end
     end
