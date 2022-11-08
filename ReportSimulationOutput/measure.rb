@@ -317,6 +317,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
       end
+
+      # Resilience Hours
+      result << OpenStudio::IdfObject.load('Output:Meter,Electricity:Facility,hourly;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,hourly;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityStorage:ElectricityProduced,hourly;').get
+      @resilience_hours.values.each do |resilience_hour|
+        resilience_hour.variables.each do |_sys_id, varkey, var|
+          result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},hourly;").get
+        end
+      end
     end
 
     # End Use/Hot Water Use/Ideal Load outputs
@@ -875,6 +885,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @resilience_hours.each do |key, resilience_hour|
       next unless key == RHT::Battery
 
+      minimum_storage_state_of_charge_fraction = 0
+      @model.getElectricLoadCenterDistributions.each do |elcd|
+        minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
+      end
+
       resilience_hour.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
@@ -882,10 +897,22 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_kwh = @hpxml.batteries[0].usable_capacity_kwh
         batt_kw = @hpxml.batteries[0].rated_power_output
         batt_roundtrip_efficiency = 0.95
-        batt_soc_kwh = get_report_variable_data_timeseries(keys, vars, 1, 0, timeseries_frequency)
-        crit_load = outputs[:elec_net_timeseries]
 
-        resilience_hours = get_resilience_hours(batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load)
+        batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, 'hourly')
+        batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
+
+        elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
+        elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
+        elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
+        elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
+        crit_load = elec.zip(elec_prod).map { |x, y| x + y }
+
+        resilience_hours = []
+        n_timesteps = crit_load.size
+        (0...n_timesteps).each do |init_time_step|
+          resilience_hours << get_resilience_hours(init_time_step, batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh[init_time_step], crit_load, n_timesteps)
+        end
+
         resilience_hour.annual_output = resilience_hours.sum / resilience_hours.size
       end
     end
@@ -1896,37 +1923,33 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
-  def get_resilience_hours(batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load)
-    resilience_hours = Array.new(crit_load.size, 0)
-    n_timesteps = crit_load.size
-    (0...n_timesteps).each do |init_time_step|
-      (0...n_timesteps).each do |i|
-        t = (init_time_step + i) % n_timesteps # for wrapping around end of year
-        load_kw = crit_load[t]
+  def get_resilience_hours(init_time_step, batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh, crit_load, n_timesteps)
+    (0...n_timesteps).each do |i|
+      t = (init_time_step + i) % n_timesteps # for wrapping around end of year
+      load_kw = crit_load[t]
 
-        if load_kw < 0 # load is met
-          if batt_soc_kwh[i] < batt_kwh # charge battery if there's room in the battery
-            batt_soc_kwh[i] += [
-              batt_kwh - batt_soc_kwh[i], # room available
-              batt_kw * batt_roundtrip_efficiency, # inverter capacity
-              -load_kw * batt_roundtrip_efficiency, # excess energy
-            ].min
-          end
-        else # check if we can meet load with generator then storage
-          if [batt_kw, batt_soc_kwh[i]].min >= load_kw # battery can carry balance
-            # prevent battery charge from going negative
-            batt_soc_kwh[i] = [0, batt_soc_kwh[i] - load_kw].max
-            load_kw = 0
-          end
+      if load_kw < 0 # load is met
+        if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
+          batt_soc_kwh += [
+            batt_kwh - batt_soc_kwh, # room available
+            batt_kw * batt_roundtrip_efficiency, # inverter capacity
+            -load_kw * batt_roundtrip_efficiency, # excess energy
+          ].min
         end
+      else # check if we can meet load with generator then storage
+        if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
+          # prevent battery charge from going negative
+          batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
+          load_kw = 0
+        end
+      end
 
-        if load_kw > 0 # failed to meet load in this time step
-          resilience_hours[init_time_step] = i
-        end
+      if load_kw > 0 # failed to meet load in this time step
+        return i
       end
     end
 
-    return resilience_hours
+    return n_timesteps
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
