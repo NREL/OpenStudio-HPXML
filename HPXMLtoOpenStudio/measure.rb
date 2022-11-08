@@ -188,8 +188,10 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
+    offset_db = @hpxml.hvac_controls.size == 0 ? nil:@hpxml.hvac_controls[0].onoff_thermostat_deadband
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml.header.schedules_filepaths)
+                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        offset_db: offset_db)
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
@@ -1645,13 +1647,6 @@ class OSModel
     hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
-    timestep = @hpxml.header.timestep
-    # Do not apply on off thermostat if timestep is >= 2
-    # Only availabe with 1 min time step
-    if timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
-      hvac_control.onoff_thermostat_deadband = 0.0
-      runner.registerWarning('Time step too large to enable on-off thermostat deadband. Continute without on-off control.')
-    end
 
     HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml.header.sim_calendar_year, @schedules_file)
   end

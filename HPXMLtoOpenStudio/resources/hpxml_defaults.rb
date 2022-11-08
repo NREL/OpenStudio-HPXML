@@ -1453,6 +1453,12 @@ class HPXMLDefaults
         hvac_control.onoff_thermostat_deadband = 0.0
       end
 
+      # Do not apply on off thermostat if timestep is >= 2
+      # Only availabe with 1 min time step
+      if hpxml.header.timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
+        hvac_control.onoff_thermostat_deadband = 0.0
+      end
+
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
          hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
         hvac_control.seasons_heating_begin_month = 1

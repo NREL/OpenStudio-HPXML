@@ -50,7 +50,6 @@ class UnitConversions
     ['w/m^2', 'btu/(hr*ft^2)'] => 0.3169983306281505,
 
     # Temperature
-    ['k', 'r'] => 1.8,
     ['deltac', 'deltaf'] => 1.8,
 
     # Specific Heat
