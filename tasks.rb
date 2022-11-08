@@ -3873,11 +3873,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         hpxml.heating_systems[i].fraction_heat_load_served = 0.35
       end
     end
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.heating_systems[0].year_installed = 2009
-    hpxml.heating_systems[0].heating_efficiency_afue = nil
-    hpxml.cooling_systems[0].year_installed = 2009
-    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = hpxml.heat_pumps[0].backup_heating_efficiency_percent
     hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
@@ -4202,10 +4197,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].usage_bin = nil
   elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].performance_adjustment = 0.92
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].year_installed = 2009
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = nil
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
     hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
