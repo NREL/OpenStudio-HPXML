@@ -1549,10 +1549,17 @@ class OSModel
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       hvac_control = @hpxml.hvac_controls[0]
-      # Fixme:  Avoid two speed with only ddb control specified (not allowed)
       if heat_pump.additional_properties.respond_to? :num_speeds
-        is_realistic_staging = (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
-        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (heat_pump.additional_properties.num_speeds == 1) || is_realistic_staging
+        if heat_pump.additional_properties.num_speeds == 1
+          is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
+        elsif heat_pump.additional_properties.num_speeds == 2
+          if hvac_control.realistic_staging
+            is_realistic_staging = true
+            is_ddb_control = true
+          elsif @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0
+            fail 'Two speed system should be modeled using realistic stating if on/off thermostat deadband is greater than 0.0'
+          end
+        end
       else
         is_ddb_control = false
         is_realistic_staging = false

@@ -154,7 +154,7 @@ class HVAC
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
-    if (is_realistic_staging || is_ddb_control)
+    if is_realistic_staging
       apply_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, num_speeds)
     end
 
