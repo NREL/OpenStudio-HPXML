@@ -1159,7 +1159,7 @@
 	</xs:simpleType>
 	<xs:complexType name="AdjacentTo">
 		<xs:annotation>
-			<xs:documentation>DEPRECATION WARNING: Choices "other housing unit above" and "other housing unit below" will be deprecated in the future. Use Ceiling vs Floor to describe whether "other housing unit" is above or below the given surface.</xs:documentation>
+			<xs:documentation>DEPRECATION WARNING: Choices "other housing unit above" and "other housing unit below" will be deprecated in the future.</xs:documentation>
 		</xs:annotation>
 		<xs:simpleContent>
 			<xs:extension base="AdjacentTo_simple">
@@ -4594,19 +4594,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="DehumidifierType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="portable"/>
-			<xs:enumeration value="whole-home"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="DehumidifierType">
-		<xs:simpleContent>
-			<xs:extension base="DehumidifierType_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="CompressorType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="single stage"/>
@@ -4621,51 +4608,15 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="PVSystemMaxPowerOutput_simple">
-		<xs:restriction base="Power_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemMaxPowerOutput">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemMaxPowerOutput_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PVSystemCollectorArea_simple">
-		<xs:restriction base="SurfaceArea_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemCollectorArea">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemCollectorArea_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PVSystemNumberOfPanels_simple">
-		<xs:restriction base="IntegerGreaterThanZero_simple"/>
-	</xs:simpleType>
-	<xs:complexType name="PVSystemNumberOfPanels">
-		<xs:simpleContent>
-			<xs:extension base="PVSystemNumberOfPanels_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="PerformanceClass_simple">
+	<xs:simpleType name="DehumidifierType_simple">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="residential"/>
-			<xs:enumeration value="architectural"/>
-			<xs:enumeration value="light commercial"/>
-			<xs:enumeration value="commercial"/>
-			<xs:enumeration value="heavy commercial"/>
+			<xs:enumeration value="portable"/>
+			<xs:enumeration value="whole-home"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="PerformanceClass">
-		<xs:annotation>
-			<xs:documentation>The North American Fenestration Standard/Specification for windows, doors and, skylights provides a method for rating the structural performance, water resistance and air leakage of fenestration products.</xs:documentation>
-		</xs:annotation>
+	<xs:complexType name="DehumidifierType">
 		<xs:simpleContent>
-			<xs:extension base="PerformanceClass_simple">
+			<xs:extension base="DehumidifierType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -4709,15 +4660,21 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="BatteryCapacityUnits_simple">
+	<xs:simpleType name="PerformanceClass_simple">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="kWh"/>
-			<xs:enumeration value="Ah"/>
+			<xs:enumeration value="residential"/>
+			<xs:enumeration value="architectural"/>
+			<xs:enumeration value="light commercial"/>
+			<xs:enumeration value="commercial"/>
+			<xs:enumeration value="heavy commercial"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="BatteryCapacityUnits">
+	<xs:complexType name="PerformanceClass">
+		<xs:annotation>
+			<xs:documentation>The North American Fenestration Standard/Specification for windows, doors and, skylights provides a method for rating the structural performance, water resistance and air leakage of fenestration products.</xs:documentation>
+		</xs:annotation>
 		<xs:simpleContent>
-			<xs:extension base="BatteryCapacityUnits_simple">
+			<xs:extension base="PerformanceClass_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -4830,17 +4787,15 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="AdditionalRuntimeOperatingModeType_simple">
+	<xs:simpleType name="BatteryCapacityUnits_simple">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="none"/>
-			<xs:enumeration value="air handler fan"/>
-			<xs:enumeration value="supplemental fan"/>
-			<xs:enumeration value="other"/>
+			<xs:enumeration value="kWh"/>
+			<xs:enumeration value="Ah"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="AdditionalRuntimeOperatingMode">
+	<xs:complexType name="BatteryCapacityUnits">
 		<xs:simpleContent>
-			<xs:extension base="AdditionalRuntimeOperatingModeType_simple">
+			<xs:extension base="BatteryCapacityUnits_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -4854,6 +4809,21 @@
 	<xs:complexType name="FloorOrCeiling">
 		<xs:simpleContent>
 			<xs:extension base="FloorOrCeiling_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="AdditionalRuntimeOperatingModeType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="none"/>
+			<xs:enumeration value="air handler fan"/>
+			<xs:enumeration value="supplemental fan"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="AdditionalRuntimeOperatingMode">
+		<xs:simpleContent>
+			<xs:extension base="AdditionalRuntimeOperatingModeType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
