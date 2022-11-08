@@ -188,7 +188,7 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
-    offset_db = @hpxml.hvac_controls.size == 0 ? nil:@hpxml.hvac_controls[0].onoff_thermostat_deadband
+    offset_db = @hpxml.hvac_controls.size == 0 ? nil : @hpxml.hvac_controls[0].onoff_thermostat_deadband
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         offset_db: offset_db)

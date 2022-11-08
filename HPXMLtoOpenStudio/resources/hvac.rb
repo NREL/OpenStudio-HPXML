@@ -3015,7 +3015,7 @@ class HVAC
     supp_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
     supp_coil_energy.setName('supp coil electric energy')
     supp_coil_energy.setKeyName(supp_coil.name.get)
-    
+
     htg_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
     htg_coil_energy.setName('hp htg coil electric energy')
     htg_coil_energy.setKeyName(htg_coil.name.get)
@@ -3024,7 +3024,7 @@ class HVAC
     supp_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, supp_coil_energy)
     supp_energy_trend.setName("#{supp_coil_energy.name} Trend")
     supp_energy_trend.setNumberOfTimestepsToBeLogged(1)
-    
+
     # Trend variable
     htg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, htg_coil_energy)
     htg_energy_trend.setName("#{htg_coil_energy.name} Trend")
@@ -3054,10 +3054,10 @@ class HVAC
     supp_coil_avail_program.addLine('Else') # Only turn on the backup coil when temprature is below lower end of ddb.
     r_s_a = ["#{htg_energy_trend.name} > 0"]
     # Observe 5 mins before turning on supp coil
-    (1...5).each do |t_i|
+    for t_i in 1..4
       r_s_a << "(@TrendValue #{htg_energy_trend.name} #{t_i}) > 0"
     end
-    supp_coil_avail_program.addLine("  If #{r_s_a.join(" && ")}")
+    supp_coil_avail_program.addLine("  If #{r_s_a.join(' && ')}")
     supp_coil_avail_program.addLine('    If living_t > htg_sp_l')
     supp_coil_avail_program.addLine("      Set #{supp_coil_avail_actuator.name} = 0")
     supp_coil_avail_program.addLine('    Else')
@@ -3153,7 +3153,7 @@ class HVAC
         cycling_degrad_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
       else
         r_s_a = ['cc_now > 0']
-        (1...t_i).each do |i|
+        for i in 1..t_i - 1
           r_s_a << "cc_#{i}_ago > 0"
         end
         r_s = r_s_a.join(' && ')

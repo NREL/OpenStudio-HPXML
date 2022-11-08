@@ -1420,13 +1420,13 @@ class SchedulesFile
 
     col_names = SchedulesFile.ColumnNames
 
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
+    for i in 0..@tmp_schedules[col_names[0]].size - 1
       col_names.each do |col_name|
         next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
-    end
+   end
   end
 
   def convert_setpoints(offset_db)
@@ -1434,20 +1434,17 @@ class SchedulesFile
 
     col_names = @tmp_schedules.keys
 
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
+    offset_db_c = UnitConversions.convert(offset_db.to_f / 2.0, 'deltaF', 'deltaC')
+
+    for i in 0..@tmp_schedules[col_names[0]].size - 1
       SchedulesFile.SetpointColumnNames.each do |setpoint_col_name|
         next unless col_names.include?(setpoint_col_name)
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
-      end
-      if offset_db.to_f > 0.0
-        SchedulesFile.HVACSetpointColumnNames.each do |hvac_setpoint_col_name|
-          next unless col_names.include?(hvac_setpoint_col_name)
-          if hvac_setpoint_col_name == ColumnHeatingSetpoint
-            @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] - UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
-          elsif hvac_setpoint_col_name == ColumnCoolingSetpoint
-            @tmp_schedules[hvac_setpoint_col_name][i] = @tmp_schedules[hvac_setpoint_col_name][i] + UnitConversions.convert(offset_db / 2.0, 'deltaF', 'deltaC')
-          end
+        if setpoint_col_name == ColumnHeatingSetpoint
+          @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] - offset_db_c
+        elsif setpoint_col_name == ColumnCoolingSetpoint
+          @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] + offset_db_c
         end
       end
     end
