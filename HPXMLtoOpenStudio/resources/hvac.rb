@@ -445,7 +445,7 @@ class HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp - 32.0, 'R', 'K'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp - 32.0, 'deltaF', 'deltaC'))
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
@@ -471,10 +471,10 @@ class HVAC
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
     if is_condensing
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
-      boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
+      boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'deltaF', 'deltaC')
       plr_Rated = 1.0
       plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'R', 'K')
+      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, 'deltaF', 'deltaC')
       # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
       condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
@@ -530,7 +530,7 @@ class HVAC
     pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
-    bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'R', 'K') * 3.0 # W/K
+    bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
     max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
     fan_cfm = 400.0 * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM; assumes 400 cfm/ton
 

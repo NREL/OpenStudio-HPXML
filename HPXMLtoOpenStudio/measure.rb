@@ -1638,13 +1638,6 @@ class OSModel
     hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
-    timestep = @hpxml.header.timestep
-    # Do not apply on off thermostat if timestep is >= 2
-    # Only availabe with 1 min time step
-    if timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
-      hvac_control.onoff_thermostat_deadband = 0.0
-      runner.registerWarning('Time step too large to enable on-off thermostat deadband. Continute without on-off control.')
-    end
 
     HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml.header.sim_calendar_year, @schedules_file)
   end

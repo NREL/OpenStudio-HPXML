@@ -233,9 +233,7 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:BackupSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem</sch:assert>
       <!-- Sum Checks -->
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &lt;= 1.01'>Expected sum(FractionHeatLoadServed) to be less than or equal to 1</sch:assert>
-      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0 or number(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadbandTemperature) = 0 or not(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadbandTemperature)'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &lt;= 1.01'>Expected sum(FractionCoolLoadServed) to be less than or equal to 1</sch:assert>
-      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0 or number(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadbandTemperature) = 0 or not(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadbandTemperature)'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Appliances/h:Dehumidifier/h:FractionDehumidificationLoadServed) &lt;= 1.01'>Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='(sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &lt;= 1.01 and sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &gt;= 0.99) or count(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>Expected sum(FractionDHWLoadServed) to be 1</sch:assert>
       <!-- Warnings -->
@@ -1191,10 +1189,18 @@
   <sch:pattern>
     <sch:title>[HVACControl]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl'>
-      <sch:assert role='ERROR' test='count(h:extension/h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OnOffThermostatDeadbandTemperature</sch:assert> <!-- deg F, specify a positive value of deadband between setpoint and cutout temperature to model on/off thermostat behavior. The same value applies to both heating and cooling. -->
+      <sch:assert role='ERROR' test='count(h:extension/h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OnOffThermostatDeadbandTemperature</sch:assert> <!-- deg F, specify a positive value of deadband between setpoint and cutout temperature to model on/off thermostat behavior. The same value applies to both heating and cooling. See [HVACControl=DeadbandControl] -->
       <sch:assert role='ERROR' test='number(h:extension/h:OnOffThermostatDeadbandTemperature) &gt;= 0 or not(h:extension/h:OnOffThermostatDeadbandTemperature)'>Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0</sch:assert>
-      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) &gt; 1 and (h:extension/h:OnOffThermostatDeadbandTemperature)'>Timestep should be 1 when extension/OnOffThermostatDeadbandTemperature exists</sch:report>
-      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1 and (h:extension/h:OnOffThermostatDeadbandTemperature)'>TemperatureCapacitanceMultiplier should typically be greater than 1 when extension/OnOffThermostatDeadbandTemperature exists</sch:report>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern>
+    <sch:title>[HVACControl=DeadbandControl]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[number(h:extension/h:OnOffThermostatDeadbandTemperature) &gt; 0]'>
+      <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
+      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) &gt; 1'>Timestep should be 1; simulation will continue without deadband control.</sch:report>
+      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
     </sch:rule>
   </sch:pattern>
 
