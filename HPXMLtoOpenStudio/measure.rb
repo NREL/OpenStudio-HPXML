@@ -1617,21 +1617,21 @@ class OSModel
     end
 
     if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-      sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
-      @remaining_heat_load_frac -= sequential_heat_load_frac
+      sequential_heat_load_frac = HVAC.calc_sequential_load_fractions(@hpxml.total_fraction_heat_load_served, @remaining_heat_load_frac, @heating_season)
+      @remaining_heat_load_frac -= (1.0 - @hpxml.total_fraction_heat_load_served)
     else
-      sequential_heat_load_frac = 0.0
+      sequential_heat_load_frac = [0.0]
     end
 
     if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-      sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
-      @remaining_cool_load_frac -= sequential_cool_load_frac
+      sequential_cool_load_frac = HVAC.calc_sequential_load_fractions(@hpxml.total_fraction_cool_load_served, @remaining_cool_load_frac, @cooling_season)
+      @remaining_cool_load_frac -= (1.0 - @hpxml.total_fraction_cool_load_served)
     else
-      sequential_cool_load_frac = 0.0
+      sequential_cool_load_frac = [0.0]
     end
 
-    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      HVAC.apply_ideal_air_loads(model, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
+    if (sequential_heat_load_frac.sum > 0.0) || (sequential_cool_load_frac.sum > 0.0)
+      HVAC.apply_ideal_air_loads(model, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
                                  living_zone)
     end
   end
