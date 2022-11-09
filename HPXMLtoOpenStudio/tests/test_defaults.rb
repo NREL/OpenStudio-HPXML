@@ -1548,23 +1548,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_hvac_controls
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed.xml')
     # Use 1.0 min for onoff_thermostat_deadband tests
     hpxml.header.timestep = 1.0
     hpxml.hvac_controls[0].heating_setpoint_temp = 71.5
     hpxml.hvac_controls[0].cooling_setpoint_temp = 77.5
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
+    hpxml.hvac_controls[0].realistic_staging = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 71.5, 77.5, 2.0)
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 71.5, 77.5, 2.0, true)
 
     # Test defaults
     hpxml.hvac_controls[0].heating_setpoint_temp = nil
     hpxml.hvac_controls[0].cooling_setpoint_temp = nil
     hpxml.hvac_controls[0].onoff_thermostat_deadband = nil
+    hpxml.hvac_controls[0].realistic_staging = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0)
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0, false)
 
     # Test inputs not overridden by defaults (w/ setbacks)
     hpxml = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')
@@ -3964,10 +3966,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp, onoff_thermostat_deadband)
+  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp, onoff_thermostat_deadband, realistic_staging)
     assert_equal(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
     assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
     assert_equal(onoff_thermostat_deadband, hvac_control.onoff_thermostat_deadband)
+    assert_equal(realistic_staging, hvac_control.realistic_staging)
   end
 
   def _test_default_hvac_control_setback_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr, onoff_thermostat_deadband)

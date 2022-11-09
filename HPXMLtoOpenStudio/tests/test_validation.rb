@@ -185,6 +185,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0'],
+                            'realistic-staging-missiong-ddb' => ['Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature',
+                                                                 'Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
+                            'realistic-staging-zero-ddb' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
                             'ptac-unattached-cooling-system' => ['Expected 1 or more element(s) for xpath: ../CoolingSystem/CoolingSystemType[text()="packaged terminal air conditioner"'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem1"]'],
@@ -501,6 +504,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['onoff-thermostat-negative-value'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
         hpxml.hvac_controls[0].onoff_thermostat_deadband = -1.0
+      elsif ['realistic-staging-missiong-ddb'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-realistic-control-2-speed-central-ac.xml'))
+        hpxml.hvac_controls[0].onoff_thermostat_deadband = nil
+      elsif ['realistic-staging-zero-ddb'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-realistic-control-2-speed-central-ac.xml'))
+        hpxml.hvac_controls[0].onoff_thermostat_deadband = 0.0
       elsif ['ptac-unattached-cooling-system'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ptac-with-heating.xml'))
         hpxml.cooling_systems[0].delete

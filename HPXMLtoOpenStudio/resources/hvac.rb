@@ -75,11 +75,7 @@ class HVAC
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, is_ddb_control)
 
         # Supplemental Heating Coil
-      if num_speeds == 1
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, control_zone, is_ddb_control, htg_coil)
-      else # two speed system backup coil realistic control is combined in staging EMS
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
-      end
 
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
@@ -156,6 +152,8 @@ class HVAC
 
     if is_realistic_staging
       apply_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, num_speeds)
+    elsif is_ddb_control && is_heatpump
+      apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
     end
 
     return air_loop
@@ -1563,7 +1561,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, control_zone = nil, is_ddb_control = false, htg_coil = nil)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1585,9 +1583,6 @@ class HVAC
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
-    if is_ddb_control
-      apply_supp_control_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
-    end
     if heat_pump.is_dual_fuel
       htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id + '_DFHPBackup') # Used by reporting measure
     else
@@ -3018,7 +3013,7 @@ class HVAC
     end
   end
 
-  def self.apply_supp_control_for_ddb_thermostat(model, supp_coil, control_zone, htg_coil)
+  def self.apply_supp_coil_EMS_for_ddb_thermostat(model, supp_coil, control_zone, htg_coil)
     # Sensors
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
     tin_sensor.setName('zone air temp')
@@ -3203,7 +3198,7 @@ class HVAC
   end
 
   def self.apply_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, num_speeds)
-    return if (num_speeds == 1) && htg_supp_coil.nil? # only supp coil needs staging control for single speed systems
+    return if num_speeds == 1
 
     # Note: Currently only available in 1 min time step
     number_of_timestep_logged = 5 # wait 5 mins to check demand
@@ -3245,19 +3240,13 @@ class HVAC
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
 
-    if num_speeds == 1
-      unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Total Heating Rate')
-      unitary_var.setName(unitary_system.name.get + ' heating rate')
-      unitary_var.setKeyName(unitary_system.name.get)
-    else
-      unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
-      unitary_var.setName(unitary_system.name.get + ' speed level')
-      unitary_var.setKeyName(unitary_system.name.get)
+    unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
+    unitary_var.setName(unitary_system.name.get + ' speed level')
+    unitary_var.setKeyName(unitary_system.name.get)
 
-      # Actuators
-      unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System DX Coil Speed Value')
-      unitary_actuator.setName(unitary_system.name.get + ' speed override')
-    end
+    # Actuators
+    unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System DX Coil Speed Value')
+    unitary_actuator.setName(unitary_system.name.get + ' speed override')
 
     # Trend variable
     unitary_speed_var_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_var)
@@ -3274,12 +3263,12 @@ class HVAC
     realistic_cycling_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
 
-    (1...number_of_timestep_logged).each do |t_i|
+    (1..(number_of_timestep_logged - 1)).each do |t_i|
       realistic_cycling_program.addLine("Set unitary_var_#{t_i}_ago = @TrendValue #{unitary_speed_var_trend.name} #{t_i}")
     end
-    (1...highest_speed_level).each do |low_speed_level|
+    (1..(highest_speed_level - 1)).each do |low_speed_level|
       s_trend = []
-      (1...number_of_timestep_logged).each do |t_i|
+      (1..(number_of_timestep_logged - 1)).each do |t_i|
         if num_speeds > 1
           s_trend << "(unitary_var_#{t_i}_ago == #{low_speed_level})"
         else
@@ -3287,14 +3276,13 @@ class HVAC
         end
       end
 
-      if low_speed_level <= (num_speeds - 1) # switch to the higher speed, single speed systems will never be here
-        realistic_cycling_program.addLine("Set unitary_level_1_ago = #{unitary_speed_var_trend.name} 1")
+      if low_speed_level <= (num_speeds - 1) # switch to the higher speed
         # Setpoint not met and low speed is on for 5 time steps
         realistic_cycling_program.addLine("If ((living_t - clg_sp_h > 0.0) || (htg_sp_l - living_t > 0.0)) && (#{s_trend.join(' && ')})")
         # Enable high speed unitary system
         realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level + 1}")
         # Keep high speed unitary on until setpoint +- deadband is met
-        realistic_cycling_program.addLine("ElseIf (unitary_level_1_ago == #{low_speed_level + 1}) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))")
+        realistic_cycling_program.addLine("ElseIf (unitary_var_1_ago == #{low_speed_level + 1}) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))")
         realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level + 1}")
         realistic_cycling_program.addLine('Else')
         realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level}")

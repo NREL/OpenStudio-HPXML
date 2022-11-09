@@ -1454,6 +1454,11 @@ class HPXMLDefaults
         hvac_control.onoff_thermostat_deadband_isdefaulted = true
       end
 
+      if hvac_control.realistic_staging.nil?
+        hvac_control.realistic_staging = false
+        hvac_control.onoff_thermostat_deadband_isdefaulted = true
+      end
+
       # Do not apply on off thermostat if timestep is >= 2
       # Only availabe with 1 min time step
       if hpxml.header.timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0

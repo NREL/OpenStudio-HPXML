@@ -228,7 +228,7 @@ class OSModel
 
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
-    add_cooling_system(model, spaces, airloop_map)
+    add_cooling_system(model, spaces, runner, airloop_map)
     add_heating_system(runner, model, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(model, spaces)
@@ -1417,7 +1417,7 @@ class OSModel
     Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
   end
 
-  def self.add_cooling_system(model, spaces, airloop_map)
+  def self.add_cooling_system(model, spaces, runner, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1429,14 +1429,24 @@ class OSModel
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
-      hvac_control = @hpxml.hvac_controls[0]
-      # Fixme:  Avoid two speed with only ddb control specified (not allowed)
+      is_ddb_control = @hpxml.hvac_controls[0].onoff_thermostat_deadband.to_f > 0.0
+      is_realistic_staging = @hpxml.hvac_controls[0].realistic_staging
+      # Error checking
       if cooling_system.additional_properties.respond_to? :num_speeds
-        is_realistic_staging = (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
-        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (cooling_system.additional_properties.num_speeds == 1) || is_realistic_staging
-      else
-        is_ddb_control = false
-        is_realistic_staging = false
+        if is_realistic_staging && cooling_system.additional_properties.num_speeds != 2
+          is_realistic_staging = false
+          runner.registerWarning( 'TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
+        end
+        if is_ddb_control && !([1, 2].include? cooling_system.additional_properties.num_speeds)
+          is_ddb_control = false
+          is_realistic_staging = false
+          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+        end
+        if cooling_system.additional_properties.num_speeds == 2 && !is_realistic_staging && is_ddb_control
+          is_ddb_control = false
+          is_realistic_staging = false
+          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+        end
       end
 
       # Calculate cooling sequential load fractions
@@ -1548,22 +1558,26 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
-      hvac_control = @hpxml.hvac_controls[0]
+      is_ddb_control = @hpxml.hvac_controls[0].onoff_thermostat_deadband.to_f > 0.0
+      is_realistic_staging = @hpxml.hvac_controls[0].realistic_staging
+      # Error checking
       if heat_pump.additional_properties.respond_to? :num_speeds
-        if heat_pump.additional_properties.num_speeds == 1
-          is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
-        elsif heat_pump.additional_properties.num_speeds == 2
-          if hvac_control.realistic_staging
-            is_realistic_staging = true
-            is_ddb_control = true
-          elsif @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0
-            fail 'Two speed system should be modeled using realistic stating if on/off thermostat deadband is greater than 0.0'
-          end
+        if is_realistic_staging && heat_pump.additional_properties.num_speeds != 2
+          is_realistic_staging = false
+          runner.registerWarning( 'TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
         end
-      else
-        is_ddb_control = false
-        is_realistic_staging = false
+        if is_ddb_control && !([1, 2].include? heat_pump.additional_properties.num_speeds)
+          is_ddb_control = false
+          is_realistic_staging = false
+          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+        end
+        if heat_pump.additional_properties.num_speeds == 2 && !is_realistic_staging && is_ddb_control
+          is_ddb_control = false
+          is_realistic_staging = false
+          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+        end
       end
+
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
