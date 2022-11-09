@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>9038eb50-8949-40bd-9783-e8057860335d</version_id>
-  <version_modified>20221102T042832Z</version_modified>
+  <version_id>a9eeb331-f3f0-4263-82b0-4b89e73a3e86</version_id>
+  <version_modified>20221109T012315Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -708,13 +708,6 @@
       <name>End Use: Electricity: Generator MBtu</name>
       <display_name>End Use: Electricity: Generator MBtu</display_name>
       <short_name>End Use: Electricity: Generator MBtu</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>End Use: Electricity: Battery MBtu</name>
-      <display_name>End Use: Electricity: Battery MBtu</display_name>
-      <short_name>End Use: Electricity: Battery MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1526,6 +1519,12 @@
   </attributes>
   <files>
     <file>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3D8EBBC3</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.1</identifier>
@@ -1534,13 +1533,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5E9A92B8</checksum>
-    </file>
-    <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>314D2C5A</checksum>
+      <checksum>3C50A5F3</checksum>
     </file>
   </files>
 </measure>

@@ -1435,6 +1435,9 @@ class OSModel
       if not heating_system.nil?
         sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
         @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      elsif cooling_system.has_integrated_heating
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.integrated_heating_system_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= cooling_system.integrated_heating_system_fraction_heat_load_served
       else
         sequential_heat_load_fracs = [0]
       end
@@ -1472,9 +1475,6 @@ class OSModel
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
       end
-      if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
-        fail 'Unhandled ducted PTAC/PTHP system.'
-      end
 
       # Calculate heating sequential load fractions
       if heating_system.is_heat_pump_backup_system
@@ -1490,7 +1490,7 @@ class OSModel
       end
 
       sys_id = heating_system.id
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
+      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,
@@ -1553,7 +1553,8 @@ class OSModel
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
-             HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+             HPXML::HVACTypeHeatPumpPTHP,
+             HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  living_zone)
