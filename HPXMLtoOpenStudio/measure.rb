@@ -1435,17 +1435,17 @@ class OSModel
       if cooling_system.additional_properties.respond_to? :num_speeds
         if is_realistic_staging && cooling_system.additional_properties.num_speeds != 2
           is_realistic_staging = false
-          runner.registerWarning( 'TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
+          runner.registerWarning('TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
         end
         if is_ddb_control && !([1, 2].include? cooling_system.additional_properties.num_speeds)
           is_ddb_control = false
           is_realistic_staging = false
-          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+          runner.registerWarning('Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
         end
         if cooling_system.additional_properties.num_speeds == 2 && !is_realistic_staging && is_ddb_control
           is_ddb_control = false
           is_realistic_staging = false
-          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+          runner.registerWarning('Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
         end
       end
 
@@ -1564,17 +1564,17 @@ class OSModel
       if heat_pump.additional_properties.respond_to? :num_speeds
         if is_realistic_staging && heat_pump.additional_properties.num_speeds != 2
           is_realistic_staging = false
-          runner.registerWarning( 'TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
+          runner.registerWarning('TwospeedRealisticStaging should only be used for two speed DX systems. Continue simulation without realistic staging.')
         end
         if is_ddb_control && !([1, 2].include? heat_pump.additional_properties.num_speeds)
           is_ddb_control = false
           is_realistic_staging = false
-          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+          runner.registerWarning('Expect OnOffThermostatDeadbandTemperature to be used only for single speed or two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
         end
         if heat_pump.additional_properties.num_speeds == 2 && !is_realistic_staging && is_ddb_control
           is_ddb_control = false
           is_realistic_staging = false
-          runner.registerWarning( 'Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
+          runner.registerWarning('Expect OnOffThermostatDeadbandTemperature to be used with realistic staging for two speed DX systems. Continue simulation without on-off thermostat deadband or realistic staging.')
         end
       end
 

@@ -151,7 +151,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if is_realistic_staging
-      apply_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, num_speeds)
+      apply_two_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, is_heatpump)
     elsif is_ddb_control && is_heatpump
       apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
     end
@@ -3197,24 +3197,20 @@ class HVAC
     # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  def self.apply_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, num_speeds)
-    return if num_speeds == 1
-
+  def self.apply_two_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, is_heatpump)
     # Note: Currently only available in 1 min time step
     number_of_timestep_logged = 5 # wait 5 mins to check demand
-    highest_speed_level = num_speeds
 
     # Sensors
-    if not htg_supp_coil.nil?
-      highest_speed_level += 1 # add one speed number for supp coil
-      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Energy')
-      coil_energy.setName('supp coil heating energy')
-      coil_energy.setKeyName(htg_supp_coil.name.get)
+    if is_heatpump
+      backup_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Energy')
+      backup_coil_energy.setName('supp coil heating energy')
+      backup_coil_energy.setKeyName(htg_supp_coil.name.get)
 
       # Trend variable
-      energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
-      energy_trend.setName("#{coil_energy.name} Trend")
-      energy_trend.setNumberOfTimestepsToBeLogged(1)
+      backup_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, backup_coil_energy)
+      backup_energy_trend.setName("#{backup_coil_energy.name} Trend")
+      backup_energy_trend.setNumberOfTimestepsToBeLogged(1)
 
       # Create a new schedule for supp availability
       supp_avail_sch = htg_supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
@@ -3223,12 +3219,13 @@ class HVAC
       supp_coil_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(supp_avail_sch, *EPlus::EMSActuatorScheduleConstantValue)
       supp_coil_avail_actuator.setName(htg_supp_coil.name.get.gsub('-', '_') + ' avail')
     end
-
-    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-    clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
+    # Sensors
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     living_temp_ss.setName('living temp')
     living_temp_ss.setKeyName(HPXML::LocationLivingSpace)
+
+    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+    clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     htg_sp_ss.setName('htg_setpoint')
@@ -3237,8 +3234,6 @@ class HVAC
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     clg_sp_ss.setName('clg_setpoint')
     clg_sp_ss.setKeyName(clg_sch.name.to_s)
-
-    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
 
     unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
     unitary_var.setName(unitary_system.name.get + ' speed level')
@@ -3253,6 +3248,7 @@ class HVAC
     unitary_speed_var_trend.setName("#{unitary_var.name} Trend")
     unitary_speed_var_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
 
+    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
     # Program
     realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     # Check values within min/max limits
@@ -3266,38 +3262,44 @@ class HVAC
     (1..(number_of_timestep_logged - 1)).each do |t_i|
       realistic_cycling_program.addLine("Set unitary_var_#{t_i}_ago = @TrendValue #{unitary_speed_var_trend.name} #{t_i}")
     end
-    (1..(highest_speed_level - 1)).each do |low_speed_level|
-      s_trend = []
-      (1..(number_of_timestep_logged - 1)).each do |t_i|
-        if num_speeds > 1
-          s_trend << "(unitary_var_#{t_i}_ago == #{low_speed_level})"
-        else
-          s_trend << "(unitary_var_#{t_i}_ago > 0)"
-        end
-      end
-
-      if low_speed_level <= (num_speeds - 1) # switch to the higher speed
-        # Setpoint not met and low speed is on for 5 time steps
-        realistic_cycling_program.addLine("If ((living_t - clg_sp_h > 0.0) || (htg_sp_l - living_t > 0.0)) && (#{s_trend.join(' && ')})")
-        # Enable high speed unitary system
-        realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level + 1}")
-        # Keep high speed unitary on until setpoint +- deadband is met
-        realistic_cycling_program.addLine("ElseIf (unitary_var_1_ago == #{low_speed_level + 1}) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))")
-        realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level + 1}")
+    s_trend_low = []
+    s_trend_high = []
+    (1..(number_of_timestep_logged - 1)).each do |t_i|
+      s_trend_low << "(unitary_var_#{t_i}_ago == 1)"
+      s_trend_high << "(unitary_var_#{t_i}_ago == 2)"
+    end
+    # Cooling
+    # Setpoint not met and low speed is on for 5 time steps
+    realistic_cycling_program.addLine("If (living_t - clg_sp_h > 0.0) && (#{s_trend_low.join(' && ')})")
+    # Enable high speed unitary system
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
+    # Keep high speed unitary on until setpoint +- deadband is met
+    realistic_cycling_program.addLine('ElseIf (unitary_var_1_ago == 2) && ((living_t - clg_sp_l > 0.0))')
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
+    realistic_cycling_program.addLine('Else')
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 1")
+    realistic_cycling_program.addLine('EndIf')
+    if is_heatpump
+      # Heating
+      realistic_cycling_program.addLine("If (htg_sp_l - living_t > 0.0) && (#{s_trend_low.join(' && ')})")
+      # Enable high speed unitary system
+      realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
+      # Keep high speed unitary on until setpoint +- deadband is met
+      realistic_cycling_program.addLine('ElseIf (unitary_var_1_ago == 2) && (htg_sp_h - living_t > 0.0)')
+      realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
+      realistic_cycling_program.addLine('Else')
+      realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 1")
+      realistic_cycling_program.addLine('EndIf')
+      if not htg_supp_coil.nil?
+        realistic_cycling_program.addLine("If (htg_sp_l - living_t > 0.0) && (#{s_trend_high.join(' && ')})")
+        realistic_cycling_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
+        realistic_cycling_program.addLine("ElseIf ((@TRENDVALUE #{backup_energy_trend.name} 1) > 0) && (htg_sp_h - living_t > 0.0)") # backup coil is turned on, keep it on until reaching upper end of ddb in case of high frequency oscillations
+        realistic_cycling_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
         realistic_cycling_program.addLine('Else')
-        realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = #{low_speed_level}")
-        realistic_cycling_program.addLine('EndIf')
-      elsif not htg_supp_coil.nil? # highest speed already
-        realistic_cycling_program.addLine("If (htg_sp_l - living_t > 0.0) && (#{s_trend.join(' && ')})")
-        realistic_cycling_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
-        realistic_cycling_program.addLine("ElseIf ((@TRENDVALUE #{energy_trend.name} 1) > 0) && (htg_sp_h - living_t > 0.0)") # backup coil is turned on, keep it on until reaching upper end of ddb in case of high frequency oscillations
-        realistic_cycling_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
-        realistic_cycling_program.addLine('Else') # backup coil is turned on, keep it on until reaching upper end of ddb in case of high frequency oscillations
         realistic_cycling_program.addLine("  Set #{supp_coil_avail_actuator.name} = 0")
         realistic_cycling_program.addLine('EndIf')
       end
     end
-
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{realistic_cycling_program.name} ProgramManager")
