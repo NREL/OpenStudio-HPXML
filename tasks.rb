@@ -262,10 +262,14 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
-    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
+    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating-electricity.xml',
     'base-hvac-autosize-pthp-sizing-methodology-acca.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-hers.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-maxload.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-acca.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-hers.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-maxload.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-heating.xml' => 'base-hvac-room-ac-with-heating.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -334,11 +338,14 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-ptac.xml' => 'base.xml',
-    'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-electricity.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-natural-gas.xml' => 'base-hvac-ptac.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-heating.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-reverse-cycle.xml' => 'base-hvac-pthp.xml',
     'base-hvac-room-ac-only-detailed-setpoints.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -1743,6 +1750,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args.delete('heating_system_2_heating_capacity')
     args.delete('cooling_system_cooling_capacity')
     args.delete('heat_pump_heating_capacity')
+    args.delete('cooling_system_integrated_heating_system_capacity')
     if hpxml_file.include? 'sizing-methodology-hers'
       args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
     elsif hpxml_file.include? 'sizing-methodology-maxload'
@@ -1989,6 +1997,18 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     args['cooling_system_fraction_cool_load_served'] = 0.33
     args['cooling_system_cooling_capacity'] = 8000.0
+  elsif ['base-hvac-room-ac-with-heating.xml',
+         'base-hvac-ptac-with-heating-electricity.xml',
+         'base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+    args['cooling_system_integrated_heating_system_capacity'] = 36000.0
+    args['cooling_system_integrated_heating_system_fraction_heat_load_served'] = 1.0
+    if ['base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 0.8
+    else
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
+    end
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60
@@ -2015,15 +2035,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpPTHP
     args['heat_pump_cooling_efficiency'] = 11.4
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-room-ac-with-reverse-cycle.xml'].include? hpxml_file
+    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRoom
   elsif ['base-hvac-ptac.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypePTAC
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 10.7
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
-  elsif ['base-hvac-ptac-with-heating.xml'].include? hpxml_file
-    args['heating_system_type'] = HPXML::HVACTypePTACHeating
-    args['heating_system_heating_efficiency'] = 1.0
   end
 
   # Lighting

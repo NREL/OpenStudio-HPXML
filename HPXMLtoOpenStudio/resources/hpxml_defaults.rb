@@ -1014,7 +1014,6 @@ class HPXMLDefaults
     # HVAC efficiencies
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-
       next unless cooling_system.cooling_efficiency_seer.nil?
 
       cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2).round(2)
@@ -1023,13 +1022,14 @@ class HPXMLDefaults
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
       if heat_pump.cooling_efficiency_seer.nil?
         heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2).round(2)
         heat_pump.cooling_efficiency_seer_isdefaulted = true
         heat_pump.cooling_efficiency_seer2 = nil
       end
+
       next unless heat_pump.heating_efficiency_hspf.nil?
 
       heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2).round(2)
@@ -1309,8 +1309,9 @@ class HPXMLDefaults
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
       if [HPXML::HVACTypeHeatPumpAirToAir,
-          HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
-        if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
+          HPXML::HVACTypeHeatPumpPTHP,
+          HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+        if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
           use_eer_cop = true
         else
           use_eer_cop = false
@@ -2679,6 +2680,15 @@ class HPXMLDefaults
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)
         clg_sys.cooling_capacity = hvac_sizing_values.Cool_Capacity.round
         clg_sys.cooling_capacity_isdefaulted = true
+      end
+      # Integrated heating system capacities
+      if (clg_sys.is_a? HPXML::CoolingSystem) && clg_sys.has_integrated_heating
+        if clg_sys.integrated_heating_system_capacity.nil? || ((clg_sys.integrated_heating_system_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
+          clg_sys.integrated_heating_system_capacity = hvac_sizing_values.Heat_Capacity.round
+          clg_sys.integrated_heating_system_capacity_isdefaulted = true
+        end
+        clg_sys.integrated_heating_system_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
+        clg_sys.integrated_heating_system_airflow_cfm_isdefaulted = true
       end
       clg_sys.additional_properties.cooling_capacity_sensible = hvac_sizing_values.Cool_Capacity_Sens.round
 
