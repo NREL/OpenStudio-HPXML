@@ -2291,6 +2291,17 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
+    # EMS Actuators
+
+    natvent_flow_actuator = nil
+    model.getEnergyManagementSystemActuators.each do |actuator|
+      next unless (actuator.actuatedComponentType == 'Zone Infiltration') && (actuator.actuatedComponentControlType == 'Air Exchange Flow Rate')
+      next unless actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(' ', '_')
+
+      natvent_flow_actuator = actuator
+      break
+    end
+
     nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
 
     # EMS program
@@ -2359,13 +2370,13 @@ class OSModel
     if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
-    
+
     if living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = living_zone.thermostatSetpointDualSetpoint.get
       htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
       clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
     end
-    
+
     # Sensors
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
     tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
@@ -2388,9 +2399,9 @@ class OSModel
     program.addLine('Set clg_mode = 0')
     program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
     program.addLine('  Set htg_mode = 1')
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
+    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (#{natvent_flow_actuator.name} > 0)") # Assign hour to cooling if cooling load or natural ventilation is operating
     program.addLine('  Set clg_mode = 1')
-    program.addLine("Else") # No load, assign hour to cooling if temperature closer to cooling setpoint, otherwise assign hour to heating
+    program.addLine('Else') # No load, assign hour to cooling if temperature closer to cooling setpoint, otherwise assign hour to heating
     if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
       program.addLine("  Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints
     else
