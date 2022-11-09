@@ -1011,102 +1011,30 @@ class HPXMLDefaults
       end
     end
 
-    # HVAC efficiencies (based on HEScore assumption)
-    hpxml.heating_systems.each do |heating_system|
-      year_installed = heating_system.year_installed
-      heating_system_type = heating_system.heating_system_type
-      heating_system_fuel = heating_system.heating_system_fuel
-
-      if [HPXML::HVACTypeBoiler, HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
-        next unless heating_system.heating_efficiency_afue.nil?
-
-        if heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_system.heating_efficiency_afue = 0.98
-        else
-          heating_system.heating_efficiency_afue = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
-        end
-        heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
-        next unless heating_system.heating_efficiency_percent.nil?
-
-        heating_system.heating_efficiency_percent = 1.0
-        heating_system.heating_efficiency_percent_isdefaulted = true
-      elsif [HPXML::HVACTypeStove, HPXML::HVACTypeFireplace, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
-        next unless heating_system.heating_efficiency_percent.nil?
-
-        if heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_system.heating_efficiency_percent = 1.0
-        elsif heating_system_fuel == HPXML::FuelTypeWoodCord
-          heating_system.heating_efficiency_percent = 0.60  # HEScore assumption
-        elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
-          heating_system.heating_efficiency_percent = 0.78  # HEScore assumption
-        else
-          heating_system.heating_efficiency_percent = 0.81  # https://www.lopistoves.com/products/ and https://www.kozyheat.com/products/
-        end
-        heating_system.heating_efficiency_percent_isdefaulted = true
-      end
-    end
-
+    # HVAC efficiencies
     hpxml.cooling_systems.each do |cooling_system|
-      year_installed = cooling_system.year_installed
-      cooling_system_type = cooling_system.cooling_system_type
-      cooling_system_fuel = HPXML::FuelTypeElectricity
+      next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      next unless cooling_system.cooling_efficiency_seer.nil?
 
-      if cooling_system.has_integrated_heating && cooling_system.integrated_heating_system_efficiency_percent.nil?
-        if cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeElectricity
-          cooling_system.integrated_heating_system_efficiency_percent = 1.0
-        elsif cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeWoodCord
-          cooling_system.integrated_heating_system_efficiency_percent = 0.60  # HEScore assumption
-        elsif cooling_system.integrated_heating_system_fuel == HPXML::FuelTypeWoodPellets
-          cooling_system.integrated_heating_system_efficiency_percent = 0.78  # HEScore assumption
-        else
-          cooling_system.integrated_heating_system_efficiency_percent = 0.81  # https://www.lopistoves.com/products/ and https://www.kozyheat.com/products/
-        end
-        cooling_system.integrated_heating_system_efficiency_percent_isdefaulted = true
-      end
-      if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-        if cooling_system.cooling_efficiency_seer.nil?
-          if cooling_system.cooling_efficiency_seer2.nil?
-            cooling_system.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
-          else
-            cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2).round(2)
-            cooling_system.cooling_efficiency_seer2 = nil
-          end
-          cooling_system.cooling_efficiency_seer_isdefaulted = true
-        end
-      elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
-        next unless cooling_system.cooling_efficiency_eer.nil? && cooling_system.cooling_efficiency_ceer.nil?
-
-        cooling_system.cooling_efficiency_eer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
-        cooling_system.cooling_efficiency_eer_isdefaulted = true
-      end
+      cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2).round(2)
+      cooling_system.cooling_efficiency_seer_isdefaulted = true
+      cooling_system.cooling_efficiency_seer2 = nil
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      year_installed = heat_pump.year_installed
-      heat_pump_type = heat_pump.heat_pump_type
-      heat_pump_fuel = HPXML::FuelTypeElectricity
-
-      next unless [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump_type
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
       if heat_pump.cooling_efficiency_seer.nil?
-        if heat_pump.cooling_efficiency_seer2.nil?
-          heat_pump.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsSEER)
-        else
-          heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2).round(2)
-          heat_pump.cooling_efficiency_seer2 = nil
-        end
+        heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2).round(2)
         heat_pump.cooling_efficiency_seer_isdefaulted = true
+        heat_pump.cooling_efficiency_seer2 = nil
       end
+
       next unless heat_pump.heating_efficiency_hspf.nil?
 
-      if heat_pump.heating_efficiency_hspf2.nil?
-        heat_pump.heating_efficiency_hspf = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsHSPF)
-      else
-        heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2).round(2)
-        heat_pump.heating_efficiency_hspf2 = nil
-      end
+      heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2).round(2)
       heat_pump.heating_efficiency_hspf_isdefaulted = true
+      heat_pump.heating_efficiency_hspf2 = nil
     end
 
     # Default AC/HP compressor type
@@ -1712,10 +1640,6 @@ class HPXMLDefaults
         if water_heating_system.tank_volume.nil?
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
           water_heating_system.tank_volume_isdefaulted = true
-        end
-        if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
-          water_heating_system.energy_factor = Waterheater.get_default_water_heater_efficiency_by_year_installed(water_heating_system.year_installed, water_heating_system.fuel_type)
-          water_heating_system.energy_factor_isdefaulted = true
         end
         if water_heating_system.recovery_efficiency.nil?
           water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
