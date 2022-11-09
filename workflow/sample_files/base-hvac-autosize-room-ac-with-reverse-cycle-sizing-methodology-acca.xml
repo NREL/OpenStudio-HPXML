@@ -11,8 +11,11 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <HVACSizingControl>
+        <HeatPumpSizingMethodology>ACCA</HeatPumpSizingMethodology>
+      </HVACSizingControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-ptac-with-heating-electricity.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-ac-with-reverse-cycle.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -321,25 +324,31 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryCoolingSystem idref='CoolingSystem1'/>
+              <PrimaryHeatingSystem idref='HeatPump1'/>
+              <PrimaryCoolingSystem idref='HeatPump1'/>
             </PrimarySystems>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem1'/>
-              <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump1'/>
+              <HeatPumpType>room air conditioner with reverse cycle</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
+              <BackupType>integrated</BackupType>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
-                <Value>10.7</Value>
+                <Value>11.4</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.65</SensibleHeatFraction>
-              <IntegratedHeatingSystemFuel>electricity</IntegratedHeatingSystemFuel>
-              <IntegratedHeatingSystemAnnualEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </IntegratedHeatingSystemAnnualEfficiency>
-              <IntegratedHeatingSystemFractionHeatLoadServed>1.0</IntegratedHeatingSystemFractionHeatLoadServed>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>COP</Units>
+                <Value>3.6</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
