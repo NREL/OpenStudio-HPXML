@@ -158,6 +158,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                            "Element 'RadiantBarrierGrade': [facet 'maxInclusive'] The value '4' is greater than the maximum value allowed ('3').",
                                                            "Element 'EnergyFactor': [facet 'maxInclusive'] The value '5.1' is greater than the maximum value allowed ('5')."],
                             'invalid-insulation-top' => ["Element 'DistanceToTopOfInsulation': [facet 'minInclusive'] The value '-0.5' is less than the minimum value allowed ('0')."],
+                            'invalid-integrated-heating' => ['Expected 0 element(s) for xpath: IntegratedHeatingSystemFuel'],
                             'invalid-natvent-availability' => ['Expected extension/NaturalVentilationAvailabilityDaysperWeek to be less than or equal to 7'],
                             'invalid-natvent-availability2' => ['Expected extension/NaturalVentilationAvailabilityDaysperWeek to be greater than or equal to 0'],
                             'invalid-number-of-bedrooms-served' => ['Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[IsSharedSystem="true"], id: "PVSystem1"]'],
@@ -414,6 +415,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['invalid-insulation-top'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.foundation_walls[0].insulation_interior_distance_to_top = -0.5
+      elsif ['invalid-integrated-heating'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-central-ac-only-1-speed.xml'))
+        hpxml.cooling_systems[0].integrated_heating_system_fuel = HPXML::FuelTypeElectricity
+        hpxml.cooling_systems[0].integrated_heating_system_efficiency_percent = 0.98
+        hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = 1.0
       elsif ['invalid-natvent-availability'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.header.natvent_days_per_week = 8
