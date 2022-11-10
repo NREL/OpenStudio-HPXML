@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Lighting
-  def self.apply(runner, model, epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa, gfa)
+  def self.apply(runner, model, epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa)
     fractions = {}
     lighting_groups.each do |lg|
       fractions[[lg.location, lg.lighting_type]] = lg.fraction_of_units_in_location
@@ -9,6 +9,11 @@ class Lighting
 
     if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
       return
+    end
+
+    gfa = 0
+    if spaces.keys.include? HPXML::LocationGarage
+      gfa = UnitConversions.convert(spaces[HPXML::LocationGarage].floorArea, 'm^2', 'ft^2')
     end
 
     int_kwh, ext_kwh, grg_kwh = calc_energy(eri_version, cfa, gfa,
@@ -199,10 +204,6 @@ class Lighting
       eff_ratio_fl = eff_inc / eff_fl
       eff_ratio_led = eff_inc / eff_led
 
-      # Fractions of lamps that are hardwired vs plug-in
-      frac_hw = 0.9
-      frac_pl = 1.0 - frac_hw
-
       # Efficiency lighting adjustments
       int_adj = (f_int_inc * eff_ratio_inc) + (f_int_fl * eff_ratio_fl) + (f_int_led * eff_ratio_led)
       ext_adj = (f_ext_inc * eff_ratio_inc) + (f_ext_fl * eff_ratio_fl) + (f_ext_led * eff_ratio_led)
@@ -266,7 +267,6 @@ class Lighting
       end
     end
 
-    dec_kws = [0.075, 0.055, 0.040, 0.035, 0.030, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025, 0.030, 0.045, 0.075, 0.130, 0.160, 0.140, 0.100, 0.075, 0.065, 0.060, 0.050, 0.045, 0.045, 0.045, 0.045, 0.045, 0.045, 0.050, 0.060, 0.080, 0.130, 0.190, 0.230, 0.250, 0.260, 0.260, 0.250, 0.240, 0.225, 0.225, 0.220, 0.210, 0.200, 0.180, 0.155, 0.125, 0.100]
     june_kws = [0.060, 0.040, 0.035, 0.025, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.025, 0.030, 0.030, 0.025, 0.020, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.020, 0.020, 0.020, 0.025, 0.025, 0.030, 0.030, 0.035, 0.045, 0.060, 0.085, 0.125, 0.145, 0.130, 0.105, 0.080]
     lighting_seasonal_multiplier =   [1.075, 1.064951905, 1.0375, 1.0, 0.9625, 0.935048095, 0.925, 0.935048095, 0.9625, 1.0, 1.0375, 1.064951905]
     amplConst1 = 0.929707907917098

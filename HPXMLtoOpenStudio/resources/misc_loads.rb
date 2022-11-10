@@ -108,7 +108,7 @@ class MiscLoads
     mfl.setSchedule(sch)
   end
 
-  def self.apply_pool_or_hot_tub_heater(model, pool_or_hot_tub, obj_name, living_space, schedules_file)
+  def self.apply_pool_or_hot_tub_heater(runner, model, pool_or_hot_tub, obj_name, living_space, schedules_file)
     return if pool_or_hot_tub.heater_type == HPXML::TypeNone
 
     heater_kwh = 0
@@ -150,7 +150,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
+      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
@@ -172,7 +172,7 @@ class MiscLoads
       mfl.setName(obj_name)
       mfl.setEndUseSubcategory(obj_name)
       mfl.setFuelType(EPlus.fuel_type(HPXML::FuelTypeNaturalGas))
-      mfl.setSpace(living_space)
+      mfl.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mfl_def.setName(obj_name)
       mfl_def.setDesignLevel(space_design_level)
       mfl_def.setFractionRadiant(0)
@@ -182,7 +182,7 @@ class MiscLoads
     end
   end
 
-  def self.apply_pool_or_hot_tub_pump(model, pool_or_hot_tub, obj_name, living_space, schedules_file)
+  def self.apply_pool_or_hot_tub_pump(runner, model, pool_or_hot_tub, obj_name, living_space, schedules_file)
     pump_kwh = 0
 
     # Create schedule
@@ -219,7 +219,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
+      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
