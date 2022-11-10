@@ -701,7 +701,7 @@ class Constructions
         constr.add_layer(mat_int_finish_or_covering)
       end
       constr.add_layer(inside_film)
-    else  # floors
+    else # floors
       # Define materials
       mat_2x = Material.Stud2x(joist_height_in)
       if cavity_r == 0
@@ -786,7 +786,7 @@ class Constructions
         constr.add_layer(mat_int_finish_or_covering)
       end
       constr.add_layer(inside_film)
-    else  # floors
+    else # floors
       # Define materials
       mat_2x = Material.Stud2x(joist_height_in)
       eR = cavity_r * correction_factor # The effective R-value of the cavity insulation with steel stud framing
