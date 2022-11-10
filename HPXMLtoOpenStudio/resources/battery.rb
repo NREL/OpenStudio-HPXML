@@ -111,6 +111,11 @@ class Battery
       elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
       elcd.setStorageConverter(elcsc)
     end
+    
+    elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('RatedPowerOutput_kW', Float(rated_power_output))
+    elcs.additionalProperties.setFeature('NominalCapacity_kWh', Float(nominal_capacity_kwh))
   end
 
   def self.get_battery_default_values()

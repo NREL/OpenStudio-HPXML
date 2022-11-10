@@ -885,22 +885,39 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @resilience_hours.each do |key, resilience_hour|
       next unless key == RHT::Battery
 
-      minimum_storage_state_of_charge_fraction = 0
-      @model.getElectricLoadCenterDistributions.each do |elcd|
-        minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
-      end
-
       resilience_hour.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
-        batt_kwh = @hpxml.batteries[0].usable_capacity_kwh
-        batt_kw = @hpxml.batteries[0].rated_power_output
-        batt_roundtrip_efficiency = 0.95
+        minimum_storage_state_of_charge_fraction = nil
+        batt_kwh = nil
+        batt_kw = nil
+        @hpxml.batteries.each do |battery|
+          @model.getElectricLoadCenterDistributions.each do |elcd|
+            battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
+            next unless (battery_id.is_initialized && battery_id.get == battery.id)
 
+            minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
+          end
+
+          @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |liion|
+            battery_id = liion.additionalProperties.getFeatureAsString('HPXML_ID')
+            next unless (battery_id.is_initialized && battery_id.get == battery.id)
+
+            batt_kwh = liion.additionalProperties.getFeatureAsDouble('NominalCapacity_kWh').get
+            batt_kw = liion.additionalProperties.getFeatureAsDouble('RatedPowerOutput_kW').get
+          end
+        end
+puts minimum_storage_state_of_charge_fraction
+puts batt_kwh
+puts batt_kw
+        batt_roundtrip_efficiency = 0.95 # FIXME: is this 0.9?
+puts keys, vars
         batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, 'hourly')
+puts batt_soc.size
         batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
-
+puts batt_soc_kwh.size
+puts batt_soc_kwh[0..10]
         elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
         elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
         elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
@@ -2462,6 +2479,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Resilience Hours
     @resilience_hours = {}
+puts get_object_variables(RHT, RHT::Battery)
     @resilience_hours[RHT::Battery] = ResilienceHours.new(variables: get_object_variables(RHT, RHT::Battery))
 
     @resilience_hours.each do |resilience_hours_type, resilience_hour|

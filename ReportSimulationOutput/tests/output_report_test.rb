@@ -177,6 +177,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     'Hot Water: Dishwasher (gal)',
     'Hot Water: Fixtures (gal)',
     'Hot Water: Distribution Waste (gal)',
+    'Resilience Hours: Battery (hr)',
     'HVAC Capacity: Cooling (Btu/h)',
     'HVAC Capacity: Heating (Btu/h)',
     'HVAC Capacity: Heat Pump Backup (Btu/h)',
