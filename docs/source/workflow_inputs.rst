@@ -1761,15 +1761,15 @@ HPXML HVAC Control
 
 If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl``.
 
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  =======================================================  ========  =====  ===========  ========  =========  =============================================
   Element                                                  Type      Units  Constraints  Required  Default    Notes
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  =======================================================  ========  =====  ===========  ========  =========  =============================================
   ``SystemIdentifier``                                     id                            Yes                  Unique identifier
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
   ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
-  ``extension/OnOffThermostatDeadbandTemperature``         double    F      >= 0         No        0          On-off thermostats/deadbands temperature[#]_
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  ``extension/OnOffThermostatDeadbandTemperature``         double    F      >= 0         No        0          On-off thermostats/deadbands temperature [#]_
+  =======================================================  ========  =====  ===========  ========  =========  =============================================
 
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
