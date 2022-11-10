@@ -1373,7 +1373,7 @@ If a room air conditioner is specified, additional information is entered in ``C
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>     Fuel type of integrated heater
   ==================================================================  ======  ======  ===========  ========  =========  ============================================
 
-  .. [#] IntegratedHeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the room air conditioner has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a room air conditioner with reverse cycle heating should be entered as a heat pump; see :ref:`room_ac_reverse_cycle`.
@@ -1402,7 +1402,7 @@ If a PTAC is specified, additional information is entered in ``CoolingSystem``.
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>     Fuel type of integrated heater
   ==================================================================  ======  ======  ===========  ========  =========  ==========================================
 
-  .. [#] IntegratedHeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the PTAC has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a packaged terminal heat pump should be entered as a heat pump; see :ref:`pthp`.
@@ -1775,9 +1775,9 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
-  .. [#] OnOffThermostatDeadband should only be used if 100% heating or cooling is provided (FractionHeatLoadServed or FractionCoolLoadServed sum to 1.0). OnOffThermostatDeadband is only enabled when simulation time step is 1 minute, otherwise simulation will ignore this feature and throw a warning.
+  .. [#] OnOffThermostatDeadband models a deadband thermostat rather than the typical EnergyPlus approach of perfectly meeting the load every timestep. This input is the size of the deadband, which is the temperature difference between when a thermostat turns on the HVAC to when it turns off. Note that thermostat deadbands are two sided. As an example, if you had a heating setpoint of 71 F and a 2 F deadband, the heating equipemnt will turn on when the space temperature hits 70 F and off when it hits 72 F. When this feature is enable, the model will also explicitly model cycling and it will take several minutes for the HVAC to reach full capacity. This feature should only be used if detailed power profiles and loads are required. Common use cases for this feature are when modeling advanced controls, such as a Home Energy Management System, or if performing co-simulation with a grid model. It should only be used if 100% heating or cooling is provided (FractionHeatLoadServed or FractionCoolLoadServed sum to 1.0). OnOffThermostatDeadband is only enabled when simulation time step is 1 minute, otherwise simulation will ignore this feature and throw a warning.
   .. [#] TwospeedRealisticStaging should only be used when OnOffThermostatDeadband is greater than 0. It only applies to two speed central AC or two speed air source heat pump systems. TwospeedRealisticStaging enables a time-based staging control where the HVAC systems will stay at low speed for 5 minutes before transitioning to the higher stage, and stay at high speed until cut-out deadband temperature is reached. Backup system will follow the same control logic of waiting for 5 minutes when heat pump is not meeting the loads.
-  
+
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
   ===================  ========  =====  ===========  ========  =======  ===========
@@ -2574,7 +2574,9 @@ If not entered, the simulation will not include batteries.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
   .. [#] If RatedPowerOutput not provided, defaults to 0.5 * NominalCapacity * 1000.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
-  .. [#] If "None", the battery doesn't degrade over time. If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
+  .. [#] If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
+         The lifetime model accounts for A) instantaneous losses in capacity due to the battery's ambient environment temperature, which can be particularly significant during winters, and B) permanent capacity losses over time.
+         Since the EnergyPlus simulation is typically one year long (or less), the latter will only reflect the initial (e.g., first-year) loss of capacity, not the entire loss of capacity over the battery's life-cycle.
 
  .. note::
 
