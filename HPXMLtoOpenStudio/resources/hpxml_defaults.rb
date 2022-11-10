@@ -240,36 +240,48 @@ class HPXMLDefaults
       else
         natural_gas, propane, fuel_oil, coal, wood, wood_pellets = nil, nil, nil, nil, nil, nil
       end
-      if (scenario.natural_gas_units.nil? || scenario.natural_gas_value.nil?) && (not natural_gas.nil?)
-        scenario.natural_gas_units = default_units
-        scenario.natural_gas_units_isdefaulted = true
-        scenario.natural_gas_value = natural_gas
-        scenario.natural_gas_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeNaturalGas)
+        if (scenario.natural_gas_units.nil? || scenario.natural_gas_value.nil?) && (not natural_gas.nil?)
+          scenario.natural_gas_units = default_units
+          scenario.natural_gas_units_isdefaulted = true
+          scenario.natural_gas_value = natural_gas
+          scenario.natural_gas_value_isdefaulted = true
+        end
       end
-      if (scenario.propane_units.nil? || scenario.propane_value.nil?) && (not propane.nil?)
-        scenario.propane_units = default_units
-        scenario.propane_units_isdefaulted = true
-        scenario.propane_value = propane
-        scenario.propane_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypePropane)
+        if (scenario.propane_units.nil? || scenario.propane_value.nil?) && (not propane.nil?)
+          scenario.propane_units = default_units
+          scenario.propane_units_isdefaulted = true
+          scenario.propane_value = propane
+          scenario.propane_value_isdefaulted = true
+        end
       end
-      if (scenario.fuel_oil_units.nil? || scenario.fuel_oil_value.nil?) && (not fuel_oil.nil?)
-        scenario.fuel_oil_units = default_units
-        scenario.fuel_oil_units_isdefaulted = true
-        scenario.fuel_oil_value = fuel_oil
-        scenario.fuel_oil_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeOil)
+        if (scenario.fuel_oil_units.nil? || scenario.fuel_oil_value.nil?) && (not fuel_oil.nil?)
+          scenario.fuel_oil_units = default_units
+          scenario.fuel_oil_units_isdefaulted = true
+          scenario.fuel_oil_value = fuel_oil
+          scenario.fuel_oil_value_isdefaulted = true
+        end
       end
-      if (scenario.coal_units.nil? || scenario.coal_value.nil?) && (not coal.nil?)
-        scenario.coal_units = default_units
-        scenario.coal_units_isdefaulted = true
-        scenario.coal_value = coal
-        scenario.coal_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeCoal)
+        if (scenario.coal_units.nil? || scenario.coal_value.nil?) && (not coal.nil?)
+          scenario.coal_units = default_units
+          scenario.coal_units_isdefaulted = true
+          scenario.coal_value = coal
+          scenario.coal_value_isdefaulted = true
+        end
       end
-      if (scenario.wood_units.nil? || scenario.wood_value.nil?) && (not wood.nil?)
-        scenario.wood_units = default_units
-        scenario.wood_units_isdefaulted = true
-        scenario.wood_value = wood
-        scenario.wood_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeWoodCord)
+        if (scenario.wood_units.nil? || scenario.wood_value.nil?) && (not wood.nil?)
+          scenario.wood_units = default_units
+          scenario.wood_units_isdefaulted = true
+          scenario.wood_value = wood
+          scenario.wood_value_isdefaulted = true
+        end
       end
+      next unless hpxml.has_fuel(HPXML::FuelTypeWoodPellets)
+
       next unless (scenario.wood_pellets_units.nil? || scenario.wood_pellets_value.nil?) && (not wood_pellets.nil?)
 
       scenario.wood_pellets_units = default_units
@@ -280,11 +292,8 @@ class HPXMLDefaults
   end
 
   def self.apply_utility_bill_scenarios(runner, hpxml)
-    hpxml_doc = nil
     hpxml.header.utility_bill_scenarios.each do |scenario|
-      hpxml_doc = hpxml.to_oga if hpxml_doc.nil?
-
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeElectricity) && scenario.elec_tariff_filepath.nil?
+      if hpxml.has_fuel(HPXML::FuelTypeElectricity) && scenario.elec_tariff_filepath.nil?
         if scenario.elec_fixed_charge.nil?
           scenario.elec_fixed_charge = 12.0 # https://www.nrdc.org/experts/samantha-williams/there-war-attrition-electricity-fixed-charges says $11.19/month in 2018
           scenario.elec_fixed_charge_isdefaulted = true
@@ -295,7 +304,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeNaturalGas)
+      if hpxml.has_fuel(HPXML::FuelTypeNaturalGas)
         if scenario.natural_gas_fixed_charge.nil?
           scenario.natural_gas_fixed_charge = 12.0 # https://www.aga.org/sites/default/files/aga_energy_analysis_-_natural_gas_utility_rate_structure.pdf says $11.25/month in 2015
           scenario.natural_gas_fixed_charge_isdefaulted = true
@@ -306,7 +315,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypePropane)
+      if hpxml.has_fuel(HPXML::FuelTypePropane)
         if scenario.propane_fixed_charge.nil?
           scenario.propane_fixed_charge = 0.0
           scenario.propane_fixed_charge_isdefaulted = true
@@ -317,7 +326,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeOil)
+      if hpxml.has_fuel(HPXML::FuelTypeOil)
         if scenario.fuel_oil_fixed_charge.nil?
           scenario.fuel_oil_fixed_charge = 0.0
           scenario.fuel_oil_fixed_charge_isdefaulted = true
@@ -328,7 +337,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeCoal)
+      if hpxml.has_fuel(HPXML::FuelTypeCoal)
         if scenario.coal_fixed_charge.nil?
           scenario.coal_fixed_charge = 0.0
           scenario.coal_fixed_charge_isdefaulted = true
@@ -339,7 +348,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeWoodCord)
+      if hpxml.has_fuel(HPXML::FuelTypeWoodCord)
         if scenario.wood_fixed_charge.nil?
           scenario.wood_fixed_charge = 0.0
           scenario.wood_fixed_charge_isdefaulted = true
@@ -350,7 +359,7 @@ class HPXMLDefaults
         end
       end
 
-      if HPXML::has_fuel(hpxml_doc, HPXML::FuelTypeWoodPellets)
+      if hpxml.has_fuel(HPXML::FuelTypeWoodPellets)
         if scenario.wood_pellets_fixed_charge.nil?
           scenario.wood_pellets_fixed_charge = 0.0
           scenario.wood_pellets_fixed_charge_isdefaulted = true

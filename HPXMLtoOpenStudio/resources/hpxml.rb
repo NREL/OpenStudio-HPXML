@@ -470,6 +470,22 @@ class HPXML < Object
     return false
   end
 
+  def has_fuel(fuel)
+    hpxml_doc = to_oga
+    ['HeatingSystemFuel',
+     'CoolingSystemFuel',
+     'HeatPumpFuel',
+     'BackupSystemFuel',
+     'FuelType',
+     'IntegratedHeatingSystemFuel'].each do |fuel_name|
+      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
+        return true
+      end
+    end
+
+    return false
+  end
+
   def predominant_heating_fuel
     fuel_fracs = {}
     @heating_systems.each do |heating_system|
@@ -6746,20 +6762,5 @@ class HPXML < Object
     end
 
     return errors
-  end
-
-  def self.has_fuel(hpxml_doc, fuel)
-    ['HeatingSystemFuel',
-     'CoolingSystemFuel',
-     'HeatPumpFuel',
-     'BackupSystemFuel',
-     'FuelType',
-     'IntegratedHeatingSystemFuel'].each do |fuel_name|
-      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
-        return true
-      end
-    end
-
-    return false
   end
 end
