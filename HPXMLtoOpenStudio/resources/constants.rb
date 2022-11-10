@@ -214,6 +214,10 @@ class Constants
     return 'ptac heating'
   end
 
+  def self.ObjectNameRoomACHeating
+    return 'room ac heating'
+  end
+
   def self.ObjectNameFurniture
     return 'furniture'
   end
@@ -304,6 +308,10 @@ class Constants
 
   def self.ObjectNamePTHP
     return 'packaged terminal heat pump'
+  end
+
+  def self.ObjectNameRoomHP
+    return 'room ac with reverse cycle'
   end
 
   def self.ObjectNamePTAC

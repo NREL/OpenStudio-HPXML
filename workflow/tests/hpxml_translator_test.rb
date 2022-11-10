@@ -624,7 +624,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       end
       # HP defrost curves
-      if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type }.size > 0
+      if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type }.size > 0
         next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
       end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
@@ -1192,6 +1192,11 @@ class HPXMLTest < MiniTest::Test
         htg_backup_fuels << heating_system.heating_system_fuel
       else
         htg_fuels << heating_system.heating_system_fuel
+      end
+    end
+    hpxml.cooling_systems.each do |cooling_system|
+      if cooling_system.has_integrated_heating
+        htg_fuels << cooling_system.integrated_heating_system_fuel
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
