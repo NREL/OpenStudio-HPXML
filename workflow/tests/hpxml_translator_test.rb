@@ -487,21 +487,6 @@ class HPXMLTest < MiniTest::Test
     hpxml.collapse_enclosure_surfaces()
 
     # Check run.log warnings
-    def skip_utility_bill_warning(err_line)
-      utility_bill_warnings = ["#{EPlus::FuelTypeElectricity}:Facility".upcase,
-                               "#{EPlus::FuelTypeElectricity}Produced:Facility".upcase,
-                               "#{EPlus::FuelTypeNaturalGas}:Facility".upcase,
-                               "#{EPlus::FuelTypeOil}:Facility".upcase,
-                               "#{EPlus::FuelTypePropane}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodCord}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodPellets}:Facility".upcase,
-                               "#{EPlus::FuelTypeCoal}:Facility".upcase]
-      skip_warning = false
-      utility_bill_warnings.each do |utility_bill_warning|
-        skip_warning = true if err_line.include? utility_bill_warning
-      end
-      return skip_warning
-    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
@@ -560,7 +545,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
 
-      flunk "Unexpected warning found in run.log: #{log_line}"
+      flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
     end
 
     # Check for unexpected warnings
@@ -604,10 +589,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
-      if err_line.include?('Output:Meter: invalid Key Name')
-        next if skip_utility_bill_warning(err_line)
-      end
-
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
@@ -649,7 +630,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
 
-      flunk "Unexpected warning found: #{err_line}"
+      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
     end
 
     # Check for unused objects/schedules/constructions warnings
@@ -674,8 +655,6 @@ class HPXMLTest < MiniTest::Test
     num_invalid_output_variables = 0
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
-        next if skip_utility_bill_warning(err_line)
-
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
         num_invalid_output_variables += 1
