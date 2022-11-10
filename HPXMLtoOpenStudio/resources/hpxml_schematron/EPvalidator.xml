@@ -1192,6 +1192,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[number(h:extension/h:OnOffThermostatDeadbandTemperature) &gt; 0]'>
       <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
+      <sch:report role='WARN' test='not(../h:HVACPlant/h:HeatPump/h:HeatPumpType[text()="air-to-air"]) and not(../h:HVACPlant/h:CoolingSystem/h:CoolingSystemType[text()="central air conditioner"])'>Unexpected system type; simulation will continue without deadband control.</sch:report>
       <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) &gt; 1'>Timestep should be 1; simulation will continue without deadband control.</sch:report>
       <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
     </sch:rule>

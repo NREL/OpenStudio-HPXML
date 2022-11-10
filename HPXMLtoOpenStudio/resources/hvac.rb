@@ -12,12 +12,15 @@ class HVAC
           obj_name = Constants.ObjectNameAirSourceHeatPump
         elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
           obj_name = Constants.ObjectNameMiniSplitHeatPump
+          is_ddb_control = false
         elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
           obj_name = Constants.ObjectNamePTHP
           fan_watts_per_cfm = 0.0
+          is_ddb_control = false
         elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpRoom
           obj_name = Constants.ObjectNameRoomHP
           fan_watts_per_cfm = 0.0
+          is_ddb_control = false
         else
           fail "Unexpected heat pump type: #{cooling_system.heat_pump_type}."
         end
@@ -34,6 +37,7 @@ class HVAC
           end
         elsif [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
           fan_watts_per_cfm = 0.0
+          is_ddb_control = false
           if cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
             obj_name = Constants.ObjectNameRoomAirConditioner
           else
@@ -41,6 +45,7 @@ class HVAC
           end
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
+          is_ddb_control = false
         else
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
