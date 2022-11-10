@@ -137,7 +137,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_emissions_factors
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
     for emissions_type in ['CO2e', 'NOx', 'SO2', 'foo']
       hpxml.header.emissions_scenarios.add(name: emissions_type,
                                            emissions_type: emissions_type,
@@ -158,6 +158,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                            wood_pellets_units: HPXML::EmissionsScenario::UnitsLbPerMBtu,
                                            wood_pellets_value: 999.0)
     end
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
+    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWoodCord
+    hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeWoodPellets
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
