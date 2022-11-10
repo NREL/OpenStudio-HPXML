@@ -210,6 +210,7 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <StructuralInsulatedPanel/>
             </FloorType>
@@ -223,19 +224,21 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <SolidConcrete/>
             </FloorType>
             <Area>450.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
-              <AssemblyEffectiveRValue>1.63</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.2</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
             <SystemIdentifier id='Floor3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <SteelFrame/>
             </FloorType>

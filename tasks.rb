@@ -3369,7 +3369,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       floor.delete
     end
     floors_map = { HPXML::FloorTypeSIP => 16.1,
-                   HPXML::FloorTypeConcrete => 1.63,
+                   HPXML::FloorTypeConcrete => 3.2,
                    HPXML::FloorTypeSteelStud => 8.1 }
     floors_map.each_with_index do |(floor_type, assembly_r), _i|
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
@@ -3377,7 +3377,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                        interior_adjacent_to: HPXML::LocationLivingSpace,
                        floor_type: floor_type,
                        area: 1350 / floors_map.size,
-                       insulation_assembly_r_value: assembly_r)
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorTypeCeiling)
     end
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.rim_joists.reverse_each do |rim_joist|
