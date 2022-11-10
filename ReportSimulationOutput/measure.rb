@@ -1278,6 +1278,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         htg_cap += hvac_system.heating_capacity.to_f
       elsif hvac_system.is_a? HPXML::CoolingSystem
         clg_cap += hvac_system.cooling_capacity.to_f
+        if hvac_system.has_integrated_heating
+          htg_cap += hvac_system.integrated_heating_system_capacity.to_f
+        end
       elsif hvac_system.is_a? HPXML::HeatPump
         htg_cap += hvac_system.heating_capacity.to_f
         clg_cap += hvac_system.cooling_capacity.to_f
