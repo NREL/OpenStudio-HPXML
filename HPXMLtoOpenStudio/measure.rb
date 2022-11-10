@@ -646,14 +646,14 @@ class OSModel
           inside_film = Material.AirFilmFloorAverage
           outside_film = Material.AirFilmFloorAverage
         end
-        mat_int_finish = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
+        mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
       else # Floor
         if @apply_ashrae140_assumptions
           # Raised floor
           inside_film = Material.AirFilmFloorASHRAE140
           outside_film = Material.AirFilmFloorZeroWindASHRAE140
           surface.setWindExposure('NoWind')
-          covering = Material.CoveringBare(1.0)
+          mat_int_finish_or_covering = Material.CoveringBare(1.0)
         else
           inside_film = Material.AirFilmFloorReduced
           if floor.is_exterior
@@ -662,13 +662,13 @@ class OSModel
             outside_film = Material.AirFilmFloorReduced
           end
           if floor.interior_adjacent_to == HPXML::LocationLivingSpace
-            covering = Material.CoveringBare
+            mat_int_finish_or_covering = Material.CoveringBare
           end
         end
       end
 
       Constructions.apply_floor_ceiling_construction(runner, model, [surface], floor.id, floor.floor_type, floor.is_ceiling, floor.insulation_assembly_r_value,
-                                                     mat_int_finish, inside_film, outside_film, covering)
+                                                     mat_int_finish_or_covering, inside_film, outside_film)
     end
   end
 
@@ -1290,9 +1290,9 @@ class OSModel
                                          0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
                                          Material.AirFilmVertical, Material.AirFilmVertical)
     elsif type == 'floor'
-      Constructions.apply_wood_frame_floor(model, surfaces, 'AdiabaticFloorConstruction',
-                                          0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare,
-                                          Material.AirFilmFloorReduced, Material.AirFilmFloorReduced)
+      Constructions.apply_wood_frame_floor_ceiling(model, surfaces, 'AdiabaticFloorConstruction', false,
+                                                   0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare,
+                                                   Material.AirFilmFloorReduced, Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
