@@ -126,7 +126,7 @@ class HPXML < Object
   FoundationWallTypeWood = 'wood'
   FloorTypeWoodFrame = 'WoodFrame'
   FloorTypeSIP = 'StructuralInsulatedPanel'
-  FloorTypeSteelStud = 'SteelFrame'
+  FloorTypeSteelFrame = 'SteelFrame'
   FloorTypeConcrete = 'SolidConcrete'
   FloorTypeCeiling = 'ceiling'
   FloorTypeFloor = 'floor'

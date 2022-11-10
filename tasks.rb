@@ -3389,7 +3389,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     end
     floors_map = { HPXML::FloorTypeSIP => 16.1,
                    HPXML::FloorTypeConcrete => 3.2,
-                   HPXML::FloorTypeSteelStud => 8.1 }
+                   HPXML::FloorTypeSteelFrame => 8.1 }
     floors_map.each_with_index do |(floor_type, assembly_r), _i|
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                        exterior_adjacent_to: HPXML::LocationAtticUnvented,

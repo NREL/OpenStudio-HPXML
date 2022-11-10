@@ -458,7 +458,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     floor_type_choices << HPXML::FloorTypeWoodFrame
     floor_type_choices << HPXML::FloorTypeSIP
     floor_type_choices << HPXML::FloorTypeConcrete
-    floor_type_choices << HPXML::FloorTypeSteelStud
+    floor_type_choices << HPXML::FloorTypeSteelFrame
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
     arg.setDisplayName('Floor: Type')

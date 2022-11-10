@@ -1910,7 +1910,7 @@ class Constructions
                                      constr_set.osb_thick_in, constr_set.rigid_r, constr_int_finish_or_covering,
                                      inside_film, outside_film)
 
-    elsif floor_type == HPXML::FloorTypeSteelStud
+    elsif floor_type == HPXML::FloorTypeSteelFrame
       install_grade = 1
       corr_factor = 0.45
       if is_ceiling
