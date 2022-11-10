@@ -1118,7 +1118,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    tol = 0.0001 # for comparing annual to annual
+    tol = 0.001 # for comparing annual to annual
     meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
 
     # Check if simulation successful
