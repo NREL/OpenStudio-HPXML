@@ -545,7 +545,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
 
-      flunk "Unexpected warning found in run.log: #{log_line}"
+      flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
     end
 
     # Check for unexpected warnings
@@ -630,7 +630,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
 
-      flunk "Unexpected warning found: #{err_line}"
+      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
     end
 
     # Check for unused objects/schedules/constructions warnings
