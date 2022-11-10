@@ -262,10 +262,14 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
-    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
+    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating-electricity.xml',
     'base-hvac-autosize-pthp-sizing-methodology-acca.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-hers.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-pthp-sizing-methodology-maxload.xml' => 'base-hvac-pthp.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-acca.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-hers.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-maxload.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
+    'base-hvac-autosize-room-ac-with-heating.xml' => 'base-hvac-room-ac-with-heating.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -334,11 +338,14 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-ptac.xml' => 'base.xml',
-    'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-electricity.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-ptac-with-heating-natural-gas.xml' => 'base-hvac-ptac.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-heating.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-with-reverse-cycle.xml' => 'base-hvac-pthp.xml',
     'base-hvac-room-ac-only-detailed-setpoints.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -383,6 +390,8 @@ def create_hpxmls
     'base-misc-bills.xml' => 'base.xml',
     'base-misc-bills-none.xml' => 'base.xml',
     'base-misc-bills-pv.xml' => 'base-pv.xml',
+    'base-misc-bills-pv-detailed-only.xml' => 'base-pv.xml',
+    'base-misc-bills-pv-mixed.xml' => 'base-pv.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
@@ -1741,6 +1750,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args.delete('heating_system_2_heating_capacity')
     args.delete('cooling_system_cooling_capacity')
     args.delete('heat_pump_heating_capacity')
+    args.delete('cooling_system_integrated_heating_system_capacity')
     if hpxml_file.include? 'sizing-methodology-hers'
       args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
     elsif hpxml_file.include? 'sizing-methodology-maxload'
@@ -1987,6 +1997,18 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     args['cooling_system_fraction_cool_load_served'] = 0.33
     args['cooling_system_cooling_capacity'] = 8000.0
+  elsif ['base-hvac-room-ac-with-heating.xml',
+         'base-hvac-ptac-with-heating-electricity.xml',
+         'base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+    args['cooling_system_integrated_heating_system_capacity'] = 36000.0
+    args['cooling_system_integrated_heating_system_fraction_heat_load_served'] = 1.0
+    if ['base-hvac-ptac-with-heating-natural-gas.xml'].include? hpxml_file
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 0.8
+    else
+      args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
+      args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
+    end
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60
@@ -2013,15 +2035,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpPTHP
     args['heat_pump_cooling_efficiency'] = 11.4
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-room-ac-with-reverse-cycle.xml'].include? hpxml_file
+    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpRoom
   elsif ['base-hvac-ptac.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypePTAC
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 10.7
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
-  elsif ['base-hvac-ptac-with-heating.xml'].include? hpxml_file
-    args['heating_system_type'] = HPXML::HVACTypePTACHeating
-    args['heating_system_heating_efficiency'] = 1.0
   end
 
   # Lighting
@@ -2180,6 +2201,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['utility_bill_pv_feed_in_tariff_rates'] = 'NA, NA, 0.13'
     args['utility_bill_pv_monthly_grid_connection_fee_units'] = "#{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollarsPerkW}, #{HPXML::UnitsDollars}"
     args['utility_bill_pv_monthly_grid_connection_fees'] = '2.5, 2.5, 7.5'
+  elsif ['base-misc-bills-pv-detailed-only.xml'].include? hpxml_file
+    args['utility_bill_scenario_names'] = 'Tiered, TOU, Tiered and TOU, Real-Time Pricing'
+    args['utility_bill_electricity_filepaths'] = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
+  elsif ['base-misc-bills-pv-mixed.xml'].include? hpxml_file
+    args['utility_bill_scenario_names'] = 'Simple, Detailed'
+    args['utility_bill_electricity_filepaths'] = 'NA, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
@@ -3865,11 +3892,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         hpxml.heating_systems[i].fraction_heat_load_served = 0.35
       end
     end
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.heating_systems[0].year_installed = 2009
-    hpxml.heating_systems[0].heating_efficiency_afue = nil
-    hpxml.cooling_systems[0].year_installed = 2009
-    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = hpxml.heat_pumps[0].backup_heating_efficiency_percent
     hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
@@ -4194,10 +4216,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].usage_bin = nil
   elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].performance_adjustment = 0.92
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].year_installed = 2009
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = nil
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
     hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
@@ -4720,7 +4738,37 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather]
+def download_utility_rates
+  require_relative 'HPXMLtoOpenStudio/resources/util'
+  require_relative 'ReportUtilityBills/resources/util'
+
+  rates_dir = File.join(File.dirname(__FILE__), 'ReportUtilityBills/resources/detailed_rates')
+  FileUtils.mkdir(rates_dir) if !File.exist?(rates_dir)
+  filepath = File.join(rates_dir, 'usurdb.csv')
+
+  if !File.exist?(filepath)
+    require 'tempfile'
+    tmpfile = Tempfile.new('rates')
+
+    UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.csv.gz', tmpfile)
+
+    puts 'Extracting utility rates...'
+    require 'zlib'
+    Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
+      File.open(filepath, 'w') do |output_stream|
+        IO.copy_stream(input_stream, output_stream)
+      end
+    end
+  end
+
+  num_rates_actual = process_usurdb(filepath)
+
+  puts "#{num_rates_actual} rate files are available in openei_rates.zip."
+  puts 'Completed.'
+  exit!
+end
+
+command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather, :download_utility_rates]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4855,6 +4903,10 @@ end
 
 if ARGV[0].to_sym == :download_weather
   download_epws
+end
+
+if ARGV[0].to_sym == :download_utility_rates
+  download_utility_rates
 end
 
 if ARGV[0].to_sym == :create_release_zips

@@ -314,8 +314,6 @@ class OSModel
 
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
-    @gfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.map { |s| s.area }.sum(0.0)
-    @ubfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementUnconditioned }.map { |s| s.area }.sum(0.0)
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
@@ -1108,22 +1106,17 @@ class OSModel
   end
 
   def self.add_thermal_mass(model, spaces)
-    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
-    basement_frac_of_cfa = cfa_basement / @cfa
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
-                                          basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
     else
       mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
       partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
-      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
-                                          basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
 
-      Constructions.apply_furniture(model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
-                                    basement_frac_of_cfa, spaces[HPXML::LocationLivingSpace])
+      Constructions.apply_furniture(model, @hpxml.furniture_mass, spaces)
     end
   end
 
@@ -1357,22 +1350,22 @@ class OSModel
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
-      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, model, spaces)
+      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
     end
     @hpxml.clothes_dryers.each do |clothes_dryer|
-      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, model, spaces)
+      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, spaces)
     end
     @hpxml.dishwashers.each do |dishwasher|
-      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, model, spaces)
+      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
     end
     @hpxml.refrigerators.each do |refrigerator|
-      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, model, spaces)
+      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, spaces)
     end
     @hpxml.freezers.each do |freezer|
-      freezer.additional_properties.space = get_space_from_location(freezer.location, model, spaces)
+      freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
     end
     @hpxml.cooking_ranges.each do |cooking_range|
-      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, model, spaces)
+      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
     end
 
     # Distribution
@@ -1442,6 +1435,9 @@ class OSModel
       if not heating_system.nil?
         sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
         @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      elsif cooling_system.has_integrated_heating
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.integrated_heating_system_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= cooling_system.integrated_heating_system_fraction_heat_load_served
       else
         sequential_heat_load_fracs = [0]
       end
@@ -1479,9 +1475,6 @@ class OSModel
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
       end
-      if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
-        fail 'Unhandled ducted PTAC/PTHP system.'
-      end
 
       # Calculate heating sequential load fractions
       if heating_system.is_heat_pump_backup_system
@@ -1497,7 +1490,7 @@ class OSModel
       end
 
       sys_id = heating_system.id
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
+      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,
@@ -1560,7 +1553,8 @@ class OSModel
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
-             HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+             HPXML::HVACTypeHeatPumpPTHP,
+             HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  living_zone)
@@ -1709,7 +1703,7 @@ class OSModel
 
   def self.add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting, @eri_version, @schedules_file, @cfa, @gfa)
+                   @hpxml.lighting, @eri_version, @schedules_file, @cfa)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
@@ -1867,9 +1861,7 @@ class OSModel
 
     @hpxml.batteries.each do |battery|
       # Assign space
-      if battery.location != HPXML::LocationOutside
-        battery.additional_properties.space = get_space_from_location(battery.location, model, spaces)
-      end
+      battery.additional_properties.space = get_space_from_location(battery.location, spaces)
       Battery.apply(model, battery)
     end
   end
@@ -2460,19 +2452,22 @@ class OSModel
   end
 
   def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    if spaces[exterior_adjacent_to].nil?
+    otherside_coeffs = nil
+    model.getSurfacePropertyOtherSideCoefficientss.each do |c|
+      next unless c.name.to_s == exterior_adjacent_to
+
+      otherside_coeffs = c
+    end
+    if otherside_coeffs.nil?
       # Create E+ other side coefficient object
-      otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_object.setName(exterior_adjacent_to)
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      otherside_coeffs = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
+      otherside_coeffs.setName(exterior_adjacent_to)
+      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       # Schedule of space temperature, can be shared with water heater/ducts
       sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
-      otherside_object.setConstantTemperatureSchedule(sch)
-      surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
-      spaces[exterior_adjacent_to] = otherside_object
-    else
-      surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
+      otherside_coeffs.setConstantTemperatureSchedule(sch)
     end
+    surface.setSurfacePropertyOtherSideCoefficients(otherside_coeffs)
     surface.setSunExposure('NoSun')
     surface.setWindExposure('NoWind')
   end
@@ -2578,32 +2573,27 @@ class OSModel
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
       sch = get_space_temperature_schedule(model, location, spaces)
     else
-      space = get_space_from_location(location, model, spaces)
+      space = get_space_from_location(location, spaces)
     end
 
     return space, sch
   end
 
-  # Returns an OS:Space, or nil if a MF space
+  # Returns an OS:Space, or nil if a MF space or outside
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
-  def self.get_space_from_location(location, model, spaces)
-    return if [HPXML::LocationOtherHeatedSpace,
+  def self.get_space_from_location(location, spaces)
+    return if [HPXML::LocationOutside,
+               HPXML::LocationOtherHeatedSpace,
                HPXML::LocationOtherHousingUnit,
                HPXML::LocationOtherMultifamilyBufferSpace,
                HPXML::LocationOtherNonFreezingSpace].include? location
 
-    num_orig_spaces = spaces.size
-
     if HPXML::conditioned_locations.include? location
-      space = create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    else
-      space = create_or_get_space(model, spaces, location)
+      location = HPXML::LocationLivingSpace
     end
 
-    fail if spaces.size != num_orig_spaces # EPvalidator.xml should prevent this
-
-    return space
+    return spaces[location]
   end
 
   def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)
