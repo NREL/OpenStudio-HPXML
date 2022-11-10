@@ -240,36 +240,48 @@ class HPXMLDefaults
       else
         natural_gas, propane, fuel_oil, coal, wood, wood_pellets = nil, nil, nil, nil, nil, nil
       end
-      if (scenario.natural_gas_units.nil? || scenario.natural_gas_value.nil?) && (not natural_gas.nil?)
-        scenario.natural_gas_units = default_units
-        scenario.natural_gas_units_isdefaulted = true
-        scenario.natural_gas_value = natural_gas
-        scenario.natural_gas_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeNaturalGas)
+        if (scenario.natural_gas_units.nil? || scenario.natural_gas_value.nil?) && (not natural_gas.nil?)
+          scenario.natural_gas_units = default_units
+          scenario.natural_gas_units_isdefaulted = true
+          scenario.natural_gas_value = natural_gas
+          scenario.natural_gas_value_isdefaulted = true
+        end
       end
-      if (scenario.propane_units.nil? || scenario.propane_value.nil?) && (not propane.nil?)
-        scenario.propane_units = default_units
-        scenario.propane_units_isdefaulted = true
-        scenario.propane_value = propane
-        scenario.propane_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypePropane)
+        if (scenario.propane_units.nil? || scenario.propane_value.nil?) && (not propane.nil?)
+          scenario.propane_units = default_units
+          scenario.propane_units_isdefaulted = true
+          scenario.propane_value = propane
+          scenario.propane_value_isdefaulted = true
+        end
       end
-      if (scenario.fuel_oil_units.nil? || scenario.fuel_oil_value.nil?) && (not fuel_oil.nil?)
-        scenario.fuel_oil_units = default_units
-        scenario.fuel_oil_units_isdefaulted = true
-        scenario.fuel_oil_value = fuel_oil
-        scenario.fuel_oil_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeOil)
+        if (scenario.fuel_oil_units.nil? || scenario.fuel_oil_value.nil?) && (not fuel_oil.nil?)
+          scenario.fuel_oil_units = default_units
+          scenario.fuel_oil_units_isdefaulted = true
+          scenario.fuel_oil_value = fuel_oil
+          scenario.fuel_oil_value_isdefaulted = true
+        end
       end
-      if (scenario.coal_units.nil? || scenario.coal_value.nil?) && (not coal.nil?)
-        scenario.coal_units = default_units
-        scenario.coal_units_isdefaulted = true
-        scenario.coal_value = coal
-        scenario.coal_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeCoal)
+        if (scenario.coal_units.nil? || scenario.coal_value.nil?) && (not coal.nil?)
+          scenario.coal_units = default_units
+          scenario.coal_units_isdefaulted = true
+          scenario.coal_value = coal
+          scenario.coal_value_isdefaulted = true
+        end
       end
-      if (scenario.wood_units.nil? || scenario.wood_value.nil?) && (not wood.nil?)
-        scenario.wood_units = default_units
-        scenario.wood_units_isdefaulted = true
-        scenario.wood_value = wood
-        scenario.wood_value_isdefaulted = true
+      if hpxml.has_fuel(HPXML::FuelTypeWoodCord)
+        if (scenario.wood_units.nil? || scenario.wood_value.nil?) && (not wood.nil?)
+          scenario.wood_units = default_units
+          scenario.wood_units_isdefaulted = true
+          scenario.wood_value = wood
+          scenario.wood_value_isdefaulted = true
+        end
       end
+      next unless hpxml.has_fuel(HPXML::FuelTypeWoodPellets)
+
       next unless (scenario.wood_pellets_units.nil? || scenario.wood_pellets_value.nil?) && (not wood_pellets.nil?)
 
       scenario.wood_pellets_units = default_units
