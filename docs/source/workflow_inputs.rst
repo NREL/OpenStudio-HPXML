@@ -2570,7 +2570,9 @@ If not entered, the simulation will not include batteries.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
   .. [#] If RatedPowerOutput not provided, defaults to 0.5 * NominalCapacity * 1000.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
-  .. [#] If "None", the battery doesn't degrade over time. If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
+  .. [#] If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
+         The lifetime model accounts for A) instantaneous losses in capacity due to the battery's ambient environment temperature, which can be particularly significant during winters, and B) permanent capacity losses over time.
+         Since the EnergyPlus simulation is typically one year long (or less), the latter will only reflect the initial (e.g., first-year) loss of capacity, not the entire loss of capacity over the battery's life-cycle.
 
  .. note::
 
