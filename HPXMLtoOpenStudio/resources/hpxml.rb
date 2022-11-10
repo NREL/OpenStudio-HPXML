@@ -3590,7 +3590,7 @@ class HPXML < Object
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
              :fan_watts_per_cfm, :charge_defect_ratio, :cooling_airflow_cfm, :location, :primary_system, :integrated_heating_system_fuel,
              :integrated_heating_system_capacity, :integrated_heating_system_efficiency_percent, :integrated_heating_system_fraction_heat_load_served,
-             :integrated_heating_system_airflow_cfm]
+             :integrated_heating_system_airflow_cfm, :htg_seed_id]
     attr_accessor(*ATTRS)
 
     def distribution_system

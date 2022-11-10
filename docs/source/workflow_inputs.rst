@@ -1375,7 +1375,7 @@ If a room air conditioner is specified, additional information is entered in ``C
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>     Fuel type of integrated heater
   ==================================================================  ======  ======  ===========  ========  =========  ============================================
 
-  .. [#] IntegratedHeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the room air conditioner has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a room air conditioner with reverse cycle heating should be entered as a heat pump; see :ref:`room_ac_reverse_cycle`.
@@ -1404,7 +1404,7 @@ If a PTAC is specified, additional information is entered in ``CoolingSystem``.
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>     Fuel type of integrated heater
   ==================================================================  ======  ======  ===========  ========  =========  ==========================================
 
-  .. [#] IntegratedHeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the PTAC has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a packaged terminal heat pump should be entered as a heat pump; see :ref:`pthp`.
