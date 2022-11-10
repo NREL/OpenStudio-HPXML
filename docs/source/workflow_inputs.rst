@@ -1761,21 +1761,23 @@ HPXML HVAC Control
 
 If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl``.
 
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
   Element                                                  Type      Units  Constraints  Required  Default    Notes
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
   ``SystemIdentifier``                                     id                            Yes                  Unique identifier
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
   ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
-  ``extension/OnOffThermostatDeadbandTemperature``         double    F      >= 0         No        0          On-off thermostats/deadbands temperature[#]_
-  =======================================================  ========  =====  ===========  ========  =========  ============================================
+  ``extension/OnOffThermostatDeadbandTemperature``         double    F      >= 0         No        0          On-off thermostats/deadbands temperature [#]_
+  ``extension/TwospeedRealisticStaging``                   boolean                       No        false      Whether to apply two speed DX system realistic staging [#]_
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
 
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
   .. [#] OnOffThermostatDeadband should only be used if 100% heating or cooling is provided (FractionHeatLoadServed or FractionCoolLoadServed sum to 1.0). OnOffThermostatDeadband is only enabled when simulation time step is 1 minute, otherwise simulation will ignore this feature and throw a warning.
-
+  .. [#] TwospeedRealisticStaging should only be used when OnOffThermostatDeadband is greater than 0. It only applies to two speed central AC or two speed air source heat pump systems. TwospeedRealisticStaging enables a time-based staging control where the HVAC systems will stay at low speed for 5 minutes before transitioning to the higher stage, and stay at high speed until cut-out deadband temperature is reached. Backup system will follow the same control logic of waiting for 5 minutes when heat pump is not meeting the loads.
+  
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
   ===================  ========  =====  ===========  ========  =======  ===========

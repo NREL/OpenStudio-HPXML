@@ -40,7 +40,7 @@ __New Features__
   - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
 - Improves Kiva foundation model heat transfer by providing better initial temperature assumptions based on foundation type and insulation levels.
 - **Research Feature**: Allows modeling on/off thermostat deadband with start-up degredation for single speed and two speed DX systems. An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
-- **Research Feature**: Allows modeling time-based realistic staging for two speed DX systems. Assumes 5 minutes before transitioning to a higher speed.
+- **Research Feature**: Allows modeling time-based realistic staging for two speed DX systems (central ac and ASHP). Assumes 5 minutes before transitioning to a higher speed.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.
