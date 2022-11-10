@@ -851,7 +851,7 @@
     <sch:title>[CoolingSystem]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem'>
       <sch:assert role='ERROR' test='count(../../h:HVACControl) = 1'>Expected 1 element(s) for xpath: ../../HVACControl</sch:assert> <!-- See [HVACControl=Cooling] -->
-      <sch:assert role='ERROR' test='count(h:CoolingSystemType) = 1'>Expected 1 element(s) for xpath: CoolingSystemType</sch:assert> <!-- See [CoolingSystemType=CentralAC] or [CoolingSystemType=RoomAC] or [CoolingSystemType=PTAC] or [CoolingSystemType=EvapCooler] or [CoolingSystemType=MiniSplitAC] or [CoolingSystemType=SharedChiller] or [CoolingSystemType=SharedCoolingTowerWLHP] -->
+      <sch:assert role='ERROR' test='count(h:CoolingSystemType) = 1'>Expected 1 element(s) for xpath: CoolingSystemType</sch:assert> <!-- See [CoolingSystemType=CentralAC] or [CoolingSystemType=PTACorRoomAC] or [CoolingSystemType=EvapCooler] or [CoolingSystemType=MiniSplitAC] or [CoolingSystemType=SharedChiller] or [CoolingSystemType=SharedCoolingTowerWLHP] -->
       <sch:assert role='ERROR' test='h:CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split" or text()="chiller" or text()="cooling tower" or text()="packaged terminal air conditioner"] or not(h:CoolingSystemType)'>Expected CoolingSystemType to be 'central air conditioner' or 'room air conditioner' or 'evaporative cooler' or 'mini-split' or 'chiller' or 'cooling tower' or 'packaged terminal air conditioner'</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingSystemFuel) = 1'>Expected 1 element(s) for xpath: CoolingSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='h:CoolingSystemFuel[text()="electricity"] or not(h:CoolingSystemFuel)'>Expected CoolingSystemFuel to be 'electricity'</sch:assert>
@@ -886,27 +886,11 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[CoolingSystemType=RoomAC]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="room air conditioner"]'>
+    <sch:title>[CoolingSystemType=PTACorRoomAC]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="room air conditioner" or h:CoolingSystemType="packaged terminal air conditioner"]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected 0 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="EER" or h:Units="CEER"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:SensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SensibleHeatFraction</sch:assert>
-      <sch:assert role='ERROR' test='count(h:IntegratedHeatingSystemFuel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IntegratedHeatingSystemFuel</sch:assert>
-      <sch:assert role='ERROR' test='h:IntegratedHeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"] or not(h:IntegratedHeatingSystemFuel)'>Expected IntegratedHeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 8'>EER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="CEER"]/h:Value) &lt; 8'>CEER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
-    </sch:rule>
-  </sch:pattern>
-  
-  <sch:pattern>
-    <sch:title>[CoolingSystemType=PTAC]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="packaged terminal air conditioner"]'>
-      <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected 0 element(s) for xpath: DistributionSystem</sch:assert> <!-- Future: allow ducted PTAC systems-->
-      <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="EER" or h:Units="CEER"]/h:Value) = 1'>Expected 1 for xpath: AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value</sch:assert>
       <sch:assert role='ERROR' test='count(h:SensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:IntegratedHeatingSystemFuel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IntegratedHeatingSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='h:IntegratedHeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"] or not(h:IntegratedHeatingSystemFuel)'>Expected IntegratedHeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
@@ -1022,7 +1006,7 @@
     <sch:title>[HeatPump]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump'>
       <sch:assert role='ERROR' test='count(../../h:HVACControl) = 1'>Expected 1 element(s) for xpath: ../../HVACControl</sch:assert> <!-- See [HVACControl=Heating] and/or [HVACControl=Cooling] -->
-      <sch:assert role='ERROR' test='count(h:HeatPumpType) = 1'>Expected 1 element(s) for xpath: HeatPumpType</sch:assert> <!-- See [HeatPumpType=AirSource] or [HeatPumpType=MiniSplit] or [HeatPumpType=GroundSource] or [HeatPumpType=WaterLoop] or [HeatPumpType=PTHP or HeatPumpType=RoomHP] -->
+      <sch:assert role='ERROR' test='count(h:HeatPumpType) = 1'>Expected 1 element(s) for xpath: HeatPumpType</sch:assert> <!-- See [HeatPumpType=AirSource] or [HeatPumpType=MiniSplit] or [HeatPumpType=GroundSource] or [HeatPumpType=WaterLoop] or [HeatPumpType=PTHPorRoomACwithReverseCycle] -->
       <sch:assert role='ERROR' test='h:HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="water-loop-to-air" or text()="packaged terminal heat pump" or text()="room air conditioner with reverse cycle"] or not(h:HeatPumpType)'>Expected HeatPumpType to be 'air-to-air' or 'mini-split' or 'ground-to-air' or 'water-loop-to-air' or 'packaged terminal heat pump' or 'room air conditioner with reverse cycle'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
@@ -1150,7 +1134,7 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[HeatPumpType=PTHP or HeatPumpType=RoomHP]</sch:title>
+    <sch:title>[HeatPumpType=PTHPorRoomACwithReverseCycle]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType="packaged terminal heat pump" or h:HeatPumpType="room air conditioner with reverse cycle"]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected 0 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>

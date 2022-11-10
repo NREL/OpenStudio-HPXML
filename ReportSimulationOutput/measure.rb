@@ -1118,7 +1118,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    tol = 0.0001 # for comparing annual to annual
+    tol = 0.1
     meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
 
     # Check if simulation successful
@@ -1163,7 +1163,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         sum_timeseries = UnitConversions.convert(obj.timeseries_output.sum(0.0), obj.timeseries_units, obj.annual_units)
         annual_total = obj.annual_output.to_f
-        if (annual_total - sum_timeseries).abs > 0.1
+        if (annual_total - sum_timeseries).abs > tol
           runner.registerError("Timeseries outputs (#{sum_timeseries.round(3)}) do not sum to annual output (#{annual_total.round(3)}) for #{output_type}: #{key}.")
           return false
         end
@@ -1397,6 +1397,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     @hpxml.cooling_systems.each do |clg_system|
+      if clg_system.has_integrated_heating && clg_system.integrated_heating_system_fraction_heat_load_served > 0
+        # Cooling system w/ integrated heating (e.g., Room AC w/ electric resistance heating)
+        htg_ids << clg_system.id
+        htg_seed_id_map[clg_system.id] = clg_system.htg_seed_id
+        htg_fuels[clg_system.id] = clg_system.integrated_heating_system_fuel
+        htg_eecs[clg_system.id] = get_eec_value_numerator('Percent') / clg_system.integrated_heating_system_efficiency_percent
+      end
+
       next unless clg_system.fraction_cool_load_served > 0
 
       clg_ids << clg_system.id
@@ -1432,6 +1440,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       clg_ids << heat_pump.id
       clg_seed_id_map[heat_pump.id] = heat_pump.clg_seed_id
+      clg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
       if not heat_pump.cooling_efficiency_seer.nil?
         clg_eecs[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
       elsif not heat_pump.cooling_efficiency_seer2.nil?
@@ -1488,9 +1497,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @loads[LT::Heating].annual_output_by_system[htg_system.id] = htg_system.fraction_heat_load_served * @loads[LT::Heating].annual_output
     end
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
-      next unless clg_ids.include? clg_system.id
+      if clg_ids.include? clg_system.id
+        @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
+      end
+      next unless (clg_system.is_a? HPXML::CoolingSystem) && clg_system.has_integrated_heating # Cooling system w/ integrated heating (e.g., Room AC w/ electric resistance heating)
 
-      @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
+      if htg_ids.include? clg_system.id
+        @loads[LT::Heating].annual_output_by_system[clg_system.id] = clg_system.integrated_heating_system_fraction_heat_load_served * @loads[LT::Heating].annual_output
+      end
     end
 
     # Handle dual-fuel heat pumps
