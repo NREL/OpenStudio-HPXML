@@ -12,7 +12,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-ptac-with-heating-electricity.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-room-ac-only.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -325,15 +325,17 @@
             </PrimarySystems>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
-              <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
+              <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
-                <Value>10.7</Value>
+                <Value>8.5</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
               <IntegratedHeatingSystemFuel>electricity</IntegratedHeatingSystemFuel>
+              <IntegratedHeatingSystemCapacity>36000.0</IntegratedHeatingSystemCapacity>
               <IntegratedHeatingSystemAnnualEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>

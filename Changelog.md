@@ -10,6 +10,7 @@ __New Features__
 - **Breaking Change**: Replaces `StandbyLoss` with `StandbyLoss[Units="F/hr"]/Value` for an indirect water heater.
 - **Breaking Change**: Replaces `BranchPipingLoopLength` with `BranchPipingLength` for a hot water recirculation system.
 - **Breaking Change**: Replaces `Floor/extension/OtherSpaceAboveOrBelow` with `Floor/FloorOrCeiling`.
+- **Breaking Change**: HVAC/DHW equipment efficiencies can no longer be defaulted (e.g., based on age of equipment); they are now required.
 - **Breaking Change**: Deprecates ReportHPXMLOutput measure; HVAC autosized capacities & design loads moved to `results_annual.csv`.
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
 - Allows heating/cooling seasons that don't span the entire year.
@@ -33,6 +34,8 @@ __New Features__
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
   - Disaggregates Battery outputs from PV outputs.
+- Allows modeling room air conditioners with heating or reverse cycle.
+- **Breaking change**: For PTAC with heating, replaces `HeatingSystem` of type PackagedTerminalAirConditionerHeating with `CoolingSystem/IntegratedHeating*` elements.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
