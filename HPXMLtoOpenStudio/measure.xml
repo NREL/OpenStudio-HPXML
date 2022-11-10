@@ -524,18 +524,6 @@
       <checksum>ABC09448</checksum>
     </file>
     <file>
-      <filename>test_battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>574D5312</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>861C9AF0</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -571,7 +559,7 @@
       <checksum>C82FEAAA</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
+      <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>DE9D48A5</checksum>
