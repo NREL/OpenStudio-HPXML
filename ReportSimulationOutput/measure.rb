@@ -1118,6 +1118,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
+    tol = 0.0001 # for comparing annual to annual
     meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
 
     # Check if simulation successful
@@ -1132,7 +1133,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check sum of electricity produced end use outputs match total output from meter
-    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > 0.0001
+    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > tol
       runner.registerError("#{FT::Elec} produced category end uses (#{outputs[:elec_prod_annual].round(3)}) do not sum to total (#{meter_elec_produced.round(3)}).")
       return false
     end
@@ -1144,7 +1145,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
       end
-      if (sum_categories - meter_fuel_total).abs > 0.1
+      if (sum_categories - meter_fuel_total).abs > tol
         runner.registerError("#{fuel_type} category end uses (#{sum_categories.round(3)}) do not sum to total (#{meter_fuel_total.round(3)}).")
         return false
       end
