@@ -2423,11 +2423,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     else
       args['battery_location'] = HPXML::LocationOutside
     end
-    args['battery_power'] = 15000
+    args['battery_power'] = 6000
     args['battery_capacity'] = 20
     args['battery_usable_capacity'] = 18
-  elsif ['base-pv-battery-scheduled.xml'].include? hpxml_file
-    args['battery_power'] = 6000
   end
 
   # Simulation Control
@@ -2540,13 +2538,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Battery Schedules
-  if ['base-battery-scheduled.xml'].include? hpxml_file
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
-  elsif ['base-misc-generators-battery-scheduled.xml'].include? hpxml_file
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
-  elsif ['base-pv-battery-scheduled.xml'].include? hpxml_file
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
-  elsif ['base-pv-generators-battery-scheduled.xml'].include? hpxml_file
+  if ['base-battery-scheduled.xml',
+      'base-misc-generators-battery-scheduled.xml',
+      'base-pv-battery-scheduled.xml',
+      'base-pv-generators-battery-scheduled.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
   end
 end
