@@ -18,7 +18,6 @@ __New Features__
 - Allows setting the EnergyPlus temperature capacitance multiplier.
 - New lithium ion battery capabilities:
   - Detailed charging/discharging schedules via CSV files.
-  - Allows modeling a scheduled battery without PV.  
 - Allows setting the ground soil conductivity used for foundation heat transfer and ground source heat pumps.
 - Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - Allows specifying duct surface area multipliers.
