@@ -392,6 +392,36 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.floors[0].id }[0]
       _check_surface(hpxml.floors[0], os_surface, floor_values[:layer_names])
     end
+
+    # Miscellaneous
+    ceilings_values = [
+      # SIP
+      [{ assembly_r: 0.1, layer_names: ['gypsum board', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['gypsum board', 'osb sheathing', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['gypsum board', 'osb sheathing', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] }],
+      # Solid Concrete
+      [{ assembly_r: 0.1, layer_names: ['gypsum board', 'ceiling layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['gypsum board', 'osb sheathing', 'ceiling layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['gypsum board', 'ceiling rigid ins', 'osb sheathing', 'ceiling layer', 'gypsum board'] }],
+      # Steel frame
+      [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling loosefill ins', 'ceiling stud and cavity', 'gypsum board'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-floortypes.xml')
+    puts hpxml.floors.size
+    for i in 0..hpxml.floors.size - 1
+      ceilings_values[i].each do |ceilings_values|
+        hpxml.floors[i].insulation_assembly_r_value = ceilings_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.floors[i].id}" }[0]
+        _check_surface(hpxml.floors[i], os_surface, ceilings_values[:layer_names])
+      end
+    end
   end
 
   def test_slabs

@@ -828,13 +828,19 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_sip_floor_ceiling(model, surfaces, constr_name, sip_r,
-                                   sip_thick_in, framing_factor, sheathing_thick_in,
+  def self.apply_sip_floor_ceiling(model, surfaces, constr_name, is_ceiling,
+                                   sip_r, sip_thick_in, framing_factor, sheathing_thick_in,
                                    mat_int_finish, osb_thick_in, rigid_r,
                                    mat_ext_finish, inside_film, outside_film,
                                    solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
+
+    if is_ceiling
+      constr_type = HPXML::FloorTypeCeiling
+    else
+      constr_type = HPXML::FloorTypeFloor
+    end
 
     # Define materials
     spline_thick_in = 0.5
@@ -852,7 +858,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: "#{constr_type} rigid ins", thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -872,9 +878,9 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
-    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'floor ins layer')
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'floor spline layer')
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
+    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], "#{constr_type} ins layer")
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
     constr.add_layer(mat_int_sheath)
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
@@ -888,13 +894,19 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_generic_layered_floor_ceiling(model, surfaces, constr_name,
+  def self.apply_generic_layered_floor_ceiling(model, surfaces, constr_name, is_ceiling,
                                                thick_ins, conds, denss, specheats,
                                                mat_int_finish, osb_thick_in, rigid_r,
                                                mat_ext_finish, inside_film, outside_film,
                                                solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
+
+    if is_ceiling
+      constr_type = HPXML::FloorTypeCeiling
+    else
+      constr_type = HPXML::FloorTypeFloor
+    end
 
     # Validate inputs
     for idx in 0..4
@@ -905,18 +917,18 @@ class Constructions
 
     # Define materials
     mats = []
-    mats << Material.new(name: 'floor layer 1', thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
+    mats << Material.new(name: "#{constr_type} layer 1", thick_in: thick_ins[0], k_in: conds[0], rho: denss[0], cp: specheats[0])
     if not thick_ins[1].nil?
-      mats << Material.new(name: 'floor layer 2', thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
+      mats << Material.new(name: "#{constr_type} layer 2", thick_in: thick_ins[1], k_in: conds[1], rho: denss[1], cp: specheats[1])
     end
     if not thick_ins[2].nil?
-      mats << Material.new(name: 'floor layer 3', thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
+      mats << Material.new(name: "#{constr_type} layer 3", thick_in: thick_ins[2], k_in: conds[2], rho: denss[2], cp: specheats[2])
     end
     if not thick_ins[3].nil?
-      mats << Material.new(name: 'floor layer 4', thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
+      mats << Material.new(name: "#{constr_type} layer 4", thick_in: thick_ins[3], k_in: conds[3], rho: denss[3], cp: specheats[3])
     end
     if not thick_ins[4].nil?
-      mats << Material.new(name: 'floor layer 5', thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
+      mats << Material.new(name: "#{constr_type} layer 5", thick_in: thick_ins[4], k_in: conds[4], rho: denss[4], cp: specheats[4])
     end
     mat_osb = nil
     if osb_thick_in > 0
@@ -925,7 +937,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: "#{constr_type} rigid ins", thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -1954,7 +1966,7 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_sip_floor_ceiling(model, surface, "#{floor_id} construction",
+      apply_sip_floor_ceiling(model, surface, "#{floor_id} construction", is_ceiling,
                               cavity_r, constr_set.thick_in, constr_set.framing_factor,
                               constr_set.sheath_thick_in, constr_set.mat_int_finish,
                               constr_set.osb_thick_in, constr_set.rigid_r,
@@ -1979,7 +1991,7 @@ class Constructions
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      apply_generic_layered_floor_ceiling(model, surface, "#{floor_id} construction",
+      apply_generic_layered_floor_ceiling(model, surface, "#{floor_id} construction", is_ceiling,
                                           thick_ins, conds, denss, specheats,
                                           constr_set.mat_int_finish, constr_set.osb_thick_in,
                                           constr_set.rigid_r, constr_set.mat_ext_finish,
