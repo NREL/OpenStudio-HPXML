@@ -73,6 +73,7 @@ class Battery
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
+    elcs.setDCtoDCChargingEfficiency(0.925) #Based on Tesla Powerwall round trip efficiency (new)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
