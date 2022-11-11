@@ -4193,9 +4193,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          floor_or_ceiling = HPXML::FloorTypeFloor
+          floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif surface.surfaceType == 'RoofCeiling'
-          floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
 
@@ -4213,9 +4213,9 @@ class HPXMLFile
                        floor_or_ceiling: floor_or_ceiling)
       if hpxml.floors[-1].floor_or_ceiling.nil?
         if hpxml.floors[-1].is_floor
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeFloor
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif hpxml.floors[-1].is_ceiling
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeCeiling
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id

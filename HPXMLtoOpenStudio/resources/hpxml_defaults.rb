@@ -770,10 +770,10 @@ class HPXMLDefaults
     hpxml.floors.each do |floor|
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
-          floor.floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling
           floor.floor_or_ceiling_isdefaulted = true
         elsif floor.is_floor
-          floor.floor_or_ceiling = HPXML::FloorTypeFloor
+          floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
           floor.floor_or_ceiling_isdefaulted = true
         end
       end

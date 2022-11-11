@@ -124,12 +124,12 @@ class HPXML < Object
   FoundationWallTypeDoubleBrick = 'double brick'
   FoundationWallTypeSolidConcrete = 'solid concrete'
   FoundationWallTypeWood = 'wood'
+  FloorOrCeilingCeiling = 'ceiling'
+  FloorOrCeilingFloor = 'floor'
   FloorTypeWoodFrame = 'WoodFrame'
   FloorTypeSIP = 'StructuralInsulatedPanel'
   FloorTypeSteelFrame = 'SteelFrame'
   FloorTypeConcrete = 'SolidConcrete'
-  FloorTypeCeiling = 'ceiling'
-  FloorTypeFloor = 'floor'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -2719,7 +2719,7 @@ class HPXML < Object
           return false
         end
       else
-        return @floor_or_ceiling == FloorTypeCeiling
+        return @floor_or_ceiling == FloorOrCeilingCeiling
       end
     end
 

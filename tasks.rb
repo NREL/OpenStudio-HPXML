@@ -2846,21 +2846,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      floor_type: HPXML::FloorTypeWoodFrame,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      floor_type: HPXML::FloorTypeWoodFrame,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
                      floor_type: HPXML::FloorTypeWoodFrame,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
@@ -2970,7 +2970,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeCeiling)
+                     floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
     hpxml.slabs[0].area = 1350
     hpxml.slabs[0].exposed_perimeter = 150
     hpxml.windows[1].area = 108
@@ -3216,7 +3216,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      floor_type: HPXML::FloorTypeWoodFrame,
                      area: 675,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3359,7 +3359,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                      floor_type: HPXML::FloorTypeWoodFrame,
                      area: 400,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3400,7 +3400,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                        floor_type: floor_type,
                        area: area / floors_map.size,
                        insulation_assembly_r_value: assembly_r,
-                       floor_or_ceiling: HPXML::FloorTypeCeiling)
+                       floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
     end
   elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
     exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
@@ -3419,7 +3419,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                        floor_type: floor_type,
                        area: area / floors_map.size,
                        insulation_assembly_r_value: assembly_r,
-                       floor_or_ceiling: HPXML::FloorTypeFloor)
+                       floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     end
     hpxml.floors << ceiling
     hpxml.floors[-1].id = "Floor#{hpxml.floors.size}"

@@ -837,9 +837,9 @@ class Constructions
     return if surfaces.empty?
 
     if is_ceiling
-      constr_type = HPXML::FloorTypeCeiling
+      constr_type = HPXML::FloorOrCeilingCeiling
     else
-      constr_type = HPXML::FloorTypeFloor
+      constr_type = HPXML::FloorOrCeilingFloor
     end
 
     # Define materials
@@ -903,9 +903,9 @@ class Constructions
     return if surfaces.empty?
 
     if is_ceiling
-      constr_type = HPXML::FloorTypeCeiling
+      constr_type = HPXML::FloorOrCeilingCeiling
     else
-      constr_type = HPXML::FloorTypeFloor
+      constr_type = HPXML::FloorOrCeilingFloor
     end
 
     # Validate inputs
