@@ -600,7 +600,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && err_line.include?('are not available.')
       next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
-      next if err_line.include? 'The following Report Variables were requested but not generated.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9732 is resolved
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
@@ -648,6 +647,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
+      end
+      if hpxml.hvac_controls[0].realistic_staging = true
+        next if err_line.include? 'The following Report Variables were requested but not generated' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9732 is resolved
       end
 
       flunk "Unexpected warning found: #{err_line}"
