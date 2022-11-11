@@ -183,7 +183,7 @@ def create_hpxmls
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
-    'base-enclosure-floortypes.xml' => 'base.xml',
+    'base-enclosure-ceilingtypes.xml' => 'base.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-natural-ventilation-availability.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
@@ -3383,7 +3383,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
-  elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
+  elsif ['base-enclosure-ceilingtypes.xml'].include? hpxml_file
     hpxml.floors.reverse_each do |floor|
       floor.delete
     end
