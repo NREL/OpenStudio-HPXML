@@ -454,6 +454,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(28.1)
     args << arg
 
+    floor_type_choices = OpenStudio::StringVector.new
+    floor_type_choices << HPXML::FloorTypeWoodFrame
+    floor_type_choices << HPXML::FloorTypeSIP
+    floor_type_choices << HPXML::FloorTypeConcrete
+    floor_type_choices << HPXML::FloorTypeSteelFrame
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
+    arg.setDisplayName('Floor: Type')
+    arg.setDescription('The type of floors.')
+    arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
+    args << arg
+
     foundation_wall_type_choices = OpenStudio::StringVector.new
     foundation_wall_type_choices << HPXML::FoundationWallTypeSolidConcrete
     foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlock
@@ -4181,9 +4193,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          floor_or_ceiling = HPXML::FloorTypeFloor
+          floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif surface.surfaceType == 'RoofCeiling'
-          floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
 
@@ -4196,13 +4208,14 @@ class HPXMLFile
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                        exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: interior_adjacent_to,
+                       floor_type: args[:floor_type],
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                        floor_or_ceiling: floor_or_ceiling)
       if hpxml.floors[-1].floor_or_ceiling.nil?
         if hpxml.floors[-1].is_floor
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeFloor
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif hpxml.floors[-1].is_ceiling
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeCeiling
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id

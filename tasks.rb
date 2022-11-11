@@ -167,6 +167,8 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-ceilingtypes.xml' => 'base.xml',
+    'base-enclosure-floortypes.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -585,6 +587,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 3
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 8.0
     args['foundation_wall_insulation_r'] = 8.9
     args['foundation_wall_insulation_distance_to_top'] = 0.0
@@ -851,6 +854,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 0
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 6.0
     args['foundation_wall_insulation_r'] = 0
     args['foundation_wall_insulation_distance_to_top'] = 0
@@ -2839,21 +2843,24 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
@@ -2959,10 +2966,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationAtticUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeCeiling)
+                     floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
     hpxml.slabs[0].area = 1350
     hpxml.slabs[0].exposed_perimeter = 150
     hpxml.windows[1].area = 108
@@ -3205,9 +3213,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 675,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3347,9 +3356,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationGarage,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 400,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3374,6 +3384,45 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
+  elsif ['base-enclosure-ceilingtypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 3.2,
+                   HPXML::FloorTypeSteelFrame => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: area / floors_map.size,
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
+    end
+  elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
+    ceiling = hpxml.floors[1].dup
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 3.2,
+                   HPXML::FloorTypeSteelFrame => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: area / floors_map.size,
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorOrCeilingFloor)
+    end
+    hpxml.floors << ceiling
+    hpxml.floors[-1].id = "Floor#{hpxml.floors.size}"
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.rim_joists.reverse_each do |rim_joist|
       rim_joist.delete
