@@ -4205,17 +4205,25 @@ class HVAC
     return { rh_setpoint: rh_setpoint, ief: ief }
   end
 
-  def self.calc_seer_from_seer2(seer2)
-    # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors (from AHRI)
-    # Calculation below for split systems.
-    seer = seer2 / 0.95
-    return seer
+  def self.calc_seer_from_seer2(seer2, is_ducted)
+    # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    if is_ducted # Ducted split system
+      return seer2 / 0.95
+    else # Ductless systems
+      return seer2 / 1.00
+    end
   end
 
-  def self.calc_hspf_from_hspf2(hspf2)
-    # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors (from AHRI)
-    # Calculation below for split systems.
-    hspf = hspf2 / 0.85
-    return hspf
+  def self.calc_hspf_from_hspf2(hspf2, is_ducted)
+    # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    if is_ducted # Ducted split system
+      return hspf2 / 0.85
+    else # Ducted split system
+      return hspf2 / 0.90
+    end
   end
 end
