@@ -829,7 +829,7 @@ class Constructions
   end
 
   def self.apply_sip_floor_ceiling(model, surfaces, constr_name, is_ceiling,
-                                   sip_r, sip_thick_in, framing_factor, sheathing_thick_in,
+                                   sip_r, sip_thick_in, framing_factor,
                                    mat_int_finish, osb_thick_in, rigid_r,
                                    mat_ext_finish, inside_film, outside_film,
                                    solar_absorptance = nil, emittance = nil)
@@ -845,7 +845,6 @@ class Constructions
     # Define materials
     spline_thick_in = 0.5
     ins_thick_in = sip_thick_in - (2.0 * spline_thick_in) # in
-    mat_int_sheath = Material.OSBSheathing(sheathing_thick_in)
     mat_framing_inner_outer = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.Wood)
     mat_framing_middle = Material.new(thick_in: ins_thick_in, mat_base: BaseMaterial.Wood)
     mat_spline = Material.new(thick_in: spline_thick_in, mat_base: BaseMaterial.Wood)
@@ -872,16 +871,15 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
+    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], "#{constr_type} ins layer")
+    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
-    constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], "#{constr_type} ins layer")
-    constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
-    constr.add_layer(mat_int_sheath)
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
@@ -949,14 +947,14 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
+    mats.each do |mat|
+      constr.add_layer(mat)
+    end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
-    end
-    mats.each do |mat|
-      constr.add_layer(mat)
     end
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
@@ -1899,6 +1897,7 @@ class Constructions
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 30.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R30
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 20.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R20
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil),  # Fallback
       ]
@@ -1934,20 +1933,17 @@ class Constructions
                                       inside_film, outside_film)
 
     elsif floor_type == HPXML::FloorTypeSIP
-      sheathing_thick_in = 0.44
-
       constr_sets = [
-        SIPConstructionSet.new(16.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
-        SIPConstructionSet.new(12.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
-        SIPConstructionSet.new(8.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil),  # 8" SIP core
-        SIPConstructionSet.new(1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil),                 # Fallback
+        SIPConstructionSet.new(16.0, 0.16, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
+        SIPConstructionSet.new(12.0, 0.16, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
+        SIPConstructionSet.new(8.0, 0.16, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # 8" SIP core
+        SIPConstructionSet.new(1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil), # Fallback
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
       apply_sip_floor_ceiling(model, surface, "#{floor_id} construction", is_ceiling,
                               cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                              constr_set.sheath_thick_in, constr_set.mat_int_finish,
-                              constr_set.osb_thick_in, constr_set.rigid_r,
+                              constr_set.mat_int_finish, constr_set.osb_thick_in, constr_set.rigid_r,
                               constr_set.mat_ext_finish, inside_film, outside_film)
     elsif floor_type == HPXML::FloorTypeConcrete
       constr_sets = [

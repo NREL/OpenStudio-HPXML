@@ -380,13 +380,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     # Miscellaneous
     ceilings_values = [
       # SIP
-      [{ assembly_r: 0.1, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
-       { assembly_r: 5.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
-       { assembly_r: 20.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] }],
+      [{ assembly_r: 0.1, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] }],
       # Solid Concrete
       [{ assembly_r: 0.1, layer_names: ['ceiling layer', 'gypsum board'] },
        { assembly_r: 5.0, layer_names: ['ceiling layer', 'gypsum board'] },
-       { assembly_r: 20.0, layer_names: ['ceiling rigid ins', 'ceiling layer', 'gypsum board'] }],
+       { assembly_r: 20.0, layer_names: ['ceiling layer', 'ceiling rigid ins', 'gypsum board'] }],
       # Steel frame
       [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
        { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
@@ -430,21 +430,21 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     # Miscellaneous
     floors_values = [
       # SIP
-      [{ assembly_r: 0.1, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] },
+      [{ assembly_r: 0.1, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'floor covering'] },
        { assembly_r: 5.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] },
        { assembly_r: 20.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] }],
       # Solid Concrete
       [{ assembly_r: 0.1, layer_names: ['floor layer', 'floor covering'] },
-       { assembly_r: 5.0, layer_names: ['floor layer', 'floor covering'] },
-       { assembly_r: 20.0, layer_names: ['floor rigid ins', 'floor layer', 'floor covering'] }],
+       { assembly_r: 5.0, layer_names: ['floor layer', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor layer', 'floor rigid ins', 'osb sheathing', 'floor covering'] }],
       # Steel frame
       [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
-       { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'floor covering'] },
-       { assembly_r: 20.0, layer_names: ['floor loosefill ins', 'floor stud and cavity', 'floor covering'] }],
+       { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor stud and cavity', 'floor rigid ins', 'osb sheathing', 'floor covering'] }],
     ]
 
     hpxml = _create_hpxml('base-enclosure-floortypes.xml')
-    for i in 0..hpxml.floors.size - 1
+    for i in 0..hpxml.floors.size - 2
       floors_values[i].each do |floor_values|
         hpxml.floors[i].insulation_assembly_r_value = floor_values[:assembly_r]
         XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -818,7 +818,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       layer_name = os_construction.getLayer(i).name.to_s
       expected_layer_name = expected_layer_names[i]
       if not layer_name.start_with? expected_layer_name
-        puts "'#{layer_name}' does not start with '#{expected_layer_name}'"
+        puts "Layer #{i + 1}: '#{layer_name}' does not start with '#{expected_layer_name}'"
       end
       assert(layer_name.start_with? expected_layer_name)
     end
