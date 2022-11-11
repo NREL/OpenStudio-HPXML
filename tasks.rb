@@ -167,6 +167,8 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-ceilingtypes.xml' => 'base.xml',
+    'base-enclosure-floortypes.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -183,7 +185,6 @@ def create_hpxmls
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
-    'base-enclosure-ceilingtypes.xml' => 'base.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-natural-ventilation-availability.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
@@ -3384,6 +3385,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     azimuth: 0,
                     r_value: 4.4)
   elsif ['base-enclosure-ceilingtypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
     hpxml.floors.reverse_each do |floor|
       floor.delete
     end
@@ -3392,13 +3395,34 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                    HPXML::FloorTypeSteelFrame => 8.1 }
     floors_map.each_with_index do |(floor_type, assembly_r), _i|
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
-                       exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                       exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: HPXML::LocationLivingSpace,
                        floor_type: floor_type,
-                       area: 1350 / floors_map.size,
+                       area: area / floors_map.size,
                        insulation_assembly_r_value: assembly_r,
                        floor_or_ceiling: HPXML::FloorTypeCeiling)
     end
+  elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
+    ceiling = hpxml.floors[1].dup
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 3.2,
+                   HPXML::FloorTypeSteelFrame => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: area / floors_map.size,
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorTypeFloor)
+    end
+    hpxml.floors << ceiling
+    hpxml.floors[-1].id = "Floor#{hpxml.floors.size}"
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.rim_joists.reverse_each do |rim_joist|
       rim_joist.delete

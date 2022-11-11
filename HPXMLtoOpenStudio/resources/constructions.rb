@@ -1937,10 +1937,10 @@ class Constructions
       sheathing_thick_in = 0.44
 
       constr_sets = [
-        SIPConstructionSet.new(16.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering), # 16" SIP core
-        SIPConstructionSet.new(12.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering), # 12" SIP core
-        SIPConstructionSet.new(8.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering),  # 8" SIP core
-        SIPConstructionSet.new(1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish_or_covering, fallback_mat_int_finish_or_covering),        # Fallback
+        SIPConstructionSet.new(16.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
+        SIPConstructionSet.new(12.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
+        SIPConstructionSet.new(8.0, 0.16, 0.0, sheathing_thick_in, osb_thick_in, mat_int_finish_or_covering, nil),  # 8" SIP core
+        SIPConstructionSet.new(1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil),                 # Fallback
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
@@ -1951,10 +1951,10 @@ class Constructions
                               constr_set.mat_ext_finish, inside_film, outside_film)
     elsif floor_type == HPXML::FloorTypeConcrete
       constr_sets = [
-        GenericConstructionSet.new(20.0, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering),         # w/R-20 rigid
-        GenericConstructionSet.new(10.0, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering),         # w/R-10 rigid
-        GenericConstructionSet.new(0.0, osb_thick_in, mat_int_finish_or_covering, mat_int_finish_or_covering),          # Standard
-        GenericConstructionSet.new(0.0, 0.0, fallback_mat_int_finish_or_covering, fallback_mat_int_finish_or_covering), # Fallback
+        GenericConstructionSet.new(20.0, osb_thick_in, mat_int_finish_or_covering, nil), # w/R-20 rigid
+        GenericConstructionSet.new(10.0, osb_thick_in, mat_int_finish_or_covering, nil), # w/R-10 rigid
+        GenericConstructionSet.new(0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # Standard
+        GenericConstructionSet.new(0.0, 0.0, fallback_mat_int_finish_or_covering, nil),  # Fallback
       ]
       match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 

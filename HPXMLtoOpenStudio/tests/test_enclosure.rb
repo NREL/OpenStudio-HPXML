@@ -380,13 +380,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     # Miscellaneous
     ceilings_values = [
       # SIP
-      [{ assembly_r: 0.1, layer_names: ['gypsum board', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
-       { assembly_r: 5.0, layer_names: ['gypsum board', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
-       { assembly_r: 20.0, layer_names: ['gypsum board', 'ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] }],
+      [{ assembly_r: 0.1, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'osb sheathing', 'gypsum board'] }],
       # Solid Concrete
-      [{ assembly_r: 0.1, layer_names: ['gypsum board', 'ceiling layer', 'gypsum board'] },
-       { assembly_r: 5.0, layer_names: ['gypsum board', 'ceiling layer', 'gypsum board'] },
-       { assembly_r: 20.0, layer_names: ['gypsum board', 'ceiling rigid ins', 'ceiling layer', 'gypsum board'] }],
+      [{ assembly_r: 0.1, layer_names: ['ceiling layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling rigid ins', 'ceiling layer', 'gypsum board'] }],
       # Steel frame
       [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
        { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
@@ -411,7 +411,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    # Floors
+    # Wood Frame
     floors_values = [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
                      { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'osb sheathing', 'floor covering'] },
                      { assembly_r: 20.0, layer_names: ['floor stud and cavity', 'floor rigid ins', 'osb sheathing', 'floor covering'] }]
@@ -425,6 +425,35 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       # Check properties
       os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.floors[0].id }[0]
       _check_surface(hpxml.floors[0], os_surface, floor_values[:layer_names])
+    end
+
+    # Miscellaneous
+    floors_values = [
+      # SIP
+      [{ assembly_r: 0.1, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] }],
+      # Solid Concrete
+      [{ assembly_r: 0.1, layer_names: ['floor layer', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor layer', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor rigid ins', 'floor layer', 'floor covering'] }],
+      # Steel frame
+      [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor loosefill ins', 'floor stud and cavity', 'floor covering'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-floortypes.xml')
+    for i in 0..hpxml.floors.size - 1
+      floors_values[i].each do |floor_values|
+        hpxml.floors[i].insulation_assembly_r_value = floor_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.floors[i].id}" }[0]
+        _check_surface(hpxml.floors[i], os_surface, floor_values[:layer_names])
+      end
     end
   end
 
