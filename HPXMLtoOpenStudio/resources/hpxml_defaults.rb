@@ -1819,6 +1819,10 @@ class HPXMLDefaults
         battery.nominal_voltage = default_values[:nominal_voltage] # V
         battery.nominal_voltage_isdefaulted = true
       end
+      if battery.round_trip_efficiency.nil?
+        battery.round_trip_efficiency = default_values[:round_trip_efficiency]
+        battery.round_trip_efficiency_isdefaulted = true
+      end
       if battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
         # Calculate nominal capacity from usable capacity or rated power output if available
         if not battery.usable_capacity_kwh.nil?

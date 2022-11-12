@@ -73,7 +73,7 @@ class Battery
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(0.925) #Based on Tesla Powerwall round trip efficiency (new)
+    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
@@ -119,6 +119,7 @@ class Battery
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,
+             round_trip_efficiency: 0.925, # Based on Tesla Powerwall round trip efficiency (new)
              usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
   end
 
