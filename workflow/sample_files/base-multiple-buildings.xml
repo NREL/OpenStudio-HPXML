@@ -212,6 +212,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -768,6 +771,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -1324,6 +1330,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

@@ -124,8 +124,12 @@ class HPXML < Object
   FoundationWallTypeDoubleBrick = 'double brick'
   FoundationWallTypeSolidConcrete = 'solid concrete'
   FoundationWallTypeWood = 'wood'
-  FloorTypeCeiling = 'ceiling'
-  FloorTypeFloor = 'floor'
+  FloorOrCeilingCeiling = 'ceiling'
+  FloorOrCeilingFloor = 'floor'
+  FloorTypeWoodFrame = 'WoodFrame'
+  FloorTypeSIP = 'StructuralInsulatedPanel'
+  FloorTypeSteelFrame = 'SteelFrame'
+  FloorTypeConcrete = 'SolidConcrete'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -2698,7 +2702,7 @@ class HPXML < Object
   end
 
   class Floor < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
@@ -2715,7 +2719,7 @@ class HPXML < Object
           return false
         end
       else
-        return @floor_or_ceiling == FloorTypeCeiling
+        return @floor_or_ceiling == FloorOrCeilingCeiling
       end
     end
 
@@ -2779,6 +2783,10 @@ class HPXML < Object
       XMLHelper.add_element(floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'FloorOrCeiling', @floor_or_ceiling, :string, @floor_or_ceiling_isdefaulted) unless @floor_or_ceiling.nil?
+      if not @floor_type.nil?
+        floor_type_el = XMLHelper.add_element(floor, 'FloorType')
+        XMLHelper.add_element(floor_type_el, @floor_type)
+      end
       XMLHelper.add_element(floor, 'Area', @area, :float) unless @area.nil?
       if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
         interior_finish = XMLHelper.add_element(floor, 'InteriorFinish')
@@ -2812,6 +2820,7 @@ class HPXML < Object
       @exterior_adjacent_to = XMLHelper.get_value(floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(floor, 'InteriorAdjacentTo', :string)
       @floor_or_ceiling = XMLHelper.get_value(floor, 'FloorOrCeiling', :string)
+      @floor_type = XMLHelper.get_child_name(floor, 'FloorType')
       @area = XMLHelper.get_value(floor, 'Area', :float)
       interior_finish = XMLHelper.get_element(floor, 'InteriorFinish')
       if not interior_finish.nil?

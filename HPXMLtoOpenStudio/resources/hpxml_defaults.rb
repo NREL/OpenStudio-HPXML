@@ -770,10 +770,10 @@ class HPXMLDefaults
     hpxml.floors.each do |floor|
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
-          floor.floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling
           floor.floor_or_ceiling_isdefaulted = true
         elsif floor.is_floor
-          floor.floor_or_ceiling = HPXML::FloorTypeFloor
+          floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
           floor.floor_or_ceiling_isdefaulted = true
         end
       end
@@ -1020,28 +1020,35 @@ class HPXMLDefaults
       end
     end
 
-    # HVAC efficiencies
+    # Convert SEER2/HSPF2 to SEER/HSPF
     hpxml.cooling_systems.each do |cooling_system|
-      next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      next unless [HPXML::HVACTypeCentralAirConditioner,
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
       next unless cooling_system.cooling_efficiency_seer.nil?
 
-      cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2).round(2)
+      is_ducted = !cooling_system.distribution_system_idref.nil?
+      cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2, is_ducted).round(2)
       cooling_system.cooling_efficiency_seer_isdefaulted = true
       cooling_system.cooling_efficiency_seer2 = nil
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+      next unless heat_pump.cooling_efficiency_seer.nil?
 
-      if heat_pump.cooling_efficiency_seer.nil?
-        heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2).round(2)
-        heat_pump.cooling_efficiency_seer_isdefaulted = true
-        heat_pump.cooling_efficiency_seer2 = nil
-      end
-
+      is_ducted = !heat_pump.distribution_system_idref.nil?
+      heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2, is_ducted).round(2)
+      heat_pump.cooling_efficiency_seer_isdefaulted = true
+      heat_pump.cooling_efficiency_seer2 = nil
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_efficiency_hspf.nil?
 
-      heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2).round(2)
+      is_ducted = !heat_pump.distribution_system_idref.nil?
+      heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2, is_ducted).round(2)
       heat_pump.heating_efficiency_hspf_isdefaulted = true
       heat_pump.heating_efficiency_hspf2 = nil
     end
