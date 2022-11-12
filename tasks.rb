@@ -414,6 +414,7 @@ def create_hpxmls
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
     'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
+    'base-pv-battery-round-trip-efficiency.xml' => 'base-pv-battery.xml',
 
     'base-pv-generators.xml' => 'base-pv.xml',
     'base-pv-generators-battery.xml' => 'base-pv-generators.xml',
@@ -2426,6 +2427,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['battery_power'] = 6000
     args['battery_capacity'] = 20
     args['battery_usable_capacity'] = 18
+  elsif ['base-pv-battery-round-trip-efficiency.xml'].include? hpxml_file
+    args['battery_round_trip_efficiency'] = 0.95
   end
 
   # Simulation Control
