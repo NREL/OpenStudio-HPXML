@@ -38,6 +38,7 @@ __New Features__
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
+  - Adds optional argument for battery round trip efficiency.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
   - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.

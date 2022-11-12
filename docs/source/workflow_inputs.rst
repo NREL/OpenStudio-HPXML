@@ -2562,6 +2562,7 @@ If not entered, the simulation will not include batteries.
   ``UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double   kWh or Ah  >= 0, < NominalCapacity  No        See [#]_  Usable capacity
   ``RatedPowerOutput``                                  double   W          >= 0                     No        See [#]_  Power output under non-peak conditions
   ``NominalVoltage``                                    double   V          >= 0                     No        50        Nominal voltage
+  ``RoundTripEfficiency``                               double   frac       0 - 1                    No        0.925     Round trip efficiency
   ``extension/LifetimeModel``                           string              See [#]_                 No        None      Lifetime model [#]_
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
