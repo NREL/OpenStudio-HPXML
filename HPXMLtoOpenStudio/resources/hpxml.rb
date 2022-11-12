@@ -474,8 +474,11 @@ class HPXML < Object
     return false
   end
 
-  def has_fuel(fuel)
-    hpxml_doc = to_oga
+  def has_fuel(fuel, hpxml_doc = nil)
+    # If calling multiple times, pass in hpxml_doc for better performance
+    if hpxml_doc.nil?
+      hpxml_doc = to_oga
+    end
     ['HeatingSystemFuel',
      'CoolingSystemFuel',
      'HeatPumpFuel',
