@@ -1406,16 +1406,19 @@ class HPXMLDefaults
 
       # Do not apply on off thermostat if timestep is >= 2
       # Only availabe with 1 min time step
-      if hpxml.header.timestep >= 2 && hvac_control.onoff_thermostat_deadband > 0.0
+      if hvac_control.onoff_thermostat_deadband > 0.0 && hpxml.header.timestep >= 2
         hvac_control.onoff_thermostat_deadband = 0.0
         hvac_control.onoff_thermostat_deadband_isdefaulted = true
       end
 
-      # Do not apply on off thermostat if not correct system types
-      # Only availabe with 1 min time step
-      if (hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir } + hpxml.cooling_systems.select { |cs| cs.cooling_system_type == HPXML::HVACTypeCentralAirConditioner }).size == 0 && hvac_control.onoff_thermostat_deadband > 0.0
-        hvac_control.onoff_thermostat_deadband = 0.0
-        hvac_control.onoff_thermostat_deadband_isdefaulted = true
+      # Only apply for single speed systems for now
+      if hvac_control.onoff_thermostat_deadband > 0.0
+        cooling_system_num_speeds = hpxml.cooling_systems.size > 0 ? hpxml.cooling_systems[0].additional_properties.num_speeds : 0
+        heat_pump_num_speeds = hpxml.heat_pumps.size > 0 ? hpxml.heat_pumps[0].additional_properties.num_speeds : 0
+        if (cooling_system_num_speeds > 1 || heat_pump_num_speeds > 1)
+          hvac_control.onoff_thermostat_deadband = 0.0
+          hvac_control.onoff_thermostat_deadband_isdefaulted = true
+        end
       end
 
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||

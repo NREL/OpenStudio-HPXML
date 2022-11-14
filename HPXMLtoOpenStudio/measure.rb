@@ -189,6 +189,20 @@ class OSModel
 
     check_file_references(hpxml_path)
     offset_db = @hpxml.hvac_controls.size == 0 ? nil : @hpxml.hvac_controls[0].onoff_thermostat_deadband
+    if offset_db && ((@hpxml.heat_pumps + @hpxml.cooling_systems).size > 0)
+      if @hpxml.heat_pumps.size > 0
+        heat_pump = @hpxml.heat_pumps[0]
+        cooling_efficiency_seer = heat_pump.cooling_efficiency_seer.nil? ? HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2).round(2) : heat_pump.cooling_efficiency_seer
+        compressor_type = HVAC.get_default_compressor_type(heat_pump.heat_pump_type, cooling_efficiency_seer)
+      else
+        cooling_system = @hpxml.cooling_systems[0]
+        cooling_efficiency_seer = cooling_system.cooling_efficiency_seer.nil? ? HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2).round(2) : cooling_system.cooling_efficiency_seer
+        compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_system_type, cooling_efficiency_seer)
+      end
+      if compressor_type != HPXML::HVACCompressorTypeSingleStage
+        offset_db = 0.0
+      end
+    end
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         offset_db: offset_db)
@@ -1544,12 +1558,6 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
-      if heat_pump.additional_properties.respond_to? :num_speeds
-        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (heat_pump.additional_properties.num_speeds == 1)
-      else
-        is_ddb_control = false
-      end
-
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
@@ -1570,7 +1578,7 @@ class OSModel
              HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                 living_zone, is_ddb_control)
+                                                                 living_zone, @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,

@@ -39,7 +39,7 @@ __New Features__
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
   - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
 - Improves Kiva foundation model heat transfer by providing better initial temperature assumptions based on foundation type and insulation levels.
-- **Research Feature**: Allows modeling on/off thermostat deadband with start-up degredation for single speed DX systems. An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
+- **Research Feature**: Allows modeling on/off thermostat deadband with start-up degredation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
 
 __Bugfixes__
 - Fixes possible incorrect autosizing of heat pump *separate* backup systems with respect to duct loads.

@@ -1441,6 +1441,8 @@ class SchedulesFile
         next unless col_names.include?(setpoint_col_name)
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
+        next if offset_db_c == 0.0
+
         if setpoint_col_name == ColumnHeatingSetpoint
           @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] - offset_db_c
         elsif setpoint_col_name == ColumnCoolingSetpoint
