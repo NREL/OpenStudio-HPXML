@@ -2,18 +2,19 @@
 
 __New Features__
 - Updates to OpenStudio 3.5.0/EnergyPlus 22.2.
+- Updates to newer proposed HPXML v4.0:
+  - **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
+  - **Breaking change**: `Floor/FloorType` (WoodFrame, StructuralInsulatedPanel, SteelFrame, or SolidConcrete) is a required input.
+  - **Breaking Change**: All `Ducts` must now have a `SystemIdentifier`.
+  - **Breaking Change**: Replaces `WallType/StructurallyInsulatedPanel` with `WallType/StructuralInsulatedPanel`.
+  - **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
+  - **Breaking Change**: Replaces `StandbyLoss` with `StandbyLoss[Units="F/hr"]/Value` for an indirect water heater.
+  - **Breaking Change**: Replaces `BranchPipingLoopLength` with `BranchPipingLength` for a hot water recirculation system.
+  - **Breaking Change**: Replaces `Floor/extension/OtherSpaceAboveOrBelow` with `Floor/FloorOrCeiling`.
+  - **Breaking change**: For PTAC with heating, replaces `HeatingSystem` of type PackagedTerminalAirConditionerHeating with `CoolingSystem/IntegratedHeating*` elements.
 - **Breaking Change**: Now performs full HPXML XSD schema validation (previously just limited checks); yields runtime speed improvements.
-- **Breaking Change**: Replaces `FrameFloors/FrameFloor` with `Floors/Floor`.
-- **Breaking change**: `Floor/FloorType` (WoodFrame, StructuralInsulatedPanel, SteelFrame, or SolidConcrete) is a required input.
-- **Breaking Change**: All `Ducts` must now have a `SystemIdentifier`.
-- **Breaking Change**: Replaces `WallType/StructurallyInsulatedPanel` with `WallType/StructuralInsulatedPanel`.
-- **Breaking change**: Replaces `SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled` with `Building/Site/TimeZone/DSTObserved`.
-- **Breaking Change**: Replaces `StandbyLoss` with `StandbyLoss[Units="F/hr"]/Value` for an indirect water heater.
-- **Breaking Change**: Replaces `BranchPipingLoopLength` with `BranchPipingLength` for a hot water recirculation system.
-- **Breaking Change**: Replaces `Floor/extension/OtherSpaceAboveOrBelow` with `Floor/FloorOrCeiling`.
 - **Breaking Change**: HVAC/DHW equipment efficiencies can no longer be defaulted (e.g., based on age of equipment); they are now required.
 - **Breaking Change**: Deprecates ReportHPXMLOutput measure; HVAC autosized capacities & design loads moved to `results_annual.csv`.
-- **Breaking change**: For PTAC with heating, replaces `HeatingSystem` of type PackagedTerminalAirConditionerHeating with `CoolingSystem/IntegratedHeating*` elements.
 - **Breaking change**: BuildResidentialHPXML measure: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type.
 - Utility bill calculations:
   - **Breaking change**: Removes utility rate and PV related arguments from the ReportUtilityBills measure in lieu of HPXML file inputs.
