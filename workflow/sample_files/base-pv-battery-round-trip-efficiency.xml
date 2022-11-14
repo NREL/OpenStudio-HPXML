@@ -472,7 +472,7 @@
               <Value>18.0</Value>
             </UsableCapacity>
             <RatedPowerOutput>6000.0</RatedPowerOutput>
-            <RoundTripEfficiency>0.95</RoundTripEfficiency>
+            <RoundTripEfficiency>0.8</RoundTripEfficiency>
           </Battery>
         </Batteries>
       </Systems>

@@ -192,7 +192,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.95, battery.dctoDCChargingEfficiency)
+      assert_equal(0.8, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
