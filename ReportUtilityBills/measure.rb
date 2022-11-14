@@ -128,10 +128,17 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                        FT::WoodPellets => HPXML::FuelTypeWoodPellets,
                        FT::Coal => HPXML::FuelTypeCoal }
 
+    # Check for presence of fuels once
+    has_fuel = { HPXML::FuelTypeElectricity => true }
+    hpxml_doc = @hpxml.to_oga
+    Constants.FossilFuels.each do |fuel|
+      has_fuel[fuel] = @hpxml.has_fuel(fuel, hpxml_doc)
+    end
+
     # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
-        next unless @hpxml.has_fuel(hpxml_fuel_map[fuel_type])
+        next unless has_fuel[hpxml_fuel_map[fuel_type]]
         next if is_production && @hpxml.pv_systems.empty?
 
         if fuel_type == FT::Elec
