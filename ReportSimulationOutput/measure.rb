@@ -295,9 +295,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     has_electricity_storage = false
-    if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
-      has_electricity_storage = true
-    end
+    # if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
+    # has_electricity_storage = true
+    # end
+    has_electricity_storage = true if @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
 
     # Fuel outputs
     @fuels.each do |_fuel_type, fuel|
@@ -312,9 +313,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
     end
     if has_electricity_storage
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Output:Meter,ConverterLoss,runperiod;').get # Used for error checking
+      result << OpenStudio::IdfObject.load('Meter:Custom,ConverterLoss,electricity,*,Converter Electricity Loss Decrement Energy;').get # Used for error checking
+
+      result << OpenStudio::IdfObject.load('Output:Meter,Converter,runperiod;').get
+      result << OpenStudio::IdfObject.load('Meter:Custom,Converter,electricity,*,Converter AC Input Electricity Energy;').get
+
+      result << OpenStudio::IdfObject.load('Output:Meter,Discharge,runperiod;').get
+      result << OpenStudio::IdfObject.load('Meter:Custom,Discharge,electricity,*,Electric Storage Discharge Energy;').get
+
       if include_timeseries_fuel_consumptions
-        result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,Converter,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,Discharge,#{timeseries_frequency};").get
       end
     end
 
@@ -645,11 +656,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuel Uses
     @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
-      fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec # We add Electric Storage onto the annual Electricity fuel meter
+      fuel.annual_output += get_report_meter_data_annual(['CONVERTER']) if fuel_type == FT::Elec
+      fuel.annual_output -= get_report_meter_data_annual(['DISCHARGE']) if fuel_type == FT::Elec
+
       next unless include_timeseries_fuel_consumptions
 
       fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
-      fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec # We add Electric Storage onto the timeseries Electricity fuel meter
+      fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['CONVERTER'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x + y } if fuel_type == FT::Elec
+      fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['DISCHARGE'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec
     end
 
     # Peak Electricity Consumption
@@ -712,19 +726,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # End Uses
     @end_uses.each do |key, end_use|
-      fuel_type, _end_use_type = key
+      fuel_type, end_use_type = key
 
       end_use.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
         end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: (end_use.is_negative || end_use.is_storage))
+        end_use.annual_output_by_system[sys_id] += get_report_meter_data_annual(['CONVERTER']) if end_use_type == EUT::Battery
+        end_use.annual_output_by_system[sys_id] -= get_report_meter_data_annual(['DISCHARGE']) if end_use_type == EUT::Battery
+
         if include_timeseries_end_use_consumptions
           end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: (end_use.is_negative || end_use.is_storage))
+          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['CONVERTER'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x + y } if end_use_type == EUT::Battery
+          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['DISCHARGE'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if end_use_type == EUT::Battery
         end
-        if include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: (end_use.is_negative || end_use.is_storage))
-        end
+        next unless include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
+
+        end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: (end_use.is_negative || end_use.is_storage))
+        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['CONVERTER'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x + y } if end_use_type == EUT::Battery
+        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['DISCHARGE'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if end_use_type == EUT::Battery
       end
     end
 
@@ -1119,7 +1140,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def check_for_errors(runner, outputs)
     tol = 0.1
-    meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
+
+    meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
+    meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced'])
+    meter_elec_produced += get_report_meter_data_annual(['CONVERTERLOSS'])
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -2692,7 +2716,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
+        return { [FT::Elec, EUT::Battery] => ['DUMMY'] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
