@@ -58,6 +58,7 @@ __Bugfixes__
 - Fixes possible simulation error if a slab has an ExposedPerimeter near zero.
 - Fixes possible "Could not identify surface type for surface" error.
 - Fixes possible ruby error when defaulting water heater location.
+- Battery round trip efficiency now correctly affects results.
 - BuildResidentialHPXML measure: 
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
