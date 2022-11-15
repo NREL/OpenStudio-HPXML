@@ -588,6 +588,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
+      next if err_line.include?('The following Report Variables were requested but not generated -- check.rdd file') && hpxml.batteries.size > 0
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -657,7 +658,7 @@ class HPXMLTest < MiniTest::Test
       if err_line.include? 'Output:Meter: invalid Key Name'
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
-        num_invalid_output_variables += 1
+        num_invalid_output_variables += 1 if !err_line.include?('DUMMY')
       end
     end
     assert_equal(0, num_invalid_output_meters)

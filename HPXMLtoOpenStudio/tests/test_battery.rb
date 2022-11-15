@@ -36,7 +36,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(62, battery.numberofStringsinParallel, 0.01)
@@ -55,6 +55,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(5000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -84,7 +89,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -106,6 +111,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(elcd.storageDischargePowerFractionSchedule.is_initialized)
       assert(elcd.storageConverter.is_initialized)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -120,7 +130,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -141,7 +151,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
       assert(!elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageDischargePowerFractionSchedule.is_initialized)
-      assert(!elcd.storageConverter.is_initialized)
+      assert(elcd.storageConverter.is_initialized)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -156,7 +171,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -178,6 +193,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(elcd.storageDischargePowerFractionSchedule.is_initialized)
       assert(elcd.storageConverter.is_initialized)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -192,7 +212,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.8, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -213,7 +233,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
       assert(!elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageDischargePowerFractionSchedule.is_initialized)
-      assert(!elcd.storageConverter.is_initialized)
+      assert(elcd.storageConverter.is_initialized)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.8, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -228,7 +253,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelKandlerSmith, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -247,6 +272,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -262,7 +292,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(battery.thermalZone.is_initialized)
       assert_equal(HPXML::LocationGarage, battery.thermalZone.get.name.to_s)
       assert_equal(0.9, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -281,6 +311,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 
@@ -295,7 +330,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       # Check object
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.925, battery.dctoDCChargingEfficiency)
+      assert_equal(0.95, battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
@@ -314,6 +349,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
       assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
+
+      elcscs = model.getElectricLoadCenterStorageConverters
+      assert_equal(1, elcscs.size)
+      elcsc = elcscs[0]
+      assert_equal(0.925, elcsc.simpleFixedEfficiency.get)
     end
   end
 

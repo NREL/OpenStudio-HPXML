@@ -109,6 +109,7 @@ class Battery
     end
 
     elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+    elcsc.setName("#{obj_name} li ion")
     elcsc.setSimpleFixedEfficiency(battery.round_trip_efficiency) # 0.95 default
     elcd.setStorageConverter(elcsc)
   end
