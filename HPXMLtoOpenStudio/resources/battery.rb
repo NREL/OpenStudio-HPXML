@@ -73,7 +73,6 @@ class Battery
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
@@ -107,11 +106,11 @@ class Battery
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
       elcd.setStorageChargePowerFractionSchedule(charging_schedule)
       elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
-
-      elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
-      elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
-      elcd.setStorageConverter(elcsc)
     end
+
+    elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+    elcsc.setSimpleFixedEfficiency(battery.round_trip_efficiency) # 0.95 default
+    elcd.setStorageConverter(elcsc)
   end
 
   def self.get_battery_default_values()
