@@ -295,9 +295,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     has_electricity_storage = false
-    # if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
-    # has_electricity_storage = true
-    # end
     has_electricity_storage = true if @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
 
     # Fuel outputs
