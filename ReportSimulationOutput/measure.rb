@@ -295,7 +295,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     has_electricity_storage = false
-    has_electricity_storage = true if @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
+    # has_electricity_storage = true if @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
+    if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
+      has_electricity_storage = true
+    end
 
     # Fuel outputs
     @fuels.each do |_fuel_type, fuel|
@@ -323,6 +326,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,Converter,#{timeseries_frequency};").get
         result << OpenStudio::IdfObject.load("Output:Meter,Discharge,#{timeseries_frequency};").get
+      end
+      if include_hourly_electric_end_use_consumptions
+        result << OpenStudio::IdfObject.load('Output:Meter,Converter,hourly;').get
+        result << OpenStudio::IdfObject.load('Output:Meter,Discharge,hourly;').get
       end
     end
 
@@ -741,8 +748,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next unless include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
 
         end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: (end_use.is_negative || end_use.is_storage))
-        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['CONVERTER'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x + y } if end_use_type == EUT::Battery
-        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['DISCHARGE'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if end_use_type == EUT::Battery
+        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['CONVERTER'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly')).map { |x, y| x + y } if end_use_type == EUT::Battery
+        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(['DISCHARGE'], UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly')).map { |x, y| x - y } if end_use_type == EUT::Battery
       end
     end
 
