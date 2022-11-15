@@ -17,6 +17,8 @@ __New Features__
 - Allows heating/cooling seasons that don't span the entire year.
 - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
 - Allows setting the EnergyPlus temperature capacitance multiplier.
+- New lithium ion battery capabilities:
+  - Detailed charging/discharging schedules via CSV files.
 - Allows setting the ground soil conductivity used for foundation heat transfer and ground source heat pumps.
 - Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - Allows specifying duct surface area multipliers.
@@ -31,11 +33,13 @@ __New Features__
   - Allows generating timeseries unmet hours for heating and cooling.
   - Allows CSV timeseries output to be formatted for use with the DView application.
   - Adds heating/cooling setpoints to timeseries outputs when requesting zone temperatures.
+  - Disaggregates Battery outputs from PV outputs.
 - Allows modeling room air conditioners with heating or reverse cycle.
 - **Breaking change**: For PTAC with heating, replaces `HeatingSystem` of type PackagedTerminalAirConditionerHeating with `CoolingSystem/IntegratedHeating*` elements.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces arguments using 'auto' for defaults with optional arguments of the appropriate data type. New `heat_pump_sizing_methodology` argument and new boolean `foo_present` arguments for lighting, appliances, etc.
   - Adds optional arguments for utility bill scenarios.
+  - Adds optional argument for battery round trip efficiency.
 - ReportUtilityBills measure:
   - Removes utility rate and PV related arguments in lieu of new utility bill scenarios described inside the HPXML file.
   - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
