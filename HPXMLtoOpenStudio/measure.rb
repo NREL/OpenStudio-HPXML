@@ -1814,8 +1814,9 @@ class OSModel
   def self.add_batteries(runner, model, spaces)
     @hpxml.batteries.each do |battery|
       # Assign space
-      battery.additional_properties.space = get_space_from_location(battery.location, spaces)
-      Battery.apply(runner, model, @hpxml.pv_systems, battery, @schedules_file)
+      space = get_space_from_location(battery.location, spaces)
+      battery.additional_properties.space = space
+      Battery.apply(runner, model, space, @hpxml.pv_systems, battery, @schedules_file)
     end
   end
 

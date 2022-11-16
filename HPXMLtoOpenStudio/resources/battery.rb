@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(runner, model, pv_systems, battery, schedules_file)
+  def self.apply(runner, model, space, pv_systems, battery, schedules_file)
     charging_schedule = nil
     discharging_schedule = nil
     if not schedules_file.nil?
@@ -113,18 +113,49 @@ class Battery
       elcd.setStorageConverter(elcsc)
     end
 
+    frac_lost = 0.0
+    if space.nil?
+      space = model.getSpaces[0]
+      frac_lost = 1.0
+    end
+
     charge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Charge Energy')
     charge_sensor.setName('charge')
     charge_sensor.setKeyName(elcs.name.to_s)
 
+    loss_adj_object_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    loss_adj_object = OpenStudio::Model::OtherEquipment.new(loss_adj_object_def)
+    obj_name = Constants.ObjectNameBatteryLossesAdjustment(elcs.name)
+    loss_adj_object.setName(obj_name)
+    loss_adj_object.setEndUseSubcategory(obj_name)
+    loss_adj_object.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
+    loss_adj_object.setSpace(space)
+    loss_adj_object_def.setName(obj_name)
+    loss_adj_object_def.setDesignLevel(0.01)
+    loss_adj_object_def.setFractionRadiant(0)
+    loss_adj_object_def.setFractionLatent(0)
+    loss_adj_object_def.setFractionLost(frac_lost)
+    loss_adj_object.setSchedule(model.alwaysOnDiscreteSchedule)
+
+    battery_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(loss_adj_object, *EPlus::EMSActuatorOtherEquipmentPower)
+    battery_adj_actuator.setName('battery loss_adj_act')
+
     battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     battery_losses_program.setName('battery_losses')
-    battery_losses_program.addLine("Set losses = charge * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set #{battery_adj_actuator.name} = charge * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set losses = #{battery_adj_actuator.name} / ( 3600 * SystemTimeStep )")
 
     battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     battery_losses_pcm.setName('battery_losses')
     battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     battery_losses_pcm.addProgram(battery_losses_program)
+
+    battery_losses_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'losses')
+    battery_losses_output_var.setName("#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar")
+    battery_losses_output_var.setTypeOfDataInVariable('Summed')
+    battery_losses_output_var.setUpdateFrequency('SystemTimestep')
+    battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
+    battery_losses_output_var.setUnits('J')
   end
 
   def self.get_battery_default_values()
