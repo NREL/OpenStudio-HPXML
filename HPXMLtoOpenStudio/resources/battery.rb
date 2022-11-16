@@ -73,7 +73,6 @@ class Battery
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
@@ -109,9 +108,23 @@ class Battery
       elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
 
       elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
+      elcsc.setName("#{obj_name} li ion converter")
       elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
       elcd.setStorageConverter(elcsc)
     end
+
+    charge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Charge Energy')
+    charge_sensor.setName('charge')
+    charge_sensor.setKeyName(elcs.name.to_s)
+
+    battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    battery_losses_program.setName('battery_losses')
+    battery_losses_program.addLine("Set losses = charge * (1 - #{battery.round_trip_efficiency})")
+
+    battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    battery_losses_pcm.setName('battery_losses')
+    battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
+    battery_losses_pcm.addProgram(battery_losses_program)
   end
 
   def self.get_battery_default_values()
