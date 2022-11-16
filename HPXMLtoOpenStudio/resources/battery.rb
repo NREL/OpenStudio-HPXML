@@ -142,8 +142,8 @@ class Battery
 
     battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     battery_losses_program.setName('battery_losses')
-    battery_losses_program.addLine("Set #{battery_adj_actuator.name} = charge * (1 - #{battery.round_trip_efficiency})")
-    battery_losses_program.addLine("Set losses = #{battery_adj_actuator.name} / ( 3600 * SystemTimeStep )")
+    battery_losses_program.addLine("Set losses = charge * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set #{battery_adj_actuator.name}  = losses / ( 3600 * SystemTimeStep )")
 
     battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     battery_losses_pcm.setName('battery_losses')
