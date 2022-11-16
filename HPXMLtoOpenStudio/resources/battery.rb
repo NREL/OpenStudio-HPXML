@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(runner, model, space, pv_systems, battery, schedules_file)
+  def self.apply(runner, model, pv_systems, battery, schedules_file)
     charging_schedule = nil
     discharging_schedule = nil
     if not schedules_file.nil?
@@ -114,6 +114,7 @@ class Battery
     end
 
     frac_lost = 0.0
+    space = battery.additional_properties.space
     if space.nil?
       space = model.getSpaces[0]
       frac_lost = 1.0
@@ -142,8 +143,8 @@ class Battery
 
     battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     battery_losses_program.setName('battery_losses')
-    battery_losses_program.addLine("Set #{battery_adj_actuator.name} = charge * (1 - #{battery.round_trip_efficiency})")
-    battery_losses_program.addLine("Set losses = #{battery_adj_actuator.name} / ( 3600 * SystemTimeStep )")
+    battery_losses_program.addLine("Set losses = -1 * charge * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set #{battery_adj_actuator.name} = -1 * losses / ( 3600 * SystemTimeStep )")
 
     battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     battery_losses_pcm.setName('battery_losses')
