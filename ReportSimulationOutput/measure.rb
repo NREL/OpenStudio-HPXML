@@ -295,7 +295,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     has_electricity_storage = false
-    # has_electricity_storage = true if @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
     if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
       has_electricity_storage = true
     end
@@ -339,6 +338,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @ideal_system_loads => false }.each do |uses, include_timeseries|
       uses.each do |key, use|
         use.variables.each do |_sys_id, varkey, var|
+          next if var == 'DUMMY'
+
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
           if include_timeseries
             result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{timeseries_frequency};").get
@@ -1145,6 +1146,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def check_for_errors(runner, outputs)
     tol = 0.1
 
+    # ElectricityProduced:Facility contains:
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # - Converter Electricity Loss Decrement Energy
+    # ElectricStorage:ElectricityProduced contains:
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # So, we need to subtract ElectricStorage:ElectricityProduced and Converter Electricity Loss Decrement Energy from ElectricityProduced:Facility
+    # Converter Electricity Loss Decrement Energy isn't on it's own meter, so a custom meter has been set up
     meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
     meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced'])
     meter_elec_produced += get_report_meter_data_annual(['CONVERTERLOSS'])
