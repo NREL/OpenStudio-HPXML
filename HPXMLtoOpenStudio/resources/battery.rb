@@ -69,6 +69,7 @@ class Battery
     end
     elcs.setRadiativeFraction(0.9 * frac_sens)
     # elcs.setLifetimeModel(battery.lifetime_model)
+    elcs.setLifetimeModel(HPXML::BatteryLifetimeModelNone)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
