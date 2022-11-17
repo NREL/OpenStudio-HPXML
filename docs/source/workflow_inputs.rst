@@ -2266,7 +2266,7 @@ If a heat pump water heater is specified, additional information is entered in `
   =============================================  ================  =============  ===============  ========  ========  =============================================
   ``FuelType``                                   string                           See [#]_         Yes                 Fuel type
   ``TankVolume``                                 double            gal            > 0              Yes                 Nominal tank volume
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1              Yes                 EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5        Yes                 EnergyGuide label rated efficiency
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
   ``extension/OperatingMode``                    string                           See [#]_         No        standard  Operating mode [#]_
