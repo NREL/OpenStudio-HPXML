@@ -24,7 +24,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -56,7 +56,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
       fuel = EPlus.fuel_type(water_heating_system.fuel_type)
       ua = UnitConversions.convert(6.476, 'Btu/(hr*F)', 'W/K')
-      t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+      t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
       ther_eff = 0.762
       loc = water_heating_system.location
 
@@ -88,7 +88,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -119,7 +119,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -150,7 +150,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -181,7 +181,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 1.0
     loc = water_heating_system.location
 
@@ -212,7 +212,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.503, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 1.0
     loc = water_heating_system.location
 
@@ -336,7 +336,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
 
     # Check water heater
@@ -365,7 +365,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     ther_eff = 1.0
 
@@ -403,7 +403,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     ther_eff = 1.0
 
@@ -441,7 +441,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     ther_eff = 1.0
 
@@ -480,7 +480,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     hx_eff = 1.0
 
@@ -553,7 +553,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     hx_eff = 1.0
 
@@ -626,7 +626,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     hx_eff = 0.7
 
@@ -699,7 +699,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     hx_eff = 1.0
 
@@ -772,7 +772,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
     hx_eff = 1.0
 
@@ -839,7 +839,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K') * 0.35
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 1.0
     loc = water_heating_system.location
 
@@ -869,7 +869,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = 0.0
     ua = UnitConversions.convert(5.056, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     loc = water_heating_system.location
 
     # Check water heater
@@ -1017,7 +1017,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(0.6415, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 1.0
     loc = water_heating_system.location
 
@@ -1048,7 +1048,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K') / water_heating_system.number_of_units_served
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -1078,7 +1078,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K') / water_heating_system.number_of_units_served
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.773
     loc = water_heating_system.location
 
@@ -1144,7 +1144,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u =  0.0743
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 1.0
     tank_height = 1.2192
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
