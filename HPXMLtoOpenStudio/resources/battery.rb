@@ -79,9 +79,13 @@ class Battery
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     if not voltage_dependence
       elcs.setBatteryCellInternalElectricalResistance(0.002) # 2 mOhm/cell, based on OCHRE defaults (which are based on fitting to lab results)
-      elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
-      elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
+      # elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
+      # elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
+      # FIXME: Jeff to look into this
+      # if the voltage reported during charge/discharge is different, energy may not balance
     end
+    elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
+    elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
 
     elcds = model.getElectricLoadCenterDistributions
     elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
