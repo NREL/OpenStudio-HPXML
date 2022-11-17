@@ -400,6 +400,7 @@ class HPXMLTest < MiniTest::Test
     rundir = File.join(rundir, 'run')
 
     # Check results
+    print "Simulation failed: #{xml}.\n" unless success
     assert_equal(true, success)
 
     # Check for output files
