@@ -228,6 +228,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
   end
 
   def test_pv_battery_lifetime_model
+    skip # Temporarily disabled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-lifetime-model.xml'))
     model, hpxml = _test_measure(args_hash)

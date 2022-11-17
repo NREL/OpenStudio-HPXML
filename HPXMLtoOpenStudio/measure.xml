@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fcb8101c-f525-4134-9d82-2575baf74ee3</version_id>
-  <version_modified>20221111T233957Z</version_modified>
+  <version_id>21b5c875-9bf9-4c74-9fdd-01964117b84f</version_id>
+  <version_modified>20221117T191849Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -302,12 +302,6 @@
       <checksum>3AFD26FF</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>93E95B59</checksum>
-    </file>
-    <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -318,12 +312,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>724B707F</checksum>
-    </file>
-    <file>
-      <filename>test_battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F8FA0CA7</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
@@ -386,12 +374,6 @@
       <checksum>CF8094A4</checksum>
     </file>
     <file>
-      <filename>output.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A5AF01C9</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -438,12 +420,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0215CBB7</checksum>
-    </file>
-    <file>
-      <filename>battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>948709B0</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -494,12 +470,6 @@
       <checksum>04140712</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1399E4C2</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -530,35 +500,6 @@
       <checksum>3E65F64D</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AAF43C1F</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>79159F9A</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9F6AF3C1</checksum>
-    </file>
-    <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0935984E</checksum>
-    </file>
-    <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -571,16 +512,81 @@
       <checksum>6A85F2CB</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>67161201</checksum>
+    </file>
+    <file>
+      <filename>test_battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E6B6B63E</checksum>
+    </file>
+    <file>
+      <filename>output.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>65B6867B</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6C3C7284</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8F9DADB4</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>844136E4</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>F4403326</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>436D6528</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1E620A64</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E685D666</checksum>
+      <checksum>8FA56F9E</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9062F658</checksum>
+      <checksum>BE1E6EFA</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/battery.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C1350909</checksum>
     </file>
   </files>
 </measure>
