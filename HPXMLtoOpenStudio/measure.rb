@@ -995,7 +995,7 @@ class OSModel
     Constructions.apply_kiva_initial_temp(kiva_foundation, slab, weather,
                                           spaces[HPXML::LocationLivingSpace].thermalZone.get,
                                           @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day,
-                                          @hpxml.header.sim_calendar_year,
+                                          @hpxml.header.sim_calendar_year, @schedules_file,
                                           foundation_walls_insulated, foundation_ceiling_insulated)
 
     return kiva_foundation
