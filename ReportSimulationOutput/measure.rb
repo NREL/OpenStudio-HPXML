@@ -1118,9 +1118,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     tol = 0.1
 
     # ElectricityProduced:Facility contains:
+    # - Generator Produced DC Electricity Energy
+    # - Inverter Conversion Loss Decrement Energy
     # - Electric Storage Production Decrement Energy
     # - Electric Storage Discharge Energy
-    # - Converter Electricity Loss Decrement Energy
+    # - Converter Electricity Loss Decrement Energy (should always be zero since efficiency=1.0)
     # ElectricStorage:ElectricityProduced contains:
     # - Electric Storage Production Decrement Energy
     # - Electric Storage Discharge Energy
@@ -2699,7 +2701,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
+        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy', 'Electric Storage Thermal Loss Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
