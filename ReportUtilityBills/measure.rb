@@ -120,9 +120,27 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     fuels = setup_fuel_outputs()
 
+    hpxml_fuel_map = { FT::Elec => HPXML::FuelTypeElectricity,
+                       FT::Gas => HPXML::FuelTypeNaturalGas,
+                       FT::Oil => HPXML::FuelTypeOil,
+                       FT::Propane => HPXML::FuelTypePropane,
+                       FT::WoodCord => HPXML::FuelTypeWoodCord,
+                       FT::WoodPellets => HPXML::FuelTypeWoodPellets,
+                       FT::Coal => HPXML::FuelTypeCoal }
+
+    # Check for presence of fuels once
+    has_fuel = { HPXML::FuelTypeElectricity => true }
+    hpxml_doc = @hpxml.to_oga
+    Constants.FossilFuels.each do |fuel|
+      has_fuel[fuel] = @hpxml.has_fuel(fuel, hpxml_doc)
+    end
+
     # Fuel outputs
-    fuels.each do |(fuel_type, _is_production), fuel|
+    fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
+        next unless has_fuel[hpxml_fuel_map[fuel_type]]
+        next if is_production && @hpxml.pv_systems.empty?
+
         if fuel_type == FT::Elec
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get if @hpxml.header.utility_bill_scenarios.has_simple_electric_rates
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get if @hpxml.header.utility_bill_scenarios.has_detailed_electric_rates

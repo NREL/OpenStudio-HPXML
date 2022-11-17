@@ -198,6 +198,9 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -212,6 +215,9 @@
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>550.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
@@ -223,6 +229,9 @@
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor3Insulation'/>
@@ -234,6 +243,9 @@
             <ExteriorAdjacentTo>other heated space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>150.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor4Insulation'/>
