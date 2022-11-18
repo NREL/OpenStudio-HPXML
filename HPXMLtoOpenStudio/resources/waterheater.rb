@@ -3,7 +3,7 @@
 class Waterheater
   def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
+    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') unless water_heating_system.temperature.nil?
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c, eri_version)
 
     act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type)
@@ -31,7 +31,7 @@ class Waterheater
   def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file)
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
+    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') unless water_heating_system.temperature.nil?
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c, eri_version)
 
     act_vol = 1.0
@@ -59,7 +59,7 @@ class Waterheater
   def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, eri_version, schedules_file)
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
+    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') unless water_heating_system.temperature.nil?
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c, eri_version)
 
     h_tank = 0.0188 * water_heating_system.tank_volume + 0.0935 # Linear relationship that gets GE height at 50 gal and AO Smith height at 80 gal
@@ -73,12 +73,6 @@ class Waterheater
     hpwh_rhamb.setName("#{obj_name_hpwh} RHamb act")
     hpwh_rhamb.setValue(0.5)
 
-    bottom_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
-    bottom_element_setpoint_schedule.setValue(-60)
-
-    water_heater_offset = 9.0 # deg-C
-
     setpoint_schedule = nil
     if not schedules_file.nil?
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
@@ -90,29 +84,23 @@ class Waterheater
         # Actuated schedule
         control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
-        control_setpoint_schedule.setValue(default_set_temp_c)
-
-        # Note: This gets overwritten by EMS later, see HPWH Control program
-        top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-        top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-        top_element_setpoint_schedule.setValue(default_set_temp_c - water_heater_offset)
       end
     end
     if setpoint_schedule.nil?
-      tset_C = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
-
       setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       setpoint_schedule.setName("#{obj_name_hpwh} Setpoint")
-      setpoint_schedule.setValue(tset_C)
+      setpoint_schedule.setValue(set_temp_c)
 
       control_setpoint_schedule = setpoint_schedule
-
-      top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-      top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
-      top_element_setpoint_schedule.setValue(tset_C - water_heater_offset)
     else
-      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !tset_C.nil?
+      runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !set_temp_c.nil?
     end
+
+    # Note: These get overwritten by EMS later, see HPWH Control program
+    top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
+    bottom_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
 
     airflow_rate = 181.0 # cfm
     min_temp = 42.0 # F
@@ -176,7 +164,7 @@ class Waterheater
       act_vol = 1.0
     end
 
-    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
+    set_temp_c = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') unless water_heating_system.temperature.nil?
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c, eri_version)
 
     # Create water heater
@@ -351,7 +339,7 @@ class Waterheater
       combi_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
       combi_ctrl_program.addLine('Else')
       combi_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
-      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alt_spt_sch.to_ScheduleConstant.get.value}")
+      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = NULL")
       combi_ctrl_program.addLine('EndIf')
 
       # ProgramCallingManagers
@@ -992,6 +980,8 @@ class Waterheater
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterOperatingMode}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
     end
 
+    t_offset = 9.0 # deg-C
+
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
     hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
@@ -1010,7 +1000,7 @@ class Waterheater
       hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine('Else')
-      hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - 9.0")
+      hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - #{t_offset}")
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
       hpwh_ctrl_program.addLine('EndIf')
       # Scheduled operating mode: if in HP only mode, disable both elements (this will override prior logic)
@@ -1018,7 +1008,7 @@ class Waterheater
         hpwh_ctrl_program.addLine("If #{op_mode_sensor.name} == 1")
         hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = 0")
         hpwh_ctrl_program.addLine('Else')
-        hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - 9.0")
+        hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name} - #{t_offset}")
         hpwh_ctrl_program.addLine('EndIf')
       end
     end
