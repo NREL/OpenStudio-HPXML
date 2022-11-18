@@ -111,6 +111,7 @@ def create_hpxmls
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-detailed-setpoints.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
@@ -134,6 +135,7 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'base-dhw-tank-coal.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-elec-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-uef.xml' => 'base-dhw-tank-gas.xml',
@@ -145,11 +147,8 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-setpoints.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-operating-modes.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-heat-pump-detailed-schedules.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
-    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml' => 'base-dhw-tank-model-type-stratified.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
@@ -409,19 +408,15 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-
     'base-pv-battery.xml' => 'base-battery.xml',
-    'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
-
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
-    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
+    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-round-trip-efficiency.xml' => 'base-pv-battery.xml',
-
+    'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
     'base-pv-generators.xml' => 'base-pv.xml',
     'base-pv-generators-battery.xml' => 'base-pv-generators.xml',
     'base-pv-generators-battery-scheduled.xml' => 'base-pv-generators-battery.xml',
-
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
@@ -2519,7 +2514,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Water Heater Schedules
-  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml'].include? hpxml_file
+  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml',
+      'base-dhw-indirect-detailed-setpoints.xml',
+      'base-dhw-tank-detailed-setpoints.xml',
+      'base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-heat-pump-detailed-operating-modes.xml'].include? hpxml_file
@@ -2528,12 +2526,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
-  elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
-  elsif ['base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
