@@ -80,10 +80,9 @@ class Battery
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     if not voltage_dependence
       elcs.setBatteryCellInternalElectricalResistance(0.002) # 2 mOhm/cell, based on OCHRE defaults (which are based on fitting to lab results)
+      # FIXME: if the voltage reported during charge/discharge is different, energy may not balance
       # elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
       # elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
-      # FIXME: Jeff to look into this
-      # if the voltage reported during charge/discharge is different, energy may not balance
     end
     elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
@@ -114,7 +113,7 @@ class Battery
 
       elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
       elcsc.setName("#{obj_name} li ion converter")
-      elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
+      elcsc.setSimpleFixedEfficiency(1.0)
       elcd.setStorageConverter(elcsc)
     end
 
@@ -125,6 +124,8 @@ class Battery
       frac_lost = 1.0
     end
 
+    # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
+    # Replace this when the first item in https://github.com/NREL/EnergyPlus/issues/9176 is fixed.
     charge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Charge Energy')
     charge_sensor.setName('charge')
     charge_sensor.setKeyName(elcs.name.to_s)
