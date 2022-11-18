@@ -321,7 +321,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Resilience Hours
       result << OpenStudio::IdfObject.load('Output:Meter,Electricity:Facility,hourly;').get
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,hourly;').get
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityStorage:ElectricityProduced,hourly;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,hourly;').get
       @resilience_hours.values.each do |resilience_hour|
         resilience_hour.variables.each do |_sys_id, varkey, var|
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},hourly;").get
