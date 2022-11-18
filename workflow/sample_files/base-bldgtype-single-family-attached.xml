@@ -283,6 +283,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>900.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>

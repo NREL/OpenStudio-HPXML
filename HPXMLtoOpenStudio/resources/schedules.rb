@@ -1231,6 +1231,7 @@ class SchedulesFile
   ColumnWholeHouseFan = 'whole_house_fan'
   ColumnVacancy = 'vacancy'
   ColumnOutage = 'outage'
+  ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
   ColumnHeatingSeason = 'heating_season'
@@ -1238,7 +1239,9 @@ class SchedulesFile
   ColumnNaturalVentilation = 'natural_ventilation'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
-  ColumnSleeping = 'sleeping'
+  ColumnBattery = 'battery'
+  ColumnBatteryCharging = 'battery_charging'
+  ColumnBatteryDischarging = 'battery_discharging'
 
   def initialize(runner: nil,
                  model: nil,
@@ -1250,8 +1253,9 @@ class SchedulesFile
     @schedules_paths = schedules_paths
 
     import()
-
+    battery_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+
     set_vacancy
     set_outage
     convert_setpoints
@@ -1322,6 +1326,12 @@ class SchedulesFile
           end
         end
 
+        if min_value_neg_one[col_name]
+          if values.min < -1
+            fail "Schedule min value for column '#{col_name}' must be -1. [context: #{schedules_path}]"
+          end
+        end
+
         if only_zeros_and_ones[col_name]
           if values.any? { |v| v != 0 && v != 1 }
             fail "Schedule value for column '#{col_name}' must be either 0 or 1. [context: #{schedules_path}]"
@@ -1364,12 +1374,8 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = []
-    @schedules_paths.each do |schedules_path|
-      next if schedules_path.nil?
+    headers = @tmp_schedules.keys
 
-      headers += CSV.open(schedules_path, 'r') { |csv| csv.first }
-    end
     col_num = headers.index(col_name)
     return col_num
   end
@@ -1544,8 +1550,23 @@ class SchedulesFile
     end
   end
 
+  def battery_schedules
+    return if !@schedules.keys.include?(SchedulesFile::ColumnBattery)
+
+    @schedules[SchedulesFile::ColumnBatteryCharging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
+    @schedules[SchedulesFile::ColumnBatteryDischarging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
+    @schedules[SchedulesFile::ColumnBattery].each_with_index do |_ts, i|
+      if @schedules[SchedulesFile::ColumnBattery][i] > 0
+        @schedules[SchedulesFile::ColumnBatteryCharging][i] = @schedules[SchedulesFile::ColumnBattery][i]
+      elsif @schedules[SchedulesFile::ColumnBattery][i] < 0
+        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = -1 * @schedules[SchedulesFile::ColumnBattery][i]
+      end
+    end
+    @schedules.delete(SchedulesFile::ColumnBattery)
+  end
+
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1613,6 +1634,14 @@ class SchedulesFile
     ]
   end
 
+  def self.BatteryColumnNames
+    return [
+      ColumnBattery,
+      ColumnBatteryCharging,
+      ColumnBatteryDischarging
+    ]
+  end
+
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
@@ -1627,7 +1656,7 @@ class SchedulesFile
                     ColumnHotTubHeater,
                     ColumnDehumidifier,
                     ColumnHouseFan,
-                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames).include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1640,7 +1669,7 @@ class SchedulesFile
     column_names.each do |column_name|
       affected_by_outage[column_name] = true
       next unless ([ColumnOccupants,
-                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames).include? column_name
+                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames).include? column_name
 
       affected_by_outage[column_name] = false
     end
@@ -1664,11 +1693,23 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name)
         min_value_zero[column_name] = false
       end
     end
     return min_value_zero
+  end
+
+  def min_value_neg_one
+    min_value_neg_one = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      min_value_neg_one[column_name] = false
+      if column_name == SchedulesFile::ColumnBattery
+        min_value_neg_one[column_name] = true
+      end
+    end
+    return min_value_neg_one
   end
 
   def only_zeros_and_ones

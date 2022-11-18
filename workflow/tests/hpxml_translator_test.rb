@@ -400,6 +400,7 @@ class HPXMLTest < MiniTest::Test
     rundir = File.join(rundir, 'run')
 
     # Check results
+    print "Simulation failed: #{xml}.\n" unless success
     assert_equal(true, success)
 
     # Check for output files
@@ -487,21 +488,6 @@ class HPXMLTest < MiniTest::Test
     hpxml.collapse_enclosure_surfaces()
 
     # Check run.log warnings
-    def skip_utility_bill_warning(err_line)
-      utility_bill_warnings = ["#{EPlus::FuelTypeElectricity}:Facility".upcase,
-                               "#{EPlus::FuelTypeElectricity}Produced:Facility".upcase,
-                               "#{EPlus::FuelTypeNaturalGas}:Facility".upcase,
-                               "#{EPlus::FuelTypeOil}:Facility".upcase,
-                               "#{EPlus::FuelTypePropane}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodCord}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodPellets}:Facility".upcase,
-                               "#{EPlus::FuelTypeCoal}:Facility".upcase]
-      skip_warning = false
-      utility_bill_warnings.each do |utility_bill_warning|
-        skip_warning = true if err_line.include? utility_bill_warning
-      end
-      return skip_warning
-    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
@@ -548,8 +534,8 @@ class HPXMLTest < MiniTest::Test
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
       end
-      if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
-        next if log_line.include? 'Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'
+      if hpxml.pv_systems.empty? && !hpxml.batteries.empty? && hpxml.header.schedules_filepaths.empty?
+        next if log_line.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
@@ -560,7 +546,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
 
-      flunk "Unexpected warning found in run.log: #{log_line}"
+      flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
     end
 
     # Check for unexpected warnings
@@ -604,10 +590,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
-      if err_line.include? 'Output:Meter: invalid Key Name'
-        next if skip_utility_bill_warning(err_line)
-      end
-
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
@@ -649,7 +631,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
 
-      flunk "Unexpected warning found: #{err_line}"
+      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
     end
 
     # Check for unused objects/schedules/constructions warnings
@@ -674,8 +656,6 @@ class HPXMLTest < MiniTest::Test
     num_invalid_output_variables = 0
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
-        next if skip_utility_bill_warning(err_line)
-
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
         num_invalid_output_variables += 1
@@ -775,6 +755,7 @@ class HPXMLTest < MiniTest::Test
       assert_equal(0, num_kiva_instances)                                                # no foundation, above dwelling unit
     else
       num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                # no foundation in contact w/ ground
+                                      'base-enclosure-floortypes.xml' => 0,              # no foundation in contact w/ ground
                                       'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
                                       'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
                                       'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
