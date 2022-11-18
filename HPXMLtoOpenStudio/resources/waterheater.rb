@@ -186,12 +186,8 @@ class Waterheater
     new_heater.additionalProperties.setFeature('EnergyFactor', ef) # Used by reporting measure
 
     # Create alternate setpoint schedule for source side flow request
-    alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    alternate_stp_sch = new_heater.setpointTemperatureSchedule.get.clone(model).to_Schedule.get
     alternate_stp_sch.setName("#{obj_name_combi} Alt Spt")
-    alt_temp = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    default_alt_temp = get_t_set_c(get_default_hot_water_temperature(eri_version), water_heating_system.water_heater_type)
-    default_alt_temp = alt_temp if !alt_temp.nil?
-    alternate_stp_sch.setValue(default_alt_temp)
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
     # Create setpoint schedule to specify source side temperature
@@ -261,7 +257,11 @@ class Waterheater
         tank_spt_sensor.setName("#{combi_sys_id} Setpoint Temperature")
         tank_spt_sensor.setKeyName(water_heater.setpointTemperatureSchedule.get.name.to_s)
         alt_spt_sch = water_heater.indirectAlternateSetpointTemperatureSchedule.get
-        altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleConstantValue)
+        if alt_spt_sch.to_ScheduleConstant.is_initialized
+          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleConstantValue)
+        else
+          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleFileValue)
+        end
         altsch_actuator.setName("#{combi_sys_id} AltSchedOverride")
       end
       plant_loop.components.each do |c|
