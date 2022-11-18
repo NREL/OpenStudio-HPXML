@@ -313,7 +313,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
     end
     if has_electricity_storage
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
       if include_timeseries_fuel_consumptions
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
       end
@@ -654,13 +654,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Fuel Uses
-    @fuels.each do |fuel_type, fuel|
+    @fuels.each do |_fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
-      fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec # We add Electric Storage onto the annual Electricity fuel meter
+
       next unless include_timeseries_fuel_consumptions
 
       fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
-      fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec # We add Electric Storage onto the timeseries Electricity fuel meter
     end
 
     # Peak Electricity Consumption
@@ -730,6 +729,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
         end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: (end_use.is_negative || end_use.is_storage))
+
         if include_timeseries_end_use_consumptions
           end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: (end_use.is_negative || end_use.is_storage))
         end
@@ -908,16 +908,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             batt_kw = liion.additionalProperties.getFeatureAsDouble('RatedPowerOutput_kW').get
           end
         end
-puts minimum_storage_state_of_charge_fraction
-puts batt_kwh
-puts batt_kw
+        puts minimum_storage_state_of_charge_fraction
+        puts batt_kwh
+        puts batt_kw
         batt_roundtrip_efficiency = 0.95 # FIXME: is this 0.9?
-puts keys, vars
+        puts keys, vars
         batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, 'hourly')
-puts batt_soc.size
+        puts batt_soc.size
         batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
-puts batt_soc_kwh.size
-puts batt_soc_kwh[0..10]
+        puts batt_soc_kwh.size
+        puts batt_soc_kwh[0..10]
         elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
         elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
         elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
@@ -1182,8 +1182,20 @@ puts batt_soc_kwh[0..10]
   end
 
   def check_for_errors(runner, outputs)
-    tol = 0.0001
-    meter_elec_produced = -1 * (get_report_meter_data_annual(['ElectricityProduced:Facility']) - get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']))
+    tol = 0.1
+
+    # ElectricityProduced:Facility contains:
+    # - Generator Produced DC Electricity Energy
+    # - Inverter Conversion Loss Decrement Energy
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # - Converter Electricity Loss Decrement Energy (should always be zero since efficiency=1.0)
+    # ElectricStorage:ElectricityProduced contains:
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # So, we need to subtract ElectricStorage:ElectricityProduced from ElectricityProduced:Facility
+    meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
+    meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced'])
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -1209,6 +1221,7 @@ puts batt_soc_kwh[0..10]
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
       end
+
       if (sum_categories - meter_fuel_total).abs > tol
         runner.registerError("#{fuel_type} category end uses (#{sum_categories.round(3)}) do not sum to total (#{meter_fuel_total.round(3)}).")
         return false
@@ -1465,6 +1478,14 @@ puts batt_soc_kwh[0..10]
       end
     end
     @hpxml.cooling_systems.each do |clg_system|
+      if clg_system.has_integrated_heating && clg_system.integrated_heating_system_fraction_heat_load_served > 0
+        # Cooling system w/ integrated heating (e.g., Room AC w/ electric resistance heating)
+        htg_ids << clg_system.id
+        htg_seed_id_map[clg_system.id] = clg_system.htg_seed_id
+        htg_fuels[clg_system.id] = clg_system.integrated_heating_system_fuel
+        htg_eecs[clg_system.id] = get_eec_value_numerator('Percent') / clg_system.integrated_heating_system_efficiency_percent
+      end
+
       next unless clg_system.fraction_cool_load_served > 0
 
       clg_ids << clg_system.id
@@ -1500,6 +1521,7 @@ puts batt_soc_kwh[0..10]
 
       clg_ids << heat_pump.id
       clg_seed_id_map[heat_pump.id] = heat_pump.clg_seed_id
+      clg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
       if not heat_pump.cooling_efficiency_seer.nil?
         clg_eecs[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
       elsif not heat_pump.cooling_efficiency_seer2.nil?
@@ -1556,9 +1578,14 @@ puts batt_soc_kwh[0..10]
       @loads[LT::Heating].annual_output_by_system[htg_system.id] = htg_system.fraction_heat_load_served * @loads[LT::Heating].annual_output
     end
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
-      next unless clg_ids.include? clg_system.id
+      if clg_ids.include? clg_system.id
+        @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
+      end
+      next unless (clg_system.is_a? HPXML::CoolingSystem) && clg_system.has_integrated_heating # Cooling system w/ integrated heating (e.g., Room AC w/ electric resistance heating)
 
-      @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
+      if htg_ids.include? clg_system.id
+        @loads[LT::Heating].annual_output_by_system[clg_system.id] = clg_system.integrated_heating_system_fraction_heat_load_served * @loads[LT::Heating].annual_output
+      end
     end
 
     # Handle dual-fuel heat pumps
@@ -2479,7 +2506,7 @@ puts batt_soc_kwh[0..10]
 
     # Resilience Hours
     @resilience_hours = {}
-puts get_object_variables(RHT, RHT::Battery)
+    puts get_object_variables(RHT, RHT::Battery)
     @resilience_hours[RHT::Battery] = ResilienceHours.new(variables: get_object_variables(RHT, RHT::Battery))
 
     @resilience_hours.each do |resilience_hours_type, resilience_hour|
@@ -2793,6 +2820,7 @@ puts get_object_variables(RHT, RHT::Battery)
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        # return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy', 'Electric Storage Thermal Loss Energy'] }
         return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
@@ -2847,6 +2875,8 @@ puts get_object_variables(RHT, RHT::Battery)
         elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
+          return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end

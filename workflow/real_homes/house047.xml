@@ -118,6 +118,9 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>718.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>

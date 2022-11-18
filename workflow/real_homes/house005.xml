@@ -168,6 +168,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>2026.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -178,6 +181,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>294.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
