@@ -20,9 +20,10 @@ __New Features__
   - **Breaking change**: Removes utility rate and PV related arguments from the ReportUtilityBills measure in lieu of HPXML file inputs.
   - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
   - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.  
-- New lithium ion battery capabilities:
+- Lithium ion battery:
   - Allows detailed charging/discharging schedules via CSV files.
   - Allows setting round trip efficiency.
+  - **Breaking change**: Lifetime model is temporarily disabled; `Battery/extension/LifetimeModel` is not allowed.
 - Allows SEER2/HSPF2 efficiency types for central air conditioners and heat pumps.
 - Allows setting the natural ventilation availability (days/week that operable windows can be opened); default changed from 7 to 3 (M/W/F).
 - Allows specifying duct surface area multipliers.

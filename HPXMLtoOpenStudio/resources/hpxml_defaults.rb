@@ -1825,10 +1825,10 @@ class HPXMLDefaults
         battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
-      if battery.lifetime_model.nil?
-        battery.lifetime_model = default_values[:lifetime_model]
-        battery.lifetime_model_isdefaulted = true
-      end
+      # if battery.lifetime_model.nil?
+      # battery.lifetime_model = default_values[:lifetime_model]
+      # battery.lifetime_model_isdefaulted = true
+      # end
       if battery.nominal_voltage.nil?
         battery.nominal_voltage = default_values[:nominal_voltage] # V
         battery.nominal_voltage_isdefaulted = true

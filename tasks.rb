@@ -414,7 +414,7 @@ def create_hpxmls
     'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
 
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
-    'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
+    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-pv-battery-round-trip-efficiency.xml' => 'base-pv-battery.xml',
 

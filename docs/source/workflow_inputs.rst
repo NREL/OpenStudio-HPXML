@@ -2571,7 +2571,6 @@ If not entered, the simulation will not include batteries.
   ``RatedPowerOutput``                                  double   W          >= 0                     No        See [#]_  Power output under non-peak conditions
   ``NominalVoltage``                                    double   V          >= 0                     No        50        Nominal voltage
   ``RoundTripEfficiency``                               double   frac       0 - 1                    No        0.925     Round trip efficiency
-  ``extension/LifetimeModel``                           string              See [#]_                 No        None      Lifetime model [#]_
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
@@ -2579,10 +2578,6 @@ If not entered, the simulation will not include batteries.
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.9 if UsableCapacity provided, else (RatedPowerOutput / 1000) / 0.5 if RatedPowerOutput provided, else 10 kWh.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
   .. [#] If RatedPowerOutput not provided, defaults to 0.5 * NominalCapacity * 1000.
-  .. [#] LifetimeModel choices are "None" or "KandlerSmith".
-  .. [#] If "KandlerSmith", the battery degrades according to the `lifetime model developed by Kandler Smith <https://ieeexplore.ieee.org/abstract/document/7963578>`_.
-         The lifetime model accounts for A) instantaneous losses in capacity due to the battery's ambient environment temperature, which can be particularly significant during winters, and B) permanent capacity losses over time.
-         Since the EnergyPlus simulation is typically one year long (or less), the latter will only reflect the initial (e.g., first-year) loss of capacity, not the entire loss of capacity over the battery's life-cycle.
 
  .. note::
 
