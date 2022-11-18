@@ -2323,6 +2323,10 @@ If the water heater uses a desuperheater, additional information is entered in `
 
   .. [#] RelatedHVACSystem must reference a ``HeatPump`` (air-to-air, mini-split, or ground-to-air) or ``CoolingSystem`` (central air conditioner or mini-split).
 
+  .. warning::
+    
+    A desuperheater is currently not allow if detailed water heater setpoint schedules are used.
+
 HPXML Hot Water Distribution
 ****************************
 

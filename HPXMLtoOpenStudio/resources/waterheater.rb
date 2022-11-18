@@ -1054,7 +1054,7 @@ class Waterheater
     fail "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
   end
 
-  def self.add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, eri_version)
+  def self.add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, _eri_version)
     return unless water_heating_system.uses_desuperheater
 
     desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, model)
@@ -1067,7 +1067,12 @@ class Waterheater
     assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
     storage_tank_name = "#{tank.name} storage tank"
     # reduce tank setpoint to enable desuperheater setpoint at t_set
-    tank_setpoint = get_t_set_c(water_heating_system.temperature - 5.0, HPXML::WaterHeaterTypeStorage)
+    if water_heating_system.temperature.nil?
+      fail "Detailed setpoints for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
+    else
+      tank_setpoint = get_t_set_c(water_heating_system.temperature - 5.0, HPXML::WaterHeaterTypeStorage)
+    end
+
     storage_tank = create_new_heater(name: storage_tank_name,
                                      act_vol: storage_vol_actual,
                                      t_set_c: tank_setpoint,
@@ -1082,13 +1087,9 @@ class Waterheater
     tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
 
     # Create a schedule for desuperheater
-    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    new_schedule.setName("#{desuperheater_name} setpoint schedule")
     # Preheat tank desuperheater setpoint set to be the same as main water heater
-    dsh_setpoint = get_t_set_c(water_heating_system.temperature, HPXML::WaterHeaterTypeStorage)
-    default_dsh_setpoint = get_t_set_c(get_default_hot_water_temperature(eri_version), water_heating_system.water_heater_type)
-    default_dsh_setpoint = dsh_setpoint if !dsh_setpoint.nil?
-    new_schedule.setValue(default_dsh_setpoint)
+    new_schedule = tank.setpointTemperatureSchedule.get.clone(model).to_Schedule.get
+    new_schedule.setName("#{desuperheater_name} setpoint schedule")
 
     # create a desuperheater object
     desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
