@@ -61,6 +61,7 @@ def create_hpxmls
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-battery.xml' => 'base.xml',
+    'base-battery-scheduled.xml' => 'base-battery.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -110,6 +111,7 @@ def create_hpxmls
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-detailed-setpoints.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
@@ -133,6 +135,7 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'base-dhw-tank-coal.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-elec-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-uef.xml' => 'base-dhw-tank-gas.xml',
@@ -144,11 +147,8 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-setpoints.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-operating-modes.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-heat-pump-detailed-schedules.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
-    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml' => 'base-dhw-tank-model-type-stratified.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
@@ -167,6 +167,8 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-ceilingtypes.xml' => 'base.xml',
+    'base-enclosure-floortypes.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -395,6 +397,8 @@ def create_hpxmls
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-emissions.xml' => 'base-pv-battery.xml',
     'base-misc-generators.xml' => 'base.xml',
+    'base-misc-generators-battery.xml' => 'base-misc-generators.xml',
+    'base-misc-generators-battery-scheduled.xml' => 'base-misc-generators-battery.xml',
     'base-misc-ground-conductivity.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
@@ -406,8 +410,13 @@ def create_hpxmls
     'base-pv.xml' => 'base.xml',
     'base-pv-battery.xml' => 'base-battery.xml',
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
-    'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
+    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
+    'base-pv-battery-round-trip-efficiency.xml' => 'base-pv-battery.xml',
+    'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
+    'base-pv-generators.xml' => 'base-pv.xml',
+    'base-pv-generators-battery.xml' => 'base-pv-generators.xml',
+    'base-pv-generators-battery-scheduled.xml' => 'base-pv-generators-battery.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
@@ -585,6 +594,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 3
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 8.0
     args['foundation_wall_insulation_r'] = 8.9
     args['foundation_wall_insulation_distance_to_top'] = 0.0
@@ -851,6 +861,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['geometry_unit_num_occupants'] = 0
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
+    args['floor_type'] = HPXML::FloorTypeWoodFrame
     args['foundation_wall_thickness'] = 6.0
     args['foundation_wall_insulation_r'] = 0
     args['foundation_wall_insulation_distance_to_top'] = 0
@@ -2403,17 +2414,20 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Battery
   if ['base-battery.xml',
-      'base-pv-battery.xml',
-      'base-pv-battery-garage.xml'].include? hpxml_file
+      'base-misc-generators-battery.xml',
+      'base-pv-battery-garage.xml',
+      'base-pv-generators-battery.xml'].include? hpxml_file
     args['battery_present'] = true
     if hpxml_file == 'base-pv-battery-garage.xml'
       args['battery_location'] = HPXML::LocationGarage
     else
       args['battery_location'] = HPXML::LocationOutside
     end
-    args['battery_power'] = 15000
+    args['battery_power'] = 6000
     args['battery_capacity'] = 20
     args['battery_usable_capacity'] = 18
+  elsif ['base-pv-battery-round-trip-efficiency.xml'].include? hpxml_file
+    args['battery_round_trip_efficiency'] = 0.8
   end
 
   # Simulation Control
@@ -2500,7 +2514,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Water Heater Schedules
-  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml'].include? hpxml_file
+  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml',
+      'base-dhw-indirect-detailed-setpoints.xml',
+      'base-dhw-tank-detailed-setpoints.xml',
+      'base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-heat-pump-detailed-operating-modes.xml'].include? hpxml_file
@@ -2509,12 +2526,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
-  elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
-  elsif ['base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
@@ -2523,6 +2534,14 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] += ', ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv'
+  end
+
+  # Battery Schedules
+  if ['base-battery-scheduled.xml',
+      'base-misc-generators-battery-scheduled.xml',
+      'base-pv-battery-scheduled.xml',
+      'base-pv-generators-battery-scheduled.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv'
   end
 end
 
@@ -2839,21 +2858,24 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 550,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 200,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 150,
                      insulation_assembly_r_value: 2.1,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
@@ -2959,10 +2981,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationAtticUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 450,
                      interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeCeiling)
+                     floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
     hpxml.slabs[0].area = 1350
     hpxml.slabs[0].exposed_perimeter = 150
     hpxml.windows[1].area = 108
@@ -3205,9 +3228,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 675,
                      insulation_assembly_r_value: 18.7,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3347,9 +3371,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                      exterior_adjacent_to: HPXML::LocationGarage,
                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                     floor_type: HPXML::FloorTypeWoodFrame,
                      area: 400,
                      insulation_assembly_r_value: 39.3,
-                     floor_or_ceiling: HPXML::FloorTypeFloor)
+                     floor_or_ceiling: HPXML::FloorOrCeilingFloor)
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
@@ -3374,6 +3399,45 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
+  elsif ['base-enclosure-ceilingtypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 3.2,
+                   HPXML::FloorTypeSteelFrame => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: area / floors_map.size,
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorOrCeilingCeiling)
+    end
+  elsif ['base-enclosure-floortypes.xml'].include? hpxml_file
+    exterior_adjacent_to = hpxml.floors[0].exterior_adjacent_to
+    area = hpxml.floors[0].area
+    ceiling = hpxml.floors[1].dup
+    hpxml.floors.reverse_each do |floor|
+      floor.delete
+    end
+    floors_map = { HPXML::FloorTypeSIP => 16.1,
+                   HPXML::FloorTypeConcrete => 3.2,
+                   HPXML::FloorTypeSteelFrame => 8.1 }
+    floors_map.each_with_index do |(floor_type, assembly_r), _i|
+      hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
+                       exterior_adjacent_to: exterior_adjacent_to,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       floor_type: floor_type,
+                       area: area / floors_map.size,
+                       insulation_assembly_r_value: assembly_r,
+                       floor_or_ceiling: HPXML::FloorOrCeilingFloor)
+    end
+    hpxml.floors << ceiling
+    hpxml.floors[-1].id = "Floor#{hpxml.floors.size}"
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.rim_joists.reverse_each do |rim_joist|
       rim_joist.delete
@@ -4457,7 +4521,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
-  elsif ['base-misc-generators.xml'].include? hpxml_file
+  elsif ['base-misc-generators.xml',
+         'base-misc-generators-battery.xml',
+         'base-misc-generators-battery-scheduled.xml',
+         'base-pv-generators.xml',
+         'base-pv-generators-battery.xml',
+         'base-pv-generators-battery-scheduled.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
