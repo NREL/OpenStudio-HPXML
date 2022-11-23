@@ -186,6 +186,7 @@ The column names available in the schedule CSV files are:
   ===============================  =====  ==============================================================================  ===================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
+In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
 Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 The schedule file must have a full year of data even if the simulation is not an entire year.
