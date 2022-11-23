@@ -72,8 +72,15 @@ class ReportUtilityBillsTest < MiniTest::Test
                                              propane_marginal_rate: 2.4532692307692305,
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
+    # Check for presence of fuels once
+    has_fuel = {}
+    hpxml_doc = @hpxml.to_oga
+    Constants.FossilFuels.each do |fuel|
+      has_fuel[fuel] = @hpxml.has_fuel(fuel, hpxml_doc)
+    end
+
     HPXMLDefaults.apply_header(@hpxml, nil)
-    HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml)
+    HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml, has_fuel)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')

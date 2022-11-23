@@ -124,8 +124,12 @@ class HPXML < Object
   FoundationWallTypeDoubleBrick = 'double brick'
   FoundationWallTypeSolidConcrete = 'solid concrete'
   FoundationWallTypeWood = 'wood'
-  FloorTypeCeiling = 'ceiling'
-  FloorTypeFloor = 'floor'
+  FloorOrCeilingCeiling = 'ceiling'
+  FloorOrCeilingFloor = 'floor'
+  FloorTypeWoodFrame = 'WoodFrame'
+  FloorTypeSIP = 'StructuralInsulatedPanel'
+  FloorTypeSteelFrame = 'SteelFrame'
+  FloorTypeConcrete = 'SolidConcrete'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -467,6 +471,25 @@ class HPXML < Object
         return true
       end
     end
+    return false
+  end
+
+  def has_fuel(fuel, hpxml_doc = nil)
+    # If calling multiple times, pass in hpxml_doc for better performance
+    if hpxml_doc.nil?
+      hpxml_doc = to_oga
+    end
+    ['HeatingSystemFuel',
+     'CoolingSystemFuel',
+     'HeatPumpFuel',
+     'BackupSystemFuel',
+     'FuelType',
+     'IntegratedHeatingSystemFuel'].each do |fuel_name|
+      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
+        return true
+      end
+    end
+
     return false
   end
 
@@ -2682,7 +2705,7 @@ class HPXML < Object
   end
 
   class Floor < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
@@ -2699,7 +2722,7 @@ class HPXML < Object
           return false
         end
       else
-        return @floor_or_ceiling == FloorTypeCeiling
+        return @floor_or_ceiling == FloorOrCeilingCeiling
       end
     end
 
@@ -2763,6 +2786,10 @@ class HPXML < Object
       XMLHelper.add_element(floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'FloorOrCeiling', @floor_or_ceiling, :string, @floor_or_ceiling_isdefaulted) unless @floor_or_ceiling.nil?
+      if not @floor_type.nil?
+        floor_type_el = XMLHelper.add_element(floor, 'FloorType')
+        XMLHelper.add_element(floor_type_el, @floor_type)
+      end
       XMLHelper.add_element(floor, 'Area', @area, :float) unless @area.nil?
       if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
         interior_finish = XMLHelper.add_element(floor, 'InteriorFinish')
@@ -2796,6 +2823,7 @@ class HPXML < Object
       @exterior_adjacent_to = XMLHelper.get_value(floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(floor, 'InteriorAdjacentTo', :string)
       @floor_or_ceiling = XMLHelper.get_value(floor, 'FloorOrCeiling', :string)
+      @floor_type = XMLHelper.get_child_name(floor, 'FloorType')
       @area = XMLHelper.get_value(floor, 'Area', :float)
       interior_finish = XMLHelper.get_element(floor, 'InteriorFinish')
       if not interior_finish.nil?
@@ -5278,7 +5306,7 @@ class HPXML < Object
   class Battery < BaseElement
     ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
-             :usable_capacity_kwh, :usable_capacity_ah]
+             :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah]
     attr_accessor(*ATTRS)
 
     def delete
@@ -5321,6 +5349,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+      XMLHelper.add_element(battery, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
     end
 
@@ -5336,6 +5365,7 @@ class HPXML < Object
       @usable_capacity_ah = XMLHelper.get_value(battery, "UsableCapacity[Units='#{UnitsAh}']/Value", :float)
       @rated_power_output = XMLHelper.get_value(battery, 'RatedPowerOutput', :float)
       @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
+      @round_trip_efficiency = XMLHelper.get_value(battery, 'RoundTripEFficiency', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
     end
   end
@@ -6746,20 +6776,5 @@ class HPXML < Object
     end
 
     return errors
-  end
-
-  def self.has_fuel(hpxml_doc, fuel)
-    ['HeatingSystemFuel',
-     'CoolingSystemFuel',
-     'HeatPumpFuel',
-     'BackupSystemFuel',
-     'FuelType',
-     'IntegratedHeatingSystemFuel'].each do |fuel_name|
-      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
-        return true
-      end
-    end
-
-    return false
   end
 end
