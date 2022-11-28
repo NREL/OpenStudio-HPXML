@@ -362,7 +362,7 @@ class HPXMLTest < MiniTest::Test
     top_dir = File.join(@this_dir, '..', '..')
     command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{File.join(top_dir, 'tasks.rb')}\" create_release_zips"
     system(command)
-    assert_equal(2, Dir["#{top_dir}/*.zip"].size)
+    assert_equal(1, Dir["#{top_dir}/*.zip"].size)
 
     # Check successful running of simulation from release zips
     require 'zip'
