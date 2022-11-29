@@ -13,7 +13,7 @@
       </SimulationControl>
       <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage-10-mins.csv</SchedulesFilePath>
       <AdditionalProperties>
-        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-lighting-ceiling-fans.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -359,8 +359,13 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
-            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
+            <extension>
+              <CeilingFanSetpointTempCoolingSeasonOffset>0.5</CeilingFanSetpointTempCoolingSeasonOffset>
+              <WeekdaySetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekdaySetpointTempsHeatingSeason>
+              <WeekendSetpointTempsHeatingSeason>68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70</WeekendSetpointTempsHeatingSeason>
+              <WeekdaySetpointTempsCoolingSeason>80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80</WeekdaySetpointTempsCoolingSeason>
+              <WeekendSetpointTempsCoolingSeason>78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78</WeekendSetpointTempsCoolingSeason>
+            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -555,6 +560,14 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
+        <CeilingFan>
+          <SystemIdentifier id='CeilingFan1'/>
+          <Airflow>
+            <FanSpeed>medium</FanSpeed>
+            <Efficiency>100.0</Efficiency>
+          </Airflow>
+          <Quantity>4</Quantity>
+        </CeilingFan>
       </Lighting>
       <MiscLoads>
         <PlugLoad>

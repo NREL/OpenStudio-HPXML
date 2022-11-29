@@ -431,7 +431,7 @@ def create_hpxmls
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year.xml' => 'base.xml',
-    'base-schedules-detailed-occupancy-stochastic-outage-full-year-10-mins.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-outage-full-year-10-mins.xml' => 'base-lighting-ceiling-fans.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year2.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year3.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-summer.xml' => 'base.xml',
@@ -2499,6 +2499,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-occupancy-stochastic-outage-full-year-10-mins.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['simulation_control_timestep'] = 10
+    args['hvac_control_heating_weekday_setpoint'] = '64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
+    args['hvac_control_heating_weekend_setpoint'] = '68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70'
+    args['hvac_control_cooling_weekday_setpoint'] = '80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80'
+    args['hvac_control_cooling_weekend_setpoint'] = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
     sch_args['schedules_outage_period'] = 'Jan 1 12am - Dec 31 12am'

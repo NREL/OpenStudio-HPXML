@@ -955,8 +955,10 @@ class HVAC
     else
       # 24-hr weekday/weekend heating setpoint schedules
       htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(',').map { |i| Float(i) }
+      htg_weekday_setpoints = htg_weekday_setpoints.map { |x| [x] * steps_in_hour }.flatten
       htg_weekday_setpoints = [htg_weekday_setpoints] * num_days
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
+      htg_weekend_setpoints = htg_weekend_setpoints.map { |x| [x] * steps_in_hour }.flatten
       htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
 
@@ -988,8 +990,10 @@ class HVAC
     else
       # 24-hr weekday/weekend cooling setpoint schedules
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(',').map { |i| Float(i) }
+      clg_weekday_setpoints = clg_weekday_setpoints.map { |x| [x] * steps_in_hour }.flatten
       clg_weekday_setpoints = [clg_weekday_setpoints] * num_days
       clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(',').map { |i| Float(i) }
+      clg_weekend_setpoints = clg_weekend_setpoints.map { |x| [x] * steps_in_hour }.flatten
       clg_weekend_setpoints = [clg_weekend_setpoints] * num_days
     end
     # Apply cooling setpoint offset due to ceiling fan?
