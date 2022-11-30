@@ -177,6 +177,7 @@ def create_hpxmls
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
     'base-enclosure-orientations.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
+    'base-enclosure-residents-0.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
@@ -421,7 +422,9 @@ def create_hpxmls
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
+    # 'base-schedules-detailed-occupancy-stochastic-residents-0.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
@@ -1590,6 +1593,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['overhangs_right_depth'] = 1.5
     args['overhangs_right_distance_to_top_of_window'] = 2.0
     args['overhangs_right_distance_to_bottom_of_window'] = 6.0
+  elsif ['base-enclosure-residents-0.xml'].include? hpxml_file
+    args['geometry_unit_num_occupants'] = 0
   elsif ['base-enclosure-windows-natural-ventilation-availability.xml'].include? hpxml_file
     args['window_natvent_availability'] = 7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
@@ -2463,11 +2468,23 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_type'] = 'stochastic'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-residents-0.xml'].include? hpxml_file
+    args['geometry_unit_num_occupants'] = 0
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-residents-0.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
     sch_args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-vacancy.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['schedules_vacancy_period'] = 'Jan 1 - Dec 31'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-vacancy-year-round.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-10-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
