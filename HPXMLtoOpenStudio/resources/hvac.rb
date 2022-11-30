@@ -778,7 +778,7 @@ class HVAC
       ceiling_fan_sch = schedules_file.create_schedule_file(col_name: ceiling_fan_col_name)
     end
     if ceiling_fan_sch.nil?
-      ceiling_fan_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[ceiling_fan_col_name]
+      ceiling_fan_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[ceiling_fan_col_name]
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions

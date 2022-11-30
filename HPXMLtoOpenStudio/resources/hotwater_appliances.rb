@@ -52,7 +52,7 @@ class HotWaterAndAppliances
         cw_power_schedule = schedules_file.create_schedule_file(col_name: cw_col_name)
       end
       if cw_power_schedule.nil?
-        cw_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[cw_col_name]
+        cw_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cw_col_name]
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
@@ -83,7 +83,7 @@ class HotWaterAndAppliances
         cd_schedule = schedules_file.create_schedule_file(col_name: cd_col_name)
       end
       if cd_schedule.nil?
-        cd_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[cd_col_name]
+        cd_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cd_col_name]
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
@@ -115,7 +115,7 @@ class HotWaterAndAppliances
         dw_power_schedule = schedules_file.create_schedule_file(col_name: dw_col_name)
       end
       if dw_power_schedule.nil?
-        dw_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[dw_col_name]
+        dw_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[dw_col_name]
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
@@ -145,7 +145,7 @@ class HotWaterAndAppliances
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
       end
       if fridge_schedule.nil?
-        fridge_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[fridge_col_name]
+        fridge_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[fridge_col_name]
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
@@ -175,7 +175,7 @@ class HotWaterAndAppliances
         freezer_schedule = schedules_file.create_schedule_file(col_name: freezer_col_name)
       end
       if freezer_schedule.nil?
-        freezer_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[freezer_col_name]
+        freezer_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[freezer_col_name]
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
@@ -206,7 +206,7 @@ class HotWaterAndAppliances
         cook_schedule = schedules_file.create_schedule_file(col_name: cook_col_name)
       end
       if cook_schedule.nil?
-        cook_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[cook_col_name]
+        cook_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cook_col_name]
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
@@ -267,7 +267,7 @@ class HotWaterAndAppliances
         fixtures_schedule = schedules_file.create_schedule_file(col_name: fixtures_col_name)
       end
       if fixtures_schedule.nil?
-        fixtures_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[fixtures_col_name]
+        fixtures_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[fixtures_col_name]
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers

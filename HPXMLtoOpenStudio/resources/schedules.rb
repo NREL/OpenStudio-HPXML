@@ -1468,7 +1468,7 @@ class SchedulesFile
 
     @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
       @tmp_schedules.keys.each do |col_name|
-        next unless Schedule.affected_by_vacancy[col_name] # skip those unaffected by vacancy
+        next unless SchedulesFile.affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
