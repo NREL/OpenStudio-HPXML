@@ -27,7 +27,7 @@ class MiscLoads
     if sch.nil?
       col_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[col_name]
       sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, vacancy_periods: col_vacancy_periods)
-      space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
+      space_design_level = sch.calc_design_level_from_daily_kwh(kwh / 365.0)
       sch = sch.schedule
     else
       runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !plug_load.weekday_fractions.nil?
@@ -81,7 +81,7 @@ class MiscLoads
       if sch.nil?
         col_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy[col_name]
         sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, vacancy_periods: col_vacancy_periods)
-        space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
+        space_design_level = sch.calc_design_level_from_daily_therm(therm / 365.0)
         sch = sch.schedule
       else
         runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !fuel_load.weekday_fractions.nil?
@@ -141,7 +141,7 @@ class MiscLoads
       if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: heater_kwh)
       else
-        space_design_level = heater_sch.calcDesignLevelFromDailykWh(heater_kwh / 365.0)
+        space_design_level = heater_sch.calc_design_level_from_daily_kwh(heater_kwh / 365.0)
         heater_sch = heater_sch.schedule
       end
 
@@ -149,7 +149,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
+      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
@@ -161,8 +161,9 @@ class MiscLoads
     if heater_therm > 0
       if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_therm(col_name: col_name, annual_therm: heater_therm)
-      else
-        space_design_level = heater_sch.calcDesignLevelFromDailyTherm(heater_therm / 365.0)
+      end
+      if space_design_level.nil?
+        space_design_level = heater_sch.calc_design_level_from_daily_therm(heater_therm / 365.0)
         heater_sch = heater_sch.schedule
       end
 
@@ -171,7 +172,7 @@ class MiscLoads
       mfl.setName(obj_name)
       mfl.setEndUseSubcategory(obj_name)
       mfl.setFuelType(EPlus.fuel_type(HPXML::FuelTypeNaturalGas))
-      mfl.setSpace(living_space)
+      mfl.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mfl_def.setName(obj_name)
       mfl_def.setDesignLevel(space_design_level)
       mfl_def.setFractionRadiant(0)
@@ -206,8 +207,9 @@ class MiscLoads
     if pump_kwh > 0
       if not schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: pump_kwh)
-      else
-        space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)
+      end
+      if space_design_level.nil?
+        space_design_level = pump_sch.calc_design_level_from_daily_kwh(pump_kwh / 365.0)
         pump_sch = pump_sch.schedule
       end
 
@@ -215,7 +217,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
+      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
