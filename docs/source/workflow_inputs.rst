@@ -506,7 +506,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_              12 comma-separated monthly multipliers
   ========================================  ========  =====  ===========  ========  ====================  ========================
 
-  .. [#] NumberofResidents is required if OccupancyCalculationType is "operational", .
+  .. [#] NumberofResidents is required, and must be greater than zero, if OccupancyCalculationType is "operational", .
   .. [#] If OccupancyCalculationType is "asset", NumberofResidents is only used to define the heat gain from occupants; various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
          If OccupancyCalculationType is "operational", end uses based on number of bedrooms are adjusted for the number of occupants.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
