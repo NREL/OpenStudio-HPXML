@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>b9ab9559-30d8-4b1c-9757-8c911f80e937</version_id>
-  <version_modified>20221031T233528Z</version_modified>
+  <version_id>19e3ab7a-48d3-4816-85dd-57fbd8fd91f9</version_id>
+  <version_modified>20221130T163723Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -37,6 +37,14 @@
           <display_name>stochastic</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>schedules_column_names</name>
+      <display_name>Schedules: Column Names</display_name>
+      <description>A comma-separated list of the column names to generate. If not provided, defaults to all columns.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>schedules_vacancy_period</name>
@@ -891,12 +899,6 @@
       <checksum>127D96AC</checksum>
     </file>
     <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>41CA164F</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -905,13 +907,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8FF07C66</checksum>
+      <checksum>1EC35CBD</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8CE52A5A</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F2E6EBB8</checksum>
+      <checksum>AC348B70</checksum>
     </file>
   </files>
 </measure>
