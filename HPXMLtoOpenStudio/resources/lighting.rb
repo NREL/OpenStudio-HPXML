@@ -31,7 +31,6 @@ class Lighting
                                             lighting.exterior_usage_multiplier)
 
     # Add lighting to each conditioned space
-    puts "int_kwh #{int_kwh}"
     if int_kwh > 0
 
       # Create schedule

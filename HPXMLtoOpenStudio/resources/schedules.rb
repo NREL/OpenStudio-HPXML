@@ -722,14 +722,6 @@ class Schedule
     rule.setApplySunday(true)
   end
 
-  def self.ZeroFractions
-    return '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0'
-  end
-
-  def self.ZeroMonthlyMultipliers
-    return '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0'
-  end
-
   def self.OccupantsWeekdayFractions
     return '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
   end

@@ -67,9 +67,6 @@ class ScheduleGenerator
       if args[:geometry_num_occupants] > 0
         success = create_stochastic_schedules(args: args)
         return false if not success
-      else
-        # success = create_unoccupied_schedules
-        # return false if not success
       end
     end
 
@@ -109,7 +106,7 @@ class ScheduleGenerator
   end
 
   def create_average_occupants
-    create_timeseries_from_weekday_weekend_monthly(sch_name: SchedulesFile::ColumnOccupants, weekday_sch: Schedule.ZeroFractions, weekend_sch: Schedule.ZeroFractions, monthly_sch: Schedule.OccupantsMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: SchedulesFile::ColumnOccupants, weekday_sch: Schedule.OccupantsWeekdayFractions, weekend_sch: Schedule.OccupantsWeekendFractions, monthly_sch: Schedule.OccupantsMonthlyMultipliers)
   end
 
   def create_average_lighting_interior

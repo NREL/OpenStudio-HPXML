@@ -447,8 +447,6 @@ def create_hpxmls
   puts "Generating #{hpxmls_files.size} HPXML files..."
 
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
-    next if hpxml_file != 'base-schedules-detailed-occupancy-stochastic-residents-0.xml'
-
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
