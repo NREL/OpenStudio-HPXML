@@ -722,6 +722,14 @@ class Schedule
     rule.setApplySunday(true)
   end
 
+  def self.ZeroFractions
+    return '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0'
+  end
+
+  def self.ZeroMonthlyMultipliers
+    return '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0'
+  end
+
   def self.OccupantsWeekdayFractions
     return '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
   end
@@ -1353,6 +1361,8 @@ class SchedulesFile
     end
 
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
+    return 0 if ann_equiv_full_load_hrs == 0
+
     design_level = annual_kwh * 1000.0 / ann_equiv_full_load_hrs # W
 
     return design_level
@@ -1380,6 +1390,8 @@ class SchedulesFile
     end
 
     full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
+    return 0 if full_load_hrs == 0
+
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = full_load_hrs / num_days_in_year
     design_level = UnitConversions.convert(daily_kwh / daily_full_load_hrs, 'kW', 'W')
@@ -1395,6 +1407,8 @@ class SchedulesFile
     end
 
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
+    return 0 if ann_equiv_full_load_hrs == 0
+
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = ann_equiv_full_load_hrs / num_days_in_year
     peak_flow = daily_water / daily_full_load_hrs # gallons_per_hour

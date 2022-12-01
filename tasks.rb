@@ -426,7 +426,7 @@ def create_hpxmls
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
-    # 'base-schedules-detailed-occupancy-stochastic-residents-0.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-residents-0.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
@@ -447,6 +447,8 @@ def create_hpxmls
   puts "Generating #{hpxmls_files.size} HPXML files..."
 
   hpxmls_files.each_with_index do |(hpxml_file, orig_parent), i|
+    next if hpxml_file != 'base-schedules-detailed-occupancy-stochastic-residents-0.xml'
+
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
@@ -2481,6 +2483,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-residents-0.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
     args['geometry_unit_num_occupants'] = 0
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
