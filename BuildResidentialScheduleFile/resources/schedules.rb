@@ -78,26 +78,26 @@ class ScheduleGenerator
 
   def create_average_schedules(args:)
     create_average_occupants if args[:geometry_num_occupants] > 0
-    create_average_cooking_range if args[:geometry_num_occupants] > 0
-    create_average_plug_loads_other if args[:geometry_num_occupants] > 0
-    create_average_plug_loads_tv if args[:geometry_num_occupants] > 0
-    create_average_plug_loads_vehicle if args[:geometry_num_occupants] > 0
-    create_average_plug_loads_well_pump if args[:geometry_num_occupants] > 0
-    create_average_lighting_interior if args[:geometry_num_occupants] > 0
-    create_average_lighting_exterior if args[:geometry_num_occupants] > 0
-    create_average_lighting_garage if args[:geometry_num_occupants] > 0
-    create_average_lighting_exterior_holiday if args[:geometry_num_occupants] > 0
-    create_average_clothes_washer if args[:geometry_num_occupants] > 0
-    create_average_clothes_dryer if args[:geometry_num_occupants] > 0
-    create_average_dishwasher if args[:geometry_num_occupants] > 0
-    create_average_fixtures if args[:geometry_num_occupants] > 0
-    create_average_ceiling_fan if args[:geometry_num_occupants] > 0
+    create_average_cooking_range
+    create_average_plug_loads_other
+    create_average_plug_loads_tv
+    create_average_plug_loads_vehicle
+    create_average_plug_loads_well_pump
+    create_average_lighting_interior
+    create_average_lighting_exterior
+    create_average_lighting_garage
+    create_average_lighting_exterior_holiday
+    create_average_clothes_washer
+    create_average_clothes_dryer
+    create_average_dishwasher
+    create_average_fixtures
+    create_average_ceiling_fan
     create_average_refrigerator
     create_average_extra_refrigerator
     create_average_freezer
-    create_average_fuel_loads_grill if args[:geometry_num_occupants] > 0
-    create_average_fuel_loads_lighting if args[:geometry_num_occupants] > 0
-    create_average_fuel_loads_fireplace if args[:geometry_num_occupants] > 0
+    create_average_fuel_loads_grill
+    create_average_fuel_loads_lighting
+    create_average_fuel_loads_fireplace
     create_average_pool_pump
     create_average_pool_heater
     create_average_hot_tub_pump

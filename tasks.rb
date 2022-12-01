@@ -98,6 +98,7 @@ def create_hpxmls
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
     'base-bldgtype-single-family-attached-atticroof-cathedral.xml' => 'base-bldgtype-single-family-attached-2stories.xml',
     'base-calctype-operational.xml' => 'base.xml',
+    'base-calctype-operational-residents-0.xml' => 'base.xml',
     'base-calctype-operational-misc-defaults.xml' => 'base-misc-defaults.xml',
     'base-calctype-operational-misc-loads-large-uncommon.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-calctype-operational-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon2.xml',
@@ -177,11 +178,6 @@ def create_hpxmls
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
     'base-enclosure-orientations.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
-    'base-enclosure-residents-0.xml' => 'base.xml',
-    'base-enclosure-residents-1.xml' => 'base.xml',
-    'base-enclosure-residents-2.xml' => 'base.xml',
-    'base-enclosure-residents-4.xml' => 'base.xml',
-    'base-enclosure-residents-5.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
@@ -1383,6 +1379,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-calctype-operational-misc-defaults.xml'].include? hpxml_file
     args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
     args['geometry_unit_num_occupants'] = 5
+  elsif ['base-calctype-operational-residents-0.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
+    args['geometry_unit_num_occupants'] = 0
   end
 
   # DHW
@@ -1597,16 +1596,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['overhangs_right_depth'] = 1.5
     args['overhangs_right_distance_to_top_of_window'] = 2.0
     args['overhangs_right_distance_to_bottom_of_window'] = 6.0
-  elsif ['base-enclosure-residents-0.xml'].include? hpxml_file
-    args['geometry_unit_num_occupants'] = 0
-  elsif ['base-enclosure-residents-1.xml'].include? hpxml_file
-    args['geometry_unit_num_occupants'] = 1
-  elsif ['base-enclosure-residents-2.xml'].include? hpxml_file
-    args['geometry_unit_num_occupants'] = 2
-  elsif ['base-enclosure-residents-4.xml'].include? hpxml_file
-    args['geometry_unit_num_occupants'] = 4
-  elsif ['base-enclosure-residents-5.xml'].include? hpxml_file
-    args['geometry_unit_num_occupants'] = 5
   elsif ['base-enclosure-windows-natural-ventilation-availability.xml'].include? hpxml_file
     args['window_natvent_availability'] = 7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file

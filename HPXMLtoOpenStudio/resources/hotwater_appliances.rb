@@ -10,7 +10,8 @@ class HotWaterAndAppliances
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
-    nbeds = HPXMLDefaults.get_nbeds_adjusted_for_operational_calculation(hpxml)
+    noccs = hpxml.building_occupancy.number_of_residents
+    nbeds = HPXMLDefaults.get_nbeds_adjusted_for_operational_calculation(hpxml, noccs)
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?
@@ -796,6 +797,7 @@ class HotWaterAndAppliances
 
   def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, water_use_connections, mw_temp_schedule = nil)
     # return if peak_flow == 0.0
+    peak_flow = 0.0 if peak_flow.is_a?(Complex)
 
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)

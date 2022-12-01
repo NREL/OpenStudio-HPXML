@@ -9,6 +9,7 @@ class HPXMLDefaults
   def self.apply(runner, hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
+    noccs = hpxml.building_occupancy.number_of_residents
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
@@ -66,15 +67,15 @@ class HPXMLDefaults
     apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
     apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
-    apply_water_fixtures(hpxml, schedules_file)
+    apply_water_fixtures(hpxml, noccs, schedules_file)
     apply_solar_thermal_systems(hpxml)
-    apply_appliances(hpxml, nbeds, eri_version, schedules_file)
-    apply_lighting(hpxml, schedules_file)
+    apply_appliances(hpxml, nbeds, noccs, eri_version, schedules_file)
+    apply_lighting(hpxml, noccs, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
-    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml)
+    nbeds_adjusted = get_nbeds_adjusted_for_operational_calculation(hpxml, noccs)
     apply_pools_and_hot_tubs(hpxml, cfa, nbeds_adjusted, schedules_file)
-    apply_plug_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
-    apply_fuel_loads(hpxml, cfa, nbeds_adjusted, schedules_file)
+    apply_plug_loads(hpxml, cfa, nbeds_adjusted, noccs, schedules_file)
+    apply_fuel_loads(hpxml, cfa, nbeds_adjusted, noccs, schedules_file)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
     apply_batteries(hpxml)
@@ -1734,11 +1735,15 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_water_fixtures(hpxml, schedules_file)
+  def self.apply_water_fixtures(hpxml, noccs, schedules_file)
     return if hpxml.hot_water_distributions.size == 0
 
     if hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
+      hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
+    end
+    if noccs == 0
+      hpxml.water_heating.water_fixtures_usage_multiplier = 0.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
     end
     schedules_file_includes_fixtures = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnHotWaterFixtures)
@@ -1876,7 +1881,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_appliances(hpxml, nbeds, eri_version, schedules_file)
+  def self.apply_appliances(hpxml, nbeds, noccs, eri_version, schedules_file)
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
@@ -1907,6 +1912,10 @@ class HPXMLDefaults
       end
       if clothes_washer.usage_multiplier.nil?
         clothes_washer.usage_multiplier = 1.0
+        clothes_washer.usage_multiplier_isdefaulted = true
+      end
+      if noccs == 0
+        clothes_washer.usage_multiplier = 0.0
         clothes_washer.usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_cw = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnClothesWasher)
@@ -1947,6 +1956,10 @@ class HPXMLDefaults
       end
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
+        clothes_dryer.usage_multiplier_isdefaulted = true
+      end
+      if noccs == 0
+        clothes_dryer.usage_multiplier = 0.0
         clothes_dryer.usage_multiplier_isdefaulted = true
       end
       if clothes_dryer.is_vented.nil?
@@ -2000,6 +2013,10 @@ class HPXMLDefaults
       end
       if dishwasher.usage_multiplier.nil?
         dishwasher.usage_multiplier = 1.0
+        dishwasher.usage_multiplier_isdefaulted = true
+      end
+      if noccs == 0
+        dishwasher.usage_multiplier = 0.0
         dishwasher.usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_dw = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnDishwasher)
@@ -2122,6 +2139,10 @@ class HPXMLDefaults
         cooking_range.usage_multiplier = 1.0
         cooking_range.usage_multiplier_isdefaulted = true
       end
+      if noccs == 0
+        cooking_range.usage_multiplier = 0.0
+        cooking_range.usage_multiplier_isdefaulted = true
+      end
       schedules_file_includes_range = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCookingRange)
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range
         cooking_range.weekday_fractions = Schedule.CookingRangeWeekdayFractions
@@ -2148,7 +2169,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_lighting(hpxml, schedules_file)
+  def self.apply_lighting(hpxml, noccs, schedules_file)
     return if hpxml.lighting_groups.empty?
 
     if hpxml.lighting.interior_usage_multiplier.nil?
@@ -2163,6 +2184,17 @@ class HPXMLDefaults
       hpxml.lighting.exterior_usage_multiplier = 1.0
       hpxml.lighting.exterior_usage_multiplier_isdefaulted = true
     end
+    if noccs == 0
+      hpxml.lighting.interior_usage_multiplier = 0.0
+      hpxml.lighting.interior_usage_multiplier_isdefaulted = true
+
+      hpxml.lighting.garage_usage_multiplier = 0.0
+      hpxml.lighting.garage_usage_multiplier_isdefaulted = true
+
+      hpxml.lighting.exterior_usage_multiplier = 0.0
+      hpxml.lighting.exterior_usage_multiplier_isdefaulted = true
+    end
+
     # Schedules from T24 2016 Residential ACM Appendix C Table 8 Exterior Lighting Hourly Multiplier (Weekdays and weekends)
     default_exterior_lighting_weekday_fractions = Schedule.LightingExteriorWeekdayFractions
     default_exterior_lighting_weekend_fractions = Schedule.LightingExteriorWeekendFractions
@@ -2371,7 +2403,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_plug_loads(hpxml, cfa, nbeds, schedules_file)
+  def self.apply_plug_loads(hpxml, cfa, nbeds, noccs, schedules_file)
     hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
@@ -2486,10 +2518,14 @@ class HPXMLDefaults
         plug_load.usage_multiplier = 1.0
         plug_load.usage_multiplier_isdefaulted = true
       end
+      if noccs == 0
+        plug_load.usage_multiplier = 0.0
+        plug_load.usage_multiplier_isdefaulted = true
+      end
     end
   end
 
-  def self.apply_fuel_loads(hpxml, cfa, nbeds, schedules_file)
+  def self.apply_fuel_loads(hpxml, cfa, nbeds, noccs, schedules_file)
     hpxml.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
         if fuel_load.therm_per_year.nil?
@@ -2572,6 +2608,10 @@ class HPXMLDefaults
       end
       if fuel_load.usage_multiplier.nil?
         fuel_load.usage_multiplier = 1.0
+        fuel_load.usage_multiplier_isdefaulted = true
+      end
+      if noccs == 0
+        fuel_load.usage_multiplier = 0.0
         fuel_load.usage_multiplier_isdefaulted = true
       end
     end
@@ -2772,14 +2812,13 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_nbeds_adjusted_for_operational_calculation(hpxml)
+  def self.get_nbeds_adjusted_for_operational_calculation(hpxml, noccs)
     occ_calc_type = hpxml.header.occupancy_calculation_type
     unit_type = hpxml.building_construction.residential_facility_type
     nbeds = hpxml.building_construction.number_of_bedrooms
     if occ_calc_type == HPXML::OccupancyCalculationTypeAsset
       return nbeds
     elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
-      noccs = hpxml.building_occupancy.number_of_residents
       if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
         return -0.68 + 1.09 * noccs
       elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
