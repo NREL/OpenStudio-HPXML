@@ -53,7 +53,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_column_names', false)
     arg.setDisplayName('Schedules: Column Names')
-    arg.setDescription('A comma-separated list of the column names to generate. If not provided, defaults to all columns.')
+    arg.setDescription("A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: #{SchedulesFile.OccupancyColumnNames.join(', ')}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)

@@ -217,7 +217,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     @args_hash['schedules_type'] = 'stochastic'
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
-    @args_hash['schedules_column_names'] = 'foobar, foobar2'
+    @args_hash['schedules_column_names'] = "foobar, #{SchedulesFile::ColumnCookingRange}, foobar2"
     _model, _hpxml, result = _test_measure(expect_fail: true)
 
     error_msgs = result.errors.map { |x| x.logMessage }
