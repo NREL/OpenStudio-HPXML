@@ -2776,10 +2776,10 @@ class HPXMLDefaults
     occ_calc_type = hpxml.header.occupancy_calculation_type
     unit_type = hpxml.building_construction.residential_facility_type
     nbeds = hpxml.building_construction.number_of_bedrooms
-    noccs = hpxml.building_occupancy.number_of_residents
-    if occ_calc_type == HPXML::OccupancyCalculationTypeAsset || noccs == 0
+    if occ_calc_type == HPXML::OccupancyCalculationTypeAsset
       return nbeds
     elsif occ_calc_type == HPXML::OccupancyCalculationTypeOperational
+      noccs = hpxml.building_occupancy.number_of_residents
       if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
         return -0.68 + 1.09 * noccs
       elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
