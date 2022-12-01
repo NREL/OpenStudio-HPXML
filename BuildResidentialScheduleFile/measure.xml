@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>fbb0385e-112d-4cf9-b766-0e57343baa80</version_id>
-  <version_modified>20221201T003520Z</version_modified>
+  <version_id>12cc60e9-7bd1-4431-a810-af6f3c9ec08e</version_id>
+  <version_modified>20221201T223011Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -17,6 +17,22 @@
       <description>Absolute/relative path of the HPXML file.</description>
       <type>String</type>
       <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_column_names</name>
+      <display_name>Schedules: Column Names</display_name>
+      <description>A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: occupants, lighting_interior, lighting_exterior, lighting_garage, lighting_exterior_holiday, cooking_range, dishwasher, clothes_washer, clothes_dryer, ceiling_fan, plug_loads_other, hot_water_dishwasher, hot_water_clothes_washer, hot_water_fixtures.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_vacancy_period</name>
+      <display_name>Schedules: Vacancy Period</display_name>
+      <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".</description>
+      <type>String</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -858,6 +874,12 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
+      <filename>README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AAB89065</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -866,25 +888,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>88E63175</checksum>
-    </file>
-    <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>993D2C0A</checksum>
+      <checksum>651A9087</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>42F45BF2</checksum>
+      <checksum>DAE98658</checksum>
     </file>
     <file>
-      <filename>README.md</filename>
-      <filetype>md</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AAB89065</checksum>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5BACA36A</checksum>
     </file>
   </files>
 </measure>

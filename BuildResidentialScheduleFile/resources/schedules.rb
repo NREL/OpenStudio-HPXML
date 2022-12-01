@@ -8,6 +8,7 @@ class ScheduleGenerator
   def initialize(runner:,
                  epw_file:,
                  state:,
+                 column_names: nil,
                  random_seed: nil,
                  minutes_per_step:,
                  steps_in_day:,
@@ -21,6 +22,7 @@ class ScheduleGenerator
     @runner = runner
     @epw_file = epw_file
     @state = state
+    @column_names = column_names
     @random_seed = random_seed
     @minutes_per_step = minutes_per_step
     @steps_in_day = steps_in_day
@@ -43,29 +45,21 @@ class ScheduleGenerator
     return seed
   end
 
-  def initialize_schedules
-    @schedules = {}
-
-    ordered_col_names = [SchedulesFile::ColumnOccupants,
-                         SchedulesFile::ColumnLightingInterior,
-                         SchedulesFile::ColumnLightingExterior,
-                         SchedulesFile::ColumnLightingGarage,
-                         SchedulesFile::ColumnLightingExteriorHoliday,
-                         SchedulesFile::ColumnCookingRange,
-                         SchedulesFile::ColumnDishwasher,
-                         SchedulesFile::ColumnClothesWasher,
-                         SchedulesFile::ColumnClothesDryer,
-                         SchedulesFile::ColumnCeilingFan,
-                         SchedulesFile::ColumnPlugLoadsOther,
-                         SchedulesFile::ColumnHotWaterDishwasher,
-                         SchedulesFile::ColumnHotWaterClothesWasher,
-                         SchedulesFile::ColumnHotWaterFixtures]
-
-    ordered_col_names.each do |col_name|
-      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
-    end
-
-    return @schedules
+  def self.export_columns
+    return [SchedulesFile::ColumnOccupants,
+            SchedulesFile::ColumnLightingInterior,
+            SchedulesFile::ColumnLightingExterior,
+            SchedulesFile::ColumnLightingGarage,
+            SchedulesFile::ColumnLightingExteriorHoliday,
+            SchedulesFile::ColumnCookingRange,
+            SchedulesFile::ColumnDishwasher,
+            SchedulesFile::ColumnClothesWasher,
+            SchedulesFile::ColumnClothesDryer,
+            SchedulesFile::ColumnCeilingFan,
+            SchedulesFile::ColumnPlugLoadsOther,
+            SchedulesFile::ColumnHotWaterDishwasher,
+            SchedulesFile::ColumnHotWaterClothesWasher,
+            SchedulesFile::ColumnHotWaterFixtures]
   end
 
   def schedules
@@ -73,7 +67,21 @@ class ScheduleGenerator
   end
 
   def create(args:)
-    initialize_schedules
+    @schedules = {}
+
+    ScheduleGenerator.export_columns.each do |col_name|
+      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
+    end
+
+    if @column_names.nil?
+      @column_names = SchedulesFile.ColumnNames
+    end
+
+    invalid_columns = (@column_names - SchedulesFile.ColumnNames)
+    invalid_columns.each do |invalid_column|
+      @runner.registerError("Invalid column name specified: '#{invalid_column}'.")
+    end
+    return false unless invalid_columns.empty?
 
     success = create_stochastic_schedules(args: args)
     return false if not success
@@ -762,6 +770,9 @@ class ScheduleGenerator
   end
 
   def export(schedules_path:)
+    (SchedulesFile.ColumnNames - @column_names).each do |col_to_remove|
+      @schedules.delete(col_to_remove)
+    end
     CSV.open(schedules_path, 'w') do |csv|
       csv << @schedules.keys
       rows = @schedules.values.transpose

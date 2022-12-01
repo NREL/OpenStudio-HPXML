@@ -61,6 +61,52 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
   end
 
+  def test_stochastic_subset_of_columns
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    columns = [SchedulesFile::ColumnCookingRange,
+               SchedulesFile::ColumnDishwasher,
+               SchedulesFile::ColumnHotWaterDishwasher,
+               SchedulesFile::ColumnClothesWasher,
+               SchedulesFile::ColumnHotWaterClothesWasher,
+               SchedulesFile::ColumnClothesDryer,
+               SchedulesFile::ColumnHotWaterFixtures]
+
+    @args_hash['schedules_type'] = 'stochastic'
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['schedules_column_names'] = columns.join(', ')
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('ColumnNames') })
+
+    sf = SchedulesFile.new(model: model,
+                           schedules_paths: hpxml.header.schedules_filepaths,
+                           year: 2007)
+
+    columns.each do |column|
+      assert(sf.schedules.keys.include?(column))
+    end
+    (SchedulesFile.ColumnNames - columns).each do |column|
+      assert(!sf.schedules.keys.include?(column))
+    end
+  end
+
+  def test_stochastic_subset_of_columns_invalid_name
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['schedules_type'] = 'stochastic'
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['schedules_column_names'] = "foobar, #{SchedulesFile::ColumnCookingRange}, foobar2"
+    _model, _hpxml, result = _test_measure(expect_fail: true)
+
+    error_msgs = result.errors.map { |x| x.logMessage }
+    assert(error_msgs.any? { |error_msg| error_msg.include?("Invalid column name specified: 'foobar'.") })
+    assert(error_msgs.any? { |error_msg| error_msg.include?("Invalid column name specified: 'foobar2'.") })
+  end
+
   def test_stochastic_debug
     hpxml = _create_hpxml('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -216,7 +262,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?("GeometryNumOccupants=#{Float(Integer(num_occupants))}") })
   end
 
-  def _test_measure()
+  def _test_measure(expect_fail: false)
     # create an instance of the measure
     measure = BuildResidentialScheduleFile.new
 
@@ -240,11 +286,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     measure.run(model, runner, argument_map)
     result = runner.result
 
-    # show the output
-    show_output(result) unless result.value.valueName == 'Success'
-
     # assert that it ran correctly
-    assert_equal('Success', result.value.valueName)
+    if expect_fail
+      show_output(result) unless result.value.valueName == 'Fail'
+      assert_equal('Fail', result.value.valueName)
+    else
+      show_output(result) unless result.value.valueName == 'Success'
+      assert_equal('Success', result.value.valueName)
+    end
 
     hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path)
 

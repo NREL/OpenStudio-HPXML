@@ -41,6 +41,16 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_column_names', false)
+    arg.setDisplayName('Schedules: Column Names')
+    arg.setDescription("A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: #{ScheduleGenerator.export_columns.join(', ')}.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
+    arg.setDisplayName('Schedules: Vacancy Period')
+    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
     arg.setDisplayName('Schedules: Random Seed')
     arg.setUnits('#')
@@ -145,6 +155,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "State=#{args[:state]}"
     info_msgs << "RandomSeed=#{args[:random_seed]}" if args[:schedules_random_seed].is_initialized
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
+    info_msgs << "ColumnNames=#{args[:column_names]}" if args[:schedules_column_names].is_initialized
 
     runner.registerInfo("Created stochastic schedule with #{info_msgs.join(', ')}")
 
@@ -172,6 +183,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:state] = hpxml.header.state_code if !hpxml.header.state_code.nil?
 
     args[:random_seed] = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
+    args[:column_names] = args[:schedules_column_names].get.split(',').map(&:strip) if args[:schedules_column_names].is_initialized
 
     if hpxml.building_occupancy.number_of_residents.nil?
       args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml.building_construction.number_of_bedrooms)

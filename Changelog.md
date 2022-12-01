@@ -1,3 +1,11 @@
+## OpenStudio-HPXML v1.6.0
+
+__New Features__
+- BuildResidentialScheduleFile measure:
+  - Allows requesting a subset of enduses/columns to be generated.
+
+__Bugfixes__
+
 ## OpenStudio-HPXML v1.5.0
 
 __New Features__
