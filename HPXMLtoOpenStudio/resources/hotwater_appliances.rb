@@ -47,7 +47,7 @@ class HotWaterAndAppliances
       power_cw_schedule = nil
       if not schedules_file.nil?
         cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnClothesWasher, daily_kwh: cw_annual_kwh / 365.0)
-        power_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesWasher)
+        power_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesWasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if power_cw_schedule.nil?
         cw_weekday_sch = clothes_washer.weekday_fractions
@@ -76,7 +76,7 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnClothesDryer, annual_kwh: cd_annual_kwh)
         cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: SchedulesFile::ColumnClothesDryer, annual_therm: cd_annual_therm)
-        cd_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesDryer)
+        cd_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnClothesDryer, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cd_schedule.nil?
         cd_weekday_sch = clothes_dryer.weekday_fractions
@@ -106,7 +106,7 @@ class HotWaterAndAppliances
       power_dw_schedule = nil
       if not schedules_file.nil?
         dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnDishwasher, daily_kwh: dw_annual_kwh / 365.0)
-        power_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnDishwasher)
+        power_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnDishwasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if power_dw_schedule.nil?
         dw_weekday_sch = dishwasher.weekday_fractions
@@ -135,7 +135,7 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::ColumnRefrigerator : SchedulesFile::ColumnExtraRefrigerator
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
-        fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
+        fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fridge_schedule.nil?
         fridge_weekday_sch = refrigerator.weekday_fractions
@@ -163,7 +163,7 @@ class HotWaterAndAppliances
       freezer_schedule = nil
       if not schedules_file.nil?
         freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnFreezer, annual_kwh: fz_annual_kwh)
-        freezer_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnFreezer)
+        freezer_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnFreezer, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if freezer_schedule.nil?
         freezer_weekday_sch = freezer.weekday_fractions
@@ -192,7 +192,7 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnCookingRange, annual_kwh: cook_annual_kwh)
         cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: SchedulesFile::ColumnCookingRange, annual_therm: cook_annual_therm)
-        cook_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCookingRange)
+        cook_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCookingRange, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cook_schedule.nil?
         cook_weekday_sch = cooking_range.weekday_fractions
@@ -251,7 +251,7 @@ class HotWaterAndAppliances
       # Create schedule
       fixtures_schedule = nil
       if not schedules_file.nil?
-        fixtures_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterFixtures)
+        fixtures_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterFixtures, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fixtures_schedule.nil?
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
@@ -322,7 +322,7 @@ class HotWaterAndAppliances
           water_cw_schedule = nil
           if not schedules_file.nil?
             cw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterClothesWasher, daily_water: cw_gpd)
-            water_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterClothesWasher)
+            water_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
           end
           if water_cw_schedule.nil?
             cw_peak_flow = cw_schedule_obj.calc_design_level_from_daily_gpm(cw_gpd)
@@ -349,7 +349,7 @@ class HotWaterAndAppliances
       water_dw_schedule = nil
       if not schedules_file.nil?
         dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterDishwasher, daily_water: dw_gpd)
-        water_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterDishwasher)
+        water_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterDishwasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if water_dw_schedule.nil?
         dw_peak_flow = dw_schedule_obj.calc_design_level_from_daily_gpm(dw_gpd)
@@ -754,7 +754,7 @@ class HotWaterAndAppliances
   private
 
   def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
-    return if design_level_w == 0.0
+    # return if design_level_w == 0.0
 
     ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
@@ -772,7 +772,7 @@ class HotWaterAndAppliances
   end
 
   def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
-    return if design_level_w == 0.0 # Negative values intentionally allowed, e.g. for water sensible
+    # return if design_level_w == 0.0 # Negative values intentionally allowed, e.g. for water sensible
 
     oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     oe = OpenStudio::Model::OtherEquipment.new(oe_def)
@@ -795,7 +795,7 @@ class HotWaterAndAppliances
   end
 
   def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, water_use_connections, mw_temp_schedule = nil)
-    return if peak_flow == 0.0
+    # return if peak_flow == 0.0
 
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)

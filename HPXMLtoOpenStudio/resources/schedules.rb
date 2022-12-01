@@ -1298,7 +1298,8 @@ class SchedulesFile
   end
 
   def create_schedule_file(col_name:,
-                           rows_to_skip: 1)
+                           rows_to_skip: 1,
+                           schedule_type_limits_name: nil)
     @model.getScheduleFiles.each do |schedule_file|
       next if schedule_file.name.to_s != col_name
 
@@ -1320,6 +1321,8 @@ class SchedulesFile
     schedule_file.setRowstoSkipatTop(rows_to_skip)
     schedule_file.setNumberofHoursofData(num_hrs_in_year.to_i)
     schedule_file.setMinutesperItem(min_per_item.to_i)
+
+    Schedule.set_schedule_type_limits(@model, schedule_file, schedule_type_limits_name)
 
     return schedule_file
   end
