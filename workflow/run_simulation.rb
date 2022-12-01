@@ -12,14 +12,14 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 basedir = File.expand_path(File.dirname(__FILE__))
 
 def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, add_comp_loads,
-                 output_format, building_id, ep_input_format, detailed_schedules, timeseries_time_column_types,
+                 output_format, building_id, ep_input_format, stochastic_schedules, timeseries_time_column_types,
                  timeseries_output_variables, timeseries_timestamp_convention)
   measures_dir = File.join(basedir, '..')
 
   measures = {}
 
   # Optionally add schedule file measure to workflow
-  if detailed_schedules
+  if stochastic_schedules
     measure_subdir = 'BuildResidentialScheduleFile'
     args = {}
     args['hpxml_path'] = hpxml
@@ -127,9 +127,9 @@ OptionParser.new do |opts|
     options[:add_comp_loads] = true
   end
 
-  options[:detailed_schedules] = false
-  opts.on('--add-detailed-schedule', 'Add detailed stochastic occupancy schedule') do |_t|
-    options[:detailed_schedules] = true
+  options[:stochastic_schedules] = false
+  opts.on('--add-stochastic-schedules', 'Add detailed stochastic occupancy schedules') do |_t|
+    options[:stochastic_schedules] = true
   end
 
   options[:timeseries_time_column_types] = []
@@ -240,7 +240,7 @@ else
   puts "HPXML: #{options[:hpxml]}"
   success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs,
                          options[:skip_validation], options[:add_comp_loads], options[:output_format], options[:building_id],
-                         options[:ep_input_format], options[:detailed_schedules], options[:timeseries_time_column_types],
+                         options[:ep_input_format], options[:stochastic_schedules], options[:timeseries_time_column_types],
                          options[:timeseries_output_variables], options[:timeseries_timestamp_convention])
 
   if not success
