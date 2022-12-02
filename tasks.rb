@@ -98,6 +98,7 @@ def create_hpxmls
     'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
     'base-bldgtype-single-family-attached-atticroof-cathedral.xml' => 'base-bldgtype-single-family-attached-2stories.xml',
     'base-calctype-operational.xml' => 'base.xml',
+    'base-calctype-operational-residents-0.xml' => 'base.xml',
     'base-calctype-operational-misc-defaults.xml' => 'base-misc-defaults.xml',
     'base-calctype-operational-misc-loads-large-uncommon.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-calctype-operational-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon2.xml',
@@ -422,6 +423,7 @@ def create_hpxmls
     'base-schedules-simple-vacancy-year-round.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-residents-0.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
@@ -1379,6 +1381,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-calctype-operational-misc-defaults.xml'].include? hpxml_file
     args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
     args['geometry_unit_num_occupants'] = 5
+  elsif ['base-calctype-operational-residents-0.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
+    args['geometry_unit_num_occupants'] = 0
   end
 
   # DHW
@@ -2477,6 +2482,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-residents-0.xml'].include? hpxml_file
+    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
+    args['geometry_unit_num_occupants'] = 0
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-residents-0.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 
