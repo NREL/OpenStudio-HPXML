@@ -111,6 +111,7 @@ def create_hpxmls
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-detailed-setpoints.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
@@ -134,6 +135,7 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'base-dhw-tank-coal.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-elec-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-uef.xml' => 'base-dhw-tank-gas.xml',
@@ -145,11 +147,8 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-setpoints.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-detailed-operating-modes.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-heat-pump-detailed-schedules.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
-    'base-dhw-tank-detailed-setpoints.xml' => 'base.xml',
     'base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml' => 'base-dhw-tank-model-type-stratified.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
@@ -409,19 +408,15 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-
     'base-pv-battery.xml' => 'base-battery.xml',
-    'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
-
     'base-pv-battery-ah.xml' => 'base-pv-battery.xml',
-    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
+    # 'base-pv-battery-lifetime-model.xml' => 'base-pv-battery.xml',
     'base-pv-battery-round-trip-efficiency.xml' => 'base-pv-battery.xml',
-
+    'base-pv-battery-scheduled.xml' => 'base-pv-battery.xml',
     'base-pv-generators.xml' => 'base-pv.xml',
     'base-pv-generators-battery.xml' => 'base-pv-generators.xml',
     'base-pv-generators-battery-scheduled.xml' => 'base-pv-generators-battery.xml',
-
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-smooth.xml' => 'base.xml',
@@ -2519,7 +2514,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Water Heater Schedules
-  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml'].include? hpxml_file
+  if ['base-dhw-tank-heat-pump-detailed-setpoints.xml',
+      'base-dhw-indirect-detailed-setpoints.xml',
+      'base-dhw-tank-detailed-setpoints.xml',
+      'base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-heat-pump-detailed-operating-modes.xml'].include? hpxml_file
@@ -2528,12 +2526,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-dhw-tank-heat-pump-detailed-schedules.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
-  elsif ['base-dhw-tank-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
-  elsif ['base-dhw-tankless-detailed-setpoints.xml'].include? hpxml_file
-    args.delete('water_heater_setpoint_temperature')
-    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
   elsif ['base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
@@ -4793,28 +4785,6 @@ def renumber_hpxml_ids(hpxml)
   end
 end
 
-def download_epws
-  require 'tempfile'
-  tmpfile = Tempfile.new('epw')
-
-  UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
-
-  puts 'Extracting weather files...'
-  require 'zip'
-  weather_dir = File.join(File.dirname(__FILE__), 'weather')
-  Zip.on_exists_proc = true
-  Zip::File.open(tmpfile.path.to_s) do |zip_file|
-    zip_file.each do |f|
-      zip_file.extract(f, File.join(weather_dir, f.name))
-    end
-  end
-
-  num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
-  puts "#{num_epws_actual} weather files are available in the weather directory."
-  puts 'Completed.'
-  exit!
-end
-
 def download_utility_rates
   require_relative 'HPXMLtoOpenStudio/resources/util'
   require_relative 'ReportUtilityBills/resources/util'
@@ -4845,7 +4815,7 @@ def download_utility_rates
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_weather, :download_utility_rates]
+command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_utility_rates]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4978,22 +4948,11 @@ if ARGV[0].to_sym == :cache_weather
   end
 end
 
-if ARGV[0].to_sym == :download_weather
-  download_epws
-end
-
 if ARGV[0].to_sym == :download_utility_rates
   download_utility_rates
 end
 
 if ARGV[0].to_sym == :create_release_zips
-  release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false,
-                  File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
-
-  release_map.keys.each do |zip_path|
-    File.delete(zip_path) if File.exist? zip_path
-  end
-
   if ENV['CI']
     # CI doesn't have git, so default to everything
     git_files = Dir['**/*.*']
@@ -5049,50 +5008,28 @@ if ARGV[0].to_sym == :create_release_zips
     if Dir.exist? fonts_dir
       FileUtils.rm_r(fonts_dir)
     end
-
-    # Check if we need to download weather files for the full release zip
-    num_epws_expected = 1011
-    num_epws_local = 0
-    files.each do |f|
-      Dir[f].each do |file|
-        next unless file.end_with? '.epw'
-
-        num_epws_local += 1
-      end
-    end
-
-    # Make sure we have the full set of weather files
-    if num_epws_local < num_epws_expected
-      puts 'Fetching all weather files...'
-      command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-      `#{command}`
-    end
   end
 
   # Create zip files
   require 'zip'
-  release_map.each do |zip_path, include_all_epws|
-    puts "Creating #{zip_path}..."
-    Zip::File.open(zip_path, create: true) do |zipfile|
-      files.each do |f|
-        Dir[f].each do |file|
-          if file.start_with? 'documentation'
-            # always include
-          elsif include_all_epws
-            if (not git_files.include? file) && (not file.start_with? 'weather')
-              next
-            end
-          else
-            if not git_files.include? file
-              next
-            end
+  zip_path = File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}.zip")
+  File.delete(zip_path) if File.exist? zip_path
+  puts "Creating #{zip_path}..."
+  Zip::File.open(zip_path, create: true) do |zipfile|
+    files.each do |f|
+      Dir[f].each do |file|
+        if file.start_with? 'documentation'
+          # always include
+        else
+          if not git_files.include? file
+            next
           end
-          zipfile.add(File.join('OpenStudio-HPXML', file), file)
         end
+        zipfile.add(File.join('OpenStudio-HPXML', file), file)
       end
     end
-    puts "Wrote file at #{zip_path}."
   end
+  puts "Wrote file at #{zip_path}."
 
   # Cleanup
   if not ENV['CI']
