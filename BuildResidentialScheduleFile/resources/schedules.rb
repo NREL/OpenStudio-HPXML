@@ -70,12 +70,14 @@ class ScheduleGenerator
     @schedules = {}
 
     ScheduleGenerator.export_columns.each do |col_name|
-      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
+      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0) if col_name == SchedulesFile::ColumnOccupants || args[:geometry_num_occupants] > 0
     end
 
     if @column_names.nil?
       @column_names = SchedulesFile.ColumnNames
     end
+
+    return true if args[:geometry_num_occupants] == 0
 
     invalid_columns = (@column_names - SchedulesFile.ColumnNames)
     invalid_columns.each do |invalid_column|
@@ -770,6 +772,9 @@ class ScheduleGenerator
   end
 
   def export(schedules_path:)
+    puts SchedulesFile.ColumnNames
+    puts 'HERE'
+    puts @column_names
     (SchedulesFile.ColumnNames - @column_names).each do |col_to_remove|
       @schedules.delete(col_to_remove)
     end
