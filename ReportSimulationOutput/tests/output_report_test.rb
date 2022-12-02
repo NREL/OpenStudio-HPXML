@@ -629,6 +629,25 @@ class ReportSimulationOutputTest < MiniTest::Test
     _check_for_nonzero_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
   end
 
+  def test_timeseries_hourly_enduses_vacancy
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-vacancy.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_end_use_consumptions' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEndUses
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], 0, 31 * 24 - 1) # Jan
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 1, -1) # Dec
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+  end
+
   def test_timeseries_hourly_hotwateruses
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'timeseries_frequency' => 'hourly',
@@ -1327,6 +1346,26 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols.each do |col|
       avg_value = values[col].sum(0.0) / values[col].size
       assert_operator(avg_value, :!=, 0)
+    end
+  end
+
+  def _check_for_zero_timeseries_values(timeseries_csv, timeseries_cols, start_ix, end_ix)
+    values = {}
+    timeseries_cols.each do |col|
+      values[col] = []
+    end
+    CSV.foreach(timeseries_csv, headers: true) do |row|
+      next if row['Time'].nil?
+
+      timeseries_cols.each do |col|
+        fail "Unexpected column: #{col}." if row[col].nil?
+
+        values[col] << Float(row[col])
+      end
+    end
+    timeseries_cols.each do |col|
+      has_only_zero_timeseries_values = values[col][start_ix..end_ix].all? { |x| x == 0 }
+      assert(has_only_zero_timeseries_values)
     end
   end
 
