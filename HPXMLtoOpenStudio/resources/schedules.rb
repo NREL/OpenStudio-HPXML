@@ -1348,12 +1348,12 @@ class SchedulesFile
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   def annual_equivalent_full_load_hrs(col_name:,
                                       schedules: nil)
-    if @schedules[col_name].nil?
-      return
-    end
-
     if schedules.nil?
       schedules = @schedules # the schedules before vacancy is applied
+    end
+
+    if schedules[col_name].nil?
+      return
     end
 
     num_hrs_in_year = Constants.NumHoursInYear(@year)
