@@ -147,43 +147,43 @@ They can be used to reflect real-world or stochastic occupancy.
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/SoftwareInfo/extension/SchedulesFilePath`` elements.
 The column names available in the schedule CSV files are:
 
-  ===============================  =====  ==============================================================================  ===================
-  Column Name                      Units  Description                                                                     Affected by Vacancy
-  ===============================  =====  ==============================================================================  ===================
-  ``occupants``                    frac   Occupant heat gain schedule.                                                    Yes
-  ``lighting_interior``            frac   Interior lighting energy use schedule.                                          Yes
-  ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                          Yes
-  ``lighting_garage``              frac   Garage lighting energy use schedule.                                            Yes
-  ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                  Yes
-  ``cooking_range``                frac   Cooking range & oven energy use schedule.                                       Yes
-  ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                       No
-  ``extra_refrigerator``           frac   Non-primary refrigerator energy use schedule.                                   No
-  ``freezer``                      frac   Freezer energy use schedule.                                                    No
-  ``dishwasher``                   frac   Dishwasher energy use schedule.                                                 Yes
-  ``clothes_washer``               frac   Clothes washer energy use schedule.                                             Yes
-  ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                              Yes
-  ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                Yes
-  ``plug_loads_other``             frac   Other plug load energy use schedule.                                            Yes
-  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                       Yes
-  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                 Yes
-  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                        Yes
-  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                            Yes
-  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                         Yes
-  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                        Yes
-  ``pool_pump``                    frac   Pool pump energy use schedule.                                                  No
-  ``pool_heater``                  frac   Pool heater energy use schedule.                                                No
-  ``hot_tub_pump``                 frac   Hot tub pump energy use schedule.                                               No
-  ``hot_tub_heater``               frac   Hot tub heater energy use schedule.                                             No
-  ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                              Yes
-  ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                          Yes
-  ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                        Yes
-  ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                           No
-  ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                           No
-  ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                 No
-  ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No
-  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.              No
-  ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A
-  ===============================  =====  ==============================================================================  ===================
+  ===============================  =====  ==============================================================================  =================== ========================
+  Column Name                      Units  Description                                                                     Affected by Vacancy Stochastically Generated
+  ===============================  =====  ==============================================================================  =================== ========================
+  ``occupants``                    frac   Occupant heat gain schedule.                                                    Yes                 Yes
+  ``lighting_interior``            frac   Interior lighting energy use schedule.                                          Yes                 Yes
+  ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                          Yes                 Yes
+  ``lighting_garage``              frac   Garage lighting energy use schedule.                                            Yes                 Yes
+  ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                  Yes                 Yes
+  ``cooking_range``                frac   Cooking range & oven energy use schedule.                                       Yes                 Yes
+  ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                       No                  No
+  ``extra_refrigerator``           frac   Non-primary refrigerator energy use schedule.                                   No                  No
+  ``freezer``                      frac   Freezer energy use schedule.                                                    No                  No
+  ``dishwasher``                   frac   Dishwasher energy use schedule.                                                 Yes                 Yes
+  ``clothes_washer``               frac   Clothes washer energy use schedule.                                             Yes                 Yes
+  ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                              Yes                 Yes
+  ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                Yes                 Yes
+  ``plug_loads_other``             frac   Other plug load energy use schedule.                                            Yes                 Yes
+  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                       Yes                 No
+  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                 Yes                 No
+  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                        Yes                 No
+  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                            Yes                 No
+  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                         Yes                 No
+  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                        Yes                 No
+  ``pool_pump``                    frac   Pool pump energy use schedule.                                                  No                  No
+  ``pool_heater``                  frac   Pool heater energy use schedule.                                                No                  No
+  ``hot_tub_pump``                 frac   Hot tub pump energy use schedule.                                               No                  No
+  ``hot_tub_heater``               frac   Hot tub heater energy use schedule.                                             No                  No
+  ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                              Yes                 Yes
+  ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                          Yes                 Yes
+  ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                        Yes                 Yes
+  ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                           No                  No
+  ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                           No                  No
+  ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                 No                  No
+  ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No                  No
+  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.              No                  No
+  ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A                 N/A
+  ===============================  =====  ==============================================================================  =================== ========================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -193,7 +193,7 @@ The schedule file must have a full year of data even if the simulation is not an
 Frequency of schedule values do not need to match the simulation timestep.
 For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
 
-A detailed stochastic occupancy schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
+A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Stochastically Generated" column above for applicable columns); see the :ref:`usage_instructions` for the commands.
 Inputs for the schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
 See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
 
