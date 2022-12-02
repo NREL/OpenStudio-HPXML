@@ -103,8 +103,8 @@ class UHT
   Cooling = 'Cooling'
 end
 
-class RHT
-  # Resilience Hours Types
+class RT
+  # Resilience Types
   Battery = 'Battery'
 end
 

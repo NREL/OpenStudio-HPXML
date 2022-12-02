@@ -133,6 +133,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_resilience', false)
+    arg.setDisplayName('Generate Timeseries Output: Resilience')
+    arg.setDescription('Generates timeseries resilience.')
+    arg.setDefaultValue(false)
+    args << arg
+
     timestamp_chs = OpenStudio::StringVector.new
     timestamp_chs << 'start'
     timestamp_chs << 'end'
@@ -193,7 +199,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     all_outputs << @peak_loads
     all_outputs << @component_loads
     all_outputs << @hot_water_uses
-    all_outputs << @resilience_hours
+    all_outputs << @resilience
 
     output_names = []
     all_outputs.each do |outputs|
@@ -318,12 +324,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
       end
 
-      # Resilience Hours
+      # Resilience
       result << OpenStudio::IdfObject.load('Output:Meter,Electricity:Facility,hourly;').get
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,hourly;').get
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,hourly;').get
-      @resilience_hours.values.each do |resilience_hour|
-        resilience_hour.variables.each do |_sys_id, varkey, var|
+      @resilience.values.each do |resilience|
+        resilience.variables.each do |_sys_id, varkey, var|
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},hourly;").get
         end
       end
@@ -496,6 +502,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = runner.getOptionalBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
       include_timeseries_airflows = runner.getOptionalBoolArgumentValue('include_timeseries_airflows', user_arguments)
       include_timeseries_weather = runner.getOptionalBoolArgumentValue('include_timeseries_weather', user_arguments)
+      include_timeseries_resilience = runner.getOptionalBoolArgumentValue('include_timeseries_resilience', user_arguments)
       use_timestamp_start_convention = (runner.getStringArgumentValue('timeseries_timestamp_convention', user_arguments) == 'start')
       add_timeseries_dst_column = runner.getOptionalBoolArgumentValue('add_timeseries_dst_column', user_arguments)
       add_timeseries_utc_column = runner.getOptionalBoolArgumentValue('add_timeseries_utc_column', user_arguments)
@@ -514,6 +521,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_zone_temperatures = include_timeseries_zone_temperatures.is_initialized ? include_timeseries_zone_temperatures.get : false
       include_timeseries_airflows = include_timeseries_airflows.is_initialized ? include_timeseries_airflows.get : false
       include_timeseries_weather = include_timeseries_weather.is_initialized ? include_timeseries_weather.get : false
+      include_timeseries_resilience = include_timeseries_resilience.is_initialized ? include_timeseries_resilience.get : false
       user_output_variables = user_output_variables.is_initialized ? user_output_variables.get : nil
     end
     generate_eri_outputs = runner.getOptionalBoolArgumentValue('generate_eri_outputs', user_arguments)
@@ -540,7 +548,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if File.exist? msgpack_timeseries_path
       @msgpackDataTimeseries = MessagePack.unpack(File.read(msgpack_timeseries_path, mode: 'rb'))
     end
-    if (not @emissions.empty?) || (not @resilience_hours[RHT::Battery].variables.empty?)
+    if (not @emissions.empty?) || (not @resilience[RT::Battery].variables.empty?)
       @msgpackDataHourly = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout_hourly.msgpack'), mode: 'rb'))
     end
 
@@ -612,6 +620,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                      include_timeseries_zone_temperatures,
                                      include_timeseries_airflows,
                                      include_timeseries_weather,
+                                     include_timeseries_resilience,
                                      add_dst_column,
                                      add_utc_column,
                                      timestamps_dst,
@@ -881,13 +890,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @totals[TE::Net].timeseries_output = @totals[TE::Total].timeseries_output.zip(outputs[:elec_prod_timeseries]).map { |x, y| x + y * unit_conv }
     end
 
-    # Resilience Hours
-    @resilience_hours.each do |key, resilience_hour|
-      next unless key == RHT::Battery
+    # Resilience
+    @resilience.each do |key, resilience|
+      next unless key == RT::Battery
 
-      resilience_hour.variables.map { |v| v[0] }.uniq.each do |sys_id|
-        keys = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
-        vars = resilience_hour.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
+      resilience.variables.map { |v| v[0] }.uniq.each do |sys_id|
+        keys = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
+        vars = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
         minimum_storage_state_of_charge_fraction = nil
         batt_kwh = nil
@@ -925,7 +934,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           resilience_hours << get_resilience_hours(init_time_step, batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh[init_time_step], crit_load, n_timesteps)
         end
 
-        resilience_hour.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
+        resilience.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
+        resilience.timeseries_output = resilience_hours
       end
     end
 
@@ -1311,8 +1321,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(n_digits - 2)]
     end
     results_out << [line_break]
-    @resilience_hours.each do |_type, resilience_hour|
-      results_out << ["#{resilience_hour.name} (#{resilience_hour.annual_units})", resilience_hour.annual_output.to_f.round(n_digits)]
+    @resilience.each do |_type, resilience|
+      results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
     end
 
     results_out = append_sizing_results(results_out, line_break)
@@ -1711,6 +1721,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                        include_timeseries_zone_temperatures,
                                        include_timeseries_airflows,
                                        include_timeseries_weather,
+                                       include_timeseries_resilience,
                                        add_dst_column,
                                        add_utc_column,
                                        timestamps_dst,
@@ -1841,6 +1852,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       weather_data = []
     end
+    if include_timeseries_resilience
+      resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
+    else
+      resilience_data = []
+    end
 
     # EnergyPlus output variables
     if not @output_variables.empty?
@@ -1851,7 +1867,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     return if (total_energy_data.size + fuel_data.size + end_use_data.size + emissions_data.size + emission_fuel_data.size +
                emission_end_use_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + unmet_hours_data.size +
-               zone_temps_data.size + airflows_data.size + weather_data.size + output_variables_data.size) == 0
+               zone_temps_data.size + airflows_data.size + weather_data.size + resilience_data.size + output_variables_data.size) == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
@@ -1859,7 +1875,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *end_use_data, *emissions_data,
                       *emission_fuel_data, *emission_end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data,
-                      *unmet_hours_data, *zone_temps_data, *airflows_data, *weather_data, *output_variables_data)
+                      *unmet_hours_data, *zone_temps_data, *airflows_data, *weather_data, *resilience_data, *output_variables_data)
 
       # Error-check
       n_elements = []
@@ -1921,7 +1937,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       [total_energy_data, fuel_data, end_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
-       zone_temps_data, airflows_data, weather_data, output_variables_data].each do |d|
+       zone_temps_data, airflows_data, weather_data, resilience_data, output_variables_data].each do |d|
         d.each do |o|
           grp, name = o[0].split(':', 2)
           h[grp] = {} if h[grp].nil?
@@ -2124,7 +2140,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @model.getModelObjects.each do |object|
       next if object.to_AdditionalProperties.is_initialized
 
-      [EUT, HWT, LT, ILT, RHT].each do |class_name|
+      [EUT, HWT, LT, ILT, RT].each do |class_name|
         vars_by_key = get_object_output_variables_by_key(@model, object, class_name)
         next if vars_by_key.size == 0
 
@@ -2220,7 +2236,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:variables, :annual_output_by_system, :timeseries_output_by_system)
   end
 
-  class ResilienceHours < BaseOutput
+  class Resilience < BaseOutput
     def initialize(variables: [])
       super()
       @variables = variables
@@ -2499,13 +2515,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       hot_water.timeseries_units = 'gal'
     end
 
-    # Resilience Hours
-    @resilience_hours = {}
-    @resilience_hours[RHT::Battery] = ResilienceHours.new(variables: get_object_variables(RHT, RHT::Battery))
+    # Resilience
+    @resilience = {}
+    @resilience[RT::Battery] = Resilience.new(variables: get_object_variables(RT, RT::Battery))
 
-    @resilience_hours.each do |resilience_hours_type, resilience_hour|
-      resilience_hour.name = "Resilience Hours: #{resilience_hours_type}"
-      resilience_hour.annual_units = 'hr'
+    @resilience.each do |resilience_type, resilience|
+      next unless resilience_type == RT::Battery
+
+      resilience.name = "Resilience: #{resilience_type}"
+      resilience.annual_units = 'avg-hr'
+      resilience.timeseries_units = 'hr'
     end
 
     # Peak Fuels
@@ -2934,12 +2953,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       end
 
-    elsif class_name == RHT
+    elsif class_name == RT
 
-      # Resilience Hours
+      # Resilience
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        return { RHT::Battery => ['Electric Storage Charge Fraction'] }
+        return { RT::Battery => ['Electric Storage Charge Fraction'] }
       end
     end
 
