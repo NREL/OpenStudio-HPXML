@@ -772,9 +772,6 @@ class ScheduleGenerator
   end
 
   def export(schedules_path:)
-    puts SchedulesFile.ColumnNames
-    puts 'HERE'
-    puts @column_names
     (SchedulesFile.ColumnNames - @column_names).each do |col_to_remove|
       @schedules.delete(col_to_remove)
     end
