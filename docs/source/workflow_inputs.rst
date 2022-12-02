@@ -420,6 +420,22 @@ If the PV compensation type is feed-in tariff, additional information can be ent
          Some utilities/regions may have a feed-in tariff policy where compensation occurs for excess PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than full PV production.
          OpenStudio-HPXML is currently unable to calculate utility bills for such a feed-in tariff policy.
 
+HPXML Vacancy Periods
+*********************
+
+One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
+
+  ====================================  ========  =======  =============  ========  ===========================  =====================================
+  Element                               Type      Units    Constraints    Required  Default                      Description
+  ====================================  ========  =======  =============  ========  ===========================  =====================================
+  ``BeginMonth``                        integer            1 - 12         No                                     Vacancy period start date
+  ``BeginDayOfMonth``                   integer            1 - 31         No                                     Vacancy period start date
+  ``EndMonth``                          integer            1 - 12         No                                     Vacancy period end date
+  ``EndDayOfMonth``                     integer            1 - 31         No                                     Vacancy period end date
+  ====================================  ========  =======  =============  ========  ===========================  =====================================
+
+See the "Affected By Vacancy" column in :ref:`detailedschedules` for a list of all schedules that are affected by vacancy.
+
 .. _buildingsite:
 
 HPXML Building Site
