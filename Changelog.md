@@ -1,8 +1,9 @@
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
+- When `Battery/Location` not provided, now defaults to garage if present, otherwise outside.
 - BuildResidentialScheduleFile measure:
-  - Allows requesting a subset of enduses/columns to be generated.
+  - Allows requesting a subset of end uses (columns) to be generated.
 
 __Bugfixes__
 
