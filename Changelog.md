@@ -6,6 +6,7 @@ __New Features__
   - Allows requesting a subset of end uses (columns) to be generated.
 
 __Bugfixes__
+- Fixes total/net electricity timeseries outputs to include battery charging/discharging energy.
 
 ## OpenStudio-HPXML v1.5.0
 
