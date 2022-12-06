@@ -165,8 +165,13 @@ class Battery
     battery_losses_output_var.setUnits('J')
   end
 
-  def self.get_battery_default_values()
-    return { location: HPXML::LocationOutside,
+  def self.get_battery_default_values(has_garage = false)
+    if has_garage
+      location = HPXML::LocationGarage
+    else
+      location = HPXML::LocationOutside
+    end
+    return { location: location,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,
