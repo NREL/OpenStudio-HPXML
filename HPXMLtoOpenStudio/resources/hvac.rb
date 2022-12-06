@@ -3030,10 +3030,8 @@ class HVAC
       end
     elsif num_speeds == 2
       htg_ap.heat_c_d =  0.11
-    elsif num_speeds == 4
-      htg_ap.heat_c_d =  0.24
-    elsif num_speeds == 10 # mini-split heat pump
-      htg_ap.heat_c_d =  0.40
+    elsif num_speeds == 4 || num_speeds == 10
+      htg_ap.heat_c_d =  0.25
     end
 
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
@@ -3572,12 +3570,6 @@ class HVAC
     end
 
     if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_heat_load_served <= 0)
-      hvac_ap.crankcase_kw = 0.0
-      hvac_ap.crankcase_temp = nil
-    elsif clg_sys_type == HPXML::HVACTypeHeatPumpMiniSplit
-      hvac_ap.crankcase_kw = 0.0
-      hvac_ap.crankcase_temp = nil
-    elsif clg_sys_type == HPXML::HVACTypeMiniSplitAirConditioner
       hvac_ap.crankcase_kw = 0.0
       hvac_ap.crankcase_temp = nil
     else
