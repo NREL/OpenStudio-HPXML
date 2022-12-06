@@ -5,6 +5,7 @@ __New Features__
   - Allows requesting a subset of enduses/columns to be generated.
 
 __Bugfixes__
+- Fixes error when a non-electric water heater has jacket insulation and the UEF metric is used.
 
 ## OpenStudio-HPXML v1.5.0
 
