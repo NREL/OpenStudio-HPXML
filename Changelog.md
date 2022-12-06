@@ -1,4 +1,4 @@
-## OpenStudio-HPXML v1.6.0
+## OpenStudio-HPXML v1.5.1
 
 __New Features__
 - When `Battery/Location` not provided, now defaults to garage if present, otherwise outside.
