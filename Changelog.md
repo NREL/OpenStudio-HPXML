@@ -7,6 +7,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes total/net electricity timeseries outputs to include battery charging/discharging energy.
+- Fixes error when a non-electric water heater has jacket insulation and the UEF metric is used.
 
 ## OpenStudio-HPXML v1.5.0
 
