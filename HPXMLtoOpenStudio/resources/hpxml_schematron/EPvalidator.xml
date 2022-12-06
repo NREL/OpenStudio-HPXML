@@ -1466,7 +1466,7 @@
   <sch:pattern>
     <sch:title>[LocalVentilation]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation="true"]'>
-      <sch:assert role='ERROR' test='count(h:Quantity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Quantity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Count) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Count</sch:assert>
       <sch:assert role='ERROR' test='count(h:RatedFlowRate) + count(h:CalculatedFlowRate) + count(h:TestedFlowRate) + count(h:DeliveredVentilation) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedFlowRate | CalculatedFlowRate | TestedFlowRate | DeliveredVentilation</sch:assert>
       <sch:assert role='ERROR' test='count(h:HoursInOperation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursInOperation</sch:assert>
       <sch:assert role='ERROR' test='count(h:FanLocation) = 1'>Expected 1 element(s) for xpath: FanLocation</sch:assert>
@@ -1709,8 +1709,8 @@
       <sch:assert role='ERROR' test='count(h:ArrayAzimuth) + count(h:ArrayOrientation) &gt;= 1'>Expected 1 or more element(s) for xpath: ArrayAzimuth | ArrayOrientation</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected 1 element(s) for xpath: ArrayTilt</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxPowerOutput) = 1'>Expected 1 element(s) for xpath: MaxPowerOutput</sch:assert>
-      <sch:assert role='ERROR' test='count(h:InverterEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InverterEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemLossesFraction) + count(h:YearModulesManufactured) &gt;= 0'>Expected 0 or more element(s) for xpath: SystemLossesFraction | YearModulesManufactured</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AttachedToInverter) = 1'>Expected 1 element(s) for xpath: AttachedToInverter</sch:assert> <!-- See [Inverter] -->
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:MaxPowerOutput) &lt;= 500 and number(h:MaxPowerOutput) &gt; 0'>Max power output should typically be greater than or equal to 500 W.</sch:report>
     </sch:rule>
@@ -1722,6 +1722,13 @@
       <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected 1 element(s) for xpath: extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[Inverter]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:Inverter'>
+      <sch:assert role='ERROR' test='count(h:InverterEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InverterEfficiency</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1987,7 +1994,7 @@
     <sch:title>[CeilingFan]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan'>
       <sch:assert role='ERROR' test='count(h:Airflow[h:FanSpeed="medium"]/h:Efficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Airflow[FanSpeed="medium"]/Efficiency</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Quantity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Quantity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Count) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Count</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>

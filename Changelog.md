@@ -1,6 +1,9 @@
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
+- Updates to newer proposed HPXML v4.0:
+  - **Breaking change**: Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
+  - **Breaking change**: Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
 - BuildResidentialScheduleFile measure:
   - Allows requesting a subset of enduses/columns to be generated.
 

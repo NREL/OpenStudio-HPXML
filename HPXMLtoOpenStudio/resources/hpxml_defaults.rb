@@ -1567,9 +1567,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
 
-      if vent_fan.quantity.nil?
-        vent_fan.quantity = 1
-        vent_fan.quantity_isdefaulted = true
+      if vent_fan.count.nil?
+        vent_fan.count = 1
+        vent_fan.count_isdefaulted = true
       end
       if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
@@ -1593,9 +1593,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationBath))
 
-      if vent_fan.quantity.nil?
-        vent_fan.quantity = hpxml.building_construction.number_of_bathrooms
-        vent_fan.quantity_isdefaulted = true
+      if vent_fan.count.nil?
+        vent_fan.count = hpxml.building_construction.number_of_bathrooms
+        vent_fan.count_isdefaulted = true
       end
       if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
@@ -1799,13 +1799,15 @@ class HPXMLDefaults
         pv_system.module_type = HPXML::PVModuleTypeStandard
         pv_system.module_type_isdefaulted = true
       end
-      if pv_system.inverter_efficiency.nil?
-        pv_system.inverter_efficiency = PV.get_default_inv_eff()
-        pv_system.inverter_efficiency_isdefaulted = true
-      end
       if pv_system.system_losses_fraction.nil?
         pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
         pv_system.system_losses_fraction_isdefaulted = true
+      end
+    end
+    hpxml.inverters.each do |inverter|
+      if inverter.inverter_efficiency.nil?
+        inverter.inverter_efficiency = PV.get_default_inv_eff()
+        inverter.inverter_efficiency_isdefaulted = true
       end
     end
   end
@@ -2238,9 +2240,9 @@ class HPXMLDefaults
       ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
       ceiling_fan.efficiency_isdefaulted = true
     end
-    if ceiling_fan.quantity.nil?
-      ceiling_fan.quantity = HVAC.get_default_ceiling_fan_quantity(nbeds)
-      ceiling_fan.quantity_isdefaulted = true
+    if ceiling_fan.count.nil?
+      ceiling_fan.count = HVAC.get_default_ceiling_fan_quantity(nbeds)
+      ceiling_fan.count_isdefaulted = true
     end
     schedules_file_includes_ceiling_fan = Schedule.schedules_file_includes_col_name(schedules_file, SchedulesFile::ColumnCeilingFan)
     if ceiling_fan.weekday_fractions.nil? && !schedules_file_includes_ceiling_fan
