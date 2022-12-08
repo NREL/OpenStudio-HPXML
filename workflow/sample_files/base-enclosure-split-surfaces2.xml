@@ -11,14 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base-enclosure-skylights.xml</ParentHPXMLFile>
-      </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -94,7 +86,7 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFloor idref='Floor1'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -979,178 +971,138 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor2Insulation'/>
+              <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>39.32</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor3'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor3Insulation'/>
+              <SystemIdentifier id='FrameFloor3Insulation'/>
               <AssemblyEffectiveRValue>39.33</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor4'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor4'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor4Insulation'/>
+              <SystemIdentifier id='FrameFloor4Insulation'/>
               <AssemblyEffectiveRValue>39.339999999999996</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor5'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor5'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor5Insulation'/>
+              <SystemIdentifier id='FrameFloor5Insulation'/>
               <AssemblyEffectiveRValue>39.349999999999994</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor6'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor6'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor6Insulation'/>
+              <SystemIdentifier id='FrameFloor6Insulation'/>
               <AssemblyEffectiveRValue>39.36</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor7'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor7'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor7Insulation'/>
+              <SystemIdentifier id='FrameFloor7Insulation'/>
               <AssemblyEffectiveRValue>39.37</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor8'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor8'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor8Insulation'/>
+              <SystemIdentifier id='FrameFloor8Insulation'/>
               <AssemblyEffectiveRValue>39.379999999999995</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor9'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor9'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>150.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor9Insulation'/>
+              <SystemIdentifier id='FrameFloor9Insulation'/>
               <AssemblyEffectiveRValue>39.39</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor10'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor10'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>0.1</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor10Insulation'/>
+              <SystemIdentifier id='FrameFloor10Insulation'/>
               <AssemblyEffectiveRValue>39.39</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
@@ -2308,14 +2260,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>

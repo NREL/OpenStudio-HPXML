@@ -8,13 +8,10 @@ rescue
 end
 
 if ENV['CI'] && !called_from_cli
-  begin
-    require 'simplecov'
-    SimpleCov.coverage_dir(File.join(Dir.getwd, 'coverage'))
-    SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
-    SimpleCov.start
-  rescue
-  end
+  require 'simplecov'
+  SimpleCov.coverage_dir(File.join(Dir.getwd, 'coverage'))
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+  SimpleCov.start
 end
 
 require 'minitest/autorun'

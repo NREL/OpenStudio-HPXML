@@ -70,7 +70,7 @@
             <AttachedToRoof idref='Roof2'/>
             <AttachedToWall idref='Wall5'/>
             <AttachedToWall idref='Wall6'/>
-            <AttachedToFloor idref='Floor2'/>
+            <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
         </Attics>
         <Roofs>
@@ -227,40 +227,32 @@
             </Insulation>
           </Wall>
         </Walls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1539.0</Area>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>14.15</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1539.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor2Insulation'/>
+              <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>18.45</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>

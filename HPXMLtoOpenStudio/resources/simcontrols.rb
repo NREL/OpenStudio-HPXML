@@ -36,7 +36,6 @@ class SimControls
     insurf.setAlgorithm('TARP')
 
     zonecap = model.getZoneCapacitanceMultiplierResearchSpecial
-    zonecap.setTemperatureCapacityMultiplier(hpxml.header.temperature_capacitance_multiplier)
     zonecap.setHumidityCapacityMultiplier(15)
 
     convlim = model.getConvergenceLimits
@@ -47,8 +46,5 @@ class SimControls
     run_period.setBeginDayOfMonth(hpxml.header.sim_begin_day)
     run_period.setEndMonth(hpxml.header.sim_end_month)
     run_period.setEndDayOfMonth(hpxml.header.sim_end_day)
-
-    ppt = model.getPerformancePrecisionTradeoffs
-    ppt.setZoneRadiantExchangeAlgorithm('CarrollMRT')
   end
 end

@@ -11,14 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
-      </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -94,8 +86,8 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall4'/>
-            <AttachedToFloor idref='Floor1'/>
-            <AttachedToFloor idref='Floor2'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
+            <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -241,39 +233,31 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>600.0</Area>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2'/>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor2Insulation'/>
+              <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
@@ -465,14 +449,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>garage</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>garage</DuctLocation>

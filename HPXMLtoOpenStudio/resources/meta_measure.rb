@@ -4,13 +4,13 @@ require 'fileutils'
 
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '',
-                       ep_input_format: 'idf', skip_simulation: false, suppress_print: false)
+                       ep_input_format: 'idf')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
   # Use print instead of puts in here in case running inside
   # a Parallel process (see https://stackoverflow.com/a/5044669)
-  print "#{print_prefix}Creating input...\n" unless suppress_print
+  print "#{print_prefix}Creating input...\n"
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   os_log = OpenStudio::StringStreamLogSink.new
@@ -92,12 +92,8 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
     fail "Unexpected ep_input_format: #{ep_input_format}."
   end
 
-  if skip_simulation
-    return { success: success, runner: runner }
-  end
-
   # Run simulation
-  print "#{print_prefix}Running simulation...\n" unless suppress_print
+  print "#{print_prefix}Running simulation...\n"
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   simulation_start = Time.now
   command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" #{ep_input_filename}"
@@ -123,7 +119,7 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
       break
     end
     if sim_success
-      print "#{print_prefix}Completed simulation in #{sim_time}s.\n" unless suppress_print
+      print "#{print_prefix}Completed simulation in #{sim_time}s.\n"
     else
       print "#{print_prefix}Simulation unsuccessful.\n"
       print "#{print_prefix}See #{File.join(rundir, 'eplusout.err')} for details.\n"
@@ -134,17 +130,23 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
     return { success: false, runner: runner }
   end
 
-  print "#{print_prefix}Processing output...\n" unless suppress_print
+  print "#{print_prefix}Processing output...\n"
 
   # Apply reporting measures
-  runner.setLastEpwFilePath(File.join(rundir, 'in.epw'))
+  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
   success = apply_measures(measures_dir, measures, runner, model, false, 'OpenStudio::Measure::ReportingMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
-  runner.resetLastEpwFilePath
+  runner.resetLastEnergyPlusSqlFilePath
 
-  Dir[File.join(rundir, 'results_*.*')].each do |results_path|
-    print "#{print_prefix}Wrote output file: #{results_path}.\n" unless suppress_print
+  annual_csv_path = File.join(rundir, 'results_annual.csv')
+  if File.exist? annual_csv_path
+    print "#{print_prefix}Wrote output file: #{annual_csv_path}.\n"
+  end
+
+  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+  if File.exist? timeseries_csv_path
+    print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
   end
 
   if not success
@@ -152,10 +154,10 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
     print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   else
-    print "#{print_prefix}Wrote log file: #{File.join(rundir, 'run.log')}.\n" unless suppress_print
+    print "#{print_prefix}Wrote log file: #{File.join(rundir, 'run.log')}.\n"
   end
 
-  print "#{print_prefix}Done.\n" unless suppress_print
+  print "#{print_prefix}Done.\n"
 
   return { success: true, runner: runner, sim_time: sim_time }
 end
@@ -233,7 +235,7 @@ def print_measure_call(measure_args, measure_dir, runner)
     return
   end
 
-  args_s = hash_to_string(measure_args, ' -> ', " \n")
+  args_s = hash_to_string(measure_args, delim = ' -> ', separator = " \n")
   if args_s.size > 0
     runner.registerInfo("Calling #{measure_dir} measure with arguments:\n#{args_s}")
   else
@@ -340,20 +342,6 @@ def get_value_from_workflow_step_value(step_value)
   end
 end
 
-def get_value_from_additional_properties(obj, feature_name)
-  additional_properties = obj.additionalProperties
-  feature_data_type = additional_properties.getFeatureDataType(feature_name).get if additional_properties.getFeatureDataType(feature_name).is_initialized
-  if feature_data_type == 'Boolean'
-    return additional_properties.getFeatureAsBoolean(feature_name).get if additional_properties.getFeatureAsBoolean(feature_name).is_initialized
-  elsif feature_data_type == 'Double'
-    return additional_properties.getFeatureAsDouble(feature_name).get if additional_properties.getFeatureAsDouble(feature_name).is_initialized
-  elsif feature_data_type == 'Integer'
-    return additional_properties.getFeatureAsInteger(feature_name).get if additional_properties.getFeatureAsInteger(feature_name).is_initialized
-  elsif feature_data_type == 'String'
-    return additional_properties.getFeatureAsString(feature_name).get if additional_properties.getFeatureAsString(feature_name).is_initialized
-  end
-end
-
 def run_measure(model, measure, argument_map, runner)
   begin
     # run the measure
@@ -363,7 +351,7 @@ def run_measure(model, measure, argument_map, runner)
     end
     if measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
       runner_child.setLastOpenStudioModel(model)
-      runner_child.setLastEpwFilePath(runner.lastEpwFilePath.get)
+      runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
       measure.run(runner_child, argument_map)
     else
       measure.run(model, runner_child, argument_map)
@@ -494,10 +482,6 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
       next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
       next if s.logMessage.include? 'Appears there are no design condition fields in the EPW file'
-      next if s.logMessage.include? 'Volume calculation will be potentially inaccurate'
-      next if s.logMessage.include? 'Valid instance'
-      next if s.logMessage.include? 'xsdValidate'
-      next if s.logMessage.include? 'xsltValidate'
 
       f << "OS Message: #{s.logMessage}\n"
     end

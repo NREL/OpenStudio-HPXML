@@ -11,14 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
-      </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -94,7 +86,7 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFloor idref='Floor1'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -206,25 +198,21 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
@@ -383,14 +371,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
@@ -651,9 +637,9 @@
               </Attic>
             </AtticType>
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
-            <AttachedToRoof idref='Roof1_2'/>
-            <AttachedToWall idref='Wall2_2'/>
-            <AttachedToFloor idref='Floor1_2'/>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToWall idref='Wall2'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -664,9 +650,9 @@
                 <Conditioned>true</Conditioned>
               </Basement>
             </FoundationType>
-            <AttachedToRimJoist idref='RimJoist1_2'/>
-            <AttachedToFoundationWall idref='FoundationWall1_2'/>
-            <AttachedToSlab idref='Slab1_2'/>
+            <AttachedToRimJoist idref='RimJoist1'/>
+            <AttachedToFoundationWall idref='FoundationWall1'/>
+            <AttachedToSlab idref='Slab1'/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -765,25 +751,21 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1_2'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1_2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_2'/>
+              <SystemIdentifier id='FrameFloor1Insulation_2'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1_2'/>
@@ -824,7 +806,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window2_2'/>
@@ -838,7 +820,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window3_2'/>
@@ -852,7 +834,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window4_2'/>
@@ -866,13 +848,13 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
         </Windows>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1_2'/>
-            <AttachedToWall idref='Wall1_2'/>
+            <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
@@ -883,12 +865,12 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1_2'/>
-              <PrimaryCoolingSystem idref='CoolingSystem1_2'/>
+              <PrimaryHeatingSystem idref='HeatingSystem1'/>
+              <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1_2'/>
-              <DistributionSystem idref='HVACDistribution1_2'/>
+              <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -902,7 +884,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1_2'/>
-              <DistributionSystem idref='HVACDistribution1_2'/>
+              <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>
@@ -942,14 +924,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1_2'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2_2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
@@ -1210,9 +1190,9 @@
               </Attic>
             </AtticType>
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
-            <AttachedToRoof idref='Roof1_3'/>
-            <AttachedToWall idref='Wall2_3'/>
-            <AttachedToFloor idref='Floor1_3'/>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToWall idref='Wall2'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -1223,9 +1203,9 @@
                 <Conditioned>true</Conditioned>
               </Basement>
             </FoundationType>
-            <AttachedToRimJoist idref='RimJoist1_3'/>
-            <AttachedToFoundationWall idref='FoundationWall1_3'/>
-            <AttachedToSlab idref='Slab1_3'/>
+            <AttachedToRimJoist idref='RimJoist1'/>
+            <AttachedToFoundationWall idref='FoundationWall1'/>
+            <AttachedToSlab idref='Slab1'/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -1324,25 +1304,21 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1_3'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1_3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_3'/>
+              <SystemIdentifier id='FrameFloor1Insulation_3'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1_3'/>
@@ -1383,7 +1359,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window2_3'/>
@@ -1397,7 +1373,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window3_3'/>
@@ -1411,7 +1387,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window4_3'/>
@@ -1425,13 +1401,13 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1_3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
         </Windows>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1_3'/>
-            <AttachedToWall idref='Wall1_3'/>
+            <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
@@ -1442,12 +1418,12 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1_3'/>
-              <PrimaryCoolingSystem idref='CoolingSystem1_3'/>
+              <PrimaryHeatingSystem idref='HeatingSystem1'/>
+              <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1_3'/>
-              <DistributionSystem idref='HVACDistribution1_3'/>
+              <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -1461,7 +1437,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1_3'/>
-              <DistributionSystem idref='HVACDistribution1_3'/>
+              <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>
@@ -1501,14 +1477,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1_3'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2_3'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>

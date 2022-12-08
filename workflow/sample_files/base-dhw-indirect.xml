@@ -11,14 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base-hvac-boiler-gas-only.xml</ParentHPXMLFile>
-      </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -94,7 +86,7 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFloor idref='Floor1'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -206,25 +198,21 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>

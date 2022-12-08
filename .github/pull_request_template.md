@@ -4,14 +4,11 @@
 
 ## Checklist
 
-PR Author: Check these when they're done. Not all may apply. ~~strikethrough~~ and check any that do not apply. 
+Not all may apply:
 
-PR Reviewer: Verify each has been completed.
-
-- [ ] Schematron validator (`EPvalidator.xml`) has been updated
-- [ ] Sample files have been added/updated (via `tasks.rb`)
-- [ ] Unit tests have been added/updated (e.g., `HPXMLtoOpenStudio/tests`)
+- [ ] EPvalidator.xml has been updated
+- [ ] Tests (and test files) have been updated
 - [ ] Documentation has been updated
 - [ ] Changelog has been updated
 - [ ] `openstudio tasks.rb update_measures` has been run
-- [ ] No unexpected changes to simulation results of sample files
+- [ ] No unexpected regression test changes on CI (checked comparison artifacts)

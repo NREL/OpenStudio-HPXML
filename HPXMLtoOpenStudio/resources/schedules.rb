@@ -10,19 +10,19 @@ class HourlyByMonthSchedule
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
     @schedule = nil
-    @weekday_month_by_hour_values = validate_values(weekday_month_by_hour_values, 12, 24)
-    @weekend_month_by_hour_values = validate_values(weekend_month_by_hour_values, 12, 24)
+    @weekday_month_by_hour_values = validateValues(weekday_month_by_hour_values, 12, 24)
+    @weekend_month_by_hour_values = validateValues(weekend_month_by_hour_values, 12, 24)
     @schedule_type_limits_name = schedule_type_limits_name
 
     if normalize_values
-      @maxval = calc_max_val()
+      @maxval = calcMaxval()
     else
       @maxval = 1.0
     end
-    @schedule = create_schedule()
+    @schedule = createSchedule()
   end
 
-  def calc_design_level(val)
+  def calcDesignLevel(val)
     return val * 1000
   end
 
@@ -36,7 +36,7 @@ class HourlyByMonthSchedule
 
   private
 
-  def validate_values(vals, num_outter_values, num_inner_values)
+  def validateValues(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
@@ -61,7 +61,7 @@ class HourlyByMonthSchedule
     return vals
   end
 
-  def calc_max_val()
+  def calcMaxval()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
       maxval = 1.0 # Prevent divide by zero
@@ -69,7 +69,7 @@ class HourlyByMonthSchedule
     return maxval
   end
 
-  def create_schedule()
+  def createSchedule()
     day_startm = Schedule.day_start_months(@year)
     day_endm = Schedule.day_end_months(@year)
 
@@ -176,19 +176,19 @@ class HourlyByDaySchedule
     @sch_name = sch_name
     @schedule = nil
     @num_days = Constants.NumDaysInYear(@year)
-    @weekday_day_by_hour_values = validate_values(weekday_day_by_hour_values, @num_days, 24)
-    @weekend_day_by_hour_values = validate_values(weekend_day_by_hour_values, @num_days, 24)
+    @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, @num_days, 24)
+    @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
 
     if normalize_values
-      @maxval = calc_max_val()
+      @maxval = calcMaxval()
     else
       @maxval = 1.0
     end
-    @schedule = create_schedule()
+    @schedule = createSchedule()
   end
 
-  def calc_design_level(val)
+  def calcDesignLevel(val)
     return val * 1000
   end
 
@@ -202,7 +202,7 @@ class HourlyByDaySchedule
 
   private
 
-  def validate_values(vals, num_outter_values, num_inner_values)
+  def validateValues(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
@@ -227,7 +227,7 @@ class HourlyByDaySchedule
     return vals
   end
 
-  def calc_max_val()
+  def calcMaxval()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
       maxval = 1.0 # Prevent divide by zero
@@ -235,7 +235,7 @@ class HourlyByDaySchedule
     return maxval
   end
 
-  def create_schedule()
+  def createSchedule()
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -340,9 +340,9 @@ class MonthWeekdayWeekendSchedule
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
     @schedule = nil
-    @weekday_hourly_values = validate_values(weekday_hourly_values, 24, 'weekday')
-    @weekend_hourly_values = validate_values(weekend_hourly_values, 24, 'weekend')
-    @monthly_values = validate_values(monthly_values, 12, 'monthly')
+    @weekday_hourly_values = validateValues(weekday_hourly_values, 24, 'weekday')
+    @weekend_hourly_values = validateValues(weekend_hourly_values, 24, 'weekend')
+    @monthly_values = validateValues(monthly_values, 12, 'monthly')
     @schedule_type_limits_name = schedule_type_limits_name
     @begin_month = begin_month
     @begin_day = begin_day
@@ -350,28 +350,28 @@ class MonthWeekdayWeekendSchedule
     @end_day = end_day
 
     if normalize_values
-      @weekday_hourly_values = normalize_sum_to_one(@weekday_hourly_values)
-      @weekend_hourly_values = normalize_sum_to_one(@weekend_hourly_values)
-      @monthly_values = normalize_avg_to_one(@monthly_values)
-      @maxval = calc_max_val()
-      @schadjust = calc_sch_adjust()
+      @weekday_hourly_values = normalizeSumToOne(@weekday_hourly_values)
+      @weekend_hourly_values = normalizeSumToOne(@weekend_hourly_values)
+      @monthly_values = normalizeAvgToOne(@monthly_values)
+      @maxval = calcMaxval()
+      @schadjust = calcSchadjust()
     else
       @maxval = 1.0
       @schadjust = 1.0
     end
-    @schedule = create_schedule()
+    @schedule = createSchedule()
   end
 
-  def calc_design_level_from_daily_kwh(daily_kwh)
+  def calcDesignLevelFromDailykWh(daily_kwh)
     design_level_kw = daily_kwh * @maxval * @schadjust
     return UnitConversions.convert(design_level_kw, 'kW', 'W')
   end
 
-  def calc_design_level_from_daily_therm(daily_therm)
-    return calc_design_level_from_daily_kwh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
+  def calcDesignLevelFromDailyTherm(daily_therm)
+    return calcDesignLevelFromDailykWh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
   end
 
-  def calc_design_level_from_daily_gpm(daily_water)
+  def calcPeakFlowFromDailygpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
   end
@@ -382,7 +382,7 @@ class MonthWeekdayWeekendSchedule
 
   private
 
-  def validate_values(values, num_values, sch_name)
+  def validateValues(values, num_values, sch_name)
     err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
     if values.is_a?(Array)
       if values.length != num_values
@@ -420,7 +420,7 @@ class MonthWeekdayWeekendSchedule
     !!Float(str) rescue false
   end
 
-  def normalize_sum_to_one(values)
+  def normalizeSumToOne(values)
     sum = values.reduce(:+).to_f
     if sum == 0.0
       return values
@@ -429,7 +429,7 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / sum }
   end
 
-  def normalize_avg_to_one(values)
+  def normalizeAvgToOne(values)
     avg = values.reduce(:+).to_f / values.size
     if avg == 0.0
       return values
@@ -438,7 +438,7 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / avg }
   end
 
-  def calc_max_val()
+  def calcMaxval()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
       maxval = @monthly_values.max * @weekday_hourly_values.max
     else
@@ -450,7 +450,7 @@ class MonthWeekdayWeekendSchedule
     return maxval
   end
 
-  def calc_sch_adjust()
+  def calcSchadjust()
     # if sum != 1, normalize to get correct max val
     sum_wkdy = 0
     sum_wknd = 0
@@ -467,7 +467,7 @@ class MonthWeekdayWeekendSchedule
     return 1 / sum_wkdy
   end
 
-  def create_schedule()
+  def createSchedule()
     month_num_days = Constants.NumDaysInMonths(@year)
     month_num_days[@end_month - 1] = @end_day
 
@@ -1035,7 +1035,7 @@ class Schedule
 
   def self.day_start_months(year)
     month_num_days = Constants.NumDaysInMonths(year)
-    return month_num_days.each_with_index.map { |_n, i| get_day_num_from_month_day(year, i + 1, 1) }
+    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(year, i + 1, 1) }
   end
 
   def self.day_end_months(year)
@@ -1094,23 +1094,6 @@ class Schedule
     return begin_month, begin_day, end_month, end_day
   end
 
-  def self.get_begin_and_end_dates_from_monthly_array(months, year)
-    if months[0] == 1 && months[11] == 1 # Wrap around year
-      begin_month = 12 - months.reverse.index(0) + 1
-      end_month = months.index(0)
-    else
-      begin_month = months.index(1) + 1
-      end_month = 12 - months.reverse.index(1)
-    end
-
-    num_days_in_month = Constants.NumDaysInMonths(year)
-
-    begin_day = 1
-    end_day = num_days_in_month[end_month - 1]
-
-    return begin_month, begin_day, end_month, end_day
-  end
-
   def self.schedules_file_includes_col_name(schedules_file, col_name)
     schedules_file_includes_col_name = false
     if not schedules_file.nil?
@@ -1152,39 +1135,27 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnVacancy = 'vacancy'
-  ColumnSleeping = 'sleeping'
-  ColumnHeatingSetpoint = 'heating_setpoint'
-  ColumnCoolingSetpoint = 'cooling_setpoint'
-  ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
-  ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
-  ColumnBattery = 'battery'
-  ColumnBatteryCharging = 'battery_charging'
-  ColumnBatteryDischarging = 'battery_discharging'
 
   def initialize(runner: nil,
                  model: nil,
-                 schedules_paths:)
+                 schedules_paths:,
+                 col_names:)
     return if schedules_paths.empty?
 
     @runner = runner
     @model = model
     @schedules_paths = schedules_paths
 
-    import()
-    battery_schedules
+    import(col_names: col_names)
+
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
-
     set_vacancy
-    convert_setpoints
 
-    tmpdir = Dir.tmpdir
-    tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
-    tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
-    tmp_schedules_path = tmpfile.path.to_s
+    tmpfile = Tempfile.new(['schedules', '.csv'])
+    @tmp_schedules_path = tmpfile.path.to_s
+    export
 
-    export(tmp_schedules_path)
-
-    get_external_file(tmp_schedules_path)
+    get_external_file
   end
 
   def nil?
@@ -1195,12 +1166,15 @@ class SchedulesFile
     return false
   end
 
-  def import()
+  def import(col_names:)
     @schedules = {}
     @schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
       columns.each do |col|
         col_name = col[0]
+        unless col_names.include? col_name
+          fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]" unless [SchedulesFile::ColumnVacancy].include?(col_name)
+        end
 
         values = col[1..-1].reject { |v| v.nil? }
 
@@ -1243,18 +1217,6 @@ class SchedulesFile
           end
         end
 
-        if min_value_neg_one[col_name]
-          if values.min < -1
-            fail "Schedule min value for column '#{col_name}' must be -1. [context: #{schedules_path}]"
-          end
-        end
-
-        if only_zeros_and_ones[col_name]
-          if values.any? { |v| v != 0 && v != 1 }
-            fail "Schedule value for column '#{col_name}' must be either 0 or 1. [context: #{schedules_path}]"
-          end
-        end
-
         valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
         valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
         unless valid_num_rows.include? schedule_length
@@ -1264,10 +1226,10 @@ class SchedulesFile
     end
   end
 
-  def export(tmp_schedules_path)
-    return false if tmp_schedules_path.nil?
+  def export
+    return false if @tmp_schedules_path.nil?
 
-    CSV.open(tmp_schedules_path, 'wb') do |csv|
+    CSV.open(@tmp_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
       rows.each do |row|
@@ -1291,8 +1253,12 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = @tmp_schedules.keys
+    headers = []
+    @schedules_paths.each do |schedules_path|
+      next if schedules_path.nil?
 
+      headers += CSV.open(schedules_path, 'r') { |csv| csv.first }
+    end
     col_num = headers.index(col_name)
     return col_num
   end
@@ -1388,8 +1354,7 @@ class SchedulesFile
   end
 
   # similar to calc_design_level_from_daily_kwh but for water usage
-  def calc_peak_flow_from_daily_gpm(col_name:,
-                                    daily_water:)
+  def calc_peak_flow_from_daily_gpm(col_name:, daily_water:)
     if @schedules[col_name].nil?
       return
     end
@@ -1403,18 +1368,11 @@ class SchedulesFile
     return peak_flow
   end
 
-  def get_external_file(tmp_schedules_path)
-    if File.exist? tmp_schedules_path
-      @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
+  def get_external_file
+    if File.exist? @tmp_schedules_path
+      @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @tmp_schedules_path)
       if @external_file.is_initialized
         @external_file = @external_file.get
-        # ExternalFile creates a new file, so delete our temporary one immediately if we can
-        begin
-          File.delete(tmp_schedules_path)
-        rescue
-        end
-      else
-        fail "Could not get external file for path '#{tmp_schedules_path}'."
       end
     end
   end
@@ -1423,9 +1381,10 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? ColumnVacancy
     return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
-    @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
-      @tmp_schedules.keys.each do |col_name|
-        next if col_name == ColumnVacancy
+    col_names = SchedulesFile.ColumnNames
+
+    @tmp_schedules[col_names[0]].each_with_index do |ts, i|
+      col_names.each do |col_name|
         next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
@@ -1433,37 +1392,8 @@ class SchedulesFile
     end
   end
 
-  def convert_setpoints
-    return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
-
-    col_names = @tmp_schedules.keys
-
-    @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
-      SchedulesFile.SetpointColumnNames.each do |setpoint_col_name|
-        next unless col_names.include?(setpoint_col_name)
-
-        @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c')
-      end
-    end
-  end
-
-  def battery_schedules
-    return if !@schedules.keys.include?(SchedulesFile::ColumnBattery)
-
-    @schedules[SchedulesFile::ColumnBatteryCharging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
-    @schedules[SchedulesFile::ColumnBatteryDischarging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
-    @schedules[SchedulesFile::ColumnBattery].each_with_index do |_ts, i|
-      if @schedules[SchedulesFile::ColumnBattery][i] > 0
-        @schedules[SchedulesFile::ColumnBatteryCharging][i] = @schedules[SchedulesFile::ColumnBattery][i]
-      elsif @schedules[SchedulesFile::ColumnBattery][i] < 0
-        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = -1 * @schedules[SchedulesFile::ColumnBattery][i]
-      end
-    end
-    @schedules.delete(SchedulesFile::ColumnBattery)
-  end
-
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames
+    return SchedulesFile.OccupancyColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1498,55 +1428,18 @@ class SchedulesFile
     ]
   end
 
-  def self.HVACSetpointColumnNames
-    return [
-      ColumnHeatingSetpoint,
-      ColumnCoolingSetpoint
-    ]
-  end
-
-  def self.WaterHeaterColumnNames
-    return [
-      ColumnWaterHeaterSetpoint,
-      ColumnWaterHeaterOperatingMode
-    ]
-  end
-
-  def self.SetpointColumnNames
-    return [
-      ColumnHeatingSetpoint,
-      ColumnCoolingSetpoint,
-      ColumnWaterHeaterSetpoint
-    ]
-  end
-
-  def self.OperatingModeColumnNames
-    return [
-      ColumnWaterHeaterOperatingMode
-    ]
-  end
-
-  def self.BatteryColumnNames
-    return [
-      ColumnBattery,
-      ColumnBatteryCharging,
-      ColumnBatteryDischarging
-    ]
-  end
-
   def affected_by_vacancy
     affected_by_vacancy = {}
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       affected_by_vacancy[column_name] = true
-      next unless ([ColumnRefrigerator,
-                    ColumnExtraRefrigerator,
-                    ColumnFreezer,
-                    ColumnPoolPump,
-                    ColumnPoolHeater,
-                    ColumnHotTubPump,
-                    ColumnHotTubHeater,
-                    ColumnSleeping] + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames).include? column_name
+      next unless [ColumnRefrigerator,
+                   ColumnExtraRefrigerator,
+                   ColumnFreezer,
+                   ColumnPoolPump,
+                   ColumnPoolHeater,
+                   ColumnHotTubPump,
+                   ColumnHotTubHeater].include? column_name
 
       affected_by_vacancy[column_name] = false
     end
@@ -1558,9 +1451,6 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name)
-        max_value_one[column_name] = false
-      end
     end
     return max_value_one
   end
@@ -1570,34 +1460,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name)
-        min_value_zero[column_name] = false
-      end
     end
     return min_value_zero
-  end
-
-  def min_value_neg_one
-    min_value_neg_one = {}
-    column_names = SchedulesFile.ColumnNames
-    column_names.each do |column_name|
-      min_value_neg_one[column_name] = false
-      if column_name == SchedulesFile::ColumnBattery
-        min_value_neg_one[column_name] = true
-      end
-    end
-    return min_value_neg_one
-  end
-
-  def only_zeros_and_ones
-    only_zeros_and_ones = { SchedulesFile::ColumnVacancy => true }
-    column_names = SchedulesFile.ColumnNames
-    column_names.each do |column_name|
-      only_zeros_and_ones[column_name] = false
-      if SchedulesFile.OperatingModeColumnNames.include?(column_name)
-        only_zeros_and_ones[column_name] = true
-      end
-    end
-    return only_zeros_and_ones
   end
 end

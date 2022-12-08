@@ -11,14 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base-mechvent-bath-kitchen-fans.xml</ParentHPXMLFile>
-      </AdditionalProperties>
-      <UtilityBillScenarios>
-        <UtilityBillScenario>
-          <Name>Bills</Name>
-        </UtilityBillScenario>
-      </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -94,7 +86,7 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
-            <AttachedToFloor idref='Floor1'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -206,25 +198,21 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
-            <SystemIdentifier id='Floor1'/>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>ceiling</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
@@ -411,14 +399,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
@@ -449,14 +435,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
-                  <SystemIdentifier id='Ducts3'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
-                  <SystemIdentifier id='Ducts4'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
@@ -501,17 +485,18 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan4'/>
               <FanType>supply only</FanType>
-              <TestedFlowRate>6.25</TestedFlowRate>
-              <HoursInOperation>14.0</HoursInOperation>
+              <TestedFlowRate>13.75</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>1.25</FanPower>
+              <FanPower>3.75</FanPower>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan5'/>
               <FanType>exhaust only</FanType>
-              <TestedFlowRate>15.0</TestedFlowRate>
+              <TestedFlowRate>6.25</TestedFlowRate>
+              <HoursInOperation>14.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>3.75</FanPower>
+              <FanPower>1.25</FanPower>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan6'/>
@@ -570,17 +555,18 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan12'/>
               <FanType>exhaust only</FanType>
-              <TestedFlowRate>15.0</TestedFlowRate>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>3.75</FanPower>
-            </VentilationFan>
-            <VentilationFan>
-              <SystemIdentifier id='VentilationFan13'/>
-              <FanType>supply only</FanType>
               <TestedFlowRate>6.25</TestedFlowRate>
               <HoursInOperation>13.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>1.25</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='VentilationFan13'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>13.75</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>3.75</FanPower>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan14'/>
@@ -615,9 +601,6 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan17'/>
               <FanType>central fan integrated supply</FanType>
-              <CFISControls>
-                <AdditionalRuntimeOperatingMode>air handler fan</AdditionalRuntimeOperatingMode>
-              </CFISControls>
               <TestedFlowRate>40.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
@@ -627,10 +610,6 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan18'/>
               <FanType>central fan integrated supply</FanType>
-              <CFISControls>
-                <AdditionalRuntimeOperatingMode>supplemental fan</AdditionalRuntimeOperatingMode>
-                <SupplementalFan idref='VentilationFan5'/>
-              </CFISControls>
               <TestedFlowRate>42.5</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>

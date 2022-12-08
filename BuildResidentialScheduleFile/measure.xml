@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>b9ab9559-30d8-4b1c-9757-8c911f80e937</version_id>
-  <version_modified>20221031T233528Z</version_modified>
+  <version_id>1a3b2f2b-04e1-4ee0-8186-dfe7ba82535c</version_id>
+  <version_modified>20220120T160820Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -58,7 +58,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Schedules: Output CSV Path</display_name>
-      <description>Absolute/relative path of the CSV file containing occupancy schedules. Relative paths are relative to the HPXML output path.</description>
+      <description>Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -70,25 +70,6 @@
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>debug</name>
-      <display_name>Debug Mode?</display_name>
-      <description>Applicable when schedules type is stochastic. If true: Write extra state column(s).</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
     </argument>
   </arguments>
   <outputs />
@@ -187,6 +168,12 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>419E598E</checksum>
+    </file>
+    <file>
+      <filename>README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FA773BE2</checksum>
     </file>
     <file>
       <filename>shower_cluster_size_probability.csv</filename>
@@ -885,16 +872,16 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
-      <filename>README.md</filename>
-      <filetype>md</filetype>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>127D96AC</checksum>
+      <checksum>8C120082</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>41CA164F</checksum>
+      <checksum>DC3A29AC</checksum>
     </file>
     <file>
       <version>
@@ -905,13 +892,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8FF07C66</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F2E6EBB8</checksum>
+      <checksum>45AA1480</checksum>
     </file>
   </files>
 </measure>
