@@ -137,7 +137,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_emissions_factors
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
     for emissions_type in ['CO2e', 'NOx', 'SO2', 'foo']
       hpxml.header.emissions_scenarios.add(name: emissions_type,
                                            emissions_type: emissions_type,
@@ -158,6 +158,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                            wood_pellets_units: HPXML::EmissionsScenario::UnitsLbPerMBtu,
                                            wood_pellets_value: 999.0)
     end
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
+    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWoodCord
+    hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeWoodPellets
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.emissions_scenarios.each do |scenario|
@@ -1105,7 +1109,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.78, 0.66, -0.11, -0.22, 12345)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.78, 0.66, -0.11, -0.22, 12345, 19.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -1115,21 +1119,27 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_capacity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.18, 0, 0, nil)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.18, 0, 0, nil, 19.0)
 
     # Test defaults w/ ductless
     hpxml.cooling_systems[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 19.0)
+
+    # Test defaults w/ ductless - SEER2
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer2 = 13.3
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 13.3)
   end
 
   def test_ptac
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-ptac-with-heating.xml')
+    hpxml = _create_hpxml('base-hvac-ptac-with-heating-electricity.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.75
     hpxml.cooling_systems[0].cooling_capacity = 12345
-    hpxml.heating_systems[0].heating_efficiency_percent = 0.98
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.75, 12345)
@@ -1383,7 +1393,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].backup_heating_lockout_temp = 20.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 20.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 19.0, 10.0, 20.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
@@ -1397,13 +1407,22 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil, 40.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil, 19.0, 10.0, 40.0)
 
     # Test defaults w/ ductless
     hpxml.heat_pumps[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 40.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 19.0, 10.0, 40.0)
+
+    # Test defaults w/ ductless - SEER2/HSPF2
+    hpxml.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer2 = 13.3
+    hpxml.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml.heat_pumps[0].heating_efficiency_hspf2 = 6.8
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 13.3, 7.56, 40.0)
   end
 
   def test_ground_source_heat_pumps
@@ -2309,10 +2328,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].usable_capacity_ah = nil
     hpxml.batteries[0].rated_power_output = 1234.0
     hpxml.batteries[0].location = HPXML::LocationBasementConditioned
-    hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
+    # hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
+    hpxml.batteries[0].round_trip_efficiency = 0.9
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 45.0, nil, 34.0, nil, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
+    _test_default_battery_values(hpxml_default, 45.0, nil, 34.0, nil, 1234.0, HPXML::LocationBasementConditioned, nil, 0.9)
 
     # Test w/ Ah instead of kWh
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2321,7 +2341,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].usable_capacity_ah = 876.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 987.0, nil, 876.0, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith)
+    _test_default_battery_values(hpxml_default, nil, 987.0, nil, 876.0, 1234.0, HPXML::LocationBasementConditioned, nil, 0.9)
 
     # Test defaults
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2331,9 +2351,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     hpxml.batteries[0].location = nil
     hpxml.batteries[0].lifetime_model = nil
+    hpxml.batteries[0].round_trip_efficiency = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ nominal kWh
     hpxml.batteries[0].nominal_capacity_kwh = 14.0
@@ -2343,7 +2364,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 14.0, nil, 12.6, nil, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 14.0, nil, 12.6, nil, 7000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ usable kWh
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2353,7 +2374,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 13.33, nil, 12.0, nil, 6665.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 13.33, nil, 12.0, nil, 6665.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ nominal Ah
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2363,7 +2384,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 280.0, nil, 252.0, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, nil, 280.0, nil, 252.0, 7000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ usable Ah
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2373,7 +2394,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 266.67, nil, 240.0, 6667.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, nil, 266.67, nil, 240.0, 6667.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ rated power output
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2383,7 +2404,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = 10000.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 20.0, nil, 18.0, nil, 10000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
+    _test_default_battery_values(hpxml_default, 20.0, nil, 18.0, nil, 10000.0, HPXML::LocationOutside, nil, 0.925)
+
+    # Test defaults w/ garage
+    hpxml = _create_hpxml('base-pv-battery-garage.xml')
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = nil
+    hpxml.batteries[0].location = nil
+    hpxml.batteries[0].lifetime_model = nil
+    hpxml.batteries[0].round_trip_efficiency = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationGarage, nil, 0.925)
   end
 
   def test_generators
@@ -3524,7 +3559,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_mini_split_air_conditioner_values(cooling_system, shr, fan_watts_per_cfm, charge_defect_ratio,
-                                                      airflow_defect_ratio, cooling_capacity)
+                                                      airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer)
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
@@ -3533,6 +3568,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert(cooling_system.cooling_capacity > 0)
     else
       assert_equal(cooling_system.cooling_capacity, cooling_capacity)
+    end
+    if cooling_efficiency_seer.nil?
+      assert_nil(cooling_system.cooling_efficiency_seer)
+    else
+      assert_equal(cooling_system.cooling_efficiency_seer, cooling_efficiency_seer)
     end
   end
 
@@ -3671,6 +3711,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_mini_split_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, charge_defect_ratio,
                                                 airflow_defect_ratio, cooling_capacity, heating_capacity,
                                                 heating_capacity_17F, backup_heating_capacity,
+                                                cooling_efficiency_seer, heating_efficiency_hspf,
                                                 backup_heating_lockout_temp)
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
@@ -3695,6 +3736,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert(heat_pump.backup_heating_capacity > 0)
     else
       assert_equal(heat_pump.backup_heating_capacity, backup_heating_capacity)
+    end
+    if cooling_efficiency_seer.nil?
+      assert_nil(heat_pump.cooling_efficiency_seer)
+    else
+      assert_equal(heat_pump.cooling_efficiency_seer, cooling_efficiency_seer)
+    end
+    if heating_efficiency_hspf.nil?
+      assert_nil(heat_pump.heating_efficiency_hspf)
+    else
+      assert_equal(heat_pump.heating_efficiency_hspf, heating_efficiency_hspf)
     end
     assert_equal(heat_pump.backup_heating_lockout_temp, backup_heating_lockout_temp)
   end
@@ -3934,7 +3985,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_battery_values(hpxml, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah,
-                                   rated_power_output, location, lifetime_model)
+                                   rated_power_output, location, lifetime_model, round_trip_efficiency)
     if nominal_capacity_kwh.nil?
       assert_nil(hpxml.batteries[0].nominal_capacity_kwh)
     else
@@ -3957,7 +4008,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     assert_equal(rated_power_output, hpxml.batteries[0].rated_power_output)
     assert_equal(location, hpxml.batteries[0].location)
-    assert_equal(lifetime_model, hpxml.batteries[0].lifetime_model)
+    if lifetime_model.nil?
+      assert_nil(hpxml.batteries[0].lifetime_model)
+    else
+      assert_equal(lifetime_model, hpxml.batteries[0].lifetime_model)
+    end
+    assert_equal(round_trip_efficiency, hpxml.batteries[0].round_trip_efficiency)
   end
 
   def _test_default_generator_values(hpxml, is_shared_system)

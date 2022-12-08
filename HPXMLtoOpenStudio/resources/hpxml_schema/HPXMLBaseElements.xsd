@@ -3771,14 +3771,6 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="PackagedTerminalAirConditionerHeating">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" ref="extension"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
 			<xs:element name="SolarThermal">
 				<xs:complexType>
 					<xs:sequence>
@@ -3905,14 +3897,15 @@
 					</xs:element>
 					<xs:element name="AnnualCoolingEfficiency" type="CoolingEfficiencyType" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element minOccurs="0" name="SensibleHeatFraction" type="Fraction"/>
-					<xs:element minOccurs="0" name="AttachedHeatingSystemFuel" type="FuelType"/>
-					<xs:element minOccurs="0" name="AttachedHeatingSystemCapacity" type="Capacity">
+					<xs:element name="RoomCoolingType" type="RoomCoolingType" minOccurs="0"/>
+					<xs:element minOccurs="0" name="IntegratedHeatingSystemFuel" type="FuelType"/>
+					<xs:element minOccurs="0" name="IntegratedHeatingSystemCapacity" type="Capacity">
 						<xs:annotation>
 							<xs:documentation>[Btuh]</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element name="AttachedHeatingSystemAnnualEfficiency" type="HeatingEfficiencyType" minOccurs="0" maxOccurs="unbounded"/>
-					<xs:element name="AttachedHeatingSystemFractionHeatLoadServed" type="Fraction" minOccurs="0"/>
+					<xs:element name="IntegratedHeatingSystemAnnualEfficiency" type="HeatingEfficiencyType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="IntegratedHeatingSystemFractionHeatLoadServed" type="Fraction" minOccurs="0"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>

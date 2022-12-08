@@ -11,9 +11,8 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv</SchedulesFilePath>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-dhw-tank-heat-pump-uef.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-hvac-ptac.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -213,6 +212,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -322,36 +324,26 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1'/>
               <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Units>EER</Units>
+                <Value>10.7</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+              <SensibleHeatFraction>0.65</SensibleHeatFraction>
+              <IntegratedHeatingSystemFuel>electricity</IntegratedHeatingSystemFuel>
+              <IntegratedHeatingSystemCapacity>36000.0</IntegratedHeatingSystemCapacity>
+              <IntegratedHeatingSystemAnnualEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </IntegratedHeatingSystemAnnualEfficiency>
+              <IntegratedHeatingSystemFractionHeatLoadServed>1.0</IntegratedHeatingSystemFractionHeatLoadServed>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
@@ -359,55 +351,18 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution1'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <AirDistributionType>regular velocity</AirDistributionType>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <SystemIdentifier id='Ducts1'/>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <SystemIdentifier id='Ducts2'/>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
             <FuelType>electricity</FuelType>
-            <WaterHeaterType>heat pump water heater</WaterHeaterType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <UniformEnergyFactor>3.75</UniformEnergyFactor>
-            <UsageBin>medium</UsageBin>
+            <HeatingCapacity>18767.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
+            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
