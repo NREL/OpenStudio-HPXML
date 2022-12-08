@@ -9,10 +9,6 @@ class Geometry
       space = OpenStudio::Model::Space.new(model)
       space.setName(location)
 
-      st = OpenStudio::Model::SpaceType.new(model)
-      st.setStandardsSpaceType(location)
-      space.setSpaceType(st)
-
       space.setThermalZone(thermal_zone)
       spaces[location] = space
     end
@@ -162,7 +158,7 @@ class Geometry
     return OpenStudio::reverse(create_floor_vertices(length, width, z_origin, default_azimuths))
   end
 
-  def self.explode_surfaces(runner, model, hpxml, walls_top)
+  def self.explode_surfaces(model, hpxml, walls_top)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
 
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth
@@ -207,7 +203,7 @@ class Geometry
     end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, 'deg', 'rad')))
 
-    add_neighbor_shading(runner, model, max_azimuth_length, hpxml, walls_top)
+    add_neighbor_shading(model, max_azimuth_length, hpxml, walls_top)
 
     # Initial distance of shifts at 90-degrees to horizontal outward
     azimuth_side_shifts = {}
@@ -310,7 +306,7 @@ class Geometry
     end
   end
 
-  def self.add_neighbor_shading(runner, model, length, hpxml, walls_top)
+  def self.add_neighbor_shading(model, length, hpxml, walls_top)
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -349,7 +345,7 @@ class Geometry
       return floor_area * height
     elsif [HPXML::LocationAtticUnvented,
            HPXML::LocationAtticVented].include? location
-      floor_area = hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
+      floor_area = hpxml.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
       roofs = hpxml.roofs.select { |r| r.interior_adjacent_to == location }
       avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
       # Assume square hip roof for volume calculation
@@ -359,7 +355,7 @@ class Geometry
     end
   end
 
-  def self.set_zone_volumes(runner, model, spaces, hpxml, apply_ashrae140_assumptions)
+  def self.set_zone_volumes(spaces, hpxml, apply_ashrae140_assumptions)
     # Living space
     spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
 
@@ -474,56 +470,13 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
-  # TODO: Remove this method
-  def self.is_living(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
-  end
-
-  # TODO: Remove this method
-  def self.is_unconditioned_basement(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
-  end
-
-  # TODO: Remove this method
-  def self.is_garage(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationGarage)
-  end
-
-  def self.space_or_zone_is_of_type(space_or_zone, location)
-    if space_or_zone.is_a? OpenStudio::Model::Space
-      return space_is_of_type(space_or_zone, location)
-    elsif space_or_zone.is_a? OpenStudio::Model::ThermalZone
-      return zone_is_of_type(space_or_zone, location)
-    end
-  end
-
-  def self.space_is_of_type(space, location)
-    unless space.isPlenum
-      if space.spaceType.is_initialized
-        if space.spaceType.get.standardsSpaceType.is_initialized
-          return true if space.spaceType.get.standardsSpaceType.get == location
-        end
-      end
-    end
-    return false
-  end
-
-  def self.zone_is_of_type(zone, location)
-    zone.spaces.each do |space|
-      return space_is_of_type(space, location)
-    end
-  end
-
-  def self.apply_occupants(model, runner, hpxml, num_occ, cfa, space, schedules_file)
-    occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+  def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file)
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Geometry.get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
-    occ_lat = lat_frac
     occ_sens = sens_frac
-    occ_conv = 0.442 * occ_sens
     occ_rad = 0.558 * occ_sens
-    occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
     # Create schedule
     people_sch = nil
@@ -555,7 +508,6 @@ class Geometry
     occ.setName(Constants.ObjectNameOccupants)
     occ.setSpace(space)
     occ_def.setName(Constants.ObjectNameOccupants)
-    occ_def.setNumberOfPeopleCalculationMethod('People', 1)
     occ_def.setNumberofPeople(num_occ)
     occ_def.setFractionRadiant(occ_rad)
     occ_def.setSensibleHeatFraction(occ_sens)
@@ -584,14 +536,13 @@ class Geometry
 
   def self.tear_down_model(model, runner)
     # Tear down the existing model if it exists
-    has_existing_objects = (model.getThermalZones.size > 0)
     handles = OpenStudio::UUIDVector.new
     model.objects.each do |obj|
       handles << obj.handle
     end
-    model.removeObjects(handles)
-    if has_existing_objects
+    if !handles.empty?
       runner.registerWarning('The model contains existing objects and is being reset.')
+      model.removeObjects(handles)
     end
   end
 
