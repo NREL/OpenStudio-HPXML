@@ -169,7 +169,7 @@ class OSModel
                   add_component_loads, building_id, debug)
     @hpxml = hpxml
     @debug = debug
-    
+
     # Set the working directory so that any files OS creates (e.g., external files
     # in the 'files' dir) end up in a writable directory.
     # Has a secondary benefit of creating the 'files' dir next to the 'run' dir.
