@@ -1810,7 +1810,7 @@ class HPXMLDefaults
   end
 
   def self.apply_batteries(hpxml)
-    default_values = Battery.get_battery_default_values()
+    default_values = Battery.get_battery_default_values(hpxml.has_location(HPXML::LocationGarage))
     hpxml.batteries.each do |battery|
       if battery.location.nil?
         battery.location = default_values[:location]
