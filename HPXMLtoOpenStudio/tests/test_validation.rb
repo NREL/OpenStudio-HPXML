@@ -1230,14 +1230,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-loads-large-uncommon.xml'))
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning
-        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/occupancy-smooth.csv'
+        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-smooth.csv')
       elsif ['schedule-file-and-setpoints'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv'
-        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv'
+        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/setpoints.csv')
+        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-setpoints.csv')
       elsif ['schedule-file-and-operating-mode'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'))
-        hpxml.header.schedules_filepaths << 'HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv'
+        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
       else
         fail "Unhandled case: #{warning_case}."
       end

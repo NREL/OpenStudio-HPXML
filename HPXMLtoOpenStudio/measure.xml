@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>945c35d9-7b16-4f8e-ae64-9d83b8d25898</version_id>
-  <version_modified>20221212T201906Z</version_modified>
+  <version_id>f6cd656d-f378-43aa-b013-c13a7c4e3ffd</version_id>
+  <version_modified>20221213T060134Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -150,12 +150,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>63C6A1E2</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AE6C2F42</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
@@ -506,12 +500,6 @@
       <checksum>74341264</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FA4D31E7</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -587,6 +575,18 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>5E081EE1</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F3DBC2BD</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>32A26A77</checksum>
     </file>
   </files>
 </measure>
