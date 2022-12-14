@@ -3,6 +3,7 @@
 __New Features__
 
 __Bugfixes__
+- Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
 
 ## OpenStudio-HPXML v1.5.1
 
