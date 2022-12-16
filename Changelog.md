@@ -1,9 +1,10 @@
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
-- Allows specifying one or more occupant vacancy periods in the HPXML file.
+- Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
 
 __Bugfixes__
+- Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
 - BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
 
 ## OpenStudio-HPXML v1.5.1
