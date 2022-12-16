@@ -1,8 +1,10 @@
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
+- Allows specifying one or more occupant vacancy periods in the HPXML file.
 
 __Bugfixes__
+- BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
 
 ## OpenStudio-HPXML v1.5.1
 

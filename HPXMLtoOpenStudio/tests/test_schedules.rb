@@ -23,22 +23,12 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
   end
 
   def get_annual_equivalent_full_load_hrs(model, name)
-    model.getScheduleConstants.each do |schedule_constant|
-      next if schedule_constant.name.to_s != name
+    (model.getScheduleConstants + model.getScheduleRulesets + model.getScheduleFixedIntervals).each do |schedule|
+      next if schedule.name.to_s != name
 
-      return Schedule.annual_equivalent_full_load_hrs(2007, schedule_constant)
+      return Schedule.annual_equivalent_full_load_hrs(2007, schedule)
     end
-    model.getScheduleRulesets.each do |schedule_ruleset|
-      next if schedule_ruleset.name.to_s != name
-
-      return Schedule.annual_equivalent_full_load_hrs(2007, schedule_ruleset)
-    end
-    model.getScheduleFixedIntervals.each do |schedule_fixed_interval|
-      next if schedule_fixed_interval.name.to_s != name
-
-      return Schedule.annual_equivalent_full_load_hrs(2007, schedule_fixed_interval)
-    end
-    puts "Could not find schedule '#{name}'."
+    flunk "Could not find schedule '#{name}'."
   end
 
   def test_default_schedules
