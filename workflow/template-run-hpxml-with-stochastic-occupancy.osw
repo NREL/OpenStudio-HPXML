@@ -7,7 +7,6 @@
     {
       "arguments": {
         "hpxml_path": "../../sample_files/base.xml",
-        "schedules_type": "stochastic",
         "output_csv_path": "stochastic.csv",
         "hpxml_output_path": "../built-stochastic-schedules.xml"
       },
