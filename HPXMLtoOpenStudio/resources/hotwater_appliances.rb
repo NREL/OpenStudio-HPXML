@@ -942,6 +942,10 @@ class HotWaterAndAppliances
   end
 
   def self.get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
+    if nbeds < 0.0
+      return 0.0
+    end
+
     if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
       hw_gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
       # Convert to mixed water gpd
@@ -953,7 +957,6 @@ class HotWaterAndAppliances
     # Amendment on Domestic Hot Water (DHW) Systems
     ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
     f_eff = get_fixtures_effectiveness(fixtures_all_low_flow)
-    ref_f_gpd = 0.0 if ref_f_gpd < 0
 
     return f_eff * ref_f_gpd * fixtures_usage_multiplier
   end
@@ -967,7 +970,7 @@ class HotWaterAndAppliances
 
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution,
                               fixtures_all_low_flow, fixtures_usage_multiplier = 1.0)
-    if Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')
+    if (Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')) || (nbeds < 0.0)
       return 0.0
     end
 
@@ -1011,7 +1014,6 @@ class HotWaterAndAppliances
     f_eff = get_fixtures_effectiveness(fixtures_all_low_flow)
 
     mw_gpd = f_eff * (o_w_gpd + s_w_gpd * wd_eff) # Eq. 4.2-11
-    mw_gpd = 0.0 if mw_gpd.is_a?(Complex) || mw_gpd < 0
 
     return mw_gpd * fixtures_usage_multiplier
   end
