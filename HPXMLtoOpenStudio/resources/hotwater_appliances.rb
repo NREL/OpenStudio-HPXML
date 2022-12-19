@@ -768,6 +768,8 @@ class HotWaterAndAppliances
   private
 
   def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
+    return if design_level_w == 0.0
+
     ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
     ee.setName(obj_name)
