@@ -203,13 +203,6 @@ class HPXMLDefaults
       hpxml.header.natvent_days_per_week = 3
       hpxml.header.natvent_days_per_week_isdefaulted = true
     end
-
-    if hpxml.building_occupancy.number_of_residents == 0
-      hpxml.header.vacancy_periods.add(begin_month: 1,
-                                       begin_day: 1,
-                                       end_month: 12,
-                                       end_day: 31)
-    end
   end
 
   def self.apply_emissions_scenarios(hpxml, has_fuel)

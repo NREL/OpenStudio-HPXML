@@ -347,17 +347,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_occupancy_values(hpxml_default, 3, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers)
   end
 
-  def test_occupancy_zero
-    # Test vacancy period created
-    hpxml = _create_hpxml('base-calctype-operational.xml')
-    assert_equal(0, hpxml.header.vacancy_periods.size)
-    hpxml.building_occupancy.number_of_residents = 0
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    assert_equal(1, hpxml_default.header.vacancy_periods.size)
-    _test_default_vacancy_period_values(hpxml_default.header.vacancy_periods[0], 1, 1, 12, 31)
-  end
-
   def test_building_construction
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-enclosure-infil-flue.xml')
@@ -3378,29 +3367,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(hpxml.building_occupancy.monthly_multipliers)
     else
       assert_equal(monthly_mults, hpxml.building_occupancy.monthly_multipliers)
-    end
-  end
-
-  def _test_default_vacancy_period_values(vacancy_period, begin_month, begin_day, end_month, end_day)
-    if begin_month.nil?
-      assert_nil(vacancy_period.begin_month)
-    else
-      assert_equal(begin_month, vacancy_period.begin_month)
-    end
-    if begin_day.nil?
-      assert_nil(vacancy_period.begin_day)
-    else
-      assert_equal(begin_day, vacancy_period.begin_day)
-    end
-    if end_month.nil?
-      assert_nil(vacancy_period.end_month)
-    else
-      assert_equal(end_month, vacancy_period.end_month)
-    end
-    if end_day.nil?
-      assert_nil(vacancy_period.end_day)
-    else
-      assert_equal(end_day, vacancy_period.end_day)
     end
   end
 

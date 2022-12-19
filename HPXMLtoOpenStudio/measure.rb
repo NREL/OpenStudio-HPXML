@@ -337,6 +337,16 @@ class OSModel
     # Now that we've written in.xml, ensure that no capacities/airflows
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
+
+    # Handle zero occupants when operational calculation
+    occ_calc_type = @hpxml.header.occupancy_calculation_type
+    noccs = @hpxml.building_occupancy.number_of_residents
+    if occ_calc_type == HPXML::OccupancyCalculationTypeOperational && noccs == 0
+      @hpxml.header.vacancy_periods.add(begin_month: 1,
+                                        begin_day: 1,
+                                        end_month: 12,
+                                        end_day: 31)
+    end
   end
 
   def self.add_simulation_params(model)
