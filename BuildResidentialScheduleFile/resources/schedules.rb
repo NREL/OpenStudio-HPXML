@@ -70,7 +70,7 @@ class ScheduleGenerator
     @schedules = {}
 
     ScheduleGenerator.export_columns.each do |col_name|
-      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0) if col_name == SchedulesFile::ColumnOccupants || args[:geometry_num_occupants] > 0
+      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
 
     if @column_names.nil?
