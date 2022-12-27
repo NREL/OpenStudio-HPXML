@@ -19,7 +19,7 @@
     </extension>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='MyBuilding'/>
+    <BuildingID id='MyBuilding1'/>
     <Site>
       <SiteID id='SiteID'/>
       <Address>
