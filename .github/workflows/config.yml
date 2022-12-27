@@ -31,6 +31,8 @@ jobs:
           echo "Checking for HPXML differences..."
           pwd
           ls -al
+          git --version
+          which git
           git diff --exit-code --ignore-cr-at-eol
 
       # - name: Run measure unit tests
