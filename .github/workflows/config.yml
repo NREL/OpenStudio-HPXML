@@ -13,7 +13,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.5.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
 
@@ -29,6 +29,8 @@ jobs:
         run: |
           openstudio tasks.rb update_hpxmls
           echo "Checking for HPXML differences..."
+          pwd
+          ls -al
           git diff --exit-code --ignore-cr-at-eol
 
       # - name: Run measure unit tests
