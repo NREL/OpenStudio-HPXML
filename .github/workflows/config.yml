@@ -13,7 +13,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.5.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
 
@@ -24,17 +24,14 @@ jobs:
           sudo apt update
           sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme
 
-      - name: Update HPXMLs
+      - name: Check HPXMLs
         shell: bash
         run: |
+          echo "Regenerating HPXML files..."
           openstudio tasks.rb update_hpxmls
           echo "Checking for HPXML differences..."
-          pwd
-          ls -al
-          git --version
-          which git
           git config --global --add safe.directory $(realpath .)
-          git diff --exit-code --ignore-cr-at-eol
+          git diff --exit-code --ignore-cr-at-eol *.xml
 
       # - name: Run measure unit tests
         # run: |
