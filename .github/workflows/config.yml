@@ -33,6 +33,7 @@ jobs:
           ls -al
           git --version
           which git
+          git config --global --add safe.directory $(realpath .)
           git diff --exit-code --ignore-cr-at-eol
 
       # - name: Run measure unit tests
