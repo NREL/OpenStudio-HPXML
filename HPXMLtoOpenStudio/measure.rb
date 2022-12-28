@@ -124,7 +124,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       return false unless hpxml.errors.empty?
 
-      epw_path, cache_path = process_weather(hpxml, runner, model, hpxml_path)
+      epw_path, cache_path = process_weather(hpxml, runner, hpxml_path)
 
       if debug
         epw_output_path = File.join(output_dir, 'in.epw')
@@ -141,7 +141,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def process_weather(hpxml, runner, model, hpxml_path)
+  def process_weather(hpxml, runner, hpxml_path)
     epw_path = Location.get_epw_path(hpxml, hpxml_path)
 
     cache_path = epw_path.gsub('.epw', '-cache.csv')
@@ -150,9 +150,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       begin
         File.open(cache_path, 'wb') do |file|
           runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-          epw_file = OpenStudio::EpwFile.new(epw_path)
-          OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-          weather = WeatherProcess.new(model, runner)
+          weather = WeatherProcess.new(epw_path: epw_path)
           weather.dump_to_csv(file)
         end
       rescue SystemCallError
@@ -194,7 +192,7 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
-    weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
+    weather, epw_file = Location.apply_weather_file(model, epw_path, cache_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),

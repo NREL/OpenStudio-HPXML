@@ -4937,22 +4937,19 @@ if ARGV[0].to_sym == :update_hpxmls
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
   # Create sample/test HPXMLs
+  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   create_hpxmls()
 end
 
 if ARGV[0].to_sym == :cache_weather
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
-  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
   puts 'Creating cache *.csv for weather files...'
 
   Dir['weather/*.epw'].each do |epw|
     next if File.exist? epw.gsub('.epw', '.cache')
 
     puts "Processing #{epw}..."
-    model = OpenStudio::Model::Model.new
-    epw_file = OpenStudio::EpwFile.new(epw)
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
-    weather = WeatherProcess.new(model, runner)
+    weather = WeatherProcess.new(epw_path: epw)
     File.open(epw.gsub('.epw', '-cache.csv'), 'wb') do |file|
       weather.dump_to_csv(file)
     end
