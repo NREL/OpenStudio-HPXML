@@ -2,6 +2,7 @@
 
 __New Features__
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
+- ReportSimulationOutput measure: Allows specifying the number of decimal places for timeseries output.
 
 __Bugfixes__
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
