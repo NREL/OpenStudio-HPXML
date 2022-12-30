@@ -5653,6 +5653,7 @@
 					<xs:documentation>[hours]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="SetpointNaturalVentilation" type="Temperature"/>
 			<xs:element minOccurs="0" name="HotWaterResetControl" type="HotWaterResetControl"/>
 			<xs:element minOccurs="0" name="HeatLowered" type="HVACControlTypeAdjustments"/>
 			<xs:element minOccurs="0" name="ACAdjusted" type="HVACControlTypeAdjustments"/>

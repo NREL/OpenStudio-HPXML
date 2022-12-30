@@ -1725,9 +1725,12 @@ class OSModel
       end
     end
 
+    nat_vent_setpoint = @hpxml.hvac_controls[0].nat_vent_setpoint
+
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
-                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
+                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file,
+                  nat_vent_setpoint)
   end
 
   def self.create_ducts(model, hvac_distribution, spaces)

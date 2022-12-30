@@ -1463,6 +1463,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('nat_vent_setpoint', false)
+    arg.setDisplayName('Natural Ventilation: Setpoint')
+    arg.setDescription('Specify a constant setpont value for natural ventilation')
+    arg.setUnits('deg-F')
+    args << arg
+
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << 'none'
     mech_vent_fan_type_choices << HPXML::MechVentTypeExhaust
@@ -4972,7 +4978,6 @@ class HPXMLFile
   end
 
   def self.set_hvac_control(hpxml, args, epw_file, weather)
-    return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
     # Heating
     if hpxml.total_fraction_heat_load_served > 0
@@ -5036,6 +5041,11 @@ class HPXMLFile
 
     end
 
+    # Natural Ventilation
+    if args[:nat_vent_setpoint].is_initialized
+      nat_vent_setpoint = args[:nat_vent_setpoint].get
+    end
+
     hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
                             heating_setpoint_temp: heating_setpoint_temp,
                             cooling_setpoint_temp: cooling_setpoint_temp,
@@ -5051,7 +5061,8 @@ class HPXMLFile
                             seasons_cooling_begin_month: seasons_cooling_begin_month,
                             seasons_cooling_begin_day: seasons_cooling_begin_day,
                             seasons_cooling_end_month: seasons_cooling_end_month,
-                            seasons_cooling_end_day: seasons_cooling_end_day)
+                            seasons_cooling_end_day: seasons_cooling_end_day,
+                            nat_vent_setpoint: nat_vent_setpoint)
   end
 
   def self.set_ventilation_fans(hpxml, args)
