@@ -12,7 +12,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-residents-0.csv</SchedulesFilePath>
       <AdditionalProperties>
         <ParentHPXMLFile>base.xml</ParentHPXMLFile>
       </AdditionalProperties>

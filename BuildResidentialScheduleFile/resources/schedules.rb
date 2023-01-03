@@ -77,8 +77,6 @@ class ScheduleGenerator
       @column_names = SchedulesFile.ColumnNames
     end
 
-    return true if args[:geometry_num_occupants] == 0
-
     invalid_columns = (@column_names - SchedulesFile.ColumnNames)
     invalid_columns.each do |invalid_column|
       @runner.registerError("Invalid column name specified: '#{invalid_column}'.")
