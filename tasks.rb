@@ -99,6 +99,7 @@ def create_hpxmls
     'base-bldgtype-single-family-attached-atticroof-cathedral.xml' => 'base-bldgtype-single-family-attached-2stories.xml',
     'base-calctype-operational.xml' => 'base.xml',
     'base-calctype-operational-residents-0.xml' => 'base.xml',
+    'base-calctype-operational-residents-0-runperiod-1-month.xml' => 'base-calctype-operational-residents-0.xml',
     'base-calctype-operational-misc-defaults.xml' => 'base-misc-defaults.xml',
     'base-calctype-operational-misc-loads-large-uncommon.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-calctype-operational-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon2.xml',
@@ -1383,6 +1384,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-calctype-operational-residents-0.xml'].include? hpxml_file
     args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
     args['geometry_unit_num_occupants'] = 0
+  elsif ['base-calctype-operational-residents-0-runperiod-1-month.xml'].include? hpxml_file
+    args['simulation_control_run_period'] = 'Feb 1 - Feb 28'
   end
 
   # DHW
@@ -2481,12 +2484,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
-    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
-  elsif ['base-schedules-detailed-occupancy-stochastic-residents-0.xml'].include? hpxml_file
-    args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
-    args['geometry_unit_num_occupants'] = 0
-    sch_args['hpxml_path'] = args['hpxml_path']
-    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-residents-0.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 
