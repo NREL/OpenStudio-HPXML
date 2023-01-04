@@ -140,6 +140,16 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_equal(8760, Schedule.annual_equivalent_full_load_hrs(2007, nv_sched))
   end
 
+  def test_natural_ventilation_setpoint
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-windows-natural-ventilation-setpoint.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check natural ventilation/whole house fan program
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameNaturalVentilation} program")
+    assert_in_epsilon(72.0, program_values['Tnvsp'][0], 0.01)
+  end
+
   def test_mechanical_ventilation_none
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
