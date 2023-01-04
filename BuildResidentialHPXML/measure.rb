@@ -1469,8 +1469,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
-    
-
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << 'none'
     mech_vent_fan_type_choices << HPXML::MechVentTypeExhaust
@@ -4984,6 +4982,7 @@ class HPXMLFile
   end
 
   def self.set_hvac_control(hpxml, args, epw_file, weather)
+    return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
     # Heating
     if hpxml.total_fraction_heat_load_served > 0
