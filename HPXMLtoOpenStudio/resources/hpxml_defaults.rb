@@ -1280,6 +1280,23 @@ class HPXMLDefaults
       end
     end
 
+    # Crankcase power [Watts]
+    # Fixme: Need to handle the crankcase modeling for cooling only scenario
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+      next if cooling_system.crankcase_watts.to_f > 0.0
+
+      HVAC.set_crankcase_assumptions(cooling_system)
+      cooling_system.crankcase_watts_isdefaulted = true
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+      next if heat_pump.crankcase_watts.to_f > 0.0
+
+      HVAC.set_crankcase_assumptions(heat_pump)
+      heat_pump.crankcase_watts_isdefaulted = true
+    end
+
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
@@ -1295,7 +1312,6 @@ class HPXMLDefaults
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
         HVAC.set_cool_rated_cfm_per_ton(cooling_system)
@@ -1305,7 +1321,6 @@ class HPXMLDefaults
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         num_speeds = 10
         HVAC.set_num_speeds(cooling_system)
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_fan_power_rated(cooling_system)
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
@@ -1342,7 +1357,6 @@ class HPXMLDefaults
         end
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
@@ -1359,7 +1373,6 @@ class HPXMLDefaults
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump)
 

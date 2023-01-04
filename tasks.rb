@@ -287,6 +287,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-hvac-crankcase-40w.xml' => 'base.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
@@ -2054,6 +2055,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 10.7
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-crankcase-40w.xml'].include? hpxml_file
+    args['cooling_system_crankcase_watts'] = 40
   end
 
   # Lighting
