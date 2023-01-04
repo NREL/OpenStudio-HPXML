@@ -3,8 +3,7 @@
 class Airflow
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
                  ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
-                 frac_windows_operable, apply_ashrae140_assumptions, schedules_file,
-                 nat_vent_setpoint)
+                 frac_windows_operable, apply_ashrae140_assumptions, schedules_file)
 
     # Global variables
 
@@ -114,7 +113,7 @@ class Airflow
     end
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
-                                                  hpxml.header.natvent_days_per_week, nat_vent_setpoint)
+                                                  hpxml.header.natvent_days_per_week, hpxml.header.natvent_setpoint)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, hpxml.air_infiltration_measurements,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl)
@@ -282,7 +281,7 @@ class Airflow
   end
 
   def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor,
-                                                         natvent_days_per_week, nat_vent_setpoint)
+                                                         natvent_days_per_week, natvent_setpoint)
     
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
@@ -388,8 +387,8 @@ class Airflow
     vent_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
     vent_program.addLine("Set MaxHR = #{max_oa_hr}")
     vent_program.addLine("Set MaxRH = #{max_oa_rh}")
-    if not nat_vent_setpoint.nil?
-      vent_program.addLine("Set Tnvsp = #{nat_vent_setpoint}") # Average of heating/cooling setpoints to minimize incurring additional heating energy
+    if not natvent_setpoint.nil?
+      vent_program.addLine("Set Tnvsp = #{natvent_setpoint}")
     elsif (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
       vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints to minimize incurring additional heating energy
     else

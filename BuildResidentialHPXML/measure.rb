@@ -763,6 +763,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default is used.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natvent_setpoint', false)
+    arg.setDisplayName('Natural Ventilation: Setpoint')
+    arg.setDescription('Specify a constant setpont value for natural ventilation')
+    arg.setUnits('deg-F')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_ufactor', true)
     arg.setDisplayName('Windows: U-Factor')
     arg.setUnits('Btu/hr-ft^2-R')
@@ -1463,11 +1469,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('nat_vent_setpoint', false)
-    arg.setDisplayName('Natural Ventilation: Setpoint')
-    arg.setDescription('Specify a constant setpont value for natural ventilation')
-    arg.setUnits('deg-F')
-    args << arg
+    
 
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << 'none'
@@ -3473,6 +3475,10 @@ class HPXMLFile
       hpxml.header.natvent_days_per_week = args[:window_natvent_availability].get
     end
 
+    if args[:natvent_setpoint].is_initialized
+      hpxml.header.natvent_setpoint = args[:natvent_setpoint].get
+    end
+
     if args[:schedules_filepaths].is_initialized
       hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
@@ -5041,11 +5047,6 @@ class HPXMLFile
 
     end
 
-    # Natural Ventilation
-    if args[:nat_vent_setpoint].is_initialized
-      nat_vent_setpoint = args[:nat_vent_setpoint].get
-    end
-
     hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
                             heating_setpoint_temp: heating_setpoint_temp,
                             cooling_setpoint_temp: cooling_setpoint_temp,
@@ -5061,8 +5062,7 @@ class HPXMLFile
                             seasons_cooling_begin_month: seasons_cooling_begin_month,
                             seasons_cooling_begin_day: seasons_cooling_begin_day,
                             seasons_cooling_end_month: seasons_cooling_end_month,
-                            seasons_cooling_end_day: seasons_cooling_end_day,
-                            nat_vent_setpoint: nat_vent_setpoint)
+                            seasons_cooling_end_day: seasons_cooling_end_day)
   end
 
   def self.set_ventilation_fans(hpxml, args)
