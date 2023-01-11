@@ -71,6 +71,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_period', false)
+    arg.setDisplayName('Schedules: Power Outage Period')
+    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15".')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
@@ -3473,6 +3478,10 @@ class HPXMLFile
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
       hpxml.header.vacancy_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
+    end
+    if args[:schedules_power_outage_period].is_initialized
+      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_power_outage_period].get)
+      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
     end
 
     if args[:software_info_program_used].is_initialized
