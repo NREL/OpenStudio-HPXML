@@ -422,10 +422,14 @@ def create_hpxmls
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-simple-vacancy.xml' => 'base.xml',
     'base-schedules-simple-vacancy-year-round.xml' => 'base.xml',
+    'base-schedules-simple-power-outage.xml' => 'base.xml',
+    'base-schedules-simple-power-outage-year-round.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
+    'base-schedules-detailed-occupancy-stochastic-power-outage.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
+    'base-schedules-detailed-occupancy-stochastic-power-outage-year-round.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
@@ -439,7 +443,8 @@ def create_hpxmls
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-30-mins.xml' => 'base.xml',
-    'base-vacancy.xml' => 'base.xml'
+    'base-vacancy.xml' => 'base.xml',
+    'base-power-outage.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2472,10 +2477,22 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_vacancy_period'] = 'Jan 1 - Dec 31'
   end
 
+  # Power Outage
+  if ['base-power-outage.xml',
+      'base-schedules-simple-power-outage.xml',
+      'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
+    args['schedules_power_outage_period'] = 'Dec 1 - Jan 31'
+  elsif ['base-schedules-simple-power-outage-year-round.xml',
+         'base-schedules-detailed-occupancy-stochastic-power-outage-year-round.xml'].include? hpxml_file
+    args['schedules_power_outage_period'] = 'Jan 1 - Dec 31'
+  end
+
   # Occupancy Schedules
   if ['base-schedules-detailed-occupancy-stochastic.xml',
       'base-schedules-detailed-occupancy-stochastic-vacancy.xml',
-      'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml'].include? hpxml_file
+      'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml',
+      'base-schedules-detailed-occupancy-stochastic-power-outage.xml',
+      'base-schedules-detailed-occupancy-stochastic-power-outage-year-round.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
