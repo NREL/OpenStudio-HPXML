@@ -5,7 +5,7 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
-                 schedule_type_limits_name = nil, normalize_values = true, vacancy_periods: nil)
+                 schedule_type_limits_name = nil, normalize_values = true, vacancy_periods: nil, power_outage_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -14,6 +14,7 @@ class HourlyByMonthSchedule
     @weekend_month_by_hour_values = validate_values(weekend_month_by_hour_values, 12, 24)
     @schedule_type_limits_name = schedule_type_limits_name
     @vacancy_periods = vacancy_periods
+    @power_outage_periods = power_outage_periods
 
     if normalize_values
       @maxval = calc_max_val()
@@ -161,6 +162,7 @@ class HourlyByMonthSchedule
     end
 
     Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
+    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -341,7 +343,7 @@ class MonthWeekdayWeekendSchedule
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
-                 begin_day = 1, end_month = 12, end_day = 31, vacancy_periods: nil)
+                 begin_day = 1, end_month = 12, end_day = 31, vacancy_periods: nil, power_outage_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -355,6 +357,7 @@ class MonthWeekdayWeekendSchedule
     @end_month = end_month
     @end_day = end_day
     @vacancy_periods = vacancy_periods
+    @power_outage_periods = power_outage_periods
 
     if normalize_values
       @weekday_hourly_values = normalize_sum_to_one(@weekday_hourly_values)
@@ -579,6 +582,7 @@ class MonthWeekdayWeekendSchedule
     end
 
     Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
+    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -601,6 +605,10 @@ class Schedule
 
   def self.vacancy_name
     return 'vacancy'
+  end
+
+  def self.outage_name
+    return 'outage'
   end
 
   # return [Double] The total number of full load hours for this schedule.
@@ -754,6 +762,28 @@ class Schedule
       Schedule.set_weekend_rule(vac_rule)
       vac_rule.setStartDate(date_s)
       vac_rule.setEndDate(date_e)
+    end
+  end
+
+  def self.set_power_outage_periods(schedule, sch_name, power_outage_periods, year)
+    return if power_outage_periods.nil?
+
+    # Add power outage rule(s), will override previous rules
+    power_outage_periods.each_with_index do |op, i|
+      out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+      out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+      day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
+      day_e = Schedule.get_day_num_from_month_day(year, op.end_month, op.end_day)
+      date_s = OpenStudio::Date::fromDayOfYear(day_s, year)
+      date_e = OpenStudio::Date::fromDayOfYear(day_e, year)
+
+      out = out_rule.daySchedule
+      out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+      out.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.0)
+      Schedule.set_weekday_rule(out_rule)
+      Schedule.set_weekend_rule(out_rule)
+      out_rule.setStartDate(date_s)
+      out_rule.setEndDate(date_e)
     end
   end
 
@@ -1177,6 +1207,7 @@ class SchedulesFile
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
   ColumnVacancy = 'vacancy'
+  ColumnOutage = 'outage'
   ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
@@ -1190,7 +1221,8 @@ class SchedulesFile
                  model: nil,
                  schedules_paths:,
                  year:,
-                 vacancy_periods: [])
+                 vacancy_periods: [],
+                 power_outage_periods: [])
     return if schedules_paths.empty?
 
     @runner = runner
@@ -1202,6 +1234,7 @@ class SchedulesFile
     battery_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy(vacancy_periods)
+    set_power_outage(power_outage_periods)
     convert_setpoints
 
     tmpdir = Dir.tmpdir
@@ -1484,6 +1517,19 @@ class SchedulesFile
     end
   end
 
+  def set_power_outage(power_outage_periods)
+    create_column_values_from_periods(ColumnOutage, power_outage_periods)
+    return if @tmp_schedules[ColumnOutage].all? { |i| i == 0 }
+
+    @tmp_schedules[ColumnOutage].each_with_index do |_ts, i|
+      @tmp_schedules.keys.each do |col_name|
+        next unless SchedulesFile.affected_by_outage[col_name] # skip those unaffected by outage
+
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
+      end
+    end
+  end
+
   def convert_setpoints
     return if @tmp_schedules.keys.none? { |k| SchedulesFile.SetpointColumnNames.include?(k) }
 
@@ -1605,6 +1651,22 @@ class SchedulesFile
       affected_by_vacancy[column_name] = false
     end
     return affected_by_vacancy
+  end
+
+  def self.affected_by_outage
+    affected_by_outage = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      affected_by_outage[column_name] = true
+      next unless ([ColumnOccupants,
+                    ColumnSleeping] +
+                    SchedulesFile.HVACSetpointColumnNames +
+                    SchedulesFile.WaterHeaterColumnNames +
+                    SchedulesFile.BatteryColumnNames).include? column_name
+
+      affected_by_outage[column_name] = false
+    end
+    return affected_by_outage
   end
 
   def max_value_one
