@@ -478,10 +478,43 @@ class Geometry
     occ_sens = sens_frac
     occ_rad = 0.558 * occ_sens
 
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+
     # Create schedule
     people_sch = nil
     if not schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnOccupants)
+
+      # Power outage
+      if schedules_file.schedules.keys.include?(SchedulesFile::ColumnOutage)
+        # Work
+        work_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+        work_schedule.setValue(0)
+        work_schedule.setName("Work Efficiency Schedule")
+
+        # Activity
+        activity_per_person = 100
+
+        # Air Velocity
+        air_velocity_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+        air_velocity_schedule.setValue(0.1)
+        air_velocity_schedule.setName("Air Velocity Schedule")
+
+        # Clothing Insulation
+        clothing_insulation_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+        clothing_insulation_schedule.setValue(0.6)
+        clothing_insulation_schedule.setName("Clothing Schedule")
+
+        # Set schedules
+        occ.setWorkEfficiencySchedule(work_schedule)
+        occ.setAirVelocitySchedule(air_velocity_schedule)
+        occ.setClothingInsulationSchedule(clothing_insulation_schedule)
+
+        # Add thermal model types
+        occ_def.pushThermalComfortModelType("Pierce")
+      end
     end
     if people_sch.nil?
       weekday_sch = hpxml.building_occupancy.weekday_fractions.split(',').map(&:to_f)
@@ -502,9 +535,7 @@ class Geometry
     activity_sch.setValue(activity_per_person)
     activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
 
-    # Add people definition for the occ
-    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-    occ = OpenStudio::Model::People.new(occ_def)
+    # Set occ
     occ.setName(Constants.ObjectNameOccupants)
     occ.setSpace(space)
     occ_def.setName(Constants.ObjectNameOccupants)

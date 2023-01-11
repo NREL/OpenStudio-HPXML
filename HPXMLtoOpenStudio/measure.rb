@@ -1917,7 +1917,7 @@ class OSModel
         end
       else
         line = "If (#{htg_season_sensor.name} == 1)"
-        line += " || (#{@outage_sensor.name} == 1)" if not @outage_sensor.nil?
+        line += " && (#{@outage_sensor.name} == 0)" if not @outage_sensor.nil?
         program.addLine(line)
       end
       program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
@@ -1932,7 +1932,7 @@ class OSModel
         end
       else
         line = "If (#{clg_season_sensor.name} == 1)"
-        line += " || (#{@outage_sensor.name} == 1)" if not @outage_sensor.nil?
+        line += " && (#{@outage_sensor.name} == 0)" if not @outage_sensor.nil?
         program.addLine(line)
       end
       program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
