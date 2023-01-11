@@ -1871,6 +1871,23 @@ class OSModel
       clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
     end
 
+    # Power outage sensor
+    outage_sensor = nil
+    if not @hpxml.header.power_outage_periods.empty?
+      sch_name = SchedulesFile::ColumnOutage
+      outage_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+      outage_sch.setName(sch_name)
+      default_day_sch = outage_sch.defaultDaySchedule
+      default_day_sch.clearValues
+      default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
+      year = model.getYearDescription.assumedYear
+      Schedule.set_power_outage_periods(outage_sch, sch_name, @hpxml.header.power_outage_periods, year)
+      Schedule.set_schedule_type_limits(model, outage_sch, Constants.ScheduleTypeLimitsFraction)
+      outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
+      outage_sensor.setKeyName(outage_sch.name.to_s)
+    end
+
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     # EMS sensors
@@ -1891,19 +1908,23 @@ class OSModel
     program.addLine("Set #{clg_hrs} = 0")
     if @hpxml.total_fraction_heat_load_served > 0
       if htg_end_day >= htg_start_day
-        program.addLine("If (DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day})")
+        line = "If ((DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day}))"
       else
-        program.addLine("If (DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day})")
+        line = "If ((DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day}))"
       end
+      line += " && (#{outage_sensor.name} == 1)" if not outage_sensor.nil? # 1 means NOT during power outage period
+      program.addLine(line)
       program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
       program.addLine('EndIf')
     end
     if @hpxml.total_fraction_cool_load_served > 0
       if clg_end_day >= clg_start_day
-        program.addLine("If (DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day})")
+        line = "If ((DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day}))"
       else
-        program.addLine("If (DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day})")
+        line = "If ((DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day}))"
       end
+      line += " && (#{outage_sensor.name} == 1)" if not outage_sensor.nil? # 1 means NOT during power outage period
+      program.addLine(line)
       program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
       program.addLine('EndIf')
     end
