@@ -170,7 +170,7 @@ class HVAC
   end
 
   def self.apply_evaporative_cooler(model, cooling_system,
-                                    sequential_cool_load_fracs, control_zone)
+                                    sequential_cool_load_fracs, control_zone, power_outage_periods)
 
     obj_name = Constants.ObjectNameEvaporativeCooler
 
@@ -188,7 +188,7 @@ class HVAC
     evap_cooler.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, [0], sequential_cool_load_fracs, clg_cfm)
+    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, [0], sequential_cool_load_fracs, clg_cfm, power_outage_periods)
 
     # Fan
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment

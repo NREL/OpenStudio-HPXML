@@ -1427,7 +1427,7 @@ class OSModel
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system,
-                                                            sequential_cool_load_fracs, living_zone)
+                                                            sequential_cool_load_fracs, living_zone, @hpxml.header.power_outage_periods)
       end
     end
   end
@@ -1573,21 +1573,21 @@ class OSModel
     end
 
     if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-      sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
-      @remaining_heat_load_frac -= sequential_heat_load_frac
+      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+      @remaining_heat_load_frac -= (1.0 - @hpxml.total_fraction_heat_load_served)
     else
-      sequential_heat_load_frac = 0.0
+      sequential_heat_load_fracs = [0.0]
     end
 
     if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-      sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
-      @remaining_cool_load_frac -= sequential_cool_load_frac
+      sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served, @remaining_cool_load_frac, @cooling_days)
+      @remaining_cool_load_frac -= (1.0 - @hpxml.total_fraction_cool_load_served)
     else
-      sequential_cool_load_frac = 0.0
+      sequential_cool_load_fracs = [0.0]
     end
 
-    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      HVAC.apply_ideal_air_loads(model, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
+    if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
+      HVAC.apply_ideal_air_loads(model, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                  living_zone, @hpxml.header.power_outage_periods)
     end
   end
