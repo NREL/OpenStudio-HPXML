@@ -3,7 +3,7 @@
 class HotWaterAndAppliances
   def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map,
-                 vacancy_periods)
+                 vacancy_periods, power_outage_periods)
 
     @runner = runner
     cfa = hpxml.building_construction.conditioned_floor_area
@@ -53,10 +53,11 @@ class HotWaterAndAppliances
       end
       if cw_power_schedule.nil?
         cw_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cw_col_name]
+        cw_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[cw_col_name]
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
-        cw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesWasher, cw_weekday_sch, cw_weekend_sch, cw_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cw_vacancy_periods)
+        cw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesWasher, cw_weekday_sch, cw_weekend_sch, cw_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cw_vacancy_periods, power_outage_periods: cw_power_outage_periods)
         cw_design_level_w = cw_schedule_obj.calc_design_level_from_daily_kwh(cw_annual_kwh / 365.0)
         cw_power_schedule = cw_schedule_obj.schedule
       else
@@ -84,10 +85,11 @@ class HotWaterAndAppliances
       end
       if cd_schedule.nil?
         cd_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cd_col_name]
+        cd_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[cd_col_name]
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
-        cd_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cd_vacancy_periods)
+        cd_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cd_vacancy_periods, power_outage_periods: cd_power_outage_periods)
         cd_design_level_e = cd_schedule_obj.calc_design_level_from_daily_kwh(cd_annual_kwh / 365.0)
         cd_design_level_f = cd_schedule_obj.calc_design_level_from_daily_therm(cd_annual_therm / 365.0)
         cd_schedule = cd_schedule_obj.schedule
@@ -116,10 +118,11 @@ class HotWaterAndAppliances
       end
       if dw_power_schedule.nil?
         dw_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[dw_col_name]
+        dw_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[dw_col_name]
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
-        dw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameDishwasher, dw_weekday_sch, dw_weekend_sch, dw_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: dw_vacancy_periods)
+        dw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameDishwasher, dw_weekday_sch, dw_weekend_sch, dw_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: dw_vacancy_periods, power_outage_periods: dw_power_outage_periods)
         dw_design_level_w = dw_schedule_obj.calc_design_level_from_daily_kwh(dw_annual_kwh / 365.0)
         dw_power_schedule = dw_schedule_obj.schedule
       else
@@ -146,10 +149,11 @@ class HotWaterAndAppliances
       end
       if fridge_schedule.nil?
         fridge_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[fridge_col_name]
+        fridge_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[fridge_col_name]
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
-        fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: fridge_vacancy_periods)
+        fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: fridge_vacancy_periods, power_outage_periods: fridge_power_outage_periods)
         fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
         fridge_schedule = fridge_schedule_obj.schedule
       else
@@ -176,10 +180,11 @@ class HotWaterAndAppliances
       end
       if freezer_schedule.nil?
         freezer_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[freezer_col_name]
+        freezer_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[freezer_col_name]
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
-        freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: freezer_vacancy_periods)
+        freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: freezer_vacancy_periods, power_outage_periods: freezer_power_outage_periods)
         freezer_design_level = freezer_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
         freezer_schedule = freezer_schedule_obj.schedule
       else
@@ -207,10 +212,11 @@ class HotWaterAndAppliances
       end
       if cook_schedule.nil?
         cook_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[cook_col_name]
+        cook_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[cook_col_name]
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
-        cook_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cook_vacancy_periods)
+        cook_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: cook_vacancy_periods, power_outage_periods: cook_power_outage_periods)
         cook_design_level_e = cook_schedule_obj.calc_design_level_from_daily_kwh(cook_annual_kwh / 365.0)
         cook_design_level_f = cook_schedule_obj.calc_design_level_from_daily_therm(cook_annual_therm / 365.0)
         cook_schedule = cook_schedule_obj.schedule
@@ -268,10 +274,11 @@ class HotWaterAndAppliances
       end
       if fixtures_schedule.nil?
         fixtures_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[fixtures_col_name]
+        fixtures_power_outage_periods = power_outage_periods if SchedulesFile.affected_by_outage[fixtures_col_name]
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers
-        fixtures_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFixtures, fixtures_weekday_sch, fixtures_weekend_sch, fixtures_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: fixtures_vacancy_periods)
+        fixtures_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFixtures, fixtures_weekday_sch, fixtures_weekend_sch, fixtures_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: fixtures_vacancy_periods, power_outage_periods: fixtures_power_outage_periods)
         fixtures_schedule = fixtures_schedule_obj.schedule
       else
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekday_fractions.nil?
