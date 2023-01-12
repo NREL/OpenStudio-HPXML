@@ -807,6 +807,12 @@ class Schedule
 
     # Add power outage rule(s), will override previous rules
     power_outage_periods.each_with_index do |op, i|
+      value = 0.0
+
+      next if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent.nil?
+
+      value = 1.0 if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent
+
       out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
       out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
       day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
@@ -816,7 +822,7 @@ class Schedule
 
       out = out_rule.daySchedule
       out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-      out.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.0)
+      out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
       Schedule.set_weekday_rule(out_rule)
       Schedule.set_weekend_rule(out_rule)
       out_rule.setStartDate(date_s)
