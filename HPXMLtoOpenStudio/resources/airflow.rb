@@ -432,7 +432,7 @@ class Airflow
     manager.addProgram(vent_program)
   end
 
-  def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, power_outage_periods = nil)
+  def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, power_outage_periods = [])
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     sch_name = "#{obj_name} avail schedule"
     avail_sch.setName(sch_name)
@@ -1451,7 +1451,7 @@ class Airflow
     end
   end
 
-  def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [])
+  def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [], power_outage_periods = [])
     # Calculate fan heat fraction
     # 1.0: Fan heat does not enter space (e.g., exhaust)
     # 0.0: Fan heat does enter space (e.g., supply)
@@ -1478,6 +1478,13 @@ class Airflow
       end
     end
 
+    # Availability Schedule
+    avail_sch = model.alwaysOnDiscreteSchedule
+    if not power_outage_periods.empty?
+      avail_sch = AlwaysOnSchedule.new(model, obj_name + ' schedule', Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
+      avail_sch = avail_sch.schedule
+    end
+
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
@@ -1485,7 +1492,7 @@ class Airflow
     equip.setSpace(@living_space)
     equip_def.setFractionRadiant(0)
     equip_def.setFractionLatent(0)
-    equip.setSchedule(model.alwaysOnDiscreteSchedule)
+    equip.setSchedule(avail_sch)
     equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
     equip_def.setFractionLost(fan_heat_lost_fraction)
     equip_actuator = nil
@@ -1716,7 +1723,7 @@ class Airflow
 
     # Non-CFIS fan power
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan,
-                              vent_mech_sup_tot, vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot)
+                              vent_mech_sup_tot, vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, power_outage_periods)
 
     # CFIS fan power
     cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS) # Fan heat enters space
