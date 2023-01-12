@@ -2,6 +2,7 @@
 
 __New Features__
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
+- Allows modeling one or more power outage periods (`PowerOutagePeriods` in the HPXML file).
 - ReportSimulationOutput measure: Allows specifying the number of decimal places for timeseries output.
 
 __Bugfixes__
