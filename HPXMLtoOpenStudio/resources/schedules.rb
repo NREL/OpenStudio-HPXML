@@ -28,7 +28,7 @@ class AlwaysOnSchedule
     default_day_sch.clearValues
     default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
 
-    Schedule.set_power_outage_periods(schedule, @sch_name, @vacancy_periods, @year)
+    Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
     Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
