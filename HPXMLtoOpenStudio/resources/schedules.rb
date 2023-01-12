@@ -1,5 +1,42 @@
 # frozen_string_literal: true
 
+# Annual always-on schedule
+class AlwaysOnSchedule
+  def initialize(model, sch_name, schedule_type_limits_name = nil, vacancy_periods: nil, power_outage_periods: nil)
+    @model = model
+    @year = model.getYearDescription.assumedYear
+    @sch_name = sch_name
+    @schedule = nil
+    @schedule_type_limits_name = schedule_type_limits_name
+    @vacancy_periods = vacancy_periods
+    @power_outage_periods = power_outage_periods
+
+    @schedule = create_schedule()
+  end
+
+  def schedule
+    return @schedule
+  end
+
+  private
+
+  def create_schedule()
+    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
+    schedule.setName(@sch_name)
+
+    default_day_sch = schedule.defaultDaySchedule
+    default_day_sch.clearValues
+    default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
+
+    Schedule.set_power_outage_periods(schedule, @sch_name, @vacancy_periods, @year)
+    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
+
+    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+
+    return schedule
+  end
+end
+
 # Annual schedule defined by 12 24-hour values for weekdays and weekends.
 class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
