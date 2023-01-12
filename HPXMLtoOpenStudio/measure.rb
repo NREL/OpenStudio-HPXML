@@ -1613,7 +1613,7 @@ class OSModel
   def self.add_dehumidifiers(model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
-    HVAC.apply_dehumidifiers(model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace])
+    HVAC.apply_dehumidifiers(model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml.header.power_outage_periods)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
@@ -1874,15 +1874,9 @@ class OSModel
     # Power outage sensor
     outage_sensor = nil
     if not @hpxml.header.power_outage_periods.empty?
-      sch_name = SchedulesFile::ColumnOutage
-      outage_sch = OpenStudio::Model::ScheduleRuleset.new(model)
-      outage_sch.setName(sch_name)
-      default_day_sch = outage_sch.defaultDaySchedule
-      default_day_sch.clearValues
-      default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
-      year = model.getYearDescription.assumedYear
-      Schedule.set_power_outage_periods(outage_sch, sch_name, @hpxml.header.power_outage_periods, year)
-      Schedule.set_schedule_type_limits(model, outage_sch, Constants.ScheduleTypeLimitsFraction)
+      outage_sch = AlwaysOnSchedule.new(model, SchedulesFile::ColumnOutage, Constants.ScheduleTypeLimitsFraction, power_outage_periods: @hpxml.header.power_outage_periods)
+      outage_sch = outage_sch.schedule
+
       outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
       outage_sensor.setKeyName(outage_sch.name.to_s)
