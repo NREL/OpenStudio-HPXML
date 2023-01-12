@@ -73,7 +73,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_period', false)
     arg.setDisplayName('Schedules: Power Outage Period')
-    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15".')
+    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (hours can be 0 through 23).')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('schedules_power_outage_window_natvent_availability', false)
@@ -3485,7 +3485,7 @@ class HPXMLFile
       hpxml.header.vacancy_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
     end
     if args[:schedules_power_outage_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_power_outage_period].get)
+      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_power_outage_period].get)
 
       natvent = nil
       if args[:schedules_power_outage_window_natvent_availability].is_initialized
@@ -3495,7 +3495,7 @@ class HPXMLFile
         end
       end
 
-      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day, natvent: natvent)
+      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent: natvent)
     end
 
     if args[:software_info_program_used].is_initialized

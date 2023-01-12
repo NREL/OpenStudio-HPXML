@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c0f82b5c-12f9-4e16-be78-acaf1ff4b875</version_id>
-  <version_modified>20230112T175215Z</version_modified>
+  <version_id>daaa57f8-2514-4f2b-9e09-949d04f99399</version_id>
+  <version_modified>20230112T233016Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -72,7 +72,7 @@
     <argument>
       <name>schedules_power_outage_period</name>
       <display_name>Schedules: Power Outage Period</display_name>
-      <description>Specifies the power outage period. Enter a date like "Dec 15 - Jan 15".</description>
+      <description>Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (hours can be 0 through 23).</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6556,7 +6556,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AC21B6C0</checksum>
+      <checksum>CEB053A6</checksum>
     </file>
   </files>
 </measure>
