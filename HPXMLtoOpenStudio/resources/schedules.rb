@@ -813,20 +813,104 @@ class Schedule
 
       value = 1.0 if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent
 
-      out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-      out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
       day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
       day_e = Schedule.get_day_num_from_month_day(year, op.end_month, op.end_day)
+
       date_s = OpenStudio::Date::fromDayOfYear(day_s, year)
       date_e = OpenStudio::Date::fromDayOfYear(day_e, year)
 
-      out = out_rule.daySchedule
-      out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-      out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
-      Schedule.set_weekday_rule(out_rule)
-      Schedule.set_weekend_rule(out_rule)
-      out_rule.setStartDate(date_s)
-      out_rule.setEndDate(date_e)
+      if (not op.begin_hour.nil?) && (not op.end_hour.nil?)
+        begin_day_schedule = schedule.getDaySchedules(date_s, date_s)[0]
+        end_day_schedule = schedule.getDaySchedules(date_e, date_e)[0]
+
+        outage_days = day_e - day_s
+        if outage_days == 0 # outage is less than one calendar day (need one outage rule)
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+
+          Schedule.set_outage_begin(out, begin_day_schedule, op.begin_hour, value)
+          Schedule.set_outage_end(out, end_day_schedule, op.end_hour, value)
+
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_s)
+          out_rule.setEndDate(date_e)
+        elsif outage_days == 1 # outage is exactly two calendar days (need two outage rules)
+
+        else # outage is more than two calendar days (need three outage rules)
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+
+          Schedule.set_outage_begin(out, begin_day_schedule, op.begin_hour, value)
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_s)
+          out_rule.setEndDate(date_s)
+
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+
+          Schedule.set_outage_end(out, end_day_schedule, op.end_hour, value)
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_e)
+          out_rule.setEndDate(date_e)
+
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+          out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
+
+          date_s = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
+          date_e = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
+
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_s)
+          out_rule.setEndDate(date_e)
+        end
+
+      else # much simpler if hours of the day aren't specified
+        out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+        out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+        out = out_rule.daySchedule
+        out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+        out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
+
+        Schedule.set_weekday_rule(out_rule)
+        Schedule.set_weekend_rule(out_rule)
+        out_rule.setStartDate(date_s)
+        out_rule.setEndDate(date_e)
+      end
+    end
+  end
+
+  def self.set_outage_begin(out, day_schedule, begin_hour, value)
+    (0..23).each do |h|
+      time = OpenStudio::Time.new(0, h + 1, 0, 0)
+      if h < begin_hour
+        out.addValue(time, day_schedule.getValue(time))
+      else
+        out.addValue(time, value)
+      end
+    end
+  end
+
+  def self.set_outage_end(out, day_schedule, end_hour, value)
+    (0..23).each do |h|
+      time = OpenStudio::Time.new(0, h + 1, 0, 0)
+      if h > end_hour
+        out.addValue(time, day_schedule.getValue(time))
+      else
+        out.addValue(time, value)
+      end
     end
   end
 
@@ -1200,6 +1284,37 @@ class Schedule
     end
 
     return begin_month, begin_day, end_month, end_day
+  end
+
+  def self.parse_date_time_range(date_time_range)
+    begin_end_dates = date_time_range.split('-').map { |v| v.strip }
+    if begin_end_dates.size != 2
+      fail "Invalid date format specified for '#{date_time_range}'."
+    end
+
+    begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
+    end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
+
+    if (begin_values.size > 3) || (end_values.size > 3)
+      fail "Invalid date format specified for '#{date_time_range}'."
+    end
+
+    require 'date'
+    begin_month = Date::ABBR_MONTHNAMES.index(begin_values[0].capitalize)
+    end_month = Date::ABBR_MONTHNAMES.index(end_values[0].capitalize)
+    begin_day = begin_values[1].to_i
+    end_day = end_values[1].to_i
+    if begin_values.size == 3
+      begin_hour = begin_values[2].to_i
+    end
+    if end_values.size == 3
+      end_hour = end_values[2].to_i
+    end
+    if begin_month.nil? || end_month.nil? || begin_day == 0 || end_day == 0
+      fail "Invalid date format specified for '#{date_time_range}'."
+    end
+
+    return begin_month, begin_day, begin_hour, end_month, end_day, end_hour
   end
 
   def self.get_begin_and_end_dates_from_monthly_array(months, year)
