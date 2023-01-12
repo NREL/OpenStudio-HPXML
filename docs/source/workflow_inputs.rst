@@ -481,7 +481,8 @@ Schedules from the following categories are affected by power outage:
 - Plug Loads
 - Fuel Loads
 - Hot Water
-- Local Ventilation Fans
+- Ventilation Fans
+- Dehumidifiers
 - Pools
 - Hot Tubs
 
