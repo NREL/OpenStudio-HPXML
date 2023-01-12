@@ -423,6 +423,8 @@ def create_hpxmls
     'base-schedules-simple-vacancy.xml' => 'base.xml',
     'base-schedules-simple-vacancy-year-round.xml' => 'base.xml',
     'base-schedules-simple-power-outage.xml' => 'base.xml',
+    'base-schedules-simple-power-outage-natvent-available.xml' => 'base.xml',
+    'base-schedules-simple-power-outage-natvent-unavailable.xml' => 'base.xml',
     'base-schedules-simple-power-outage-year-round.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
@@ -2480,8 +2482,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   # Power Outage
   if ['base-power-outage.xml',
       'base-schedules-simple-power-outage.xml',
+      'base-schedules-simple-power-outage-natvent-available.xml',
+      'base-schedules-simple-power-outage-natvent-unavailable.xml',
       'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
     args['schedules_power_outage_period'] = 'Dec 1 - Jan 31'
+    if hpxml_file == 'base-schedules-simple-power-outage-natvent-available.xml'
+      args['schedules_power_outage_window_natvent_availability'] = true
+    elsif hpxml_file == 'base-schedules-simple-power-outage-natvent-unavailable.xml'
+      args['schedules_power_outage_window_natvent_availability'] = false
+    end
   elsif ['base-schedules-simple-power-outage-year-round.xml',
          'base-schedules-detailed-occupancy-stochastic-power-outage-year-round.xml'].include? hpxml_file
     args['schedules_power_outage_period'] = 'Jan 1 - Dec 31'
