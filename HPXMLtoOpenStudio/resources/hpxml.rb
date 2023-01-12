@@ -1401,7 +1401,7 @@ class HPXML < Object
   end
 
   class PowerOutagePeriod < BaseElement
-    ATTRS = [:begin_month, :begin_day, :end_month, :end_day]
+    ATTRS = [:begin_month, :begin_day, :end_month, :end_day, :natvent]
     attr_accessor(*ATTRS)
 
     def delete
@@ -1421,6 +1421,7 @@ class HPXML < Object
       XMLHelper.add_element(power_outage_period, 'BeginDayOfMonth', @begin_day, :integer) unless @begin_day.nil?
       XMLHelper.add_element(power_outage_period, 'EndMonth', @end_month, :integer) unless @end_month.nil?
       XMLHelper.add_element(power_outage_period, 'EndDayOfMonth', @end_day, :integer) unless @end_day.nil?
+      XMLHelper.add_element(power_outage_period, 'NaturalVentilation', @natvent, :boolean) unless @natvent.nil?
     end
 
     def from_oga(power_outage_period)
@@ -1430,6 +1431,7 @@ class HPXML < Object
       @begin_day = XMLHelper.get_value(power_outage_period, 'BeginDayOfMonth', :integer)
       @end_month = XMLHelper.get_value(power_outage_period, 'EndMonth', :integer)
       @end_day = XMLHelper.get_value(power_outage_period, 'EndDayOfMonth', :integer)
+      @natvent = XMLHelper.get_value(power_outage_period, 'NaturalVentilation', :boolean)
     end
   end
 
