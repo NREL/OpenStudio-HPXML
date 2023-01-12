@@ -76,6 +76,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15".')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('schedules_power_outage_window_natvent_availability', false)
+    arg.setDisplayName('Schedules: Power Outage Period Window Natural Ventilation Availability')
+    arg.setDescription('Whether natural ventilation is available during the outage period (i.e., always available or always unavailable).')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
@@ -3481,7 +3486,16 @@ class HPXMLFile
     end
     if args[:schedules_power_outage_period].is_initialized
       begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_power_outage_period].get)
-      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
+
+      natvent = nil
+      if args[:schedules_power_outage_window_natvent_availability].is_initialized
+        natvent = false
+        if args[:schedules_power_outage_window_natvent_availability].get
+          natvent = true
+        end
+      end
+
+      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day, natvent: natvent)
     end
 
     if args[:software_info_program_used].is_initialized
