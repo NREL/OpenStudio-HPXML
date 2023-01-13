@@ -825,95 +825,49 @@ class Schedule
 
         outage_days = day_e - day_s
         if outage_days == 0 # outage is less than one calendar day (need one outage rule)
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
           Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, op.end_hour, value)
-
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_s)
-          out_rule.setEndDate(date_e)
         elsif outage_days == 1 # outage is exactly two calendar days (need two outage rules)
           # first day
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_s)
           Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, 23, value)
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_s)
-          out_rule.setEndDate(date_s)
 
           # last day
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_e, date_e)
           Schedule.set_outage_values(out, end_day_schedule, 0, op.end_hour, value)
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_e)
-          out_rule.setEndDate(date_e)
         else # outage is more than two calendar days (need three outage rules)
           # first day
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_s)
           Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, 23, value)
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_s)
-          out_rule.setEndDate(date_s)
 
           # last day
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_e, date_e)
           Schedule.set_outage_values(out, end_day_schedule, 0, op.end_hour, value)
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_e)
-          out_rule.setEndDate(date_e)
 
           # all other days
-          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-          out = out_rule.daySchedule
-          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
-          out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
-
           date_s = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
           date_e = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
-
-          Schedule.set_weekday_rule(out_rule)
-          Schedule.set_weekend_rule(out_rule)
-          out_rule.setStartDate(date_s)
-          out_rule.setEndDate(date_e)
+          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+          out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
         end
 
       else # much simpler if hours of the day aren't specified
-        out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-        out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
-        out = out_rule.daySchedule
-        out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+        out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
         out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
-
-        Schedule.set_weekday_rule(out_rule)
-        Schedule.set_weekend_rule(out_rule)
-        out_rule.setStartDate(date_s)
-        out_rule.setEndDate(date_e)
       end
     end
+  end
+
+  def self.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+    out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+    out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+    out_sch = out_rule.daySchedule
+    out_sch.setName(sch_name + " #{Schedule.outage_name}#{i}")
+    out_rule.setStartDate(date_s)
+    out_rule.setEndDate(date_e)
+    Schedule.set_weekday_rule(out_rule)
+    Schedule.set_weekend_rule(out_rule)
+    return out_sch
   end
 
   def self.set_outage_values(out, day_schedule, begin_hour, end_hour, value)
@@ -1656,7 +1610,9 @@ class SchedulesFile
   def create_column_values_from_periods(col_name, periods)
     # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
-    steps_in_day = n_steps / 365
+    num_days_in_year = Constants.NumDaysInYear(@year)
+    steps_in_day = n_steps / num_days_in_year
+    steps_in_hour = steps_in_day / 24
 
     if @tmp_schedules[col_name].nil?
       @tmp_schedules[col_name] = Array.new(n_steps, 0)
@@ -1666,11 +1622,19 @@ class SchedulesFile
       start_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
       end_day_num = Schedule.get_day_num_from_month_day(@year, period.end_month, period.end_day)
 
+      begin_hour = 0
+      end_hour = 24
+
+      if col_name == ColumnOutage
+        begin_hour = period.begin_hour if not period.begin_hour.nil?
+        end_hour = period.end_hour if not period.end_hour.nil?
+      end
+
       if end_day_num >= start_day_num
-        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day, (end_day_num - start_day_num + 1) * steps_in_day) # Fill between start/end days
+        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour), (end_day_num - start_day_num + 1) * steps_in_day - ((24 - end_hour) * steps_in_hour)) # Fill between start/end days
       else # Wrap around year
-        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day) # Fill between start day and end of year
-        @tmp_schedules[col_name].fill(1.0, 0, end_day_num * steps_in_day) # Fill between start of year and end day
+        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour)) # Fill between start day and end of year
+        @tmp_schedules[col_name].fill(1.0, 0, end_day_num * steps_in_day - ((24 - end_hour) * steps_in_hour)) # Fill between start of year and end day
       end
     end
   end
