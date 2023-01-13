@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Annual always-on schedule
-class AlwaysOnSchedule
-  def initialize(model, sch_name, schedule_type_limits_name = nil, vacancy_periods: nil, power_outage_periods: nil)
+# Annual constant schedule
+class ScheduleRulesetConstant
+  def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, vacancy_periods: nil, power_outage_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
+    @val = val
     @schedule = nil
     @schedule_type_limits_name = schedule_type_limits_name
     @vacancy_periods = vacancy_periods
@@ -26,7 +27,7 @@ class AlwaysOnSchedule
 
     default_day_sch = schedule.defaultDaySchedule
     default_day_sch.clearValues
-    default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1.0)
+    default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), @val)
 
     Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
     Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
@@ -808,6 +809,9 @@ class Schedule
     # Add power outage rule(s), will override previous rules
     power_outage_periods.each_with_index do |op, i|
       value = 0.0
+
+      # Temperature of tank < 2C indicates of possibility of freeze.
+      value = 2.0 if sch_name.include?('WH Setpoint Temp') || sch_name.include?("#{Constants.ObjectNameWaterHeater} Setpoint")
 
       next if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent.nil?
 
@@ -1658,6 +1662,11 @@ class SchedulesFile
 
     @tmp_schedules[ColumnOutage].each_with_index do |_ts, i|
       @tmp_schedules.keys.each do |col_name|
+        # Temperature of tank < 2C indicates of possibility of freeze.
+        if col_name == ColumnWaterHeaterSetpoint
+          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[ColumnOutage][i] == 1.0
+        end
+
         next unless SchedulesFile.affected_by_outage[col_name] # skip those unaffected by outage
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
