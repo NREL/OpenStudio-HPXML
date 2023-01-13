@@ -1481,7 +1481,7 @@ class Airflow
     # Availability Schedule
     avail_sch = model.alwaysOnDiscreteSchedule
     if not power_outage_periods.empty?
-      avail_sch = AlwaysOnSchedule.new(model, obj_name + ' schedule', Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
+      avail_sch = ScheduleRulesetConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
       avail_sch = avail_sch.schedule
     end
 
