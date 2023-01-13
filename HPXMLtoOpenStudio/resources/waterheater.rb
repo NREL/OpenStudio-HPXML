@@ -90,8 +90,8 @@ class Waterheater
         Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
 
         # Actuated schedule
-        control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-        control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
+        control_setpoint_schedule = ScheduleRulesetConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, power_outage_periods: power_outage_periods)
+        control_setpoint_schedule = control_setpoint_schedule.schedule
       end
     end
     if setpoint_schedule.nil?
@@ -261,6 +261,8 @@ class Waterheater
         alt_spt_sch = water_heater.indirectAlternateSetpointTemperatureSchedule.get
         if alt_spt_sch.to_ScheduleConstant.is_initialized
           altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleConstantValue)
+        elsif alt_spt_sch.to_ScheduleRuleset.is_initialized
+          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleYearValue)
         else
           altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleFileValue)
         end
@@ -958,7 +960,7 @@ class Waterheater
     ueschedoverride_actuator.setName("#{obj_name_hpwh} UESchedOverride")
 
     # Actuator for setpoint schedule
-    hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleConstantValue)
+    hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleYearValue)
     hpwhschedoverride_actuator.setName("#{obj_name_hpwh} HPWHSchedOverride")
 
     # EMS for the HPWH control logic
