@@ -24,8 +24,10 @@
         <PowerOutagePeriod>
           <BeginMonth>12</BeginMonth>
           <BeginDayOfMonth>1</BeginDayOfMonth>
+          <BeginHourOfDay>5</BeginHourOfDay>
           <EndMonth>1</EndMonth>
           <EndDayOfMonth>31</EndDayOfMonth>
+          <EndHourOfDay>14</EndHourOfDay>
         </PowerOutagePeriod>
       </PowerOutagePeriods>
     </extension>
