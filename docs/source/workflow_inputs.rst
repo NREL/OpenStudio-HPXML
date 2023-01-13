@@ -463,8 +463,10 @@ If not entered, power outages will not be modeled.
   ====================================  ========  =======  =============  ========  =======  ===========
   ``BeginMonth``                        integer            1 - 12         Yes                Begin month
   ``BeginDayOfMonth``                   integer            1 - 31         Yes                Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No                 Begin hour
   ``EndMonth``                          integer            1 - 12         Yes                End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
+  ``EndHourOfDay``                      integer            0 - 23         No                 End hour
   ====================================  ========  =======  =============  ========  =======  ===========
 
 Schedules from the following categories are affected by power outage:
