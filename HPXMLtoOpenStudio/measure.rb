@@ -1360,14 +1360,14 @@ class OSModel
 
       sys_id = water_heating_system.id
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file)
+        plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, @hpxml.header.power_outage_periods)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-        plantloop_map[sys_id] = Waterheater.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file)
+        plantloop_map[sys_id] = Waterheater.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, @hpxml.header.power_outage_periods)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @eri_version, @schedules_file)
+        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @eri_version, @schedules_file, @hpxml.header.power_outage_periods)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file)
+        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, @hpxml.header.power_outage_periods)
       else
         fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
       end
@@ -1874,7 +1874,7 @@ class OSModel
     # Power outage sensor
     outage_sensor = nil
     if not @hpxml.header.power_outage_periods.empty?
-      outage_sch = AlwaysOnSchedule.new(model, SchedulesFile::ColumnOutage, Constants.ScheduleTypeLimitsFraction, power_outage_periods: @hpxml.header.power_outage_periods)
+      outage_sch = ScheduleRulesetConstant.new(model, SchedulesFile::ColumnOutage, 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: @hpxml.header.power_outage_periods)
       outage_sch = outage_sch.schedule
 
       outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
