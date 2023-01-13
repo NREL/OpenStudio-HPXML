@@ -830,38 +830,62 @@ class Schedule
           out = out_rule.daySchedule
           out.setName(sch_name + " #{Schedule.outage_name}#{i}")
 
-          Schedule.set_outage_begin(out, begin_day_schedule, op.begin_hour, value)
-          Schedule.set_outage_end(out, end_day_schedule, op.end_hour, value)
+          Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, op.end_hour, value)
 
           Schedule.set_weekday_rule(out_rule)
           Schedule.set_weekend_rule(out_rule)
           out_rule.setStartDate(date_s)
           out_rule.setEndDate(date_e)
         elsif outage_days == 1 # outage is exactly two calendar days (need two outage rules)
-
-        else # outage is more than two calendar days (need three outage rules)
+          # first day
           out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
           out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
           out = out_rule.daySchedule
           out.setName(sch_name + " #{Schedule.outage_name}#{i}")
 
-          Schedule.set_outage_begin(out, begin_day_schedule, op.begin_hour, value)
+          Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, 23, value)
           Schedule.set_weekday_rule(out_rule)
           Schedule.set_weekend_rule(out_rule)
           out_rule.setStartDate(date_s)
           out_rule.setEndDate(date_s)
 
+          # last day
           out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
           out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
           out = out_rule.daySchedule
           out.setName(sch_name + " #{Schedule.outage_name}#{i}")
 
-          Schedule.set_outage_end(out, end_day_schedule, op.end_hour, value)
+          Schedule.set_outage_values(out, end_day_schedule, 0, op.end_hour, value)
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_e)
+          out_rule.setEndDate(date_e)
+        else # outage is more than two calendar days (need three outage rules)
+          # first day
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+
+          Schedule.set_outage_values(out, begin_day_schedule, op.begin_hour, 23, value)
+          Schedule.set_weekday_rule(out_rule)
+          Schedule.set_weekend_rule(out_rule)
+          out_rule.setStartDate(date_s)
+          out_rule.setEndDate(date_s)
+
+          # last day
+          out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+          out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+          out = out_rule.daySchedule
+          out.setName(sch_name + " #{Schedule.outage_name}#{i}")
+
+          Schedule.set_outage_values(out, end_day_schedule, 0, op.end_hour, value)
           Schedule.set_weekday_rule(out_rule)
           Schedule.set_weekend_rule(out_rule)
           out_rule.setStartDate(date_e)
           out_rule.setEndDate(date_e)
 
+          # all other days
           out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
           out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
           out = out_rule.daySchedule
@@ -892,21 +916,10 @@ class Schedule
     end
   end
 
-  def self.set_outage_begin(out, day_schedule, begin_hour, value)
+  def self.set_outage_values(out, day_schedule, begin_hour, end_hour, value)
     (0..23).each do |h|
       time = OpenStudio::Time.new(0, h + 1, 0, 0)
-      if h < begin_hour
-        out.addValue(time, day_schedule.getValue(time))
-      else
-        out.addValue(time, value)
-      end
-    end
-  end
-
-  def self.set_outage_end(out, day_schedule, end_hour, value)
-    (0..23).each do |h|
-      time = OpenStudio::Time.new(0, h + 1, 0, 0)
-      if h > end_hour
+      if (h < begin_hour) || (h > end_hour)
         out.addValue(time, day_schedule.getValue(time))
       else
         out.addValue(time, value)
