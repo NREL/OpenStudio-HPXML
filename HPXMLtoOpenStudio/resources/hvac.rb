@@ -1048,7 +1048,7 @@ class HVAC
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
       # From Carrier heat pump lab testing
-      hp_ap.cool_rated_airflow_rate = 411.0 # cfm/ton
+      hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       hp_ap.cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
       hp_ap.cool_rated_shrs_net = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
@@ -1150,7 +1150,7 @@ class HVAC
     hp_ap.cool_min_capacity_ratio = 0.4 # frac
     hp_ap.cool_max_capacity_ratio = 1.2 # frac
     hp_ap.cool_min_cfm_per_ton = 200.0 / hp_ap.cool_min_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of min capacity
-    hp_ap.cool_max_cfm_per_ton = 425.0 / hp_ap.cool_max_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of max capacity
+    hp_ap.cool_max_cfm_per_ton = 480.0 / hp_ap.cool_max_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of max capacity
   end
 
   def self.set_heat_curves_mshp(heat_pump, num_speeds)
