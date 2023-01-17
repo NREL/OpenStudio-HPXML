@@ -335,6 +335,16 @@ class OSModel
     # Now that we've written in.xml, ensure that no capacities/airflows
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
+
+    # Handle zero occupants when operational calculation
+    occ_calc_type = @hpxml.header.occupancy_calculation_type
+    noccs = @hpxml.building_occupancy.number_of_residents
+    if occ_calc_type == HPXML::OccupancyCalculationTypeOperational && noccs == 0
+      @hpxml.header.vacancy_periods.add(begin_month: @hpxml.header.sim_begin_month,
+                                        begin_day: @hpxml.header.sim_begin_day,
+                                        end_month: @hpxml.header.sim_end_month,
+                                        end_day: @hpxml.header.sim_end_day)
+    end
   end
 
   def self.add_simulation_params(model)
@@ -1727,7 +1737,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
-                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
+                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
   end
 
   def self.create_ducts(model, hvac_distribution, spaces)
