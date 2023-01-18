@@ -37,7 +37,7 @@ You can also request generation of timeseries output CSV/JSON/MessagePack files 
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --monthly fuels --monthly temperatures --output-format json``
 
 | You can also add a detailed schedule as part of the simulation by using:
-| ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --add-detailed-schedule stochastic``
+| ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --add-stochastic-schedules``
 | This run includes the automatic generation of a CSV file with stochastic occupancy schedules that are used in the EnergyPlus simulation.
 
 Run ``openstudio workflow/run_simulation.rb -h`` to see all available commands/arguments.

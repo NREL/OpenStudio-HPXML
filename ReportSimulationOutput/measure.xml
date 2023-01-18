@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>16b781cb-81df-4d15-9a0f-a6ef3e7910d9</version_id>
-  <version_modified>20221118T005334Z</version_modified>
+  <version_id>772572a4-9c1b-4b22-9fcf-63de810ef311</version_id>
+  <version_modified>20230118T182507Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -317,6 +317,25 @@
       </choices>
     </argument>
     <argument>
+      <name>include_timeseries_resilience</name>
+      <display_name>Generate Timeseries Output: Resilience</display_name>
+      <description>Generates timeseries resilience.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>timeseries_timestamp_convention</name>
       <display_name>Generate Timeseries Output: Timestamp Convention</display_name>
       <description>Determines whether timeseries timestamps use the start-of-period or end-of-period convention. Doesn't apply if the output format is 'csv_dview'.</description>
@@ -334,6 +353,14 @@
           <display_name>end</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>timeseries_num_decimal_places</name>
+      <display_name>Generate Timeseries Output: Number of Decimal Places</display_name>
+      <description>Allows overriding the default number of decimal places for timeseries output.</description>
+      <type>Integer</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>add_timeseries_dst_column</name>
@@ -1502,6 +1529,13 @@
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
+    <output>
+      <name>Resilience: Battery avg-hr</name>
+      <display_name>Resilience: Battery avg-hr</display_name>
+      <short_name>Resilience: Battery avg-hr</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
   </outputs>
   <provenances />
   <tags>
@@ -1529,7 +1563,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>314D2C5A</checksum>
+      <checksum>137DDED6</checksum>
     </file>
     <file>
       <version>
@@ -1540,7 +1574,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BB6A623C</checksum>
+      <checksum>C02D2139</checksum>
     </file>
   </files>
 </measure>

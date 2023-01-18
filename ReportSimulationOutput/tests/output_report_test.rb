@@ -510,7 +510,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Energy Use: Total'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Energy Use: Total'])
   end
 
   def test_timeseries_hourly_total_energy_pv
@@ -527,8 +527,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Energy Use: Total',
-                                                         'Energy Use: Net'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Energy Use: Total',
+                                                             'Energy Use: Net'])
   end
 
   def test_timeseries_hourly_fuels
@@ -545,7 +545,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
   end
 
   def test_timeseries_hourly_fuels_pv
@@ -562,8 +562,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total',
-                                                         'Fuel Use: Electricity: Net'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total',
+                                                             'Fuel Use: Electricity: Net'])
   end
 
   def test_timeseries_hourly_emissions
@@ -580,7 +580,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
   end
 
   def test_timeseries_hourly_emission_end_uses
@@ -597,7 +597,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, emission_end_uses_timeseries_cols[0..2])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emission_end_uses_timeseries_cols[0..2])
   end
 
   def test_timeseries_hourly_emission_fuels
@@ -614,7 +614,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, emission_fuels_timeseries_cols[0..2])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emission_fuels_timeseries_cols[0..2])
   end
 
   def test_timeseries_hourly_enduses
@@ -631,7 +631,26 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
+  end
+
+  def test_timeseries_hourly_enduses_vacancy
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-vacancy.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_end_use_consumptions' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEndUses
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], 0, 31 * 24 - 1) # Jan
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 1, -1) # Dec
+    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_hourly_hotwateruses
@@ -648,7 +667,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWaterUses)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWaterUses)
   end
 
   def test_timeseries_hourly_total_loads
@@ -665,7 +684,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsTotalLoads)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsTotalLoads)
   end
 
   def test_timeseries_hourly_component_loads
@@ -683,7 +702,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
   end
 
   def test_timeseries_hourly_unmet_hours
@@ -701,7 +720,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Unmet Hours: Heating', 'Unmet Hours: Cooling'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Unmet Hours: Heating', 'Unmet Hours: Cooling'])
   end
 
   def test_timeseries_hourly_zone_temperatures
@@ -718,7 +737,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps)
   end
 
   def test_timeseries_hourly_zone_temperatures_without_cooling
@@ -735,7 +754,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps - ['Temperature: Cooling Setpoint'])
   end
 
   def test_timeseries_hourly_zone_temperatures_mf_space
@@ -759,7 +778,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, cols_temps_other_side)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, cols_temps_other_side)
   end
 
   def test_timeseries_hourly_airflows_with_exhaust_mechvent
@@ -776,7 +795,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
   end
 
   def test_timeseries_hourly_airflows_with_whf
@@ -795,7 +814,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, add_cols)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, add_cols)
   end
 
   def test_timeseries_hourly_airflows_with_clothes_dryer_exhaust
@@ -812,7 +831,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
   def test_timeseries_hourly_airflows_with_balanced_mechvent
@@ -829,7 +848,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
   def test_timeseries_hourly_airflows_with_cfis
@@ -846,7 +865,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
   def test_timeseries_hourly_weather
@@ -863,7 +882,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWeather)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWeather)
   end
 
   def test_timeseries_hourly_resilience
@@ -916,8 +935,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL
@@ -951,8 +970,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(365, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL
@@ -984,8 +1003,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(12, timeseries_rows.size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep
@@ -1029,7 +1048,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
   end
 
   def test_timeseries_timestep_10min
@@ -1214,7 +1233,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsStandardOutputVariables)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsStandardOutputVariables)
     assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
   end
 
@@ -1245,7 +1264,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAdvancedOutputVariables)
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAdvancedOutputVariables)
   end
 
   def test_eri_output
@@ -1334,7 +1353,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     return steps.uniq.size
   end
 
-  def _check_for_nonzero_timeseries_value(timeseries_csv, timeseries_cols)
+  def _check_for_nonzero_avg_timeseries_value(timeseries_csv, timeseries_cols)
     values = {}
     timeseries_cols.each do |col|
       values[col] = []
@@ -1354,7 +1373,27 @@ class ReportSimulationOutputTest < MiniTest::Test
     end
   end
 
-  def _check_for_zero_baseload_timeseries_value(timeseries_csv, timeseries_cols)
+  def _check_for_zero_timeseries_values(timeseries_csv, timeseries_cols, start_ix, end_ix)
+    values = {}
+    timeseries_cols.each do |col|
+      values[col] = []
+    end
+    CSV.foreach(timeseries_csv, headers: true) do |row|
+      next if row['Time'].nil?
+
+      timeseries_cols.each do |col|
+        fail "Unexpected column: #{col}." if row[col].nil?
+
+        values[col] << Float(row[col])
+      end
+    end
+    timeseries_cols.each do |col|
+      has_only_zero_timeseries_values = values[col][start_ix..end_ix].all? { |x| x == 0 }
+      assert(has_only_zero_timeseries_values)
+    end
+  end
+
+  def _check_for_nonzero_timeseries_values(timeseries_csv, timeseries_cols)
     # check that every day has non zero values for baseload equipment (e.g., refrigerator)
     values = {}
     timeseries_cols.each do |col|
