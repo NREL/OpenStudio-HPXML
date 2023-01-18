@@ -1208,7 +1208,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
     all_total += @ideal_system_loads.values.map { |x| x.annual_output.to_f }.sum(0.0)
-    if all_total == 0
+    if all_total == 0 && (not @hpxml.header.power_outage_periods.any? { |op| op.year_round? })
       runner.registerError('Simulation unsuccessful.')
       return false
     elsif all_total.infinite?
