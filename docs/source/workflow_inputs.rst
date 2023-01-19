@@ -142,14 +142,14 @@ Detailed Schedule Inputs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
-They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
+They can be used to reflect real-world or stochastic occupancy.
 
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/SoftwareInfo/extension/SchedulesFilePath`` elements.
 The column names available in the schedule CSV files are:
 
-  ===============================  =====  ==============================================================================  ===================
-  Column Name                      Units  Description                                                                     Affected by Vacancy
-  ===============================  =====  ==============================================================================  ===================
+  ===============================  =====  ==============================================================================  ===============================
+  Column Name                      Units  Description                                                                     Can Be Stochastically Generated
+  ===============================  =====  ==============================================================================  ===============================
   ``occupants``                    frac   Occupant heat gain schedule.                                                    Yes
   ``lighting_interior``            frac   Interior lighting energy use schedule.                                          Yes
   ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                          Yes
@@ -164,12 +164,12 @@ The column names available in the schedule CSV files are:
   ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                              Yes
   ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                Yes
   ``plug_loads_other``             frac   Other plug load energy use schedule.                                            Yes
-  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                       Yes
-  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                 Yes
-  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                        Yes
-  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                            Yes
-  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                         Yes
-  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                        Yes
+  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                       No
+  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                 No
+  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                        No
+  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                            No
+  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                         No
+  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                        No
   ``pool_pump``                    frac   Pool pump energy use schedule.                                                  No
   ``pool_heater``                  frac   Pool heater energy use schedule.                                                No
   ``hot_tub_pump``                 frac   Hot tub pump energy use schedule.                                               No
@@ -183,7 +183,7 @@ The column names available in the schedule CSV files are:
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=standard, 1=heat pump only.   No
   ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.              No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.  N/A
-  ===============================  =====  ==============================================================================  ===================
+  ===============================  =====  ==============================================================================  ===============================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -193,8 +193,8 @@ The schedule file must have a full year of data even if the simulation is not an
 Frequency of schedule values do not need to match the simulation timestep.
 For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
 
-A detailed stochastic or smooth occupancy schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
-Inputs for the schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
+A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Can Be Stochastically Generated" above for applicable columns); see the :ref:`usage_instructions` for the commands.
+Inputs for the stochastic schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
 See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
 
 .. warning::
@@ -224,14 +224,15 @@ HPXML Emissions Scenarios
 *************************
 
 One or more emissions scenarios can be entered as an ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario``.
+If not entered, emissions will not be calculated.
 
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
   Element                           Type      Units  Constraints  Required  Default   Notes
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
   ``Name``                          string                        Yes                 Name of the scenario (which shows up in the output file)
   ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2e)
   ``EmissionsFactor``               element          >= 1         See [#]_            Emissions factor(s) for a given fuel type
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
 
   .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2e"), then some emissions factors can be defaulted as described further below.
   .. [#] EmissionsFactor is required for electricity and optional for all non-electric fuel types.
@@ -257,25 +258,25 @@ For each scenario, electricity emissions factors must be entered as an ``/HPXML/
 
 If an electricity schedule file is used, additional information can be entered in the ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor``.
 
-  =================================  ================  =====  ===========  ========  ========  ============================================================
+  =================================  ================  =====  ===========  ========  ========  ==============================================
   Element                            Type              Units  Constraints  Required  Default   Notes
-  =================================  ================  =====  ===========  ========  ========  ============================================================
+  =================================  ================  =====  ===========  ========  ========  ==============================================
   ``NumberofHeaderRows``             integer           #      >= 0         No        0         Number of header rows in the schedule file
   ``ColumnNumber``                   integer           #      >= 1         No        1         Column number of the data in the schedule file
-  =================================  ================  =====  ===========  ========  ========  ============================================================
+  =================================  ================  =====  ===========  ========  ========  ==============================================
 
 Fuel Emissions
 ~~~~~~~~~~~~~~
 
 For each scenario, fuel emissions factors can be optionally entered as an ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor``.
 
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  =============================
   Element                           Type      Units  Constraints  Required  Default   Notes
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  =============================
   ``FuelType``                      string           See [#]_     Yes                 Emissions factor fuel type
   ``Units``                         string           See [#]_     Yes                 Emissions factor units
   ``Value``                         double                        Yes                 Emissions factor annual value
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  =============================
 
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] Units choices are "lb/MBtu" and "kg/MBtu".
@@ -304,14 +305,15 @@ HPXML Utility Bill Scenarios
 ****************************
 
 One or more utility bill scenarios can be entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario``.
+If not entered, utility bills will not be calculated.
 
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
   Element                           Type      Units  Constraints  Required  Default   Notes
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
   ``Name``                          string                        Yes                 Name of the scenario (which shows up in the output file)
   ``UtilityRate``                   element          >= 0                             Utility rate(s) for a given fuel type
   ``PVCompensation``                element          <= 1                             PV compensation information
-  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ================================  ========  =====  ===========  ========  ========  ========================================================
 
 See :ref:`bill_outputs` for a description of how the calculated utility bills appear in the output files.
 
@@ -325,13 +327,13 @@ Electricity rates can be entered using Simple inputs or Detailed inputs.
 
 For simple utility rate structures, inputs can be entered using a fixed charge and a marginal rate.
 
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  ====================
   Element                           Type      Units    Constraints  Required  Default   Notes
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  ====================
   ``FuelType``                      string             electricity  Yes                 Fuel type
   ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
   ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  ====================
 
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
@@ -339,12 +341,12 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
 
 For detailed utility rate structures, inputs can be entered using a tariff JSON file.
 
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  =============================
   Element                           Type      Units    Constraints  Required  Default   Notes
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  =============================
   ``FuelType``                      string             electricity  Yes                 Fuel type
   ``TariffFilePath``                string                          Yes                 Path to tariff JSON file [#]_
-  ================================  ========  =======  ===========  ========  ========  ============================================================
+  ================================  ========  =======  ===========  ========  ========  =============================
 
   .. [#] TariffFilePath must point to a JSON file with utility rate structure information.
          Tariff files can describe flat, tiered, time-of-use, tiered time-of-use, or real-time pricing rates.
@@ -358,13 +360,13 @@ Fuel Rates
 
 For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/UtilityRate``.
 
-  ================================  ========  ========  ===========  ========  ========  ============================================================
+  ================================  ========  ========  ===========  ========  ========  ====================
   Element                           Type      Units     Constraints  Required  Default   Notes
-  ================================  ========  ========  ===========  ========  ========  ============================================================
+  ================================  ========  ========  ===========  ========  ========  ====================
   ``FuelType``                      string              See [#]_     Yes                 Fuel type
   ``FixedCharge``                   double    $/month                No        See [#]_  Monthly fixed charge
   ``MarginalRate``                  double    See [#]_               No        See [#]_  Marginal flat rate
-  ================================  ========  ========  ===========  ========  ========  ============================================================
+  ================================  ========  ========  ===========  ========  ========  ====================
 
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
@@ -410,15 +412,44 @@ If the PV compensation type is net-metering, additional information can be enter
 
 If the PV compensation type is feed-in tariff, additional information can be entered in ``/HPXML/SoftwareInfo/extension/UtilityBillScenarios/UtilityBillScenario/PVCompensation/CompensationType/FeedInTariff``.
 
-  ============================  ========  =======  ===========  ========  ==============  =============================================================
+  ============================  ========  =======  ===========  ========  ==============  ========================
   Element                       Type      Units    Constraints  Required  Default         Notes
-  ============================  ========  =======  ===========  ========  ==============  =============================================================
+  ============================  ========  =======  ===========  ========  ==============  ========================
   ``FeedInTariffRate``          double    $/kWh                 No        0.12            Feed-in tariff rate [#]_
-  ============================  ========  =======  ===========  ========  ==============  =============================================================
+  ============================  ========  =======  ===========  ========  ==============  ========================
 
   .. [#] FeedInTariffRate applies to full (not excess) PV production.
          Some utilities/regions may have a feed-in tariff policy where compensation occurs for excess PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than full PV production.
          OpenStudio-HPXML is currently unable to calculate utility bills for such a feed-in tariff policy.
+
+HPXML Vacancy Periods
+*********************
+
+One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
+If not entered, occupant vacancies will not be modeled.
+
+  ====================================  ========  =======  =============  ========  =======  ===========
+  Element                               Type      Units    Constraints    Required  Default  Description
+  ====================================  ========  =======  =============  ========  =======  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                Begin day
+  ``EndMonth``                          integer            1 - 12         Yes                End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
+  ====================================  ========  =======  =============  ========  =======  ===========
+
+Schedules from the following categories are affected by vacancy:
+
+- Occupancy
+- Lighting
+- Ceiling Fans
+- Cooking Range/Oven
+- Dishwasher
+- Clothes Washer
+- Clothes Dryer
+- Plug Loads
+- Fuel Loads
+- Hot Water
+- Local Ventilation Fans
 
 .. _buildingsite:
 
@@ -426,7 +457,6 @@ HPXML Building Site
 -------------------
 
 Building site information can be entered in ``/HPXML/Building/Site``.
-
 
   =======================================  ========  =====  ===========  ========  ========  ===============
   Element                                  Type      Units  Constraints  Required  Default   Description

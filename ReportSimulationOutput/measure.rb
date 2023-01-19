@@ -142,6 +142,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('start')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('timeseries_num_decimal_places', false)
+    arg.setDisplayName('Generate Timeseries Output: Number of Decimal Places')
+    arg.setDescription('Allows overriding the default number of decimal places for timeseries output.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('add_timeseries_dst_column', false)
     arg.setDisplayName('Generate Timeseries Output: Add TimeDST Column')
     arg.setDescription('Optionally add, in addition to the default local standard Time column, a local clock TimeDST column. Requires that daylight saving time is enabled.')
@@ -509,6 +514,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     generate_eri_outputs = generate_eri_outputs.is_initialized ? generate_eri_outputs.get : false
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
+    timeseries_num_decimal_places = runner.getOptionalIntegerArgumentValue('timeseries_num_decimal_places', user_arguments)
+    timeseries_num_decimal_places = timeseries_num_decimal_places.is_initialized ? Integer(timeseries_num_decimal_places.get) : nil
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
 
@@ -548,8 +555,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if timeseries_frequency != 'none'
       add_dst_column = (add_timeseries_dst_column.is_initialized ? add_timeseries_dst_column.get : false)
       add_utc_column = (add_timeseries_utc_column.is_initialized ? add_timeseries_utc_column.get : false)
-      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(@msgpackDataTimeseries, @hpxml, use_timestamp_start_convention,
-                                                                                 add_dst_column, add_utc_column, use_dview_format, timeseries_frequency)
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml, use_timestamp_start_convention,
+                                                                   add_dst_column, add_utc_column, use_dview_format, timeseries_frequency)
     end
 
     # Retrieve outputs
@@ -588,6 +595,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     report_timeseries_output_results(runner, outputs, output_format,
                                      timeseries_output_path,
                                      timeseries_frequency,
+                                     timeseries_num_decimal_places,
                                      include_timeseries_total_consumptions,
                                      include_timeseries_fuel_consumptions,
                                      include_timeseries_end_use_consumptions,
@@ -608,6 +616,68 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                      use_dview_format)
 
     return true
+  end
+
+  def get_timestamps(msgpackData, hpxml, use_timestamp_start_convention, add_dst_column = false, add_utc_column = false,
+                     use_dview_format = false, timeseries_frequency = nil)
+    return if msgpackData.nil?
+
+    ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
+
+    if add_dst_column || use_dview_format
+      dst_start_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_begin_month, hpxml.header.dst_begin_day, 2)
+      dst_end_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_end_month, hpxml.header.dst_end_day, 1)
+    end
+    if add_utc_column
+      utc_offset = hpxml.header.time_zone_utc_offset
+      utc_offset *= 3600 # seconds
+    end
+
+    timestamps = []
+    timestamps_dst = [] if add_dst_column || use_dview_format
+    timestamps_utc = [] if add_utc_column
+    year = hpxml.header.sim_calendar_year
+    ep_timestamps.each do |ep_timestamp|
+      month_day, hour_minute = ep_timestamp.split(' ')
+      month, day = month_day.split('/').map(&:to_i)
+      hour, minute, _ = hour_minute.split(':').map(&:to_i)
+
+      # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
+      if use_timestamp_start_convention
+        if timeseries_frequency == 'timestep'
+          ts_offset = hpxml.header.timestep * 60 # seconds
+        elsif timeseries_frequency == 'hourly'
+          ts_offset = 60 * 60 # seconds
+        elsif timeseries_frequency == 'daily'
+          ts_offset = 60 * 60 * 24 # seconds
+        elsif timeseries_frequency == 'monthly'
+          ts_offset = Constants.NumDaysInMonths(year)[month - 1] * 60 * 60 * 24 # seconds
+        else
+          fail 'Unexpected timeseries_frequency/'
+        end
+      end
+
+      ts = Time.utc(year, month, day, hour, minute)
+      ts -= ts_offset unless ts_offset.nil?
+
+      timestamps << ts.iso8601.delete('Z')
+
+      if add_dst_column || use_dview_format
+        if (ts >= dst_start_ts) && (ts < dst_end_ts)
+          ts_dst = ts + 3600 # 1 hr shift forward
+        else
+          ts_dst = ts
+        end
+        timestamps_dst << ts_dst.iso8601.delete('Z')
+      end
+
+      if add_utc_column
+        ts_utc = ts - utc_offset
+        timestamps_utc << ts_utc.iso8601
+      end
+    end
+
+    return timestamps, timestamps_dst, timestamps_utc
   end
 
   def get_outputs(runner, timeseries_frequency,
@@ -1637,6 +1707,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def report_timeseries_output_results(runner, outputs, output_format,
                                        timeseries_output_path,
                                        timeseries_frequency,
+                                       timeseries_num_decimal_places,
                                        include_timeseries_total_consumptions,
                                        include_timeseries_fuel_consumptions,
                                        include_timeseries_end_use_consumptions,
@@ -1661,14 +1732,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
 
-    # Set rounding precision for timeseries (e.g., hourly) outputs.
-    # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
-    n_digits = 2 # Default for hourly (or longer) data
-    if timeseries_frequency == 'timestep'
-      if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
-        n_digits += 2
-      elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
-        n_digits += 1
+    if not timeseries_num_decimal_places.nil?
+      n_digits = timeseries_num_decimal_places
+    else
+      # Set rounding precision for timeseries (e.g., hourly) outputs.
+      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
+      n_digits = 3 # Default for hourly (or longer) data
+      if timeseries_frequency == 'timestep'
+        if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
+          n_digits += 2
+        elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
+          n_digits += 1
+        end
       end
     end
 
@@ -1839,7 +1914,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Apply daylight savings
         if timeseries_frequency == 'timestep' || timeseries_frequency == 'hourly'
           if @hpxml.header.dst_enabled
-            dst_start_ix, dst_end_ix = OutputMethods.get_dst_start_end_indexes(@timestamps, timestamps_dst)
+            dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
             dst_end_ix.downto(dst_start_ix + 1) do |i|
               data[i + 1] = data[i]
             end
@@ -1879,6 +1954,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote timeseries output results to #{timeseries_output_path}.")
   end
 
+  def get_dst_start_end_indexes(timestamps, timestamps_dst)
+    dst_start_ix = nil
+    dst_end_ix = nil
+    timestamps.zip(timestamps_dst).each_with_index do |ts, i|
+      dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
+      dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
+    end
+
+    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? # run period ends before DST ends
+
+    return dst_start_ix, dst_end_ix
+  end
+
   def get_report_meter_data_annual(meter_names, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'))
     return 0.0 if meter_names.empty?
 
@@ -1908,7 +1996,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
-    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_frequency]
+    msgpack_timeseries_name = { 'timestep' => 'TimeStep',
+                                'hourly' => 'Hourly',
+                                'daily' => 'Daily',
+                                'monthly' => 'Monthly' }[timeseries_frequency]
     cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
     rows = @msgpackData['MeterData'][msgpack_timeseries_name]['Rows']
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
