@@ -4,10 +4,24 @@ __New Features__
 - Updates to newer proposed HPXML v4.0:
   - **Breaking change**: Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
   - **Breaking change**: Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
-- BuildResidentialScheduleFile measure:
-  - Allows requesting a subset of enduses/columns to be generated.
+- Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
+- ReportSimulationOutput measure: Allows specifying the number of decimal places for timeseries output.
 
 __Bugfixes__
+- Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
+- BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
+- Fixes operational calculation when the number of residents is set to zero.
+
+## OpenStudio-HPXML v1.5.1
+
+__New Features__
+- When `Battery/Location` not provided, now defaults to garage if present, otherwise outside.
+- BuildResidentialScheduleFile measure:
+  - Allows requesting a subset of end uses (columns) to be generated.
+
+__Bugfixes__
+- Fixes total/net electricity timeseries outputs to include battery charging/discharging energy.
+- Fixes error when a non-electric water heater has jacket insulation and the UEF metric is used.
 
 ## OpenStudio-HPXML v1.5.0
 

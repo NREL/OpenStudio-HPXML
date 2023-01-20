@@ -2320,7 +2320,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pv_system_values(hpxml_default, 0.96, 0.190, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
+    _test_default_pv_system_values(hpxml_default, 0.96, 0.194, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
   end
 
   def test_batteries
@@ -2336,7 +2336,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].round_trip_efficiency = 0.9
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 45.0, nil, 34.0, nil, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith, 0.9)
+    _test_default_battery_values(hpxml_default, 45.0, nil, 34.0, nil, 1234.0, HPXML::LocationBasementConditioned, nil, 0.9)
 
     # Test w/ Ah instead of kWh
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2345,7 +2345,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].usable_capacity_ah = 876.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 987.0, nil, 876.0, 1234.0, HPXML::LocationBasementConditioned, HPXML::BatteryLifetimeModelKandlerSmith, 0.9)
+    _test_default_battery_values(hpxml_default, nil, 987.0, nil, 876.0, 1234.0, HPXML::LocationBasementConditioned, nil, 0.9)
 
     # Test defaults
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2358,7 +2358,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].round_trip_efficiency = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ nominal kWh
     hpxml.batteries[0].nominal_capacity_kwh = 14.0
@@ -2368,7 +2368,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 14.0, nil, 12.6, nil, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, 14.0, nil, 12.6, nil, 7000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ usable kWh
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2378,7 +2378,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 13.33, nil, 12.0, nil, 6665.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, 13.33, nil, 12.0, nil, 6665.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ nominal Ah
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2388,7 +2388,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 280.0, nil, 252.0, 7000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, nil, 280.0, nil, 252.0, 7000.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ usable Ah
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2398,7 +2398,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, nil, 266.67, nil, 240.0, 6667.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, nil, 266.67, nil, 240.0, 6667.0, HPXML::LocationOutside, nil, 0.925)
 
     # Test defaults w/ rated power output
     hpxml.batteries[0].nominal_capacity_kwh = nil
@@ -2408,7 +2408,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.batteries[0].rated_power_output = 10000.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_battery_values(hpxml_default, 20.0, nil, 18.0, nil, 10000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone, 0.925)
+    _test_default_battery_values(hpxml_default, 20.0, nil, 18.0, nil, 10000.0, HPXML::LocationOutside, nil, 0.925)
+
+    # Test defaults w/ garage
+    hpxml = _create_hpxml('base-pv-battery-garage.xml')
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+    hpxml.batteries[0].nominal_capacity_ah = nil
+    hpxml.batteries[0].usable_capacity_kwh = nil
+    hpxml.batteries[0].usable_capacity_ah = nil
+    hpxml.batteries[0].rated_power_output = nil
+    hpxml.batteries[0].location = nil
+    hpxml.batteries[0].lifetime_model = nil
+    hpxml.batteries[0].round_trip_efficiency = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_battery_values(hpxml_default, 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationGarage, nil, 0.925)
   end
 
   def test_generators
@@ -3977,7 +3991,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_battery_values(hpxml, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah,
-                                   rated_power_output, location, _lifetime_model, round_trip_efficiency)
+                                   rated_power_output, location, lifetime_model, round_trip_efficiency)
     if nominal_capacity_kwh.nil?
       assert_nil(hpxml.batteries[0].nominal_capacity_kwh)
     else
@@ -4000,7 +4014,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     assert_equal(rated_power_output, hpxml.batteries[0].rated_power_output)
     assert_equal(location, hpxml.batteries[0].location)
-    assert_equal(nil, hpxml.batteries[0].lifetime_model)
+    if lifetime_model.nil?
+      assert_nil(hpxml.batteries[0].lifetime_model)
+    else
+      assert_equal(lifetime_model, hpxml.batteries[0].lifetime_model)
+    end
     assert_equal(round_trip_efficiency, hpxml.batteries[0].round_trip_efficiency)
   end
 
