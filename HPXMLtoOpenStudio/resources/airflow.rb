@@ -77,7 +77,7 @@ class Airflow
     vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
 
     # Initialization
-    initialize_cfis(model, vent_fans_mech, airloop_map)
+    initialize_cfis(model, vent_fans_mech, airloop_map, power_outage_periods)
     model.getAirLoopHVACs.each do |air_loop|
       initialize_fan_objects(model, air_loop)
     end
@@ -522,7 +522,7 @@ class Airflow
     return actuator
   end
 
-  def self.initialize_cfis(model, vent_fans_mech, airloop_map)
+  def self.initialize_cfis(model, vent_fans_mech, airloop_map, power_outage_periods)
     # Get AirLoop associated with CFIS
     @cfis_airloop = {}
     @cfis_t_sum_open_var = {}
@@ -533,6 +533,8 @@ class Airflow
 
     vent_fans_mech.each do |vent_mech|
       next if vent_mech.fan_type != HPXML::MechVentTypeCFIS
+
+      fail 'Cannot apply power outage period(s) to CFIS systems.' if !power_outage_periods.empty?
 
       vent_mech.distribution_system.hvac_systems.map { |system| system.id }.each do |cfis_id|
         next if airloop_map[cfis_id].nil?
