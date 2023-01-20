@@ -125,7 +125,7 @@ class HVAC
     end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
     if heating_system.is_a?(HPXML::HeatPump) && (not heating_system.backup_system.nil?) && (not heating_system.backup_heating_switchover_temp.nil?)
-      # Disable blower fan power below switchover temperature
+      # Disable blower fan power below switchover temperature if separate backup heating system
       set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
@@ -3604,8 +3604,8 @@ class HVAC
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
     else
+      hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
-      hp_ap.hp_min_temp = -40.0
     end
   end
 

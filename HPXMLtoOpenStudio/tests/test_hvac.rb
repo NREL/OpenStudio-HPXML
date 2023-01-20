@@ -479,19 +479,21 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     end
   end
 
-  def test_air_to_air_heat_pump_1_speed_backup_lockout_temperature
+  def test_air_to_air_heat_pump_1_speed_lockout_temperatures
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-1-speed-backup-lockout-temperature.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
-    lockout_temperature = UnitConversions.convert(heat_pump.backup_heating_lockout_temp, 'F', 'C')
+    backup_lockout_temp = UnitConversions.convert(heat_pump.backup_heating_lockout_temp, 'F', 'C')
+    compressor_lockout_temp = UnitConversions.convert(heat_pump.compressor_lockout_temp, 'F', 'C')
 
     # Check unitary system
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    assert_in_delta(lockout_temperature, unitary_system.maximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation, 0.01)
+    assert_in_delta(backup_lockout_temp, unitary_system.maximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation, 0.01)
+    assert_in_delta(compressor_lockout_temp, unitary_system.minimumOutdoorDryBulbTemperatureforCompressorOperation, 0.01)
   end
 
   def test_air_to_air_heat_pump_2_speed

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>0929a1f0-4cfb-4cf2-849c-d858027f8000</version_id>
-  <version_modified>20221228T192553Z</version_modified>
+  <version_id>7e53d695-0a8e-48bb-bd93-6c5e9a27bace</version_id>
+  <version_modified>20230120T224703Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2607,9 +2607,9 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>heat_pump_backup_heating_switchover_temp</name>
-      <display_name>Heat Pump: Backup Heating Switchover Temperature</display_name>
-      <description>The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either 'integrated' or 'separate'. Both Switchover Temperature and Lockout Temperature cannot be specified.</description>
+      <name>heat_pump_compressor_lockout_temp</name>
+      <display_name>Heat Pump: Compressor Lockout Temperature</display_name>
+      <description>The temperature below which the heat pump compressor is disabled. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -2618,7 +2618,7 @@
     <argument>
       <name>heat_pump_backup_heating_lockout_temp</name>
       <display_name>Heat Pump: Backup Heating Lockout Temperature</display_name>
-      <description>The temperature above which the backup system is disabled in order to prevent backup heating operation during, e.g., a thermostat heating setback recovery event. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Only applies if Backup Type is 'integrated'. Both Switchover Temperature and Lockout Temperature cannot be specified.</description>
+      <description>The temperature above which the heat pump backup system is disabled. Only applies if Backup Type is 'integrated'. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -6530,7 +6530,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>19B3F93F</checksum>
+      <checksum>4ABAD4F8</checksum>
     </file>
   </files>
 </measure>

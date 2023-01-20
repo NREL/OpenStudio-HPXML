@@ -1962,10 +1962,10 @@ class HVACSizing
       capacity_ratio = 1.0
     end
 
-    if (not hvac.SwitchoverTemperature.nil?) && (hvac.SwitchoverTemperature > weather.design.HeatingDrybulb)
-      # Calculate the heating load at the switchover temperature to limit uninitialized capacity
+    if (not hvac.MinCompressorTemperature.nil?) && (hvac.MinCompressorTemperature > weather.design.HeatingDrybulb)
+      # Calculate the heating load at the minimum compressor temperature to limit uninitialized capacity
       switchover_weather = Marshal.load(Marshal.dump(weather))
-      switchover_weather.design.HeatingDrybulb = hvac.SwitchoverTemperature
+      switchover_weather.design.HeatingDrybulb = hvac.MinCompressorTemperature
       _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
       heating_load = switchover_all_hvac_sizing_values[hvac.hvac_system].Heat_Load
       heating_db = switchover_weather.design.HeatingDrybulb
@@ -2352,7 +2352,11 @@ class HVACSizing
 
       # HP Switchover Temperature
       if hpxml_hvac.is_a?(HPXML::HeatPump)
-        hvac.SwitchoverTemperature = hpxml_hvac.backup_heating_switchover_temp
+        if not hpxml_hvac.backup_heating_switchover_temp.nil?
+          hvac.MinCompressorTemperature = hpxml_hvac.backup_heating_switchover_temp
+        elsif not hpxml_hvac.compressor_lockout_temp.nil?
+          hvac.MinCompressorTemperature = hpxml_hvac.compressor_lockout_temp
+        end
       end
 
       # Number of speeds
@@ -3436,7 +3440,7 @@ class HVACInfo
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :OverSizeLimit, :OverSizeDelta, :hvac_system,
                 :HeatingEIR, :CoolingEIR, :SizingSpeed, :HeatingCOP,
-                :GSHP_SpacingType, :EvapCoolerEffectiveness, :SwitchoverTemperature, :LeavingAirTemp,
+                :GSHP_SpacingType, :EvapCoolerEffectiveness, :MinCompressorTemperature, :LeavingAirTemp,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :BackupSupplyAirTemp,
                 :GSHP_design_chw, :GSHP_design_delta_t, :GSHP_design_hw, :GSHP_bore_d,
                 :GSHP_pipe_od, :GSHP_pipe_id, :GSHP_pipe_cond, :GSHP_grout_k, :HasIntegratedHeating)
