@@ -1800,7 +1800,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults
     vent_fan.rated_flow_rate = nil
     vent_fan.start_hour = nil
-    vent_fan.quantity = nil
+    vent_fan.count = nil
     vent_fan.is_shared_system = nil
     vent_fan.fraction_recirculation = nil
     vent_fan.in_unit_flow_rate = nil
@@ -1935,13 +1935,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     kitchen_fan.rated_flow_rate = 300
     kitchen_fan.fan_power = 20
     kitchen_fan.start_hour = 12
-    kitchen_fan.quantity = 2
+    kitchen_fan.count = 2
     kitchen_fan.hours_in_operation = 2
     bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
     bath_fan.rated_flow_rate = 80
     bath_fan.fan_power = 33
     bath_fan.start_hour = 6
-    bath_fan.quantity = 3
+    bath_fan.count = 3
     bath_fan.hours_in_operation = 3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1952,12 +1952,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     kitchen_fan.rated_flow_rate = nil
     kitchen_fan.fan_power = nil
     kitchen_fan.start_hour = nil
-    kitchen_fan.quantity = nil
+    kitchen_fan.count = nil
     kitchen_fan.hours_in_operation = nil
     bath_fan.rated_flow_rate = nil
     bath_fan.fan_power = nil
     bath_fan.start_hour = nil
-    bath_fan.quantity = nil
+    bath_fan.count = nil
     bath_fan.hours_in_operation = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -2284,12 +2284,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.pv_systems.each do |pv|
       pv.is_shared_system = true
       pv.number_of_bedrooms_served = 20
-      pv.inverter_efficiency = 0.90
       pv.system_losses_fraction = 0.20
       pv.location = HPXML::LocationGround
       pv.tracking = HPXML::PVTrackingType1Axis
       pv.module_type = HPXML::PVModuleTypePremium
       pv.array_azimuth = 123
+    end
+    hpxml.inverters.each do |inv|
+      inv.inverter_efficiency = 0.90
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -2298,13 +2300,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/o year modules manufactured
     hpxml.pv_systems.each do |pv|
       pv.is_shared_system = nil
-      pv.inverter_efficiency = nil
       pv.system_losses_fraction = nil
       pv.location = nil
       pv.tracking = nil
       pv.module_type = nil
       pv.array_orientation = HPXML::OrientationSoutheast
       pv.array_azimuth = nil
+    end
+    hpxml.inverters.each do |inv|
+      inv.inverter_efficiency = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -2866,7 +2870,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_ceiling_fans
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-lighting-ceiling-fans.xml')
-    hpxml.ceiling_fans[0].quantity = 2
+    hpxml.ceiling_fans[0].count = 2
     hpxml.ceiling_fans[0].efficiency = 100
     hpxml.ceiling_fans[0].weekday_fractions = ConstantDaySchedule
     hpxml.ceiling_fans[0].weekend_fractions = ConstantDaySchedule
@@ -2877,7 +2881,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     hpxml.ceiling_fans.each do |ceiling_fan|
-      ceiling_fan.quantity = nil
+      ceiling_fan.count = nil
       ceiling_fan.efficiency = nil
       ceiling_fan.weekday_fractions = nil
       ceiling_fan.weekend_fractions = nil
@@ -3853,20 +3857,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.01)
   end
 
-  def _test_default_kitchen_fan_values(hpxml, quantity, flow_rate, hours_in_operation, fan_power, start_hour)
+  def _test_default_kitchen_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
     kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
 
-    assert_equal(quantity, kitchen_fan.quantity)
+    assert_equal(count, kitchen_fan.count)
     assert_equal(flow_rate, kitchen_fan.rated_flow_rate.to_f + kitchen_fan.calculated_flow_rate.to_f + kitchen_fan.tested_flow_rate.to_f + kitchen_fan.delivered_ventilation.to_f)
     assert_equal(hours_in_operation, kitchen_fan.hours_in_operation)
     assert_equal(fan_power, kitchen_fan.fan_power)
     assert_equal(start_hour, kitchen_fan.start_hour)
   end
 
-  def _test_default_bath_fan_values(hpxml, quantity, flow_rate, hours_in_operation, fan_power, start_hour)
+  def _test_default_bath_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
     bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
 
-    assert_equal(quantity, bath_fan.quantity)
+    assert_equal(count, bath_fan.count)
     assert_equal(flow_rate, bath_fan.rated_flow_rate.to_f + bath_fan.calculated_flow_rate.to_f + bath_fan.tested_flow_rate.to_f + bath_fan.delivered_ventilation.to_f)
     assert_equal(hours_in_operation, bath_fan.hours_in_operation)
     assert_equal(fan_power, bath_fan.fan_power)
@@ -3975,12 +3979,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system, location, tracking, module_type, azimuth)
     hpxml.pv_systems.each do |pv|
       assert_equal(is_shared_system, pv.is_shared_system)
-      assert_equal(interver_efficiency, pv.inverter_efficiency)
       assert_in_epsilon(system_loss_frac, pv.system_losses_fraction, 0.01)
       assert_equal(location, pv.location)
       assert_equal(tracking, pv.tracking)
       assert_equal(module_type, pv.module_type)
       assert_equal(azimuth, pv.array_azimuth)
+    end
+    hpxml.inverters.each do |inv|
+      assert_equal(interver_efficiency, inv.inverter_efficiency)
     end
   end
 
@@ -4280,8 +4286,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_ceiling_fan_values(ceiling_fan, quantity, efficiency, weekday_sch, weekend_sch, monthly_mults)
-    assert_equal(quantity, ceiling_fan.quantity)
+  def _test_default_ceiling_fan_values(ceiling_fan, count, efficiency, weekday_sch, weekend_sch, monthly_mults)
+    assert_equal(count, ceiling_fan.count)
     assert_in_epsilon(efficiency, ceiling_fan.efficiency, 0.01)
     if weekday_sch.nil?
       assert_nil(ceiling_fan.weekday_fractions)
