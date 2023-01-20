@@ -2591,7 +2591,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
 
-In addition, a single inverter must be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
+In addition, an inverter must be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
   =======================================================  =================  ================  ===================  ========  ========  ============================================
   Element                                                  Type               Units             Constraints          Required  Default   Notes
