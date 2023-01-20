@@ -5197,7 +5197,7 @@ class HPXMLFile
                                  fan_location: HPXML::LocationKitchen,
                                  fan_power: fan_power,
                                  start_hour: start_hour,
-                                 quantity: quantity)
+                                 count: quantity)
     end
 
     if !args[:bathroom_fans_quantity].is_initialized || (args[:bathroom_fans_quantity].get > 0)
@@ -5228,7 +5228,7 @@ class HPXMLFile
                                  fan_location: HPXML::LocationBath,
                                  fan_power: fan_power,
                                  start_hour: start_hour,
-                                 quantity: quantity)
+                                 count: quantity)
     end
 
     if args[:whole_house_fan_present]
@@ -5497,10 +5497,6 @@ class HPXMLFile
 
       max_power_output = [args[:pv_system_max_power_output], args[:pv_system_2_max_power_output]][i]
 
-      if args[:pv_system_inverter_efficiency].is_initialized
-        inverter_efficiency = args[:pv_system_inverter_efficiency].get
-      end
-
       if args[:pv_system_system_losses_fraction].is_initialized
         system_losses_fraction = args[:pv_system_system_losses_fraction].get
       end
@@ -5519,10 +5515,21 @@ class HPXMLFile
                            array_azimuth: [args[:pv_system_array_azimuth], args[:pv_system_2_array_azimuth]][i],
                            array_tilt: Geometry.get_absolute_tilt([args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], args[:geometry_roof_pitch], epw_file),
                            max_power_output: max_power_output,
-                           inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
                            is_shared_system: is_shared_system,
                            number_of_bedrooms_served: number_of_bedrooms_served)
+    end
+    if hpxml.pv_systems.size > 0
+      # Add inverter efficiency; assume a single inverter even if multiple PV arrays
+      if args[:pv_system_inverter_efficiency].is_initialized
+        inverter_efficiency = args[:pv_system_inverter_efficiency].get
+      end
+
+      hpxml.inverters.add(id: "Inverter#{hpxml.inverters.size + 1}",
+                          inverter_efficiency: inverter_efficiency)
+      hpxml.pv_systems.each do |pv_system|
+        pv_system.inverter_idref = hpxml.inverters[-1].id
+      end
     end
   end
 
@@ -5909,7 +5916,7 @@ class HPXMLFile
 
     hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size + 1}",
                            efficiency: efficiency,
-                           quantity: quantity)
+                           count: quantity)
   end
 
   def self.set_misc_plug_loads_television(hpxml, args)
