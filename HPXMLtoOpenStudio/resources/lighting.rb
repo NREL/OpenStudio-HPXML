@@ -209,6 +209,8 @@ class Lighting
   private
 
   def self.calc_interior_energy(eri_version, cfa, f_int_cfl, f_int_lfl, f_int_led, interior_usage_multiplier = 1.0)
+    return if f_int_cfl.nil? || f_int_lfl.nil? || f_int_led.nil?
+
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
       # Calculate fluorescent (CFL + LFL) fraction
       f_int_fl = f_int_cfl + f_int_lfl
@@ -245,6 +247,8 @@ class Lighting
   end
 
   def self.calc_exterior_energy(eri_version, cfa, f_ext_cfl, f_ext_lfl, f_ext_led, exterior_usage_multiplier = 1.0)
+    return if f_ext_cfl.nil? || f_ext_lfl.nil? || f_ext_led.nil?
+
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
       # Calculate fluorescent (CFL + LFL) fraction
       f_ext_fl = f_ext_cfl + f_ext_lfl
@@ -281,6 +285,8 @@ class Lighting
   end
 
   def self.calc_garage_energy(eri_version, gfa, f_grg_cfl, f_grg_lfl, f_grg_led, garage_usage_multiplier = 1.0)
+    return if f_grg_cfl.nil? || f_grg_lfl.nil? || f_grg_led.nil?
+
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
       # Calculate fluorescent (CFL + LFL) fraction
       f_grg_fl = f_grg_cfl + f_grg_lfl
