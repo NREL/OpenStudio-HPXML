@@ -1250,7 +1250,7 @@ class Airflow
     return obj_sch_sensor
   end
 
-  def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index)
+  def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index, vacancy_periods, power_outage_periods)
     obj_name = "#{Constants.ObjectNameClothesDryerExhaust} #{index}"
 
     # Create schedule
@@ -1264,7 +1264,7 @@ class Airflow
       cd_weekday_sch = vented_dryer.weekday_fractions
       cd_weekend_sch = vented_dryer.weekend_fractions
       cd_monthly_sch = vented_dryer.monthly_multipliers
-      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction)
+      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
       obj_sch = obj_sch.schedule
       obj_sch_name = obj_sch.name.to_s
       full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
@@ -1563,7 +1563,7 @@ class Airflow
       next unless @clothes_dryer_in_cond_space
 
       # Infiltration impact
-      obj_sch_sensor, cfm_mult = apply_dryer_exhaust(model, vented_dryer, schedules_file, index)
+      obj_sch_sensor, cfm_mult = apply_dryer_exhaust(model, vented_dryer, schedules_file, index, vacancy_periods, power_outage_periods)
       infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * cfm_mult, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
 
