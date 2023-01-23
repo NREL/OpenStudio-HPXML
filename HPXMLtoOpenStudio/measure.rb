@@ -1982,7 +1982,7 @@ class OSModel
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
     objects_already_processed = []
 
-    # EMS Sensors: Surfaces, SubSurfaces, InternalMass
+    # EMS Sensors: Surfaces, SubSurfaces
     surfaces_sensors = { walls: [],
                          rim_joists: [],
                          foundation_walls: [],
@@ -1994,8 +1994,7 @@ class OSModel
                          windows_solar: [],
                          doors: [],
                          skylights_conduction: [],
-                         skylights_solar: [],
-                         internal_mass: [] }
+                         skylights_solar: [] }
 
     # Output diagnostics needed for some output variables used below
     output_diagnostics = model.getOutputDiagnostics
@@ -2012,6 +2011,8 @@ class OSModel
       end
 
       surface_type = surface_type.get
+
+      next if ['InferredCeiling', 'InferredFloor'].include? surface_type # Skip surface within the zone
 
       s.subSurfaces.each do |ss|
         # Conduction (windows, skylights, doors)
@@ -2068,9 +2069,7 @@ class OSModel
               'Slab' => :slabs,
               'Floor' => :floors,
               'Ceiling' => :ceilings,
-              'Roof' => :roofs,
-              'InferredCeiling' => :internal_mass,
-              'InferredFloor' => :internal_mass }[surface_type]
+              'Roof' => :roofs }[surface_type]
       fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
 
       surfaces_sensors[key] << []
@@ -2083,22 +2082,6 @@ class OSModel
         sensor.setName(name)
         sensor.setKeyName(s.name.to_s)
         surfaces_sensors[key][-1] << sensor
-      end
-    end
-
-    model.getInternalMasss.sort.each do |m|
-      next unless m.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      surfaces_sensors[:internal_mass] << []
-      { 'Surface Inside Face Convection Heat Gain Energy' => 'im_conv',
-        'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'im_ig',
-        'Surface Inside Face Solar Radiation Heat Gain Energy' => 'im_sol',
-        'Surface Inside Face Lights Radiation Heat Gain Energy' => 'im_lgt',
-        'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'im_surf' }.each do |var, name|
-        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        sensor.setName(name)
-        sensor.setKeyName(m.name.to_s)
-        surfaces_sensors[:internal_mass][-1] << sensor
       end
     end
 
