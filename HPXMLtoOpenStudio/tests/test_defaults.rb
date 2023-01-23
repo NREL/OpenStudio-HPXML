@@ -3012,7 +3012,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
     tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
-    tv_pl.kWh_per_year = 1000
+    tv_pl.kwh_per_year = 1000
     tv_pl.usage_multiplier = 1.1
     tv_pl.frac_sensible = 0.6
     tv_pl.frac_latent = 0.3
@@ -3020,7 +3020,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     tv_pl.weekend_fractions = ConstantDaySchedule
     tv_pl.monthly_multipliers = ConstantMonthSchedule
     other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
-    other_pl.kWh_per_year = 2000
+    other_pl.kwh_per_year = 2000
     other_pl.usage_multiplier = 1.2
     other_pl.frac_sensible = 0.5
     other_pl.frac_latent = 0.4
@@ -3028,7 +3028,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     other_pl.weekend_fractions = ConstantDaySchedule
     other_pl.monthly_multipliers = ConstantMonthSchedule
     veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }[0]
-    veh_pl.kWh_per_year = 4000
+    veh_pl.kwh_per_year = 4000
     veh_pl.usage_multiplier = 1.3
     veh_pl.frac_sensible = 0.4
     veh_pl.frac_latent = 0.5
@@ -3036,7 +3036,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     veh_pl.weekend_fractions = ConstantDaySchedule
     veh_pl.monthly_multipliers = ConstantMonthSchedule
     wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
-    wellpump_pl.kWh_per_year = 3000
+    wellpump_pl.kwh_per_year = 3000
     wellpump_pl.usage_multiplier = 1.4
     wellpump_pl.frac_sensible = 0.3
     wellpump_pl.frac_latent = 0.6
@@ -3052,7 +3052,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     hpxml.plug_loads.each do |plug_load|
-      plug_load.kWh_per_year = nil
+      plug_load.kwh_per_year = nil
       plug_load.usage_multiplier = nil
       plug_load.frac_sensible = nil
       plug_load.frac_latent = nil
@@ -4339,8 +4339,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_pool_pump_values(pool, kWh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(kWh_per_year, pool.pump_kwh_per_year, 0.01)
+  def _test_default_pool_pump_values(pool, kwh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    assert_in_epsilon(kwh_per_year, pool.pump_kwh_per_year, 0.01)
     assert_equal(usage_multiplier, pool.pump_usage_multiplier)
     assert_equal(weekday_sch, pool.pump_weekday_fractions)
     assert_equal(weekend_sch, pool.pump_weekend_fractions)
@@ -4380,18 +4380,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_hot_tub_pump_values(hot_tub, kWh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(kWh_per_year, hot_tub.pump_kwh_per_year, 0.01)
+  def _test_default_hot_tub_pump_values(hot_tub, kwh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    assert_in_epsilon(kwh_per_year, hot_tub.pump_kwh_per_year, 0.01)
     assert_equal(usage_multiplier, hot_tub.pump_usage_multiplier)
     assert_equal(weekday_sch, hot_tub.pump_weekday_fractions)
     assert_equal(weekend_sch, hot_tub.pump_weekend_fractions)
     assert_equal(monthly_mults, hot_tub.pump_monthly_multipliers)
   end
 
-  def _test_default_plug_load_values(hpxml, load_type, kWh_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_plug_load_values(hpxml, load_type, kwh_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == load_type }[0]
 
-    assert_in_epsilon(kWh_per_year, pl.kWh_per_year, 0.01)
+    assert_in_epsilon(kwh_per_year, pl.kwh_per_year, 0.01)
     assert_equal(usage_multiplier, pl.usage_multiplier)
     assert_in_epsilon(frac_sensible, pl.frac_sensible, 0.01)
     assert_in_epsilon(frac_latent, pl.frac_latent, 0.01)

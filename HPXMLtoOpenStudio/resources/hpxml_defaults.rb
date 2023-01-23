@@ -2396,9 +2396,9 @@ class HPXMLDefaults
     hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
@@ -2423,9 +2423,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
@@ -2450,9 +2450,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
         default_annual_kwh = MiscLoads.get_electric_vehicle_charging_default_values
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = 0.0
@@ -2477,9 +2477,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = 0.0

@@ -362,6 +362,8 @@ def create_hpxmls
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-holiday.xml' => 'base.xml',
+    'base-lighting-kwh-per-year.xml' => 'base.xml',
+    'base-lighting-mixed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
@@ -528,6 +530,7 @@ def create_hpxmls
       schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
       errors, _ = XMLValidator.validate_against_schema(hpxml_path, schema_path)
       if errors.size > 0
+        puts errors.to_s
         puts "\nError: Did not successfully validate #{hpxml_file}."
         exit!
       end
@@ -4678,6 +4681,28 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.lighting.garage_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
     hpxml.lighting.garage_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
     hpxml.lighting.garage_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+  elsif ['base-lighting-kwh-per-year.xml'].include? hpxml_file
+    ltg_kwhs_per_year = { HPXML::LocationInterior => 1500,
+                          HPXML::LocationExterior => 150,
+                          HPXML::LocationGarage => 0 }
+    hpxml.lighting_groups.clear
+    ltg_kwhs_per_year.each do |location, kwh_per_year|
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: location,
+                                kwh_per_year: kwh_per_year)
+    end
+  elsif ['base-lighting-mixed.xml'].include? hpxml_file
+    hpxml.lighting_groups.each do |lg|
+      next unless lg.location == HPXML::LocationExterior
+
+      lg.delete
+    end
+    hpxml.lighting_groups.each_with_index do |lg, i|
+      lg.id = "LightingGroup#{i + 1}"
+    end
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                              location: HPXML::LocationExterior,
+                              kwh_per_year: 150)
   end
 
   # --------------- #
