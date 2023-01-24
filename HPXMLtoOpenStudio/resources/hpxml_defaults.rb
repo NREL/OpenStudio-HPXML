@@ -1074,11 +1074,10 @@ class HPXMLDefaults
         if heat_pump.compressor_lockout_temp.nil?
           if heat_pump.heat_pump_type == HPXML::HPXML::HVACTypeHeatPumpMiniSplit
             heat_pump.compressor_lockout_temp = -20.0 # deg-F
-            heat_pump.compressor_lockout_temp_isdefaulted = true
           else
             heat_pump.compressor_lockout_temp = 0.0 # deg-F
-            heat_pump.compressor_lockout_temp_isdefaulted = true
           end
+          heat_pump.compressor_lockout_temp_isdefaulted = true
         end
         if heat_pump.backup_heating_lockout_temp.nil?
           heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
