@@ -3598,7 +3598,7 @@ class HVAC
     end
   end
 
-  def self.set_heat_pump_temperatures(heat_pump)
+  def self.set_heat_pump_temperatures(heat_pump, runner = nil)
     hp_ap = heat_pump.additional_properties
 
     # Sets:
@@ -3607,6 +3607,15 @@ class HVAC
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
+
+      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+        hp_backup_fuel = heat_pump.backup_heating_fuel
+      elsif not heat_pump.backup_system.nil?
+        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+      end
+      if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
+        runner.registerError('Switchover temperature should not be used for a heat pump with electric backup; use compressor lockout temperature instead.')
+      end
     else
       hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp

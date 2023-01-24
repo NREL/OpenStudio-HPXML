@@ -43,7 +43,7 @@ class HPXMLDefaults
     apply_doors(hpxml)
     apply_partition_wall_mass(hpxml)
     apply_furniture_mass(hpxml)
-    apply_hvac(hpxml, weather, convert_shared_systems)
+    apply_hvac(runner, hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
@@ -988,7 +988,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather, convert_shared_systems)
+  def self.apply_hvac(runner, hpxml, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml)
     end
@@ -1057,10 +1057,33 @@ class HPXMLDefaults
       heat_pump.compressor_type_isdefaulted = true
     end
 
-    # Default temperatures for HP w/ integrated backup
+    # Default HP compressor lockout temp
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.compressor_lockout_temp.nil?
+      next unless heat_pump.backup_heating_switchover_temp.nil?
+
+      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+        hp_backup_fuel = heat_pump.backup_heating_fuel
+      elsif not heat_pump.backup_system.nil?
+        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+      end
+
+      if hp_backup_fuel.nil? || (hp_backup_fuel == HPXML::FuelTypeElectricity)
+        if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+          heat_pump.compressor_lockout_temp = -20.0 # deg-F
+        else
+          heat_pump.compressor_lockout_temp = 0.0 # deg-F
+        end
+      else
+        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+      end
+      heat_pump.compressor_lockout_temp_isdefaulted = true
+    end
+
+    # Default HP backup lockout temp
     hpxml.heat_pumps.each do |heat_pump|
       next if heat_pump.backup_type.nil?
-      # FIXME: Give an error or warning if switchover temp used w/ electric backup
+      next unless heat_pump.backup_heating_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
@@ -1070,30 +1093,11 @@ class HPXMLDefaults
       end
 
       if hp_backup_fuel == HPXML::FuelTypeElectricity
-        # Electric backup
-        if heat_pump.compressor_lockout_temp.nil?
-          if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
-            heat_pump.compressor_lockout_temp = -20.0 # deg-F
-          else
-            heat_pump.compressor_lockout_temp = 0.0 # deg-F
-          end
-          heat_pump.compressor_lockout_temp_isdefaulted = true
-        end
-        if heat_pump.backup_heating_lockout_temp.nil?
-          heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
-          heat_pump.backup_heating_lockout_temp_isdefaulted = true
-        end
+        heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
       else
-        # Fuel backup
-        if heat_pump.compressor_lockout_temp.nil?
-          heat_pump.compressor_lockout_temp = 25.0 # deg-F
-          heat_pump.compressor_lockout_temp_isdefaulted = true
-        end
-        if heat_pump.backup_heating_lockout_temp.nil?
-          heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
-          heat_pump.backup_heating_lockout_temp_isdefaulted = true
-        end
+        heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
       end
+      heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 
     # Default boiler EAE
@@ -1355,7 +1359,7 @@ class HPXMLDefaults
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
         HVAC.set_crankcase_assumptions(heat_pump)
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
@@ -1373,7 +1377,7 @@ class HPXMLDefaults
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -1392,7 +1396,7 @@ class HPXMLDefaults
         HVAC.set_curves_gshp(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
       end
     end
