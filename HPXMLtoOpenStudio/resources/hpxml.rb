@@ -6183,7 +6183,7 @@ class HPXML < Object
   end
 
   class LightingGroup < BaseElement
-    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type]
+    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type, :kwh_per_year]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6208,6 +6208,11 @@ class HPXML < Object
         lighting_type = XMLHelper.add_element(lighting_group, 'LightingType')
         XMLHelper.add_element(lighting_type, @lighting_type)
       end
+      if not @kwh_per_year.nil?
+        lighting_load = XMLHelper.add_element(lighting_group, 'Load')
+        XMLHelper.add_element(lighting_load, 'Units', UnitsKwhPerYear, :string)
+        XMLHelper.add_element(lighting_load, 'Value', @kwh_per_year, :float, @kwh_per_year_isdefaulted)
+      end
     end
 
     def from_oga(lighting_group)
@@ -6217,6 +6222,7 @@ class HPXML < Object
       @location = XMLHelper.get_value(lighting_group, 'Location', :string)
       @fraction_of_units_in_location = XMLHelper.get_value(lighting_group, 'FractionofUnitsInLocation', :float)
       @lighting_type = XMLHelper.get_child_name(lighting_group, 'LightingType')
+      @kwh_per_year = XMLHelper.get_value(lighting_group, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
     end
   end
 
@@ -6585,7 +6591,7 @@ class HPXML < Object
   end
 
   class PlugLoad < BaseElement
-    ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
+    ATTRS = [:id, :plug_load_type, :kwh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
@@ -6606,10 +6612,10 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(plug_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(plug_load, 'PlugLoadType', @plug_load_type, :string) unless @plug_load_type.nil?
-      if not @kWh_per_year.nil?
+      if not @kwh_per_year.nil?
         load = XMLHelper.add_element(plug_load, 'Load')
         XMLHelper.add_element(load, 'Units', UnitsKwhPerYear, :string)
-        XMLHelper.add_element(load, 'Value', @kWh_per_year, :float, @kWh_per_year_isdefaulted)
+        XMLHelper.add_element(load, 'Value', @kwh_per_year, :float, @kwh_per_year_isdefaulted)
       end
       XMLHelper.add_extension(plug_load, 'FracSensible', @frac_sensible, :float, @frac_sensible_isdefaulted) unless @frac_sensible.nil?
       XMLHelper.add_extension(plug_load, 'FracLatent', @frac_latent, :float, @frac_latent_isdefaulted) unless @frac_latent.nil?
@@ -6622,7 +6628,7 @@ class HPXML < Object
     def from_oga(plug_load)
       @id = HPXML::get_id(plug_load)
       @plug_load_type = XMLHelper.get_value(plug_load, 'PlugLoadType', :string)
-      @kWh_per_year = XMLHelper.get_value(plug_load, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
+      @kwh_per_year = XMLHelper.get_value(plug_load, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
       @frac_sensible = XMLHelper.get_value(plug_load, 'extension/FracSensible', :float)
       @frac_latent = XMLHelper.get_value(plug_load, 'extension/FracLatent', :float)
       @usage_multiplier = XMLHelper.get_value(plug_load, 'extension/UsageMultiplier', :float)

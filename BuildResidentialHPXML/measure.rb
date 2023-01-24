@@ -5946,7 +5946,7 @@ class HPXMLFile
     return unless args[:misc_plug_loads_television_present]
 
     if args[:misc_plug_loads_television_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_television_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_television_annual_kwh].get
     end
 
     if args[:misc_plug_loads_television_usage_multiplier].is_initialized
@@ -5955,13 +5955,13 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 
   def self.set_misc_plug_loads_other(hpxml, args)
     if args[:misc_plug_loads_other_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_other_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_other_annual_kwh].get
     end
 
     if args[:misc_plug_loads_other_frac_sensible].is_initialized
@@ -5978,7 +5978,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeOther,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          frac_sensible: frac_sensible,
                          frac_latent: frac_latent,
                          usage_multiplier: usage_multiplier)
@@ -5988,7 +5988,7 @@ class HPXMLFile
     return unless args[:misc_plug_loads_well_pump_present]
 
     if args[:misc_plug_loads_well_pump_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_well_pump_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_well_pump_annual_kwh].get
     end
 
     if args[:misc_plug_loads_well_pump_usage_multiplier].is_initialized
@@ -5997,7 +5997,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeWellPump,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 
@@ -6005,7 +6005,7 @@ class HPXMLFile
     return unless args[:misc_plug_loads_vehicle_present]
 
     if args[:misc_plug_loads_vehicle_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_vehicle_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_vehicle_annual_kwh].get
     end
 
     if args[:misc_plug_loads_vehicle_usage_multiplier].is_initialized
@@ -6014,7 +6014,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 

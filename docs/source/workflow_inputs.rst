@@ -2972,19 +2972,16 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-Nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided, each of which is the combination of:
+Lighting can be specified with lighting type fractions or annual energy consumption values.
 
-- ``LightingType``: 'LightEmittingDiode', 'CompactFluorescent', and 'FluorescentTube'
-- ``Location``: 'interior', 'garage', and 'exterior'
-
-Information is entered in each ``LightingGroup``.
+If specifying **lighting type fractions**, nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided using every combination of ``LightingType`` and ``Location``:
 
   =============================  =======  ======  ===========  ========  =======  ===========================================================================
   Element                        Type     Units   Constraints  Required  Default  Notes
   =============================  =======  ======  ===========  ========  =======  ===========================================================================
   ``SystemIdentifier``           id                            Yes                Unique identifier
   ``LightingType``               element          1 [#]_       Yes                Lighting type
-  ``Location``                   string           See [#]_     Yes                See [#]_
+  ``Location``                   string           See [#]_     Yes                Lighting location [#]_
   ``FractionofUnitsInLocation``  double   frac    0 - 1 [#]_   Yes                Fraction of light fixtures in the location with the specified lighting type
   =============================  =======  ======  ===========  ========  =======  ===========================================================================
 
@@ -2994,7 +2991,22 @@ Information is entered in each ``LightingGroup``.
   .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
          If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 
-Additional information is entered in ``Lighting``.
+  Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+If specifying **annual energy consumption** instead, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided using every ``Location``:
+
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  Element                           Type     Units   Constraints  Required  Default   Notes
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  ``SystemIdentifier``              id                            Yes                 Unique identifier
+  ``Location``                      string           See [#]_     Yes                 Lighting location [#]_
+  ``Load[Units="kWh/year"]/Value``  double   kWh/yr  >= 0         Yes                 Lighting energy use
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+
+  .. [#] Location choices are "interior", "garage", or "exterior".
+  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+
+With either lighting specification, additional information can be entered in ``Lighting``.
 
   ================================================  =======  ======  ===========  ========  ========  ===============================================
   Element                                           Type     Units   Constraints  Required  Default   Notes
@@ -3034,8 +3046,6 @@ If exterior holiday lighting is specified, additional information is entered in 
 
   .. [#] If Value not provided, defaults to 1.1 for single-family detached and 0.55 for others.
   .. [#] If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults to "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019".
-
-Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 HPXML Ceiling Fans
 ******************
