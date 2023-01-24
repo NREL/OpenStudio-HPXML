@@ -1060,44 +1060,38 @@ class HPXMLDefaults
     # Default temperatures for HP w/ integrated backup
     hpxml.heat_pumps.each do |heat_pump|
       next if heat_pump.backup_type.nil?
+      # FIXME: Give an error or warning if switchover temp used w/ electric backup
+      next unless heat_pump.backup_heating_switchover_temp.nil?
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-        # Integrated backup
-        if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-          # Electric backup
-          if heat_pump.compressor_lockout_temp.nil?
-            if heat_pump.heat_pump_type == HPXML::HPXML::HVACTypeHeatPumpMiniSplit
-              heat_pump.compressor_lockout_temp = -20.0 # deg-F
-              heat_pump.compressor_lockout_temp_isdefaulted = true
-            elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-              heat_pump.compressor_lockout_temp = 0.0 # deg-F
-              heat_pump.compressor_lockout_temp_isdefaulted = true
-            end
-          end
-          if heat_pump.backup_heating_lockout_temp.nil?
-            heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
-            heat_pump.backup_heating_lockout_temp_isdefaulted = true
-          end
-        elsif (heat_pump.backup_heating_fuel != HPXML::FuelTypeElectricity) && heat_pump.backup_heating_switchover_temp.nil?
-          # Dual-fuel HP without switchover temperature
-          if heat_pump.compressor_lockout_temp.nil?
-            heat_pump.compressor_lockout_temp = 25.0 # deg-F
+        hp_backup_fuel = heat_pump.backup_heating_fuel
+      else
+        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+      end
+
+      if hp_backup_fuel == HPXML::FuelTypeElectricity
+        # Electric backup
+        if heat_pump.compressor_lockout_temp.nil?
+          if heat_pump.heat_pump_type == HPXML::HPXML::HVACTypeHeatPumpMiniSplit
+            heat_pump.compressor_lockout_temp = -20.0 # deg-F
+            heat_pump.compressor_lockout_temp_isdefaulted = true
+          else
+            heat_pump.compressor_lockout_temp = 0.0 # deg-F
             heat_pump.compressor_lockout_temp_isdefaulted = true
           end
-          if heat_pump.backup_heating_lockout_temp.nil?
-            heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
-            heat_pump.backup_heating_lockout_temp_isdefaulted = true
-          end
-        end
-      elsif heat_pump.backup_type == HPXML::HeatPumpBackupTypeSeparate
-        # FIXME: Need to address
-        # FIXME: Temporary values below, need to address
-        if heat_pump.compressor_lockout_temp.nil?
-          heat_pump.compressor_lockout_temp = -40.0 # deg-F
-          heat_pump.compressor_lockout_temp_isdefaulted = true
         end
         if heat_pump.backup_heating_lockout_temp.nil?
           heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+          heat_pump.backup_heating_lockout_temp_isdefaulted = true
+        end
+      else
+        # Fuel backup
+        if heat_pump.compressor_lockout_temp.nil?
+          heat_pump.compressor_lockout_temp = 25.0 # deg-F
+          heat_pump.compressor_lockout_temp_isdefaulted = true
+        end
+        if heat_pump.backup_heating_lockout_temp.nil?
+          heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
           heat_pump.backup_heating_lockout_temp_isdefaulted = true
         end
       end

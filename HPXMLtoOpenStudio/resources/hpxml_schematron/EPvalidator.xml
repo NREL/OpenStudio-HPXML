@@ -1022,7 +1022,7 @@
       <sch:assert role='ERROR' test='h:HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="water-loop-to-air" or text()="packaged terminal heat pump" or text()="room air conditioner with reverse cycle"] or not(h:HeatPumpType)'>Expected HeatPumpType to be 'air-to-air' or 'mini-split' or 'ground-to-air' or 'water-loop-to-air' or 'packaged terminal heat pump' or 'room air conditioner with reverse cycle'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupType</sch:assert> <!-- See [HeatPumpBackup=Integrated] or [HeatPumpBackup=Separate] -->
+      <sch:assert role='ERROR' test='count(h:BackupType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupType</sch:assert> <!-- See [HeatPumpBackup] or [HeatPumpBackup=Integrated] or [HeatPumpBackup=Separate] -->
       <sch:assert role='ERROR' test='h:BackupType[text()="integrated" or text()="separate"] or not(h:BackupType)'>Expected BackupType to be 'integrated' or 'separate'</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -1163,10 +1163,22 @@
   </sch:pattern>
   
   <sch:pattern>
+    <sch:title>[HeatPumpBackup]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:BackupType or h:BackupSystemFuel or h:BackupSystem]'>
+      <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) + count(h:CompressorLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupHeatingSwitchoverTemperature | CompressorLockoutTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) + count(h:BackupHeatingLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupHeatingSwitchoverTemperature | BackupHeatingLockoutTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:CompressorLockoutTemperature) &lt; number(h:BackupHeatingLockoutTemperature) or not(h:CompressorLockoutTemperature) or not (h:BackupHeatingLockoutTemperature)'>Expected CompressorLockoutTemperature to be less than BackupHeatingLockoutTemperature</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:BackupHeatingSwitchoverTemperature) &lt; 30'>BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.</sch:report>
+      <sch:report role='WARN' test='number(h:BackupHeatingLockoutTemperature) &lt; 30'>BackupHeatingLockoutTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.</sch:report>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern>
     <sch:title>[HeatPumpBackup=Integrated]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:BackupType="integrated" or h:BackupSystemFuel]'>
       <sch:assert role='ERROR' test='count(h:BackupType[text()="integrated"]) = 1'>Expected 1 element(s) for xpath: BackupType[text()="integrated"]</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupSystemFuel) = 1'>Expected 1 element(s) for xpath: BackupSystemFuel</sch:assert> <!-- See [HeatPumpBackup=IntegratedElectric] or [HeatPumpBackup=IntegratedFuel] -->
+      <sch:assert role='ERROR' test='count(h:BackupSystemFuel) = 1'>Expected 1 element(s) for xpath: BackupSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='h:BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"] or not(h:BackupSystemFuel)'>Expected BackupSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupAnnualHeatingEfficiency[h:Units="Percent" or h:Units="AFUE"]/h:Value) = 1'>Expected 1 element(s) for xpath: BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value</sch:assert>
       <sch:assert role='ERROR' test='number(h:BackupAnnualHeatingEfficiency[h:Units="Percent" or h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:BackupAnnualHeatingEfficiency[h:Units="Percent" or h:Units="AFUE"]/h:Value)'>Expected BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
@@ -1176,27 +1188,6 @@
       <sch:report role='WARN' test='number(h:BackupAnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt; 0.6'>Percent efficiency should typically be greater than or equal to 0.6.</sch:report>
       <sch:report role='WARN' test='number(h:BackupAnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt; 0.6'>AFUE should typically be greater than or equal to 0.6.</sch:report>
       <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &lt;= 1000 and number(h:BackupHeatingCapacity) &gt; 0 and h:BackupHeatingCapacity'>Backup heating capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[HeatPumpBackup=IntegratedElectric]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:BackupType="integrated" or h:BackupSystemFuel="electricity"]'>
-      <!-- FIXME: Ensure CompressorLockoutTemperature < BackupHeatingLockoutTemperature; add validation test -->
-      <!-- FIXME: Add warning if BackupHeatingSwitchoverTemperature or BackupHeatingLockoutTemperature is too low -->
-      <sch:assert role='ERROR' test='count(h:CompressorLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CompressorLockoutTemperature</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupHeatingLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupHeatingLockoutTemperature</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) = 0'>Expected 0 element(s) for xpath: BackupHeatingSwitchoverTemperature</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[HeatPumpBackup=IntegratedFuel]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:BackupType="integrated" or h:BackupSystemFuel!="electricity"]'>
-      <!-- FIXME: Ensure CompressorLockoutTemperature < BackupHeatingLockoutTemperature; add validation test -->
-      <!-- FIXME: Add warning if BackupHeatingSwitchoverTemperature or BackupHeatingLockoutTemperature is too low -->
-      <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) + count(h:CompressorLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupHeatingSwitchoverTemperature | CompressorLockoutTemperature</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) + count(h:BackupHeatingLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupHeatingSwitchoverTemperature | BackupHeatingLockoutTemperature</sch:assert>
     </sch:rule>
   </sch:pattern>
 

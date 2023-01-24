@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6e86ce26-8353-42d3-a166-7d5854d6def6</version_id>
-  <version_modified>20230123T235347Z</version_modified>
+  <version_id>2b83ba02-1436-4f64-a667-6281eb202100</version_id>
+  <version_modified>20230124T005335Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -476,12 +476,6 @@
       <checksum>76B30337</checksum>
     </file>
     <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B1446270</checksum>
-    </file>
-    <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -553,34 +547,40 @@
       <checksum>017FC8D3</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>294A6540</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>63174433</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A5C53CC0</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>81D590B3</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE4B4DB2</checksum>
+    </file>
+    <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0326FBCD</checksum>
+      <checksum>CE948B2F</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>60AA5A74</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A5C53CC0</checksum>
+      <checksum>AC367178</checksum>
     </file>
   </files>
 </measure>
