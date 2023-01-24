@@ -3618,14 +3618,18 @@ class HPXML < Object
       return
     end
 
-    def is_heat_pump_backup_system
+    def primary_heat_pump
       @hpxml_object.heat_pumps.each do |heat_pump|
         next if heat_pump.backup_system_idref.nil?
         next if heat_pump.backup_system_idref != @id
 
-        return true
+        return heat_pump
       end
-      return false
+      return
+    end
+
+    def is_heat_pump_backup_system
+      return !primary_heat_pump.nil?
     end
 
     def delete

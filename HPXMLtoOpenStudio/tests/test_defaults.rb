@@ -1420,7 +1420,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_heat_pump_temperatures
-    # Test inputs not overridden by defaults - HP w/ integrated electric backup
+    # Test inputs not overridden by defaults - ASHP w/ electric backup
     hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
     hpxml.heat_pumps[0].compressor_lockout_temp = -2.0
     hpxml.heat_pumps[0].backup_heating_lockout_temp = 44.0
@@ -1435,7 +1435,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_heat_pump_temperature_values(hpxml_default.heat_pumps[0], 0.0, 40.0, nil)
 
-    # Test inputs not overridden by defaults - HP w/o backup
+    # Test inputs not overridden by defaults - MSHP w/o backup
     hpxml = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml')
     hpxml.heat_pumps[0].compressor_lockout_temp = 33.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1447,6 +1447,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_heat_pump_temperature_values(hpxml_default.heat_pumps[0], -20.0, nil, nil)
+
+    # Test inputs not overridden by defaults - MSHP w/ electric backup
+    hpxml = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml')
+    hpxml.heat_pumps[0].compressor_lockout_temp = -2.0
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = 44.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_temperature_values(hpxml_default.heat_pumps[0], -2.0, 44.0, nil)
+
+    # Test defaults
+    hpxml.heat_pumps[0].compressor_lockout_temp = nil
+    hpxml.heat_pumps[0].backup_heating_lockout_temp = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_temperature_values(hpxml_default.heat_pumps[0], -20.0, 40.0, nil)
 
     # Test inputs not overridden by defaults - HP w/ fuel backup
     ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',

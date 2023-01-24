@@ -482,9 +482,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   def test_heat_pump_temperatures
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
      'base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml',
-     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
      'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
-     'base-hvac-mini-split-heat-pump-ductless.xml'].each do |hpxml_name|
+     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+     'base-hvac-mini-split-heat-pump-ductless.xml',
+     'base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml'].each do |hpxml_name|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
       model, hpxml = _test_measure(args_hash)
