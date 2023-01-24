@@ -1317,7 +1317,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       comp_load_htg = 0
       comp_load_clg = 0
       results_out << [line_break]
-      @component_loads.each do |load_type, load|
+      @component_loads.each do |_load_type, load|
         results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(n_digits)]
       end
 
