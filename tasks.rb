@@ -1838,6 +1838,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 30.0
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-lockout-temperatures.xml'].include? hpxml_file
+    args.delete('heat_pump_backup_heating_switchover_temp')
     args['heat_pump_backup_heating_lockout_temp'] = 45.0
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
