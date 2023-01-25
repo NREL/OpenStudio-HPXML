@@ -3619,6 +3619,7 @@ class HPXML < Object
     end
 
     def primary_heat_pump
+      # Returns the HP for which this heating system is backup
       @hpxml_object.heat_pumps.each do |heat_pump|
         next if heat_pump.backup_system_idref.nil?
         next if heat_pump.backup_system_idref != @id

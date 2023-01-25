@@ -1964,11 +1964,11 @@ class HVACSizing
 
     if (not hvac.MinCompressorTemperature.nil?) && (hvac.MinCompressorTemperature > weather.design.HeatingDrybulb)
       # Calculate the heating load at the minimum compressor temperature to limit uninitialized capacity
-      switchover_weather = Marshal.load(Marshal.dump(weather))
-      switchover_weather.design.HeatingDrybulb = hvac.MinCompressorTemperature
-      _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
+      alternate_weather = Marshal.load(Marshal.dump(weather))
+      alternate_weather.design.HeatingDrybulb = hvac.MinCompressorTemperature
+      _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(alternate_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
       heating_load = switchover_all_hvac_sizing_values[hvac.hvac_system].Heat_Load
-      heating_db = switchover_weather.design.HeatingDrybulb
+      heating_db = alternate_weather.design.HeatingDrybulb
     else
       heating_load = hvac_sizing_values.Heat_Load
       heating_db = weather.design.HeatingDrybulb
