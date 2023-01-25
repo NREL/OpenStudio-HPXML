@@ -7,7 +7,11 @@ __New Features__
 - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
 - ReportSimulationOutput measure: Allows specifying the number of decimal places for timeseries output.
-- Adds new component loads outputs `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, `Skylights Solar`, `Lighting`, and `Residual`, removes `Windows`, `Skylights`, and `Internal Mass` components.
+- **Breaking change**: Updates component loads outputs:
+  - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
+  - Disaggregates `Lighting` from `Internal Gains`.
+  - Adds `Residual` (calculated as difference between energy delivered and sum of component loads).
+  - Removes `Internal Mass`.
 
 __Bugfixes__
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
