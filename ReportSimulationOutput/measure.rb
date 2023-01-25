@@ -1318,13 +1318,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @component_loads.each do |_load_type, load|
         results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(n_digits)]
       end
-
-      sum_comp_htg = results_out.filter_map { |row| row[1] if (not row[0].nil?) && (row[0].start_with? 'Component Load: Heating:') }.sum()
-      sum_comp_clg = results_out.filter_map { |row| row[1] if (not row[0].nil?) && (row[0].start_with? 'Component Load: Cooling:') }.sum()
-      residual_htg = @loads[LT::Heating].annual_output.to_f - sum_comp_htg
-      residual_clg = @loads[LT::Cooling].annual_output.to_f - sum_comp_clg
-      results_out << ['Component Load: Heating: Residual (MBtu)', residual_htg.round(n_digits)]
-      results_out << ['Component Load: Cooling: Residual (MBtu)', residual_clg.round(n_digits)]
     end
     results_out << [line_break]
     @hot_water_uses.each do |_hot_water_type, hot_water|

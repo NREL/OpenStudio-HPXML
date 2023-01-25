@@ -10,7 +10,6 @@ __New Features__
 - **Breaking change**: Updates component loads outputs:
   - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
   - Disaggregates `Lighting` from `Internal Gains`.
-  - Adds `Residual` (calculated as difference between energy delivered and sum of component loads).
   - Removes `Internal Mass`.
 
 __Bugfixes__

@@ -338,7 +338,6 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Ducts (MBtu)                   Heat gain/loss from conduction and leakage losses through supply/return ducts outside conditioned space
    Component Load: \*: Internal Gains (MBtu)          Heat gain/loss from appliances, plug loads, water heater tank losses, etc. in the conditioned space
    Component Load: \*: Lighting (MBtu)                Heat gain/loss from lighting in the conditioned space
-   Component Load: \*: Residual (MBtu)                Difference between the energy delivered to the zone by the HVAC system(s) and sum of the component loads 
    =================================================  =========================================================================================================
 
 Annual Hot Water Uses
