@@ -1061,6 +1061,7 @@ class HPXMLDefaults
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.compressor_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
+      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
         hp_backup_fuel = heat_pump.backup_heating_fuel
@@ -1068,14 +1069,14 @@ class HPXMLDefaults
         hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
       end
 
-      if hp_backup_fuel.nil? || (hp_backup_fuel == HPXML::FuelTypeElectricity)
+      if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
+        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+      else
         if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
           heat_pump.compressor_lockout_temp = -20.0 # deg-F
         else
           heat_pump.compressor_lockout_temp = 0.0 # deg-F
         end
-      else
-        heat_pump.compressor_lockout_temp = 25.0 # deg-F
       end
       heat_pump.compressor_lockout_temp_isdefaulted = true
     end

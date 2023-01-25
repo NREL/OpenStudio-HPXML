@@ -398,7 +398,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameWaterLoopHeatPump
 
-    hp_ap = heat_pump.additional_properties
     htg_cfm = heat_pump.heating_airflow_cfm
 
     # Cooling Coil (none)
@@ -411,9 +410,6 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
     htg_coil.setDefrostTimePeriodFraction(0.00001) # Disable defrost; avoid E+ warning w/ value of zero
-    if not hp_ap.hp_min_temp.nil?
-      htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_ap.hp_min_temp, 'F', 'C'))
-    end
     htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
     htg_coil.setRatedAirFlowRate(htg_cfm)
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
@@ -427,7 +423,7 @@ class HVAC
     disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil, hp_ap.supp_max_temp)
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil)
 
     # Air Loop
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, htg_cfm, heat_pump)
