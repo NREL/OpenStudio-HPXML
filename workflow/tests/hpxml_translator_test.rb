@@ -85,6 +85,14 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? osm_path)
       hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
       assert(File.exist? hpxml_defaults_path)
+
+      next unless output_format == 'msgpack'
+
+      # Check timeseries output isn't rounded
+      require 'msgpack'
+      data = MessagePack.unpack(File.read(File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"), mode: 'rb'))
+      value = data['Energy Use']['Total (kBtu)'][0]
+      assert_operator((value - value.round(8)).abs, :>, 0)
     end
   end
 
