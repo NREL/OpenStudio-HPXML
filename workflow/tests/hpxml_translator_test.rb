@@ -66,7 +66,7 @@ class HPXMLTest < MiniTest::Test
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
-    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+    Parallel.map(xmls, in_threads: 1) do |xml|
       xml_name = File.basename(xml)
       all_results[xml_name], _, _ = _run_xml(xml, Parallel.worker_number)
     end
