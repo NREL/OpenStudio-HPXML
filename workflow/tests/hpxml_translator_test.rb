@@ -14,11 +14,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_simulations
-    @max_abs_htg_load_delta = 0.0
-    @max_abs_clg_load_delta = 0.0
-    @max_abs_htg_load_frac = 0.0
-    @max_abs_clg_load_frac = 0.0
-    
     results_out = File.join(@results_dir, 'results.csv')
     File.delete(results_out) if File.exist? results_out
     bills_out = File.join(@results_dir, 'results_bills.csv')
@@ -44,11 +39,6 @@ class HPXMLTest < MiniTest::Test
       all_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
-    puts "@max_abs_htg_load_delta #{@max_abs_htg_load_delta}"
-    puts "@max_abs_clg_load_delta #{@max_abs_clg_load_delta}"
-    puts "@max_abs_htg_load_frac #{@max_abs_htg_load_frac}"
-    puts "@max_abs_clg_load_frac #{@max_abs_clg_load_frac}"
-
     _write_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
     _write_results(all_bill_results.sort_by { |k, _v| k.downcase }.to_h, bills_out)
   end
@@ -66,7 +56,7 @@ class HPXMLTest < MiniTest::Test
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
       all_results[xml_name], _, _ = _run_xml(xml, Parallel.worker_number)
     end
@@ -378,8 +368,8 @@ class HPXMLTest < MiniTest::Test
     if not xml.include? 'ASHRAE_Standard_140'
       sum_component_htg_loads = results.select { |k, _v| k.start_with? 'Component Load: Heating:' }.values.sum(0.0)
       sum_component_clg_loads = results.select { |k, _v| k.start_with? 'Component Load: Cooling:' }.values.sum(0.0)
-      total_htg_load_delivered = results['Load: Heating: Delivered (MBtu)'].to_f
-      total_clg_load_delivered = results['Load: Cooling: Delivered (MBtu)'].to_f
+      total_htg_load_delivered = results['Load: Heating: Delivered (MBtu)']
+      total_clg_load_delivered = results['Load: Cooling: Delivered (MBtu)']
       abs_htg_load_delta = (total_htg_load_delivered - sum_component_htg_loads).abs
       abs_clg_load_delta = (total_clg_load_delivered - sum_component_clg_loads).abs
       avg_htg_load = ([total_htg_load_delivered, sum_component_htg_loads].sum / 2.0)
@@ -390,17 +380,13 @@ class HPXMLTest < MiniTest::Test
       if avg_clg_load > 0
         abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
       end
-      # Check that the difference is less than 0.6MBtu or less than 10%
-      #if hpxml.total_fraction_heat_load_served > 0
-      #  assert((abs_htg_load_delta < 0.6) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
-      #end
-      #if hpxml.total_fraction_cool_load_served > 0
-      #  assert((abs_clg_load_delta < 1.1) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
-      #end
-      @max_abs_htg_load_delta = [@max_abs_htg_load_delta, abs_htg_load_delta].max
-      @max_abs_clg_load_delta = [@max_abs_clg_load_delta, abs_clg_load_delta].max
-      @max_abs_htg_load_frac = [@max_abs_htg_load_frac, abs_htg_load_frac.to_f].max
-      @max_abs_clg_load_frac = [@max_abs_clg_load_frac, abs_clg_load_frac.to_f].max
+      # Check that the difference is less than 1.5 MBtu or less than 10%
+      if hpxml.total_fraction_heat_load_served > 0
+        assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
+      end
+      if hpxml.total_fraction_cool_load_served > 0
+        assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
+      end
     end
 
     return results
