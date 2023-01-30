@@ -90,6 +90,7 @@ class CLT
   SkylightsSolar = 'Skylights Solar'
   Floors = 'Floors'
   Slabs = 'Slabs'
+  InternalMass = 'Internal Mass'
   Infiltration = 'Infiltration'
   NaturalVentilation = 'Natural Ventilation'
   MechanicalVentilation = 'Mechanical Ventilation'

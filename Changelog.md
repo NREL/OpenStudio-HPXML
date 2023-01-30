@@ -12,7 +12,6 @@ __New Features__
 - **Breaking change**: Updates component loads outputs:
   - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
   - Disaggregates `Lighting` from `Internal Gains`.
-  - Removes `Internal Mass`.
 
 __Bugfixes__
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.

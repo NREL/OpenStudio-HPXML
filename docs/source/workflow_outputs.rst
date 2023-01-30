@@ -331,6 +331,7 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Skylights Solar (MBtu)         Heat gain/loss attributed to solar gains through HPXML ``Skylight`` elements adjacent to conditioned space
    Component Load: \*: Floors (MBtu)                  Heat gain/loss through HPXML ``Floor`` elements (inferred to be floors) adjacent to conditioned space
    Component Load: \*: Slabs (MBtu)                   Heat gain/loss through HPXML ``Slab`` elements adjacent to conditioned space
+   Component Load: \*: Internal Mass (MBtu)           Heat gain/loss from internal mass (e.g., furniture, interior walls/floors) in conditioned space
    Component Load: \*: Infiltration (MBtu)            Heat gain/loss from airflow induced by stack and wind effects
    Component Load: \*: Natural Ventilation (MBtu)     Heat gain/loss from airflow through operable windows
    Component Load: \*: Mechanical Ventilation (MBtu)  Heat gain/loss from airflow/fan energy from mechanical ventilation systems (including clothes dryer exhaust)
