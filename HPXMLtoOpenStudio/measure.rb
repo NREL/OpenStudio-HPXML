@@ -2033,7 +2033,6 @@ class OSModel
         end
 
         vars.each do |var, name|
-          surfaces_sensors[key] << []
           sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
           sensor.setName(name)
           sensor.setKeyName(ss.name.to_s)
@@ -2058,25 +2057,6 @@ class OSModel
           sensor.setName(name)
           sensor.setKeyName(ss.name.to_s)
           surfaces_sensors[key][-1] << sensor
-        end
-
-        # Solar (windows, skylights)
-        if (surface_type == 'Window') || (surface_type == 'Skylight')
-          key = { 'Window'=> :windows_solar,
-                  'Skylight'=> :skylights_solar}[surface_type]
-          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
-            'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
-            'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
-            'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
-            'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
-          
-          surfaces_sensors[key] << []
-          vars.each do |var, name|
-            sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-            sensor.setName(name)
-            sensor.setKeyName(ss.name.to_s)
-            surfaces_sensors[key][-1] << sensor
-          end
         end
       end
 
