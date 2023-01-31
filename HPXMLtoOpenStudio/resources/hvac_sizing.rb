@@ -1027,7 +1027,11 @@ class HVACSizing
     '''
 
     # Per ANSI/RESNET/ICC 301
-    n_occupants = @nbeds + 1
+    if @hpxml.header.occupancy_calculation_type == HPXML::OccupancyCalculationTypeAsset
+      n_occupants = @nbeds + 1
+    else
+      n_occupants = @hpxml.building_occupancy.number_of_residents
+    end
     bldg_design_loads.Cool_IntGains_Sens = 1600.0 + 230.0 * n_occupants
     bldg_design_loads.Cool_IntGains_Lat = 200.0 * n_occupants
   end

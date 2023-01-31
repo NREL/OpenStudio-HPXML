@@ -17,6 +17,7 @@ __Bugfixes__
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
 - BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
 - Fixes operational calculation when the number of residents is set to zero.
+- Fixes HVAC sizing for operational calculations; now uses the provided # occupants instead of assuming it based on # bedrooms.
 
 ## OpenStudio-HPXML v1.5.1
 
