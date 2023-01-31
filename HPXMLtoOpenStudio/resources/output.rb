@@ -85,7 +85,7 @@ class CLT
   FoundationWalls = 'Foundation Walls'
   Doors = 'Doors'
   WindowsConduction = 'Windows Conduction'
-  WindowsSolar= 'Windows Solar'
+  WindowsSolar = 'Windows Solar'
   SkylightsConduction = 'Skylights Conduction'
   SkylightsSolar = 'Skylights Solar'
   Floors = 'Floors'
