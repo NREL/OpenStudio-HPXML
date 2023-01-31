@@ -2033,6 +2033,7 @@ class OSModel
         end
 
         vars.each do |var, name|
+          surfaces_sensors[key] << []
           sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
           sensor.setName(name)
           sensor.setKeyName(ss.name.to_s)
