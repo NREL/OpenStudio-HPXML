@@ -2403,7 +2403,7 @@ class OSModel
     program.addLine('Set clg_mode = 0')
     program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
     program.addLine('  Set htg_mode = 1')
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (#{natvent_flow_actuator.name} > 0)") # Assign hour to cooling if cooling load or natural ventilation is operating
+    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (#{natvent_flow_actuator.name} > 0) || (hr_whf <> 0)") # Assign hour to cooling if cooling load or natural ventilation is operating
     program.addLine('  Set clg_mode = 1')
     program.addLine('Else') # No load, assign hour to cooling if temperature closer to cooling setpoint, otherwise assign hour to heating
     if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
