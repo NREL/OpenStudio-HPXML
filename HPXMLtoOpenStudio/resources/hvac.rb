@@ -1048,7 +1048,7 @@ class HVAC
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
       # From Carrier heat pump lab testing
-      hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
+      hp_ap.cool_rated_airflow_rate = 411.0 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       hp_ap.cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
       hp_ap.cool_rated_shrs_net = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
@@ -1147,10 +1147,9 @@ class HVAC
     hp_ap.cool_cap_fflow_spec = [[1, 0, 0]] * num_speeds
     hp_ap.cool_eir_fflow_spec = [[1, 0, 0]] * num_speeds
 
-    hp_ap.cool_min_capacity_ratio = 0.4 # frac
-    hp_ap.cool_max_capacity_ratio = 1.2 # frac
-    hp_ap.cool_min_cfm_per_ton = 200.0 / hp_ap.cool_min_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of min capacity
-    hp_ap.cool_max_cfm_per_ton = 480.0 / hp_ap.cool_max_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of max capacity
+    hp_ap.cool_rated_airflow_rate = 425.0 # cfm/ton
+	hp_ap.cool_fan_speed_ratios = [0.4706, 0.5294, 0.5882, 0.6471, 0.7059, 0.7647, 0.8235, 0.8824, 0.9412, 1.0]
+	hp_ap.cool_capacity_ratios = [0.4, 0.4889, 0.5778, 0.6667, 0.7556, 0.8444, 0.9333, 1.0222, 1.1111, 1.2]
   end
 
   def self.set_heat_curves_mshp(heat_pump, num_speeds)
@@ -3087,23 +3086,17 @@ class HVAC
     wB_rated = 67.0 # deg-F
 
     cool_nominal_capacity_ratio = 1.0
-    cool_nominal_cfm_per_ton = ((hp_ap.cool_max_cfm_per_ton * hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio) /
-                                (hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_capacity_ratio)) *
-                               (cool_nominal_capacity_ratio - hp_ap.cool_min_capacity_ratio) + hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio
+    cool_nominal_cfm_per_ton = 368.75 # Fixme: hardcoded for previous calculated value
 
     p_atm = 14.696 # standard atmospheric pressure (psia)
 
     ao = Psychrometrics.CoilAoFactor(dB_rated, wB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, heat_pump.cooling_shr)
-
-    hp_ap.cool_capacity_ratios = []
     hp_ap.cool_rated_cfm_per_ton = []
     hp_ap.cool_rated_shrs_gross = []
-
-    for i in 0..num_speeds - 1
-      hp_ap.cool_capacity_ratios << hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)
-      hp_ap.cool_rated_cfm_per_ton << (hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio + i * (hp_ap.cool_max_cfm_per_ton * hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.cool_capacity_ratios[-1]
+    hp_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
+      hp_ap.cool_rated_cfm_per_ton << hp_ap.cool_fan_speed_ratios[i] * hp_ap.cool_rated_airflow_rate / capacity_ratio
       # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
-      hp_ap.cool_rated_shrs_gross[i] = [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(hp_ap.cool_capacity_ratios[i], 'ton', 'kBtu/hr'), hp_ap.cool_rated_cfm_per_ton[i] * hp_ap.cool_capacity_ratios[i], ao), 0.98].min
+      hp_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), hp_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao), 0.98].min
     end
   end
 
@@ -3174,10 +3167,7 @@ class HVAC
     hp_ap.cool_capacity_ratios = hp_ap.cool_capacity_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
     hp_ap.cool_rated_shrs_gross = hp_ap.cool_rated_shrs_gross.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
     hp_ap.cool_rated_eirs = hp_ap.cool_rated_eirs.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
-    hp_ap.cool_fan_speed_ratios = []
-    for i in 0..(hp_ap.speed_indices.size - 1)
-      hp_ap.cool_fan_speed_ratios << hp_ap.cool_rated_cfm_per_ton[i] * hp_ap.cool_capacity_ratios[i] / (hp_ap.cool_rated_cfm_per_ton[-1] * hp_ap.cool_capacity_ratios[-1])
-    end
+    hp_ap.cool_fan_speed_ratios = hp_ap.cool_fan_speed_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
 
     if heat_pump.is_a? HPXML::HeatPump # Skip for mini-split air conditioner
       # Heating
