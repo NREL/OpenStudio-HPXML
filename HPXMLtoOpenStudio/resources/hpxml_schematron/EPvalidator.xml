@@ -1399,16 +1399,19 @@
   <sch:pattern>
     <sch:title>[MechanicalVentilationType=HRV]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:FanType="heat recovery ventilator"]'>
-      <sch:assert role='ERROR' test='count(h:TotalRecoveryEfficiency) + count(h:AdjustedTotalRecoveryEfficiency) = 0'>Expected 0 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency</sch:assert>
-      <sch:assert role='ERROR' test='count(h:SensibleRecoveryEfficiency) + count(h:AdjustedSensibleRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AdjustedTotalRecoveryEfficiency) + count(h:TotalRecoveryEfficiency) = 0'>Expected 0 element(s) for xpath: AdjustedTotalRecoveryEfficiency | TotalRecoveryEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AdjustedSensibleRecoveryEfficiency) + count(h:SensibleRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: AdjustedSensibleRecoveryEfficiency | SensibleRecoveryEfficiency</sch:assert>
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[MechanicalVentilationType=ERV]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:FanType="energy recovery ventilator"]'>
-      <sch:assert role='ERROR' test='count(h:TotalRecoveryEfficiency) + count(h:AdjustedTotalRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency</sch:assert>
-      <sch:assert role='ERROR' test='count(h:SensibleRecoveryEfficiency) + count(h:AdjustedSensibleRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AdjustedTotalRecoveryEfficiency) + count(h:TotalRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: AdjustedTotalRecoveryEfficiency | TotalRecoveryEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AdjustedSensibleRecoveryEfficiency) + count(h:SensibleRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: AdjustedSensibleRecoveryEfficiency | SensibleRecoveryEfficiency</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:AdjustedTotalRecoveryEfficiency) &lt; 0.5*number(h:AdjustedSensibleRecoveryEfficiency)'>Adjusted total recovery efficiency should typically be at least half of the adjusted sensible recovery efficiency.</sch:report>
+      <sch:report role='WARN' test='number(h:TotalRecoveryEfficiency) &lt; 0.5*number(h:SensibleRecoveryEfficiency)'>Total recovery efficiency should typically be at least half of the sensible recovery efficiency.</sch:report>
     </sch:rule>
   </sch:pattern>
 
