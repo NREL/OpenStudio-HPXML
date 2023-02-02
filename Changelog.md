@@ -10,7 +10,12 @@ __New Features__
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
 - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
-- ReportSimulationOutput measure: Allows specifying the number of decimal places for timeseries output.
+- ReportSimulationOutput measure:
+  - Allows specifying the number of decimal places for timeseries output.
+  - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
+- **Breaking change**: Updates component loads outputs:
+  - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
+  - Disaggregates `Lighting` from `Internal Gains`.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
