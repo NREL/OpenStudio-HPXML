@@ -194,6 +194,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -204,6 +207,9 @@
             <SystemIdentifier id='Floor2'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>216.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
@@ -501,11 +507,11 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
           <FuelType>electricity</FuelType>
         </ClothesDryer>
         <Dishwasher>

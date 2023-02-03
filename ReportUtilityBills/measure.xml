@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>5fb6c411-30ab-4c55-a903-8ef22f7622e2</version_id>
-  <version_modified>20221102T180650Z</version_modified>
+  <version_id>d038c4e6-ece0-4eb9-be8a-05c37ec4e492</version_id>
+  <version_modified>20221214T064430Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -85,23 +85,6 @@
       <checksum>F96CB80F</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>3C0D95E3</checksum>
-    </file>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>041AE7DE</checksum>
-    </file>
-    <file>
       <filename>detailed_rates/openei_rates.zip</filename>
       <filetype>zip</filetype>
       <usage_type>resource</usage_type>
@@ -174,12 +157,6 @@
       <checksum>D9D25D07</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>165C1A67</checksum>
-    </file>
-    <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -238,6 +215,29 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>387337AD</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>8DBDE597</checksum>
+    </file>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D59E7385</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>041AE7DE</checksum>
     </file>
   </files>
 </measure>

@@ -66,6 +66,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
+    arg.setDisplayName('Schedules: Vacancy Period')
+    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
@@ -452,6 +457,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDescription('Assembly R-value for the floor over the garage. Ignored unless the building has a garage under conditioned space.')
     arg.setDefaultValue(28.1)
+    args << arg
+
+    floor_type_choices = OpenStudio::StringVector.new
+    floor_type_choices << HPXML::FloorTypeWoodFrame
+    floor_type_choices << HPXML::FloorTypeSIP
+    floor_type_choices << HPXML::FloorTypeConcrete
+    floor_type_choices << HPXML::FloorTypeSteelFrame
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
+    arg.setDisplayName('Floor: Type')
+    arg.setDescription('The type of floors.')
+    arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
     args << arg
 
     foundation_wall_type_choices = OpenStudio::StringVector.new
@@ -2161,6 +2178,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('battery_round_trip_efficiency', false)
+    arg.setDisplayName('Battery: Round Trip Efficiency')
+    arg.setDescription('The round trip efficiency of the lithium ion battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('Frac')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -3040,10 +3063,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       runner.registerError("Could not find EPW file at '#{epw_path}'.")
       return false
     end
-    epw_file = OpenStudio::EpwFile.new(epw_path)
 
     # Create HPXML file
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file)
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -3276,10 +3298,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_file)
+  def self.create(runner, model, args, epw_path)
+    epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults].is_initialized && args[:apply_defaults].get)
-      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      weather = WeatherProcess.new(model, runner)
+      weather = WeatherProcess.new(epw_path: epw_path)
     end
 
     success = create_geometry_envelope(runner, model, args)
@@ -3440,11 +3462,17 @@ class HPXMLFile
     if args[:occupancy_calculation_type].is_initialized
       hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
     end
+
     if args[:window_natvent_availability].is_initialized
       hpxml.header.natvent_days_per_week = args[:window_natvent_availability].get
     end
+
     if args[:schedules_filepaths].is_initialized
       hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
+    end
+    if args[:schedules_vacancy_period].is_initialized
+      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
+      hpxml.header.vacancy_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
     end
 
     if args[:software_info_program_used].is_initialized
@@ -4181,9 +4209,9 @@ class HPXMLFile
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
-          floor_or_ceiling = HPXML::FloorTypeFloor
+          floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif surface.surfaceType == 'RoofCeiling'
-          floor_or_ceiling = HPXML::FloorTypeCeiling
+          floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
 
@@ -4196,13 +4224,14 @@ class HPXMLFile
       hpxml.floors.add(id: "Floor#{hpxml.floors.size + 1}",
                        exterior_adjacent_to: exterior_adjacent_to,
                        interior_adjacent_to: interior_adjacent_to,
+                       floor_type: args[:floor_type],
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                        floor_or_ceiling: floor_or_ceiling)
       if hpxml.floors[-1].floor_or_ceiling.nil?
         if hpxml.floors[-1].is_floor
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeFloor
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif hpxml.floors[-1].is_ceiling
-          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorTypeCeiling
+          hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
         end
       end
       @surface_ids[surface.name.to_s] = hpxml.floors[-1].id
@@ -5168,7 +5197,7 @@ class HPXMLFile
                                  fan_location: HPXML::LocationKitchen,
                                  fan_power: fan_power,
                                  start_hour: start_hour,
-                                 quantity: quantity)
+                                 count: quantity)
     end
 
     if !args[:bathroom_fans_quantity].is_initialized || (args[:bathroom_fans_quantity].get > 0)
@@ -5199,7 +5228,7 @@ class HPXMLFile
                                  fan_location: HPXML::LocationBath,
                                  fan_power: fan_power,
                                  start_hour: start_hour,
-                                 quantity: quantity)
+                                 count: quantity)
     end
 
     if args[:whole_house_fan_present]
@@ -5468,10 +5497,6 @@ class HPXMLFile
 
       max_power_output = [args[:pv_system_max_power_output], args[:pv_system_2_max_power_output]][i]
 
-      if args[:pv_system_inverter_efficiency].is_initialized
-        inverter_efficiency = args[:pv_system_inverter_efficiency].get
-      end
-
       if args[:pv_system_system_losses_fraction].is_initialized
         system_losses_fraction = args[:pv_system_system_losses_fraction].get
       end
@@ -5490,10 +5515,21 @@ class HPXMLFile
                            array_azimuth: [args[:pv_system_array_azimuth], args[:pv_system_2_array_azimuth]][i],
                            array_tilt: Geometry.get_absolute_tilt([args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], args[:geometry_roof_pitch], epw_file),
                            max_power_output: max_power_output,
-                           inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
                            is_shared_system: is_shared_system,
                            number_of_bedrooms_served: number_of_bedrooms_served)
+    end
+    if hpxml.pv_systems.size > 0
+      # Add inverter efficiency; assume a single inverter even if multiple PV arrays
+      if args[:pv_system_inverter_efficiency].is_initialized
+        inverter_efficiency = args[:pv_system_inverter_efficiency].get
+      end
+
+      hpxml.inverters.add(id: "Inverter#{hpxml.inverters.size + 1}",
+                          inverter_efficiency: inverter_efficiency)
+      hpxml.pv_systems.each do |pv_system|
+        pv_system.inverter_idref = hpxml.inverters[-1].id
+      end
     end
   end
 
@@ -5516,12 +5552,17 @@ class HPXMLFile
       usable_capacity_kwh = args[:battery_usable_capacity].get
     end
 
+    if args[:battery_round_trip_efficiency].is_initialized
+      round_trip_efficiency = args[:battery_round_trip_efficiency].get
+    end
+
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         location: location,
                         rated_power_output: rated_power_output,
                         nominal_capacity_kwh: nominal_capacity_kwh,
-                        usable_capacity_kwh: usable_capacity_kwh)
+                        usable_capacity_kwh: usable_capacity_kwh,
+                        round_trip_efficiency: round_trip_efficiency)
   end
 
   def self.set_lighting(hpxml, args)
@@ -5875,14 +5916,14 @@ class HPXMLFile
 
     hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size + 1}",
                            efficiency: efficiency,
-                           quantity: quantity)
+                           count: quantity)
   end
 
   def self.set_misc_plug_loads_television(hpxml, args)
     return unless args[:misc_plug_loads_television_present]
 
     if args[:misc_plug_loads_television_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_television_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_television_annual_kwh].get
     end
 
     if args[:misc_plug_loads_television_usage_multiplier].is_initialized
@@ -5891,13 +5932,13 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 
   def self.set_misc_plug_loads_other(hpxml, args)
     if args[:misc_plug_loads_other_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_other_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_other_annual_kwh].get
     end
 
     if args[:misc_plug_loads_other_frac_sensible].is_initialized
@@ -5914,7 +5955,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeOther,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          frac_sensible: frac_sensible,
                          frac_latent: frac_latent,
                          usage_multiplier: usage_multiplier)
@@ -5924,7 +5965,7 @@ class HPXMLFile
     return unless args[:misc_plug_loads_well_pump_present]
 
     if args[:misc_plug_loads_well_pump_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_well_pump_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_well_pump_annual_kwh].get
     end
 
     if args[:misc_plug_loads_well_pump_usage_multiplier].is_initialized
@@ -5933,7 +5974,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeWellPump,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 
@@ -5941,7 +5982,7 @@ class HPXMLFile
     return unless args[:misc_plug_loads_vehicle_present]
 
     if args[:misc_plug_loads_vehicle_annual_kwh].is_initialized
-      kWh_per_year = args[:misc_plug_loads_vehicle_annual_kwh].get
+      kwh_per_year = args[:misc_plug_loads_vehicle_annual_kwh].get
     end
 
     if args[:misc_plug_loads_vehicle_usage_multiplier].is_initialized
@@ -5950,7 +5991,7 @@ class HPXMLFile
 
     hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
-                         kWh_per_year: kWh_per_year,
+                         kwh_per_year: kwh_per_year,
                          usage_multiplier: usage_multiplier)
   end
 

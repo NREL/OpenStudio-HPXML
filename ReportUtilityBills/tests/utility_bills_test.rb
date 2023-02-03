@@ -72,8 +72,15 @@ class ReportUtilityBillsTest < MiniTest::Test
                                              propane_marginal_rate: 2.4532692307692305,
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
+    # Check for presence of fuels once
+    has_fuel = {}
+    hpxml_doc = @hpxml.to_oga
+    Constants.FossilFuels.each do |fuel|
+      has_fuel[fuel] = @hpxml.has_fuel(fuel, hpxml_doc)
+    end
+
     HPXMLDefaults.apply_header(@hpxml, nil)
-    HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml)
+    HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml, has_fuel)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
@@ -231,6 +238,15 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_workflow_detailed_calculations
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    actual_bills = _test_measure()
+    assert_operator(actual_bills['Test 1: Total (USD)'], :>, 0)
+  end
+
+  def test_workflow_detailed_calculations_all_electric
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills = _test_measure()

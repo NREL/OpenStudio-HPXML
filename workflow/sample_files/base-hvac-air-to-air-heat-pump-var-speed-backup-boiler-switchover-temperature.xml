@@ -212,6 +212,9 @@
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -350,7 +353,7 @@
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>separate</BackupType>
               <BackupSystem idref='HeatingSystem1'/>
-              <BackupHeatingSwitchoverTemperature>25.0</BackupHeatingSwitchoverTemperature>
+              <BackupHeatingSwitchoverTemperature>30.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

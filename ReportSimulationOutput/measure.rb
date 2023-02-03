@@ -142,6 +142,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('start')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('timeseries_num_decimal_places', false)
+    arg.setDisplayName('Generate Timeseries Output: Number of Decimal Places')
+    arg.setDescription('Allows overriding the default number of decimal places for timeseries output. Does not apply if output format is msgpack, where no rounding is performed because there is no file size penalty to storing full precision.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('add_timeseries_dst_column', false)
     arg.setDisplayName('Generate Timeseries Output: Add TimeDST Column')
     arg.setDescription('Optionally add, in addition to the default local standard Time column, a local clock TimeDST column. Requires that daylight saving time is enabled.')
@@ -294,6 +299,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       has_electricity_production = true
     end
 
+    has_electricity_storage = false
+    if @end_uses.select { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 }.size > 0
+      has_electricity_storage = true
+    end
+
     # Fuel outputs
     @fuels.each do |_fuel_type, fuel|
       fuel.meters.each do |meter|
@@ -303,10 +313,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
-    if has_electricity_production
+    if has_electricity_production || has_electricity_storage
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
+    end
+    if has_electricity_storage
+      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
       if include_timeseries_fuel_consumptions
-        result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
       end
     end
 
@@ -501,6 +514,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     generate_eri_outputs = generate_eri_outputs.is_initialized ? generate_eri_outputs.get : false
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
+    timeseries_num_decimal_places = runner.getOptionalIntegerArgumentValue('timeseries_num_decimal_places', user_arguments)
+    timeseries_num_decimal_places = timeseries_num_decimal_places.is_initialized ? Integer(timeseries_num_decimal_places.get) : nil
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
 
@@ -540,8 +555,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if timeseries_frequency != 'none'
       add_dst_column = (add_timeseries_dst_column.is_initialized ? add_timeseries_dst_column.get : false)
       add_utc_column = (add_timeseries_utc_column.is_initialized ? add_timeseries_utc_column.get : false)
-      @timestamps, timestamps_dst, timestamps_utc = OutputMethods.get_timestamps(@msgpackDataTimeseries, @hpxml, use_timestamp_start_convention,
-                                                                                 add_dst_column, add_utc_column, use_dview_format, timeseries_frequency)
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml, use_timestamp_start_convention,
+                                                                   add_dst_column, add_utc_column, use_dview_format, timeseries_frequency)
     end
 
     # Retrieve outputs
@@ -565,14 +580,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Set rounding precision for run period (e.g., annual) outputs.
-    # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
-    runperiod_n_digits = 3 # Default for annual (or near-annual) data
-    sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
-                  Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
-    if sim_n_days <= 10 # 10 days or less; add two decimal places
-      runperiod_n_digits += 2
-    elsif sim_n_days <= 100 # 100 days or less; add one decimal place
-      runperiod_n_digits += 1
+    if output_format == 'msgpack'
+      # No need to round; no file size penalty to storing full precision
+      runperiod_n_digits = 100
+    else
+      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
+      runperiod_n_digits = 3 # Default for annual (or near-annual) data
+      sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
+                    Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
+      if sim_n_days <= 10 # 10 days or less; add two decimal places
+        runperiod_n_digits += 2
+      elsif sim_n_days <= 100 # 100 days or less; add one decimal place
+        runperiod_n_digits += 1
+      end
     end
 
     # Write/report results
@@ -580,6 +600,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     report_timeseries_output_results(runner, outputs, output_format,
                                      timeseries_output_path,
                                      timeseries_frequency,
+                                     timeseries_num_decimal_places,
                                      include_timeseries_total_consumptions,
                                      include_timeseries_fuel_consumptions,
                                      include_timeseries_end_use_consumptions,
@@ -600,6 +621,68 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                      use_dview_format)
 
     return true
+  end
+
+  def get_timestamps(msgpackData, hpxml, use_timestamp_start_convention, add_dst_column = false, add_utc_column = false,
+                     use_dview_format = false, timeseries_frequency = nil)
+    return if msgpackData.nil?
+
+    ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
+
+    if add_dst_column || use_dview_format
+      dst_start_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_begin_month, hpxml.header.dst_begin_day, 2)
+      dst_end_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_end_month, hpxml.header.dst_end_day, 1)
+    end
+    if add_utc_column
+      utc_offset = hpxml.header.time_zone_utc_offset
+      utc_offset *= 3600 # seconds
+    end
+
+    timestamps = []
+    timestamps_dst = [] if add_dst_column || use_dview_format
+    timestamps_utc = [] if add_utc_column
+    year = hpxml.header.sim_calendar_year
+    ep_timestamps.each do |ep_timestamp|
+      month_day, hour_minute = ep_timestamp.split(' ')
+      month, day = month_day.split('/').map(&:to_i)
+      hour, minute, _ = hour_minute.split(':').map(&:to_i)
+
+      # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
+      if use_timestamp_start_convention
+        if timeseries_frequency == 'timestep'
+          ts_offset = hpxml.header.timestep * 60 # seconds
+        elsif timeseries_frequency == 'hourly'
+          ts_offset = 60 * 60 # seconds
+        elsif timeseries_frequency == 'daily'
+          ts_offset = 60 * 60 * 24 # seconds
+        elsif timeseries_frequency == 'monthly'
+          ts_offset = Constants.NumDaysInMonths(year)[month - 1] * 60 * 60 * 24 # seconds
+        else
+          fail 'Unexpected timeseries_frequency/'
+        end
+      end
+
+      ts = Time.utc(year, month, day, hour, minute)
+      ts -= ts_offset unless ts_offset.nil?
+
+      timestamps << ts.iso8601.delete('Z')
+
+      if add_dst_column || use_dview_format
+        if (ts >= dst_start_ts) && (ts < dst_end_ts)
+          ts_dst = ts + 3600 # 1 hr shift forward
+        else
+          ts_dst = ts
+        end
+        timestamps_dst << ts_dst.iso8601.delete('Z')
+      end
+
+      if add_utc_column
+        ts_utc = ts - utc_offset
+        timestamps_utc << ts_utc.iso8601
+      end
+    end
+
+    return timestamps, timestamps_dst, timestamps_utc
   end
 
   def get_outputs(runner, timeseries_frequency,
@@ -635,11 +718,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Fuel Uses
-    @fuels.each do |_fuel_type, fuel|
+    @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
-      if include_timeseries_fuel_consumptions
-        fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
-      end
+      fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec # We add Electric Storage onto the annual Electricity fuel meter
+
+      next unless include_timeseries_fuel_consumptions
+
+      fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
+      fuel.timeseries_output = fuel.timeseries_output.zip(get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)).map { |x, y| x - y } if fuel_type == FT::Elec # We add Electric Storage onto the timeseries Electricity fuel meter
     end
 
     # Peak Electricity Consumption
@@ -708,12 +794,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
-        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: end_use.is_negative)
+        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: (end_use.is_negative || end_use.is_storage))
+
         if include_timeseries_end_use_consumptions
-          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: end_use.is_negative)
+          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency, is_negative: (end_use.is_negative || end_use.is_storage))
         end
         if include_hourly_electric_end_use_consumptions && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: end_use.is_negative)
+          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: (end_use.is_negative || end_use.is_storage))
         end
       end
     end
@@ -1108,7 +1195,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
+    tol = 0.1
+
+    # ElectricityProduced:Facility contains:
+    # - Generator Produced DC Electricity Energy
+    # - Inverter Conversion Loss Decrement Energy
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # - Converter Electricity Loss Decrement Energy (should always be zero since efficiency=1.0)
+    # ElectricStorage:ElectricityProduced contains:
+    # - Electric Storage Production Decrement Energy
+    # - Electric Storage Discharge Energy
+    # So, we need to subtract ElectricStorage:ElectricityProduced from ElectricityProduced:Facility
     meter_elec_produced = -1 * get_report_meter_data_annual(['ElectricityProduced:Facility'])
+    meter_elec_produced += get_report_meter_data_annual(['ElectricStorage:ElectricityProduced'])
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
@@ -1122,7 +1222,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check sum of electricity produced end use outputs match total output from meter
-    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > 0.1
+    if (outputs[:elec_prod_annual] - meter_elec_produced).abs > tol
       runner.registerError("#{FT::Elec} produced category end uses (#{outputs[:elec_prod_annual].round(3)}) do not sum to total (#{meter_elec_produced.round(3)}).")
       return false
     end
@@ -1134,7 +1234,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
       end
-      if (sum_categories - meter_fuel_total).abs > 0.1
+
+      if (sum_categories - meter_fuel_total).abs > tol
         runner.registerError("#{fuel_type} category end uses (#{sum_categories.round(3)}) do not sum to total (#{meter_fuel_total.round(3)}).")
         return false
       end
@@ -1152,7 +1253,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         sum_timeseries = UnitConversions.convert(obj.timeseries_output.sum(0.0), obj.timeseries_units, obj.annual_units)
         annual_total = obj.annual_output.to_f
-        if (annual_total - sum_timeseries).abs > 0.1
+        if (annual_total - sum_timeseries).abs > tol
           runner.registerError("Timeseries outputs (#{sum_timeseries.round(3)}) do not sum to annual output (#{annual_total.round(3)}) for #{output_type}: #{key}.")
           return false
         end
@@ -1611,6 +1712,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def report_timeseries_output_results(runner, outputs, output_format,
                                        timeseries_output_path,
                                        timeseries_frequency,
+                                       timeseries_num_decimal_places,
                                        include_timeseries_total_consumptions,
                                        include_timeseries_fuel_consumptions,
                                        include_timeseries_end_use_consumptions,
@@ -1635,14 +1737,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
 
-    # Set rounding precision for timeseries (e.g., hourly) outputs.
-    # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
-    n_digits = 2 # Default for hourly (or longer) data
-    if timeseries_frequency == 'timestep'
-      if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
-        n_digits += 2
-      elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
-        n_digits += 1
+    if output_format == 'msgpack'
+      # No need to round; no file size penalty to storing full precision
+      n_digits = 100
+    elsif not timeseries_num_decimal_places.nil?
+      n_digits = timeseries_num_decimal_places
+    else
+      # Set rounding precision for timeseries (e.g., hourly) outputs.
+      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
+      n_digits = 3 # Default for hourly (or longer) data
+      if timeseries_frequency == 'timestep'
+        if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
+          n_digits += 2
+        elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
+          n_digits += 1
+        end
       end
     end
 
@@ -1813,7 +1922,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Apply daylight savings
         if timeseries_frequency == 'timestep' || timeseries_frequency == 'hourly'
           if @hpxml.header.dst_enabled
-            dst_start_ix, dst_end_ix = OutputMethods.get_dst_start_end_indexes(@timestamps, timestamps_dst)
+            dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
             dst_end_ix.downto(dst_start_ix + 1) do |i|
               data[i + 1] = data[i]
             end
@@ -1853,6 +1962,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote timeseries output results to #{timeseries_output_path}.")
   end
 
+  def get_dst_start_end_indexes(timestamps, timestamps_dst)
+    dst_start_ix = nil
+    dst_end_ix = nil
+    timestamps.zip(timestamps_dst).each_with_index do |ts, i|
+      dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
+      dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
+    end
+
+    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? # run period ends before DST ends
+
+    return dst_start_ix, dst_end_ix
+  end
+
   def get_report_meter_data_annual(meter_names, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'))
     return 0.0 if meter_names.empty?
 
@@ -1882,7 +2004,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
-    msgpack_timeseries_name = OutputMethods.msgpack_frequency_map[timeseries_frequency]
+    msgpack_timeseries_name = { 'timestep' => 'TimeStep',
+                                'hourly' => 'Hourly',
+                                'daily' => 'Daily',
+                                'monthly' => 'Monthly' }[timeseries_frequency]
     cols = @msgpackData['MeterData'][msgpack_timeseries_name]['Cols']
     rows = @msgpackData['MeterData'][msgpack_timeseries_name]['Rows']
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
@@ -2068,17 +2193,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   class EndUse < BaseOutput
-    def initialize(variables: [], is_negative: false)
+    def initialize(variables: [], is_negative: false, is_storage: false)
       super()
       @variables = variables
       @is_negative = is_negative
+      @is_storage = is_storage
       @timeseries_output_by_system = {}
       @annual_output_by_system = {}
       # These outputs used to apply Cambium hourly electricity factors
       @hourly_output = []
       @hourly_output_by_system = {}
     end
-    attr_accessor(:variables, :is_negative, :annual_output_by_system, :timeseries_output_by_system,
+    attr_accessor(:variables, :is_negative, :is_storage, :annual_output_by_system, :timeseries_output_by_system,
                   :hourly_output, :hourly_output_by_system)
   end
 
@@ -2242,6 +2368,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
                                                        is_negative: true)
+    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Battery]),
+                                                     is_storage: true)
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotWater]))
@@ -2411,8 +2539,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @component_loads[[LT::Heating, CLT::RimJoists]] = ComponentLoad.new(ems_variable: 'loads_htg_rim_joists')
     @component_loads[[LT::Heating, CLT::FoundationWalls]] = ComponentLoad.new(ems_variable: 'loads_htg_foundation_walls')
     @component_loads[[LT::Heating, CLT::Doors]] = ComponentLoad.new(ems_variable: 'loads_htg_doors')
-    @component_loads[[LT::Heating, CLT::Windows]] = ComponentLoad.new(ems_variable: 'loads_htg_windows')
-    @component_loads[[LT::Heating, CLT::Skylights]] = ComponentLoad.new(ems_variable: 'loads_htg_skylights')
+    @component_loads[[LT::Heating, CLT::WindowsConduction]] = ComponentLoad.new(ems_variable: 'loads_htg_windows_conduction')
+    @component_loads[[LT::Heating, CLT::WindowsSolar]] = ComponentLoad.new(ems_variable: 'loads_htg_windows_solar')
+    @component_loads[[LT::Heating, CLT::SkylightsConduction]] = ComponentLoad.new(ems_variable: 'loads_htg_skylights_conduction')
+    @component_loads[[LT::Heating, CLT::SkylightsSolar]] = ComponentLoad.new(ems_variable: 'loads_htg_skylights_solar')
     @component_loads[[LT::Heating, CLT::Floors]] = ComponentLoad.new(ems_variable: 'loads_htg_floors')
     @component_loads[[LT::Heating, CLT::Slabs]] = ComponentLoad.new(ems_variable: 'loads_htg_slabs')
     @component_loads[[LT::Heating, CLT::InternalMass]] = ComponentLoad.new(ems_variable: 'loads_htg_internal_mass')
@@ -2422,14 +2552,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @component_loads[[LT::Heating, CLT::WholeHouseFan]] = ComponentLoad.new(ems_variable: 'loads_htg_whf')
     @component_loads[[LT::Heating, CLT::Ducts]] = ComponentLoad.new(ems_variable: 'loads_htg_ducts')
     @component_loads[[LT::Heating, CLT::InternalGains]] = ComponentLoad.new(ems_variable: 'loads_htg_intgains')
+    @component_loads[[LT::Heating, CLT::Lighting]] = ComponentLoad.new(ems_variable: 'loads_htg_lighting')
     @component_loads[[LT::Cooling, CLT::Roofs]] = ComponentLoad.new(ems_variable: 'loads_clg_roofs')
     @component_loads[[LT::Cooling, CLT::Ceilings]] = ComponentLoad.new(ems_variable: 'loads_clg_ceilings')
     @component_loads[[LT::Cooling, CLT::Walls]] = ComponentLoad.new(ems_variable: 'loads_clg_walls')
     @component_loads[[LT::Cooling, CLT::RimJoists]] = ComponentLoad.new(ems_variable: 'loads_clg_rim_joists')
     @component_loads[[LT::Cooling, CLT::FoundationWalls]] = ComponentLoad.new(ems_variable: 'loads_clg_foundation_walls')
     @component_loads[[LT::Cooling, CLT::Doors]] = ComponentLoad.new(ems_variable: 'loads_clg_doors')
-    @component_loads[[LT::Cooling, CLT::Windows]] = ComponentLoad.new(ems_variable: 'loads_clg_windows')
-    @component_loads[[LT::Cooling, CLT::Skylights]] = ComponentLoad.new(ems_variable: 'loads_clg_skylights')
+    @component_loads[[LT::Cooling, CLT::WindowsConduction]] = ComponentLoad.new(ems_variable: 'loads_clg_windows_conduction')
+    @component_loads[[LT::Cooling, CLT::WindowsSolar]] = ComponentLoad.new(ems_variable: 'loads_clg_windows_solar')
+    @component_loads[[LT::Cooling, CLT::SkylightsConduction]] = ComponentLoad.new(ems_variable: 'loads_clg_skylights_conduction')
+    @component_loads[[LT::Cooling, CLT::SkylightsSolar]] = ComponentLoad.new(ems_variable: 'loads_clg_skylights_solar')
     @component_loads[[LT::Cooling, CLT::Floors]] = ComponentLoad.new(ems_variable: 'loads_clg_floors')
     @component_loads[[LT::Cooling, CLT::Slabs]] = ComponentLoad.new(ems_variable: 'loads_clg_slabs')
     @component_loads[[LT::Cooling, CLT::InternalMass]] = ComponentLoad.new(ems_variable: 'loads_clg_internal_mass')
@@ -2439,6 +2572,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @component_loads[[LT::Cooling, CLT::WholeHouseFan]] = ComponentLoad.new(ems_variable: 'loads_clg_whf')
     @component_loads[[LT::Cooling, CLT::Ducts]] = ComponentLoad.new(ems_variable: 'loads_clg_ducts')
     @component_loads[[LT::Cooling, CLT::InternalGains]] = ComponentLoad.new(ems_variable: 'loads_clg_intgains')
+    @component_loads[[LT::Cooling, CLT::Lighting]] = ComponentLoad.new(ems_variable: 'loads_clg_lighting')
 
     @component_loads.each do |key, comp_load|
       load_type, comp_load_type = key
@@ -2667,12 +2801,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
-        return { [FT::Elec, EUT::PV] => ["Inverter AC Output #{EPlus::FuelTypeElectricity} Energy"] }
+        return { [FT::Elec, EUT::PV] => ['Inverter Conversion Loss Decrement Energy'] }
+
+      elsif object.to_GeneratorPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ["Generator Produced DC #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_GeneratorMicroTurbine.is_initialized
         fuel = object.to_GeneratorMicroTurbine.get.fuelType
         return { [FT::Elec, EUT::Generator] => ["Generator Produced AC #{EPlus::FuelTypeElectricity} Energy"],
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
+
+      elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        # return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy', 'Electric Storage Thermal Loss Energy'] }
+        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
@@ -2726,6 +2867,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
+          return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end

@@ -149,6 +149,9 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>1311.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -426,11 +429,11 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
           <FuelType>natural gas</FuelType>
         </ClothesDryer>
         <Dishwasher>

@@ -88,8 +88,8 @@ Annual energy consumption outputs are listed below.
   ====================================  ===========================
   Type                                  Notes
   ====================================  ===========================
-  Energy Use: Total (MBtu)
-  Energy Use: Net (MBtu)                Subtracts any power produced by PV (including any battery storage) or generators.
+  Energy Use: Total (MBtu)              Includes any battery charging/discharging
+  Energy Use: Net (MBtu)                Subtracts any power produced by PV or generators.
   ====================================  ===========================
 
 Annual Energy Consumption by Fuel Use
@@ -100,8 +100,8 @@ Fuel uses are listed below.
    ====================================  ===========================
    Type                                  Notes
    ====================================  ===========================
-   Fuel Use: Electricity: Total (MBtu)
-   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV (including any battery storage) or generators.
+   Fuel Use: Electricity: Total (MBtu)   Includes any battery charging/discharging
+   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV or generators.
    Fuel Use: Natural Gas: Total (MBtu)
    Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Fuel Use: Propane: Total (MBtu)
@@ -152,8 +152,9 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Pool Pump (MBtu)
    End Use: Electricity: Hot Tub Heater (MBtu)
    End Use: Electricity: Hot Tub Pump (MBtu)
-   End Use: Electricity: PV (MBtu)                                      Negative value for any power produced (including any battery storage)
+   End Use: Electricity: PV (MBtu)                                      Negative value for any power produced
    End Use: Electricity: Generator (MBtu)                               Negative value for any power produced
+   End Use: Electricity: Battery (MBtu)                                 Positive value for charging (including efficiency losses); negative value for discharging
    End Use: Natural Gas: Heating (MBtu)                                 Excludes heat pump backup
    End Use: Natural Gas: Heating Heat Pump Backup (MBtu)
    End Use: Natural Gas: Hot Water (MBtu)
@@ -324,8 +325,10 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Rim Joists (MBtu)              Heat gain/loss through HPXML ``RimJoist`` elements adjacent to conditioned space
    Component Load: \*: Foundation Walls (MBtu)        Heat gain/loss through HPXML ``FoundationWall`` elements adjacent to conditioned space
    Component Load: \*: Doors (MBtu)                   Heat gain/loss through HPXML ``Door`` elements adjacent to conditioned space
-   Component Load: \*: Windows (MBtu)                 Heat gain/loss through HPXML ``Window`` elements adjacent to conditioned space, including solar
-   Component Load: \*: Skylights (MBtu)               Heat gain/loss through HPXML ``Skylight`` elements adjacent to conditioned space, including solar
+   Component Load: \*: Windows Conduction (MBtu)      Heat gain/loss attributed to conduction through HPXML ``Window`` elements adjacent to conditioned space
+   Component Load: \*: Windows Solar (MBtu)           Heat gain/loss attributed to solar gains through HPXML ``Window`` elements adjacent to conditioned space
+   Component Load: \*: Skylights Conduction (MBtu)    Heat gain/loss attributed to conduction through HPXML ``Skylight`` elements adjacent to conditioned space
+   Component Load: \*: Skylights Solar (MBtu)         Heat gain/loss attributed to solar gains through HPXML ``Skylight`` elements adjacent to conditioned space
    Component Load: \*: Floors (MBtu)                  Heat gain/loss through HPXML ``Floor`` elements (inferred to be floors) adjacent to conditioned space
    Component Load: \*: Slabs (MBtu)                   Heat gain/loss through HPXML ``Slab`` elements adjacent to conditioned space
    Component Load: \*: Internal Mass (MBtu)           Heat gain/loss from internal mass (e.g., furniture, interior walls/floors) in conditioned space
@@ -334,7 +337,8 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Mechanical Ventilation (MBtu)  Heat gain/loss from airflow/fan energy from mechanical ventilation systems (including clothes dryer exhaust)
    Component Load: \*: Whole House Fan (MBtu)         Heat gain/loss from airflow due to a whole house fan
    Component Load: \*: Ducts (MBtu)                   Heat gain/loss from conduction and leakage losses through supply/return ducts outside conditioned space
-   Component Load: \*: Internal Gains (MBtu)          Heat gain/loss from appliances, lighting, plug loads, water heater tank losses, etc. in the conditioned space
+   Component Load: \*: Internal Gains (MBtu)          Heat gain/loss from appliances, plug loads, water heater tank losses, etc. in the conditioned space
+   Component Load: \*: Lighting (MBtu)                Heat gain/loss from lighting in the conditioned space
    =================================================  =========================================================================================================
 
 Annual Hot Water Uses

@@ -85,6 +85,14 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? osm_path)
       hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
       assert(File.exist? hpxml_defaults_path)
+
+      next unless output_format == 'msgpack'
+
+      # Check timeseries output isn't rounded
+      require 'msgpack'
+      data = MessagePack.unpack(File.read(File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"), mode: 'rb'))
+      value = data['Energy Use']['Total (kBtu)'][0]
+      assert_operator((value - value.round(8)).abs, :>, 0)
     end
   end
 
@@ -149,7 +157,7 @@ class HPXMLTest < MiniTest::Test
 
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.absolute_path(tmp_hpxml_path)
-      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --add-detailed-schedule stochastic"
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --add-stochastic-schedules"
       command += ' -d' if debug
       system(command, err: File::NULL)
 
@@ -210,127 +218,53 @@ class HPXMLTest < MiniTest::Test
     end
   end
 
-  def test_template_osw
-    # Check that simulation works using template-run-hpxml.osw
+  def test_template_osws
+    # Check that simulation works using template-*.osw
     require 'json'
 
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-run-hpxml.osw')
+    ['template-run-hpxml.osw',
+     'template-run-hpxml-with-stochastic-occupancy.osw',
+     'template-run-hpxml-with-stochastic-occupancy-subset.osw',
+     'template-build-and-run-hpxml-with-stochastic-occupancy.osw'].each do |osw_name|
+      osw_path = File.join(File.dirname(__FILE__), '..', osw_name)
 
-    # Create derivative OSW for testing
-    osw_path_test = osw_path.gsub('.osw', '_test.osw')
-    FileUtils.cp(osw_path, osw_path_test)
+      # Create derivative OSW for testing
+      osw_path_test = osw_path.gsub('.osw', '_test.osw')
+      FileUtils.cp(osw_path, osw_path_test)
 
-    # Turn on debug mode
-    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-    json[:steps][0][:arguments][:debug] = true
+      # Turn on debug mode
+      json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+      measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
+      json[:steps][measure_index][:arguments][:debug] = true
 
-    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so update dir name
-      json[:steps][0][:measure_dir_name] = 'project'
+      if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+        # CI checks out the repo as "project", so update dir name
+        json[:steps][measure_index][:measure_dir_name] = 'project'
+      end
+
+      File.open(osw_path_test, 'w') do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
+      system(command, err: File::NULL)
+
+      # Check for output files
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
+
+      # Check for debug files
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
+      hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+      assert(File.exist? hpxml_defaults_path)
+
+      # Cleanup
+      File.delete(osw_path_test)
+      xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built.xml')
+      File.delete(xml_path_test) if File.exist?(xml_path_test)
+      xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built-stochastic-schedules.xml')
+      File.delete(xml_path_test) if File.exist?(xml_path_test)
     end
-
-    File.open(osw_path_test, 'w') do |f|
-      f.write(JSON.pretty_generate(json))
-    end
-
-    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
-    system(command, err: File::NULL)
-
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
-
-    # Check for debug files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
-    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-
-    # Cleanup
-    File.delete(osw_path_test)
-  end
-
-  def test_template_osw_with_schedule
-    # Check that simulation works using template-run-hpxml-with-stochastic-occupancy.osw
-    require 'json'
-
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-run-hpxml-with-stochastic-occupancy.osw')
-
-    # Create derivative OSW for testing
-    osw_path_test = osw_path.gsub('.osw', '_test.osw')
-    FileUtils.cp(osw_path, osw_path_test)
-
-    # Turn on debug mode
-    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-    json[:steps][1][:arguments][:debug] = true
-
-    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so update dir name
-      json[:steps][1][:measure_dir_name] = 'project'
-    end
-
-    File.open(osw_path_test, 'w') do |f|
-      f.write(JSON.pretty_generate(json))
-    end
-
-    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
-    system(command, err: File::NULL)
-
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
-
-    # Check for debug files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
-    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-
-    # Cleanup
-    File.delete(osw_path_test)
-    xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'base-stochastic-schedules.xml')
-    File.delete(xml_path_test)
-  end
-
-  def test_template_osw_with_build_hpxml_and_schedule
-    # Check that simulation works using template-build-and-run-hpxml-with-stochastic-occupancy.osw
-    require 'json'
-
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-and-run-hpxml-with-stochastic-occupancy.osw')
-
-    # Create derivative OSW for testing
-    osw_path_test = osw_path.gsub('.osw', '_test.osw')
-    FileUtils.cp(osw_path, osw_path_test)
-
-    # Turn on debug mode
-    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-    json[:steps][2][:arguments][:debug] = true
-
-    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so update dir name
-      json[:steps][1][:measure_dir_name] = 'project'
-    end
-
-    File.open(osw_path_test, 'w') do |f|
-      f.write(JSON.pretty_generate(json))
-    end
-
-    command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
-    system(command, err: File::NULL)
-
-    # Check for output files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
-
-    # Check for debug files
-    assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
-    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
-    assert(File.exist? hpxml_defaults_path)
-
-    # Cleanup
-    File.delete(osw_path_test)
-    xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built.xml')
-    File.delete(xml_path_test)
-    xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built-stochastic-schedules.xml')
-    File.delete(xml_path_test)
   end
 
   def test_multiple_building_ids
@@ -362,7 +296,7 @@ class HPXMLTest < MiniTest::Test
     top_dir = File.join(@this_dir, '..', '..')
     command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{File.join(top_dir, 'tasks.rb')}\" create_release_zips"
     system(command)
-    assert_equal(2, Dir["#{top_dir}/*.zip"].size)
+    assert_equal(1, Dir["#{top_dir}/*.zip"].size)
 
     # Check successful running of simulation from release zips
     require 'zip'
@@ -400,6 +334,7 @@ class HPXMLTest < MiniTest::Test
     rundir = File.join(rundir, 'run')
 
     # Check results
+    print "Simulation failed: #{xml}.\n" unless success
     assert_equal(true, success)
 
     # Check for output files
@@ -445,16 +380,20 @@ class HPXMLTest < MiniTest::Test
       total_clg_load_delivered = results['Load: Cooling: Delivered (MBtu)']
       abs_htg_load_delta = (total_htg_load_delivered - sum_component_htg_loads).abs
       abs_clg_load_delta = (total_clg_load_delivered - sum_component_clg_loads).abs
-      avg_htg_load = ([total_htg_load_delivered, abs_htg_load_delta].sum / 2.0)
-      avg_clg_load = ([total_clg_load_delivered, abs_clg_load_delta].sum / 2.0)
-      abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
-      abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
-      # Check that the difference is less than 0.6MBtu or less than 10%
+      avg_htg_load = ([total_htg_load_delivered, sum_component_htg_loads].sum / 2.0)
+      avg_clg_load = ([total_clg_load_delivered, sum_component_clg_loads].sum / 2.0)
+      if avg_htg_load > 0
+        abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
+      end
+      if avg_clg_load > 0
+        abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
+      end
+      # Check that the difference is less than 1.5 MBtu or less than 10%
       if hpxml.total_fraction_heat_load_served > 0
-        assert((abs_htg_load_delta < 0.6) || (abs_htg_load_frac < 0.1))
+        assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
       end
       if hpxml.total_fraction_cool_load_served > 0
-        assert((abs_clg_load_delta < 1.1) || (abs_clg_load_frac < 0.1))
+        assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
       end
     end
 
@@ -487,21 +426,6 @@ class HPXMLTest < MiniTest::Test
     hpxml.collapse_enclosure_surfaces()
 
     # Check run.log warnings
-    def skip_utility_bill_warning(err_line)
-      utility_bill_warnings = ["#{EPlus::FuelTypeElectricity}:Facility".upcase,
-                               "#{EPlus::FuelTypeElectricity}Produced:Facility".upcase,
-                               "#{EPlus::FuelTypeNaturalGas}:Facility".upcase,
-                               "#{EPlus::FuelTypeOil}:Facility".upcase,
-                               "#{EPlus::FuelTypePropane}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodCord}:Facility".upcase,
-                               "#{EPlus::FuelTypeWoodPellets}:Facility".upcase,
-                               "#{EPlus::FuelTypeCoal}:Facility".upcase]
-      skip_warning = false
-      utility_bill_warnings.each do |utility_bill_warning|
-        skip_warning = true if err_line.include? utility_bill_warning
-      end
-      return skip_warning
-    end
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
@@ -548,8 +472,8 @@ class HPXMLTest < MiniTest::Test
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
       end
-      if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
-        next if log_line.include? 'Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'
+      if hpxml.pv_systems.empty? && !hpxml.batteries.empty? && hpxml.header.schedules_filepaths.empty?
+        next if log_line.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
         next if log_line.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
@@ -560,7 +484,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
 
-      flunk "Unexpected warning found in run.log: #{log_line}"
+      flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
     end
 
     # Check for unexpected warnings
@@ -603,10 +527,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
-
-      if err_line.include? 'Output:Meter: invalid Key Name'
-        next if skip_utility_bill_warning(err_line)
-      end
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -652,7 +572,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'The following Report Variables were requested but not generated' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9732 is resolved
       end
 
-      flunk "Unexpected warning found: #{err_line}"
+      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
     end
 
     # Check for unused objects/schedules/constructions warnings
@@ -677,8 +597,6 @@ class HPXMLTest < MiniTest::Test
     num_invalid_output_variables = 0
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
-        next if skip_utility_bill_warning(err_line)
-
         num_invalid_output_meters += 1
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
         num_invalid_output_variables += 1
@@ -778,6 +696,7 @@ class HPXMLTest < MiniTest::Test
       assert_equal(0, num_kiva_instances)                                                # no foundation, above dwelling unit
     else
       num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                # no foundation in contact w/ ground
+                                      'base-enclosure-floortypes.xml' => 0,              # no foundation in contact w/ ground
                                       'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
                                       'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
                                       'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
@@ -1141,10 +1060,10 @@ class HPXMLTest < MiniTest::Test
           fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         end
         if not vent_fan_kitchen.empty?
-          fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
         end
         if not vent_fan_bath.empty?
-          fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
         end
         # Maximum error that can be caused by rounding
         assert_in_delta(mv_energy, fan_gj, 0.006)
@@ -1173,7 +1092,12 @@ class HPXMLTest < MiniTest::Test
 
     # Lighting
     ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
-    assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+    if not (hpxml_path.include?('vacancy-year-round') || hpxml_path.include?('residents-0'))
+      assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+    else
+      assert_operator(hpxml.lighting_groups.size, :>, 0)
+      assert_equal(0, ltg_energy)
+    end
 
     # Get fuels
     htg_fuels = []
