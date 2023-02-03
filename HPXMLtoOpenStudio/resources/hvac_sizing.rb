@@ -1026,7 +1026,7 @@ class HVACSizing
     Cooling Load: Internal Gains
     '''
 
-    bldg_design_loads.Cool_IntGains_Sens = @hpxml.header.acca_internal_gains + 230.0 * @hpxml.header.acca_num_occupants
+    bldg_design_loads.Cool_IntGains_Sens = @hpxml.header.acca_internal_loads + 230.0 * @hpxml.header.acca_num_occupants
     bldg_design_loads.Cool_IntGains_Lat = 200.0 * @hpxml.header.acca_num_occupants
   end
 
