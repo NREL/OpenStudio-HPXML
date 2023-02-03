@@ -33,8 +33,8 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl'>
       <sch:assert role='ERROR' test='count(h:Timestep) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Timestep</sch:assert> <!-- minutes; must be a divisor of 60 -->
       <sch:assert role='ERROR' test='60 mod number(h:Timestep) = 0 or not(h:Timestep)'>Expected Timestep to be 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, or 1</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BeginMonth) + count(h:BeginDayOfMonth) = 0 or count(h:BeginMonth) + count(h:BeginDayOfMonth) = 2'>Expected 0 or 2 element(s) for xpath: BeginMonth | BeginDayOfMonth</sch:assert> <!-- integer -->
-      <sch:assert role='ERROR' test='count(h:EndMonth) + count(h:EndDayOfMonth) = 0 or count(h:EndMonth) + count(h:EndDayOfMonth) = 2'>Expected 0 or 2 element(s) for xpath: EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:BeginMonth) + count(h:BeginDayOfMonth) = 0 or count(h:BeginMonth) + count(h:BeginDayOfMonth) = 2'>Expected 0 or 2 element(s) for xpath: BeginMonth | BeginDayOfMonth</sch:assert>
+      <sch:assert role='ERROR' test='count(h:EndMonth) + count(h:EndDayOfMonth) = 0 or count(h:EndMonth) + count(h:EndDayOfMonth) = 2'>Expected 0 or 2 element(s) for xpath: EndMonth | EndDayOfMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:CalendarYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CalendarYear</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='number(h:CalendarYear) &gt;= 1600 or not(h:CalendarYear)'>Expected CalendarYear to be greater than or equal to 1600</sch:assert>
       <sch:assert role='ERROR' test='number(h:CalendarYear) &lt;= 9999 or not(h:CalendarYear)'>Expected CalendarYear to be less than or equal to 9999</sch:assert>
@@ -45,9 +45,15 @@
   <sch:pattern>
     <sch:title>[HVACSizingControl]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:HVACSizingControl'>
-      <sch:assert role='ERROR' test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AllowIncreasedFixedCapacities</sch:assert> <!-- boolean -->
+      <sch:assert role='ERROR' test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AllowIncreasedFixedCapacities</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpSizingMethodology) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatPumpSizingMethodology</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpSizingMethodology[text()="ACCA" or text()="HERS" or text()="MaxLoad"] or not(h:HeatPumpSizingMethodology)'>Expected HeatPumpSizingMethodology to be 'ACCA' or 'HERS' or 'MaxLoad'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:HeatingDesignTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/WinterDesignTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:CoolingDesignTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/SummerDesignTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:HeatingSetpoint) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/HeatingSetpoint</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:CoolingSetpoint) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/CoolingSetpoint</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:InternalLoads) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/InternalLoads</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ACCASizingInputs/h:NumberofOccupants) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ACCASizingInputs/NumberofOccupants</sch:assert>
     </sch:rule>
   </sch:pattern>
 

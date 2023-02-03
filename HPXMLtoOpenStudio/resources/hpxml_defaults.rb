@@ -21,7 +21,7 @@ class HPXMLDefaults
       has_fuel[fuel] = hpxml.has_fuel(fuel, hpxml_doc)
     end
 
-    apply_header(hpxml, epw_file)
+    apply_header(hpxml, epw_file, weather, nbeds)
     apply_emissions_scenarios(hpxml, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml, has_fuel)
     apply_site(hpxml)
@@ -63,7 +63,7 @@ class HPXMLDefaults
     apply_batteries(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(hpxml, weather, cfa, nbeds)
+    apply_hvac_sizing(hpxml, weather, cfa)
   end
 
   def self.get_default_azimuths(hpxml)
@@ -104,7 +104,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file)
+  def self.apply_header(hpxml, epw_file, weather, nbeds)
     if hpxml.header.occupancy_calculation_type.nil?
       hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
       hpxml.header.occupancy_calculation_type_isdefaulted = true
@@ -176,9 +176,40 @@ class HPXMLDefaults
       hpxml.header.allow_increased_fixed_capacities = false
       hpxml.header.allow_increased_fixed_capacities_isdefaulted = true
     end
+
     if hpxml.header.heat_pump_sizing_methodology.nil? && (hpxml.heat_pumps.size > 0)
       hpxml.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingHERS
       hpxml.header.heat_pump_sizing_methodology_isdefaulted = true
+    end
+
+    if hpxml.header.acca_heating_design_temp.nil?
+      hpxml.header.acca_heating_design_temp = weather.design.HeatingDrybulb
+      hpxml.header.acca_heating_design_temp_isdefaulted = true
+    end
+
+    if hpxml.header.acca_cooling_design_temp.nil?
+      hpxml.header.acca_cooling_design_temp = weather.design.CoolingDrybulb
+      hpxml.header.acca_cooling_design_temp_isdefaulted = true
+    end
+
+    if hpxml.header.acca_heating_setpoint.nil?
+      hpxml.header.acca_heating_setpoint = 70.0 # deg-F
+      hpxml.header.acca_heating_setpoint_isdefaulted = true
+    end
+
+    if hpxml.header.acca_cooling_setpoint.nil?
+      hpxml.header.acca_cooling_setpoint = 75.0 # deg-F
+      hpxml.header.acca_cooling_setpoint_isdefaulted = true
+    end
+
+    if hpxml.header.acca_internal_loads.nil?
+      hpxml.header.acca_internal_loads = 2400.0 # Btuh
+      hpxml.header.acca_internal_loads_isdefaulted = true
+    end
+
+    if hpxml.header.acca_num_occupants.nil?
+      hpxml.header.acca_num_occupants = nbeds + 1
+      hpxml.header.acca_num_occupants_isdefaulted = true
     end
 
     if (not epw_file.nil?) && hpxml.header.state_code.nil?
@@ -2562,11 +2593,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(hpxml, weather, cfa, nbeds)
+  def self.apply_hvac_sizing(hpxml, weather, cfa)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml)
 
     # Calculate building design loads and equipment capacities/airflows
-    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml, cfa, nbeds, hvac_systems)
+    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml, cfa, hvac_systems)
 
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh

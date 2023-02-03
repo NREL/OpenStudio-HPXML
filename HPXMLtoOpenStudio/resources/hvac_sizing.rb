@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.calculate(weather, hpxml, cfa, nbeds, hvac_systems)
+  def self.calculate(weather, hpxml, cfa, hvac_systems)
     # Calculates heating/cooling design loads, and selects equipment
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
 
     @hpxml = hpxml
     @cfa = cfa
-    @nbeds = nbeds
 
     def self.is_system_to_skip(hvac)
       # These shared systems should be converted to other equivalent
@@ -81,14 +80,15 @@ class HVACSizing
     @daily_range_temp_adjust = [4, 0, -5]
 
     # Manual J inside conditions
-    @cool_setpoint = 75.0
-    @heat_setpoint = 70.0
+    @cool_setpoint = @hpxml.header.acca_cooling_setpoint
+    @heat_setpoint = @hpxml.header.acca_heating_setpoint
 
     @cool_design_grains = UnitConversions.convert(weather.design.CoolingHumidityRatio, 'lbm/lbm', 'grains')
 
     # Calculate the design temperature differences
-    @ctd = [weather.design.CoolingDrybulb - @cool_setpoint, 0.0].max
-    @htd = [@heat_setpoint - weather.design.HeatingDrybulb, 0.0].max
+    # FIXME: Replace all instances of e.g. weather.design.HeatingDrybulb with @hpxml.header.acca_heating_design_temp? (Same for cooling)
+    @ctd = [@hpxml.header.acca_cooling_design_temp - @cool_setpoint, 0.0].max
+    @htd = [@heat_setpoint - @hpxml.header.acca_heating_design_temp, 0.0].max
 
     # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
     dtr = weather.design.DailyTemperatureRange
@@ -1026,10 +1026,8 @@ class HVACSizing
     Cooling Load: Internal Gains
     '''
 
-    # Per ANSI/RESNET/ICC 301
-    n_occupants = @nbeds + 1
-    bldg_design_loads.Cool_IntGains_Sens = 1600.0 + 230.0 * n_occupants
-    bldg_design_loads.Cool_IntGains_Lat = 200.0 * n_occupants
+    bldg_design_loads.Cool_IntGains_Sens = @hpxml.header.acca_internal_gains + 230.0 * @hpxml.header.acca_num_occupants
+    bldg_design_loads.Cool_IntGains_Lat = 200.0 * @hpxml.header.acca_num_occupants
   end
 
   def self.aggregate_loads(bldg_design_loads)
@@ -1966,7 +1964,7 @@ class HVACSizing
       # Calculate the heating load at the switchover temperature to limit uninitialized capacity
       switchover_weather = Marshal.load(Marshal.dump(weather))
       switchover_weather.design.HeatingDrybulb = hvac.SwitchoverTemperature
-      _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, @nbeds, [hvac.hvac_system])
+      _switchover_bldg_design_loads, switchover_all_hvac_sizing_values = calculate(switchover_weather, @hpxml, @cfa, [hvac.hvac_system])
       heating_load = switchover_all_hvac_sizing_values[hvac.hvac_system].Heat_Load
       heating_db = switchover_weather.design.HeatingDrybulb
     else

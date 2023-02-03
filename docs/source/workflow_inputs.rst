@@ -106,6 +106,8 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
 
+.. _sizing_control:
+
 HPXML HVAC Sizing Control
 *************************
 
@@ -123,6 +125,32 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
   .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
          If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
+
+If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl/ACCASizingInputs``.
+
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  Element                            Type      Units   Constraints  Required  Default       Description
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
+  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
+  ``HeatingSetpoint``                double    F                    No        70 [#]_       Conditioned space heating setpoint
+  ``CoolingSetpoint``                double    F                    No        75 [#]_       Conditioned space cooling setpoint
+  ``InternalLoads``                  double    Btu/hr               No        2400 [#]_     Internal loads for cooling design load
+  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
+  =================================  ========  ======  ===========  ========  ============  ============================================
+
+  .. [#] The 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] The 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
+  .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
+  .. [#] Internal loads of 2400 Btu/hr is the Manual J default scenario.
+         It includes 1000 Btu/hr for the kitchen, 500 Btu/hr for the utility room, and 900 Btu/hr allowance for a TV or computer and a few lighting fixtures.
+         This default represents loads that normally occur during the early evening in mid-summer.
+         Additional adjustments or custom internal loads can instead be specified here.
+  .. [#] Per Manual J, the number of occupants shall equal the number of bedrooms plus one.
+         Each occupant produces 230 Btu/hr sensible load and 200 Btu/hr latent load.
 
 HPXML Schedules
 ***************
