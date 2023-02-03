@@ -588,6 +588,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                          'EnergyFactor should typically be greater than or equal to 0.45.',
                                                          'No space cooling specified, the model will not include space cooling energy use.'],
                               'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
+                              'erv-atre-low' => ['Adjusted total recovery efficiency should typically be at least half of the adjusted sensible recovery efficiency.'],
+                              'erv-tre-low' => ['Total recovery efficiency should typically be at least half of the sensible recovery efficiency.'],
                               'garage-ventilation' => ['Ventilation fans for the garage are not currently modeled.'],
                               'integrated-heating-efficiency-low' => ['Percent efficiency should typically be greater than or equal to 0.6.'],
                               'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
@@ -662,6 +664,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['dhw-setpoint-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.water_heating_systems[0].temperature = 100
+      elsif ['erv-atre-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-erv-atre-asre.xml'))
+        hpxml.ventilation_fans[0].total_recovery_efficiency_adjusted = 0.1
+      elsif ['erv-tre-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-erv.xml'))
+        hpxml.ventilation_fans[0].total_recovery_efficiency = 0.1
       elsif ['garage-ventilation'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.ventilation_fans.add(id: 'VentilationFan1',
