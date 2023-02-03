@@ -21,7 +21,8 @@ class HPXMLDefaults
       has_fuel[fuel] = hpxml.has_fuel(fuel, hpxml_doc)
     end
 
-    apply_header(hpxml, epw_file, weather, nbeds)
+    apply_header(hpxml, epw_file)
+    apply_header_sizing(hpxml, weather, nbeds)
     apply_emissions_scenarios(hpxml, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml, has_fuel)
     apply_site(hpxml)
@@ -104,7 +105,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file, weather, nbeds)
+  def self.apply_header(hpxml, epw_file)
     if hpxml.header.occupancy_calculation_type.nil?
       hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
       hpxml.header.occupancy_calculation_type_isdefaulted = true
@@ -172,6 +173,31 @@ class HPXMLDefaults
       end
     end
 
+    if (not epw_file.nil?) && hpxml.header.state_code.nil?
+      state_province_region = epw_file.stateProvinceRegion.upcase
+      if /^[A-Z]{2}$/.match(state_province_region)
+        hpxml.header.state_code = state_province_region
+        hpxml.header.state_code_isdefaulted = true
+      end
+    end
+
+    if (not epw_file.nil?) && hpxml.header.time_zone_utc_offset.nil?
+      hpxml.header.time_zone_utc_offset = epw_file.timeZone
+      hpxml.header.time_zone_utc_offset_isdefaulted = true
+    end
+
+    if hpxml.header.temperature_capacitance_multiplier.nil?
+      hpxml.header.temperature_capacitance_multiplier = 1.0
+      hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml.header.natvent_days_per_week.nil?
+      hpxml.header.natvent_days_per_week = 3
+      hpxml.header.natvent_days_per_week_isdefaulted = true
+    end
+  end
+
+  def apply_header_sizing(hpxml, weather, nbeds)
     if hpxml.header.allow_increased_fixed_capacities.nil?
       hpxml.header.allow_increased_fixed_capacities = false
       hpxml.header.allow_increased_fixed_capacities_isdefaulted = true
@@ -210,29 +236,6 @@ class HPXMLDefaults
     if hpxml.header.acca_num_occupants.nil?
       hpxml.header.acca_num_occupants = nbeds + 1
       hpxml.header.acca_num_occupants_isdefaulted = true
-    end
-
-    if (not epw_file.nil?) && hpxml.header.state_code.nil?
-      state_province_region = epw_file.stateProvinceRegion.upcase
-      if /^[A-Z]{2}$/.match(state_province_region)
-        hpxml.header.state_code = state_province_region
-        hpxml.header.state_code_isdefaulted = true
-      end
-    end
-
-    if (not epw_file.nil?) && hpxml.header.time_zone_utc_offset.nil?
-      hpxml.header.time_zone_utc_offset = epw_file.timeZone
-      hpxml.header.time_zone_utc_offset_isdefaulted = true
-    end
-
-    if hpxml.header.temperature_capacitance_multiplier.nil?
-      hpxml.header.temperature_capacitance_multiplier = 1.0
-      hpxml.header.temperature_capacitance_multiplier_isdefaulted = true
-    end
-
-    if hpxml.header.natvent_days_per_week.nil?
-      hpxml.header.natvent_days_per_week = 3
-      hpxml.header.natvent_days_per_week_isdefaulted = true
     end
   end
 
