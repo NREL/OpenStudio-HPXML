@@ -1418,7 +1418,7 @@ class HPXMLDefaults
       if hvac_control.onoff_thermostat_deadband > 0.0
         cooling_system_num_speeds = hpxml.cooling_systems.size > 0 ? hpxml.cooling_systems[0].additional_properties.num_speeds : 0
         heat_pump_num_speeds = hpxml.heat_pumps.size > 0 ? hpxml.heat_pumps[0].additional_properties.num_speeds : 0
-        if (cooling_system_num_speeds > 1 || heat_pump_num_speeds > 1)
+        if (cooling_system_num_speeds > 2 || heat_pump_num_speeds > 2)
           hvac_control.onoff_thermostat_deadband = 0.0
           hvac_control.onoff_thermostat_deadband_isdefaulted = true
         end

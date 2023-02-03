@@ -3283,12 +3283,12 @@ class HVAC
     realistic_cycling_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
 
-    (1..(number_of_timestep_logged - 1)).each do |t_i|
+    (1..number_of_timestep_logged).each do |t_i|
       realistic_cycling_program.addLine("Set unitary_var_#{t_i}_ago = @TrendValue #{unitary_speed_var_trend.name} #{t_i}")
     end
     s_trend_low = []
     s_trend_high = []
-    (1..(number_of_timestep_logged - 1)).each do |t_i|
+    (1..number_of_timestep_logged).each do |t_i|
       s_trend_low << "(unitary_var_#{t_i}_ago == 1)"
       s_trend_high << "(unitary_var_#{t_i}_ago == 2)"
     end
