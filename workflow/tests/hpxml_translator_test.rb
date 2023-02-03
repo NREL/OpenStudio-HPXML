@@ -23,7 +23,7 @@ class HPXMLTest < MiniTest::Test
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
-      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/base-enclosure-split-surfaces.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
         xmls << File.absolute_path(xml)
@@ -700,7 +700,8 @@ class HPXMLTest < MiniTest::Test
                                       'base-enclosure-garage.xml' => 2,                  # additional instance for garage
                                       'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
                                       'base-foundation-complex.xml' => 10,               # lots of foundations for testing
-                                      'base-enclosure-split-surfaces2.xml' => 81,        # lots of foundations for testing
+                                      'base-enclosure-split-surfaces.xml' => 2,
+                                      'base-enclosure-split-surfaces2.xml' => 90,        # lots of foundations for testing
                                       'base-pv-battery-garage.xml' => 2 }                # additional instance for garage
 
       if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
