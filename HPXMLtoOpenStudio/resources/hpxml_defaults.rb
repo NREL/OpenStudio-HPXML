@@ -197,7 +197,7 @@ class HPXMLDefaults
     end
   end
 
-  def apply_header_sizing(hpxml, weather, nbeds)
+  def self.apply_header_sizing(hpxml, weather, nbeds)
     if hpxml.header.allow_increased_fixed_capacities.nil?
       hpxml.header.allow_increased_fixed_capacities = false
       hpxml.header.allow_increased_fixed_capacities_isdefaulted = true
