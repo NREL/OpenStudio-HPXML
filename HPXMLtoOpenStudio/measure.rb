@@ -192,7 +192,7 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
-	#Fixme: do we need to check system number of speed?
+    # Fixme: do we need to check system number of speed?
     offset_db = @hpxml.hvac_controls.size == 0 ? nil : @hpxml.hvac_controls[0].onoff_thermostat_deadband
     weather, epw_file = Location.apply_weather_file(model, epw_path, cache_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
@@ -1572,7 +1572,7 @@ class OSModel
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  living_zone, is_ddb_control,
-																 is_realistic_staging)
+                                                                 is_realistic_staging)
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,

@@ -1475,13 +1475,14 @@ class SchedulesFile
   def set_vacancy(vacancy_periods)
     create_column_values_from_periods(ColumnVacancy, vacancy_periods)
     return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
+
     @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
       @tmp_schedules.keys.each do |col_name|
         next unless SchedulesFile.affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
-   end
+    end
   end
 
   def convert_setpoints(offset_db)
@@ -1493,8 +1494,8 @@ class SchedulesFile
 
     SchedulesFile.SetpointColumnNames.each do |setpoint_col_name|
       next unless col_names.include?(setpoint_col_name)
-      @tmp_schedules[setpoint_col_name].each_with_index do |setpoint_value, i|
 
+      @tmp_schedules[setpoint_col_name].each_with_index do |setpoint_value, i|
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(setpoint_value, 'f', 'c')
         next if offset_db_c == 0.0
 

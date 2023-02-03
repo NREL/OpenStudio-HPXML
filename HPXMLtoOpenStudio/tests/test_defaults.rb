@@ -1501,20 +1501,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0, false)
 
-    # Test on/off thermostat override
-    hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+    # Test on/off thermostat override, on off thermostat solely
+    hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0)
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0, false)
 
-    # Test on/off thermostat override
-    hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
+    # Test on/off thermostat override, large time step
+    hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
     hpxml.header.timestep = 5
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0)
+    _test_default_hvac_control_setpoint_values(hpxml_default.hvac_controls[0], 68, 78, 0.0, false)
 
     # Test inputs not overridden by defaults (w/ setbacks)
     hpxml = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')
