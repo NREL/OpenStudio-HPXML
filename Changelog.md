@@ -4,6 +4,10 @@ __New Features__
 - Updates to newer proposed HPXML v4.0:
   - **Breaking change**: Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
   - **Breaking change**: Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
+- Heat pump enhancements:
+  - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
+  - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.
+  - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
 - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
 - ReportSimulationOutput measure:
@@ -15,6 +19,7 @@ __New Features__
 - **Research Feature**: Allows modeling on/off thermostat deadband with start-up degredation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
 
 __Bugfixes__
+- Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
 - BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
 - Fixes operational calculation when the number of residents is set to zero.
