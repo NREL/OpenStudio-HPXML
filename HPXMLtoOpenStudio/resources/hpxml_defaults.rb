@@ -208,34 +208,43 @@ class HPXMLDefaults
       hpxml.header.heat_pump_sizing_methodology_isdefaulted = true
     end
 
-    if hpxml.header.acca_heating_design_temp.nil?
-      hpxml.header.acca_heating_design_temp = weather.design.HeatingDrybulb
-      hpxml.header.acca_heating_design_temp_isdefaulted = true
+    if hpxml.header.manualj_heating_design_temp.nil?
+      hpxml.header.manualj_heating_design_temp = weather.design.HeatingDrybulb.round(2)
+      hpxml.header.manualj_heating_design_temp_isdefaulted = true
     end
 
-    if hpxml.header.acca_cooling_design_temp.nil?
-      hpxml.header.acca_cooling_design_temp = weather.design.CoolingDrybulb
-      hpxml.header.acca_cooling_design_temp_isdefaulted = true
+    if hpxml.header.manualj_cooling_design_temp.nil?
+      hpxml.header.manualj_cooling_design_temp = weather.design.CoolingDrybulb.round(2)
+      hpxml.header.manualj_cooling_design_temp_isdefaulted = true
     end
 
-    if hpxml.header.acca_heating_setpoint.nil?
-      hpxml.header.acca_heating_setpoint = 70.0 # deg-F
-      hpxml.header.acca_heating_setpoint_isdefaulted = true
+    if hpxml.header.manualj_heating_setpoint.nil?
+      hpxml.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
+      hpxml.header.manualj_heating_setpoint_isdefaulted = true
     end
 
-    if hpxml.header.acca_cooling_setpoint.nil?
-      hpxml.header.acca_cooling_setpoint = 75.0 # deg-F
-      hpxml.header.acca_cooling_setpoint_isdefaulted = true
+    if hpxml.header.manualj_cooling_setpoint.nil?
+      hpxml.header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
+      hpxml.header.manualj_cooling_setpoint_isdefaulted = true
     end
 
-    if hpxml.header.acca_internal_loads.nil?
-      hpxml.header.acca_internal_loads = 2400.0 # Btuh
-      hpxml.header.acca_internal_loads_isdefaulted = true
+    if hpxml.header.manualj_internal_loads_sensible.nil?
+      if hpxml.refrigerators.size + hpxml.freezers.size <= 1
+        hpxml.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
+      else
+        hpxml.header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
+      end
+      hpxml.header.manualj_internal_loads_sensible_isdefaulted = true
     end
 
-    if hpxml.header.acca_num_occupants.nil?
-      hpxml.header.acca_num_occupants = nbeds + 1
-      hpxml.header.acca_num_occupants_isdefaulted = true
+    if hpxml.header.manualj_internal_loads_latent.nil?
+      hpxml.header.manualj_internal_loads_latent = 0.0 # Btuh
+      hpxml.header.manualj_internal_loads_latent_isdefaulted = true
+    end
+
+    if hpxml.header.manualj_num_occupants.nil?
+      hpxml.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      hpxml.header.manualj_num_occupants_isdefaulted = true
     end
   end
 

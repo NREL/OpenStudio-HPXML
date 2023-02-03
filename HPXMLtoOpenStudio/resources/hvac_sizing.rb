@@ -80,15 +80,15 @@ class HVACSizing
     @daily_range_temp_adjust = [4, 0, -5]
 
     # Manual J inside conditions
-    @cool_setpoint = @hpxml.header.acca_cooling_setpoint
-    @heat_setpoint = @hpxml.header.acca_heating_setpoint
+    @cool_setpoint = @hpxml.header.manualj_cooling_setpoint
+    @heat_setpoint = @hpxml.header.manualj_heating_setpoint
 
     @cool_design_grains = UnitConversions.convert(weather.design.CoolingHumidityRatio, 'lbm/lbm', 'grains')
 
     # Calculate the design temperature differences
-    # FIXME: Replace all instances of e.g. weather.design.HeatingDrybulb with @hpxml.header.acca_heating_design_temp? (Same for cooling)
-    @ctd = [@hpxml.header.acca_cooling_design_temp - @cool_setpoint, 0.0].max
-    @htd = [@heat_setpoint - @hpxml.header.acca_heating_design_temp, 0.0].max
+    # FIXME: Replace all instances of e.g. weather.design.HeatingDrybulb with @hpxml.header.manualj_heating_design_temp? (Same for cooling)
+    @ctd = [@hpxml.header.manualj_cooling_design_temp - @cool_setpoint, 0.0].max
+    @htd = [@heat_setpoint - @hpxml.header.manualj_heating_design_temp, 0.0].max
 
     # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
     dtr = weather.design.DailyTemperatureRange
@@ -1026,8 +1026,8 @@ class HVACSizing
     Cooling Load: Internal Gains
     '''
 
-    bldg_design_loads.Cool_IntGains_Sens = @hpxml.header.acca_internal_loads + 230.0 * @hpxml.header.acca_num_occupants
-    bldg_design_loads.Cool_IntGains_Lat = 200.0 * @hpxml.header.acca_num_occupants
+    bldg_design_loads.Cool_IntGains_Sens = @hpxml.header.manualj_internal_loads_sensible + 230.0 * @hpxml.header.manualj_num_occupants
+    bldg_design_loads.Cool_IntGains_Lat = @hpxml.header.manualj_internal_loads_latent + 200.0 * @hpxml.header.manualj_num_occupants
   end
 
   def self.aggregate_loads(bldg_design_loads)

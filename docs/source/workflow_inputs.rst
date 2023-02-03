@@ -126,31 +126,31 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
          If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
 
-If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl/ACCASizingInputs``.
+If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl/ManualJInputs``.
 
   =================================  ========  ======  ===========  ========  ============  ============================================
   Element                            Type      Units   Constraints  Required  Default       Description
   =================================  ========  ======  ===========  ========  ============  ============================================
   ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
   ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
-  ``HeatingSetpoint``                double    F                    No        70 [#]_       Conditioned space heating setpoint
-  ``CoolingSetpoint``                double    F                    No        75 [#]_       Conditioned space cooling setpoint
-  ``InternalLoads``                  double    Btu/hr               No        2400 [#]_     Internal loads for cooling design load
+  ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
+  ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
+  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
+  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
   ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
   =================================  ========  ======  ===========  ========  ============  ============================================
 
-  .. [#] The 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+  .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
-  .. [#] The 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+  .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
   .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
-  .. [#] Internal loads of 2400 Btu/hr is the Manual J default scenario.
-         It includes 1000 Btu/hr for the kitchen, 500 Btu/hr for the utility room, and 900 Btu/hr allowance for a TV or computer and a few lighting fixtures.
+  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
-  .. [#] Per Manual J, the number of occupants shall equal the number of bedrooms plus one.
-         Each occupant produces 230 Btu/hr sensible load and 200 Btu/hr latent load.
+  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
+         Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
 
 HPXML Schedules
 ***************
