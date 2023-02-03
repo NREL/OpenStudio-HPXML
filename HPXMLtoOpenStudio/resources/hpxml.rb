@@ -4219,9 +4219,7 @@ class HPXML < Object
                       cdl_lat_ducts: 'Ducts',
                       cdl_lat_infilvent: 'InfilVent',
                       cdl_lat_intgains: 'InternalLoads' }
-    TEMPERATURE_ATTRS = { temp_heating: 'Heating',
-                          temp_cooling: 'Cooling' }
-    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys + TEMPERATURE_ATTRS.keys
+    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -4233,13 +4231,6 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      if not @temp_heating.nil?
-        dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignTemperatures'])
-        XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
-        TEMPERATURE_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(dl_extension, element_name, send(attr), :float)
-        end
-      end
       if not @hdl_total.nil?
         dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignLoads'])
         XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
@@ -4264,9 +4255,6 @@ class HPXML < Object
       hvac_plant = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant')
       return if hvac_plant.nil?
 
-      TEMPERATURE_ATTRS.each do |attr, element_name|
-        send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignTemperatures/#{element_name}", :float))
-      end
       HDL_ATTRS.each do |attr, element_name|
         send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/Heating/#{element_name}", :float))
       end

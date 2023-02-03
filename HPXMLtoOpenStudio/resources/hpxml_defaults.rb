@@ -2702,10 +2702,6 @@ class HPXMLDefaults
       fail 'Cooling latent design loads do not sum to total.'
     end
 
-    # Assign design temperatures to HPXML object
-    hvacpl.temp_heating = weather.design.HeatingDrybulb.round(2)
-    hvacpl.temp_cooling = weather.design.CoolingDrybulb.round(2)
-
     # Assign sizing values to HPXML objects
     all_hvac_sizing_values.each do |hvac_system, hvac_sizing_values|
       htg_sys = hvac_system[:heating]

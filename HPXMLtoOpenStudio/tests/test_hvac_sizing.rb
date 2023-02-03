@@ -129,6 +129,54 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
     assert(hpxml.heat_pumps[0].cooling_capacity > clg_cap)
   end
 
+  def test_manual_j_sizing_inputs
+    # Run base
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base.xml'))
+    _model, base_hpxml = _test_measure(args_hash)
+
+    # Test heating/cooling design temps
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = _create_hpxml('base.xml')
+    hpxml.header.manualj_heating_design_temp = 0.0
+    hpxml.header.manualj_cooling_design_temp = 100.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    _model, test_hpxml = _test_measure(args_hash)
+    assert_operator(test_hpxml.hvac_plant.hdl_total, :>, base_hpxml.hvac_plant.hdl_total)
+    assert_operator(test_hpxml.hvac_plant.cdl_sens_total, :>, base_hpxml.hvac_plant.cdl_sens_total)
+
+    # Test heating/cooling setpoints
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = _create_hpxml('base.xml')
+    hpxml.header.manualj_heating_setpoint = 72.5
+    hpxml.header.manualj_cooling_setpoint = 72.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    _model, test_hpxml = _test_measure(args_hash)
+    assert_operator(test_hpxml.hvac_plant.hdl_total, :>, base_hpxml.hvac_plant.hdl_total)
+    assert_operator(test_hpxml.hvac_plant.cdl_sens_total, :>, base_hpxml.hvac_plant.cdl_sens_total)
+
+    # Test internal loads
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = _create_hpxml('base.xml')
+    hpxml.header.manualj_internal_loads_sensible = 1000.0
+    hpxml.header.manualj_internal_loads_latent = 500.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    _model, test_hpxml = _test_measure(args_hash)
+    assert_equal(test_hpxml.hvac_plant.hdl_total, base_hpxml.hvac_plant.hdl_total)
+    assert_operator(test_hpxml.hvac_plant.cdl_sens_intgains, :<, base_hpxml.hvac_plant.cdl_sens_intgains)
+    assert_operator(test_hpxml.hvac_plant.cdl_lat_intgains, :>, base_hpxml.hvac_plant.cdl_lat_intgains)
+
+    # Test number of occupants
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = _create_hpxml('base.xml')
+    hpxml.header.manualj_num_occupants = 10
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    _model, test_hpxml = _test_measure(args_hash)
+    assert_equal(test_hpxml.hvac_plant.hdl_total, base_hpxml.hvac_plant.hdl_total)
+    assert_operator(test_hpxml.hvac_plant.cdl_sens_intgains, :>, base_hpxml.hvac_plant.cdl_sens_intgains)
+    assert_operator(test_hpxml.hvac_plant.cdl_lat_intgains, :>, base_hpxml.hvac_plant.cdl_lat_intgains)
+  end
+
   def test_slab_f_factor
     def get_unins_slab()
       slab = HPXML::Slab.new(nil)
