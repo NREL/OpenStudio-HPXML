@@ -445,7 +445,6 @@ class HPXML < Object
     return unless @errors.empty?
 
     # Clean up
-    delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
@@ -6780,14 +6779,6 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
-    end
-  end
-
-  def delete_tiny_surfaces()
-    (@rim_joists + @walls + @foundation_walls + @floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
-      next if surface.area.nil? || (surface.area > 1.0)
-
-      surface.delete
     end
   end
 
