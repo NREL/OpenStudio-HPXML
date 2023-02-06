@@ -108,8 +108,9 @@ class HVACSizing
     @acf = MathTools.interp2(weather.header.Altitude, alt_cnt * 1000.0, (alt_cnt + 1.0) * 1000.0, acfs[alt_cnt], acfs[alt_cnt + 1])
 
     # Calculate the interior humidity in Grains and enthalpy in Btu/lb for cooling
-    pwsat = UnitConversions.convert(0.430075, 'psi', 'kPa') # Calculated for 75degF indoor temperature
-    rh_indoor_cooling = 0.55 # Manual J is vague on the indoor RH. 55% corresponds to BA goals
+    @cool_setpoint_c = UnitConversions.convert(@cool_setpoint, 'F', 'C')
+    pwsat = 6.11 * 10**(7.5 * @cool_setpoint_c / (237.3 + @cool_setpoint_c)) / 10.0 # kPa, using https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf
+    rh_indoor_cooling = 0.5 # Manual J is vague on the indoor RH but uses 50% in its examples
     hr_indoor_cooling = (0.62198 * rh_indoor_cooling * pwsat) / (UnitConversions.convert(weather.header.LocalPressure, 'atm', 'kPa') - rh_indoor_cooling * pwsat)
     @cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
     @wetbulb_indoor_cooling = Psychrometrics.Twb_fT_R_P(@cool_setpoint, rh_indoor_cooling, UnitConversions.convert(weather.header.LocalPressure, 'atm', 'psi'))
