@@ -228,6 +228,14 @@ class HPXMLDefaults
       hpxml.header.manualj_cooling_setpoint_isdefaulted = true
     end
 
+    if hpxml.header.manualj_humidity_setpoint.nil?
+      hpxml.header.manualj_humidity_setpoint = 0.5 # 50%
+      if hpxml.dehumidifiers.size > 0
+        hpxml.header.manualj_humidity_setpoint = [hpxml.header.manualj_humidity_setpoint, hpxml.dehumidifiers[0].rh_setpoint].min
+      end
+      hpxml.header.manualj_humidity_setpoint_isdefaulted = true
+    end
+
     if hpxml.header.manualj_internal_loads_sensible.nil?
       if hpxml.refrigerators.size + hpxml.freezers.size <= 1
         hpxml.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
