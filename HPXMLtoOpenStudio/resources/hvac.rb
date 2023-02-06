@@ -3630,7 +3630,8 @@ class HVAC
       year = model.getYearDescription.assumedYear
       steps_in_hour = model.getTimestep.numberOfTimestepsPerHour
       minutes = 60 / steps_in_hour
-      s = Schedule.create_interval_from_array(model, values, '', year, 0, 0, minutes)
+      s = Schedule.create_interval_from_array(model, values, '', year, 0, 0, minutes, 0)
+      s.to_ScheduleFixedInterval.get.setTranslatetoScheduleFile(true) # if not true, translated schedule is Schedule:Compact without 2/29 (bug in OS?)
     end
 
     s.setName(sch_name)

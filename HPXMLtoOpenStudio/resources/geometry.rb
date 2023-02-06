@@ -492,7 +492,7 @@ class Geometry
         # Work
         work_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         work_schedule.setValue(0)
-        work_schedule.setName("Work Efficiency Schedule")
+        work_schedule.setName('Work Efficiency Schedule')
 
         # Activity
         activity_per_person = 100
@@ -500,12 +500,12 @@ class Geometry
         # Air Velocity
         air_velocity_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         air_velocity_schedule.setValue(0.1)
-        air_velocity_schedule.setName("Air Velocity Schedule")
+        air_velocity_schedule.setName('Air Velocity Schedule')
 
         # Clothing Insulation
         clothing_insulation_schedule = OpenStudio::Model::ScheduleConstant.new(model)
         clothing_insulation_schedule.setValue(0.6)
-        clothing_insulation_schedule.setName("Clothing Schedule")
+        clothing_insulation_schedule.setName('Clothing Schedule')
 
         # Set schedules
         occ.setWorkEfficiencySchedule(work_schedule)
@@ -513,7 +513,7 @@ class Geometry
         occ.setClothingInsulationSchedule(clothing_insulation_schedule)
 
         # Add thermal model types
-        occ_def.pushThermalComfortModelType("Pierce")
+        occ_def.pushThermalComfortModelType('Pierce')
       end
     end
     if people_sch.nil?

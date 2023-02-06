@@ -435,6 +435,7 @@ def create_hpxmls
     'base-schedules-detailed-occupancy-stochastic-outage-full-year2.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-full-year3.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-summer.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-outage-summer-AMY-2012.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-outage-winter.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
@@ -2534,6 +2535,15 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_outage_period'] = 'Jul 1 12am - Jul 7 12am'
     sch_args['schedules_outage_window_natvent_availability'] = true
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage-summer.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-outage-summer-AMY-2012.xml'].include? hpxml_file
+    args['weather_station_epw_filepath'] = 'US_CO_Boulder_AMY_2012.epw'
+    args.delete('water_heater_setpoint_temperature')
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['schedules_outage_period'] = 'Jul 1 12am - Jul 7 12am'
+    sch_args['schedules_outage_window_natvent_availability'] = true
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-outage-summer-AMY-2012.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-occupancy-stochastic-outage-winter.xml'].include? hpxml_file
     args.delete('water_heater_setpoint_temperature')
