@@ -2812,10 +2812,7 @@ class HPXMLDefaults
     infil_height = nil
     infil_measurements = []
     hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
-      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
-      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach || is_cfm || is_nach)
+      next unless Airflow.is_air_infiltration_measurement_of_interest(measurement)
 
       infil_measurements << measurement
       if not measurement.infiltration_volume.nil?
