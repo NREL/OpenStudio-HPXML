@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>add9d99f-6b47-4c4a-a64a-f14a30aa673e</version_id>
-  <version_modified>20230118T204020Z</version_modified>
+  <version_id>9a7f9a99-573e-4b37-84e9-2dcab5fef18b</version_id>
+  <version_modified>20230206T175559Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -357,7 +357,7 @@
     <argument>
       <name>timeseries_num_decimal_places</name>
       <display_name>Generate Timeseries Output: Number of Decimal Places</display_name>
-      <description>Allows overriding the default number of decimal places for timeseries output.</description>
+      <description>Allows overriding the default number of decimal places for timeseries output. Does not apply if output format is msgpack, where no rounding is performed because there is no file size penalty to storing full precision.</description>
       <type>Integer</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1306,16 +1306,30 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Component Load: Heating: Windows MBtu</name>
-      <display_name>Component Load: Heating: Windows MBtu</display_name>
-      <short_name>Component Load: Heating: Windows MBtu</short_name>
+      <name>Component Load: Heating: Windows Conduction MBtu</name>
+      <display_name>Component Load: Heating: Windows Conduction MBtu</display_name>
+      <short_name>Component Load: Heating: Windows Conduction MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Component Load: Heating: Skylights MBtu</name>
-      <display_name>Component Load: Heating: Skylights MBtu</display_name>
-      <short_name>Component Load: Heating: Skylights MBtu</short_name>
+      <name>Component Load: Heating: Windows Solar MBtu</name>
+      <display_name>Component Load: Heating: Windows Solar MBtu</display_name>
+      <short_name>Component Load: Heating: Windows Solar MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Component Load: Heating: Skylights Conduction MBtu</name>
+      <display_name>Component Load: Heating: Skylights Conduction MBtu</display_name>
+      <short_name>Component Load: Heating: Skylights Conduction MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Component Load: Heating: Skylights Solar MBtu</name>
+      <display_name>Component Load: Heating: Skylights Solar MBtu</display_name>
+      <short_name>Component Load: Heating: Skylights Solar MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1383,6 +1397,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Component Load: Heating: Lighting MBtu</name>
+      <display_name>Component Load: Heating: Lighting MBtu</display_name>
+      <short_name>Component Load: Heating: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Component Load: Cooling: Roofs MBtu</name>
       <display_name>Component Load: Cooling: Roofs MBtu</display_name>
       <short_name>Component Load: Cooling: Roofs MBtu</short_name>
@@ -1425,16 +1446,30 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Component Load: Cooling: Windows MBtu</name>
-      <display_name>Component Load: Cooling: Windows MBtu</display_name>
-      <short_name>Component Load: Cooling: Windows MBtu</short_name>
+      <name>Component Load: Cooling: Windows Conduction MBtu</name>
+      <display_name>Component Load: Cooling: Windows Conduction MBtu</display_name>
+      <short_name>Component Load: Cooling: Windows Conduction MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Component Load: Cooling: Skylights MBtu</name>
-      <display_name>Component Load: Cooling: Skylights MBtu</display_name>
-      <short_name>Component Load: Cooling: Skylights MBtu</short_name>
+      <name>Component Load: Cooling: Windows Solar MBtu</name>
+      <display_name>Component Load: Cooling: Windows Solar MBtu</display_name>
+      <short_name>Component Load: Cooling: Windows Solar MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Component Load: Cooling: Skylights Conduction MBtu</name>
+      <display_name>Component Load: Cooling: Skylights Conduction MBtu</display_name>
+      <short_name>Component Load: Cooling: Skylights Conduction MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Component Load: Cooling: Skylights Solar MBtu</name>
+      <display_name>Component Load: Cooling: Skylights Solar MBtu</display_name>
+      <short_name>Component Load: Cooling: Skylights Solar MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1502,6 +1537,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Component Load: Cooling: Lighting MBtu</name>
+      <display_name>Component Load: Cooling: Lighting MBtu</display_name>
+      <short_name>Component Load: Cooling: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Hot Water: Clothes Washer gal</name>
       <display_name>Hot Water: Clothes Washer gal</display_name>
       <short_name>Hot Water: Clothes Washer gal</short_name>
@@ -1560,6 +1602,12 @@
   </attributes>
   <files>
     <file>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A8F9F0E8</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.1</identifier>
@@ -1568,13 +1616,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C02D2139</checksum>
-    </file>
-    <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CC97DAB7</checksum>
+      <checksum>596895F0</checksum>
     </file>
   </files>
 </measure>

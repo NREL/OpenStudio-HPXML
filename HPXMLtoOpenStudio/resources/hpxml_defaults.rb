@@ -43,7 +43,7 @@ class HPXMLDefaults
     apply_doors(hpxml)
     apply_partition_wall_mass(hpxml)
     apply_furniture_mass(hpxml)
-    apply_hvac(hpxml, weather, convert_shared_systems)
+    apply_hvac(runner, hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml, infil_measurements, weather, cfa, nbeds)
@@ -988,7 +988,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather, convert_shared_systems)
+  def self.apply_hvac(runner, hpxml, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml)
     end
@@ -1057,13 +1057,47 @@ class HPXMLDefaults
       heat_pump.compressor_type_isdefaulted = true
     end
 
-    # Default ASHP backup heating lockout capability
+    # Default HP compressor lockout temp
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.compressor_lockout_temp.nil?
+      next unless heat_pump.backup_heating_switchover_temp.nil?
+      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+        hp_backup_fuel = heat_pump.backup_heating_fuel
+      elsif not heat_pump.backup_system.nil?
+        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+      end
+
+      if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
+        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+      else
+        if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+          heat_pump.compressor_lockout_temp = -20.0 # deg-F
+        else
+          heat_pump.compressor_lockout_temp = 0.0 # deg-F
+        end
+      end
+      heat_pump.compressor_lockout_temp_isdefaulted = true
+    end
+
+    # Default HP backup lockout temp
     hpxml.heat_pumps.each do |heat_pump|
       next if heat_pump.backup_type.nil?
-      next unless heat_pump.backup_heating_switchover_temp.nil?
       next unless heat_pump.backup_heating_lockout_temp.nil?
+      next unless heat_pump.backup_heating_switchover_temp.nil?
 
-      heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+        hp_backup_fuel = heat_pump.backup_heating_fuel
+      else
+        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+      end
+
+      if hp_backup_fuel == HPXML::FuelTypeElectricity
+        heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+      else
+        heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
+      end
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 
@@ -1326,7 +1360,7 @@ class HPXMLDefaults
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
         HVAC.set_crankcase_assumptions(heat_pump)
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
@@ -1344,7 +1378,7 @@ class HPXMLDefaults
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -1363,7 +1397,7 @@ class HPXMLDefaults
         HVAC.set_curves_gshp(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-        HVAC.set_heat_pump_temperatures(heat_pump)
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
       end
     end
@@ -1550,9 +1584,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
 
-      if vent_fan.quantity.nil?
-        vent_fan.quantity = 1
-        vent_fan.quantity_isdefaulted = true
+      if vent_fan.count.nil?
+        vent_fan.count = 1
+        vent_fan.count_isdefaulted = true
       end
       if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
@@ -1576,9 +1610,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationBath))
 
-      if vent_fan.quantity.nil?
-        vent_fan.quantity = hpxml.building_construction.number_of_bathrooms
-        vent_fan.quantity_isdefaulted = true
+      if vent_fan.count.nil?
+        vent_fan.count = hpxml.building_construction.number_of_bathrooms
+        vent_fan.count_isdefaulted = true
       end
       if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
@@ -1782,13 +1816,15 @@ class HPXMLDefaults
         pv_system.module_type = HPXML::PVModuleTypeStandard
         pv_system.module_type_isdefaulted = true
       end
-      if pv_system.inverter_efficiency.nil?
-        pv_system.inverter_efficiency = PV.get_default_inv_eff()
-        pv_system.inverter_efficiency_isdefaulted = true
-      end
       if pv_system.system_losses_fraction.nil?
         pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
         pv_system.system_losses_fraction_isdefaulted = true
+      end
+    end
+    hpxml.inverters.each do |inverter|
+      if inverter.inverter_efficiency.nil?
+        inverter.inverter_efficiency = PV.get_default_inv_eff()
+        inverter.inverter_efficiency_isdefaulted = true
       end
     end
   end
@@ -2221,9 +2257,9 @@ class HPXMLDefaults
       ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
       ceiling_fan.efficiency_isdefaulted = true
     end
-    if ceiling_fan.quantity.nil?
-      ceiling_fan.quantity = HVAC.get_default_ceiling_fan_quantity(nbeds)
-      ceiling_fan.quantity_isdefaulted = true
+    if ceiling_fan.count.nil?
+      ceiling_fan.count = HVAC.get_default_ceiling_fan_quantity(nbeds)
+      ceiling_fan.count_isdefaulted = true
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnCeilingFan))
     if ceiling_fan.weekday_fractions.nil? && !schedules_file_includes_ceiling_fan
@@ -2358,9 +2394,9 @@ class HPXMLDefaults
     hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
@@ -2385,9 +2421,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
@@ -2412,9 +2448,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
         default_annual_kwh = MiscLoads.get_electric_vehicle_charging_default_values
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = 0.0
@@ -2439,9 +2475,9 @@ class HPXMLDefaults
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds)
-        if plug_load.kWh_per_year.nil?
-          plug_load.kWh_per_year = default_annual_kwh
-          plug_load.kWh_per_year_isdefaulted = true
+        if plug_load.kwh_per_year.nil?
+          plug_load.kwh_per_year = default_annual_kwh
+          plug_load.kwh_per_year_isdefaulted = true
         end
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = 0.0
