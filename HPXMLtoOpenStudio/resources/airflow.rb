@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Airflow
+  # Constants
+  InfilPressureExponent = 0.65
+
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
                  ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file, vacancy_periods)
@@ -161,51 +164,50 @@ class Airflow
     end
   end
 
-  def self.is_air_infiltration_measurement_of_interest(measurement)
-    # Returns true if the minimum information (per EPvalidator.xml) is available for simulation
-    if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
-      return true
-    elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
-      return true
-    elsif !measurement.effective_leakage_area.nil?
-      return true
+  def self.get_infiltration_measurement_of_interest(infil_measurements)
+    # Returns the infiltration measurement that has the minimum information needed for simulation
+    infil_measurements.each do |measurement|
+      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+        return measurement
+      elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+        return measurement
+      elsif !measurement.effective_leakage_area.nil?
+        return measurement
+      end
     end
-
-    return false
+    fail 'Unexpected error.'
   end
 
   def self.get_values_from_air_infiltration_measurements(infil_measurements, cfa, weather)
-    sla, ach50, nach, volume, height = nil
-    infil_measurements.each do |measurement|
-      next unless is_air_infiltration_measurement_of_interest(measurement)
+    measurement = get_infiltration_measurement_of_interest(infil_measurements)
 
-      volume = measurement.infiltration_volume
-      height = measurement.infiltration_height
-      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
-        if measurement.unit_of_measure == HPXML::UnitsACH
-          ach50 = calc_air_leakage_at_diff_pressure(0.65, measurement.air_leakage, measurement.house_pressure, 50.0)
-        elsif measurement.unit_of_measure == HPXML::UnitsCFM
-          achXX = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
-          ach50 = calc_air_leakage_at_diff_pressure(0.65, achXX, measurement.house_pressure, 50.0)
-        end
-        sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, cfa, volume)
-        nach = get_infiltration_ACH_from_SLA(sla, height, weather)
-      elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
-        if measurement.unit_of_measure == HPXML::UnitsACHNatural
-          nach = measurement.air_leakage
-        elsif measurement.unit_of_measure == HPXML::UnitsCFMNatural
-          nach = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
-        end
-        sla = get_infiltration_SLA_from_ACH(nach, height, weather)
-        ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, volume)
-      elsif !measurement.effective_leakage_area.nil?
-        sla = UnitConversions.convert(measurement.effective_leakage_area, 'in^2', 'ft^2') / cfa
-        ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, volume)
-        nach = get_infiltration_ACH_from_SLA(sla, height, weather)
-      else
-        fail 'Unexpected error.'
+    volume = measurement.infiltration_volume
+    height = measurement.infiltration_height
+
+    sla, ach50, nach = nil
+    if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure)
+      if measurement.unit_of_measure == HPXML::UnitsACH
+        ach50 = calc_air_leakage_at_diff_pressure(InfilPressureExponent, measurement.air_leakage, measurement.house_pressure, 50.0)
+      elsif measurement.unit_of_measure == HPXML::UnitsCFM
+        achXX = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
+        ach50 = calc_air_leakage_at_diff_pressure(InfilPressureExponent, achXX, measurement.house_pressure, 50.0)
       end
-      break # We found our values
+      sla = get_infiltration_SLA_from_ACH50(ach50, InfilPressureExponent, cfa, volume)
+      nach = get_infiltration_ACH_from_SLA(sla, height, weather)
+    elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+      if measurement.unit_of_measure == HPXML::UnitsACHNatural
+        nach = measurement.air_leakage
+      elsif measurement.unit_of_measure == HPXML::UnitsCFMNatural
+        nach = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
+      end
+      sla = get_infiltration_SLA_from_ACH(nach, height, weather)
+      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, volume)
+    elsif !measurement.effective_leakage_area.nil?
+      sla = UnitConversions.convert(measurement.effective_leakage_area, 'in^2', 'ft^2') / cfa
+      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, volume)
+      nach = get_infiltration_ACH_from_SLA(sla, height, weather)
+    else
+      fail 'Unexpected error.'
     end
     return sla, ach50, nach, volume, height
   end
@@ -944,7 +946,7 @@ class Airflow
           leakage_cfm25s[duct.side] += duct.leakage_cfm25
         elsif not duct.leakage_cfm50.nil?
           leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
-          leakage_cfm25s[duct.side] += calc_air_leakage_at_diff_pressure(0.65, duct.leakage_cfm50, 50.0, 25.0)
+          leakage_cfm25s[duct.side] += calc_air_leakage_at_diff_pressure(InfilPressureExponent, duct.leakage_cfm50, 50.0, 25.0)
         end
         ua_values[duct.side] += duct.area / duct.rvalue
       end
@@ -1179,7 +1181,7 @@ class Airflow
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     hor_lk_frac = 0.4
     neutral_level = 0.5
-    sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, area, volume)
+    sla = get_infiltration_SLA_from_ACH50(ach50, InfilPressureExponent, area, volume)
     ela = sla * area
     c_w_SG, c_s_SG = calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
@@ -1843,7 +1845,7 @@ class Airflow
 
       outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
 
-      n_i = 0.65 # Pressure Exponent
+      n_i = InfilPressureExponent
       living_sla = get_infiltration_SLA_from_ACH50(living_ach50, n_i, @cfa, infil_volume) # Calculate SLA
       a_o = living_sla * @cfa # Effective Leakage Area (ft^2)
 
@@ -1973,14 +1975,14 @@ class Airflow
     return ach / (weather.data.WSF * 1000 * (infil_height / 8.202)**0.4)
   end
 
-  def self.get_infiltration_SLA_from_ACH50(ach50, n_i, floor_area, volume, pressure_difference_Pa = 50)
+  def self.get_infiltration_SLA_from_ACH50(ach50, n_i, floor_area, volume)
     # Returns the infiltration SLA given a ACH50.
-    return ((ach50 * 0.283316478 * 4.0**n_i * volume) / (floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * pressure_difference_Pa**n_i * 60.0))
+    return ((ach50 * 0.283316478 * 4.0**n_i * volume) / (floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0))
   end
 
-  def self.get_infiltration_ACH50_from_SLA(sla, n_i, floor_area, volume, pressure_difference_Pa = 50)
+  def self.get_infiltration_ACH50_from_SLA(sla, n_i, floor_area, volume)
     # Returns the infiltration ACH50 given a SLA.
-    return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * pressure_difference_Pa**n_i * 60.0) / (0.283316478 * 4.0**n_i * volume))
+    return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0) / (0.283316478 * 4.0**n_i * volume))
   end
 
   def self.calc_duct_leakage_at_diff_pressure(q_old, p_old, p_new)
