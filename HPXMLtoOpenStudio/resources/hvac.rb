@@ -1182,11 +1182,9 @@ class HVAC
     e = 0
     f = 0
     hp_ap.heat_cap_ft_spec = [HVAC.convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
-
-    hp_ap.heat_min_capacity_ratio = 0.3 # frac
-    hp_ap.heat_max_capacity_ratio = 1.2 # frac
-    hp_ap.heat_min_cfm_per_ton = 200.0 / hp_ap.heat_min_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of min capacity
-    hp_ap.heat_max_cfm_per_ton = 400.0 / hp_ap.heat_max_capacity_ratio # Convert cfm/ton of nominal rated capacity to cfm/ton of min capacity
+	hp_ap.heat_rated_airflow_rate = 400.0 # cfm/ton
+    hp_ap.heat_fan_speed_ratios = [0.5, 0.5556, 0.6111, 0.6667, 0.7222, 0.7778, 0.8333, 0.8889, 0.9444, 1.0]
+	hp_ap.heat_capacity_ratios = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
   end
 
   def self.set_curves_gshp(heat_pump)
@@ -3173,10 +3171,7 @@ class HVAC
       hp_ap.heat_rated_cfm_per_ton = hp_ap.heat_rated_cfm_per_ton.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
       hp_ap.heat_capacity_ratios = hp_ap.heat_capacity_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
       hp_ap.heat_rated_eirs = hp_ap.heat_rated_eirs.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
-      hp_ap.heat_fan_speed_ratios = []
-      for i in 0..(hp_ap.speed_indices.size - 1)
-        hp_ap.heat_fan_speed_ratios << hp_ap.heat_rated_cfm_per_ton[i] * hp_ap.heat_capacity_ratios[i] / (hp_ap.heat_rated_cfm_per_ton[-1] * hp_ap.heat_capacity_ratios[-1])
-      end
+      hp_ap.heat_fan_speed_ratios = hp_ap.heat_fan_speed_ratios.select.with_index { |_x, i| hp_ap.speed_indices.include? i }
     end
   end
 
@@ -3288,14 +3283,11 @@ class HVAC
 
   def self.set_heat_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
     hp_ap = heat_pump.additional_properties
-
-    hp_ap.heat_capacity_ratios = []
     hp_ap.heat_rated_cfm_per_ton = []
 
-    for i in 0..num_speeds - 1
-      hp_ap.heat_capacity_ratios << hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)
-      hp_ap.heat_rated_cfm_per_ton << (hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio + i * (hp_ap.heat_max_cfm_per_ton * hp_ap.heat_max_capacity_ratio - hp_ap.heat_min_cfm_per_ton * hp_ap.heat_min_capacity_ratio) / (num_speeds - 1)) / hp_ap.heat_capacity_ratios[-1]
-    end
+    hp_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, i|
+      hp_ap.heat_rated_cfm_per_ton << hp_ap.heat_fan_speed_ratios[i] * hp_ap.heat_rated_airflow_rate / capacity_ratio
+	end
   end
 
   def self.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
