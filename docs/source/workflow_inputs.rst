@@ -653,6 +653,7 @@ ACH or CFM
 ~~~~~~~~~~
 
 If entering air leakage as ACH or CFM at a user-specific pressure, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+For example, ACH50 (ACH at 50 Pascals) is a commonly obtained value from a blower door measurement.
 
   ====================================  ======  =====  ===========  =========  =======  ===============================================
   Element                               Type    Units  Constraints  Required   Default  Notes
@@ -671,6 +672,7 @@ Natural ACH or CFM
 ~~~~~~~~~~~~~~~~~~
 
 If entering air leakage as natural ACH or CFM, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Natural ACH or CFM represents the annual average infiltration that a building will see.
 
   ====================================  ======  =====  ===========  =========  =======  =================================
   Element                               Type    Units  Constraints  Required   Default  Notes
@@ -686,16 +688,16 @@ If entering air leakage as natural ACH or CFM, additional information is entered
 Effective Leakage Area
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If entering air leakage as ELA, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+If entering air leakage as Effective Leakage Area (ELA), additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Effective Leakage Area is defined as the area of a special nozzle-shaped hole (similar to the inlet of a blower door fan) that would leak the same amount of air as the building does at a pressure difference of 4 Pascals.
+Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a sharp-edged hole at a pressure difference of 10 Pascals.
 
-  ====================================  ======  =====  ===========  =========  =========================  ===============================================
-  Element                               Type    Units  Constraints  Required   Default                    Notes
-  ====================================  ======  =====  ===========  =========  =========================  ===============================================
-  ``EffectiveLeakageArea``              double         >= 0         Yes                                   Effective leakage area value [#]_
-  ====================================  ======  =====  ===========  =========  =========================  ===============================================
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  Element                               Type    Units    Constraints  Required   Default                    Notes
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
   
-  .. [#] EffectiveLeakageArea is defined as the area of a special nozzle-shaped hole (similar to the inlet of a blower door fan) that would leak the same amount of air as the building does at a pressure of 4 Pascals.
-
 HPXML Attics
 ************
 
