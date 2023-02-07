@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>2a857e52-fb7f-4306-b767-ba57f8bb62b7</version_id>
-  <version_modified>20230206T224430Z</version_modified>
+  <version_id>69c5d704-9fef-4705-9338-a3ad8210af52</version_id>
+  <version_modified>20230207T013302Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2000,7 +2000,7 @@
     <argument>
       <name>air_leakage_value</name>
       <display_name>Air Leakage: Value</display_name>
-      <description>Air exchange rate value. For units of 'EffectiveLeakageArea', provide value in sq. in.</description>
+      <description>Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -6538,7 +6538,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AA2CECCA</checksum>
+      <checksum>92F3436B</checksum>
     </file>
   </files>
 </measure>

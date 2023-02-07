@@ -975,7 +975,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
     arg.setDisplayName('Air Leakage: Value')
-    arg.setDescription("Air exchange rate value. For units of '#{HPXML::UnitsELA}', provide value in sq. in.")
+    arg.setDescription("Air exchange rate value. For '#{HPXML::UnitsELA}', provide value in sq. in.")
     arg.setDefaultValue(3)
     args << arg
 
