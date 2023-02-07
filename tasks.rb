@@ -175,8 +175,10 @@ def create_hpxmls
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
+    'base-enclosure-infil-ela.xml' => 'base.xml',
     'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
+    'base-enclosure-infil-natural-cfm.xml' => 'base.xml',
     'base-enclosure-orientations.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
@@ -1596,11 +1598,17 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
     args['air_leakage_units'] = HPXML::UnitsCFM
     args['air_leakage_value'] = 1080
+  elsif ['base-enclosure-infil-ela.xml'].include? hpxml_file
+    args['air_leakage_units'] = HPXML::UnitsELA
+    args['air_leakage_value'] = 123.0
   elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
     args['geometry_has_flue_or_chimney'] = 'true'
   elsif ['base-enclosure-infil-natural-ach.xml'].include? hpxml_file
     args['air_leakage_units'] = HPXML::UnitsACHNatural
     args['air_leakage_value'] = 0.2
+  elsif ['base-enclosure-infil-natural-cfm.xml'].include? hpxml_file
+    args['air_leakage_units'] = HPXML::UnitsCFMNatural
+    args['air_leakage_value'] = 72.0
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     args['overhangs_back_depth'] = 2.5
     args['overhangs_back_distance_to_bottom_of_window'] = 4.0

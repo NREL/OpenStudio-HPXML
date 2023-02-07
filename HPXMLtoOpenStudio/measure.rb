@@ -2430,6 +2430,7 @@ class OSModel
     ocf.setOutputMTR(@debug)
     ocf.setOutputRDD(@debug)
     ocf.setOutputSHD(@debug)
+    ocf.setOutputSQLite(@debug)
     ocf.setOutputPerfLog(@debug)
   end
 
