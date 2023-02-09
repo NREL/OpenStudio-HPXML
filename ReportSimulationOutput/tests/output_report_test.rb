@@ -658,6 +658,24 @@ class ReportSimulationOutputTest < MiniTest::Test
     _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
+  def test_timeseries_hourly_enduses_power_outage
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-power-outage.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_end_use_consumptions' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEndUses
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], 0, 31 * 24 - 11) # Jan
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 5, -1) # Dec
+  end
+
   def test_timeseries_hourly_hotwateruses
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'timeseries_frequency' => 'hourly',
