@@ -11,11 +11,74 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
+    @test_files_path = File.join(@root_path, 'workflow', 'tests')
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
   end
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+  end
+  
+  def test_acca_block_load_residences
+    # Vatilo Residence
+    # Expected values from Figure 7-4
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Vatilo_Residence.xml'))
+    _model, hpxml = _test_measure(args_hash)
+    assert_in_delta(9147, hpxml.hvac_plant.hdl_ducts, 2000)
+    assert_in_delta(4234, hpxml.hvac_plant.hdl_windows, 1000)
+    assert_in_delta(0, hpxml.hvac_plant.hdl_skylights, 500)
+    assert_in_delta(574, hpxml.hvac_plant.hdl_doors, 500)
+    assert_in_delta(2874, hpxml.hvac_plant.hdl_walls, 500)
+    assert_in_delta(0, hpxml.hvac_plant.hdl_roofs, 500)
+    assert_in_delta(0, hpxml.hvac_plant.hdl_floors, 500)
+    assert_in_delta(7415, hpxml.hvac_plant.hdl_slabs, 500)
+    assert_in_delta(1498, hpxml.hvac_plant.hdl_ceilings, 500)
+    assert_in_delta(3089, hpxml.hvac_plant.hdl_infilvent, 500)
+    assert_in_delta(9973, hpxml.hvac_plant.cdl_sens_ducts, 1500)
+    assert_in_delta(5295, hpxml.hvac_plant.cdl_sens_windows, 2000)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_skylights, 500)
+    assert_in_delta(456, hpxml.hvac_plant.cdl_sens_doors, 500)
+    assert_in_delta(1715, hpxml.hvac_plant.cdl_sens_walls, 500)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_roofs, 500)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_floors, 500)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_slabs, 500)
+    assert_in_delta(2112, hpxml.hvac_plant.cdl_sens_ceilings, 500)
+    assert_in_delta(769, hpxml.hvac_plant.cdl_sens_infilvent, 500)
+    assert_in_delta(3090, hpxml.hvac_plant.cdl_sens_intgains, 500)
+    assert_in_delta(2488, hpxml.hvac_plant.cdl_lat_ducts, 1500)
+    assert_in_delta(1276, hpxml.hvac_plant.cdl_lat_infilvent, 500)
+    assert_in_delta(600, hpxml.hvac_plant.cdl_lat_intgains, 500)
+    
+    # Section 8: Victor Residence
+    # Expected values from Figure 8-3
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Victor_Residence.xml'))
+    _model, hpxml = _test_measure(args_hash)
+    assert_in_delta(29137, hpxml.hvac_plant.hdl_ducts, 12000) # FIXME: Investigate
+    assert_in_delta(9978, hpxml.hvac_plant.hdl_windows, 3000) # FIXME: Investigate
+    assert_in_delta(471, hpxml.hvac_plant.hdl_skylights, 500)
+    assert_in_delta(984, hpxml.hvac_plant.hdl_doors, 500)
+    assert_in_delta(6305, hpxml.hvac_plant.hdl_walls, 500)
+    assert_in_delta(7069, hpxml.hvac_plant.hdl_roofs, 500)
+    assert_in_delta(6044, hpxml.hvac_plant.hdl_floors, 500)
+    assert_in_delta(0, hpxml.hvac_plant.hdl_slabs, 500)
+    assert_in_delta(0, hpxml.hvac_plant.hdl_ceilings, 500)
+    assert_in_delta(21426, hpxml.hvac_plant.hdl_infilvent, 500)
+    assert_in_delta(5602, hpxml.hvac_plant.cdl_sens_ducts, 3000)
+    assert_in_delta(4706, hpxml.hvac_plant.cdl_sens_windows, 1000)
+    assert_in_delta(1409, hpxml.hvac_plant.cdl_sens_skylights, 500)
+    assert_in_delta(382, hpxml.hvac_plant.cdl_sens_doors, 500)
+    assert_in_delta(1130, hpxml.hvac_plant.cdl_sens_walls, 500)
+    assert_in_delta(2743, hpxml.hvac_plant.cdl_sens_roofs, 500)
+    assert_in_delta(1393, hpxml.hvac_plant.cdl_sens_floors, 500)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_slabs, 500)
+    assert_in_delta(0, hpxml.hvac_plant.cdl_sens_ceilings, 500)
+    assert_in_delta(2504, hpxml.hvac_plant.cdl_sens_infilvent, 500)
+    assert_in_delta(4520, hpxml.hvac_plant.cdl_sens_intgains, 1500)
+    assert_in_delta(6282, hpxml.hvac_plant.cdl_lat_ducts, 5000)
+    assert_in_delta(4644, hpxml.hvac_plant.cdl_lat_infilvent, 500)
+    assert_in_delta(800, hpxml.hvac_plant.cdl_lat_intgains, 500)
   end
 
   def test_heat_pumps

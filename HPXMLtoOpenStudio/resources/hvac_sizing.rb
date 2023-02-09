@@ -1007,7 +1007,7 @@ class HVACSizing
 
     icfm_Cooling = ela_in2 * (c_s * @ctd + c_w * windspeed_cooling_mph**2)**0.5
     icfm_Heating = ela_in2 * (c_s * @htd + c_w * windspeed_heating_mph**2)**0.5
-
+    
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
@@ -1017,8 +1017,8 @@ class HVACSizing
 
     bldg_design_loads.Heat_InfilVent = 1.1 * @acf * cfm_Heating * @htd
 
-    bldg_design_loads.Cool_Infil_Sens = 1.1 * @acf * cfm_Cool_Load_Sens * @ctd
-    bldg_design_loads.Cool_Infil_Lat = 0.68 * @acf * cfm_Cool_Load_Lat * (@cool_design_grains - @cool_indoor_grains)
+    bldg_design_loads.Cool_Infilvent_Sens = 1.1 * @acf * cfm_Cool_Load_Sens * @ctd
+    bldg_design_loads.Cool_Infilvent_Lat = 0.68 * @acf * cfm_Cool_Load_Lat * (@cool_design_grains - @cool_indoor_grains)
   end
 
   def self.process_load_internal_gains(bldg_design_loads)
@@ -1046,12 +1046,12 @@ class HVACSizing
     bldg_design_loads.Cool_Sens = bldg_design_loads.Cool_Windows + bldg_design_loads.Cool_Skylights +
                                   bldg_design_loads.Cool_Doors + bldg_design_loads.Cool_Walls +
                                   bldg_design_loads.Cool_Floors + bldg_design_loads.Cool_Ceilings +
-                                  bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_Infil_Sens +
+                                  bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_Infilvent_Sens +
                                   bldg_design_loads.Cool_IntGains_Sens
-    bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_Infil_Lat + bldg_design_loads.Cool_IntGains_Lat
+    bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_Infilvent_Lat + bldg_design_loads.Cool_IntGains_Lat
     if bldg_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
       bldg_design_loads.Cool_Lat = 0.0
-      bldg_design_loads.Cool_Infil_Lat = 0.0
+      bldg_design_loads.Cool_Infilvent_Lat = 0.0
       bldg_design_loads.Cool_IntGains_Lat = 0.0
     end
     bldg_design_loads.Cool_Tot = bldg_design_loads.Cool_Sens + bldg_design_loads.Cool_Lat
@@ -3398,7 +3398,7 @@ class DesignLoads
   end
   attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
                 :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors,
-                :Cool_Ceilings, :Cool_Infil_Sens, :Cool_Infil_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
+                :Cool_Ceilings, :Cool_Infilvent_Sens, :Cool_Infilvent_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
                 :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent)
 end
