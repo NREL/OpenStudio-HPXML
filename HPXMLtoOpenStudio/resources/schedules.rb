@@ -850,8 +850,8 @@ class Schedule
               Schedule.set_outage_values(out, end_day_schedule, 0, op_end_hour, value)
 
               # all other days
-              date_e = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
-              out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+              date_e2 = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
+              out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e2)
               out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
             elsif op_begin_hour != 0 && op_end_hour == 24
               # first day
@@ -859,8 +859,8 @@ class Schedule
               Schedule.set_outage_values(out, begin_day_schedule, op_begin_hour, 24, value)
 
               # all other days
-              date_s = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
-              out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+              date_s2 = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
+              out = Schedule.create_outage_rule(schedule, sch_name, i, date_s2, date_e)
               out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
             end
           else # 3 outage rules
@@ -869,9 +869,9 @@ class Schedule
             Schedule.set_outage_values(out, begin_day_schedule, op_begin_hour, 24, value)
 
             # all other days
-            date_s = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
-            date_e = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
-            out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+            date_s2 = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
+            date_e2 = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
+            out = Schedule.create_outage_rule(schedule, sch_name, i, date_s2, date_e2)
             out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
 
             # last day
