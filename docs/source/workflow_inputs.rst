@@ -438,19 +438,11 @@ If not entered, occupant vacancies will not be modeled.
   ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
   ====================================  ========  =======  =============  ========  =======  ===========
 
-Schedules from the following categories are affected by vacancy:
+See the "Affected By Vacancy" column in the table above to understand which components are affected by vacancy periods.
 
-- Occupancy
-- Lighting
-- Ceiling Fans
-- Cooking Range/Oven
-- Dishwasher
-- Clothes Washer
-- Clothes Dryer
-- Plug Loads
-- Fuel Loads
-- Hot Water
-- Local Ventilation Fans
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/schedules_affected.csv
+   :header-rows: 1
 
 HPXML Power Outage Periods
 **************************
@@ -469,24 +461,7 @@ If not entered, power outages will not be modeled.
   ``EndHourOfDay``                      integer            0 - 23         No                 End hour
   ====================================  ========  =======  =============  ========  =======  ===========
 
-Schedules from the following categories are affected by power outage:
-
-- Lighting
-- Ceiling Fans
-- Cooking Range/Oven
-- Refrigerators
-- Freezers
-- Dishwasher
-- Clothes Washer
-- Clothes Dryer
-- HVAC Systems
-- Plug Loads
-- Fuel Loads
-- Hot Water
-- Ventilation Fans
-- Dehumidifiers
-- Pools
-- Hot Tubs
+See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
 
 .. _buildingsite:
 
