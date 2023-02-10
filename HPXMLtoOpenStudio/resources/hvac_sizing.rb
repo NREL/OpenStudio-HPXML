@@ -489,7 +489,7 @@ class HVACSizing
 
       bldg_design_loads.Heat_Windows += window_ufactor * window.area * @htd
 
-      for hr in -1..12
+      for hr in -1..11
 
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
@@ -587,7 +587,7 @@ class HVACSizing
         if hr == -1
           alp_load += htm * window.area
         else
-          afl_hr[hr - 1] += htm * window.area
+          afl_hr[hr] += htm * window.area
         end
       end
     end # window
@@ -622,7 +622,7 @@ class HVACSizing
 
       bldg_design_loads.Heat_Skylights += skylight_ufactor * skylight.area * @htd
 
-      for hr in -1..12
+      for hr in -1..11
 
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
@@ -665,7 +665,7 @@ class HVACSizing
         if hr == -1
           alp_load += htm * skylight.area
         else
-          afl_hr[hr - 1] += htm * skylight.area
+          afl_hr[hr] += htm * skylight.area
         end
       end
     end # skylight
