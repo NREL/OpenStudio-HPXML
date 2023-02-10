@@ -1228,31 +1228,6 @@ class Schedule
     return s
   end
 
-  def self.parse_date_range(date_range)
-    begin_end_dates = date_range.split('-').map { |v| v.strip }
-    if begin_end_dates.size != 2
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
-    end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
-
-    if (begin_values.size != 2) || (end_values.size != 2)
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    require 'date'
-    begin_month = Date::ABBR_MONTHNAMES.index(begin_values[0].capitalize)
-    end_month = Date::ABBR_MONTHNAMES.index(end_values[0].capitalize)
-    begin_day = begin_values[1].to_i
-    end_day = end_values[1].to_i
-    if begin_month.nil? || end_month.nil? || begin_day == 0 || end_day == 0
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    return begin_month, begin_day, end_month, end_day
-  end
-
   def self.parse_date_time_range(date_time_range)
     begin_end_dates = date_time_range.split('-').map { |v| v.strip }
     if begin_end_dates.size != 2
@@ -1262,7 +1237,7 @@ class Schedule
     begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
     end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
 
-    if (begin_values.size > 3) || (end_values.size > 3)
+    if !(begin_values.size == 2 || begin_values.size == 3) || !(end_values.size == 2 || end_values.size == 3)
       fail "Invalid date format specified for '#{date_time_range}'."
     end
 
