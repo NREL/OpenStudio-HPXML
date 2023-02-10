@@ -476,7 +476,7 @@ class HVACSizing
     # Windows
     bldg_design_loads.Heat_Windows = 0.0
     alp_load = 0.0 # Average Load Procedure (ALP) Load
-    afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
+    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     @hpxml.windows.each do |window|
       next unless window.wall.is_exterior_thermal_boundary
@@ -587,7 +587,7 @@ class HVACSizing
         if hr == -1
           alp_load += htm * window.area
         else
-          afl_hr[hr] += htm * window.area
+          afl_hr[hr - 1] += htm * window.area
         end
       end
     end # window
@@ -610,7 +610,7 @@ class HVACSizing
     # Skylights
     bldg_design_loads.Heat_Skylights = 0.0
     alp_load = 0.0 # Average Load Procedure (ALP) Load
-    afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
+    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     @hpxml.skylights.each do |skylight|
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
@@ -665,7 +665,7 @@ class HVACSizing
         if hr == -1
           alp_load += htm * skylight.area
         else
-          afl_hr[hr] += htm * skylight.area
+          afl_hr[hr - 1] += htm * skylight.area
         end
       end
     end # skylight
@@ -953,9 +953,16 @@ class HVACSizing
         bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * @htd
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
-        # FIXME: Assumes slab is uninsulated?
-        k_soil = @hpxml.site.ground_conductivity
-        r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
+        slab_is_insulated = false
+        if slab.under_slab_insulation_width > 0 && slab.under_slab_insulation_r_value > 0
+          slab_is_insulated = true
+        elsif slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
+          slab_is_insulated = true
+        elsif slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
+          slab_is_insulated = true
+        end
+        k_soil = 0.8 # Value from ASHRAE HoF, probably used by Manual J
+        r_other = 1.47 # Value from ASHRAE HoF, probably used by Manual J
         foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
         z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
         sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
@@ -964,7 +971,10 @@ class HVACSizing
         w_b = [length, width].min
         w_b = [w_b, 1.0].max # handle zero exposed perimeter
         u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
-        u_value_mj8 = 0.85 * u_avg_bf
+        u_value_mj8 = 0.85 * u_avg_bf # To account for the storage effect of soil, multiply by 0.85
+        if slab_is_insulated
+          u_value_mj8 *= 0.7 # U-values are multiplied y 0.70 to produce U-values for insulated floors
+        end
         bldg_design_loads.Heat_Slabs += u_value_mj8 * slab.area * @htd
       end
     end
@@ -1007,7 +1017,7 @@ class HVACSizing
 
     icfm_Cooling = ela_in2 * (c_s * @ctd + c_w * windspeed_cooling_mph**2)**0.5
     icfm_Heating = ela_in2 * (c_s * @htd + c_w * windspeed_heating_mph**2)**0.5
-    
+
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc

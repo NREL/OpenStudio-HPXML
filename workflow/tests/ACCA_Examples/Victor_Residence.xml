@@ -21,10 +21,8 @@
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
-          <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>1800.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>26100</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -106,7 +104,6 @@
             <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
             <FloorType>
               <WoodFrame/>
             </FloorType>
@@ -166,7 +163,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>88.66</Area>
+            <Area>44.33</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>

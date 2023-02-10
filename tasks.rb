@@ -491,7 +491,7 @@ def create_hpxmls
         exit!
       end
 
-      if hpxml_file.include? 'ASHRAE_Standard_140' or hpxml_file.include? 'ACCA_Examples'
+      if hpxml_file.include?('ASHRAE_Standard_140') || hpxml_file.include?('ACCA_Examples')
         hpxml_path = File.absolute_path(File.join(tests_dir, '..', 'tests', hpxml_file))
       else
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
@@ -564,7 +564,7 @@ def create_hpxmls
 end
 
 def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
-  if hpxml_file.include? 'ASHRAE_Standard_140' or hpxml_file.include? 'ACCA_Examples'
+  if hpxml_file.include?('ASHRAE_Standard_140') || hpxml_file.include?('ACCA_Examples')
     args['hpxml_path'] = "workflow/tests/#{hpxml_file}"
   else
     args['hpxml_path'] = "workflow/sample_files/#{hpxml_file}"
