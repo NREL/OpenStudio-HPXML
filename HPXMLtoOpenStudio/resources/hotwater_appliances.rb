@@ -53,8 +53,8 @@ class HotWaterAndAppliances
       end
       if cw_power_schedule.nil?
         cw_off_periods = []
-        cw_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[cw_col_name]
-        cw_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[cw_col_name]
+        cw_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cw_col_name)
+        cw_off_periods += power_outage_periods if Schedule.affected_by_outage(cw_col_name)
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
@@ -86,8 +86,8 @@ class HotWaterAndAppliances
       end
       if cd_schedule.nil?
         cd_off_periods = []
-        cd_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[cd_col_name]
-        cd_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[cd_col_name]
+        cd_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cd_col_name)
+        cd_off_periods += power_outage_periods if Schedule.affected_by_outage(cd_col_name)
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
@@ -120,8 +120,8 @@ class HotWaterAndAppliances
       end
       if dw_power_schedule.nil?
         dw_off_periods = []
-        dw_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[dw_col_name]
-        dw_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[dw_col_name]
+        dw_off_periods += vacancy_periods if Schedule.affected_by_vacancy(dw_col_name)
+        dw_off_periods += power_outage_periods if Schedule.affected_by_outage(dw_col_name)
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
@@ -152,8 +152,8 @@ class HotWaterAndAppliances
       end
       if fridge_schedule.nil?
         fridge_off_periods = []
-        fridge_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[fridge_col_name]
-        fridge_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[fridge_col_name]
+        fridge_off_periods += vacancy_periods if Schedule.affected_by_vacancy(fridge_col_name)
+        fridge_off_periods += power_outage_periods if Schedule.affected_by_outage(fridge_col_name)
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
@@ -184,8 +184,8 @@ class HotWaterAndAppliances
       end
       if freezer_schedule.nil?
         freezer_off_periods = []
-        freezer_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[freezer_col_name]
-        freezer_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[freezer_col_name]
+        freezer_off_periods += vacancy_periods if Schedule.affected_by_vacancy(freezer_col_name)
+        freezer_off_periods += power_outage_periods if Schedule.affected_by_outage(freezer_col_name)
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
@@ -217,8 +217,8 @@ class HotWaterAndAppliances
       end
       if cook_schedule.nil?
         cook_off_periods = []
-        cook_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[cook_col_name]
-        cook_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[cook_col_name]
+        cook_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cook_col_name)
+        cook_off_periods += power_outage_periods if Schedule.affected_by_outage(cook_col_name)
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
@@ -280,8 +280,8 @@ class HotWaterAndAppliances
       end
       if fixtures_schedule.nil?
         fixtures_off_periods = []
-        fixtures_off_periods += vacancy_periods if SchedulesFile.affected_by_vacancy[fixtures_col_name]
-        fixtures_off_periods += power_outage_periods if SchedulesFile.affected_by_outage[fixtures_col_name]
+        fixtures_off_periods += vacancy_periods if Schedule.affected_by_vacancy(fixtures_col_name)
+        fixtures_off_periods += power_outage_periods if Schedule.affected_by_outage(fixtures_col_name)
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers

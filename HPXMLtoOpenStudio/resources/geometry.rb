@@ -485,7 +485,7 @@ class Geometry
       people_sch = schedules_file.create_schedule_file(col_name: people_col_name)
     end
     if people_sch.nil?
-      people_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[people_col_name]
+      people_vacancy_periods = vacancy_periods if Schedule.affected_by_vacancy(people_col_name)
       weekday_sch = hpxml.building_occupancy.weekday_fractions.split(',').map(&:to_f)
       weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
       weekend_sch = hpxml.building_occupancy.weekend_fractions.split(',').map(&:to_f)

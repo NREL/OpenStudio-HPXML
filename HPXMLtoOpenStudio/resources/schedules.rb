@@ -1275,6 +1275,51 @@ class Schedule
 
     return begin_month, begin_day, end_month, end_day
   end
+
+  def self.get_schedules_affected
+    affected_csv = File.join(File.dirname(__FILE__), 'data', 'schedules_affected.csv')
+    if not File.exist?(affected_csv)
+      fail 'Could not find schedules_affected.csv'
+    end
+
+    return affected_csv
+  end
+
+  def self.affected_by_vacancy(col_name)
+    affected_csv = get_schedules_affected
+
+    require 'csv'
+    vacancy_ix = 1
+    CSV.foreach(affected_csv) do |row|
+      if row[0].to_s == col_name
+        if row[vacancy_ix].downcase.to_s == 'true'
+          return true
+        elsif row[vacancy_ix].downcase.to_s == 'false'
+          return false
+        end
+      end
+    end
+
+    return "Could not find #{col_name} in schedules_affected.csv"
+  end
+
+  def self.affected_by_outage(col_name)
+    affected_csv = get_schedules_affected
+
+    require 'csv'
+    outage_ix = 2
+    CSV.foreach(affected_csv) do |row|
+      if row[0].to_s == col_name
+        if row[outage_ix].downcase.to_s == 'true'
+          return true
+        elsif row[outage_ix].downcase.to_s == 'false'
+          return false
+        end
+      end
+    end
+
+    return "Could not find #{col_name} in schedules_affected.csv"
+  end
 end
 
 class SchedulesFile
@@ -1624,7 +1669,7 @@ class SchedulesFile
 
     @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
       @tmp_schedules.keys.each do |col_name|
-        next unless SchedulesFile.affected_by_vacancy[col_name] # skip those unaffected by vacancy
+        next unless Schedule.affected_by_vacancy(col_name) # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
@@ -1642,7 +1687,7 @@ class SchedulesFile
           @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[ColumnOutage][i] == 1.0
         end
 
-        next unless SchedulesFile.affected_by_outage[col_name] # skip those unaffected by outage
+        next unless Schedule.affected_by_outage(col_name) # skip those unaffected by outage
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
       end
@@ -1748,44 +1793,6 @@ class SchedulesFile
       ColumnBatteryCharging,
       ColumnBatteryDischarging
     ]
-  end
-
-  def self.affected_by_vacancy
-    affected_by_vacancy = {}
-    column_names = SchedulesFile.ColumnNames
-    column_names.each do |column_name|
-      affected_by_vacancy[column_name] = true
-      next unless ([ColumnRefrigerator,
-                    ColumnExtraRefrigerator,
-                    ColumnFreezer,
-                    ColumnPoolPump,
-                    ColumnPoolHeater,
-                    ColumnHotTubPump,
-                    ColumnHotTubHeater,
-                    ColumnSleeping] +
-                    SchedulesFile.HVACSetpointColumnNames +
-                    SchedulesFile.WaterHeaterColumnNames +
-                    SchedulesFile.BatteryColumnNames).include? column_name
-
-      affected_by_vacancy[column_name] = false
-    end
-    return affected_by_vacancy
-  end
-
-  def self.affected_by_outage
-    affected_by_outage = {}
-    column_names = SchedulesFile.ColumnNames
-    column_names.each do |column_name|
-      affected_by_outage[column_name] = true
-      next unless ([ColumnOccupants,
-                    ColumnSleeping] +
-                    SchedulesFile.HVACSetpointColumnNames +
-                    SchedulesFile.WaterHeaterColumnNames +
-                    SchedulesFile.BatteryColumnNames).include? column_name
-
-      affected_by_outage[column_name] = false
-    end
-    return affected_by_outage
   end
 
   def max_value_one
