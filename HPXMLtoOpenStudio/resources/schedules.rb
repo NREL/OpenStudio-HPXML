@@ -1378,8 +1378,7 @@ class SchedulesFile
     import()
     battery_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
-    set_vacancy(vacancy_periods)
-    set_power_outage(power_outage_periods)
+    set_off_periods(vacancy_periods, power_outage_periods)
     convert_setpoints
 
     tmpdir = Dir.tmpdir
@@ -1663,33 +1662,22 @@ class SchedulesFile
     end
   end
 
-  def set_vacancy(vacancy_periods)
-    create_column_values_from_periods(ColumnVacancy, vacancy_periods)
-    return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
+  def set_off_periods(vacancy_periods, power_outage_periods)
+    { ColumnVacancy => vacancy_periods, ColumnOutage => power_outage_periods }.each do |off_name, off_periods|
+      create_column_values_from_periods(off_name, off_periods)
+      return if @tmp_schedules[off_name].all? { |i| i == 0 }
 
-    @tmp_schedules[ColumnVacancy].each_with_index do |_ts, i|
-      @tmp_schedules.keys.each do |col_name|
-        next unless Schedule.affected_by_vacancy(col_name) # skip those unaffected by vacancy
+      @tmp_schedules[off_name].each_with_index do |_ts, i|
+        @tmp_schedules.keys.each do |col_name|
+          # Temperature of tank < 2C indicates of possibility of freeze.
+          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
 
-        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
-      end
-    end
-  end
+          # skip those unaffected
+          next if off_name == ColumnVacancy && !Schedule.affected_by_vacancy(col_name)
+          next if off_name == ColumnOutage && !Schedule.affected_by_outage(col_name)
 
-  def set_power_outage(power_outage_periods)
-    create_column_values_from_periods(ColumnOutage, power_outage_periods)
-    return if @tmp_schedules[ColumnOutage].all? { |i| i == 0 }
-
-    @tmp_schedules[ColumnOutage].each_with_index do |_ts, i|
-      @tmp_schedules.keys.each do |col_name|
-        # Temperature of tank < 2C indicates of possibility of freeze.
-        if col_name == ColumnWaterHeaterSetpoint
-          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[ColumnOutage][i] == 1.0
+          @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
         end
-
-        next unless Schedule.affected_by_outage(col_name) # skip those unaffected by outage
-
-        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnOutage][i])
       end
     end
   end
