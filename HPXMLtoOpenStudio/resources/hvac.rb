@@ -3568,7 +3568,7 @@ class HVAC
     s.setName(sch_name)
 
     year = model.getYearDescription.assumedYear
-    Schedule.set_power_outage_periods(s, sch_name, power_outage_periods, year)
+    Schedule.set_off_periods(s, sch_name, power_outage_periods, year)
 
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
 

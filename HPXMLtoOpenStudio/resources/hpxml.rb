@@ -1357,8 +1357,15 @@ class HPXML < Object
   end
 
   class VacancyPeriod < BaseElement
-    ATTRS = [:begin_month, :begin_day, :end_month, :end_day]
+    ATTRS = [:begin_month, :begin_day, :begin_hour, :end_month, :end_day, :end_hour, :natvent]
     attr_accessor(*ATTRS)
+
+    def year_round?
+      return true if @begin_month == 1 && @begin_day == 1 && (@begin_hour == 0 || @begin_hour.nil?) && @end_month == 12 && @end_day == 31 && @end_hour.nil?
+      return true if @begin_month == 1 && @begin_day == 1 && (@begin_hour == 0 || @begin_hour.nil?) && @end_month == 1 && @end_day == 1 && @end_hour == 0
+
+      return false
+    end
 
     def delete
       @hpxml_object.header.vacancy_periods.delete(self)
@@ -1375,8 +1382,11 @@ class HPXML < Object
       vacancy_period = XMLHelper.add_element(vacancy_periods, 'VacancyPeriod')
       XMLHelper.add_element(vacancy_period, 'BeginMonth', @begin_month, :integer) unless @begin_month.nil?
       XMLHelper.add_element(vacancy_period, 'BeginDayOfMonth', @begin_day, :integer) unless @begin_day.nil?
+      XMLHelper.add_element(vacancy_period, 'BeginHourOfDay', @begin_hour, :integer) unless @begin_hour.nil?
       XMLHelper.add_element(vacancy_period, 'EndMonth', @end_month, :integer) unless @end_month.nil?
       XMLHelper.add_element(vacancy_period, 'EndDayOfMonth', @end_day, :integer) unless @end_day.nil?
+      XMLHelper.add_element(vacancy_period, 'EndHourOfDay', @end_hour, :integer) unless @end_hour.nil?
+      XMLHelper.add_element(vacancy_period, 'NaturalVentilation', @natvent, :boolean) unless @natvent.nil?
     end
 
     def from_oga(vacancy_period)
@@ -1384,8 +1394,11 @@ class HPXML < Object
 
       @begin_month = XMLHelper.get_value(vacancy_period, 'BeginMonth', :integer)
       @begin_day = XMLHelper.get_value(vacancy_period, 'BeginDayOfMonth', :integer)
+      @begin_hour = XMLHelper.get_value(vacancy_period, 'BeginHourOfDay', :integer)
       @end_month = XMLHelper.get_value(vacancy_period, 'EndMonth', :integer)
       @end_day = XMLHelper.get_value(vacancy_period, 'EndDayOfMonth', :integer)
+      @end_hour = XMLHelper.get_value(vacancy_period, 'EndHourOfDay', :integer)
+      @natvent = XMLHelper.get_value(vacancy_period, 'NaturalVentilation', :boolean)
     end
   end
 

@@ -491,7 +491,7 @@ class Geometry
       weekend_sch = hpxml.building_occupancy.weekend_fractions.split(',').map(&:to_f)
       weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
       monthly_sch = hpxml.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: people_vacancy_periods)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, off_periods: people_vacancy_periods)
       people_sch = people_sch.schedule
     else
       runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.building_occupancy.weekday_fractions.nil?

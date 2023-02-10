@@ -2,15 +2,14 @@
 
 # Annual constant schedule
 class ScheduleRulesetConstant
-  def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, vacancy_periods: nil, power_outage_periods: nil)
+  def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, off_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
     @val = val
     @schedule = nil
     @schedule_type_limits_name = schedule_type_limits_name
-    @vacancy_periods = vacancy_periods
-    @power_outage_periods = power_outage_periods
+    @off_periods = off_periods
 
     @schedule = create_schedule()
   end
@@ -29,8 +28,7 @@ class ScheduleRulesetConstant
     default_day_sch.clearValues
     default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), @val)
 
-    Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
-    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
+    Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -43,7 +41,7 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
-                 schedule_type_limits_name = nil, normalize_values = true, vacancy_periods: nil, power_outage_periods: nil)
+                 schedule_type_limits_name = nil, normalize_values = true, off_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -51,8 +49,7 @@ class HourlyByMonthSchedule
     @weekday_month_by_hour_values = validate_values(weekday_month_by_hour_values, 12, 24)
     @weekend_month_by_hour_values = validate_values(weekend_month_by_hour_values, 12, 24)
     @schedule_type_limits_name = schedule_type_limits_name
-    @vacancy_periods = vacancy_periods
-    @power_outage_periods = power_outage_periods
+    @off_periods = off_periods
 
     if normalize_values
       @maxval = calc_max_val()
@@ -199,8 +196,7 @@ class HourlyByMonthSchedule
       prev_wknd_vals = wknd_vals
     end
 
-    Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
-    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
+    Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -213,7 +209,7 @@ class HourlyByDaySchedule
   # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
-                 schedule_type_limits_name = nil, normalize_values = true, vacancy_periods: nil)
+                 schedule_type_limits_name = nil, normalize_values = true, off_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -222,7 +218,7 @@ class HourlyByDaySchedule
     @weekday_day_by_hour_values = validate_values(weekday_day_by_hour_values, @num_days, 24)
     @weekend_day_by_hour_values = validate_values(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
-    @vacancy_periods = vacancy_periods
+    @off_periods = off_periods
 
     if normalize_values
       @maxval = calc_max_val()
@@ -366,7 +362,7 @@ class HourlyByDaySchedule
       prev_wknd_vals = wknd_vals
     end
 
-    Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
+    Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -381,7 +377,7 @@ class MonthWeekdayWeekendSchedule
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
-                 begin_day = 1, end_month = 12, end_day = 31, vacancy_periods: nil, power_outage_periods: nil)
+                 begin_day = 1, end_month = 12, end_day = 31, off_periods: nil)
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -394,8 +390,7 @@ class MonthWeekdayWeekendSchedule
     @begin_day = begin_day
     @end_month = end_month
     @end_day = end_day
-    @vacancy_periods = vacancy_periods
-    @power_outage_periods = power_outage_periods
+    @off_periods = off_periods
 
     if normalize_values
       @weekday_hourly_values = normalize_sum_to_one(@weekday_hourly_values)
@@ -619,8 +614,7 @@ class MonthWeekdayWeekendSchedule
       end
     end
 
-    Schedule.set_vacancy_periods(schedule, @sch_name, @vacancy_periods, @year)
-    Schedule.set_power_outage_periods(schedule, @sch_name, @power_outage_periods, @year)
+    Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
@@ -781,33 +775,11 @@ class Schedule
     rule.setApplySunday(true)
   end
 
-  def self.set_vacancy_periods(schedule, sch_name, vacancy_periods, year)
-    return if vacancy_periods.nil?
+  def self.set_off_periods(schedule, sch_name, off_periods, year)
+    return if off_periods.nil?
 
-    # Add vacancy rule(s), will override previous rules
-    vacancy_periods.each_with_index do |vp, i|
-      vac_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-      vac_rule.setName(sch_name + " #{Schedule.vacancy_name} ruleset#{i}")
-      day_s = Schedule.get_day_num_from_month_day(year, vp.begin_month, vp.begin_day)
-      day_e = Schedule.get_day_num_from_month_day(year, vp.end_month, vp.end_day)
-      date_s = OpenStudio::Date::fromDayOfYear(day_s, year)
-      date_e = OpenStudio::Date::fromDayOfYear(day_e, year)
-
-      vac = vac_rule.daySchedule
-      vac.setName(sch_name + " #{Schedule.vacancy_name}#{i}")
-      vac.addValue(OpenStudio::Time.new(0, 24, 0, 0), 0.0)
-      Schedule.set_weekday_rule(vac_rule)
-      Schedule.set_weekend_rule(vac_rule)
-      vac_rule.setStartDate(date_s)
-      vac_rule.setEndDate(date_e)
-    end
-  end
-
-  def self.set_power_outage_periods(schedule, sch_name, power_outage_periods, year)
-    return if power_outage_periods.nil?
-
-    # Add power outage rule(s), will override previous rules
-    power_outage_periods.each_with_index do |op, i|
+    # Add off rule(s), will override previous rules
+    off_periods.each_with_index do |op, i|
       value = 0.0
 
       # Temperature of tank < 2C indicates of possibility of freeze.
@@ -1653,10 +1625,8 @@ class SchedulesFile
       begin_hour = 0
       end_hour = 24
 
-      if col_name == ColumnOutage
-        begin_hour = period.begin_hour if not period.begin_hour.nil?
-        end_hour = period.end_hour if not period.end_hour.nil?
-      end
+      begin_hour = period.begin_hour if not period.begin_hour.nil?
+      end_hour = period.end_hour if not period.end_hour.nil?
 
       if end_hour == 0
         end_hour = 24

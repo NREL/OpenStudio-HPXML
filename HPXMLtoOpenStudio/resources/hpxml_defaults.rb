@@ -205,6 +205,13 @@ class HPXMLDefaults
       hpxml.header.natvent_days_per_week = 3
       hpxml.header.natvent_days_per_week_isdefaulted = true
     end
+
+    hpxml.header.vacancy_periods.each do |vacancy_period|
+      if vacancy_period.natvent.nil?
+        vacancy_period.natvent = false
+        vacancy_period.natvent_isdefaulted = true
+      end
+    end
   end
 
   def self.apply_emissions_scenarios(hpxml, has_fuel)

@@ -1874,7 +1874,7 @@ class OSModel
     # Power outage sensor
     outage_sensor = nil
     if not @hpxml.header.power_outage_periods.empty?
-      outage_sch = ScheduleRulesetConstant.new(model, SchedulesFile::ColumnOutage, 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: @hpxml.header.power_outage_periods)
+      outage_sch = ScheduleRulesetConstant.new(model, SchedulesFile::ColumnOutage, 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: @hpxml.header.power_outage_periods)
       outage_sch = outage_sch.schedule
 
       outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')

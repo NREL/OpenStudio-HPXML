@@ -120,7 +120,7 @@ class Airflow
     end
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
-                                                  hpxml.header.natvent_days_per_week, infil_volume, infil_height, power_outage_periods)
+                                                  hpxml.header.natvent_days_per_week, infil_volume, infil_height, vacancy_periods, power_outage_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, living_ach50, living_const_ach, infil_volume, infil_height,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, vacancy_periods, power_outage_periods)
@@ -323,7 +323,7 @@ class Airflow
   end
 
   def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor,
-                                                         natvent_days_per_week, infil_volume, infil_height, power_outage_periods)
+                                                         natvent_days_per_week, infil_volume, infil_height, vacancy_periods, power_outage_periods)
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
       htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
@@ -331,7 +331,7 @@ class Airflow
     end
 
     # NV Availability Schedule
-    nv_avail_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameNaturalVentilation, natvent_days_per_week, power_outage_periods)
+    nv_avail_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameNaturalVentilation, natvent_days_per_week, vacancy_periods + power_outage_periods)
 
     nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} avail s")
@@ -474,7 +474,7 @@ class Airflow
     manager.addProgram(vent_program)
   end
 
-  def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, power_outage_periods = [])
+  def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, off_periods = [])
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     sch_name = "#{obj_name} avail schedule"
     avail_sch.setName(sch_name)
@@ -494,7 +494,7 @@ class Airflow
     on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
 
     year = model.getYearDescription.assumedYear
-    Schedule.set_power_outage_periods(avail_sch, sch_name, power_outage_periods, year)
+    Schedule.set_off_periods(avail_sch, sch_name, off_periods, year)
     return avail_sch
   end
 
@@ -1274,7 +1274,7 @@ class Airflow
       end
       remaining_hrs -= 1
     end
-    obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
+    obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false, off_periods: vacancy_periods + power_outage_periods)
     obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     obj_sch_sensor.setName("#{obj_name} sch s")
     obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
@@ -1308,7 +1308,7 @@ class Airflow
       cd_weekday_sch = vented_dryer.weekday_fractions
       cd_weekend_sch = vented_dryer.weekend_fractions
       cd_monthly_sch = vented_dryer.monthly_multipliers
-      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
+      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, off_periods: vacancy_periods + power_outage_periods)
       obj_sch = obj_sch.schedule
       obj_sch_name = obj_sch.name.to_s
       full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
@@ -1525,7 +1525,7 @@ class Airflow
     # Availability Schedule
     avail_sch = model.alwaysOnDiscreteSchedule
     if not power_outage_periods.empty?
-      avail_sch = ScheduleRulesetConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
+      avail_sch = ScheduleRulesetConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: power_outage_periods)
       avail_sch = avail_sch.schedule
     end
 

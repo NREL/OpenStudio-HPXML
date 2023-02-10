@@ -1751,7 +1751,7 @@ class Waterheater
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
-      new_schedule = ScheduleRulesetConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, power_outage_periods: power_outage_periods)
+      new_schedule = ScheduleRulesetConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       new_schedule = new_schedule.schedule
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
@@ -1768,7 +1768,7 @@ class Waterheater
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
-      new_schedule = ScheduleRulesetConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, power_outage_periods: power_outage_periods)
+      new_schedule = ScheduleRulesetConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       new_schedule = new_schedule.schedule
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
