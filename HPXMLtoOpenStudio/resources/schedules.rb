@@ -1282,39 +1282,38 @@ class Schedule
       fail 'Could not find schedules_affected.csv'
     end
 
-    return affected_csv
+    require 'csv'
+    schedules_affected = CSV.open(affected_csv, headers: :first_row).map(&:to_h)
+
+    return schedules_affected
   end
 
-  def self.affected_by_vacancy(col_name)
-    affected_csv = get_schedules_affected
+  def self.affected_by_vacancy(col_name, schedules_affected = nil)
+    schedules_affected = get_schedules_affected if schedules_affected.nil?
+    schedules_affected.each do |schedule_affected|
+      next if schedule_affected['Schedule Name'] != col_name
 
-    require 'csv'
-    vacancy_ix = 1
-    CSV.foreach(affected_csv) do |row|
-      if row[0].to_s == col_name
-        if row[vacancy_ix].downcase.to_s == 'true'
-          return true
-        elsif row[vacancy_ix].downcase.to_s == 'false'
-          return false
-        end
+      affected = schedule_affected['Affected By Vacancy'].downcase.to_s
+      if affected == 'true'
+        return true
+      elsif affected == 'false'
+        return false
       end
     end
 
     return "Could not find #{col_name} in schedules_affected.csv"
   end
 
-  def self.affected_by_outage(col_name)
-    affected_csv = get_schedules_affected
+  def self.affected_by_outage(col_name, schedules_affected = nil)
+    schedules_affected = get_schedules_affected if schedules_affected.nil?
+    schedules_affected.each do |schedule_affected|
+      next if schedule_affected['Schedule Name'] != col_name
 
-    require 'csv'
-    outage_ix = 2
-    CSV.foreach(affected_csv) do |row|
-      if row[0].to_s == col_name
-        if row[outage_ix].downcase.to_s == 'true'
-          return true
-        elsif row[outage_ix].downcase.to_s == 'false'
-          return false
-        end
+      affected = schedule_affected['Affected By Power Outage'].downcase.to_s
+      if affected == 'true'
+        return true
+      elsif affected == 'false'
+        return false
       end
     end
 
@@ -1665,16 +1664,19 @@ class SchedulesFile
   def set_off_periods(vacancy_periods, power_outage_periods)
     { ColumnVacancy => vacancy_periods, ColumnOutage => power_outage_periods }.each do |off_name, off_periods|
       create_column_values_from_periods(off_name, off_periods)
-      return if @tmp_schedules[off_name].all? { |i| i == 0 }
+      next if @tmp_schedules[off_name].all? { |i| i == 0 }
 
+      schedules_affected = Schedule.get_schedules_affected
       @tmp_schedules[off_name].each_with_index do |_ts, i|
         @tmp_schedules.keys.each do |col_name|
+          next if col_name == off_name
+
           # Temperature of tank < 2C indicates of possibility of freeze.
-          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
+          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
 
           # skip those unaffected
-          next if off_name == ColumnVacancy && !Schedule.affected_by_vacancy(col_name)
-          next if off_name == ColumnOutage && !Schedule.affected_by_outage(col_name)
+          next if off_name == ColumnVacancy && !Schedule.affected_by_vacancy(col_name, schedules_affected)
+          next if off_name == ColumnOutage && !Schedule.affected_by_outage(col_name, schedules_affected)
 
           @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
         end

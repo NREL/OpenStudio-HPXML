@@ -40,7 +40,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    hpxml.header.vacancy_periods.add(begin_month: 1, begin_day: 1, end_month: 12, end_day: 31)
+    hpxml.header.vacancy_periods.add(begin_month: 1,
+                                     begin_day: 1,
+                                     end_month: 12,
+                                     end_day: 31)
     vacancy_periods = hpxml.header.vacancy_periods
 
     schedule_rules = schedule.scheduleRules
