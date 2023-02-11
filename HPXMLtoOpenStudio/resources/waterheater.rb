@@ -90,12 +90,12 @@ class Waterheater
         Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
 
         # Actuated schedule
-        control_setpoint_schedule = ScheduleRulesetConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, power_outage_periods: power_outage_periods)
+        control_setpoint_schedule = ScheduleRulesetConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
         control_setpoint_schedule = control_setpoint_schedule.schedule
       end
     end
     if setpoint_schedule.nil?
-      setpoint_schedule = ScheduleRulesetConstant.new(model, "#{obj_name_hpwh} Setpoint", t_set_c, Constants.ScheduleTypeLimitsTemperature, power_outage_periods: power_outage_periods)
+      setpoint_schedule = ScheduleRulesetConstant.new(model, "#{obj_name_hpwh} Setpoint", t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       setpoint_schedule = setpoint_schedule.schedule
 
       control_setpoint_schedule = setpoint_schedule
