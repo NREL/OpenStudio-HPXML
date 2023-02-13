@@ -31,131 +31,6 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     flunk "Could not find schedule '#{name}'."
   end
 
-  def test_vacancy_period_year_round
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-
-    begin_month = 1
-    begin_day = 1
-    end_month = 12
-    end_day = 31
-
-    # hours not specified
-    model, hpxml = _test_measure(args_hash)
-
-    sch_name = Constants.ObjectNameRefrigerator
-    year = model.getYearDescription.assumedYear
-
-    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    hpxml.header.vacancy_periods.add(begin_month: begin_month,
-                                     begin_day: begin_day,
-                                     end_month: end_month,
-                                     end_day: end_day)
-    vacancy_periods = hpxml.header.vacancy_periods
-
-    schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
-    off_schedule_rules = schedule.scheduleRules - schedule_rules
-
-    assert_equal(1, off_schedule_rules.size)
-
-    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
-    _test_day_schedule(schedule, begin_month + 5, begin_day + 10, year, 0, 24)
-    _test_day_schedule(schedule, end_month, end_day, year, 0, 24)
-
-    # hours specified
-    begin_hour = 0
-    end_hour = 0
-
-    model, hpxml = _test_measure(args_hash)
-
-    sch_name = Constants.ObjectNameRefrigerator
-    year = model.getYearDescription.assumedYear
-
-    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    hpxml.header.vacancy_periods.add(begin_month: begin_month,
-                                     begin_day: begin_day,
-                                     begin_hour: begin_hour,
-                                     end_month: begin_month,
-                                     end_day: begin_day,
-                                     end_hour: end_hour)
-    vacancy_periods = hpxml.header.vacancy_periods
-
-    schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
-    off_schedule_rules = schedule.scheduleRules - schedule_rules
-
-    assert_equal(1, off_schedule_rules.size)
-
-    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
-    _test_day_schedule(schedule, begin_month + 5, begin_day + 10, year, 0, 24)
-    _test_day_schedule(schedule, end_month, end_day, year, 0, 24)
-  end
-
-  def test_vacancy_period_wrap_around
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-
-    begin_month = 12
-    begin_day = 1
-    begin_hour = 5
-    end_month = 1
-    end_day = 31
-    end_hour = 12
-
-    model, hpxml = _test_measure(args_hash)
-
-    sch_name = Constants.ObjectNameRefrigerator
-    year = model.getYearDescription.assumedYear
-
-    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    hpxml.header.vacancy_periods.add(begin_month: begin_month,
-                                     begin_day: begin_day,
-                                     begin_hour: begin_hour,
-                                     end_month: end_month,
-                                     end_day: end_day,
-                                     end_hour: end_hour)
-    vacancy_periods = hpxml.header.vacancy_periods
-
-    schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
-    off_schedule_rules = schedule.scheduleRules - schedule_rules
-
-    assert_equal(3, off_schedule_rules.size)
-
-    _test_day_schedule(schedule, begin_month, begin_day, year, begin_hour, 24)
-    _test_day_schedule(schedule, end_month + 5, begin_day + 10, year, nil, nil)
-    _test_day_schedule(schedule, end_month, end_day, year, 0, end_hour)
-  end
-
-  def _test_day_schedule(schedule, month, day, year, begin_hour, end_hour)
-    month_of_year = OpenStudio::MonthOfYear.new(month)
-    date = OpenStudio::Date.new(month_of_year, day, year)
-    day_schedule = schedule.getDaySchedules(date, date)[0]
-
-    (0..23).each do |h|
-      time = OpenStudio::Time.new(0, h + 1, 0, 0)
-      value = day_schedule.getValue(time)
-      if (begin_hour.nil? && end_hour.nil?) || (h < begin_hour) || (h >= end_hour)
-        assert_operator(value, :>, 0)
-      else
-        assert_equal(0, value)
-      end
-    end
-  end
-
-  def test_vacancy_period_less_than_one_day
-  end
-
-  def test_vacancy_period_begins_at_midnight
-  end
-
-  def test_vacancy_period_ends_at_midnight
-  end
-
-  def test_vacancy_period_begins_and_ends_midday
-  end
-
   def test_default_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -621,6 +496,262 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     assert_in_epsilon(8760 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), 0.1)
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
     assert_in_epsilon(outage_hrs, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOutage, schedules: sf.tmp_schedules), 0.1)
+  end
+
+  def test_set_off_periods_refrigerator
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+
+    begin_month = 1
+    begin_day = 1
+    begin_hour = nil
+    end_month = 12
+    end_day = 31
+    end_hour = nil
+
+    sch_name = Constants.ObjectNameRefrigerator
+
+    # hours not specified
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
+    _test_day_schedule(schedule, begin_month + 5, begin_day + 10, year, 0, 24)
+    _test_day_schedule(schedule, end_month, end_day, year, 0, 24)
+
+    # hours specified
+    begin_hour = 0
+    end_hour = 0
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, begin_month, begin_day, end_hour) # note the change of end month/day
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
+    _test_day_schedule(schedule, begin_month + 5, begin_day + 10, year, 0, 24)
+    _test_day_schedule(schedule, end_month, end_day, year, 0, 24)
+
+    # 1 calendar day
+    end_month = 1
+    end_day = 1
+    end_hour = 5
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, end_hour)
+    _test_day_schedule(schedule, end_month, begin_day + 1, year, nil, nil)
+
+    # 2 calendar days, partial first day
+    begin_hour = 5
+    end_day = 3
+    end_hour = 0
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(2, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, begin_hour, 24)
+    _test_day_schedule(schedule, end_month, begin_day + 1, year, 0, 24)
+    _test_day_schedule(schedule, end_month, begin_day + 2, year, nil, nil)
+
+    # 2 calendar days, partial last day
+    begin_hour = 0
+    end_day = 2
+    end_hour = 11
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(2, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
+    _test_day_schedule(schedule, end_month, end_day, year, 0, end_hour)
+    _test_day_schedule(schedule, end_month, end_day + 1, year, nil, nil)
+
+    # wrap around
+    begin_month = 12
+    begin_day = 1
+    begin_hour = 5
+    end_month = 1
+    end_day = 31
+    end_hour = 12
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(3, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, begin_hour, 24)
+    _test_day_schedule(schedule, end_month + 5, begin_day + 10, year, nil, nil)
+    _test_day_schedule(schedule, end_month, end_day, year, 0, end_hour)
+  end
+
+  def test_set_off_periods_water_heater_setpoint
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+
+    begin_month = 1
+    begin_day = 1
+    begin_hour = nil
+    end_month = 6
+    end_day = 30
+    end_hour = nil
+
+    sch_name = 'WH Setpoint Temp'
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24, 2)
+    _test_day_schedule(schedule, 7, 15, year, nil, nil)
+  end
+
+  def test_set_off_periods_natvent
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+
+    # normal availability
+    begin_month = 1
+    begin_day = 1
+    begin_hour = nil
+    end_month = 6
+    end_day = 30
+    end_hour = nil
+
+    sch_name = "#{Constants.ObjectNameNaturalVentilation} avail schedule"
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(0, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24, 1)
+    _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 0)
+
+    # not available
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    vacancy_periods[-1].natvent = false
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24, 0)
+    _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 0)
+
+    # available
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    vacancy_periods[-1].natvent = true
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24, 1)
+    _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 1)
+  end
+
+  def _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    hpxml.header.vacancy_periods.add(begin_month: begin_month,
+                                     begin_day: begin_day,
+                                     begin_hour: begin_hour,
+                                     end_month: end_month,
+                                     end_day: end_day,
+                                     end_hour: end_hour)
+    return hpxml.header.vacancy_periods
+  end
+
+  def _test_day_schedule(schedule, month, day, year, begin_hour, end_hour, expected_value = 0)
+    month_of_year = OpenStudio::MonthOfYear.new(month)
+    date = OpenStudio::Date.new(month_of_year, day, year)
+    day_schedule = schedule.getDaySchedules(date, date)[0]
+
+    (0..23).each do |h|
+      time = OpenStudio::Time.new(0, h + 1, 0, 0)
+      actual_value = day_schedule.getValue(time)
+      if (begin_hour.nil? && end_hour.nil?) || (h < begin_hour) || (h >= end_hour)
+        assert_operator(actual_value, :>, expected_value)
+      else
+        assert_equal(expected_value, actual_value)
+      end
+    end
   end
 
   def _test_measure(args_hash)
