@@ -1281,6 +1281,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |_key, end_use|
       results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(n_digits)]
     end
+
+    # Outage warnings
+    if @hpxml.header.power_outage_periods.size > 0
+      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::Cooling]].name}.") if @end_uses[[FT::Elec, EUT::Cooling]].annual_output.to_f > 0.0
+      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]].name}.") if @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]].annual_output.to_f > 0.0 && @hpxml.solar_thermal_systems.size > 0
+      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::HotWater]].name}.") if @end_uses[[FT::Elec, EUT::HotWater]].annual_output.to_f > 0.0 && @hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
+    end
+
     if not @emissions.empty?
       results_out << [line_break]
       @emissions.each do |_scenario_key, emission|
