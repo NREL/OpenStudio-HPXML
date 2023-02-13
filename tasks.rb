@@ -450,12 +450,7 @@ def create_hpxmls
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-30-mins.xml' => 'base.xml',
     'base-vacancy.xml' => 'base.xml',
-    'base-power-outage.xml' => 'base.xml',
-    'base-power-outage-summer-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only-33percent.xml',
-    'base-power-outage-summer-simcontrol-timestep-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
-    'base-power-outage-summer-location-AMY-2012.xml' => 'base-location-AMY-2012.xml',
-    'base-power-outage-winter-simcontrol-timestep-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
-    'base-power-outage-winter-location-AMY-2012.xml' => 'base-location-AMY-2012.xml'
+    'base-power-outage.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2524,13 +2519,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-simple-power-outage-year-round.xml',
          'base-schedules-detailed-occupancy-stochastic-power-outage-year-round.xml'].include? hpxml_file
     args['schedules_power_outage_period'] = 'Jan 1 - Dec 31'
-  elsif ['base-power-outage-summer-hvac-room-ac-only-33percent.xml',
-         'base-power-outage-summer-simcontrol-timestep-10-mins.xml',
-         'base-power-outage-summer-location-AMY-2012.xml'].include? hpxml_file
-    args['schedules_power_outage_period'] = 'Jul 20 11 - Aug 1 4'
-  elsif ['base-power-outage-winter-simcontrol-timestep-10-mins.xml',
-         'base-power-outage-winter-location-AMY-2012.xml'].include? hpxml_file
-    args['schedules_power_outage_period'] = 'Feb 20 19 - Mar 1 2'
   end
 
   # Occupancy Schedules
