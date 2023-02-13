@@ -483,6 +483,9 @@ class HPXMLTest < MiniTest::Test
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
+      if hpxml.header.power_outage_periods.size > 0
+        next if log_line.include? 'Power outage period(s) may contain nonzero values'
+      end
 
       flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
     end
