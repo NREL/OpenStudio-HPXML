@@ -1043,7 +1043,7 @@ class HVAC
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
       # From Carrier heat pump lab testing
-      hp_ap.cool_rated_airflow_rate = 411.0 # cfm/ton
+      hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       hp_ap.cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
       hp_ap.cool_rated_shrs_net = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
@@ -1142,9 +1142,9 @@ class HVAC
     hp_ap.cool_cap_fflow_spec = [[1, 0, 0]] * num_speeds
     hp_ap.cool_eir_fflow_spec = [[1, 0, 0]] * num_speeds
 
-    hp_ap.cool_rated_airflow_rate = 425.0 # cfm/ton
-	hp_ap.cool_fan_speed_ratios = [0.4706, 0.5294, 0.5882, 0.6471, 0.7059, 0.7647, 0.8235, 0.8824, 0.9412, 1.0]
-	hp_ap.cool_capacity_ratios = [0.4, 0.4889, 0.5778, 0.6667, 0.7556, 0.8444, 0.9333, 1.0222, 1.1111, 1.2]
+    hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
+    hp_ap.cool_fan_speed_ratios = [0.4706, 0.5294, 0.5882, 0.6471, 0.7059, 0.7647, 0.8235, 0.8824, 0.9412, 1.0]
+    hp_ap.cool_capacity_ratios = [0.4, 0.4889, 0.5778, 0.6667, 0.7556, 0.8444, 0.9333, 1.0222, 1.1111, 1.2]
   end
 
   def self.set_heat_curves_mshp(heat_pump, num_speeds)
@@ -1182,9 +1182,9 @@ class HVAC
     e = 0
     f = 0
     hp_ap.heat_cap_ft_spec = [HVAC.convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
-	hp_ap.heat_rated_airflow_rate = 400.0 # cfm/ton
+    hp_ap.heat_rated_airflow_rate = 400.0 # cfm/ton
     hp_ap.heat_fan_speed_ratios = [0.5, 0.5556, 0.6111, 0.6667, 0.7222, 0.7778, 0.8333, 0.8889, 0.9444, 1.0]
-	hp_ap.heat_capacity_ratios = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
+    hp_ap.heat_capacity_ratios = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
   end
 
   def self.set_curves_gshp(heat_pump)
@@ -3025,7 +3025,7 @@ class HVAC
       end
     elsif num_speeds == 2
       htg_ap.heat_c_d =  0.11
-    elsif num_speeds == 4 || num_speeds == 10
+    elsif num_speeds >= 4
       htg_ap.heat_c_d =  0.25
     end
 
@@ -3071,13 +3071,12 @@ class HVAC
     return
   end
 
-  def self.set_cool_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
+  def self.set_cool_rated_cfm_per_ton_mshp(heat_pump, _num_speeds)
     hp_ap = heat_pump.additional_properties
 
     dB_rated = 80.0 # deg-F
     wB_rated = 67.0 # deg-F
 
-    cool_nominal_capacity_ratio = 1.0
     cool_nominal_cfm_per_ton = 368.75 # Fixme: hardcoded for previous calculated value
 
     p_atm = 14.696 # standard atmospheric pressure (psia)
@@ -3281,13 +3280,13 @@ class HVAC
     return seer
   end
 
-  def self.set_heat_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
+  def self.set_heat_rated_cfm_per_ton_mshp(heat_pump, _num_speeds)
     hp_ap = heat_pump.additional_properties
     hp_ap.heat_rated_cfm_per_ton = []
 
     hp_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, i|
       hp_ap.heat_rated_cfm_per_ton << hp_ap.heat_fan_speed_ratios[i] * hp_ap.heat_rated_airflow_rate / capacity_ratio
-	end
+    end
   end
 
   def self.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
