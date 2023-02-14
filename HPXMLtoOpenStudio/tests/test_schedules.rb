@@ -666,6 +666,37 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 1)
   end
 
+  def test_set_off_periods_leap_year
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-location-AMY-2012.xml'))
+
+    begin_month = 1
+    begin_day = 1
+    begin_hour = nil
+    end_month = 3
+    end_day = 31
+    end_hour = nil
+
+    sch_name = Constants.ObjectNameRefrigerator
+
+    model, hpxml = _test_measure(args_hash)
+    year = model.getYearDescription.assumedYear
+    assert_equal(2012, year)
+
+    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
+    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+
+    schedule_rules = schedule.scheduleRules
+    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    off_schedule_rules = schedule.scheduleRules - schedule_rules
+
+    assert_equal(1, off_schedule_rules.size)
+
+    _test_day_schedule(schedule, 2, 28, year, 0, 24)
+    _test_day_schedule(schedule, 2, 29, year, 0, 24)
+    _test_day_schedule(schedule, 3, 1, year, 0, 24)
+  end
+
   def _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
     hpxml.header.vacancy_periods.add(begin_month: begin_month,
                                      begin_day: begin_day,
