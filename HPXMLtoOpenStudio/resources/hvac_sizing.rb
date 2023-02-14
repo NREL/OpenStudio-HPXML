@@ -985,23 +985,7 @@ class HVACSizing
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
 
-    # FUTURE: Consolidate code w/ airflow.rb
-    infil_volume = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_height.nil? }[0].infiltration_height
-    sla = nil
-    @hpxml.air_infiltration_measurements.each do |measurement|
-      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
-        if measurement.unit_of_measure == HPXML::UnitsACH
-          ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, measurement.air_leakage, measurement.house_pressure, 50.0)
-        elsif measurement.unit_of_measure == HPXML::UnitsCFM
-          achXX = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
-          ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, achXX, measurement.house_pressure, 50.0)
-        end
-        sla = Airflow.get_infiltration_SLA_from_ACH50(ach50, 0.65, @cfa, infil_volume)
-      elsif measurement.unit_of_measure == HPXML::UnitsACHNatural
-        sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
-      end
-    end
+    sla, _ach50, _nach, _volume, _height = Airflow.get_values_from_air_infiltration_measurements(@hpxml, @cfa, weather)
     ela = sla * @cfa
 
     ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade

@@ -664,19 +664,70 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   Element                               Type    Units  Constraints  Required   Default                    Notes
   ====================================  ======  =====  ===========  =========  =========================  ===============================================
   ``SystemIdentifier``                  id                          Yes                                   Unique identifier
-  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_     Yes                                   Units for air leakage
-  ``HousePressure``                     double  Pa     > 0          See [#]_                              House pressure with respect to outside [#]_
-  ``BuildingAirLeakage/AirLeakage``     double         > 0          Yes                                   Value for air leakage
   ``InfiltrationVolume``                double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement
   ``InfiltrationHeight``                double  ft     > 0          No         See [#]_                   Height associated with infiltration measurement [#]_
   ====================================  ======  =====  ===========  =========  =========================  ===============================================
 
-  .. [#] UnitofMeasure choices are "ACH" (air changes per hour at user-specified pressure), "CFM" (cubic feet per minute at user-specified pressure), or "ACHnatural" (natural air changes per hour).
-  .. [#] HousePressure only required if BuildingAirLeakage/UnitofMeasure is not "ACHnatural".
-  .. [#] HousePressure typical value is 50 Pa.
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
 
+In addition, one of the following air leakage types must also be defined:
+
+- :ref:`infil_ach_cfm`
+- :ref:`infil_natural_ach_cfm`
+- :ref:`infil_ela`
+
+.. _infil_ach_cfm:
+
+ACH or CFM
+~~~~~~~~~~
+
+If entering air leakage as ACH or CFM at a user-specific pressure, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+For example, ACH50 (ACH at 50 Pascals) is a commonly obtained value from a blower door measurement.
+
+  ====================================  ======  =====  ===========  =========  =======  ===============================================
+  Element                               Type    Units  Constraints  Required   Default  Notes
+  ====================================  ======  =====  ===========  =========  =======  ===============================================
+  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_     Yes                 Units for air leakage
+  ``HousePressure``                     double  Pa     > 0          Yes                 House pressure with respect to outside [#]_
+  ``BuildingAirLeakage/AirLeakage``     double         > 0          Yes                 Value for air leakage
+  ====================================  ======  =====  ===========  =========  =======  ===============================================
+
+  .. [#] UnitofMeasure choices are "ACH" or "CFM".
+  .. [#] HousePressure typical value is 50 Pa.
+
+.. _infil_natural_ach_cfm:
+
+Natural ACH or CFM
+~~~~~~~~~~~~~~~~~~
+
+If entering air leakage as natural ACH or CFM, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Natural ACH or CFM represents the annual average infiltration that a building will see.
+
+  ====================================  ======  =====  ===========  =========  =======  =================================
+  Element                               Type    Units  Constraints  Required   Default  Notes
+  ====================================  ======  =====  ===========  =========  =======  =================================
+  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_     Yes                 Units for air leakage
+  ``BuildingAirLeakage/AirLeakage``     double         > 0          Yes                 Value for air leakage
+  ====================================  ======  =====  ===========  =========  =======  =================================
+
+  .. [#] UnitofMeasure choices are "ACHnatural" or "CFMnatural".
+
+.. _infil_ela:
+
+Effective Leakage Area
+~~~~~~~~~~~~~~~~~~~~~~
+
+If entering air leakage as Effective Leakage Area (ELA), additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Effective Leakage Area is defined as the area of a special nozzle-shaped hole (similar to the inlet of a blower door fan) that would leak the same amount of air as the building does at a pressure difference of 4 Pascals.
+Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a sharp-edged hole at a pressure difference of 10 Pascals.
+
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  Element                               Type    Units    Constraints  Required   Default                    Notes
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  
 HPXML Attics
 ************
 

@@ -957,6 +957,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_units_choices << HPXML::UnitsACH
     air_leakage_units_choices << HPXML::UnitsCFM
     air_leakage_units_choices << HPXML::UnitsACHNatural
+    air_leakage_units_choices << HPXML::UnitsCFMNatural
+    air_leakage_units_choices << HPXML::UnitsELA
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_units', air_leakage_units_choices, true)
     arg.setDisplayName('Air Leakage: Units')
@@ -973,7 +975,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
     arg.setDisplayName('Air Leakage: Value')
-    arg.setDescription('Air exchange rate value.')
+    arg.setDescription("Air exchange rate value. For '#{HPXML::UnitsELA}', provide value in sq. in.")
     arg.setDefaultValue(3)
     args << arg
 
@@ -3894,22 +3896,22 @@ class HPXMLFile
   end
 
   def self.set_air_infiltration_measurements(hpxml, args)
-    if args[:air_leakage_units] == HPXML::UnitsACH
-      house_pressure = args[:air_leakage_house_pressure]
-      unit_of_measure = HPXML::UnitsACH
-    elsif args[:air_leakage_units] == HPXML::UnitsCFM
-      house_pressure = args[:air_leakage_house_pressure]
-      unit_of_measure = HPXML::UnitsCFM
-    elsif args[:air_leakage_units] == HPXML::UnitsACHNatural
-      house_pressure = nil
-      unit_of_measure = HPXML::UnitsACHNatural
+    if args[:air_leakage_units] == HPXML::UnitsELA
+      effective_leakage_area = args[:air_leakage_value]
+    else
+      unit_of_measure = args[:air_leakage_units]
+      air_leakage = args[:air_leakage_value]
+      if [HPXML::UnitsACH, HPXML::UnitsCFM].include? args[:air_leakage_units]
+        house_pressure = args[:air_leakage_house_pressure]
+      end
     end
     infiltration_volume = hpxml.building_construction.conditioned_building_volume
 
     hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             house_pressure: house_pressure,
                                             unit_of_measure: unit_of_measure,
-                                            air_leakage: args[:air_leakage_value],
+                                            air_leakage: air_leakage,
+                                            effective_leakage_area: effective_leakage_area,
                                             infiltration_volume: infiltration_volume)
   end
 
