@@ -3489,12 +3489,12 @@ class HPXMLFile
     if args[:schedules_power_outage_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_power_outage_period].get)
 
-      natvent = nil
+      natvent_availability = nil
       if args[:schedules_power_outage_window_natvent_availability].is_initialized
-        natvent = args[:schedules_power_outage_window_natvent_availability].get
+        natvent_availability = args[:schedules_power_outage_window_natvent_availability].get
       end
 
-      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent: natvent)
+      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
     end
 
     if args[:software_info_program_used].is_initialized
