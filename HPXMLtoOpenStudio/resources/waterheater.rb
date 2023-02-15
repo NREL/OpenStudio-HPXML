@@ -1085,7 +1085,8 @@ class Waterheater
                                      model: model,
                                      runner: runner,
                                      ua: assumed_ua,
-                                     is_dsh_storage: true)
+                                     is_dsh_storage: true,
+                                     power_outage_periods: [])
 
     loop.addSupplyBranchForComponent(storage_tank)
     tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
