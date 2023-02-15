@@ -25,9 +25,7 @@ class MiscLoads
       sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if sch.nil?
-      col_off_periods = []
-      col_off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
-      col_off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+      col_off_periods = Schedule.get_off_periods(col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
       sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, off_periods: col_off_periods)
       space_design_level = sch.calc_design_level_from_daily_kwh(kwh / 365.0)
       sch = sch.schedule
@@ -81,9 +79,7 @@ class MiscLoads
         sch = schedules_file.create_schedule_file(col_name: col_name)
       end
       if sch.nil?
-        col_off_periods = []
-        col_off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
-        col_off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+        col_off_periods = Schedule.get_off_periods(col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, off_periods: col_off_periods)
         space_design_level = sch.calc_design_level_from_daily_therm(therm / 365.0)
         sch = sch.schedule
@@ -127,9 +123,7 @@ class MiscLoads
       heater_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if heater_sch.nil?
-      col_off_periods = []
-      col_off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
-      col_off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+      col_off_periods = Schedule.get_off_periods(col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
       heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, off_periods: col_off_periods)
     else
       runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !pool_or_hot_tub.heater_weekday_fractions.nil?
@@ -199,9 +193,7 @@ class MiscLoads
       pump_sch = schedules_file.create_schedule_file(col_name: col_name)
     end
     if pump_sch.nil?
-      col_off_periods = []
-      col_off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
-      col_off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+      col_off_periods = Schedule.get_off_periods(col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
       pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, off_periods: col_off_periods)
     else
       runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !pool_or_hot_tub.pump_weekday_fractions.nil?

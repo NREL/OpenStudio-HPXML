@@ -52,9 +52,7 @@ class HotWaterAndAppliances
         cw_power_schedule = schedules_file.create_schedule_file(col_name: cw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cw_power_schedule.nil?
-        cw_off_periods = []
-        cw_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cw_col_name)
-        cw_off_periods += power_outage_periods if Schedule.affected_by_outage(cw_col_name)
+        cw_off_periods = Schedule.get_off_periods(cw_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
@@ -85,9 +83,7 @@ class HotWaterAndAppliances
         cd_schedule = schedules_file.create_schedule_file(col_name: cd_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cd_schedule.nil?
-        cd_off_periods = []
-        cd_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cd_col_name)
-        cd_off_periods += power_outage_periods if Schedule.affected_by_outage(cd_col_name)
+        cd_off_periods = Schedule.get_off_periods(cd_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
@@ -119,9 +115,7 @@ class HotWaterAndAppliances
         dw_power_schedule = schedules_file.create_schedule_file(col_name: dw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if dw_power_schedule.nil?
-        dw_off_periods = []
-        dw_off_periods += vacancy_periods if Schedule.affected_by_vacancy(dw_col_name)
-        dw_off_periods += power_outage_periods if Schedule.affected_by_outage(dw_col_name)
+        dw_off_periods = Schedule.get_off_periods(dw_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
@@ -151,9 +145,7 @@ class HotWaterAndAppliances
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fridge_schedule.nil?
-        fridge_off_periods = []
-        fridge_off_periods += vacancy_periods if Schedule.affected_by_vacancy(fridge_col_name)
-        fridge_off_periods += power_outage_periods if Schedule.affected_by_outage(fridge_col_name)
+        fridge_off_periods = Schedule.get_off_periods(fridge_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
@@ -183,9 +175,7 @@ class HotWaterAndAppliances
         freezer_schedule = schedules_file.create_schedule_file(col_name: freezer_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if freezer_schedule.nil?
-        freezer_off_periods = []
-        freezer_off_periods += vacancy_periods if Schedule.affected_by_vacancy(freezer_col_name)
-        freezer_off_periods += power_outage_periods if Schedule.affected_by_outage(freezer_col_name)
+        freezer_off_periods = Schedule.get_off_periods(freezer_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
@@ -216,9 +206,7 @@ class HotWaterAndAppliances
         cook_schedule = schedules_file.create_schedule_file(col_name: cook_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cook_schedule.nil?
-        cook_off_periods = []
-        cook_off_periods += vacancy_periods if Schedule.affected_by_vacancy(cook_col_name)
-        cook_off_periods += power_outage_periods if Schedule.affected_by_outage(cook_col_name)
+        cook_off_periods = Schedule.get_off_periods(cook_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
@@ -279,9 +267,7 @@ class HotWaterAndAppliances
         fixtures_schedule = schedules_file.create_schedule_file(col_name: fixtures_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fixtures_schedule.nil?
-        fixtures_off_periods = []
-        fixtures_off_periods += vacancy_periods if Schedule.affected_by_vacancy(fixtures_col_name)
-        fixtures_off_periods += power_outage_periods if Schedule.affected_by_outage(fixtures_col_name)
+        fixtures_off_periods = Schedule.get_off_periods(fixtures_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers

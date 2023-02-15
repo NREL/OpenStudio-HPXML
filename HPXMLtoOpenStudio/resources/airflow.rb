@@ -1523,11 +1523,8 @@ class Airflow
     end
 
     # Availability Schedule
-    avail_sch = model.alwaysOnDiscreteSchedule
-    if not power_outage_periods.empty?
-      avail_sch = ScheduleRulesetConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: power_outage_periods)
-      avail_sch = avail_sch.schedule
-    end
+    avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: power_outage_periods)
+    avail_sch = avail_sch.schedule
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     equip_def.setName(obj_name)

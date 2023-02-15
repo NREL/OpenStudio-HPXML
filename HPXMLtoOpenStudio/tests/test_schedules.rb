@@ -36,8 +36,8 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 8
-    schedule_rulesets = 18
+    schedule_constants = 7
+    schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0
 
@@ -108,8 +108,8 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 8
-    schedule_rulesets = 18
+    schedule_constants = 7
+    schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0
 
@@ -573,35 +573,6 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     _test_day_schedule(schedule, end_month, end_day, year, 0, end_hour)
   end
 
-  def test_set_off_periods_water_heater_setpoint
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-
-    begin_month = 1
-    begin_day = 1
-    begin_hour = nil
-    end_month = 6
-    end_day = 30
-    end_hour = nil
-
-    sch_name = 'WH Setpoint Temp'
-
-    model, hpxml = _test_measure(args_hash)
-    year = model.getYearDescription.assumedYear
-
-    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-
-    schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
-    off_schedule_rules = schedule.scheduleRules - schedule_rules
-
-    assert_equal(1, off_schedule_rules.size)
-
-    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24, 2)
-    _test_day_schedule(schedule, 7, 15, year, nil, nil)
-  end
-
   def test_set_off_periods_natvent
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -620,10 +591,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
     off_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(0, off_schedule_rules.size)
@@ -636,11 +607,11 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-    vacancy_periods[-1].natvent = false
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    power_outage_periods[-1].natvent_availability = false
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
     off_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, off_schedule_rules.size)
@@ -653,11 +624,11 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-    vacancy_periods[-1].natvent = true
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    power_outage_periods[-1].natvent_availability = true
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
+    Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
     off_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, off_schedule_rules.size)
@@ -705,6 +676,16 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
                                      end_day: end_day,
                                      end_hour: end_hour)
     return hpxml.header.vacancy_periods
+  end
+
+  def _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    hpxml.header.power_outage_periods.add(begin_month: begin_month,
+                                          begin_day: begin_day,
+                                          begin_hour: begin_hour,
+                                          end_month: end_month,
+                                          end_day: end_day,
+                                          end_hour: end_hour)
+    return hpxml.header.power_outage_periods
   end
 
   def _test_day_schedule(schedule, month, day, year, begin_hour, end_hour, expected_value = 0)

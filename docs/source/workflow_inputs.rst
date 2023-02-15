@@ -429,16 +429,21 @@ HPXML Vacancy Periods
 One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
 If not entered, occupant vacancies will not be modeled.
 
-  ====================================  ========  =======  =============  ========  =======  ===========
-  Element                               Type      Units    Constraints    Required  Default  Description
-  ====================================  ========  =======  =============  ========  =======  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                Begin day
-  ``EndMonth``                          integer            1 - 12         Yes                End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
-  ====================================  ========  =======  =============  ========  =======  ===========
+  ====================================  ========  =======  =============  ========  ========  ===========
+  Element                               Type      Units    Constraints    Required  Default   Description
+  ====================================  ========  =======  =============  ========  ========  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
+  ``EndMonth``                          integer            1 - 12         Yes                 End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
+  ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
+  ``NaturalVentilationAvailability``    boolean                           No                  Natural ventilation is always, or never, available during vacancy period
+  ====================================  ========  =======  =============  ========  ========  ===========
 
-See the "Affected By Vacancy" column in the table above to understand which components are affected by vacancy periods.
+  .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
+
+See the "Affected By Vacancy" column in the table below to understand which components are affected by vacancy periods.
 
 .. csv-table::
    :file: ../../HPXMLtoOpenStudio/resources/data/schedules_affected.csv
@@ -450,16 +455,19 @@ HPXML Power Outage Periods
 One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
 If not entered, power outages will not be modeled.
 
-  ====================================  ========  =======  =============  ========  =======  ===========
-  Element                               Type      Units    Constraints    Required  Default  Description
-  ====================================  ========  =======  =============  ========  =======  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                Begin day
-  ``BeginHourOfDay``                    integer            0 - 23         No                 Begin hour
-  ``EndMonth``                          integer            1 - 12         Yes                End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
-  ``EndHourOfDay``                      integer            0 - 23         No                 End hour
-  ====================================  ========  =======  =============  ========  =======  ===========
+  ====================================  ========  =======  =============  ========  ========  ===========
+  Element                               Type      Units    Constraints    Required  Default   Description
+  ====================================  ========  =======  =============  ========  ========  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
+  ``EndMonth``                          integer            1 - 12         Yes                 End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
+  ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
+  ``NaturalVentilationAvailability``    boolean                           No                  Natural ventilation is always, or never, available during power outage period
+  ====================================  ========  =======  =============  ========  ========  ===========
+
+  .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
 
 See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
 

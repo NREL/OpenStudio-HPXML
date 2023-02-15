@@ -742,7 +742,7 @@ class HVAC
     # Availability Schedule
     avail_sch = model.alwaysOnDiscreteSchedule
     if not power_outage_periods.empty?
-      avail_sch = ScheduleRulesetConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
+      avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
       avail_sch = avail_sch.schedule
     end
 
@@ -780,9 +780,7 @@ class HVAC
       ceiling_fan_sch = schedules_file.create_schedule_file(col_name: ceiling_fan_col_name)
     end
     if ceiling_fan_sch.nil?
-      ceiling_fan_off_periods = []
-      ceiling_fan_off_periods += vacancy_periods if Schedule.affected_by_vacancy(ceiling_fan_col_name)
-      ceiling_fan_off_periods += power_outage_periods if Schedule.affected_by_outage(ceiling_fan_col_name)
+      ceiling_fan_off_periods = Schedule.get_off_periods(ceiling_fan_col_name, vacancy_periods: vacancy_periods, power_outage_periods: power_outage_periods)
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions
@@ -3558,20 +3556,16 @@ class HVAC
   def self.get_sequential_load_schedule(model, fractions, power_outage_periods = [])
     values = fractions.map { |f| f > 1 ? 1.0 : f.round(5) }
 
-    if values.uniq.length == 1 && power_outage_periods.empty?
-      s = OpenStudio::Model::ScheduleConstant.new(model)
-      s.setValue(values[0])
+    sch_name = 'Sequential Fraction Schedule'
+    if values.uniq.length == 1
+      s = ScheduleConstant.new(model, sch_name, values[0], Constants.ScheduleTypeLimitsFraction, off_periods: power_outage_periods)
+      s = s.schedule
     else
       s = Schedule.create_ruleset_from_daily_season(model, values)
+      s.setName(sch_name)
+      Schedule.set_off_periods(s, sch_name, power_outage_periods, model.getYearDescription.assumedYear)
+      Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     end
-
-    sch_name = 'Sequential Fraction Schedule'
-    s.setName(sch_name)
-
-    year = model.getYearDescription.assumedYear
-    Schedule.set_off_periods(s, sch_name, power_outage_periods, year)
-
-    Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
 
     return s
   end

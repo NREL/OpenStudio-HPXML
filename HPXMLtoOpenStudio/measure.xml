@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5a682ce4-5a36-4f46-8b64-84d89d466043</version_id>
-  <version_modified>20230214T004744Z</version_modified>
+  <version_id>0be7985d-46cc-4f34-bae8-2f728ae6567c</version_id>
+  <version_modified>20230215T185951Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -506,40 +506,52 @@
       <checksum>D171C2F0</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>68F0E99A</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B3137B87</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>65668270</checksum>
+      <checksum>C4E9278D</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6EED092E</checksum>
+      <checksum>30154D73</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2C0D0D42</checksum>
+      <checksum>DBCE84A1</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>40C8F742</checksum>
+      <checksum>CC00F95D</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B86493A7</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4D34308E</checksum>
+    </file>
+    <file>
+      <filename>data/schedules_affected.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4906D996</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC254DA4</checksum>
     </file>
     <file>
       <version>
@@ -550,43 +562,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CAE88C76</checksum>
+      <checksum>13AF590E</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
+      <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3AAFE783</checksum>
+      <checksum>FFBB3291</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9D945231</checksum>
+      <checksum>C0D69FC2</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
+      <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0B7CF76F</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AA485065</checksum>
-    </file>
-    <file>
-      <filename>data/schedules_affected.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>929637A5</checksum>
+      <checksum>4660A2F0</checksum>
     </file>
     <file>
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1FBEAA38</checksum>
+      <checksum>EFC91E56</checksum>
     </file>
   </files>
 </measure>

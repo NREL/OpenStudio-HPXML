@@ -7,7 +7,7 @@ lighting_exterior_holiday,true,true
 cooking_range,true,true
 refrigerator,false,true
 extra_refrigerator,false,true
-freezer,true,true
+freezer,false,true
 dishwasher,true,true
 clothes_washer,true,true
 clothes_dryer,true,true
@@ -26,7 +26,6 @@ hot_tub_heater,false,true
 hot_water_dishwasher,true,true
 hot_water_clothes_washer,true,true
 hot_water_fixtures,true,true
-sleeping,false,false
 heating_setpoint,false,false
 cooling_setpoint,false,false
 water_heater_setpoint,false,false

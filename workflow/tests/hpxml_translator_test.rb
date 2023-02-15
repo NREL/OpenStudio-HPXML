@@ -1020,13 +1020,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # HVAC Load Fractions
-    if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix') && (not hpxml_path.include? 'power-outage-year-round')
+    if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
       htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
       assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
-    elsif hpxml_path.include? 'power-outage-year-round'
-      htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-      assert_operator(hpxml.total_fraction_heat_load_served, :>, 0)
-      assert_equal(0, htg_energy)
     end
     clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
     assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
@@ -1096,7 +1092,7 @@ class HPXMLTest < MiniTest::Test
 
     # Lighting
     ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
-    if not (hpxml_path.include?('year-round') || hpxml_path.include?('residents-0'))
+    if not (hpxml_path.include?('vacancy-year-round') || hpxml_path.include?('residents-0'))
       assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
     else
       assert_operator(hpxml.lighting_groups.size, :>, 0)
@@ -1156,10 +1152,8 @@ class HPXMLTest < MiniTest::Test
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
       if htg_fuels.include? fuel
-        if (not hpxml_path.include? 'autosize') && (not is_warm_climate) && (not hpxml_path.include? 'power-outage-year-round')
+        if (not hpxml_path.include? 'autosize') && (not is_warm_climate)
           assert_operator(energy_htg, :>, 0)
-        elsif hpxml_path.include? 'power-outage-year-round'
-          assert_equal(0, energy_htg)
         end
       else
         assert_equal(0, energy_htg)

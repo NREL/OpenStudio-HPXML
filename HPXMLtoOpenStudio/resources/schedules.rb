@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Annual constant schedule
-class ScheduleRulesetConstant
-  def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, off_periods: nil)
+class ScheduleConstant
+  def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, off_periods: [])
     @model = model
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
@@ -21,16 +21,28 @@ class ScheduleRulesetConstant
   private
 
   def create_schedule()
-    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
-    schedule.setName(@sch_name)
+    if @off_periods.empty?
+      if @val == 1.0
+        schedule = @model.alwaysOnDiscreteSchedule
+      elsif @val == 0.0
+        schedule = @model.alwaysOffDiscreteSchedule
+      else
+        schedule = OpenStudio::Model::ScheduleConstant.new(@model)
+        schedule.setName(@sch_name)
+        schedule.setValue(@val)
+      end
+    else
+      schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
+      schedule.setName(@sch_name)
 
-    default_day_sch = schedule.defaultDaySchedule
-    default_day_sch.clearValues
-    default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), @val)
+      default_day_sch = schedule.defaultDaySchedule
+      default_day_sch.clearValues
+      default_day_sch.addValue(OpenStudio::Time.new(0, 24, 0, 0), @val)
 
-    Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
+      Schedule.set_off_periods(schedule, @sch_name, @off_periods, @year)
 
-    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+      Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+    end
 
     return schedule
   end
@@ -775,6 +787,13 @@ class Schedule
     rule.setApplySunday(true)
   end
 
+  def self.get_off_periods(col_name, vacancy_periods: [], power_outage_periods: [])
+    off_periods = []
+    off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
+    off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+    return off_periods
+  end
+
   def self.set_off_periods(schedule, sch_name, off_periods, year)
     return if off_periods.nil?
 
@@ -785,9 +804,9 @@ class Schedule
       # Temperature of tank < 2C indicates of possibility of freeze.
       value = 2.0 if sch_name.include?('WH Setpoint Temp') || sch_name.include?("#{Constants.ObjectNameWaterHeater} Setpoint")
 
-      next if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent.nil?
+      next if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent_availability.nil?
 
-      value = 1.0 if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent
+      value = 1.0 if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent_availability
 
       day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
       day_e = Schedule.get_day_num_from_month_day(year, op.end_month, op.end_day)
@@ -871,7 +890,7 @@ class Schedule
   end
 
   def self.set_outage_values(out, day_schedule, begin_hour, end_hour, value)
-    (0..23).each do |h|
+    for h in 0..23
       time = OpenStudio::Time.new(0, h + 1, 0, 0)
       if (h < begin_hour) || (h >= end_hour)
         out.addValue(time, day_schedule.getValue(time))
@@ -1301,7 +1320,7 @@ class Schedule
       end
     end
 
-    return "Could not find #{col_name} in schedules_affected.csv"
+    fail "Could not find #{col_name} in schedules_affected.csv"
   end
 
   def self.affected_by_outage(col_name, schedules_affected = nil)

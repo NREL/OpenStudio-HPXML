@@ -207,9 +207,9 @@ class HPXMLDefaults
     end
 
     hpxml.header.vacancy_periods.each do |vacancy_period|
-      if vacancy_period.natvent.nil?
-        vacancy_period.natvent = false
-        vacancy_period.natvent_isdefaulted = true
+      if vacancy_period.natvent_availability.nil?
+        vacancy_period.natvent_availability = false
+        vacancy_period.natvent_availability_isdefaulted = true
       end
     end
   end
