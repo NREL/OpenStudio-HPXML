@@ -960,7 +960,11 @@ class Waterheater
     ueschedoverride_actuator.setName("#{obj_name_hpwh} UESchedOverride")
 
     # Actuator for setpoint schedule
-    hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleYearValue)
+    if control_setpoint_schedule.to_ScheduleConstant.is_initialized
+      hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleConstantValue)
+    elsif control_setpoint_schedule.to_ScheduleRuleset.is_initialized
+      hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleYearValue)
+    end
     hpwhschedoverride_actuator.setName("#{obj_name_hpwh} HPWHSchedOverride")
 
     # EMS for the HPWH control logic

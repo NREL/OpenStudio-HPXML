@@ -584,6 +584,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     end_month = 6
     end_day = 30
     end_hour = nil
+    natvent_availability = HPXML::ScheduleRegular
 
     sch_name = "#{Constants.ObjectNameNaturalVentilation} avail schedule"
 
@@ -591,7 +592,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
     Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
@@ -603,12 +604,13 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 0)
 
     # not available
+    natvent_availability = HPXML::ScheduleUnavailable
+
     model, hpxml = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-    power_outage_periods[-1].natvent_availability = false
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
     Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
@@ -620,12 +622,13 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     _test_day_schedule(schedule, begin_month, begin_day + 1, year, 0, 24, 0)
 
     # available
+    natvent_availability = HPXML::ScheduleAvailable
+
     model, hpxml = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-    power_outage_periods[-1].natvent_availability = true
+    power_outage_periods = _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
     Schedule.set_off_periods(schedule, sch_name, power_outage_periods, year)
@@ -678,13 +681,14 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     return hpxml.header.vacancy_periods
   end
 
-  def _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+  def _add_power_outage_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
     hpxml.header.power_outage_periods.add(begin_month: begin_month,
                                           begin_day: begin_day,
                                           begin_hour: begin_hour,
                                           end_month: end_month,
                                           end_day: end_day,
-                                          end_hour: end_hour)
+                                          end_hour: end_hour,
+                                          natvent_availability: natvent_availability)
     return hpxml.header.power_outage_periods
   end
 

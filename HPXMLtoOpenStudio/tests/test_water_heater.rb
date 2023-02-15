@@ -37,9 +37,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(0.64, wh.offCycleLossFractiontoThermalZone)
   end
@@ -71,9 +69,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
       assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
       assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-      assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-      assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-      assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+      assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
       assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
       assert_equal(0.64, wh.offCycleLossFractiontoThermalZone)
     end
@@ -105,9 +101,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(0.64, wh.offCycleLossFractiontoThermalZone)
   end
@@ -138,9 +132,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(0.64, wh.offCycleLossFractiontoThermalZone)
   end
@@ -171,9 +163,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(0.64, wh.offCycleLossFractiontoThermalZone)
   end
@@ -204,9 +194,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -237,9 +225,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -270,9 +256,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -303,9 +287,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -336,9 +318,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -368,9 +348,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
@@ -400,9 +378,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -440,9 +416,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -480,9 +454,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -531,9 +503,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -606,9 +576,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -681,9 +649,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -756,9 +722,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -829,9 +793,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
@@ -890,9 +852,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -920,9 +880,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
     tank_attached_to_boiler = false
@@ -959,9 +917,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
 
     tank_attached_to_boiler = false
@@ -1070,9 +1026,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
@@ -1103,9 +1057,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
@@ -1135,9 +1087,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
     assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
@@ -1205,9 +1155,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cap, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(cap, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert_equal(wh.heater1SetpointTemperatureSchedule.to_ScheduleRuleset.get.scheduleRules.size, 0)
-    assert_equal(wh.heater1SetpointTemperatureSchedule.to_ScheduleRuleset.get.defaultDaySchedule.values.size, 1)
-    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleRuleset.get.defaultDaySchedule.values[0], 0.001)
+    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
   end
 
