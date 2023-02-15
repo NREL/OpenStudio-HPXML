@@ -238,6 +238,8 @@ class HPXML < Object
   MechVentTypeSupply = 'supply only'
   OccupancyCalculationTypeAsset = 'asset'
   OccupancyCalculationTypeOperational = 'operational'
+  OffPeriodVacancy = 'vacancy'
+  OffPeriodPowerOutage = 'power outage'
   OrientationEast = 'east'
   OrientationNorth = 'north'
   OrientationNortheast = 'northeast'
@@ -274,6 +276,9 @@ class HPXML < Object
   RoofTypePlasticRubber = 'plastic/rubber/synthetic sheeting'
   RoofTypeShingles = 'shingles'
   RoofTypeWoodShingles = 'wood shingles or shakes'
+  ScheduleRegular = 'regular schedule'
+  ScheduleAvailable = 'always available'
+  ScheduleUnavailable = 'always unavailable'
   ShieldingExposed = 'exposed'
   ShieldingNormal = 'normal'
   ShieldingWellShielded = 'well-shielded'
@@ -1357,7 +1362,7 @@ class HPXML < Object
   end
 
   class VacancyPeriod < BaseElement
-    ATTRS = [:begin_month, :begin_day, :begin_hour, :end_month, :end_day, :end_hour, :natvent_availability]
+    ATTRS = [:begin_month, :begin_day, :begin_hour, :end_month, :end_day, :end_hour]
     attr_accessor(*ATTRS)
 
     def delete
@@ -1379,7 +1384,6 @@ class HPXML < Object
       XMLHelper.add_element(vacancy_period, 'EndMonth', @end_month, :integer, @end_month_isdefaulted) unless @end_month.nil?
       XMLHelper.add_element(vacancy_period, 'EndDayOfMonth', @end_day, :integer, @end_day_isdefaulted) unless @end_day.nil?
       XMLHelper.add_element(vacancy_period, 'EndHourOfDay', @end_hour, :integer, @end_hour_isdefaulted) unless @end_hour.nil?
-      XMLHelper.add_element(vacancy_period, 'NaturalVentilationAvailability', @natvent_availability, :boolean, @natvent_availability_isdefaulted) unless @natvent_availability.nil?
     end
 
     def from_oga(vacancy_period)
@@ -1391,7 +1395,6 @@ class HPXML < Object
       @end_month = XMLHelper.get_value(vacancy_period, 'EndMonth', :integer)
       @end_day = XMLHelper.get_value(vacancy_period, 'EndDayOfMonth', :integer)
       @end_hour = XMLHelper.get_value(vacancy_period, 'EndHourOfDay', :integer)
-      @natvent_availability = XMLHelper.get_value(vacancy_period, 'NaturalVentilationAvailability', :boolean)
     end
   end
 
@@ -1432,7 +1435,7 @@ class HPXML < Object
       XMLHelper.add_element(power_outage_period, 'EndMonth', @end_month, :integer, @end_month_isdefaulted) unless @end_month.nil?
       XMLHelper.add_element(power_outage_period, 'EndDayOfMonth', @end_day, :integer, @end_day_isdefaulted) unless @end_day.nil?
       XMLHelper.add_element(power_outage_period, 'EndHourOfDay', @end_hour, :integer, @end_hour_isdefaulted) unless @end_hour.nil?
-      XMLHelper.add_element(power_outage_period, 'NaturalVentilationAvailability', @natvent_availability, :boolean, @natvent_availability_isdefaulted) unless @natvent_availability.nil?
+      XMLHelper.add_element(power_outage_period, 'NaturalVentilation', @natvent_availability, :string, @natvent_availability_isdefaulted) unless @natvent_availability.nil?
     end
 
     def from_oga(power_outage_period)
@@ -1444,7 +1447,7 @@ class HPXML < Object
       @end_month = XMLHelper.get_value(power_outage_period, 'EndMonth', :integer)
       @end_day = XMLHelper.get_value(power_outage_period, 'EndDayOfMonth', :integer)
       @end_hour = XMLHelper.get_value(power_outage_period, 'EndHourOfDay', :integer)
-      @natvent_availability = XMLHelper.get_value(power_outage_period, 'NaturalVentilationAvailability', :boolean)
+      @natvent_availability = XMLHelper.get_value(power_outage_period, 'NaturalVentilation', :string)
     end
   end
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>e2b459e5-d477-4d85-befa-7e2e35e8965b</version_id>
-  <version_modified>20230215T190721Z</version_modified>
+  <version_id>50022d67-7402-45de-a523-895201c78cee</version_id>
+  <version_modified>20230215T195926Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -80,18 +80,22 @@
     <argument>
       <name>schedules_power_outage_window_natvent_availability</name>
       <display_name>Schedules: Power Outage Period Window Natural Ventilation Availability</display_name>
-      <description>Whether natural ventilation is available during the outage period (i.e., always available or always unavailable).</description>
-      <type>Boolean</type>
+      <description>The availability of the natural ventilation schedule during the outage period.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>regular schedule</value>
+          <display_name>regular schedule</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>always available</value>
+          <display_name>always available</display_name>
+        </choice>
+        <choice>
+          <value>always unavailable</value>
+          <display_name>always unavailable</display_name>
         </choice>
       </choices>
     </argument>
@@ -6564,7 +6568,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B830712A</checksum>
+      <checksum>D9789FC1</checksum>
     </file>
   </files>
 </measure>

@@ -799,14 +799,33 @@ class Schedule
 
     # Add off rule(s), will override previous rules
     off_periods.each_with_index do |op, i|
+      # Default Value
       value = 0.0
 
+      # Special Values
+      # Water heater setpoint
       # Temperature of tank < 2C indicates of possibility of freeze.
       value = 2.0 if sch_name.include?('WH Setpoint Temp') || sch_name.include?("#{Constants.ObjectNameWaterHeater} Setpoint")
 
-      next if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent_availability.nil?
+      # Natural ventilation availability
+      off_period_type = nil
+      off_period_type = HPXML::OffPeriodVacancy if op.is_a?(HPXML::VacancyPeriod)
+      off_period_type = HPXML::OffPeriodPowerOutage if op.is_a?(HPXML::PowerOutagePeriod)
+      fail 'Unsupported off period type.' if off_period_type.nil?
 
-      value = 1.0 if sch_name.include?(Constants.ObjectNameNaturalVentilation) && op.natvent_availability
+      if sch_name.include?(Constants.ObjectNameNaturalVentilation)
+        if off_period_type == HPXML::OffPeriodVacancy
+          value = 0.0
+        elsif off_period_type == HPXML::OffPeriodPowerOutage
+          if op.natvent_availability == HPXML::ScheduleRegular
+            next # don't change the natural ventilation availability schedule
+          elsif op.natvent_availability == HPXML::ScheduleAvailable
+            value = 1.0
+          elsif op.natvent_availability == HPXML::ScheduleUnavailable
+            value = 0.0
+          end
+        end
+      end
 
       day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
       day_e = Schedule.get_day_num_from_month_day(year, op.end_month, op.end_day)
@@ -1656,7 +1675,7 @@ class SchedulesFile
     end
 
     periods.each do |period|
-      start_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
+      begin_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
       end_day_num = Schedule.get_day_num_from_month_day(@year, period.end_month, period.end_day)
 
       begin_hour = 0
@@ -1671,11 +1690,11 @@ class SchedulesFile
         end_day_num = num_days_in_year if end_day_num == 0
       end
 
-      if end_day_num >= start_day_num
-        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour), (end_day_num - start_day_num + 1) * steps_in_day - ((24 - end_hour + begin_hour) * steps_in_hour)) # Fill between start/end days
+      if end_day_num >= begin_day_num
+        @tmp_schedules[col_name].fill(1.0, (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour), (end_day_num - begin_day_num + 1) * steps_in_day - ((24 - end_hour + begin_hour) * steps_in_hour)) # Fill between begin/end days
       else # Wrap around year
-        @tmp_schedules[col_name].fill(1.0, (start_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour)) # Fill between start day and end of year
-        @tmp_schedules[col_name].fill(1.0, 0, (end_day_num - 1) * steps_in_day + (end_hour * steps_in_hour)) # Fill between start of year and end day
+        @tmp_schedules[col_name].fill(1.0, (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour)) # Fill between begin day and end of year
+        @tmp_schedules[col_name].fill(1.0, 0, (end_day_num - 1) * steps_in_day + (end_hour * steps_in_hour)) # Fill between begin of year and end day
       end
     end
   end

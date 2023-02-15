@@ -206,10 +206,10 @@ class HPXMLDefaults
       hpxml.header.natvent_days_per_week_isdefaulted = true
     end
 
-    hpxml.header.vacancy_periods.each do |vacancy_period|
-      if vacancy_period.natvent_availability.nil?
-        vacancy_period.natvent_availability = false
-        vacancy_period.natvent_availability_isdefaulted = true
+    hpxml.header.power_outage_periods.each do |power_outage_period|
+      if power_outage_period.natvent_availability.nil?
+        power_outage_period.natvent_availability = HPXML::ScheduleRegular
+        power_outage_period.natvent_availability_isdefaulted = true
       end
     end
   end

@@ -428,6 +428,7 @@ HPXML Vacancy Periods
 
 One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
 If not entered, occupant vacancies will not be modeled.
+Natural ventilation is always unavailable during a vacancy period.
 
   ====================================  ========  =======  =============  ========  ========  ===========
   Element                               Type      Units    Constraints    Required  Default   Description
@@ -438,7 +439,6 @@ If not entered, occupant vacancies will not be modeled.
   ``EndMonth``                          integer            1 - 12         Yes                 End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
   ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
-  ``NaturalVentilationAvailability``    boolean                           No                  Natural ventilation is always, or never, available during vacancy period
   ====================================  ========  =======  =============  ========  ========  ===========
 
   .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
@@ -464,10 +464,12 @@ If not entered, power outages will not be modeled.
   ``EndMonth``                          integer            1 - 12         Yes                 End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
   ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
-  ``NaturalVentilationAvailability``    boolean                           No                  Natural ventilation is always, or never, available during power outage period
+  ``NaturalVentilation``                string             See [#]_       No        See [#]_  The availability of the natural ventilation schedule during the power outage period
   ====================================  ========  =======  =============  ========  ========  ===========
 
   .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
+  .. [#} NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
+  .. [#] If NaturalVentilation not provided, defaults to "regular schedule".
 
 See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
 
