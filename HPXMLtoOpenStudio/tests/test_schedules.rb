@@ -36,7 +36,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 7
+    schedule_constants = 11
     schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0
@@ -108,7 +108,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    schedule_constants = 7
+    schedule_constants = 11
     schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0

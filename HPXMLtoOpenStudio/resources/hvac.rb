@@ -740,7 +740,7 @@ class HVAC
     control_zone.setZoneControlHumidistat(humidistat)
 
     # Availability Schedule
-    avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, power_outage_periods: power_outage_periods)
+    avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: power_outage_periods)
     avail_sch = avail_sch.schedule
 
     # Dehumidifier
