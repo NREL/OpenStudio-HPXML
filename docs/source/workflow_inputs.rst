@@ -468,7 +468,7 @@ If not entered, power outages will not be modeled.
   ====================================  ========  =======  =============  ========  ========  ===========
 
   .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
-  .. [#} NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
+  .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
   .. [#] If NaturalVentilation not provided, defaults to "regular schedule".
 
 See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
