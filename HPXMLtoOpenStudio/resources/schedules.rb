@@ -22,9 +22,9 @@ class ScheduleConstant
 
   def create_schedule()
     if @off_periods.empty?
-      if @val == 1.0
+      if @val == 1.0 && (@schedule_type_limits_name.nil? || @schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
         schedule = @model.alwaysOnDiscreteSchedule
-      elsif @val == 0.0
+      elsif @val == 0.0 && (@schedule_type_limits_name.nil? || @schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
         schedule = @model.alwaysOffDiscreteSchedule
       else
         schedule = OpenStudio::Model::ScheduleConstant.new(@model)

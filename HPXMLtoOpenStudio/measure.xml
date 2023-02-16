@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>bae89530-1990-42b1-aaa6-9e79b8014aa9</version_id>
-  <version_modified>20230216T185212Z</version_modified>
+  <version_id>d8eabf06-6776-4a20-a2c8-31d1b55dec82</version_id>
+  <version_modified>20230216T190555Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -518,12 +518,6 @@
       <checksum>C4E9278D</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0E6305CD</checksum>
-    </file>
-    <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -534,12 +528,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>DBCE84A1</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FFBB3291</checksum>
     </file>
     <file>
       <version>
@@ -581,6 +569,18 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>4906D996</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>19F0319D</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>668AC58B</checksum>
     </file>
   </files>
 </measure>
