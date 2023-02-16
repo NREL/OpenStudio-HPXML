@@ -1692,7 +1692,7 @@ class HPXMLDefaults
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump)
         schedules_file_includes_water_heater_operating_mode = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnWaterHeaterOperatingMode))
         if water_heating_system.operating_mode.nil? && !schedules_file_includes_water_heater_operating_mode
-          water_heating_system.operating_mode = HPXML::WaterHeaterOperatingModeStandard
+          water_heating_system.operating_mode = HPXML::WaterHeaterOperatingModeHybridAuto
           water_heating_system.operating_mode_isdefaulted = true
         end
       end
