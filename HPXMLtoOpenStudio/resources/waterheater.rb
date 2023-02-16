@@ -90,8 +90,14 @@ class Waterheater
         Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
 
         # Actuated schedule
-        control_setpoint_schedule = ScheduleConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
-        control_setpoint_schedule = control_setpoint_schedule.schedule
+        if power_outage_periods.empty?
+          # need to avoid Always Off Discrete "because it has an incompatible ScheduleTypeLimits"
+          control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+          control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
+        else
+          control_setpoint_schedule = ScheduleConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
+          control_setpoint_schedule = control_setpoint_schedule.schedule
+        end
       end
     end
     if setpoint_schedule.nil?
@@ -1089,8 +1095,7 @@ class Waterheater
                                      model: model,
                                      runner: runner,
                                      ua: assumed_ua,
-                                     is_dsh_storage: true,
-                                     power_outage_periods: [])
+                                     is_dsh_storage: true)
 
     loop.addSupplyBranchForComponent(storage_tank)
     tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
@@ -1606,7 +1611,7 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, runner:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, power_outage_periods: nil)
+  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, runner:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, power_outage_periods: [])
     # storage tank doesn't require water_heating_system class argument being passed
     if is_dsh_storage || is_combi
       fuel = nil

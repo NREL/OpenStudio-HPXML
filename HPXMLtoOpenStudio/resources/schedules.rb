@@ -30,6 +30,8 @@ class ScheduleConstant
         schedule = OpenStudio::Model::ScheduleConstant.new(@model)
         schedule.setName(@sch_name)
         schedule.setValue(@val)
+
+        Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
       end
     else
       schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
