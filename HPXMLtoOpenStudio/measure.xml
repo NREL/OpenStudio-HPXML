@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f132fef2-bc02-4b5f-aedd-bb879ea05e21</version_id>
-  <version_modified>20230208T193033Z</version_modified>
+  <version_id>62707efd-6569-44cf-9029-b87f98749b1b</version_id>
+  <version_modified>20230216T235231Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
