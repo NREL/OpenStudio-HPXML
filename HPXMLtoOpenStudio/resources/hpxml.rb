@@ -75,6 +75,7 @@ class HPXML < Object
   AtticTypeUnvented = 'UnventedAttic'
   AtticTypeVented = 'VentedAttic'
   AtticWallTypeGable = 'gable'
+  AtticWallTypeKneeWall = 'knee wall'
   BatteryTypeLithiumIon = 'Li-ion'
   BatteryLifetimeModelNone = 'None'
   BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
