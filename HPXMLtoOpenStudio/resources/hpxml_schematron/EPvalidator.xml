@@ -1222,7 +1222,7 @@
       <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
       <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) &gt; 1'>Timestep should be 1; simulation will continue without deadband control.</sch:report>
       <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
-      <sch:report role='WARN' test='count(../h:HVACPlant/*/h:CompressorType[text()="two stage" or text()="variable speed"]) &gt; 0'>Expected single speed DX systems to be modeled; simulation will continue without deadband control.</sch:report>
+      <sch:report role='WARN' test='count(../h:HVACPlant/*/h:CompressorType[text()="variable speed"]) &gt; 0'>Expected single-speed or two-speed DX systems to be modeled; simulation will continue without deadband control.</sch:report>
     </sch:rule>
   </sch:pattern>
 
