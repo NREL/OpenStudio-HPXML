@@ -438,10 +438,8 @@ Natural ventilation is always unavailable during a vacancy period.
   ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
   ``EndMonth``                          integer            1 - 12         Yes                 End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
-  ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
+  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
   ====================================  ========  =======  =============  ========  ========  ===========
-
-  .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
 
 See the "Affected By Vacancy" column in the table below to understand which components are affected by vacancy periods.
 
@@ -463,11 +461,10 @@ If not entered, power outages will not be modeled.
   ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
   ``EndMonth``                          integer            1 - 12         Yes                 End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
-  ``EndHourOfDay``                      integer            0 - 23         No        See [#]_  End hour
+  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
   ``NaturalVentilation``                string             See [#]_       No        See [#]_  The availability of the natural ventilation schedule during the power outage period
   ====================================  ========  =======  =============  ========  ========  ===========
 
-  .. [#] If EndHourOfDay not provided, defaults to the remainder of the day (i.e., until 12am of the following day).
   .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
   .. [#] If NaturalVentilation not provided, defaults to "regular schedule".
 
