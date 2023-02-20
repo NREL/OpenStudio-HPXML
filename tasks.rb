@@ -432,7 +432,7 @@ def create_hpxmls
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
-    'base-schedules-detailed-occupancy-stochastic-10-mins-peak-shift.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-10-mins-peak-shift.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-setbacks.xml' => 'base.xml',

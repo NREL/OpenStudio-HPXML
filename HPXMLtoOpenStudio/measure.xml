@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3557b967-9364-42b0-bd9e-1f11f29222a3</version_id>
-  <version_modified>20230220T203754Z</version_modified>
+  <version_id>13950f3c-1830-402f-bded-ecc642dfc069</version_id>
+  <version_modified>20230220T233303Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -577,16 +577,16 @@
       <checksum>0BE6113D</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-10-mins-peak-shift.csv</filename>
+      <filename>schedule_files/occupancy-stochastic-peak-shift.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>4767B6F0</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-peak-shift.csv</filename>
+      <filename>schedule_files/occupancy-stochastic-10-mins-peak-shift.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4767B6F0</checksum>
+      <checksum>D7AB4B86</checksum>
     </file>
   </files>
 </measure>

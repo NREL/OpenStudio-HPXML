@@ -73,7 +73,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                SchedulesFile::ColumnClothesDryer,
                SchedulesFile::ColumnHotWaterFixtures]
 
-    @args_hash['schedules_type'] = 'stochastic'
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     @args_hash['schedules_column_names'] = columns.join(', ')
     model, hpxml, result = _test_measure()
@@ -97,7 +96,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    @args_hash['schedules_type'] = 'stochastic'
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     @args_hash['schedules_column_names'] = "foobar, #{SchedulesFile::ColumnCookingRange}, foobar2"
     _model, _hpxml, result = _test_measure(expect_fail: true)
@@ -277,6 +275,132 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('Number of occupants set to zero; skipping generation of stochastic schedules.') })
     assert(!File.exist?(@args_hash['output_csv_path']))
     assert_empty(hpxml.header.schedules_filepaths)
+  end
+
+  def test_peak_period_shift
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod') })
+
+    sf = SchedulesFile.new(model: model,
+                           schedules_paths: hpxml.header.schedules_filepaths,
+                           year: 2007)
+
+    assert_in_epsilon(213, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
+
+    @args_hash['schedules_peak_period'] = '10 - 13'
+    @args_hash['schedules_peak_period_delay'] = 1
+    @args_hash['schedules_peak_period_dishwasher'] = true
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
+    # assert(info_msgs.any? { |info_msg| info_msg.include?("'#{SchedulesFile::ColumnDishwasher}' schedules were not shifted") })
+
+    sf2 = SchedulesFile.new(model: model,
+                            schedules_paths: hpxml.header.schedules_filepaths,
+                            year: 2007)
+
+    assert_in_epsilon(213, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf2.tmp_schedules), 0.1)
+
+    # weekday
+    old_day = sf.schedules[SchedulesFile::ColumnDishwasher][0..23]
+    new_day = sf2.schedules[SchedulesFile::ColumnDishwasher][0..23]
+
+    assert(old_day != new_day)
+
+    # peak period is zeroed out
+    assert_equal([0.0] * 3, new_day[10..12])
+
+    # old peak is shifted
+    assert_equal(old_day[10..12], new_day[(10 + 3 + 1)..(12 + 3 + 1)])
+
+    # weekend
+    # wked = 5
+    # old_day = sf.schedules[SchedulesFile::ColumnDishwasher][(0 + 24 * wked)..(23 + 24 * wked)]
+    # new_day = sf2.schedules[SchedulesFile::ColumnDishwasher][(0 + 24 * wked)..(23 + 24 * wked)]
+
+    # assert(old_day == new_day)
+  end
+
+  def test_peak_period_shift_10_min_timestep
+    hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=10') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod') })
+
+    sf = SchedulesFile.new(model: model,
+                           schedules_paths: hpxml.header.schedules_filepaths,
+                           year: 2007)
+
+    assert_in_epsilon(213, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
+
+    @args_hash['schedules_peak_period'] = '10 - 13'
+    @args_hash['schedules_peak_period_delay'] = 1
+    @args_hash['schedules_peak_period_dishwasher'] = true
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=10') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("'#{SchedulesFile::ColumnDishwasher}' schedules were not shifted") })
+
+    sf2 = SchedulesFile.new(model: model,
+                            schedules_paths: hpxml.header.schedules_filepaths,
+                            year: 2007)
+
+    assert_in_epsilon(213, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf2.tmp_schedules), 0.1)
+
+    # weekday
+    old_day = sf.schedules[SchedulesFile::ColumnDishwasher][0..(24 * 6 - 1)]
+    new_day = sf2.schedules[SchedulesFile::ColumnDishwasher][0..(24 * 6 - 1)]
+
+    assert(old_day != new_day)
+
+    # peak period is zeroed out
+    assert_equal([0.0] * 3 * 6, new_day[(10 * 6)..(12 * 6 + 5)])
+
+    # old period is shifted
+    assert_equal(old_day[(10 * 6)..(12 * 6 + 5)], new_day[((10 + 3 + 1) * 6)..((12 + 3 + 1) * 6 + 5)])
+
+    # weekend
+    # wked = 5
+    # old_day = sf.schedules[SchedulesFile::ColumnDishwasher][(0 + 24 * 6 * wked)..((24 * 6 - 1) + (24 * 6 * wked))]
+    # new_day = sf2.schedules[SchedulesFile::ColumnDishwasher][(0 + 24 * 6 * wked)..((24 * 6 - 1) + (24 * 6 * wked))]
+
+    # assert(old_day == new_day)
   end
 
   def _test_measure(expect_fail: false)

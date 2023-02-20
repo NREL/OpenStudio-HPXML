@@ -99,14 +99,18 @@ class ScheduleGenerator
 
     begin_hour, end_hour = Schedule.parse_time_range(args[:peak_period])
 
-    all_shifted = true
+    all_shifted = { SchedulesFile::ColumnDishwasher => true }
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       day_of_week = today.wday
       next if [0, 6].include?(day_of_week)
 
       shifted = peak_shift(SchedulesFile::ColumnDishwasher, day, begin_hour, end_hour, args[:peak_period_delay]) if args[:peak_period_dishwasher]
-      all_shifted = false if !shifted
+      all_shifted[SchedulesFile::ColumnDishwasher] = false if !shifted
+    end
+
+    all_shifted.each do |col_name, shifted|
+      @runner.registerInfo("To prevent stacking, some '#{col_name}' schedules were not shifted.") if !shifted
     end
 
     return true
@@ -121,7 +125,7 @@ class ScheduleGenerator
     peak_end_ix = peak_begin_ix + period
 
     # new period
-    new_begin_ix = peak_end_ix + delay
+    new_begin_ix = peak_end_ix + (delay * steps_in_hour)
     new_end_ix = new_begin_ix + period
 
     return if @schedules[col_name][new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
