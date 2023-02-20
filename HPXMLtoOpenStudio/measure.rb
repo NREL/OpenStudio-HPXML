@@ -343,8 +343,10 @@ class OSModel
     if occ_calc_type == HPXML::OccupancyCalculationTypeOperational && noccs == 0
       @hpxml.header.vacancy_periods.add(begin_month: @hpxml.header.sim_begin_month,
                                         begin_day: @hpxml.header.sim_begin_day,
+                                        begin_hour: 0,
                                         end_month: @hpxml.header.sim_end_month,
-                                        end_day: @hpxml.header.sim_end_day)
+                                        end_day: @hpxml.header.sim_end_day,
+                                        end_hour: 24)
     end
   end
 
