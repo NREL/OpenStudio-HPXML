@@ -17,6 +17,7 @@ class ScheduleGenerator
                  total_days_in_year:,
                  sim_year:,
                  sim_start_day:,
+                 peak_period: nil,
                  debug:,
                  **)
     @runner = runner
@@ -31,6 +32,7 @@ class ScheduleGenerator
     @total_days_in_year = total_days_in_year
     @sim_year = sim_year
     @sim_start_day = sim_start_day
+    @peak_period = peak_period
     @debug = debug
   end
 
@@ -86,7 +88,46 @@ class ScheduleGenerator
     success = create_stochastic_schedules(args: args)
     return false if not success
 
+    success = shift_stochastic_schedules(args: args)
+    return false if not success
+
     return true
+  end
+
+  def shift_stochastic_schedules(args:)
+    return true if !args[:peak_period_dishwasher]
+
+    begin_hour, end_hour = Schedule.parse_time_range(args[:peak_period])
+
+    all_shifted = true
+    @total_days_in_year.times do |day|
+      today = @sim_start_day + day
+      day_of_week = today.wday
+      next if [0, 6].include?(day_of_week)
+
+      shifted = peak_shift(SchedulesFile::ColumnDishwasher, day, begin_hour, end_hour, args[:peak_period_delay]) if args[:peak_period_dishwasher]
+      all_shifted = false if !shifted
+    end
+
+    return true
+  end
+
+  def peak_shift(col_name, day, begin_hour, end_hour, delay)
+    steps_in_hour = @steps_in_day / 24
+    period = (end_hour - begin_hour) * steps_in_hour # n steps
+
+    # peak period
+    peak_begin_ix = day * @steps_in_day + (begin_hour * steps_in_hour)
+    peak_end_ix = peak_begin_ix + period
+
+    # new period
+    new_begin_ix = peak_end_ix + delay
+    new_end_ix = new_begin_ix + period
+
+    return if @schedules[col_name][new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
+
+    @schedules[col_name][new_begin_ix...new_end_ix] = @schedules[col_name][peak_begin_ix...peak_end_ix]
+    @schedules[col_name][peak_begin_ix...peak_end_ix] = [0.0] * period
   end
 
   def create_stochastic_schedules(args:)

@@ -52,6 +52,25 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription("This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_peak_period', false)
+    arg.setDisplayName('Schedules: Peak Period')
+    arg.setDescription('Specifies the peak period. Enter a time like "15 - 18" (start hour can be 0 through 23 and end hour can be 1 through 24).')
+    arg.setDefaultValue('15 - 18')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_peak_period_delay', false)
+    arg.setDisplayName('Schedules: Peak Period Delay')
+    arg.setUnits('hr')
+    arg.setDescription('The number of hours after peak period end.')
+    arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('schedules_peak_period_dishwasher', false)
+    arg.setDisplayName('Schedules: Peak Period Dishwasher')
+    arg.setDescription('Whether to shift the dishwasher schedule during the peak period.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Schedules: Output CSV Path')
     arg.setDescription('Absolute/relative path of the CSV file containing occupancy schedules. Relative paths are relative to the HPXML output path.')
@@ -192,6 +211,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
     end
     args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
+
+    args[:peak_period] = args[:schedules_peak_period].get if args[:schedules_peak_period].is_initialized
+    args[:peak_period_delay] = args[:schedules_peak_period_delay].get if args[:schedules_peak_period_delay].is_initialized
+    args[:peak_period_dishwasher] = args[:schedules_peak_period_dishwasher].get if args[:schedules_peak_period_dishwasher].is_initialized
 
     debug = false
     if args[:debug].is_initialized

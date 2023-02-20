@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>2e7e9dee-6b6d-423e-a2a2-082bb3c606dc</version_id>
-  <version_modified>20230110T190141Z</version_modified>
+  <version_id>70ac24aa-e4f1-43a1-b4e7-c63c1131973d</version_id>
+  <version_modified>20230220T204355Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -35,6 +35,44 @@
       <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_peak_period</name>
+      <display_name>Schedules: Peak Period</display_name>
+      <description>Specifies the peak period. Enter a time like "15 - 18" (start hour can be 0 through 23 and end hour can be 1 through 24).</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>15 - 18</default_value>
+    </argument>
+    <argument>
+      <name>schedules_peak_period_delay</name>
+      <display_name>Schedules: Peak Period Delay</display_name>
+      <description>The number of hours after peak period end.</description>
+      <type>Integer</type>
+      <units>hr</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>schedules_peak_period_dishwasher</name>
+      <display_name>Schedules: Peak Period Dishwasher</display_name>
+      <description>Whether to shift the dishwasher schedule during the peak period.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>output_csv_path</name>
@@ -878,12 +916,6 @@
       <checksum>580F9B46</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DAE98658</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -892,7 +924,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>94C38C85</checksum>
+      <checksum>33AF16C2</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>22CC682D</checksum>
     </file>
   </files>
 </measure>
