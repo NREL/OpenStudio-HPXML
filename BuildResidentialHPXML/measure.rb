@@ -68,12 +68,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
     arg.setDisplayName('Schedules: Vacancy Period')
-    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (hours can be 0 through 23).')
+    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_period', false)
     arg.setDisplayName('Schedules: Power Outage Period')
-    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (hours can be 0 through 23).')
+    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
     args << arg
 
     natvent_availability_choices = OpenStudio::StringVector.new
@@ -85,9 +85,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Schedules: Power Outage Period Window Natural Ventilation Availability')
     arg.setDescription('The availability of the natural ventilation schedule during the outage period.')
     args << arg
-
-    # FIXME
-    # update epvalidator.xml for these values
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
