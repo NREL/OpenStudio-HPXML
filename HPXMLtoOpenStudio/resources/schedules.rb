@@ -1104,6 +1104,18 @@ class Schedule
     return s
   end
 
+  def self.parse_time_range(time_range)
+    begin_end_times = time_range.split('-').map { |v| v.strip }
+    if begin_end_times.size != 2
+      fail "Invalid time format specified for '#{time_range}'."
+    end
+
+    begin_hour = begin_end_times[0].strip.to_i
+    end_hour = begin_end_times[1].strip.to_i
+
+    return begin_hour, end_hour
+  end
+
   def self.parse_date_range(date_range)
     begin_end_dates = date_range.split('-').map { |v| v.strip }
     if begin_end_dates.size != 2
