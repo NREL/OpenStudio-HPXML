@@ -398,8 +398,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     # intentionally overlaps the first power outage period
     hpxml.header.power_outage_periods.add(begin_month: 1,
                                           begin_day: 25,
+                                          begin_hour: 0,
                                           end_month: 2,
-                                          end_day: 28)
+                                          end_day: 27,
+                                          end_hour: 24)
 
     schedules_paths = hpxml.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
@@ -442,10 +444,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
 
     begin_month = 1
     begin_day = 1
-    begin_hour = nil
+    begin_hour = 0
     end_month = 12
     end_day = 31
-    end_hour = nil
+    end_hour = 24
 
     sch_name = Constants.ObjectNameRefrigerator
 
@@ -455,26 +457,6 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
 
     schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
     vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-
-    schedule_rules = schedule.scheduleRules
-    Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
-    off_schedule_rules = schedule.scheduleRules - schedule_rules
-
-    assert_equal(1, off_schedule_rules.size)
-
-    _test_day_schedule(schedule, begin_month, begin_day, year, 0, 24)
-    _test_day_schedule(schedule, begin_month + 5, begin_day + 10, year, 0, 24)
-    _test_day_schedule(schedule, end_month, end_day, year, 0, 24)
-
-    # hours specified
-    begin_hour = 0
-    end_hour = 0
-
-    model, hpxml = _test_measure(args_hash)
-    year = model.getYearDescription.assumedYear
-
-    schedule = model.getScheduleRulesets.select { |schedule| schedule.name.to_s == sch_name }[0]
-    vacancy_periods = _add_vacancy_period(hpxml, begin_month, begin_day, begin_hour, begin_month, begin_day, end_hour) # note the change of end month/day
 
     schedule_rules = schedule.scheduleRules
     Schedule.set_off_periods(schedule, sch_name, vacancy_periods, year)
@@ -508,8 +490,8 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
 
     # 2 calendar days, partial first day
     begin_hour = 5
-    end_day = 3
-    end_hour = 0
+    end_day = 2
+    end_hour = 24
 
     model, hpxml = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
@@ -580,10 +562,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     # normal availability
     begin_month = 1
     begin_day = 1
-    begin_hour = nil
+    begin_hour = 0
     end_month = 6
     end_day = 30
-    end_hour = nil
+    end_hour = 24
     natvent_availability = HPXML::ScheduleRegular
 
     sch_name = "#{Constants.ObjectNameNaturalVentilation} avail schedule"
@@ -646,10 +628,10 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
 
     begin_month = 1
     begin_day = 1
-    begin_hour = nil
+    begin_hour = 0
     end_month = 3
-    end_day = 31
-    end_hour = nil
+    end_day = 30
+    end_hour = 24
 
     sch_name = Constants.ObjectNameRefrigerator
 
