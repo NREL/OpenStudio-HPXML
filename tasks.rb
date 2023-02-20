@@ -428,9 +428,11 @@ def create_hpxmls
     'base-schedules-simple-vacancy-year-round.xml' => 'base.xml',
     'base-schedules-detailed-all-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-schedules-detailed-occupancy-stochastic.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-peak-shift.xml' => 'base.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml' => 'base-schedules-detailed-occupancy-stochastic.xml',
     'base-schedules-detailed-occupancy-stochastic-10-mins.xml' => 'base.xml',
+    'base-schedules-detailed-occupancy-stochastic-10-mins-peak-shift.xml' => 'base.xml',
     'base-schedules-detailed-setpoints.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-schedules.xml' => 'base.xml',
     'base-schedules-detailed-setpoints-daily-setbacks.xml' => 'base.xml',
@@ -442,6 +444,8 @@ def create_hpxmls
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
+    'base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins-peak-shift.xml' => 'base-simcontrol-timestep-10-mins.xml',
+    'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins-peak-shift.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-30-mins.xml' => 'base.xml',
     'base-vacancy.xml' => 'base.xml'
   }
@@ -2483,6 +2487,10 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
   elsif ['base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml'].include? hpxml_file
     args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
+  elsif ['base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins-peak-shift.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins-peak-shift.csv'
+  elsif ['base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins-peak-shift.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-peak-shift.csv'
   elsif ['base-simcontrol-timestep-30-mins.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 30
   end
@@ -2509,6 +2517,20 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-schedules-detailed-all-10-mins.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-peak-shift.xml'].include? hpxml_file
+    sch_args['schedules_peak_period'] = '10 - 13'
+    sch_args['schedules_peak_period_delay'] = 1
+    sch_args['schedules_peak_period_dishwasher'] = true
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-peak-shift.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-occupancy-stochastic-10-mins-peak-shift.xml'].include? hpxml_file
+    sch_args['schedules_peak_period'] = '10 - 13'
+    sch_args['schedules_peak_period_delay'] = 1
+    sch_args['schedules_peak_period_dishwasher'] = true
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins-peak-shift.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 
