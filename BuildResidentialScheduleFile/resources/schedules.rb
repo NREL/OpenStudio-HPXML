@@ -111,10 +111,8 @@ class ScheduleGenerator
 
     unshifted = {}
     schedules_affected = Schedule.get_schedules_affected
-    schedules_affected.each do |schedule_affected|
-      next if !schedule_affected['Affected By Peak Shift']
-
-      col_name = schedule_affected['Schedule Name']
+    ScheduleGenerator.export_columns.each do |col_name|
+      next if !Schedule.affected_by_peak_shift(col_name, schedules_affected)
 
       unshifted[col_name] = 0
     end
@@ -125,8 +123,10 @@ class ScheduleGenerator
       next if [0, 6].include?(day_of_week)
 
       unshifted.keys.each do |col_name|
-        shifted = peak_shift(col_name, day, begin_hour, end_hour, args[:peak_period_delay]) if args["peak_period_#{col_name}".to_sym]
-        unshifted[col_name] += 1 if !shifted
+        if args["peak_period_#{col_name}".to_sym]
+          shifted = peak_shift(col_name, day, begin_hour, end_hour, args[:peak_period_delay])
+          unshifted[col_name] += 1 if !shifted
+        end
       end
     end
 

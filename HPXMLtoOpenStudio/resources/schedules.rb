@@ -1169,6 +1169,22 @@ class Schedule
 
     return schedules_affected
   end
+
+  def self.affected_by_peak_shift(col_name, schedules_affected = nil)
+    schedules_affected = get_schedules_affected if schedules_affected.nil?
+    schedules_affected.each do |schedule_affected|
+      next if schedule_affected['Schedule Name'] != col_name
+
+      affected = schedule_affected['Affected By Peak Shift'].downcase.to_s
+      if affected == 'true'
+        return true
+      elsif affected == 'false'
+        return false
+      end
+    end
+
+    fail "Could not find #{col_name} in schedules_affected.csv"
+  end
 end
 
 class SchedulesFile

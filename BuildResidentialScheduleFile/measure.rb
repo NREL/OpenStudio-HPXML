@@ -66,10 +66,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args << arg
 
     schedules_affected = Schedule.get_schedules_affected
-    schedules_affected.each do |schedule_affected|
-      next if !schedule_affected['Affected By Peak Shift']
-
-      col_name = schedule_affected['Schedule Name']
+    ScheduleGenerator.export_columns.each do |col_name|
+      next if !Schedule.affected_by_peak_shift(col_name, schedules_affected)
 
       arg = OpenStudio::Measure::OSArgument::makeBoolArgument("schedules_peak_period_#{col_name}", false)
       arg.setDisplayName("Schedules: Peak Period #{col_name}")
@@ -245,10 +243,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:peak_period_delay] = args[:schedules_peak_period_delay].get if args[:schedules_peak_period_delay].is_initialized
 
     schedules_affected = Schedule.get_schedules_affected
-    schedules_affected.each do |schedule_affected|
-      next if !schedule_affected['Affected By Peak Shift']
-
-      col_name = schedule_affected['Schedule Name']
+    ScheduleGenerator.export_columns.each do |col_name|
+      next if !Schedule.affected_by_peak_shift(col_name, schedules_affected)
 
       args["peak_period_#{col_name}".to_sym] = args["schedules_peak_period_#{col_name}".to_sym].get if args["schedules_peak_period_#{col_name}".to_sym].is_initialized
     end

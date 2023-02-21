@@ -305,7 +305,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @args_hash['schedules_peak_period_dishwasher'] = true
     @args_hash['schedules_peak_period_clothes_washer'] = true
     @args_hash['schedules_peak_period_clothes_dryer'] = true
-    @args_hash['schedules_peak_period_cooking_range'] = true
+    @args_hash['schedules_peak_period_cooking_range'] = false
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -316,8 +316,12 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('To prevent stacking') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?("schedule with 'natural gas' fuel type") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("'clothes_dryer' schedule with 'natural gas' fuel type") })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?("'cooking_range' schedule with 'natural gas' fuel type") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("days were not shifted for the 'dishwasher' schedule") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("days were not shifted for the 'clothes_washer' schedule") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("days were not shifted for the 'clothes_dryer' schedule") })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?("days were not shifted for the 'cooking_range' schedule") })
 
     sf2 = SchedulesFile.new(model: model,
                             schedules_paths: hpxml.header.schedules_filepaths,
@@ -386,6 +390,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('To prevent stacking') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('days were not shifted') })
 
     sf2 = SchedulesFile.new(model: model,
                             schedules_paths: hpxml.header.schedules_filepaths,
