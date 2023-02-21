@@ -303,7 +303,9 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @args_hash['schedules_peak_period'] = '10 - 13'
     @args_hash['schedules_peak_period_delay'] = 1
     @args_hash['schedules_peak_period_dishwasher'] = true
+    @args_hash['schedules_peak_period_clothes_washer'] = true
     @args_hash['schedules_peak_period_clothes_dryer'] = true
+    @args_hash['schedules_peak_period_cooking_range'] = true
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -370,6 +372,9 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @args_hash['schedules_peak_period'] = '10 - 13'
     @args_hash['schedules_peak_period_delay'] = 1
     @args_hash['schedules_peak_period_dishwasher'] = true
+    @args_hash['schedules_peak_period_clothes_washer'] = true
+    @args_hash['schedules_peak_period_clothes_dryer'] = true
+    @args_hash['schedules_peak_period_cooking_range'] = true
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }

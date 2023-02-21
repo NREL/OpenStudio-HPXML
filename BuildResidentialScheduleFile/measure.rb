@@ -65,10 +65,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    { 'Dishwasher' => SchedulesFile::ColumnDishwasher,
-      'Clothes Dryer' => SchedulesFile::ColumnClothesDryer }.each do |display_name, col_name|
+    schedules_affected = Schedule.get_schedules_affected
+    schedules_affected.each do |schedule_affected|
+      next if !schedule_affected['Affected By Peak Shift']
+
+      col_name = schedule_affected['Schedule Name']
+
       arg = OpenStudio::Measure::OSArgument::makeBoolArgument("schedules_peak_period_#{col_name}", false)
-      arg.setDisplayName("Schedules: Peak Period #{display_name}")
+      arg.setDisplayName("Schedules: Peak Period #{col_name}")
       arg.setDescription("Whether to shift the #{col_name} schedule during the peak period.")
       arg.setDefaultValue(false)
       args << arg
@@ -134,6 +138,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
         if not hpxml.clothes_dryers.empty?
           clothes_dryer = hpxml.clothes_dryers[0]
           runner.registerInfo("Applying peak period shift to '#{SchedulesFile::ColumnClothesDryer}' schedule with '#{clothes_dryer.fuel_type}' fuel type.") if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+        end
+      end
+      if args[:schedules_peak_period_cooking_range].is_initialized && args[:schedules_peak_period_cooking_range].get
+        if not hpxml.cooking_ranges.empty?
+          cooking_range = hpxml.cooking_ranges[0]
+          runner.registerInfo("Applying peak period shift to '#{SchedulesFile::ColumnCookingRange}' schedule with '#{clothes_dryer.fuel_type}' fuel type.") if cooking_range.fuel_type != HPXML::FuelTypeElectricity
         end
       end
     end
@@ -233,8 +243,15 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     args[:peak_period] = args[:schedules_peak_period].get if args[:schedules_peak_period].is_initialized
     args[:peak_period_delay] = args[:schedules_peak_period_delay].get if args[:schedules_peak_period_delay].is_initialized
-    args[:peak_period_dishwasher] = args[:schedules_peak_period_dishwasher].get if args[:schedules_peak_period_dishwasher].is_initialized
-    args[:peak_period_clothes_dryer] = args[:schedules_peak_period_clothes_dryer].get if args[:schedules_peak_period_clothes_dryer].is_initialized
+
+    schedules_affected = Schedule.get_schedules_affected
+    schedules_affected.each do |schedule_affected|
+      next if !schedule_affected['Affected By Peak Shift']
+
+      col_name = schedule_affected['Schedule Name']
+
+      args["peak_period_#{col_name}".to_sym] = args["schedules_peak_period_#{col_name}".to_sym].get if args["schedules_peak_period_#{col_name}".to_sym].is_initialized
+    end
 
     debug = false
     if args[:debug].is_initialized

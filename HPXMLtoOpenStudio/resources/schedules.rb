@@ -1157,6 +1157,18 @@ class Schedule
 
     return begin_month, begin_day, end_month, end_day
   end
+
+  def self.get_schedules_affected
+    affected_csv = File.join(File.dirname(__FILE__), 'data', 'schedules_affected.csv')
+    if not File.exist?(affected_csv)
+      fail 'Could not find schedules_affected.csv'
+    end
+
+    require 'csv'
+    schedules_affected = CSV.open(affected_csv, headers: :first_row).map(&:to_h)
+
+    return schedules_affected
+  end
 end
 
 class SchedulesFile

@@ -109,7 +109,16 @@ class ScheduleGenerator
       return false
     end
 
-    unshifted = { SchedulesFile::ColumnDishwasher => 0, SchedulesFile::ColumnClothesDryer => 0 }
+    unshifted = {}
+    schedules_affected = Schedule.get_schedules_affected
+    schedules_affected.each do |schedule_affected|
+      next if !schedule_affected['Affected By Peak Shift']
+
+      col_name = schedule_affected['Schedule Name']
+
+      unshifted[col_name] = 0
+    end
+
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       day_of_week = today.wday
