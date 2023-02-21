@@ -65,11 +65,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('schedules_peak_period_dishwasher', false)
-    arg.setDisplayName('Schedules: Peak Period Dishwasher')
-    arg.setDescription('Whether to shift the dishwasher schedule during the peak period.')
-    arg.setDefaultValue(false)
-    args << arg
+    { 'Dishwasher' => SchedulesFile::ColumnDishwasher,
+      'Clothes Dryer' => SchedulesFile::ColumnClothesDryer }.each do |display_name, col_name|
+      arg = OpenStudio::Measure::OSArgument::makeBoolArgument("schedules_peak_period_#{col_name}", false)
+      arg.setDisplayName("Schedules: Peak Period #{display_name}")
+      arg.setDescription("Whether to shift the #{col_name} schedule during the peak period.")
+      arg.setDefaultValue(false)
+      args << arg
+    end
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Schedules: Output CSV Path')
@@ -125,6 +128,16 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       return true
     end
 
+    # check peak shifts against fuel types
+    if args[:schedules_peak_period].is_initialized
+      if args[:schedules_peak_period_clothes_dryer].is_initialized && args[:schedules_peak_period_clothes_dryer].get
+        if not hpxml.clothes_dryers.empty?
+          clothes_dryer = hpxml.clothes_dryers[0]
+          runner.registerInfo("Applying peak period shift to '#{SchedulesFile::ColumnClothesDryer}' schedule with '#{clothes_dryer.fuel_type}' fuel type.") if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+        end
+      end
+    end
+
     # create EpwFile object
     epw_path = Location.get_epw_path(hpxml, hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)
@@ -177,7 +190,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
     info_msgs << "ColumnNames=#{args[:column_names]}" if args[:schedules_column_names].is_initialized
     if args[:schedules_peak_period].is_initialized
-      if args[:schedules_peak_period_dishwasher].is_initialized && args[:schedules_peak_period_dishwasher].get
+      if (args[:schedules_peak_period_dishwasher].is_initialized && args[:schedules_peak_period_dishwasher].get) ||
+         (args[:schedules_peak_period_clothes_dryer].is_initialized && args[:schedules_peak_period_clothes_dryer].get)
         info_msgs << "PeakPeriod=#{args[:peak_period]}"
       end
     end
@@ -220,6 +234,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:peak_period] = args[:schedules_peak_period].get if args[:schedules_peak_period].is_initialized
     args[:peak_period_delay] = args[:schedules_peak_period_delay].get if args[:schedules_peak_period_delay].is_initialized
     args[:peak_period_dishwasher] = args[:schedules_peak_period_dishwasher].get if args[:schedules_peak_period_dishwasher].is_initialized
+    args[:peak_period_clothes_dryer] = args[:schedules_peak_period_clothes_dryer].get if args[:schedules_peak_period_clothes_dryer].is_initialized
 
     debug = false
     if args[:debug].is_initialized

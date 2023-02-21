@@ -95,7 +95,7 @@ class ScheduleGenerator
   end
 
   def shift_stochastic_schedules(args:)
-    return true if !args[:peak_period_dishwasher]
+    return true if !args[:peak_period_dishwasher] && !args[:peak_period_clothes_dryer]
 
     begin_hour, end_hour = Schedule.parse_time_range(args[:peak_period])
 
@@ -109,14 +109,16 @@ class ScheduleGenerator
       return false
     end
 
-    unshifted = { SchedulesFile::ColumnDishwasher => 0 }
+    unshifted = { SchedulesFile::ColumnDishwasher => 0, SchedulesFile::ColumnClothesDryer => 0 }
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       day_of_week = today.wday
       next if [0, 6].include?(day_of_week)
 
-      shifted = peak_shift(SchedulesFile::ColumnDishwasher, day, begin_hour, end_hour, args[:peak_period_delay]) if args[:peak_period_dishwasher]
-      unshifted[SchedulesFile::ColumnDishwasher] += 1 if !shifted
+      unshifted.keys.each do |col_name|
+        shifted = peak_shift(col_name, day, begin_hour, end_hour, args[:peak_period_delay]) if args["peak_period_#{col_name}".to_sym]
+        unshifted[col_name] += 1 if !shifted
+      end
     end
 
     unshifted.each do |col_name, val|

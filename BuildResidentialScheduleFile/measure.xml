@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>5aa3007b-6b94-422b-b820-2e79093591ca</version_id>
-  <version_modified>20230221T171839Z</version_modified>
+  <version_id>a1eb5e48-28a6-4255-b7f5-952f1064df22</version_id>
+  <version_modified>20230221T202404Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -59,6 +59,25 @@
       <name>schedules_peak_period_dishwasher</name>
       <display_name>Schedules: Peak Period Dishwasher</display_name>
       <description>Whether to shift the dishwasher schedule during the peak period.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>schedules_peak_period_clothes_dryer</name>
+      <display_name>Schedules: Peak Period Clothes Dryer</display_name>
+      <description>Whether to shift the clothes_dryer schedule during the peak period.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -910,10 +929,16 @@
       <checksum>AAB89065</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7136BBB9</checksum>
+    </file>
+    <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>04E5432B</checksum>
+      <checksum>DC07DA03</checksum>
     </file>
     <file>
       <version>
@@ -924,13 +949,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F7E8D533</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5CCF8A76</checksum>
+      <checksum>29481B9C</checksum>
     </file>
   </files>
 </measure>

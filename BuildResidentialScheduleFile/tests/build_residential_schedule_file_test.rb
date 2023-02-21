@@ -278,7 +278,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_peak_period_shift
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-appliances-gas.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
@@ -298,10 +298,12 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                            year: 2007)
 
     assert_in_epsilon(213, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(151, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
 
     @args_hash['schedules_peak_period'] = '10 - 13'
     @args_hash['schedules_peak_period_delay'] = 1
     @args_hash['schedules_peak_period_dishwasher'] = true
+    @args_hash['schedules_peak_period_clothes_dryer'] = true
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -313,12 +315,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('To prevent stacking') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("schedule with 'natural gas' fuel type") })
 
     sf2 = SchedulesFile.new(model: model,
                             schedules_paths: hpxml.header.schedules_filepaths,
                             year: 2007)
 
     assert_in_epsilon(213, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf2.tmp_schedules), 0.1)
+    assert_in_epsilon(151, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
 
     # weekday
     old_day = sf.schedules[SchedulesFile::ColumnDishwasher][0..23]
@@ -361,6 +365,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                            year: 2007)
 
     assert_in_epsilon(213, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(151, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
 
     @args_hash['schedules_peak_period'] = '10 - 13'
     @args_hash['schedules_peak_period_delay'] = 1
@@ -382,6 +387,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                             year: 2007)
 
     assert_in_epsilon(213, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf2.tmp_schedules), 0.1)
+    assert_in_epsilon(151, sf2.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
 
     # weekday
     old_day = sf.schedules[SchedulesFile::ColumnDishwasher][0..(24 * 6 - 1)]
