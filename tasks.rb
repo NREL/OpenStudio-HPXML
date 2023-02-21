@@ -2522,6 +2522,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_peak_period'] = '10 - 13'
     sch_args['schedules_peak_period_delay'] = 1
     sch_args['schedules_peak_period_dishwasher'] = true
+    sch_args['schedules_peak_period_clothes_dryer'] = true
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-peak-shift.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
@@ -2529,6 +2530,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     sch_args['schedules_peak_period'] = '10 - 13'
     sch_args['schedules_peak_period_delay'] = 1
     sch_args['schedules_peak_period_dishwasher'] = true
+    sch_args['schedules_peak_period_clothes_dryer'] = true
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins-peak-shift.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
