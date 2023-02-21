@@ -1329,7 +1329,6 @@ class HPXMLDefaults
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
-        HVAC.set_cool_rated_cfm_per_ton(cooling_system)
         HVAC.set_cool_rated_shrs_gross(cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
 
@@ -1340,7 +1339,6 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
         HVAC.set_cool_curves_mshp(cooling_system, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(cooling_system, num_speeds)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
@@ -1358,7 +1356,7 @@ class HPXMLDefaults
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      HVAC.set_heat_rated_cfm_per_ton(heating_system)
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(1, true)
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
@@ -1376,13 +1374,11 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_cool_rated_cfm_per_ton(heat_pump)
         HVAC.set_cool_rated_shrs_gross(heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
@@ -1393,12 +1389,10 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)
         HVAC.set_heat_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_heat_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
         HVAC.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
