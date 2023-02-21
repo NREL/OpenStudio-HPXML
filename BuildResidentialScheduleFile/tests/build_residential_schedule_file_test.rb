@@ -312,7 +312,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
-    # assert(info_msgs.any? { |info_msg| info_msg.include?("'#{SchedulesFile::ColumnDishwasher}' schedules were not shifted") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('To prevent stacking') })
 
     sf2 = SchedulesFile.new(model: model,
                             schedules_paths: hpxml.header.schedules_filepaths,
@@ -375,7 +375,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('PeakPeriod=10 - 13') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?("'#{SchedulesFile::ColumnDishwasher}' schedules were not shifted") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('To prevent stacking') })
 
     sf2 = SchedulesFile.new(model: model,
                             schedules_paths: hpxml.header.schedules_filepaths,
@@ -401,6 +401,26 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     # new_day = sf2.schedules[SchedulesFile::ColumnDishwasher][(0 + 24 * 6 * wked)..((24 * 6 - 1) + (24 * 6 * wked))]
 
     # assert(old_day == new_day)
+  end
+
+  def test_peak_period_invalid_time_range
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['schedules_peak_period'] = '13 - 13'
+    @args_hash['schedules_peak_period_dishwasher'] = true
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    _model, _hpxml, result = _test_measure(expect_fail: true)
+
+    error_msgs = result.errors.map { |x| x.logMessage }
+    assert(error_msgs.any? { |error_msg| error_msg.include?('Specified peak period (13 - 13) must be at least one hour long.') })
+
+    @args_hash['schedules_peak_period'] = '2 - 15'
+    @args_hash['schedules_peak_period_dishwasher'] = true
+    _model, _hpxml, result = _test_measure(expect_fail: true)
+
+    error_msgs = result.errors.map { |x| x.logMessage }
+    assert(error_msgs.any? { |error_msg| error_msg.include?('Specified peak period (2 - 15) must be no longer than 12 hours.') })
   end
 
   def _test_measure(expect_fail: false)

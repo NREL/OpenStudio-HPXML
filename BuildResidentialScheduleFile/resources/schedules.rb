@@ -99,18 +99,30 @@ class ScheduleGenerator
 
     begin_hour, end_hour = Schedule.parse_time_range(args[:peak_period])
 
-    all_shifted = { SchedulesFile::ColumnDishwasher => true }
+    if begin_hour >= end_hour
+      @runner.registerError("Specified peak period (#{begin_hour} - #{end_hour}) must be at least one hour long.")
+      return false
+    end
+
+    if (end_hour - begin_hour > 12)
+      @runner.registerError("Specified peak period (#{begin_hour} - #{end_hour}) must be no longer than 12 hours.")
+      return false
+    end
+
+    unshifted = { SchedulesFile::ColumnDishwasher => 0 }
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       day_of_week = today.wday
       next if [0, 6].include?(day_of_week)
 
       shifted = peak_shift(SchedulesFile::ColumnDishwasher, day, begin_hour, end_hour, args[:peak_period_delay]) if args[:peak_period_dishwasher]
-      all_shifted[SchedulesFile::ColumnDishwasher] = false if !shifted
+      unshifted[SchedulesFile::ColumnDishwasher] += 1 if !shifted
     end
 
-    all_shifted.each do |col_name, shifted|
-      @runner.registerInfo("To prevent stacking, some '#{col_name}' schedules were not shifted.") if !shifted
+    unshifted.each do |col_name, val|
+      next if val == 0
+
+      @runner.registerInfo("To prevent stacking, #{val} days were not shifted for the '#{col_name}' schedule.")
     end
 
     return true
@@ -128,10 +140,12 @@ class ScheduleGenerator
     new_begin_ix = peak_end_ix + (delay * steps_in_hour)
     new_end_ix = new_begin_ix + period
 
-    return if @schedules[col_name][new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
+    return false if @schedules[col_name][new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
 
     @schedules[col_name][new_begin_ix...new_end_ix] = @schedules[col_name][peak_begin_ix...peak_end_ix]
     @schedules[col_name][peak_begin_ix...peak_end_ix] = [0.0] * period
+
+    return true
   end
 
   def create_stochastic_schedules(args:)

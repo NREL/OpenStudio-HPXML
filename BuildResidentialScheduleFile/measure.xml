@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>c8c440e2-dde2-4468-8689-232125077d14</version_id>
-  <version_modified>20230220T233301Z</version_modified>
+  <version_id>5aa3007b-6b94-422b-b820-2e79093591ca</version_id>
+  <version_modified>20230221T171839Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -43,6 +43,7 @@
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>15 - 18</default_value>
     </argument>
     <argument>
       <name>schedules_peak_period_delay</name>
@@ -52,6 +53,7 @@
       <units>hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>schedules_peak_period_dishwasher</name>
@@ -60,6 +62,7 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -910,7 +913,7 @@
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3AF12727</checksum>
+      <checksum>04E5432B</checksum>
     </file>
     <file>
       <version>
@@ -921,13 +924,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>89803644</checksum>
+      <checksum>F7E8D533</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E1C0104D</checksum>
+      <checksum>5CCF8A76</checksum>
     </file>
   </files>
 </measure>
