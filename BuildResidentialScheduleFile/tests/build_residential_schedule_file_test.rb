@@ -277,7 +277,145 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_empty(hpxml.header.schedules_filepaths)
   end
 
-  def test_peak_period_shift
+  def test_peak_shift
+    steps_in_day = 24
+    schedule = [0] * steps_in_day
+    day = 0
+    begin_hour = 15
+    end_hour = 18
+    delay = 0
+
+    # all zeroes, no problem
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0] * 24
+    assert_equal(schedule, new_schedule)
+
+    # same day, no delay, no stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13, 5)
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0]
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # same day, no delay, stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13, 6)
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(!shifted)
+
+    # same day, delay, no stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13, 6)
+    delay = 1
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0, 0]
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # next day, no delay, no stacking
+    begin_hour = 19
+    end_hour = 22
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17, 5)
+    delay = 0
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # next day, no delay, stacking
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17, 6)
+    delay = 0
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(!shifted)
+
+    # next day, delay, no stacking
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17, 6)
+    delay = 1
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+  end
+
+  def test_peak_shift_10_min_timestep
+    steps_in_day = 24 * 6
+    schedule = [0] * steps_in_day
+    day = 0
+    begin_hour = 15
+    end_hour = 18
+    delay = 0
+
+    # all zeroes, no problem
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0] * 24 * 6
+    assert_equal(schedule, new_schedule)
+
+    # same day, no delay, no stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13 * 6, 5 * 6)
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0].map { |x| [x] * 6 }.flatten
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # same day, no delay, stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13 * 6, 6 * 6)
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(!shifted)
+
+    # same day, delay, no stacking
+    schedule = [0] * steps_in_day
+    schedule.fill(0.5, 13 * 6, 6 * 6)
+    delay = 1
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0, 0].map { |x| [x] * 6 }.flatten
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # next day, no delay, no stacking
+    begin_hour = 19
+    end_hour = 22
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17 * 6, 5 * 6)
+    delay = 0
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map { |x| [x] * 6 }.flatten
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+
+    # next day, no delay, stacking
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17 * 6, 6 * 6)
+    delay = 0
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(!shifted)
+
+    # next day, delay, no stacking
+    schedule = [0] * steps_in_day * 2
+    schedule.fill(0.5, 17 * 6, 6 * 6)
+    delay = 1
+    shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    assert(shifted)
+    new_schedule = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map { |x| [x] * 6 }.flatten
+    assert_equal(schedule.sum, new_schedule.sum)
+    assert_equal(schedule, new_schedule)
+  end
+
+  def test_peak_period_shift_appliances
     hpxml = _create_hpxml('base-appliances-gas.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
@@ -350,7 +488,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     # assert(old_day == new_day)
   end
 
-  def test_peak_period_shift_10_min_timestep
+  def test_peak_period_shift_10_min_timestep_appliances
     hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
@@ -436,7 +574,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     _model, _hpxml, result = _test_measure(expect_fail: true)
 
     error_msgs = result.errors.map { |x| x.logMessage }
-    assert(error_msgs.any? { |error_msg| error_msg.include?('Specified peak period (2 - 15) must be no longer than 12 hours.') })
+    assert(error_msgs.any? { |error_msg| error_msg.include?('Specified peak period (2 - 15), plus the delay (0), must be no longer than 12 hours.') })
+
+    @args_hash['schedules_peak_period'] = '2 - 10'
+    @args_hash['schedules_peak_period_delay'] = 5
+    @args_hash['schedules_peak_period_dishwasher'] = true
+    _model, _hpxml, result = _test_measure(expect_fail: true)
+
+    error_msgs = result.errors.map { |x| x.logMessage }
+    assert(error_msgs.any? { |error_msg| error_msg.include?('Specified peak period (2 - 10), plus the delay (5), must be no longer than 12 hours.') })
   end
 
   def _test_measure(expect_fail: false)

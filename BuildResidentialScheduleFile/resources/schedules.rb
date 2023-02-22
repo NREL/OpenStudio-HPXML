@@ -95,17 +95,16 @@ class ScheduleGenerator
   end
 
   def shift_stochastic_schedules(args:)
-    return true if !args[:peak_period_dishwasher] && !args[:peak_period_clothes_dryer]
-
     begin_hour, end_hour = Schedule.parse_time_range(args[:peak_period])
+    delay = args[:peak_period_delay]
 
     if begin_hour >= end_hour
       @runner.registerError("Specified peak period (#{begin_hour} - #{end_hour}) must be at least one hour long.")
       return false
     end
 
-    if (end_hour - begin_hour > 12)
-      @runner.registerError("Specified peak period (#{begin_hour} - #{end_hour}) must be no longer than 12 hours.")
+    if ((end_hour - begin_hour) + delay > 12)
+      @runner.registerError("Specified peak period (#{begin_hour} - #{end_hour}), plus the delay (#{delay}), must be no longer than 12 hours.")
       return false
     end
 
@@ -123,38 +122,39 @@ class ScheduleGenerator
       next if [0, 6].include?(day_of_week)
 
       unshifted.keys.each do |col_name|
-        if args["peak_period_#{col_name}".to_sym]
-          shifted = peak_shift(col_name, day, begin_hour, end_hour, args[:peak_period_delay])
-          unshifted[col_name] += 1 if !shifted
-        end
+        next unless args["peak_period_#{col_name}".to_sym]
+
+        schedule = @schedules[col_name]
+        shifted = ScheduleGenerator.peak_shift(schedule, day, begin_hour, end_hour, delay, @steps_in_day)
+        unshifted[col_name] += 1 if !shifted
       end
     end
 
-    unshifted.each do |col_name, val|
-      next if val == 0
+    unshifted.each do |col_name, days|
+      next if days == 0
 
-      @runner.registerInfo("To prevent stacking, #{val} days were not shifted for the '#{col_name}' schedule.")
+      @runner.registerInfo("To prevent stacking, #{days} days were not shifted for the '#{col_name}' schedule.")
     end
 
     return true
   end
 
-  def peak_shift(col_name, day, begin_hour, end_hour, delay)
-    steps_in_hour = @steps_in_day / 24
+  def self.peak_shift(schedule, day, begin_hour, end_hour, delay, steps_in_day)
+    steps_in_hour = steps_in_day / 24
     period = (end_hour - begin_hour) * steps_in_hour # n steps
 
     # peak period
-    peak_begin_ix = day * @steps_in_day + (begin_hour * steps_in_hour)
+    peak_begin_ix = day * steps_in_day + (begin_hour * steps_in_hour)
     peak_end_ix = peak_begin_ix + period
 
     # new period
     new_begin_ix = peak_end_ix + (delay * steps_in_hour)
     new_end_ix = new_begin_ix + period
 
-    return false if @schedules[col_name][new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
+    return false if schedule[new_begin_ix...new_end_ix].any? { |x| x > 0 } # prevent stacking
 
-    @schedules[col_name][new_begin_ix...new_end_ix] = @schedules[col_name][peak_begin_ix...peak_end_ix]
-    @schedules[col_name][peak_begin_ix...peak_end_ix] = [0.0] * period
+    schedule[new_begin_ix...new_end_ix] = schedule[peak_begin_ix...peak_end_ix]
+    schedule[peak_begin_ix...peak_end_ix] = [0] * period
 
     return true
   end
