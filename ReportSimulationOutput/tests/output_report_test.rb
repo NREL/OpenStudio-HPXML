@@ -912,6 +912,15 @@ class ReportSimulationOutputTest < MiniTest::Test
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsResilience)
   end
 
+  def test_timeseries_daily_resilience
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-pv-battery.xml'),
+                  'timeseries_frequency' => 'daily',
+                  'include_timeseries_resilience' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+  end
+
   def test_timeseries_hourly_ALL
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-misc-emissions.xml'),
                   'timeseries_frequency' => 'hourly',
