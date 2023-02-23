@@ -1012,7 +1012,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         resilience.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
-        resilience.timeseries_output = resilience_hours
+        resilience.timeseries_output = resilience_hours if timeseries_frequency == 'hourly'
       end
     end
 
