@@ -3272,31 +3272,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     return errors
   end
-
-  def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    is_valid = true
-
-    # Validate input HPXML against schema
-    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
-    schema_path = File.join(schema_dir, 'HPXML.xsd')
-    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
-
-    # Validate input HPXML against schematron docs
-    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
-    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
-    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
-
-    # Handle errors/warnings
-    (xsd_errors + sct_errors).each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-    (xsd_warnings + sct_warnings).each do |warning|
-      runner.registerWarning("#{hpxml_path}: #{warning}")
-    end
-
-    return is_valid
-  end
 end
 
 class HPXMLFile
@@ -3413,6 +3388,31 @@ class HPXMLFile
     end
 
     return hpxml_doc
+  end
+
+  def self.validate_hpxml(runner, hpxml_path, hpxml_doc)
+    is_valid = true
+
+    # Validate input HPXML against schema
+    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
+    schema_path = File.join(schema_dir, 'HPXML.xsd')
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+
+    # Validate input HPXML against schematron docs
+    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
+    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
+
+    # Handle errors/warnings
+    (xsd_errors + sct_errors).each do |error|
+      runner.registerError("#{hpxml_path}: #{error}")
+      is_valid = false
+    end
+    (xsd_warnings + sct_warnings).each do |warning|
+      runner.registerWarning("#{hpxml_path}: #{warning}")
+    end
+
+    return is_valid
   end
 
   def self.create_geometry_envelope(runner, model, args)
