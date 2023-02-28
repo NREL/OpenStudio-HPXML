@@ -182,6 +182,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-invalid-window-aspect-ratio.xml' => 'base-sfd.xml',
       'error-garage-too-wide.xml' => 'base-sfd.xml',
       'error-garage-too-deep.xml' => 'base-sfd.xml',
+      'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
@@ -237,7 +238,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-invalid-door-area.xml' => 'Door area cannot be negative.',
       'error-invalid-window-aspect-ratio.xml' => 'Window aspect ratio must be greater than zero.',
       'error-garage-too-wide.xml' => 'Garage is as wide as the single-family detached unit.',
-      'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.'
+      'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.',
+      'error-vented-attic-with-zero-floor-insulation.xml' => 'Home with unconditioned attic type has zero ceiling insulation assembly R-value specified.'
     }
 
     expected_warnings = {
@@ -1090,6 +1092,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     elsif ['error-garage-too-deep.xml'].include? hpxml_file
       args['geometry_garage_width'] = 12
       args['geometry_garage_depth'] = 40
+    elsif ['error-vented-attic-with-zero-floor-insulation.xml'].include? hpxml_file
+      args['ceiling_assembly_r'] = 0
     end
 
     # Warning
