@@ -3012,7 +3012,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply Default Values?')
-    arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file.')
+    arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file. Setting to true will also force validation of the HPXML output file before applying OS-HPXML default values.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -3388,7 +3388,7 @@ class HPXMLFile
     end
 
     # Check for errors in the HPXML object
-    if args[:apply_validation].is_initialized && args[:apply_validation].get
+    if (args[:apply_defaults].is_initialized && args[:apply_defaults].get) || (args[:apply_validation].is_initialized && args[:apply_validation].get)
       errors = hpxml.check_for_errors()
       if errors.size > 0
         fail "ERROR: Invalid HPXML object produced.\n#{errors}"
