@@ -3270,6 +3270,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:window_aspect_ratio] <= 0)
     errors << 'Window aspect ratio must be greater than zero.' if error
 
+    error = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] == 0.0)
+    errors << 'Home with unconditioned attic type has zero ceiling insulation assembly R-value specified.' if error
+
     return errors
   end
 
