@@ -23,7 +23,7 @@ class HPXMLTest < MiniTest::Test
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
-      Dir["#{sample_files_dir}/base-power-outage.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
         xmls << File.absolute_path(xml)
@@ -483,7 +483,7 @@ class HPXMLTest < MiniTest::Test
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
-      if !hpxml.header.power_outage_periods.empty
+      if !hpxml.header.power_outage_periods.empty?
         next if log_line.include? 'Power outage period(s) may contain nonzero values'
       end
 
@@ -571,7 +571,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if !hpxml.header.power_outage_periods.empty
+      if !hpxml.header.power_outage_periods.empty?
         next if err_line.include? 'Target water temperature is greater than the hot water temperature'
         next if err_line.include? 'Target water temperature should be less than or equal to the hot water temperature'
       end
