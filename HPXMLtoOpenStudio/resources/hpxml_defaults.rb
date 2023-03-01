@@ -23,7 +23,7 @@ class HPXMLDefaults
       has_fuel[fuel] = hpxml.has_fuel(fuel, hpxml_doc)
     end
 
-    apply_header(hpxml, epw_file, weather)
+    apply_header(hpxml, epw_file)
     apply_emissions_scenarios(hpxml, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml, has_fuel)
     apply_site(hpxml)
@@ -106,7 +106,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file, weather)
+  def self.apply_header(hpxml, epw_file)
     if hpxml.header.occupancy_calculation_type.nil?
       hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
       hpxml.header.occupancy_calculation_type_isdefaulted = true
@@ -208,7 +208,7 @@ class HPXMLDefaults
 
     if hpxml.header.seasons_summer_begin_month.nil? || hpxml.header.seasons_summer_begin_day.nil? ||
        hpxml.header.seasons_summer_end_month.nil? || hpxml.header.seasons_summer_end_day.nil?
-      if weather.header.Latitude < 0 # Southern hemisphere
+      if (not epw_file.nil?) && (epw_file.latitude < 0) # Southern hemisphere
         hpxml.header.seasons_summer_begin_month = 10 # Oct 15
         hpxml.header.seasons_summer_end_month = 4 # Apr 14
       else # Northern hemisphere
