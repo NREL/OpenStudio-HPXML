@@ -106,8 +106,6 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
 
-.. _hpxml_seasons:
-
 HPXML HVAC Sizing Control
 *************************
 
