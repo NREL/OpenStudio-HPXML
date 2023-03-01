@@ -499,14 +499,43 @@ class Geometry
       runner.registerWarning("Both '#{people_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml.building_occupancy.monthly_multipliers.nil?
     end
 
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+
+    if !hpxml.header.power_outage_periods.empty?
+      # Work
+      work_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      work_schedule.setValue(0)
+      work_schedule.setName('Work Efficiency Schedule')
+
+      # Activity
+      activity_per_person = 100
+
+      # Air Velocity
+      air_velocity_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      air_velocity_schedule.setValue(0.1)
+      air_velocity_schedule.setName('Air Velocity Schedule')
+
+      # Clothing Insulation
+      clothing_insulation_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      clothing_insulation_schedule.setValue(0.6)
+      clothing_insulation_schedule.setName('Clothing Schedule')
+
+      # Set schedules
+      occ.setWorkEfficiencySchedule(work_schedule)
+      occ.setAirVelocitySchedule(air_velocity_schedule)
+      occ.setClothingInsulationSchedule(clothing_insulation_schedule)
+
+      # Add thermal model types
+      occ_def.pushThermalComfortModelType('Pierce')
+    end
+
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
     activity_sch.setValue(activity_per_person)
     activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
 
-    # Add people definition for the occ
-    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-    occ = OpenStudio::Model::People.new(occ_def)
     occ.setName(Constants.ObjectNameOccupants)
     occ.setSpace(space)
     occ_def.setName(Constants.ObjectNameOccupants)
