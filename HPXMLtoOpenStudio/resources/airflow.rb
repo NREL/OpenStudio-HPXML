@@ -4,8 +4,7 @@ class Airflow
   # Constants
   InfilPressureExponent = 0.65
 
-  def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
-                 ncfl_ag, duct_systems, airloop_map, summer_season_sensor, eri_version,
+  def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds, ncfl_ag, duct_systems, airloop_map, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file, vacancy_periods)
 
     # Global variables
@@ -119,11 +118,11 @@ class Airflow
       living_ach50 = nil
     end
 
-    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, summer_season_sensor,
+    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area,
                                                   hpxml.header.natvent_days_per_week, infil_volume, infil_height)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, living_ach50, living_const_ach, infil_volume, infil_height,
-                                            vented_attic, vented_crawl, summer_season_sensor, schedules_file, vent_fans_cfis_suppl, vacancy_periods)
+                                            vented_attic, vented_crawl, schedules_file, vent_fans_cfis_suppl, vacancy_periods)
   end
 
   def self.get_default_fraction_of_windows_operable()
@@ -322,7 +321,7 @@ class Airflow
     end
   end
 
-  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_summer_season_sensor,
+  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area,
                                                          natvent_days_per_week, infil_volume, infil_height)
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
@@ -434,12 +433,11 @@ class Airflow
       vent_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
-    vent_program.addLine("Set ClgSsnAvail = #{nv_summer_season_sensor.name}")
     vent_program.addLine("Set #{nv_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{whf_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
-    vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
+    vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp)')
     vent_program.addLine('  Set WHF_Flow = 0')
     vent_fans_whf.each do |vent_whf|
       vent_program.addLine("  Set WHF_Flow = WHF_Flow + #{UnitConversions.convert(vent_whf.flow_rate, 'cfm', 'm^3/s')} * #{whf_avail_sensors[vent_whf.id].name}")
@@ -1673,7 +1671,7 @@ class Airflow
     end
   end
 
-  def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, summer_season_sensor)
+  def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator)
     # Preconditioning
     # Assume introducing no sensible loads to zone if preconditioned
     if not vent_mech_preheat.empty?
@@ -1689,7 +1687,7 @@ class Airflow
       infil_program.addLine("Set ClgStp = #{clg_stp_sensor.name}") # cooling thermostat setpoint
     end
     vent_mech_preheat.each_with_index do |f_preheat, i|
-      infil_program.addLine("If (OASupInTemp < HtgStp) && (#{summer_season_sensor.name} < 1)")
+      infil_program.addLine('If (OASupInTemp < HtgStp)')
       htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreheating)
       htg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_preheat.id) # Used by reporting measure
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -1714,7 +1712,7 @@ class Airflow
       infil_program.addLine("Set #{htg_energy_actuator.name} = PreHeatingWatt / #{f_preheat.preheating_efficiency_cop}")
     end
     vent_mech_precool.each_with_index do |f_precool, i|
-      infil_program.addLine("If (OASupInTemp > ClgStp) && (#{summer_season_sensor.name} > 0)")
+      infil_program.addLine('If (OASupInTemp > ClgStp)')
       clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPrecooling)
       clg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_precool.id) # Used by reporting measure
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -1741,7 +1739,7 @@ class Airflow
   end
 
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, living_ach50, living_const_ach, infil_volume, infil_height, weather,
-                                                         vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, summer_season_sensor, schedules_file,
+                                                         vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, schedules_file,
                                                          vent_fans_cfis_suppl, vacancy_periods)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
@@ -1813,7 +1811,7 @@ class Airflow
     calculate_fan_loads(infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
 
     # Address preconditioning
-    calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, summer_season_sensor)
+    calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator)
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{infil_program.name} calling manager")
@@ -1823,7 +1821,7 @@ class Airflow
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                                    has_flue_chimney, living_ach50, living_const_ach, infil_volume, infil_height, vented_attic,
-                                                   vented_crawl, summer_season_sensor, schedules_file, vent_fans_cfis_suppl, vacancy_periods)
+                                                   vented_crawl, schedules_file, vent_fans_cfis_suppl, vacancy_periods)
 
     # Infiltration for unconditioned spaces
     apply_infiltration_to_garage(model, site, living_ach50)
@@ -1835,7 +1833,7 @@ class Airflow
 
     # Infiltration/ventilation for conditioned space
     apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, living_ach50, living_const_ach, infil_volume, infil_height, weather,
-                                                  vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, summer_season_sensor, schedules_file,
+                                                  vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, schedules_file,
                                                   vent_fans_cfis_suppl, vacancy_periods)
   end
 

@@ -730,7 +730,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     is_southern_hemisphere = @model.getBuilding.additionalProperties.getFeatureAsBoolean('is_southern_hemisphere').get
     is_northern_hemisphere = !is_southern_hemisphere
     @peak_fuels.each do |key, peak_fuel|
-      # FIXME: Need to handle southern hemisphere
       _fuel, season = key
       if (season == PFT::Summer && is_northern_hemisphere) || (season == PFT::Winter && is_southern_hemisphere)
         months = ['June', 'July', 'August']

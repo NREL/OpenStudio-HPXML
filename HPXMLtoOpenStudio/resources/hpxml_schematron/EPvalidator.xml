@@ -20,7 +20,6 @@
       <sch:assert role='ERROR' test='number(h:extension/h:NaturalVentilationAvailabilityDaysperWeek) &gt;= 0 or not(h:extension/h:NaturalVentilationAvailabilityDaysperWeek)'>Expected extension/NaturalVentilationAvailabilityDaysperWeek to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NaturalVentilationAvailabilityDaysperWeek) &lt;= 7 or not(h:extension/h:NaturalVentilationAvailabilityDaysperWeek)'>Expected extension/NaturalVentilationAvailabilityDaysperWeek to be less than or equal to 7</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
-      <sch:assert role='ERROR' test='count(h:extension/h:SummerSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SummerSeason</sch:assert> <!-- See [SummerSeason] -->
       <sch:assert role='ERROR' test='count(h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
       <sch:assert role='ERROR' test='count(h:extension/h:SchedulesFilePath) &gt;= 0'>Expected 0 or more element(s) for xpath: extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:EmissionsScenarios/h:EmissionsScenario) &gt;= 0'>Expected 0 or more element(s) for xpath: extension/EmissionsScenarios/EmissionsScenario</sch:assert> <!-- See [EmissionsScenario] -->
@@ -40,16 +39,6 @@
       <sch:assert role='ERROR' test='number(h:CalendarYear) &gt;= 1600 or not(h:CalendarYear)'>Expected CalendarYear to be greater than or equal to 1600</sch:assert>
       <sch:assert role='ERROR' test='number(h:CalendarYear) &lt;= 9999 or not(h:CalendarYear)'>Expected CalendarYear to be less than or equal to 9999</sch:assert>
       <sch:assert role='ERROR' test='count(h:TemperatureCapacitanceMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TemperatureCapacitanceMultiplier</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[SummerSeason]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SummerSeason'>
-      <sch:assert role='ERROR' test='count(h:BeginMonth) = 1'>Expected 1 element(s) for xpath: BeginMonth</sch:assert> <!-- integer -->
-      <sch:assert role='ERROR' test='count(h:BeginDayOfMonth) = 1'>Expected 1 element(s) for xpath: BeginDayOfMonth</sch:assert> <!-- integer -->
-      <sch:assert role='ERROR' test='count(h:EndMonth) = 1'>Expected 1 element(s) for xpath: EndMonth</sch:assert> <!-- integer -->
-      <sch:assert role='ERROR' test='count(h:EndDayOfMonth) = 1'>Expected 1 element(s) for xpath: EndDayOfMonth</sch:assert> <!-- integer -->
     </sch:rule>
   </sch:pattern>
 

@@ -61,11 +61,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, end uses based on number of bedrooms are adjusted for the number of occupants. If not provided, the OS-HPXML default is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('summer_season_period', false)
-    arg.setDisplayName('Summer Season Period')
-    arg.setDescription("Enter a date like 'Apr 15 - Oct 14'. If not provided, the OS-HPXML default is used. The winter season is defined as the remainder of the year. Summer/winter seasons are used for various modeling features including window shading, natural ventilation availability, and peak electricity outputs.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
     arg.setDisplayName('Schedules: CSV File Paths')
     arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
@@ -3475,14 +3470,6 @@ class HPXMLFile
 
     if args[:occupancy_calculation_type].is_initialized
       hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
-    end
-
-    if args[:summer_season_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:summer_season_period].get)
-      hpxml.header.seasons_summer_begin_month = begin_month
-      hpxml.header.seasons_summer_begin_day = begin_day
-      hpxml.header.seasons_summer_end_month = end_month
-      hpxml.header.seasons_summer_end_day = end_day
     end
 
     if args[:window_natvent_availability].is_initialized

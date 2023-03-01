@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0adcb837-3dda-411a-9a14-c2da08be2700</version_id>
-  <version_modified>20230301T232236Z</version_modified>
+  <version_id>02577dc2-fc40-455f-bdea-47f3bbd6cf4c</version_id>
+  <version_modified>20230301T234146Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -524,18 +524,6 @@
       <checksum>D05DFB8A</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9470CB4D</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8E3EC30C</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -548,22 +536,34 @@
       <checksum>5FC8D96B</checksum>
     </file>
     <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0B53F0BE</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EA18B33E</checksum>
+    </file>
+    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CDC639CF</checksum>
+      <checksum>A8ADA0A6</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>71A558B8</checksum>
+      <checksum>7B7C4726</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A8C47623</checksum>
+      <checksum>BD64D806</checksum>
     </file>
     <file>
       <version>
@@ -574,7 +574,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4A7CAD34</checksum>
+      <checksum>F7CF426B</checksum>
     </file>
   </files>
 </measure>

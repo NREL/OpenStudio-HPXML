@@ -205,23 +205,6 @@ class HPXMLDefaults
       hpxml.header.natvent_days_per_week = 3
       hpxml.header.natvent_days_per_week_isdefaulted = true
     end
-
-    if hpxml.header.seasons_summer_begin_month.nil? || hpxml.header.seasons_summer_begin_day.nil? ||
-       hpxml.header.seasons_summer_end_month.nil? || hpxml.header.seasons_summer_end_day.nil?
-      if (not epw_file.nil?) && (epw_file.latitude < 0) # Southern hemisphere
-        hpxml.header.seasons_summer_begin_month = 10 # Oct 15
-        hpxml.header.seasons_summer_end_month = 4 # Apr 14
-      else # Northern hemisphere
-        hpxml.header.seasons_summer_begin_month = 4 # Apr 15
-        hpxml.header.seasons_summer_end_month = 10 # Oct 14
-      end
-      hpxml.header.seasons_summer_begin_day = 15
-      hpxml.header.seasons_summer_end_day = 14
-      hpxml.header.seasons_summer_begin_month_isdefaulted = true
-      hpxml.header.seasons_summer_begin_day_isdefaulted = true
-      hpxml.header.seasons_summer_end_month_isdefaulted = true
-      hpxml.header.seasons_summer_end_day_isdefaulted = true
-    end
   end
 
   def self.apply_emissions_scenarios(hpxml, has_fuel)

@@ -411,7 +411,6 @@ def create_hpxmls
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-shielding-of-home.xml' => 'base.xml',
-    'base-misc-summer-season.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
@@ -2383,8 +2382,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['neighbor_front_height'] = 12
   elsif ['base-misc-shielding-of-home.xml'].include? hpxml_file
     args['site_shielding_of_home'] = HPXML::ShieldingWellShielded
-  elsif ['base-misc-summer-season.xml'].include? hpxml_file
-    args['summer_season_period'] = 'May 1 - Sep 30'
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     args['water_fixtures_usage_multiplier'] = 0.9
     args['lighting_interior_usage_multiplier'] = 0.9

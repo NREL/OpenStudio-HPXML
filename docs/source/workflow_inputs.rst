@@ -108,30 +108,6 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
 
 .. _hpxml_seasons:
 
-HPXML Summer/Winter Seasons
-***************************
-
-The summer season definition can be entered in ``/HPXML/SoftwareInfo/extension/SummerSeason``.
-
-  ===================  ========  =====  ===========  ========  =======  ===========
-  Element              Type      Units  Constraints  Required  Default  Description
-  ===================  ========  =====  ===========  ========  =======  ===========
-  ``BeginMonth``       integer          1 - 12       Yes                Begin month
-  ``BeginDayOfMonth``  integer          1 - 31       Yes                Begin day
-  ``EndMonth``         integer          1 - 12       Yes                End month
-  ``EndDayOfMonth``    integer          1 - 31       Yes                End day
-  ===================  ========  =====  ===========  ========  =======  ===========
-
-If not defined, summer defaults to Apr 15 - Oct 14 in the northern hemisphere and Oct 15 - Apr 14 in the southern hemisphere.
-The winter season is defined as the remainder of the year.
-
-.. note::
-
-  Summer/winter seasons are used for various modeling features including:
-
-  - Window shading
-  - Natural ventilation availability
-
 HPXML HVAC Sizing Control
 *************************
 

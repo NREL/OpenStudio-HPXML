@@ -208,7 +208,7 @@ class OSModel
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
     set_heating_and_cooling_seasons()
-    set_summer_and_winter_seasons(model)
+    set_summer_and_winter_seasons(model, epw_file)
     add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
@@ -1090,15 +1090,22 @@ class OSModel
     end
   end
 
-  def self.set_summer_and_winter_seasons(model)
-    summer_start_day_num = Schedule.get_day_num_from_month_day(@hpxml.header.sim_calendar_year,
-                                                               @hpxml.header.seasons_summer_begin_month,
-                                                               @hpxml.header.seasons_summer_begin_day)
-    summer_end_day_num = Schedule.get_day_num_from_month_day(@hpxml.header.sim_calendar_year,
-                                                             @hpxml.header.seasons_summer_end_month,
-                                                             @hpxml.header.seasons_summer_end_day)
+  def self.set_summer_and_winter_seasons(model, epw_file)
+    if epw_file.latitude < 0 # southern hemisphere
+      # Oct 15 - Apr 14
+      summer_begin_month = 10
+      summer_end_month = 4
+    else # northern hemisphere
+      # Apr 15 - Oct 14
+      summer_begin_month = 4
+      summer_end_month = 10
+    end
 
-    # 365-element array of 24-element arrays of 0 or 1
+    year = @hpxml.header.sim_calendar_year
+    summer_start_day_num = Schedule.get_day_num_from_month_day(year, summer_begin_month, 15)
+    summer_end_day_num = Schedule.get_day_num_from_month_day(year, summer_end_month, 14)
+
+    # 365-element array of 24-element arrays of 1 or 0
     @summer_values = []
     for day in 1..Constants.NumDaysInYear(@hpxml.header.sim_calendar_year)
       if summer_end_day_num > summer_start_day_num # northern hemisphere
@@ -1115,6 +1122,7 @@ class OSModel
     end
 
     # Create summer schedule
+    # FIXME: Use summer sch for component loads? If not, delete lines below.
     summer_sch = HourlyByDaySchedule.new(model, 'summer season schedule', @summer_values, @summer_values, Constants.ScheduleTypeLimitsFraction, false)
     @summer_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @summer_season_sensor.setName('summer_season')
@@ -1755,8 +1763,7 @@ class OSModel
       end
     end
 
-    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
-                  @ncfl_ag, duct_systems, airloop_map, @summer_season_sensor, @eri_version,
+    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds, @ncfl_ag, duct_systems, airloop_map, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
   end
 
