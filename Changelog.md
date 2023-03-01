@@ -12,6 +12,10 @@ __New Features__
 - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
 - Allows building air leakage to be specified using CFMnatural or EffectiveLeakageArea.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
+- Changes summer vs winter definitions:
+  - Default schedules changed from being based on monthly outdoor temperatures to calendar time (summer: Apr 15 - Oct 14 in northern hemisphere).
+  - Peak summer/winter electricity outputs are now based on summer/winter definitions, not HVAC heating/cooling operation.
+  - Summer schedule can now be overridden using HPXML inputs.
 - ReportSimulationOutput measure:
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).

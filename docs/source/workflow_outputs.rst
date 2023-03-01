@@ -284,12 +284,12 @@ Peak Building Electricity
 
 Peak building electricity outputs are listed below.
 
-   ==================================  =========================================================
+   ==================================  ==============================================
    Type                                Notes
-   ==================================  =========================================================
-   Peak Electricity: Winter Total (W)  Winter season defined by operation of the heating system.
-   Peak Electricity: Summer Total (W)  Summer season defined by operation of the cooling system.
-   ==================================  =========================================================
+   ==================================  ==============================================
+   Peak Electricity: Winter Total (W)  Winter season defined by :ref:`hpxml_seasons`.
+   Peak Electricity: Summer Total (W)  Summer season defined by :ref:`hpxml_seasons`.
+   ==================================  ==============================================
 
 Peak Building Loads
 ~~~~~~~~~~~~~~~~~~~

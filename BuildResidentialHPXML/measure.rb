@@ -61,6 +61,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, end uses based on number of bedrooms are adjusted for the number of occupants. If not provided, the OS-HPXML default is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('summer_season_period', false)
+    arg.setDisplayName('Summer Season Period')
+    arg.setDescription("Enter a date like 'Apr 15 - Oct 14'. If not provided, the OS-HPXML default is used. The winter season is defined as the remainder of the year. Summer/winter seasons are used for various modeling features including window shading, natural ventilation availability, and peak electricity outputs.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
     arg.setDisplayName('Schedules: CSV File Paths')
     arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
@@ -779,25 +784,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_winter', false)
     arg.setDisplayName('Windows: Winter Interior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Interior shading multiplier for the heating season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Interior shading multiplier for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_summer', false)
     arg.setDisplayName('Windows: Summer Interior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Interior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Interior shading multiplier for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_winter', false)
     arg.setDisplayName('Windows: Winter Exterior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Exterior shading multiplier for the heating season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Exterior shading multiplier for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_summer', false)
     arg.setDisplayName('Windows: Summer Exterior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Exterior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Exterior shading multiplier for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     storm_window_type_choices = OpenStudio::StringVector.new
@@ -2646,7 +2651,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_cooling_setpoint_temp_offset', false)
     arg.setDisplayName('Ceiling Fan: Cooling Setpoint Temperature Offset')
     arg.setUnits('deg-F')
-    arg.setDescription('The setpoint temperature offset during cooling season for the ceiling fan(s). Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('The setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_television_present', true)
@@ -3463,6 +3468,14 @@ class HPXMLFile
 
     if args[:occupancy_calculation_type].is_initialized
       hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
+    end
+
+    if args[:summer_season_period].is_initialized
+      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:summer_season_period].get)
+      hpxml.header.seasons_summer_begin_month = begin_month
+      hpxml.header.seasons_summer_begin_day = begin_day
+      hpxml.header.seasons_summer_end_month = end_month
+      hpxml.header.seasons_summer_end_day = end_day
     end
 
     if args[:window_natvent_availability].is_initialized
@@ -5030,7 +5043,7 @@ class HPXMLFile
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
-          begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:hvac_control_cooling_season_period].get)
+          begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(hvac_control_cooling_season_period)
         end
         seasons_cooling_begin_month = begin_month
         seasons_cooling_begin_day = begin_day

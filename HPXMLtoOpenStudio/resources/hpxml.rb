@@ -936,8 +936,8 @@ class HPXML < Object
              :heat_pump_sizing_methodology, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths,
              :occupancy_calculation_type, :extension_properties, :iecc_eri_calculation_version,
-             :zerh_calculation_version, :temperature_capacitance_multiplier,
-             :natvent_days_per_week]
+             :zerh_calculation_version, :temperature_capacitance_multiplier, :natvent_days_per_week,
+             :seasons_summer_begin_month, :seasons_summer_begin_day, :seasons_summer_end_month, :seasons_summer_end_day]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -962,6 +962,7 @@ class HPXML < Object
       end
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
+      errors += HPXML::check_dates('Summer Season', @seasons_summer_begin_month, @seasons_summer_begin_day, @seasons_summer_end_month, @seasons_summer_end_day)
       errors += @emissions_scenarios.check_for_errors
       errors += @utility_bill_scenarios.check_for_errors
       errors += @vacancy_periods.check_for_errors
@@ -1009,6 +1010,13 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', @sim_end_day, :integer, @sim_end_day_isdefaulted) unless @sim_end_day.nil?
         XMLHelper.add_element(simulation_control, 'CalendarYear', @sim_calendar_year, :integer, @sim_calendar_year_isdefaulted) unless @sim_calendar_year.nil?
         XMLHelper.add_element(simulation_control, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
+      end
+      if (not @seasons_summer_begin_month.nil?) || (not @seasons_summer_begin_day.nil?) || (not @seasons_summer_end_month.nil?) || (not @seasons_summer_end_day.nil?)
+        summer_season = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SummerSeason'])
+        XMLHelper.add_element(summer_season, 'BeginMonth', @seasons_summer_begin_month, :integer, @seasons_summer_begin_month_isdefaulted) unless @seasons_summer_begin_month.nil?
+        XMLHelper.add_element(summer_season, 'BeginDayOfMonth', @seasons_summer_begin_day, :integer, @seasons_summer_begin_day_isdefaulted) unless @seasons_summer_begin_day.nil?
+        XMLHelper.add_element(summer_season, 'EndMonth', @seasons_summer_end_month, :integer, @seasons_summer_end_month_isdefaulted) unless @seasons_summer_end_month.nil?
+        XMLHelper.add_element(summer_season, 'EndDayOfMonth', @seasons_summer_end_day, :integer, @seasons_summer_end_day_isdefaulted) unless @seasons_summer_end_day.nil?
       end
       if (not @heat_pump_sizing_methodology.nil?) || (not @allow_increased_fixed_capacities.nil?)
         hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'HVACSizingControl'])
@@ -1088,6 +1096,10 @@ class HPXML < Object
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
+      @seasons_summer_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SummerSeason/BeginMonth', :integer)
+      @seasons_summer_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SummerSeason/BeginDayOfMonth', :integer)
+      @seasons_summer_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SummerSeason/EndMonth', :integer)
+      @seasons_summer_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SummerSeason/EndDayOfMonth', :integer)
       @occupancy_calculation_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancyCalculationType', :string)
       @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)

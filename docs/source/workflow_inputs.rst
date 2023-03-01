@@ -106,6 +106,33 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
 
+.. _hpxml_seasons:
+
+HPXML Summer/Winter Seasons
+***************************
+
+The summer season definition can be entered in ``/HPXML/SoftwareInfo/extension/SummerSeason``.
+
+  ===================  ========  =====  ===========  ========  =======  ===========
+  Element              Type      Units  Constraints  Required  Default  Description
+  ===================  ========  =====  ===========  ========  =======  ===========
+  ``BeginMonth``       integer          1 - 12       Yes                Begin month
+  ``BeginDayOfMonth``  integer          1 - 31       Yes                Begin day
+  ``EndMonth``         integer          1 - 12       Yes                End month
+  ``EndDayOfMonth``    integer          1 - 31       Yes                End day
+  ===================  ========  =====  ===========  ========  =======  ===========
+
+If not defined, summer defaults to Apr 15 - Oct 14 in the northern hemisphere and Oct 15 - Apr 14 in the southern hemisphere.
+The winter season is defined as the remainder of the year.
+
+.. note::
+
+  Summer/winter seasons are used for various modeling features including:
+
+  - Window shading
+  - Natural ventilation availability
+  - Peak electricity outputs
+
 HPXML HVAC Sizing Control
 *************************
 
@@ -3116,7 +3143,7 @@ Ceiling fan energy use is calculated per the Energy Rating Rated Home in `ANSI/R
 
 .. note::
 
-  A reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
+  A reduced cooling setpoint can be specified for months when ceiling fans are operating.
   See :ref:`hvac_control` for more information.
 
 HPXML Pools & Hot Tubs
