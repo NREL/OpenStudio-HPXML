@@ -131,7 +131,6 @@ The winter season is defined as the remainder of the year.
 
   - Window shading
   - Natural ventilation availability
-  - Peak electricity outputs
 
 HPXML HVAC Sizing Control
 *************************

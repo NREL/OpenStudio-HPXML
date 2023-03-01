@@ -12,11 +12,11 @@ __New Features__
 - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
 - Allows building air leakage to be specified using CFMnatural or EffectiveLeakageArea.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
-- Summer/winter seasons (for window shading, natural ventilation availability, etc.):
-  - Default seasons now based on calendar time (e.g., summer: Apr 15 - Oct 14 in northern hemisphere) instead of monthly outdoor temperatures.
-  - Peak summer/winter electricity outputs are now based on summer/winter definitions, not HVAC heating/cooling operation.
-  - Summer/winter seasons can now be entered using HPXML inputs.
+- Summer/winter seasons (for, e.g., window shading, natural ventilation availability):
+  - Defaults now based on calendar time (e.g., summer: Apr 15 - Oct 14 in northern hemisphere) instead of monthly outdoor temperatures.
+  - Seasons can now be defined using HPXML inputs.
 - ReportSimulationOutput measure:
+  - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
 - **Breaking change**: Updates component loads outputs:
