@@ -4,7 +4,7 @@ class Airflow
   # Constants
   InfilPressureExponent = 0.65
 
-  def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds, ncfl_ag, duct_systems, airloop_map, eri_version,
+  def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds, ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file, vacancy_periods)
 
     # Global variables
@@ -118,7 +118,7 @@ class Airflow
       living_ach50 = nil
     end
 
-    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area,
+    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
                                                   hpxml.header.natvent_days_per_week, infil_volume, infil_height)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, living_ach50, living_const_ach, infil_volume, infil_height,
@@ -321,7 +321,7 @@ class Airflow
     end
   end
 
-  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area,
+  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, clg_ssn_sensor,
                                                          natvent_days_per_week, infil_volume, infil_height)
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
@@ -433,11 +433,12 @@ class Airflow
       vent_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
+    vent_program.addLine("Set ClgSsnAvail = #{clg_ssn_sensor.name}")
     vent_program.addLine("Set #{nv_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{whf_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
-    vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp)')
+    vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
     vent_program.addLine('  Set WHF_Flow = 0')
     vent_fans_whf.each do |vent_whf|
       vent_program.addLine("  Set WHF_Flow = WHF_Flow + #{UnitConversions.convert(vent_whf.flow_rate, 'cfm', 'm^3/s')} * #{whf_avail_sensors[vent_whf.id].name}")

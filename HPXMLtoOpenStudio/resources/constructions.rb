@@ -1618,7 +1618,7 @@ class Constructions
   end
 
   def self.apply_window_skylight_shading(model, window_or_skylight, index, shading_vertices, parent_surface, sub_surface, shading_group,
-                                         shading_schedules, shading_ems, name, summer_values)
+                                         shading_schedules, shading_ems, name, epw_file)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
@@ -1632,6 +1632,23 @@ class Constructions
       shading_surface.setName("#{window_or_skylight.id} shading surface")
       shading_surface.additionalProperties.setFeature('Azimuth', window_or_skylight.azimuth)
       shading_surface.additionalProperties.setFeature('ParentSurface', parent_surface.name.to_s)
+      
+      # Determine summer/winter seasons
+      year = model.getYearDescription.assumedYear
+      summer_start_day_num, summer_end_day_num = Location.get_summer_season(epw_file, year)
+      summer_values = []
+      for day in 1..Constants.NumDaysInYear(year)
+        if summer_end_day_num > summer_start_day_num # northern hemisphere
+          is_summer = (day >= summer_start_day_num && day <= summer_end_day_num)
+        else # southern hemisphere
+          is_summer = (day >= summer_start_day_num || day <= summer_end_day_num)
+        end
+        if is_summer
+          summer_values << [1] * 24
+        else
+          summer_values << [0] * 24
+        end
+      end
 
       # Create transmittance schedule for summer/winter seasons
       trans_values = []

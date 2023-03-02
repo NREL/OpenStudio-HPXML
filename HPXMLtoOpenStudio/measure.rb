@@ -207,8 +207,7 @@ class OSModel
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
-    set_heating_and_cooling_seasons()
-    set_summer_and_winter_seasons(model, epw_file)
+    set_heating_and_cooling_seasons(model, weather)
     add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
@@ -217,9 +216,9 @@ class OSModel
     add_rim_joists(runner, model, spaces)
     add_floors(runner, model, spaces)
     add_foundation_walls_slabs(runner, model, weather, spaces)
-    add_windows(model, spaces)
+    add_windows(model, spaces, epw_file)
     add_doors(model, spaces)
-    add_skylights(model, spaces)
+    add_skylights(model, spaces, epw_file)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
     Geometry.set_zone_volumes(spaces, @hpxml, @apply_ashrae140_assumptions)
@@ -1090,46 +1089,7 @@ class OSModel
     end
   end
 
-  def self.set_summer_and_winter_seasons(model, epw_file)
-    if epw_file.latitude < 0 # southern hemisphere
-      # Oct 15 - Apr 14
-      summer_begin_month = 10
-      summer_end_month = 4
-    else # northern hemisphere
-      # Apr 15 - Oct 14
-      summer_begin_month = 4
-      summer_end_month = 10
-    end
-
-    year = @hpxml.header.sim_calendar_year
-    summer_start_day_num = Schedule.get_day_num_from_month_day(year, summer_begin_month, 15)
-    summer_end_day_num = Schedule.get_day_num_from_month_day(year, summer_end_month, 14)
-
-    # 365-element array of 24-element arrays of 1 or 0
-    @summer_values = []
-    for day in 1..Constants.NumDaysInYear(@hpxml.header.sim_calendar_year)
-      if summer_end_day_num > summer_start_day_num # northern hemisphere
-        is_summer = (day >= summer_start_day_num && day <= summer_end_day_num)
-      else # southern hemisphere
-        is_summer = (day >= summer_start_day_num || day <= summer_end_day_num)
-      end
-
-      if is_summer
-        @summer_values << [1] * 24
-      else
-        @summer_values << [0] * 24
-      end
-    end
-
-    # Create summer schedule
-    # FIXME: Use summer sch for component loads? If not, delete lines below.
-    summer_sch = HourlyByDaySchedule.new(model, 'summer season schedule', @summer_values, @summer_values, Constants.ScheduleTypeLimitsFraction, false)
-    @summer_season_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    @summer_season_sensor.setName('summer_season')
-    @summer_season_sensor.setKeyName(summer_sch.schedule.name.to_s)
-  end
-
-  def self.add_windows(model, spaces)
+  def self.add_windows(model, spaces, epw_file)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
     # so as to prevent potentially modeling multiple identical windows in E+,
@@ -1194,7 +1154,7 @@ class OSModel
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
         shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @summer_values)
+                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, epw_file)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1231,7 +1191,7 @@ class OSModel
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def self.add_skylights(model, spaces)
+  def self.add_skylights(model, spaces, epw_file)
     surfaces = []
 
     shading_group = nil
@@ -1272,7 +1232,7 @@ class OSModel
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
       shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @summer_values)
+                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, epw_file)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')
@@ -1763,7 +1723,7 @@ class OSModel
       end
     end
 
-    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds, @ncfl_ag, duct_systems, airloop_map, @eri_version,
+    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds, @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
   end
 
@@ -2391,13 +2351,14 @@ class OSModel
     end
 
     # EMS program: Heating vs Cooling logic
+    
     program.addLine('Set htg_mode = 0')
     program.addLine('Set clg_mode = 0')
     program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
     program.addLine('  Set htg_mode = 1')
     program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
     program.addLine('  Set clg_mode = 1')
-    program.addLine("ElseIf (#{@summer_season_sensor.name} > 0)") # No load, assign hour to cooling if in summer season definition (Note: natural ventilation & whole house fan only operate during the summer season)
+    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
     program.addLine('  Set clg_mode = 1')
     program.addLine('Else') # No load, assign hour to heating if not in cooling season definition
     program.addLine('  Set htg_mode = 1')
@@ -2664,7 +2625,15 @@ class OSModel
     @walls_top = @foundation_top + 8.0 * @ncfl_ag
   end
 
-  def self.set_heating_and_cooling_seasons()
+  def self.set_heating_and_cooling_seasons(model, weather)
+    # Use BAHSP cooling season, and not year-round or user-specified cooling season, for component loads and natural ventilation.
+    _default_heating_months, @default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+    
+    clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), @default_cooling_months, Constants.ScheduleTypeLimitsFraction)
+    @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    @clg_ssn_sensor.setName('cool_season')
+    @clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
+  
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]

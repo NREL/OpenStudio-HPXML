@@ -127,4 +127,19 @@ class Location
     end
     return sim_calendar_year
   end
+  
+  def self.get_summer_season(epw_file, year)
+    if epw_file.latitude < 0 # southern hemisphere
+      # Oct 15 - Apr 14
+      summer_begin_month = 10
+      summer_end_month = 4
+    else # northern hemisphere
+      # Apr 15 - Oct 14
+      summer_begin_month = 4
+      summer_end_month = 10
+    end
+    summer_start_day_num = Schedule.get_day_num_from_month_day(year, summer_begin_month, 15)
+    summer_end_day_num = Schedule.get_day_num_from_month_day(year, summer_end_month, 14)
+    return summer_start_day_num, summer_end_day_num
+  end
 end
