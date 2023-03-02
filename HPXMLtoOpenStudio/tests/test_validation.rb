@@ -676,7 +676,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
                               'onoff-thermostat-timestep-ten-mins' => ['Timestep should be 1; simulation will continue without deadband control.'],
                               'onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
-                              'onoff-thermostat-num-speeds-greater-than-one' => ['Expected single speed DX systems to be modeled; simulation will continue without deadband control.'],
+                              'onoff-thermostat-num-speeds-greater-than-two' => ['Expected single-speed or two-speed DX systems to be modeled; simulation will continue without deadband control.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
@@ -788,7 +788,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
         hpxml.header.temperature_capacitance_multiplier = 1
-      elsif ['onoff-thermostat-num-speeds-greater-than-one'].include? warning_case
+      elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
         hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
