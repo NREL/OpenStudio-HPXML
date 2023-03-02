@@ -255,7 +255,7 @@ class OSModel
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(runner, model, spaces)
-    add_additional_properties(model, hpxml_path, building_id)
+    add_additional_properties(model, hpxml_path, building_id, epw_file)
 
     # Output
 
@@ -1842,7 +1842,7 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(model, hpxml_path, building_id)
+  def self.add_additional_properties(model, hpxml_path, building_id, epw_file)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
