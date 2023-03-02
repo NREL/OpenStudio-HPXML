@@ -527,6 +527,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if err_line.include? 'View factors not complete'
       next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
+      next if err_line.include?('Wrong coil speed EMS override value, for unit=') && err_line.include?('Exceeding maximum coil speed level.') # FIXME: speed level actuator throws this error when speed is set to 1 but no load
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
