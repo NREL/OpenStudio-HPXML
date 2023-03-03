@@ -202,7 +202,7 @@ class OSModel
     validate_emissions_files()
     Location.apply(model, weather, epw_file, @hpxml)
     add_simulation_params(model)
-    @availability_sensor = create_availability_sensor_sensor(model)
+    @availability_sensor = create_availability_sensor(model)
 
     # Conditioned space/zone
 
