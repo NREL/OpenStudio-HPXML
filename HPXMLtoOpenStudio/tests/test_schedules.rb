@@ -179,7 +179,7 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple-power-outage.xml'))
     model, _hpxml = _test_measure(args_hash)
 
-    outage_hrs = 31.0 * 2.0 * 24.0 - 15.0
+    outage_hrs = 31.0 * 1.0 * 24.0 - 15.0
     powered_ratio = (1.0 - outage_hrs / 8760.0)
 
     assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), 0.1)
