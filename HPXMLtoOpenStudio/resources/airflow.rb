@@ -7,7 +7,7 @@ class Airflow
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
                  ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file,
-                 vacancy_periods, power_outage_periods, outage_sensor)
+                 vacancy_periods, power_outage_periods, availability_sensor)
 
     # Global variables
 
@@ -23,7 +23,7 @@ class Airflow
     @cfa = cfa
     @cooking_range_in_cond_space = hpxml.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.cooking_ranges[0].location)
     @clothes_dryer_in_cond_space = hpxml.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.clothes_dryers[0].location)
-    @outage_sensor = outage_sensor
+    @availability_sensor = availability_sensor
 
     # Global sensors
 
@@ -441,10 +441,10 @@ class Airflow
     vent_program.addLine("Set #{whf_flow_actuator.name} = 0") # Init
     vent_program.addLine("Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
-    if @outage_sensor.nil?
+    if @availability_sensor.nil?
       vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
     else
-      vent_program.addLine("If ((Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)) || ((Tin > Tout) && (Tin > Tnvsp) && (#{@outage_sensor.name} == 0))") # 0 means during the power outage period
+      vent_program.addLine("If ((Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)) || ((Tin > Tout) && (Tin > Tnvsp) && (#{@availability_sensor.name} == 0))")
     end
     vent_program.addLine('  Set WHF_Flow = 0')
     vent_fans_whf.each do |vent_whf|
