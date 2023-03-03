@@ -2504,11 +2504,12 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Power Outage
   if ['base-power-outage.xml',
-      'base-schedules-simple-power-outage.xml',
-      'base-schedules-simple-power-outage-natvent-available.xml',
-      'base-schedules-simple-power-outage-natvent-unavailable.xml',
       'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
     args['schedules_power_outage_period'] = 'Dec 1 5 - Jan 31 14'
+  elsif ['base-schedules-simple-power-outage.xml',
+         'base-schedules-simple-power-outage-natvent-available.xml',
+         'base-schedules-simple-power-outage-natvent-unavailable.xml'].include? hpxml_file
+    args['schedules_power_outage_period'] = 'Jul 1 5 - Jul 31 14'
     if hpxml_file == 'base-schedules-simple-power-outage-natvent-available.xml'
       args['schedules_power_outage_window_natvent_availability'] = HPXML::ScheduleAvailable
     elsif hpxml_file == 'base-schedules-simple-power-outage-natvent-unavailable.xml'
