@@ -676,6 +676,49 @@ class ReportSimulationOutputTest < MiniTest::Test
     _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 5, -1) # Dec
   end
 
+  def test_timeseries_hourly_enduses_power_outage_natvent_availability
+    energy_use_total_col = 'Energy Use: Total'
+    temperature_living_space_col = 'Temperature: Living Space'
+
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-power-outage.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_total_consumptions' => true,
+                  'include_timeseries_zone_temperatures' => true }
+    _annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(timeseries_csv))
+    values = _get_values(timeseries_csv, [energy_use_total_col, temperature_living_space_col])
+    schedule_regular_total = values[energy_use_total_col].sum(0.0)
+    schedule_regular_temp = values[temperature_living_space_col].sum(0.0) / values[temperature_living_space_col].size
+
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-power-outage-natvent-available.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_total_consumptions' => true,
+                  'include_timeseries_zone_temperatures' => true }
+    _annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(timeseries_csv))
+    values = _get_values(timeseries_csv, [energy_use_total_col, temperature_living_space_col])
+    schedule_available_total = values[energy_use_total_col].sum(0.0)
+    schedule_available_temp = values[temperature_living_space_col].sum(0.0) / values[temperature_living_space_col].size
+
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-power-outage-natvent-unavailable.xml'),
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_total_consumptions' => true,
+                  'include_timeseries_zone_temperatures' => true }
+    _annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(timeseries_csv))
+    values = _get_values(timeseries_csv, [energy_use_total_col, temperature_living_space_col])
+    schedule_unavailable_total = values[energy_use_total_col].sum(0.0)
+    schedule_unavailable_temp = values[temperature_living_space_col].sum(0.0) / values[temperature_living_space_col].size
+
+    assert_operator(schedule_regular_total, :>, schedule_available_total)
+    assert_operator(schedule_available_total, :<, schedule_unavailable_total)
+    assert_operator(schedule_unavailable_total, :<, schedule_regular_total)
+
+    assert_operator(schedule_regular_temp, :>, schedule_available_temp)
+    assert_operator(schedule_available_temp, :<, schedule_unavailable_temp)
+    assert_operator(schedule_unavailable_temp, :>, schedule_regular_temp)
+  end
+
   def test_timeseries_hourly_hotwateruses
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'timeseries_frequency' => 'hourly',
@@ -1357,7 +1400,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     return steps.uniq.size
   end
 
-  def _check_for_nonzero_avg_timeseries_value(timeseries_csv, timeseries_cols)
+  def _get_values(timeseries_csv, timeseries_cols)
     values = {}
     timeseries_cols.each do |col|
       values[col] = []
@@ -1371,6 +1414,12 @@ class ReportSimulationOutputTest < MiniTest::Test
         values[col] << Float(row[col])
       end
     end
+    return values
+  end
+
+  def _check_for_nonzero_avg_timeseries_value(timeseries_csv, timeseries_cols)
+    values = _get_values(timeseries_csv, timeseries_cols)
+
     timeseries_cols.each do |col|
       avg_value = values[col].sum(0.0) / values[col].size
       assert_operator(avg_value, :!=, 0)
@@ -1378,19 +1427,8 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   def _check_for_zero_timeseries_values(timeseries_csv, timeseries_cols, start_ix, end_ix)
-    values = {}
-    timeseries_cols.each do |col|
-      values[col] = []
-    end
-    CSV.foreach(timeseries_csv, headers: true) do |row|
-      next if row['Time'].nil?
+    values = _get_values(timeseries_csv, timeseries_cols)
 
-      timeseries_cols.each do |col|
-        fail "Unexpected column: #{col}." if row[col].nil?
-
-        values[col] << Float(row[col])
-      end
-    end
     timeseries_cols.each do |col|
       has_only_zero_timeseries_values = values[col][start_ix..end_ix].all? { |x| x == 0 }
       assert(has_only_zero_timeseries_values)
@@ -1399,19 +1437,7 @@ class ReportSimulationOutputTest < MiniTest::Test
 
   def _check_for_nonzero_timeseries_values(timeseries_csv, timeseries_cols)
     # check that every day has non zero values for baseload equipment (e.g., refrigerator)
-    values = {}
-    timeseries_cols.each do |col|
-      values[col] = []
-    end
-    CSV.foreach(timeseries_csv, headers: true) do |row|
-      next if row['Time'].nil?
-
-      timeseries_cols.each do |col|
-        fail "Unexpected column: #{col}." if row[col].nil?
-
-        values[col] << Float(row[col])
-      end
-    end
+    values = _get_values(timeseries_csv, timeseries_cols)
 
     timeseries_cols.each do |col|
       has_no_zero_timeseries_value = !values[col].include?(0.0)
