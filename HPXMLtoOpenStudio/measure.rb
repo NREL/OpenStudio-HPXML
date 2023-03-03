@@ -202,6 +202,7 @@ class OSModel
     validate_emissions_files()
     Location.apply(model, weather, epw_file, @hpxml)
     add_simulation_params(model)
+    @outage_sensor = create_outage_sensor(model)
 
     # Conditioned space/zone
 
@@ -274,6 +275,20 @@ class OSModel
   end
 
   private
+
+  def self.create_outage_sensor(model)
+    # Power outage sensor
+    outage_sensor = nil
+    if not @hpxml.header.power_outage_periods.empty?
+      outage_sch = ScheduleConstant.new(model, SchedulesFile::ColumnOutage, 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: @hpxml.header.power_outage_periods)
+      outage_sch = outage_sch.schedule
+
+      outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
+      outage_sensor.setKeyName(outage_sch.name.to_s)
+    end
+    return outage_sensor
+  end
 
   def self.check_file_references(hpxml_path)
     # Check/update file references
@@ -1740,7 +1755,8 @@ class OSModel
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
-                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods, @hpxml.header.power_outage_periods)
+                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file,
+                  @hpxml.header.vacancy_periods, @hpxml.header.power_outage_periods, @outage_sensor)
   end
 
   def self.create_ducts(model, hvac_distribution, spaces)
@@ -1873,17 +1889,6 @@ class OSModel
       clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
     end
 
-    # Power outage sensor
-    outage_sensor = nil
-    if not @hpxml.header.power_outage_periods.empty?
-      outage_sch = ScheduleConstant.new(model, SchedulesFile::ColumnOutage, 1.0, Constants.ScheduleTypeLimitsFraction, off_periods: @hpxml.header.power_outage_periods)
-      outage_sch = outage_sch.schedule
-
-      outage_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      outage_sensor.setName("#{SchedulesFile::ColumnOutage} s")
-      outage_sensor.setKeyName(outage_sch.name.to_s)
-    end
-
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     # EMS sensors
@@ -1908,7 +1913,7 @@ class OSModel
       else
         line = "If ((DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day}))"
       end
-      line += " && (#{outage_sensor.name} == 1)" if not outage_sensor.nil? # 1 means NOT during power outage period
+      line += " && (#{@outage_sensor.name} == 1)" if not @outage_sensor.nil? # 1 means NOT during power outage period
       program.addLine(line)
       program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
       program.addLine('EndIf')
@@ -1919,7 +1924,7 @@ class OSModel
       else
         line = "If ((DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day}))"
       end
-      line += " && (#{outage_sensor.name} == 1)" if not outage_sensor.nil? # 1 means NOT during power outage period
+      line += " && (#{@outage_sensor.name} == 1)" if not @outage_sensor.nil? # 1 means NOT during power outage period
       program.addLine(line)
       program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
       program.addLine('EndIf')
