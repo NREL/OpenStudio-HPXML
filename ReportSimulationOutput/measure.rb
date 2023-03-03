@@ -986,7 +986,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def write_annual_output_results(runner, outputs, output_format, annual_output_path)
     # Set rounding precision.
     # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
-    dig = 2 # Default for annual (or near-annual) data
+    dig = 3 # Default for annual (or near-annual) data
     year = 2000 # Not important
     sim_n_days = (Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
                   Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
