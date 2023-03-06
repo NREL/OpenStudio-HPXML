@@ -334,6 +334,10 @@ class OSModel
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
 
+    # Now that we've written in.xml, collapse enclosure surfaces.
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
+    @hpxml.collapse_enclosure_surfaces()
+
     # Handle zero occupants when operational calculation
     occ_calc_type = @hpxml.header.occupancy_calculation_type
     noccs = @hpxml.building_occupancy.number_of_residents
@@ -1100,6 +1104,15 @@ class OSModel
   end
 
   def self.add_windows(model, spaces)
+    # We already stored @fraction_of_windows_operable, so lets remove the
+    # fraction_operable properties from windows and re-collapse the enclosure
+    # so as to prevent potentially modeling multiple identical windows in E+,
+    # which can increase simulation runtime.
+    @hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    @hpxml.collapse_enclosure_surfaces()
+
     shading_group = nil
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }
@@ -1730,7 +1743,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
-                  @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
+                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
   end
 
   def self.create_ducts(model, hvac_distribution, spaces)

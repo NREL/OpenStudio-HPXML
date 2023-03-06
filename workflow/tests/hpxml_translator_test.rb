@@ -419,6 +419,12 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
+    # Collapse windows further using same logic as measure.rb
+    hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    hpxml.collapse_enclosure_surfaces()
+
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
