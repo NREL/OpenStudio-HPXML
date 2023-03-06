@@ -6,7 +6,7 @@ class Airflow
 
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
                  ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
-                 frac_windows_operable, apply_ashrae140_assumptions, schedules_file, vacancy_periods)
+                 apply_ashrae140_assumptions, schedules_file, vacancy_periods)
 
     # Global variables
 
@@ -96,7 +96,7 @@ class Airflow
 
     set_wind_speed_correction(model, hpxml.site)
     window_area = hpxml.windows.map { |w| w.area }.sum(0.0)
-    open_window_area = window_area * frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
+    open_window_area = window_area * hpxml.fraction_of_windows_operable() * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
 
     vented_attic = nil
     hpxml.attics.each do |attic|

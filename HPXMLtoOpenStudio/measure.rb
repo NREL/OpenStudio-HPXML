@@ -326,8 +326,6 @@ class OSModel
     # Apply defaults to HPXML object
     HPXMLDefaults.apply(runner, @hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
-    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
-
     # Write updated HPXML object (w/ defaults) to file for inspection
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
@@ -1102,15 +1100,6 @@ class OSModel
   end
 
   def self.add_windows(model, spaces)
-    # We already stored @fraction_of_windows_operable, so lets remove the
-    # fraction_operable properties from windows and re-collapse the enclosure
-    # so as to prevent potentially modeling multiple identical windows in E+,
-    # which can increase simulation runtime.
-    @hpxml.windows.each do |window|
-      window.fraction_operable = nil
-    end
-    @hpxml.collapse_enclosure_surfaces()
-
     shading_group = nil
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }
@@ -1741,7 +1730,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
-                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
+                  @apply_ashrae140_assumptions, @schedules_file, @hpxml.header.vacancy_periods)
   end
 
   def self.create_ducts(model, hvac_distribution, spaces)
