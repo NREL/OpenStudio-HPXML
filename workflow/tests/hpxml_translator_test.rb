@@ -419,12 +419,6 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
-    # Collapse windows further using same logic as measure.rb
-    hpxml.windows.each do |window|
-      window.fraction_operable = nil
-    end
-    hpxml.collapse_enclosure_surfaces()
-
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
@@ -906,6 +900,10 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
+      if subsurface.is_a? HPXML::Window
+        next if subsurface.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+      end
+
       subsurface_id = subsurface.id.upcase
 
       if subsurface.is_exterior
@@ -959,11 +957,11 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
-      if subsurface.respond_to? :wall_idref
+      if subsurface.is_a? HPXML::Window
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(90.0, sql_value, 0.01)
-      elsif subsurface.respond_to? :roof_idref
+      elsif subsurface.is_a? HPXML::Skylight
         hpxml_value = nil
         hpxml.roofs.each do |roof|
           next if roof.id != subsurface.roof_idref
@@ -980,6 +978,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
+      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
       door_id = door.id.upcase
 
       if door.wall.is_exterior
