@@ -444,6 +444,9 @@ class Airflow
     if @availability_sensor.nil?
       vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
     else
+      # We are using the availability schedule, but we also constrain the window opening based on temperatures and humidity.
+      # We're assuming that if it's an outage, you'd ignore the humidity constraints we normally put on window opening per the old HSP guidance (RH < 70% and w < 0.015).
+      # Without, the humidity constraints prevent the window from opening during the entire outage period even though the sensible cooling would have really helped.
       vent_program.addLine("If ((Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)) || ((Tin > Tout) && (Tin > Tnvsp) && (#{@availability_sensor.name} == 0))")
     end
     vent_program.addLine('  Set WHF_Flow = 0')
