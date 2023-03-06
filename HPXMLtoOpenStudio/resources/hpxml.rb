@@ -392,7 +392,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
 
-  def initialize(hpxml_path: nil, schema_path: nil, schematron_path: nil, collapse_enclosure: true, building_id: nil)
+  def initialize(hpxml_path: nil, schema_path: nil, schematron_path: nil, building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -446,12 +446,6 @@ class HPXML < Object
     # Check for additional errors (those hard to check via Schematron)
     @errors += check_for_errors()
     return unless @errors.empty?
-
-    # Clean up
-    delete_adiabatic_subsurfaces()
-    if collapse_enclosure
-      collapse_enclosure_surfaces()
-    end
   end
 
   def hvac_systems
@@ -6782,21 +6776,6 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
-    end
-  end
-
-  def delete_adiabatic_subsurfaces()
-    @doors.reverse_each do |door|
-      next if door.wall.nil?
-      next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
-
-      door.delete
-    end
-    @windows.reverse_each do |window|
-      next if window.wall.nil?
-      next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
-
-      window.delete
     end
   end
 

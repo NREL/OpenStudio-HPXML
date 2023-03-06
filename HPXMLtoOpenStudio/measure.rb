@@ -1117,6 +1117,8 @@ class OSModel
 
     surfaces = []
     @hpxml.windows.each_with_index do |window, i|
+      next if window.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1253,6 +1255,8 @@ class OSModel
   def self.add_doors(model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
+      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
       door_height = 6.67 # ft
       door_length = door.area / door_height
       z_origin = @foundation_top
