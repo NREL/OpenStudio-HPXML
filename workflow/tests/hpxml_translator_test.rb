@@ -424,6 +424,7 @@ class HPXMLTest < MiniTest::Test
       window.fraction_operable = nil
     end
     hpxml.collapse_enclosure_surfaces()
+    hpxml.delete_adiabatic_subsurfaces()
 
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
@@ -906,10 +907,6 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
-      if subsurface.is_a? HPXML::Window
-        next if subsurface.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-      end
-
       subsurface_id = subsurface.id.upcase
 
       if subsurface.is_exterior
@@ -984,8 +981,6 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-
       door_id = door.id.upcase
 
       if door.wall.is_exterior
