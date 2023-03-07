@@ -334,9 +334,10 @@ class OSModel
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
 
-    # Now that we've written in.xml, collapse enclosure surfaces.
+    # Now that we've written in.xml, make adjustments for modeling purposes.
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
-    @hpxml.collapse_enclosure_surfaces()
+    @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
+    @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
     # Handle zero occupants when operational calculation
     occ_calc_type = @hpxml.header.occupancy_calculation_type
@@ -1119,8 +1120,6 @@ class OSModel
 
     surfaces = []
     @hpxml.windows.each_with_index do |window, i|
-      next if window.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1257,8 +1256,6 @@ class OSModel
   def self.add_doors(model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
-      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-
       door_height = 6.67 # ft
       door_length = door.area / door_height
       z_origin = @foundation_top
