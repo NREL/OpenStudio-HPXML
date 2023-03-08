@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>df53f30f-3e9e-4190-9eff-2f41de0bad7f</version_id>
-  <version_modified>20230308T022855Z</version_modified>
+  <version_id>3d416ab1-6d68-4e86-9e30-d1a63872caf9</version_id>
+  <version_modified>20230308T201803Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3935,6 +3935,16 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>hot_water_distribution_recirc_num_units_served</name>
+      <display_name>Hot Water Distribution: Number of Units Served</display_name>
+      <description>If the distribution system is Recirculation, number of dwelling units served by the recirculation system. Must be 1 if single-family detached. TODO</description>
+      <type>Integer</type>
+      <units>#</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
       <name>hot_water_distribution_pipe_r</name>
       <display_name>Hot Water Distribution: Pipe Insulation Nominal R-Value</display_name>
       <description>Nominal R-value of the pipe insulation. If not provided, the OS-HPXML default is used.</description>
@@ -6538,7 +6548,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4C1A74A9</checksum>
+      <checksum>CF223419</checksum>
     </file>
   </files>
 </measure>
