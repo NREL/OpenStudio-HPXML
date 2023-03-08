@@ -3120,7 +3120,7 @@ Ceiling fan energy use is calculated per the Energy Rating Rated Home in `ANSI/R
 
 .. note::
 
-  A reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
+  A reduced cooling setpoint can be specified for months when ceiling fans are operating.
   See :ref:`hvac_control` for more information.
 
 HPXML Pools & Hot Tubs

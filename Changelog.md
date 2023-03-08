@@ -14,6 +14,7 @@ __New Features__
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods` in the HPXML file).
 - Window shading seasons now based on calendar dates (e.g., summer: May 1-Sep 30 in northern hemisphere) instead of monthly outdoor temperatures.
 - ReportSimulationOutput measure:
+  - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
 - **Breaking change**: Updates component loads outputs:

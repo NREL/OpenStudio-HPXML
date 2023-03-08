@@ -255,7 +255,7 @@ class OSModel
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(runner, model, spaces)
-    add_additional_properties(model, hpxml_path, building_id)
+    add_additional_properties(model, hpxml_path, building_id, epw_file)
 
     # Output
 
@@ -1847,7 +1847,7 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(model, hpxml_path, building_id)
+  def self.add_additional_properties(model, hpxml_path, building_id, epw_file)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
@@ -1857,10 +1857,9 @@ class OSModel
     additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
     emissions_scenario_types = @hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s
     additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
-    has_heating = (@hpxml.total_fraction_heat_load_served > 0)
-    additionalProperties.setFeature('has_heating', has_heating)
-    has_cooling = (@hpxml.total_fraction_cool_load_served > 0)
-    additionalProperties.setFeature('has_cooling', has_cooling)
+    additionalProperties.setFeature('has_heating', @hpxml.total_fraction_heat_load_served > 0)
+    additionalProperties.setFeature('has_cooling', @hpxml.total_fraction_cool_load_served > 0)
+    additionalProperties.setFeature('is_southern_hemisphere', epw_file.latitude < 0)
   end
 
   def self.add_unmet_hours_output(model, spaces)
