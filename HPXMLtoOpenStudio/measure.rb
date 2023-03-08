@@ -326,8 +326,6 @@ class OSModel
     # Apply defaults to HPXML object
     HPXMLDefaults.apply(runner, @hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
-    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
-
     # Write updated HPXML object (w/ defaults) to file for inspection
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
@@ -335,6 +333,11 @@ class OSModel
     # Now that we've written in.xml, ensure that no capacities/airflows
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
+
+    # Now that we've written in.xml, make adjustments for modeling purposes.
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
+    @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
+    @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
     # Handle zero occupants when operational calculation
     occ_calc_type = @hpxml.header.occupancy_calculation_type
