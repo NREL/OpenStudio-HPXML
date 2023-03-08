@@ -748,6 +748,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['hot_water_distribution_recirc_piping_length'] = 50
     args['hot_water_distribution_recirc_branch_piping_length'] = 50
     args['hot_water_distribution_recirc_pump_power'] = 50
+    args['hot_water_distribution_recirc_num_units_served'] = 1
     args['hot_water_distribution_pipe_r'] = 0.0
     args['dwhr_facilities_connected'] = 'none'
     args['dwhr_equal_flow'] = true
@@ -1009,6 +1010,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['hot_water_distribution_recirc_piping_length'] = 0
     args['hot_water_distribution_recirc_branch_piping_length'] = 0
     args['hot_water_distribution_recirc_pump_power'] = 0
+    args['hot_water_distribution_recirc_num_units_served'] = 0
     args['hot_water_distribution_pipe_r'] = 0
     args['dwhr_facilities_connected'] = 'none'
     args['dwhr_equal_flow'] = true
@@ -1361,6 +1363,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.59
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 40000
+  elsif ['base-bldgtype-multifamily-shared-water-heater-recirc.xml'].include? hpxml_file
+    args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeRecirc
+    args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeTimer
+    args['hot_water_distribution_recirc_pump_power'] = 220.0
+    args['hot_water_distribution_recirc_num_units_served'] = 6
   end
 
   # Occ Calc Type
@@ -4142,11 +4149,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.water_heating.water_fixtures_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
     hpxml.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
     hpxml.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-  elsif ['base-bldgtype-multifamily-shared-water-heater-recirc.xml'].include? hpxml_file
-    hpxml.hot_water_distributions[0].has_shared_recirculation = true
-    hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
-    hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
-    hpxml.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecirControlTypeTimer
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml',
          'base-bldgtype-multifamily-shared-laundry-room-multiple-water-heaters.xml'].include? hpxml_file
     hpxml.water_heating_systems.reverse_each do |water_heating_system|
