@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>51c646e2-9ec5-4951-b482-16e29c59879f</version_id>
-  <version_modified>20230302T013719Z</version_modified>
+  <version_id>5eecbb83-bc51-4a33-8b00-5e09adb86dee</version_id>
+  <version_modified>20230308T022858Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -326,12 +326,6 @@
       <checksum>D605D60B</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D63B2207</checksum>
-    </file>
-    <file>
       <filename>schedule_files/battery.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -554,10 +548,16 @@
       <checksum>D05DFB8A</checksum>
     </file>
     <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>98619C56</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0BE6113D</checksum>
+      <checksum>CBC4A01B</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
@@ -574,7 +574,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F5613311</checksum>
+      <checksum>24F01877</checksum>
     </file>
   </files>
 </measure>
