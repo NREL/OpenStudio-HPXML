@@ -1894,11 +1894,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power. If not provided, the OS-HPXML default is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('hot_water_distribution_recirc_num_units_served', true)
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('hot_water_distribution_recirc_num_units_served', false)
     arg.setDisplayName('Hot Water Distribution: Number of Units Served')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, number of dwelling units served by the recirculation system. Must be 1 if #{HPXML::ResidentialTypeSFD}. TODO")
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, number of dwelling units served by the recirculation system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion recirculation pump power to the unit.")
     arg.setUnits('#')
-    arg.setDefaultValue(1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_pipe_r', false)
@@ -5408,18 +5407,18 @@ class HPXMLFile
     end
 
     system_type = args[:hot_water_distribution_system_type]
-    if system_type == HPXML::DHWDistTypeStandard || ((system_type == HPXML::DHWDistTypeRecirc) && (args[:hot_water_distribution_recirc_num_units_served] > 1))
+    if system_type == HPXML::DHWDistTypeStandard || ((system_type == HPXML::DHWDistTypeRecirc) && args[:hot_water_distribution_recirc_num_units_served].is_initialized && (args[:hot_water_distribution_recirc_num_units_served].get > 1))
       if args[:hot_water_distribution_standard_piping_length].is_initialized
         standard_piping_length = args[:hot_water_distribution_standard_piping_length].get
       end
     end
 
     if system_type == HPXML::DHWDistTypeRecirc
-      if args[:hot_water_distribution_recirc_num_units_served] > 1
+      if args[:hot_water_distribution_recirc_num_units_served].is_initialized && args[:hot_water_distribution_recirc_num_units_served].get > 1
         system_type = HPXML::DHWDistTypeStandard
 
         has_shared_recirculation = true
-        shared_recirculation_number_of_units_served = args[:hot_water_distribution_recirc_num_units_served]
+        shared_recirculation_number_of_units_served = args[:hot_water_distribution_recirc_num_units_served].get
 
         shared_recirculation_control_type = args[:hot_water_distribution_recirc_control_type]
 
