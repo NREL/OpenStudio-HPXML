@@ -15,8 +15,11 @@ __New Features__
 - Window shading seasons now based on calendar dates (e.g., summer: May 1-Sep 30 in northern hemisphere) instead of monthly outdoor temperatures.
 - ReportSimulationOutput measure:
   - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
+  - Annual emissions outputs now include all fuel/end uses, even if zero.
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
+- ReportUtilityBills measure:
+  - Utility bill outputs now include all fuels, even if zero.
 - **Breaking change**: Updates component loads outputs:
   - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
   - Disaggregates `Lighting` from `Internal Gains`.
