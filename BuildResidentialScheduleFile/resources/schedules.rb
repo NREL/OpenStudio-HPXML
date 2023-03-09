@@ -48,9 +48,6 @@ class ScheduleGenerator
   def self.export_columns
     return [SchedulesFile::ColumnOccupants,
             SchedulesFile::ColumnLightingInterior,
-            SchedulesFile::ColumnLightingExterior,
-            SchedulesFile::ColumnLightingGarage,
-            SchedulesFile::ColumnLightingExteriorHoliday,
             SchedulesFile::ColumnCookingRange,
             SchedulesFile::ColumnDishwasher,
             SchedulesFile::ColumnClothesWasher,
@@ -166,10 +163,7 @@ class ScheduleGenerator
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     plugload_sch = schedule_config['plugload']
-    lighting_sch = schedule_config['lighting']
     ceiling_fan_sch = schedule_config['ceiling_fan']
-
-    holiday_lighting_schedule = schedule_config['lighting']['holiday_sch']
 
     sch = Lighting.get_schedule(@epw_file)
     interior_lighting_schedule = []
@@ -180,8 +174,6 @@ class ScheduleGenerator
     interior_lighting_schedule = interior_lighting_schedule.flatten
     m = interior_lighting_schedule.max
     interior_lighting_schedule = interior_lighting_schedule.map { |s| s / m }
-
-    holiday_lighting_schedule = get_holiday_lighting_sch(holiday_lighting_schedule)
 
     sleep_schedule = []
     away_schedule = []
@@ -203,17 +195,11 @@ class ScheduleGenerator
         active_occupancy_percentage = 1 - (away_schedule[-1] + sleep_schedule[-1])
         @schedules[SchedulesFile::ColumnPlugLoadsOther][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_sch, month, is_weekday, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::ColumnLightingInterior][day * @steps_in_day + step] = scale_lighting_by_occupancy(interior_lighting_schedule, minute, active_occupancy_percentage)
-        @schedules[SchedulesFile::ColumnLightingExterior][day * @steps_in_day + step] = get_value_from_daily_sch(lighting_sch, month, is_weekday, minute, 1)
-        @schedules[SchedulesFile::ColumnLightingGarage][day * @steps_in_day + step] = get_value_from_daily_sch(lighting_sch, month, is_weekday, minute, 1)
-        @schedules[SchedulesFile::ColumnLightingExteriorHoliday][day * @steps_in_day + step] = scale_lighting_by_occupancy(holiday_lighting_schedule, minute, 1)
         @schedules[SchedulesFile::ColumnCeilingFan][day * @steps_in_day + step] = get_value_from_daily_sch(ceiling_fan_sch, month, is_weekday, minute, active_occupancy_percentage)
       end
     end
     @schedules[SchedulesFile::ColumnPlugLoadsOther] = normalize(@schedules[SchedulesFile::ColumnPlugLoadsOther])
     @schedules[SchedulesFile::ColumnLightingInterior] = normalize(@schedules[SchedulesFile::ColumnLightingInterior])
-    @schedules[SchedulesFile::ColumnLightingExterior] = normalize(@schedules[SchedulesFile::ColumnLightingExterior])
-    @schedules[SchedulesFile::ColumnLightingGarage] = normalize(@schedules[SchedulesFile::ColumnLightingGarage])
-    @schedules[SchedulesFile::ColumnLightingExteriorHoliday] = normalize(@schedules[SchedulesFile::ColumnLightingExteriorHoliday])
     @schedules[SchedulesFile::ColumnCeilingFan] = normalize(@schedules[SchedulesFile::ColumnCeilingFan])
 
     # Generate the Sink Schedule

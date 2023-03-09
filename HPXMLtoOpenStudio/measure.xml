@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5eecbb83-bc51-4a33-8b00-5e09adb86dee</version_id>
-  <version_modified>20230308T022858Z</version_modified>
+  <version_id>f46c3cc1-2d56-486b-b2c9-a446bf533e30</version_id>
+  <version_modified>20230309T213241Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -374,24 +374,6 @@
       <checksum>F3DBC2BD</checksum>
     </file>
     <file>
-      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9704F10C</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/occupancy-stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>43367A9C</checksum>
-    </file>
-    <file>
-      <filename>test_schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>76D3043A</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -575,6 +557,24 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>24F01877</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2CAE40E4</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6EAA6641</checksum>
+    </file>
+    <file>
+      <filename>test_schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BB4AF461</checksum>
     </file>
   </files>
 </measure>
