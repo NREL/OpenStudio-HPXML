@@ -496,11 +496,11 @@ def create_hpxmls
 
       if hpxml_file.include? 'ASHRAE_Standard_140'
         hpxml_path = File.absolute_path(File.join(tests_dir, '..', 'tests', hpxml_file))
-        hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+        hpxml = HPXML.new(hpxml_path: hpxml_path)
         apply_hpxml_modification_ashrae_140(hpxml)
       else
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
-        hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+        hpxml = HPXML.new(hpxml_path: hpxml_path)
         apply_hpxml_modification(hpxml_file, hpxml)
       end
 
