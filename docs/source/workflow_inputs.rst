@@ -153,7 +153,7 @@ The column names available in the schedule CSV files are:
   ``occupants``                    frac   Occupant heat gain schedule.                                                       Yes
   ``lighting_interior``            frac   Interior lighting energy use schedule.                                             Yes
   ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                             No
-  ``lighting_garage``              frac   Garage lighting energy use schedule.                                               No
+  ``lighting_garage``              frac   Garage lighting energy use schedule.                                               Yes
   ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                     No
   ``cooking_range``                frac   Cooking range & oven energy use schedule.                                          Yes
   ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                          No

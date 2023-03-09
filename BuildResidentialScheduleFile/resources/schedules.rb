@@ -48,6 +48,7 @@ class ScheduleGenerator
   def self.export_columns
     return [SchedulesFile::ColumnOccupants,
             SchedulesFile::ColumnLightingInterior,
+            SchedulesFile::ColumnLightingGarage,
             SchedulesFile::ColumnCookingRange,
             SchedulesFile::ColumnDishwasher,
             SchedulesFile::ColumnClothesWasher,
@@ -200,6 +201,7 @@ class ScheduleGenerator
     end
     @schedules[SchedulesFile::ColumnPlugLoadsOther] = normalize(@schedules[SchedulesFile::ColumnPlugLoadsOther])
     @schedules[SchedulesFile::ColumnLightingInterior] = normalize(@schedules[SchedulesFile::ColumnLightingInterior])
+    @schedules[SchedulesFile::ColumnLightingGarage] = @schedules[SchedulesFile::ColumnLightingInterior]
     @schedules[SchedulesFile::ColumnCeilingFan] = normalize(@schedules[SchedulesFile::ColumnCeilingFan])
 
     # Generate the Sink Schedule
@@ -820,18 +822,5 @@ class ScheduleGenerator
       end
     end
     return weights.size - 1 # If the prob weight don't sum to n, return last index
-  end
-
-  def get_holiday_lighting_sch(holiday_sch)
-    holiday_start_day = 332 # November 27
-    holiday_end_day = 6 # Jan 6
-    sch = [0] * 24 * @total_days_in_year
-    final_days = @total_days_in_year - holiday_start_day + 1
-    beginning_days = holiday_end_day
-    sch[0..holiday_end_day * 24 - 1] = holiday_sch * beginning_days
-    sch[(holiday_start_day - 1) * 24..-1] = holiday_sch * final_days
-    m = sch.max
-    sch = sch.map { |s| s / m }
-    return sch
   end
 end
