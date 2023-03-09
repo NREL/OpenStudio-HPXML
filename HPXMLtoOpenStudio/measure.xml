@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>27cbcfb8-5aa1-49f2-9883-37885bba4474</version_id>
-  <version_modified>20230309T214148Z</version_modified>
+  <version_id>a7fcc9de-292e-48df-bd9d-45a0475b3c5d</version_id>
+  <version_modified>20230309T215210Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -562,19 +562,19 @@
       <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>87FB63E9</checksum>
+      <checksum>D4373DC9</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C071F1FD</checksum>
+      <checksum>DEED74EA</checksum>
     </file>
     <file>
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3B871C68</checksum>
+      <checksum>DC82224C</checksum>
     </file>
   </files>
 </measure>

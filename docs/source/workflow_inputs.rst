@@ -164,7 +164,7 @@ The column names available in the schedule CSV files are:
   ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                                 Yes
   ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                   Yes
   ``plug_loads_other``             frac   Other plug load energy use schedule.                                               Yes
-  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                          No
+  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                          Yes
   ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                    No
   ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                           No
   ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                               No

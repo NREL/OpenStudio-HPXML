@@ -55,6 +55,7 @@ class ScheduleGenerator
             SchedulesFile::ColumnClothesDryer,
             SchedulesFile::ColumnCeilingFan,
             SchedulesFile::ColumnPlugLoadsOther,
+            SchedulesFile::ColumnPlugLoadsTV,
             SchedulesFile::ColumnHotWaterDishwasher,
             SchedulesFile::ColumnHotWaterClothesWasher,
             SchedulesFile::ColumnHotWaterFixtures]
@@ -200,6 +201,7 @@ class ScheduleGenerator
       end
     end
     @schedules[SchedulesFile::ColumnPlugLoadsOther] = normalize(@schedules[SchedulesFile::ColumnPlugLoadsOther])
+    @schedules[SchedulesFile::ColumnPlugLoadsTV] = @schedules[SchedulesFile::ColumnPlugLoadsOther]
     @schedules[SchedulesFile::ColumnLightingInterior] = normalize(@schedules[SchedulesFile::ColumnLightingInterior])
     @schedules[SchedulesFile::ColumnLightingGarage] = @schedules[SchedulesFile::ColumnLightingInterior]
     @schedules[SchedulesFile::ColumnCeilingFan] = normalize(@schedules[SchedulesFile::ColumnCeilingFan])
