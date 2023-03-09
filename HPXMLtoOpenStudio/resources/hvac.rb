@@ -2992,7 +2992,11 @@ class HVAC
       wB_rated = 67.0 # deg-F
 
       #    cool_nominal_cfm_per_ton = 400
-      cool_nominal_cfm_per_ton = (clg_ap.cool_rated_airflow_rate - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
+      if clg_ap.num_speeds > 1
+        cool_nominal_cfm_per_ton = (clg_ap.cool_rated_airflow_rate - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
+      else
+        cool_nominal_cfm_per_ton = clg_ap.cool_rated_cfm_per_ton[0]
+      end
 
       p_atm = 14.696 # standard atmospheric pressure (psia)
 
