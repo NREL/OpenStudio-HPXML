@@ -1339,6 +1339,7 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
         HVAC.set_cool_curves_mshp(cooling_system, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(cooling_system)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
@@ -1389,6 +1390,7 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(heat_pump)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)

@@ -1013,7 +1013,6 @@ class HVAC
       hp_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
       hp_ap.cool_capacity_ratios = [1.0]
       if not use_eer
-        hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr]
         hp_ap.cool_rated_airflow_rate = 394.2 # cfm/ton of rated capacity
         hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
         # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
@@ -1032,7 +1031,6 @@ class HVAC
       hp_ap.cool_rated_airflow_rate = 344.1 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.72, 1.0]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-      hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr - 0.014, heat_pump.cooling_shr]
       hp_ap.cool_cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
                                 [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
       hp_ap.cool_eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
@@ -1048,7 +1046,6 @@ class HVAC
       hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-      hp_ap.cool_rated_shrs_net = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
       hp_ap.cool_cap_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
                                        [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
                                        [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
@@ -1147,27 +1144,10 @@ class HVAC
     hp_ap.cool_cap_fflow_spec = [[1, 0, 0]] * num_speeds
     hp_ap.cool_eir_fflow_spec = [[1, 0, 0]] * num_speeds
 
-    # rated shr gross and fan speed ratios
-    dB_rated = 80.0 # deg-F
-    wB_rated = 67.0 # deg-F
-
-    #    cool_nominal_cfm_per_ton = ((hp_ap.cool_max_cfm_per_ton * hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio) /
-    #                            (hp_ap.cool_max_capacity_ratio - hp_ap.cool_min_capacity_ratio)) *
-    #                           (cool_nominal_capacity_ratio - hp_ap.cool_min_capacity_ratio) + hp_ap.cool_min_cfm_per_ton * hp_ap.cool_min_capacity_ratio
-    cool_nominal_cfm_per_ton = 368.75 # Fixme: hardcoded for previous calculated value, double check this
-
-    p_atm = 14.696 # standard atmospheric pressure (psia)
-
-    ao = Psychrometrics.CoilAoFactor(dB_rated, wB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, heat_pump.cooling_shr)
-    hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton
+    hp_ap.cool_rated_airflow_rate = 400.0 # cfm/ton, FIXME: Is this of nominal rated capacity or of maximum capacity? Treated as nominal here
     hp_ap.cool_capacity_ratios = [0.4, 0.4889, 0.5778, 0.6667, 0.7556, 0.8444, 0.9333, 1.0222, 1.1111, 1.2]
     hp_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(num_speeds)
     hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-    hp_ap.cool_rated_shrs_gross = []
-    hp_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
-      # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
-      hp_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), hp_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao), 0.98].min
-    end
   end
 
   def self.set_heat_curves_mshp(heat_pump, num_speeds)
@@ -3003,25 +2983,25 @@ class HVAC
   def self.set_cool_rated_shrs_gross(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    # Convert SHRs from net to gross.
     if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
        ((cooling_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? cooling_system.heat_pump_type))
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
-      clg_ap.cool_rated_shrs_gross = []
-      for speed in 0..clg_ap.num_speeds - 1
-        qtot_net_nominal = 12000.0
-        qsens_net_nominal = qtot_net_nominal * clg_ap.cool_rated_shrs_net[speed]
-        qtot_gross_nominal = qtot_net_nominal + UnitConversions.convert(clg_ap.cool_rated_cfm_per_ton[speed] * clg_ap.fan_power_rated, 'Wh', 'Btu')
-        qsens_gross_nominal = qsens_net_nominal + UnitConversions.convert(clg_ap.cool_rated_cfm_per_ton[speed] * clg_ap.fan_power_rated, 'Wh', 'Btu')
-        clg_ap.cool_rated_shrs_gross << (qsens_gross_nominal / qtot_gross_nominal)
+      # rated shr gross and fan speed ratios
+      dB_rated = 80.0 # deg-F
+      wB_rated = 67.0 # deg-F
 
-        # Make sure SHR's are in valid range based on E+ model limits.
-        # The following correlation was developed by Jon Winkler to test for maximum allowed SHR based on the 300 - 450 cfm/ton limits in E+
-        max_shr = 0.3821066 + 0.001050652 * clg_ap.cool_rated_cfm_per_ton[speed] - 0.01
-        clg_ap.cool_rated_shrs_gross[speed] = [clg_ap.cool_rated_shrs_gross[speed], max_shr].min
-        min_shr = 0.60 # Approximate minimum SHR such that an ADP exists
-        clg_ap.cool_rated_shrs_gross[speed] = [clg_ap.cool_rated_shrs_gross[speed], min_shr].max
+      #    cool_nominal_cfm_per_ton = 400
+      cool_nominal_cfm_per_ton = (clg_ap.cool_rated_airflow_rate - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
+
+      p_atm = 14.696 # standard atmospheric pressure (psia)
+
+      ao = Psychrometrics.CoilAoFactor(dB_rated, wB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr)
+
+      clg_ap.cool_rated_shrs_gross = []
+      clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
+        # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
+        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao), 0.98].min
       end
     end
   end
