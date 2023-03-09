@@ -1895,8 +1895,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('hot_water_distribution_recirc_num_units_served', false)
-    arg.setDisplayName('Hot Water Distribution: Number of Units Served')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, number of dwelling units served by the recirculation system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion recirculation pump power to the unit.")
+    arg.setDisplayName('Hot Water Distribution: Recirculation Number of Units Served')
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, number of dwelling units served by the recirculation system. Can only be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion recirculation pump power to the unit.")
     arg.setUnits('#')
     args << arg
 
