@@ -282,6 +282,7 @@ def create_hpxmls
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-boiler-gas-only.xml' => 'base.xml',
+    'base-hvac-boiler-gas-only-pilot.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-oil-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-propane-only.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-wood-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -1903,7 +1904,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heating_system_type'] = HPXML::HVACTypeFloorFurnace
     args['heating_system_fuel'] = HPXML::FuelTypePropane
   elsif ['base-hvac-floor-furnace-propane-only-pilot-light.xml',
-         'base-hvac-furnace-gas-only-pilot.xml'].include? hpxml_file
+         'base-hvac-furnace-gas-only-pilot.xml',
+         'base-hvac-boiler-gas-only-pilot.xml'].include? hpxml_file
     args['heating_system_pilot_light'] = 600.0
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeElectricity

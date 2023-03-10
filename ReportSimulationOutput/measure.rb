@@ -2873,6 +2873,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end

@@ -1301,7 +1301,8 @@ class HPXMLDefaults
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace,
-                   HPXML::HVACTypeStove].include? heating_system.heating_system_type
+                   HPXML::HVACTypeStove,
+                   HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
       if heating_system.pilot_light.nil?
         heating_system.pilot_light = false

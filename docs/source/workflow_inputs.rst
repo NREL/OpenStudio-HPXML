@@ -1341,6 +1341,8 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   Element                                                Type     Units      Constraints  Required  Default   Notes
   =====================================================  =======  =========  ===========  ========  ========  =========================================
   ``IsSharedSystem``                                     boolean             No           false               Whether it serves multiple dwelling units
+  ``HeatingSystemType/Boiler/PilotLight``                boolean                          No        false     Presence of standing pilot light
+  ``HeatingSystemType/Boiler/extension/PilotLightBtuh``  double   Btu/hr     >= 0         No        500       Pilot light burn rate
   ``DistributionSystem``                                 idref    See [#]_   Yes                              ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``        double   frac       0 - 1        Yes                 Rated efficiency
   =====================================================  =======  =========  ===========  ========  ========  =========================================
