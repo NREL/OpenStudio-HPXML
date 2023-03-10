@@ -282,7 +282,7 @@ class HourlyByDaySchedule
   end
 
   def calc_max_val()
-    maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
+    maxval = [@weekday_day_by_hour_values.flatten.max, @weekend_day_by_hour_values.flatten.max].max
     if maxval == 0.0
       maxval = 1.0 # Prevent divide by zero
     end
