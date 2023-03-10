@@ -1296,17 +1296,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Emissions total
         results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(2)]
         # Emissions by fuel
-        emission.annual_output_by_fuel.each do |fuel, annual_output|
-          next if annual_output.to_f == 0
-
-          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", annual_output.to_f.round(2)]
+        @fuels.keys.each do |fuel|
+          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(2)]
           # Emissions by end use
-          emission.annual_output_by_end_use.each do |key, eu_annual_output|
+          @end_uses.keys.each do |key|
             fuel_type, end_use_type = key
             next unless fuel_type == fuel
-            next if eu_annual_output.to_f == 0
 
-            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", eu_annual_output.to_f.round(2)]
+            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(2)]
           end
         end
       end
