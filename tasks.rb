@@ -307,12 +307,14 @@ def create_hpxmls
     'base-hvac-fireplace-wood-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-fixed-heater-gas-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base-hvac-stove-oil-only.xml',
+    'base-hvac-floor-furnace-propane-only-pilot-light.xml' => 'base-hvac-floor-furnace-propane-only.xml',
     'base-hvac-furnace-coal-only.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-only.xml' => 'base.xml',
+    'base-hvac-furnace-gas-only-pilot.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-furnace-gas-only-detailed-setpoints.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-furnace-gas-room-ac.xml' => 'base.xml',
     'base-hvac-furnace-oil-only.xml' => 'base-hvac-furnace-gas-only.xml',
@@ -1900,6 +1902,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-floor-furnace-propane-only.xml'].include? hpxml_file
     args['heating_system_type'] = HPXML::HVACTypeFloorFurnace
     args['heating_system_fuel'] = HPXML::FuelTypePropane
+  elsif ['base-hvac-floor-furnace-propane-only-pilot-light.xml',
+         'base-hvac-furnace-gas-only-pilot.xml'].include? hpxml_file
+    args['heating_system_pilot_light'] = 600.0
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeElectricity
     args['heating_system_heating_efficiency'] = 1.0

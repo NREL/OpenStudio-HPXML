@@ -1634,8 +1634,6 @@ class Waterheater
       new_heater.setHeater2Height(h_LE)
       new_heater.setHeater2DeadbandTemperatureDifference(5.556)
       new_heater.setHeaterThermalEfficiency(1)
-      new_heater.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-      new_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
       new_heater.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u) unless u.nil?
       new_heater.setNumberofNodes(12)
       new_heater.setAdditionalDestratificationConductivity(0)
@@ -1671,7 +1669,28 @@ class Waterheater
       # Capacity, storage tank to be 0
       new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeaterMinimumCapacity(0.0)
-      set_wh_parasitic_parameters(water_heating_system, new_heater, is_dsh_storage)
+
+      # Set fraction of heat loss from tank to ambient (vs out flue)
+      # Based on lab testing done by LBNL
+      skinlossfrac = 1.0
+      if (not is_dsh_storage) && (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
+        # Fuel storage water heater
+        # EF cutoffs derived from Figure 2 of http://title24stakeholders.com/wp-content/uploads/2017/10/2013_CASE-Report_High-efficiency-Water-Heater-Ready.pdf
+        # FUTURE: Add an optional HPXML input for water heater type for a user to specify this (and default based on EF as below)
+        ef = water_heating_system.energy_factor
+        if ef.nil?
+          ef = calc_ef_from_uef(water_heating_system)
+        end
+        if ef < 0.64
+          skinlossfrac = 0.64 # Natural draft
+        elsif ef < 0.77
+          skinlossfrac = 0.91 # Power vent
+        else
+          skinlossfrac = 0.96 # Condensing
+        end
+      end
+      new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
+      new_heater.setOnCycleLossFractiontoThermalZone(1.0)
 
       ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
       new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
@@ -1691,40 +1710,17 @@ class Waterheater
     set_wh_ambient(loc_space, loc_schedule, new_heater)
 
     # FUTURE: These are always zero right now; develop smart defaults.
-    new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
     new_heater.setOffCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOffCycleParasiticHeatFractiontoTank(0)
+    new_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
+    new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOnCycleParasiticHeatFractiontoTank(0)
 
     return new_heater
   end
 
   def self.set_wh_parasitic_parameters(water_heating_system, water_heater, is_dsh_storage)
-    water_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-    water_heater.setOnCycleParasiticHeatFractiontoTank(0)
-    water_heater.setOnCycleLossFractiontoThermalZone(1.0)
-
-    water_heater.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-    water_heater.setOffCycleParasiticHeatFractiontoTank(0)
-
-    # Set fraction of heat loss from tank to ambient (vs out flue)
-    # Based on lab testing done by LBNL
-    skinlossfrac = 1.0
-    if (not is_dsh_storage) && (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
-      # Fuel storage water heater
-      # EF cutoffs derived from Figure 2 of http://title24stakeholders.com/wp-content/uploads/2017/10/2013_CASE-Report_High-efficiency-Water-Heater-Ready.pdf
-      # FUTURE: Add an optional HPXML input for water heater type for a user to specify this (and default based on EF as below)
-      ef = water_heating_system.energy_factor
-      if ef.nil?
-        ef = calc_ef_from_uef(water_heating_system)
-      end
-      if ef < 0.64
-        skinlossfrac = 0.64 # Natural draft
-      elsif ef < 0.77
-        skinlossfrac = 0.91 # Power vent
-      else
-        skinlossfrac = 0.96 # Condensing
-      end
-    end
-    water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
   end
 
   def self.set_wh_ambient(loc_space, loc_schedule, wh_obj)
