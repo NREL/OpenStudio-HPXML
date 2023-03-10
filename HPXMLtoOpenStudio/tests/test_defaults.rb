@@ -1195,25 +1195,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-wall-furnace-elec-only.xml')
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
-    hpxml.heating_systems[0].pilot_light = true
-    hpxml.heating_systems[0].pilot_light_btuh = 999
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 22, 12345, true, 999)
+    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 22, 12345)
 
     # Test defaults
     hpxml.heating_systems[0].fan_watts = nil
     hpxml.heating_systems[0].heating_capacity = nil
-    hpxml.heating_systems[0].pilot_light_btuh = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 0, nil, true, 500)
+    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 0, nil)
 
     # Test defaults w/o pilot
-    hpxml.heating_systems[0].pilot_light = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 0, nil, false, nil)
+    _test_default_wall_furnace_values(hpxml_default.heating_systems[0], 0, nil)
   end
 
   def test_floor_furnaces
@@ -3672,18 +3668,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_wall_furnace_values(heating_system, fan_watts, heating_capacity, pilot_light, pilot_light_btuh)
+  def _test_default_wall_furnace_values(heating_system, fan_watts, heating_capacity)
     assert_equal(fan_watts, heating_system.fan_watts)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
       assert_equal(heating_system.heating_capacity, heating_capacity)
-    end
-    assert_equal(heating_system.pilot_light, pilot_light)
-    if pilot_light_btuh.nil?
-      assert_nil(heating_system.pilot_light_btuh)
-    else
-      assert_equal(heating_system.pilot_light_btuh, pilot_light_btuh)
     end
   end
 
