@@ -3668,7 +3668,6 @@ class HPXML < Object
         if [HPXML::HVACTypeFurnace,
             HPXML::HVACTypeWallFurnace,
             HPXML::HVACTypeFloorFurnace,
-            HPXML::HVACTypeBoiler,
             HPXML::HVACTypeFireplace,
             HPXML::HVACTypeStove].include? @heating_system_type
           XMLHelper.add_element(type_el, 'PilotLight', @pilot_light, :boolean, @pilot_light_isdefaulted) unless @pilot_light.nil?
