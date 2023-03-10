@@ -1307,7 +1307,8 @@ class HPXMLDefaults
       if heating_system.pilot_light.nil?
         heating_system.pilot_light = false
         heating_system.pilot_light_isdefaulted = true
-      elsif heating_system.pilot_light && heating_system.pilot_light_btuh.nil?
+      end
+      if heating_system.pilot_light && heating_system.pilot_light_btuh.nil?
         heating_system.pilot_light_btuh = 500.0
         heating_system.pilot_light_btuh_isdefaulted = true
       end

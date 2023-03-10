@@ -1289,7 +1289,7 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   Element                                                 Type     Units      Constraints  Required  Default   Notes
   ======================================================  =======  =========  ===========  ========  ========  ================================================
   ``DistributionSystem``                                  idref    See [#]_                Yes                 ID of attached distribution system
-  ``HeatingSystemType/Furnace/PilotLight``                boolean                          No        false     Presence of standing pilot light
+  ``HeatingSystemType/Furnace/PilotLight``                boolean                          No        false     Presence of standing pilot light (older systems)
   ``HeatingSystemType/Furnace/extension/PilotLightBtuh``  double   Btu/hr     >= 0         No        500       Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``         double   frac       0 - 1        Yes                 Rated efficiency
   ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0         No        See [#]_  Blower fan efficiency at maximum fan speed [#]_
@@ -1310,7 +1310,7 @@ If a wall furnace is specified, additional information is entered in ``HeatingSy
   ==========================================================  =======  ======  ===========  ========  ========  ================
   Element                                                     Type     Units   Constraints  Required  Default   Notes
   ==========================================================  =======  ======  ===========  ========  ========  ================
-  ``HeatingSystemType/WallFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light
+  ``HeatingSystemType/WallFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light (older systems)
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    0 - 1        Yes                 Rated efficiency
   ``extension/FanPowerWatts``                                 double   W       >= 0         No        0         Fan power
@@ -1324,7 +1324,7 @@ If a floor furnace is specified, additional information is entered in ``HeatingS
   ===========================================================  =======  ======  ===========  ========  ========  ================
   Element                                                      Type     Units   Constraints  Required  Default   Notes
   ===========================================================  =======  ======  ===========  ========  ========  ================
-  ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light
+  ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light (older systems)
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    0 - 1        Yes                 Rated efficiency
   ``extension/FanPowerWatts``                                  double   W       >= 0         No        0         Fan power
@@ -1341,7 +1341,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   Element                                                Type     Units      Constraints  Required  Default   Notes
   =====================================================  =======  =========  ===========  ========  ========  =========================================
   ``IsSharedSystem``                                     boolean             No           false               Whether it serves multiple dwelling units
-  ``HeatingSystemType/Boiler/PilotLight``                boolean                          No        false     Presence of standing pilot light
+  ``HeatingSystemType/Boiler/PilotLight``                boolean                          No        false     Presence of standing pilot light (older systems)
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``  double   Btu/hr     >= 0         No        500       Pilot light burn rate
   ``DistributionSystem``                                 idref    See [#]_   Yes                              ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``        double   frac       0 - 1        Yes                 Rated efficiency
@@ -1391,7 +1391,7 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ====================================================  =======  ======  ===========  ========  =========  ===================
   Element                                               Type     Units   Constraints  Required  Default    Notes
   ====================================================  =======  ======  ===========  ========  =========  ===================
-  ``HeatingSystemType/Stove/PilotLight``                boolean                       No        false      Presence of standing pilot light
+  ``HeatingSystemType/Stove/PilotLight``                boolean                       No        false      Presence of standing pilot light (older systems)
   ``HeatingSystemType/Stove/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    0 - 1        Yes                  Efficiency
   ``extension/FanPowerWatts``                           double   W       >= 0         No        40         Fan power
@@ -1417,7 +1417,7 @@ If a fireplace is specified, additional information is entered in ``HeatingSyste
   ========================================================  =======  ======  ===========  ========  =========  ===================
   Element                                                   Type     Units   Constraints  Required  Default    Notes
   ========================================================  =======  ======  ===========  ========  =========  ===================
-  ``HeatingSystemType/Fireplace/PilotLight``                boolean                       No        false      Presence of standing pilot light
+  ``HeatingSystemType/Fireplace/PilotLight``                boolean                       No        false      Presence of standing pilot light (older systems)
   ``HeatingSystemType/Fireplace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    0 - 1        Yes                  Efficiency
   ``extension/FanPowerWatts``                               double   W       >= 0         No        0          Fan power
