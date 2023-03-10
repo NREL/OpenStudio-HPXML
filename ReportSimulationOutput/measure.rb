@@ -2715,9 +2715,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
         if not is_heat_pump_backup(sys_id)
-          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         else
-          return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
@@ -2873,6 +2873,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end

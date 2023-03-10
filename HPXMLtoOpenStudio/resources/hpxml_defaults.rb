@@ -1295,6 +1295,25 @@ class HPXMLDefaults
       end
     end
 
+    # Pilot Light
+    hpxml.heating_systems.each do |heating_system|
+      next unless [HPXML::HVACTypeFurnace,
+                   HPXML::HVACTypeWallFurnace,
+                   HPXML::HVACTypeFloorFurnace,
+                   HPXML::HVACTypeFireplace,
+                   HPXML::HVACTypeStove,
+                   HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+
+      if heating_system.pilot_light.nil?
+        heating_system.pilot_light = false
+        heating_system.pilot_light_isdefaulted = true
+      end
+      if heating_system.pilot_light && heating_system.pilot_light_btuh.nil?
+        heating_system.pilot_light_btuh = 500.0
+        heating_system.pilot_light_btuh_isdefaulted = true
+      end
+    end
+
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
