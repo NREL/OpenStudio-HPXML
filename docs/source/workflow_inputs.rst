@@ -453,22 +453,25 @@ HPXML Power Outage Periods
 One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
 If not entered, power outages will not be modeled.
 
-  ====================================  ========  =======  =============  ========  ========  ===========
-  Element                               Type      Units    Constraints    Required  Default   Description
-  ====================================  ========  =======  =============  ========  ========  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
-  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
-  ``EndMonth``                          integer            1 - 12         Yes                 End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
-  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
-  ``NaturalVentilation``                string             See [#]_       No        See [#]_  The availability of the natural ventilation schedule during the power outage period
-  ====================================  ========  =======  =============  ========  ========  ===========
+  ====================================  ========  =======  =============  ========  ================  ===========
+  Element                               Type      Units    Constraints    Required  Default           Description
+  ====================================  ========  =======  =============  ========  ================  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                         Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                         Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No        0                 Begin hour
+  ``EndMonth``                          integer            1 - 12         Yes                         End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                         End day
+  ``EndHourOfDay``                      integer            1 - 24         No        24                End hour
+  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability during the power outage period
+  ====================================  ========  =======  =============  ========  ================  ===========
 
   .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
-  .. [#] If NaturalVentilation not provided, defaults to "regular schedule".
 
 See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
+
+.. warning::
+
+  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.
 
 .. _buildingsite:
 

@@ -239,8 +239,6 @@ class HPXML < Object
   MechVentTypeSupply = 'supply only'
   OccupancyCalculationTypeAsset = 'asset'
   OccupancyCalculationTypeOperational = 'operational'
-  OffPeriodVacancy = 'vacancy'
-  OffPeriodPowerOutage = 'power outage'
   OrientationEast = 'east'
   OrientationNorth = 'north'
   OrientationNortheast = 'northeast'

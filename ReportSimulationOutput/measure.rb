@@ -1291,11 +1291,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(n_digits)]
     end
 
-    # Outage warnings
+    # Outage warning
     if @hpxml.header.power_outage_periods.size > 0
-      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::Cooling]].name}.") if @end_uses[[FT::Elec, EUT::Cooling]].annual_output.to_f > 0.0
-      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]].name}.") if @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]].annual_output.to_f > 0.0 && @hpxml.solar_thermal_systems.size > 0
-      runner.registerWarning("Power outage period(s) may contain nonzero values for #{@end_uses[[FT::Elec, EUT::HotWater]].name}.") if @end_uses[[FT::Elec, EUT::HotWater]].annual_output.to_f > 0.0 && @hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
+      runner.registerWarning('It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.')
     end
 
     if not @emissions.empty?

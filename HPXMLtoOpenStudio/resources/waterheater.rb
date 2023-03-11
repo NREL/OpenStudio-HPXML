@@ -101,7 +101,7 @@ class Waterheater
       end
     end
     if setpoint_schedule.nil?
-      setpoint_schedule = ScheduleConstant.new(model, "#{obj_name_hpwh} Setpoint", t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
+      setpoint_schedule = ScheduleConstant.new(model, Constants.ObjectNameWaterHeaterSetpoint, t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       setpoint_schedule = setpoint_schedule.schedule
 
       control_setpoint_schedule = setpoint_schedule
@@ -1757,7 +1757,7 @@ class Waterheater
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
-      new_schedule = ScheduleConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
+      new_schedule = ScheduleConstant.new(model, Constants.ObjectNameWaterHeaterSetpoint, t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       new_schedule = new_schedule.schedule
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
@@ -1774,7 +1774,7 @@ class Waterheater
       new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
-      new_schedule = ScheduleConstant.new(model, 'WH Setpoint Temp', t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
+      new_schedule = ScheduleConstant.new(model, Constants.ObjectNameWaterHeaterSetpoint, t_set_c, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
       new_schedule = new_schedule.schedule
     else
       runner.registerWarning("Both '#{SchedulesFile::ColumnWaterHeaterSetpoint}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?

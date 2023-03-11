@@ -649,14 +649,6 @@ class Schedule
     return 'weekend'
   end
 
-  def self.vacancy_name
-    return 'vacancy'
-  end
-
-  def self.outage_name
-    return 'outage'
-  end
-
   # return [Double] The total number of full load hours for this schedule.
   def self.annual_equivalent_full_load_hrs(modelYear, schedule)
     if schedule.to_ScheduleInterval.is_initialized
@@ -801,24 +793,16 @@ class Schedule
 
     # Add off rule(s), will override previous rules
     off_periods.each_with_index do |op, i|
-      # Default Value
-      value = 0.0
-
       # Special Values
-      # Water heater setpoint
-      # Temperature of tank < 2C indicates of possibility of freeze.
-      value = 2.0 if sch_name.include?('WH Setpoint Temp') || sch_name.include?("#{Constants.ObjectNameWaterHeater} Setpoint")
-
-      # Natural ventilation availability
-      off_period_type = nil
-      off_period_type = HPXML::OffPeriodVacancy if op.is_a?(HPXML::VacancyPeriod)
-      off_period_type = HPXML::OffPeriodPowerOutage if op.is_a?(HPXML::PowerOutagePeriod)
-      fail 'Unsupported off period type.' if off_period_type.nil?
-
-      if sch_name.include?(Constants.ObjectNameNaturalVentilation)
-        if off_period_type == HPXML::OffPeriodVacancy
+      if sch_name.include? Constants.ObjectNameWaterHeaterSetpoint
+        # Water heater setpoint
+        # Temperature of tank < 2C indicates of possibility of freeze.
+        value = 2.0
+      elsif sch_name.include? Constants.ObjectNameNaturalVentilation
+        # Natural ventilation availability
+        if op.is_a? HPXML::VacancyPeriod
           value = 0.0
-        elsif off_period_type == HPXML::OffPeriodPowerOutage
+        elsif op.is_a? HPXML::PowerOutagePeriod
           if op.natvent_availability == HPXML::ScheduleRegular
             next # don't change the natural ventilation availability schedule
           elsif op.natvent_availability == HPXML::ScheduleAvailable
@@ -826,7 +810,11 @@ class Schedule
           elsif op.natvent_availability == HPXML::ScheduleUnavailable
             value = 0.0
           end
+        else
+          fail 'Unsupported off period type.'
         end
+      else
+        value = 0.0
       end
 
       day_s = Schedule.get_day_num_from_month_day(year, op.begin_month, op.begin_day)
@@ -843,56 +831,56 @@ class Schedule
 
       outage_days = day_e - day_s
       if outage_days == 0 # outage is less than 1 calendar day (need 1 outage rule)
-        out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
-        Schedule.set_outage_values(out, begin_day_schedule, op_begin_hour, op_end_hour, value)
+        out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s, date_e)
+        Schedule.set_off_period_values(out, begin_day_schedule, op_begin_hour, op_end_hour, value)
       else # outage is at least 1 calendar day
         if op_begin_hour == 0 && op_end_hour == 24 # 1 outage rule
-          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+          out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s, date_e)
           out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
         elsif (op_begin_hour == 0 && op_end_hour != 24) || (op_begin_hour != 0 && op_end_hour == 24) # 2 outage rules
           if op_begin_hour == 0 && op_end_hour != 24
             # last day
-            out = Schedule.create_outage_rule(schedule, sch_name, i, date_e, date_e)
-            Schedule.set_outage_values(out, end_day_schedule, 0, op_end_hour, value)
+            out = Schedule.create_off_period_rule(schedule, sch_name, i, date_e, date_e)
+            Schedule.set_off_period_values(out, end_day_schedule, 0, op_end_hour, value)
 
             # all other days
             date_e2 = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
-            out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_e2)
+            out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s, date_e2)
             out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
           elsif op_begin_hour != 0 && op_end_hour == 24
             # first day
-            out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_s)
-            Schedule.set_outage_values(out, begin_day_schedule, op_begin_hour, 24, value)
+            out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s, date_s)
+            Schedule.set_off_period_values(out, begin_day_schedule, op_begin_hour, 24, value)
 
             # all other days
             date_s2 = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
-            out = Schedule.create_outage_rule(schedule, sch_name, i, date_s2, date_e)
+            out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s2, date_e)
             out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
           end
         else # 3 outage rules
           # first day
-          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s, date_s)
-          Schedule.set_outage_values(out, begin_day_schedule, op_begin_hour, 24, value)
+          out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s, date_s)
+          Schedule.set_off_period_values(out, begin_day_schedule, op_begin_hour, 24, value)
 
           # all other days
           date_s2 = OpenStudio::Date::fromDayOfYear(day_s + 1, year)
           date_e2 = OpenStudio::Date::fromDayOfYear(day_e - 1, year)
-          out = Schedule.create_outage_rule(schedule, sch_name, i, date_s2, date_e2)
+          out = Schedule.create_off_period_rule(schedule, sch_name, i, date_s2, date_e2)
           out.addValue(OpenStudio::Time.new(0, 24, 0, 0), value)
 
           # last day
-          out = Schedule.create_outage_rule(schedule, sch_name, i, date_e, date_e)
-          Schedule.set_outage_values(out, end_day_schedule, 0, op_end_hour, value)
+          out = Schedule.create_off_period_rule(schedule, sch_name, i, date_e, date_e)
+          Schedule.set_off_period_values(out, end_day_schedule, 0, op_end_hour, value)
         end
       end
     end
   end
 
-  def self.create_outage_rule(schedule, sch_name, i, date_s, date_e)
+  def self.create_off_period_rule(schedule, sch_name, i, date_s, date_e)
     out_rule = OpenStudio::Model::ScheduleRule.new(schedule)
-    out_rule.setName(sch_name + " #{Schedule.outage_name} ruleset#{i}")
+    out_rule.setName(sch_name + " off period ruleset#{i}")
     out_sch = out_rule.daySchedule
-    out_sch.setName(sch_name + " #{Schedule.outage_name}#{i}")
+    out_sch.setName(sch_name + " off period#{i}")
     out_rule.setStartDate(date_s)
     out_rule.setEndDate(date_e)
     Schedule.set_weekday_rule(out_rule)
@@ -900,7 +888,7 @@ class Schedule
     return out_sch
   end
 
-  def self.set_outage_values(out, day_schedule, begin_hour, end_hour, value)
+  def self.set_off_period_values(out, day_schedule, begin_hour, end_hour, value)
     for h in 0..23
       time = OpenStudio::Time.new(0, h + 1, 0, 0)
       if (h < begin_hour) || (h >= end_hour)
