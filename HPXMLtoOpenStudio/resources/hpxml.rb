@@ -6794,7 +6794,7 @@ class HPXML < Object
       @capacity = XMLHelper.get_value(performance_data_point, 'Capacity', :float)
       @capacity_fraction_of_nominal = XMLHelper.get_value(performance_data_point, 'CapacityFractionOfNominal', :float)
       @capacity_description = XMLHelper.get_value(performance_data_point, 'CapacityDescription', :string)
-      @efficiency_cop = XMLHelper.get_value(performance_data_point, "Efficiency[Units=#{UnitsCOP}]/Value", :float)
+      @efficiency_cop = XMLHelper.get_value(performance_data_point, "Efficiency[Units='#{UnitsCOP}']/Value", :float)
     end
   end
 
@@ -6851,7 +6851,7 @@ class HPXML < Object
       @capacity = XMLHelper.get_value(performance_data_point, 'Capacity', :float)
       @capacity_fraction_of_nominal = XMLHelper.get_value(performance_data_point, 'CapacityFractionOfNominal', :float)
       @capacity_description = XMLHelper.get_value(performance_data_point, 'CapacityDescription', :string)
-      @efficiency_cop = XMLHelper.get_value(performance_data_point, "Efficiency[Units=#{UnitsCOP}]/Value", :float)
+      @efficiency_cop = XMLHelper.get_value(performance_data_point, "Efficiency[Units='#{UnitsCOP}']/Value", :float)
     end
   end
 
