@@ -783,8 +783,8 @@ class Schedule
 
   def self.get_off_periods(col_name, vacancy_periods: [], power_outage_periods: [])
     off_periods = []
-    off_periods += vacancy_periods if Schedule.affected_by_vacancy(col_name)
-    off_periods += power_outage_periods if Schedule.affected_by_outage(col_name)
+    off_periods += vacancy_periods if Schedule.affected_by_off_period(col_name, 'Affected By Vacancy')
+    off_periods += power_outage_periods if Schedule.affected_by_off_period(col_name, 'Affected By Power Outage')
     return off_periods
   end
 
@@ -1306,12 +1306,12 @@ class Schedule
     return schedules_affected
   end
 
-  def self.affected_by_vacancy(col_name, schedules_affected = nil)
+  def self.affected_by_off_period(col_name, off_type, schedules_affected = nil)
     schedules_affected = get_schedules_affected if schedules_affected.nil?
     schedules_affected.each do |schedule_affected|
       next if schedule_affected['Schedule Name'] != col_name
 
-      affected = schedule_affected['Affected By Vacancy'].downcase.to_s
+      affected = schedule_affected[off_type].downcase.to_s
       if affected == 'true'
         return true
       elsif affected == 'false'
@@ -1320,22 +1320,6 @@ class Schedule
     end
 
     fail "Could not find #{col_name} in schedules_affected.csv"
-  end
-
-  def self.affected_by_outage(col_name, schedules_affected = nil)
-    schedules_affected = get_schedules_affected if schedules_affected.nil?
-    schedules_affected.each do |schedule_affected|
-      next if schedule_affected['Schedule Name'] != col_name
-
-      affected = schedule_affected['Affected By Power Outage'].downcase.to_s
-      if affected == 'true'
-        return true
-      elsif affected == 'false'
-        return false
-      end
-    end
-
-    return "Could not find #{col_name} in schedules_affected.csv"
   end
 end
 
@@ -1687,8 +1671,8 @@ class SchedulesFile
           @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
 
           # skip those unaffected
-          next if off_name == ColumnVacancy && !Schedule.affected_by_vacancy(col_name, schedules_affected)
-          next if off_name == ColumnOutage && !Schedule.affected_by_outage(col_name, schedules_affected)
+          next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(col_name, 'Affected By Vacancy', schedules_affected)
+          next if off_name == ColumnOutage && !Schedule.affected_by_off_period(col_name, 'Affected By Power Outage', schedules_affected)
 
           @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
         end
