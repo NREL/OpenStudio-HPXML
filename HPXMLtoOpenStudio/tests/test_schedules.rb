@@ -60,49 +60,6 @@ class HPXMLtoOpenStudioSchedulesTest < MiniTest::Test
     assert_in_epsilon(4204, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures), 0.1)
   end
 
-  def test_default_vacancy_schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-vacancy.xml'))
-    model, _hpxml = _test_measure(args_hash)
-
-    vacancy_hrs = 31.0 * 2.0 * 24.0
-    occupied_ratio = (1.0 - vacancy_hrs / 8760.0)
-
-    assert_in_epsilon(6020 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), 0.1)
-    assert_in_epsilon(3321 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, 'lighting schedule'), 0.1)
-    assert_in_epsilon(2763 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameExteriorLighting + ' schedule'), 0.1)
-    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator), 0.1)
-    assert_in_epsilon(2224 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange), 0.1)
-    assert_in_epsilon(2994 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher), 0.1)
-    assert_in_epsilon(4158 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher), 0.1)
-    assert_in_epsilon(4502 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer), 0.1)
-    assert_in_epsilon(5468 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), 0.1)
-    assert_in_epsilon(2256 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), 0.1)
-    assert_in_epsilon(4204 * occupied_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures), 0.1)
-  end
-
-  def test_default_power_outage_schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-power-outage.xml'))
-    model, _hpxml = _test_measure(args_hash)
-
-    outage_hrs = 31.0 * 2.0 * 24.0 - 15.0
-    powered_ratio = (1.0 - outage_hrs / 8760.0)
-
-    assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), 0.1)
-    assert_in_epsilon(3321 * powered_ratio, get_annual_equivalent_full_load_hrs(model, 'lighting schedule'), 0.1)
-    assert_in_epsilon(2763 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameExteriorLighting + ' schedule'), 0.1)
-    assert_in_epsilon(6673 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator), 0.1)
-    assert_in_epsilon(2224 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange), 0.1)
-    assert_in_epsilon(2994 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher), 0.1)
-    assert_in_epsilon(4158 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher), 0.1)
-    assert_in_epsilon(4502 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer), 0.1)
-    assert_in_epsilon(5468 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), 0.1)
-    assert_in_epsilon(2256 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), 0.1)
-    assert_in_epsilon(4204 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures), 0.1)
-    assert_in_epsilon(8760 * powered_ratio, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), 0.1)
-  end
-
   def test_simple_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple.xml'))

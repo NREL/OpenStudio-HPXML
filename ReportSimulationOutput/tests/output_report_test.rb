@@ -725,7 +725,7 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_enduses_vacancy
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-vacancy.xml'),
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-vacancy.xml'),
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_end_use_consumptions' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
@@ -744,7 +744,7 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_enduses_power_outage
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-power-outage.xml'),
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-power-outage.xml'),
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_end_use_consumptions' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
@@ -757,8 +757,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], 0, 31 * 24 - 11) # Jan
-    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 5, -1) # Dec
+    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30) * 24 + 4, (31 + 28 + 31 + 30 + 31 + 30 + 31) * 24 - 12) # Jul
   end
 
   def test_timeseries_hourly_enduses_power_outage_natvent_availability
