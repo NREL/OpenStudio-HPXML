@@ -449,9 +449,7 @@ def create_hpxmls
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
     'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml' => 'base-simcontrol-timestep-10-mins.xml',
-    'base-simcontrol-timestep-30-mins.xml' => 'base.xml',
-    'base-vacancy.xml' => 'base.xml',
-    'base-power-outage.xml' => 'base.xml'
+    'base-simcontrol-timestep-30-mins.xml' => 'base.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2500,8 +2498,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Vacancy
-  if ['base-vacancy.xml',
-      'base-schedules-simple-vacancy.xml',
+  if ['base-schedules-simple-vacancy.xml',
       'base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
     args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
   elsif ['base-schedules-simple-vacancy-year-round.xml',
@@ -2510,8 +2507,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # Power Outage
-  if ['base-power-outage.xml',
-      'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
+  if ['base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
     args['schedules_power_outage_period'] = 'Dec 1 5 - Jan 31 14'
   elsif ['base-schedules-simple-power-outage.xml',
          'base-schedules-simple-power-outage-natvent-available.xml',
