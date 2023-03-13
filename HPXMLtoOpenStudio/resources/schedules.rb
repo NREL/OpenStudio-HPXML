@@ -1658,11 +1658,11 @@ class SchedulesFile
   end
 
   def set_off_periods(vacancy_periods, power_outage_periods)
+    schedules_affected = Schedule.get_schedules_affected
     { ColumnVacancy => vacancy_periods, ColumnOutage => power_outage_periods }.each do |off_name, off_periods|
       create_column_values_from_periods(off_name, off_periods)
       next if @tmp_schedules[off_name].all? { |i| i == 0 }
 
-      schedules_affected = Schedule.get_schedules_affected
       @tmp_schedules[off_name].each_with_index do |_ts, i|
         @tmp_schedules.keys.each do |col_name|
           next if col_name == off_name
@@ -1670,8 +1670,11 @@ class SchedulesFile
           # Temperature of tank < 2C indicates of possibility of freeze.
           @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
 
-          # skip those unaffected
+          # Skip those unaffected
+          next if off_name == ColumnVacancy && col_name == ColumnOutage
           next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(col_name, 'Affected By Vacancy', schedules_affected)
+
+          next if off_name == ColumnOutage && col_name == ColumnVacancy
           next if off_name == ColumnOutage && !Schedule.affected_by_off_period(col_name, 'Affected By Power Outage', schedules_affected)
 
           @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])

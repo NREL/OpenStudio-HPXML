@@ -611,7 +611,7 @@ class HVAC
       disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     end
 
-    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, [0], power_outage_periods, [], heating_system)
+    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, power_outage_periods, heating_system)
 
     return zone_hvac
   end
@@ -629,7 +629,7 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     zone_hvac.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
 
-    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, [0], power_outage_periods, [], heating_system)
+    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, power_outage_periods, heating_system)
   end
 
   def self.apply_unit_heater(model, heating_system,
@@ -665,7 +665,7 @@ class HVAC
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.addToThermalZone(control_zone)
 
-    set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, [0], power_outage_periods, [], heating_system)
+    set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, nil, power_outage_periods, heating_system)
   end
 
   def self.apply_ideal_air_loads(model, obj_name, sequential_cool_load_fracs,
@@ -694,7 +694,7 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods, power_outage_periods)
+    set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods)
   end
 
   def self.apply_dehumidifiers(model, dehumidifiers, living_space, power_outage_periods)
@@ -1736,7 +1736,7 @@ class HVAC
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
-    set_sequential_load_fractions(model, control_zone, air_terminal, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods, power_outage_periods, heating_system)
+    set_sequential_load_fractions(model, control_zone, air_terminal, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods, heating_system)
 
     return air_loop
   end
@@ -3592,7 +3592,12 @@ class HVAC
     return sequential_load_fracs
   end
 
-  def self.get_sequential_load_schedule(model, fractions, power_outage_periods = [])
+  def self.get_sequential_load_schedule(model, fractions, power_outage_periods)
+    if fractions.nil?
+      fractions = [0]
+      power_outage_periods = []
+    end
+
     values = fractions.map { |f| f > 1 ? 1.0 : f.round(5) }
 
     sch_name = 'Sequential Fraction Schedule'
@@ -3609,9 +3614,9 @@ class HVAC
     return s
   end
 
-  def self.set_sequential_load_fractions(model, control_zone, hvac_object, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods_htg, power_outage_periods_clg, heating_system = nil)
-    heating_sch = get_sequential_load_schedule(model, sequential_heat_load_fracs, power_outage_periods_htg)
-    cooling_sch = get_sequential_load_schedule(model, sequential_cool_load_fracs, power_outage_periods_clg)
+  def self.set_sequential_load_fractions(model, control_zone, hvac_object, sequential_heat_load_fracs, sequential_cool_load_fracs, power_outage_periods, heating_system = nil)
+    heating_sch = get_sequential_load_schedule(model, sequential_heat_load_fracs, power_outage_periods)
+    cooling_sch = get_sequential_load_schedule(model, sequential_cool_load_fracs, power_outage_periods)
     control_zone.setSequentialHeatingFractionSchedule(hvac_object, heating_sch)
     control_zone.setSequentialCoolingFractionSchedule(hvac_object, cooling_sch)
 
