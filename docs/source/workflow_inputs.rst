@@ -183,6 +183,7 @@ The column names available in the schedule CSV files are:
   ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=hyrbid/auto, 1=heat pump only.   No
   ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.                 No
   ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
+  ``outage``                       0/1    Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
   ===============================  =====  =================================================================================  ===============================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
@@ -427,29 +428,50 @@ HPXML Vacancy Periods
 
 One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
 If not entered, occupant vacancies will not be modeled.
+Natural ventilation is always unavailable during a vacancy period.
 
-  ====================================  ========  =======  =============  ========  =======  ===========
-  Element                               Type      Units    Constraints    Required  Default  Description
-  ====================================  ========  =======  =============  ========  =======  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                Begin day
-  ``EndMonth``                          integer            1 - 12         Yes                End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                End day
-  ====================================  ========  =======  =============  ========  =======  ===========
+  ====================================  ========  =======  =============  ========  ========  ===========
+  Element                               Type      Units    Constraints    Required  Default   Description
+  ====================================  ========  =======  =============  ========  ========  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
+  ``EndMonth``                          integer            1 - 12         Yes                 End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
+  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
+  ====================================  ========  =======  =============  ========  ========  ===========
 
-Schedules from the following categories are affected by vacancy:
+See the "Affected By Vacancy" column in the table below to understand which components are affected by vacancy periods.
 
-- Occupancy
-- Lighting
-- Ceiling Fans
-- Cooking Range/Oven
-- Dishwasher
-- Clothes Washer
-- Clothes Dryer
-- Plug Loads
-- Fuel Loads
-- Hot Water
-- Local Ventilation Fans
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/schedules_affected.csv
+   :header-rows: 1
+
+HPXML Power Outage Periods
+**************************
+
+One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
+If not entered, power outages will not be modeled.
+
+  ====================================  ========  =======  =============  ========  ================  ===========
+  Element                               Type      Units    Constraints    Required  Default           Description
+  ====================================  ========  =======  =============  ========  ================  ===========
+  ``BeginMonth``                        integer            1 - 12         Yes                         Begin month
+  ``BeginDayOfMonth``                   integer            1 - 31         Yes                         Begin day
+  ``BeginHourOfDay``                    integer            0 - 23         No        0                 Begin hour
+  ``EndMonth``                          integer            1 - 12         Yes                         End month
+  ``EndDayOfMonth``                     integer            1 - 31         Yes                         End day
+  ``EndHourOfDay``                      integer            1 - 24         No        24                End hour
+  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability during the power outage period
+  ====================================  ========  =======  =============  ========  ================  ===========
+
+  .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
+
+See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
+
+.. warning::
+
+  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.
 
 .. _buildingsite:
 

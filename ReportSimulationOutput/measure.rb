@@ -1290,6 +1290,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |_key, end_use|
       results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(n_digits)]
     end
+
+    # Outage warning
+    if @hpxml.header.power_outage_periods.size > 0
+      runner.registerWarning('It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.')
+    end
+
     if not @emissions.empty?
       results_out << [line_break]
       @emissions.each do |_scenario_key, emission|
@@ -1778,6 +1784,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       total_energy_data = []
       [TE::Total, TE::Net].each do |energy_type|
         next if (energy_type == TE::Net) && (outputs[:elec_prod_timeseries].sum(0.0) == 0)
+        next if @totals[energy_type].timeseries_output.empty?
 
         total_energy_data << [@totals[energy_type].name, @totals[energy_type].timeseries_units] + @totals[energy_type].timeseries_output.map { |v| v.round(n_digits) }
       end
