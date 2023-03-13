@@ -90,14 +90,8 @@ class Waterheater
         Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
 
         # Actuated schedule
-        if power_outage_periods.empty?
-          # need to avoid Always Off Discrete "because it has an incompatible ScheduleTypeLimits"
-          control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-          control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
-        else
-          control_setpoint_schedule = ScheduleConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
-          control_setpoint_schedule = control_setpoint_schedule.schedule
-        end
+        control_setpoint_schedule = ScheduleConstant.new(model, "#{obj_name_hpwh} ControlSetpoint", 0.0, Constants.ScheduleTypeLimitsTemperature, off_periods: power_outage_periods)
+        control_setpoint_schedule = control_setpoint_schedule.schedule
       end
     end
     if setpoint_schedule.nil?
