@@ -219,6 +219,8 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
@@ -339,10 +341,14 @@ def create_hpxmls
     'base-hvac-mini-split-air-conditioner-only-ductless.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml' => 'base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml',
     'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml' => 'base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base-location-honolulu-hi.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
@@ -4134,6 +4140,164 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
     hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
+  end
+  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml',
+      'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml'].include? hpxml_file
+    # YORK HMH7 
+    # https://ashp.neep.org/#!/product/64253/7/25000///0
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
+    hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
+    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 11700,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.47)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 36000,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.71)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 13200,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 6.34)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 40000,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.53)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 10000,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.73)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 36000,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.44)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 4200,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 1.84)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 24800,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.66)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 1900,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 0.81)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 19900,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.28)
+  end
+  if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml',
+      'base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml'].include? hpxml_file
+    # FUJITSU Halcyon Single-room Mini-Split Systems Slim
+    # https://ashp.neep.org/#!/product/25352/7/25000///0
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
+    hpxml.heat_pumps[0].cooling_efficiency_seer = 16.7
+    hpxml.heat_pumps[0].heating_efficiency_hspf = 11.3
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 9600,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.02)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 39000,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.86)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 10224,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.61)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 41587,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.29)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 9200,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.35)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 48000,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.21)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 7063,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 2.92)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 36800,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.15)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 6310,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 2.60)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 32920,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 1.93)
+  end
+  if ['base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml',
+      'base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml'].include? hpxml_file
+    # BOSCH Bosch Climate 5000 ductless minisplit series 
+    # https://ashp.neep.org/#!/product/66076/7/25000///0
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
+    hpxml.heat_pumps[0].cooling_efficiency_seer = 21.5
+    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.5
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 10372,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.05)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 95.0,
+                                                    capacity: 42653,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.27)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 19456,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 8.03)
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.add(outdoor_temperature: 82.0,
+                                                    capacity: 40093,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.27)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 12143,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 4.81)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 47.0,
+                                                    capacity: 56499,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 3.17)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 7414,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 1.96)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 17.0,
+                                                    capacity: 43387,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 2.31)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 8130,
+                                                    capacity_description: HPXML::CapacityDescriptionMinimum,
+                                                    efficiency_cop: 1.71)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.add(outdoor_temperature: 5.0,
+                                                    capacity: 36037,
+                                                    capacity_description: HPXML::CapacityDescriptionMaximum,
+                                                    efficiency_cop: 1.96)
+  end
+  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml',
+      'base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml',
+      'base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml'].include? hpxml_file
+    # Convert from Capacity to CapacityFractionOfNominal
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.each do |data_point|
+      data_point.capacity_fraction_of_nominal = (Float(data_point.capacity) / hpxml.heat_pumps[0].cooling_capacity).round(3)
+    end
+    hpxml.heat_pumps[0].heating_detailed_performance_data.each do |data_point|
+      data_point.capacity_fraction_of_nominal = (Float(data_point.capacity) / hpxml.heat_pumps[0].heating_capacity).round(3)
+    end
   end
 
   # ------------------ #
