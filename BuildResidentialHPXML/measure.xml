@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>df53f30f-3e9e-4190-9eff-2f41de0bad7f</version_id>
-  <version_modified>20230308T022855Z</version_modified>
+  <version_id>a052c3d8-5816-4da4-9e8e-c49239c7f6f8</version_id>
+  <version_modified>20230310T230924Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -64,10 +64,40 @@
     <argument>
       <name>schedules_vacancy_period</name>
       <display_name>Schedules: Vacancy Period</display_name>
-      <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".</description>
+      <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_power_outage_period</name>
+      <display_name>Schedules: Power Outage Period</display_name>
+      <description>Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_power_outage_window_natvent_availability</name>
+      <display_name>Schedules: Power Outage Period Window Natural Ventilation Availability</display_name>
+      <description>The availability of the natural ventilation schedule during the outage period.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>regular schedule</value>
+          <display_name>regular schedule</display_name>
+        </choice>
+        <choice>
+          <value>always available</value>
+          <display_name>always available</display_name>
+        </choice>
+        <choice>
+          <value>always unavailable</value>
+          <display_name>always unavailable</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>simulation_control_timestep</name>
@@ -2132,6 +2162,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>heating_system_pilot_light</name>
+      <display_name>Heating System: Pilot Light</display_name>
+      <description>The fuel usage of the pilot light. Applies only to Furnace, WallFurnace, FloorFurnace, Stove, Boiler, and Fireplace with non-electric fuel type. If not provided, assumes no pilot light.</description>
+      <type>Double</type>
+      <units>Btuh</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>heating_system_airflow_defect_ratio</name>
@@ -6538,7 +6577,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4C1A74A9</checksum>
+      <checksum>3DC9D959</checksum>
     </file>
   </files>
 </measure>
