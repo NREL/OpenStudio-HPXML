@@ -225,7 +225,6 @@ Annual Emissions
 ~~~~~~~~~~~~~~~~
 
 Results for each emissions scenario defined in the HPXML file are listed as shown below.
-Note that rows below with values of zero will be excluded.
 
    =======================================================================  ==================================================================
    Type                                                                     Notes
@@ -468,7 +467,6 @@ OpenStudio-HPXML can optionally generate a utility bills output file.
 The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
 
 Results for each utility bill scenario defined in the HPXML file are listed as shown below.
-Note that rows below with values of zero will be excluded.
 
    =============================================  ====================
    Type                                           Notes

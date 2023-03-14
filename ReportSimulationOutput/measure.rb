@@ -1290,23 +1290,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |_key, end_use|
       results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(n_digits)]
     end
+
+    # Outage warning
+    if @hpxml.header.power_outage_periods.size > 0
+      runner.registerWarning('It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.')
+    end
+
     if not @emissions.empty?
       results_out << [line_break]
       @emissions.each do |_scenario_key, emission|
         # Emissions total
         results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(2)]
         # Emissions by fuel
-        emission.annual_output_by_fuel.each do |fuel, annual_output|
-          next if annual_output.to_f == 0
-
-          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", annual_output.to_f.round(2)]
+        @fuels.keys.each do |fuel|
+          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(2)]
           # Emissions by end use
-          emission.annual_output_by_end_use.each do |key, eu_annual_output|
+          @end_uses.keys.each do |key|
             fuel_type, end_use_type = key
             next unless fuel_type == fuel
-            next if eu_annual_output.to_f == 0
 
-            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", eu_annual_output.to_f.round(2)]
+            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(2)]
           end
         end
       end
@@ -1781,6 +1784,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       total_energy_data = []
       [TE::Total, TE::Net].each do |energy_type|
         next if (energy_type == TE::Net) && (outputs[:elec_prod_timeseries].sum(0.0) == 0)
+        next if @totals[energy_type].timeseries_output.empty?
 
         total_energy_data << [@totals[energy_type].name, @totals[energy_type].timeseries_units] + @totals[energy_type].timeseries_output.map { |v| v.round(n_digits) }
       end
@@ -2718,9 +2722,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
         if not is_heat_pump_backup(sys_id)
-          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         else
-          return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
@@ -2876,6 +2880,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end
