@@ -121,8 +121,8 @@ class Airflow
       living_ach50 = nil
     end
 
-    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor,
-                                                  hpxml.header.natvent_days_per_week, infil_volume, infil_height, vacancy_periods, power_outage_periods)
+    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml.header.natvent_days_per_week,
+                                                  infil_volume, infil_height, vacancy_periods, power_outage_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, living_ach50, living_const_ach, infil_volume, infil_height,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, vacancy_periods, power_outage_periods)
@@ -324,13 +324,8 @@ class Airflow
     end
   end
 
-  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor,
-                                                         natvent_days_per_week, infil_volume, infil_height, vacancy_periods, power_outage_periods)
-    if @living_zone.thermostatSetpointDualSetpoint.is_initialized
-      thermostat = @living_zone.thermostatSetpointDualSetpoint.get
-      htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
-      clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
-    end
+  def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor, natvent_days_per_week,
+                                                         infil_volume, infil_height, vacancy_periods, power_outage_periods)
 
     # NV Availability Schedule
     nv_avail_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameNaturalVentilation, natvent_days_per_week, vacancy_periods + power_outage_periods)
@@ -354,16 +349,16 @@ class Airflow
     end
 
     # Sensors
-    if not htg_sch.nil?
+    if @living_zone.thermostatSetpointDualSetpoint.is_initialized
+      thermostat = @living_zone.thermostatSetpointDualSetpoint.get
+
       htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       htg_sp_sensor.setName('htg sp s')
-      htg_sp_sensor.setKeyName(htg_sch.name.to_s)
-    end
+      htg_sp_sensor.setKeyName(thermostat.heatingSetpointTemperatureSchedule.get.name.to_s)
 
-    if not clg_sch.nil?
       clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       clg_sp_sensor.setName('clg sp s')
-      clg_sp_sensor.setKeyName(clg_sch.name.to_s)
+      clg_sp_sensor.setKeyName(thermostat.coolingSetpointTemperatureSchedule.get.name.to_s)
     end
 
     # Actuators
@@ -430,10 +425,14 @@ class Airflow
     vent_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
     vent_program.addLine("Set MaxHR = #{max_oa_hr}")
     vent_program.addLine("Set MaxRH = #{max_oa_rh}")
-    if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
-      vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints to minimize incurring additional heating energy
+    if not thermostat.nil?
+      # Home has HVAC system (though setpoints may be defaulted); use the average of heating/cooling setpoints to minimize incurring additional heating energy.
+      vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
     else
-      vent_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
+      # No HVAC system; use the average of defaulted heating/cooling setpoints.
+      default_htg_sp = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual)[0]
+      default_clg_sp = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual)[0]
+      vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
     vent_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
