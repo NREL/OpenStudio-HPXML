@@ -22,6 +22,7 @@ class Lighting
                                      fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
                                      fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
                                      lighting.interior_usage_multiplier)
+      return if int_kwh.nil?
     end
 
     ext_kwh = kwhs_per_year[HPXML::LocationExterior]
@@ -31,6 +32,7 @@ class Lighting
                                      fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
                                      fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
                                      lighting.exterior_usage_multiplier)
+      ext_kwh = 0.0 if ext_kwh.nil? # Exterior lighting is optional
     end
 
     grg_kwh = kwhs_per_year[HPXML::LocationGarage]
@@ -45,10 +47,7 @@ class Lighting
                                    fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
                                    fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
                                    lighting.garage_usage_multiplier)
-    end
-
-    if int_kwh.nil? || ext_kwh.nil? || grg_kwh.nil?
-      return
+      grg_kwh = 0.0 if grg_kwh.nil? # Garage lighting is optional
     end
 
     # Add lighting to each conditioned space

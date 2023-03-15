@@ -2005,8 +2005,8 @@
     <sch:title>[Lighting]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Lighting'>
       <sch:assert role='ERROR' test='count(h:LightingGroup[h:Location="interior"]) &gt;= 1'>Expected 1 or more element(s) for xpath: LightingGroup[Location="interior"]</sch:assert> <!-- See [LightingGroup=Interior] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:Location="exterior"]) &gt;= 1'>Expected 1 or more element(s) for xpath: LightingGroup[Location="exterior"]</sch:assert> <!-- See [LightingGroup=Exterior] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:Location="garage"]) &gt;= 1'>Expected 1 or more element(s) for xpath: LightingGroup[Location="garage"]</sch:assert> <!-- See [LightingGroup=Garage] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:Location="exterior"]) &gt;= 0'>Expected 0 or more element(s) for xpath: LightingGroup[Location="exterior"]</sch:assert> <!-- See [LightingGroup=Exterior] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:Location="garage"]) &gt;= 0'>Expected 0 or more element(s) for xpath: LightingGroup[Location="garage"]</sch:assert> <!-- See [LightingGroup=Garage] -->
       <sch:assert role='ERROR' test='count(h:extension/h:InteriorUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/InteriorUsageMultiplier</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:GarageUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GarageUsageMultiplier</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ExteriorUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ExteriorUsageMultiplier</sch:assert>
@@ -2024,6 +2024,9 @@
       <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="interior"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="exterior"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="exterior" to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="garage"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="garage" to be less than or equal to 1</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='count(h:LightingGroup[h:Location="exterior"]) = 0'>No exterior lighting specified, the model will not include exterior lighting energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:LightingGroup[h:Location="garage"]) = 0 and count(../h:Enclosure/h:Slabs/h:Slab[h:InteriorAdjacentTo="garage"]) &gt; 0'>No garage lighting specified, the model will not include garage lighting energy use.</sch:report>
     </sch:rule>
   </sch:pattern>
 
