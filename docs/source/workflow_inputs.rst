@@ -663,6 +663,10 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
 
+.. note::
+
+  For attached and multifamily dwelling units, the provided infiltration rate should solely reflect the amount of air from outside (e.g., excluding air exchange from adjacent dwelling units).
+
 In addition, one of the following air leakage types must also be defined:
 
 - :ref:`infil_ach_cfm`
@@ -2171,8 +2175,15 @@ If not entered, the simulation will not include mechanical ventilation.
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_, including adjustments for A) infiltration credit, B) balanced vs imbalanced systems, and C) adiabatic surfaces for SFA/MF buildings.
-  .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+  .. [#] | If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         | Qfan = Qtot - Φ*(Qinf * Aext)
+         | where
+         | Qfan = required mechanical ventilation rate (cfm)
+         | Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         | Qinf = infiltration rate (cfm)
+         | Aext = 1 for single-family detached, otherwise ratio of exterior envelope surface area not attached to garages or other dwelling units to total envelope surface area
+         | Φ = 1 for balanced ventilation systems, and Qinf/Qtot otherwise
+  .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a CFIS system, in which case it is not allowed.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
          For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
