@@ -446,7 +446,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.cooling_systems[0].integrated_heating_system_efficiency_percent = 0.98
         hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = 1.0
       elsif ['invalid-lighting-groups'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-garage.xml'))
         [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |ltg_loc|
           hpxml.lighting_groups.each do |lg|
             next unless lg.location == ltg_loc
@@ -456,7 +456,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
           end
         end
       elsif ['invalid-lighting-groups2'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-garage.xml'))
         [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |ltg_loc|
           hpxml.lighting_groups.each do |lg|
             next unless lg.location == ltg_loc

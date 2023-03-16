@@ -4601,7 +4601,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                 kwh_per_year: kwh_per_year)
     end
   elsif ['base-lighting-mixed.xml'].include? hpxml_file
-    hpxml.lighting_groups.each do |lg|
+    hpxml.lighting_groups.reverse_each do |lg|
       next unless lg.location == HPXML::LocationExterior
 
       lg.delete
