@@ -779,6 +779,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
     args['battery_present'] = false
+    args['lighting_present'] = true
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1040,6 +1041,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
     args['battery_present'] = false
+    args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
     args['lighting_interior_fraction_led'] = 0
@@ -2102,9 +2104,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
 
   # Lighting
   if ['base-lighting-none.xml'].include? hpxml_file
-    args['lighting_interior_usage_multiplier'] = 0
-    args['lighting_exterior_usage_multiplier'] = 0
-    args['lighting_garage_usage_multiplier'] = 0
+    args['lighting_present'] = false
   elsif ['base-lighting-ceiling-fans.xml',
          'base-lighting-none-ceiling-fans.xml'].include? hpxml_file
     args['ceiling_fan_present'] = true

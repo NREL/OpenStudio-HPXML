@@ -534,6 +534,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['pv_system_2_array_tilt'] = 20
       args['pv_system_2_max_power_output'] = 4000
       args['battery_present'] = false
+      args['lighting_present'] = true
       args['lighting_interior_fraction_cfl'] = 0.4
       args['lighting_interior_fraction_lfl'] = 0.1
       args['lighting_interior_fraction_led'] = 0.25
