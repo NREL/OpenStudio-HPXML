@@ -5610,7 +5610,7 @@ class HPXMLFile
   end
 
   def self.set_lighting(hpxml, args)
-    has_garage = hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.size > 0
+    has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
 
     # Interior
     if args[:lighting_interior_usage_multiplier].is_initialized
