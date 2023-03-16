@@ -200,6 +200,8 @@ class HPXML < Object
   InteriorFinishNone = 'none'
   InteriorFinishPlaster = 'plaster'
   InteriorFinishWood = 'wood'
+  InfiltrationTestCompartmentalization = 'compartmentalization test'
+  InfiltrationTestGuarded = 'guarded test'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
   LightingTypeCFL = 'CompactFluorescent'
@@ -1727,7 +1729,7 @@ class HPXML < Object
 
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area, :type,
-             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext]
+             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext, :type_of_multifamily_test]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1743,6 +1745,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(air_infiltration_measurement, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationMeasurement', @type, :string) unless @type.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'TypeOfMultifamilyInfiltrationTest', @type_of_multifamily_test, :string) unless @type_of_multifamily_test.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'HousePressure', @house_pressure, :float) unless @house_pressure.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'LeakinessDescription', @leakiness_description, :string) unless @leakiness_description.nil?
       if (not @unit_of_measure.nil?) && (not @air_leakage.nil?)
@@ -1761,6 +1764,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(air_infiltration_measurement)
       @type = XMLHelper.get_value(air_infiltration_measurement, 'TypeOfInfiltrationMeasurement', :string)
+      @type_of_multifamily_test = XMLHelper.get_value(air_infiltration_measurement, 'TypeOfMultifamilyInfiltrationTest', :string)
       @house_pressure = XMLHelper.get_value(air_infiltration_measurement, 'HousePressure', :float)
       @leakiness_description = XMLHelper.get_value(air_infiltration_measurement, 'LeakinessDescription', :string)
       @unit_of_measure = XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/UnitofMeasure', :string)
