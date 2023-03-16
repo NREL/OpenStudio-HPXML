@@ -12,7 +12,7 @@
         <Timestep>60</Timestep>
       </SimulationControl>
       <AdditionalProperties>
-        <ParentHPXMLFile>base-bldgtype-multifamily-shared-laundry-room.xml</ParentHPXMLFile>
+        <ParentHPXMLFile>base-bldgtype-multifamily.xml</ParentHPXMLFile>
       </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -75,7 +75,7 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <TypeOfMultifamilyInfiltrationTest>guarded test</TypeOfMultifamilyInfiltrationTest>
+            <TypeOfMultifamilyInfiltrationTest>compartmentalization test</TypeOfMultifamilyInfiltrationTest>
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>ACH</UnitofMeasure>
@@ -309,30 +309,13 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
-            <FuelType>natural gas</FuelType>
+            <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>3</NumberofUnitsServed>
-            <TankVolume>60.0</TankVolume>
-            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeatingSystem2'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>3</NumberofUnitsServed>
-            <TankVolume>60.0</TankVolume>
-            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+            <TankVolume>40.0</TankVolume>
+            <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
+            <HeatingCapacity>18767.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -361,9 +344,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution1'/>
-          <Location>other heated space</Location>
+          <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -374,8 +355,7 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <Location>other heated space</Location>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <Vented>true</Vented>
@@ -383,9 +363,7 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution1'/>
-          <Location>other heated space</Location>
+          <Location>living space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>70f05b75-887b-40ec-a1de-cb3c5d203473</version_id>
-  <version_modified>20230316T041016Z</version_modified>
+  <version_id>649d49c6-1157-406b-be7b-74d84665d5fb</version_id>
+  <version_modified>20230316T234622Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -410,12 +410,6 @@
       <checksum>C7DAF9C1</checksum>
     </file>
     <file>
-      <filename>test_enclosure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>131F55BD</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -426,12 +420,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>05E66CD2</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schema/HPXML.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F786FF44</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -475,12 +463,6 @@
       <checksum>F7135315</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CAFB6A2B</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -497,12 +479,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>D202A548</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>41816C82</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -577,10 +553,34 @@
       <checksum>DD833223</checksum>
     </file>
     <file>
+      <filename>hpxml_schema/HPXML.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF7D06AE</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0C78779A</checksum>
+    </file>
+    <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>33A1B4AB</checksum>
+      <checksum>A5E1F671</checksum>
+    </file>
+    <file>
+      <filename>test_enclosure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>87CC65CF</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DA427D45</checksum>
     </file>
   </files>
 </measure>

@@ -1901,7 +1901,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_mech_vent_values(hpxml_default, false, 24.0, 35.0, 100)
 
     # Test defaults w/ SFA building
-    hpxml = _create_hpxml('base-bldgtype-single-family-attached.xml')
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)

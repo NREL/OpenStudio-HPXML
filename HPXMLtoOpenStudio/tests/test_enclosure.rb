@@ -706,7 +706,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     assert_equal(1.0, a_ext_ratio)
 
     # Test single-family attached
-    hpxml = _create_hpxml('base-bldgtype-single-family-attached.xml')
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas()
     a_ext_ratio = exterior_area / total_area
     assert_in_delta(0.840, a_ext_ratio, 0.001)
@@ -833,7 +833,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
   def test_aspect_ratios
     # Test single-family attached
-    hpxml = _create_hpxml('base-bldgtype-single-family-attached.xml')
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     wall_outside = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOutside && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
     wall_other_housing_unit = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
 
