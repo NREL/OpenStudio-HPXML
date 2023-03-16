@@ -4612,6 +4612,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationExterior,
                               kwh_per_year: 150)
+  elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
+    int_lighting_groups = hpxml.lighting_groups.select { |lg| lg.location == HPXML::LocationInterior }
+    int_lighting_groups.each do |lg|
+      hpxml.lighting_groups << lg.dup
+      hpxml.lighting_groups[-1].location = HPXML::LocationGarage
+      hpxml.lighting_groups[-1].id = "LightingGroup#{hpxml.lighting_groups.size}"
+    end
   end
 
   # --------------- #
