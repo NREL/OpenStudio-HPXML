@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4496d578-ffe9-434f-ace7-ed65045348d3</version_id>
-  <version_modified>20230315T231558Z</version_modified>
+  <version_id>3d0c6dc1-6c67-4b2f-8e7c-9ea312348b3a</version_id>
+  <version_modified>20230316T002617Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4581,25 +4581,6 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>lighting_present</name>
-      <display_name>Lighting: Present</display_name>
-      <description>Whether there is lighting energy use.</description>
-      <type>Boolean</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>true</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
       <name>lighting_interior_fraction_cfl</name>
       <display_name>Lighting: Interior Fraction CFL</display_name>
       <description>Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
@@ -6566,7 +6547,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B1DB9680</checksum>
+      <checksum>50C9E0A2</checksum>
     </file>
     <file>
       <version>
@@ -6577,7 +6558,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A4585FFF</checksum>
+      <checksum>25F9F200</checksum>
     </file>
   </files>
 </measure>

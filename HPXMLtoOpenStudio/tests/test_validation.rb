@@ -642,7 +642,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
                               'integrated-heating-efficiency-low' => ['Percent efficiency should typically be greater than or equal to 0.5.'],
-                              'lighting-groups-missing' => ['No exterior lighting specified, the model will not include exterior lighting energy use.',
+                              'lighting-groups-missing' => ['No interior lighting specified, the model will not include interior lighting energy use.',
+                                                            'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
@@ -752,8 +753,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['lighting-groups-missing'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-garage.xml'))
         hpxml.lighting_groups.reverse_each do |lg|
-          next unless [HPXML::LocationExterior, HPXML::LocationGarage].include? lg.location
-
           lg.delete
         end
       elsif ['slab-zero-exposed-perimeter'].include? warning_case

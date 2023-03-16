@@ -2207,12 +2207,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
-    arg.setDisplayName('Lighting: Present')
-    arg.setDescription('Whether there is lighting energy use.')
-    arg.setDefaultValue(true)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_fraction_cfl', true)
     arg.setDisplayName('Lighting: Interior Fraction CFL')
     arg.setDescription('Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
@@ -5616,70 +5610,68 @@ class HPXMLFile
   end
 
   def self.set_lighting(hpxml, args)
-    return unless args[:lighting_present] || args[:ceiling_fan_present] # If ceiling fans present but not lighting present, need to continue and use lighting multipliers = 0 instead
-
     has_garage = hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.size > 0
 
     # Interior
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
+    if args[:lighting_interior_usage_multiplier].is_initialized
+      interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+    end
+    if interior_usage_multiplier.nil? || interior_usage_multiplier.to_f > 0
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationInterior,
+                                fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
+                                lighting_type: HPXML::LightingTypeCFL)
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationInterior,
+                                fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
+                                lighting_type: HPXML::LightingTypeLFL)
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationInterior,
+                                fraction_of_units_in_location: args[:lighting_interior_fraction_led],
+                                lighting_type: HPXML::LightingTypeLED)
+      hpxml.lighting.interior_usage_multiplier = interior_usage_multiplier
+    end
 
     # Exterior
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
+    if args[:lighting_exterior_usage_multiplier].is_initialized
+      exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+    end
+    if exterior_usage_multiplier.nil? || exterior_usage_multiplier.to_f > 0
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationExterior,
+                                fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
+                                lighting_type: HPXML::LightingTypeCFL)
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationExterior,
+                                fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
+                                lighting_type: HPXML::LightingTypeLFL)
+      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                location: HPXML::LocationExterior,
+                                fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
+                                lighting_type: HPXML::LightingTypeLED)
+      hpxml.lighting.exterior_usage_multiplier = exterior_usage_multiplier
+    end
 
     # Garage
     if has_garage
-      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                                location: HPXML::LocationGarage,
-                                fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
-                                lighting_type: HPXML::LightingTypeCFL)
-      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                                location: HPXML::LocationGarage,
-                                fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
-                                lighting_type: HPXML::LightingTypeLFL)
-      hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                                location: HPXML::LocationGarage,
-                                fraction_of_units_in_location: args[:lighting_garage_fraction_led],
-                                lighting_type: HPXML::LightingTypeLED)
-    end
-
-    if args[:lighting_present]
-      if args[:lighting_interior_usage_multiplier].is_initialized
-        hpxml.lighting.interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+      if args[:lighting_garage_usage_multiplier].is_initialized
+        garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
       end
-
-      if args[:lighting_exterior_usage_multiplier].is_initialized
-        hpxml.lighting.exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+      if garage_usage_multiplier.nil? || garage_usage_multiplier.to_f > 0
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationGarage,
+                                  fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
+                                  lighting_type: HPXML::LightingTypeCFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationGarage,
+                                  fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
+                                  lighting_type: HPXML::LightingTypeLFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationGarage,
+                                  fraction_of_units_in_location: args[:lighting_garage_fraction_led],
+                                  lighting_type: HPXML::LightingTypeLED)
+        hpxml.lighting.garage_usage_multiplier = garage_usage_multiplier
       end
-
-      if args[:lighting_garage_usage_multiplier].is_initialized && has_garage
-        hpxml.lighting.garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
-      end
-    elsif args[:ceiling_fan_present]
-      hpxml.lighting.interior_usage_multiplier = 0.0
-      hpxml.lighting.exterior_usage_multiplier = 0.0
-      hpxml.lighting.garage_usage_multiplier = 0.0 if has_garage
     end
 
     return unless args[:holiday_lighting_present]
