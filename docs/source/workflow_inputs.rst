@@ -2694,29 +2694,44 @@ If not entered, the simulation will not include photovoltaics.
 
 Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_.
 
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  Element                                                  Type               Units             Constraints          Required  Default   Notes
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  ``SystemIdentifier``                                     id                                                        Yes                 Unique identifier
-  ``IsSharedSystem``                                       boolean                                                   No        false     Whether it serves multiple dwelling units
-  ``Location``                                             string                               See [#]_             No        roof      Mounting location
-  ``ModuleType``                                           string                               See [#]_             No        standard  Type of module
-  ``Tracking``                                             string                               See [#]_             No        fixed     Type of tracking
-  ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or See [#]_  Yes                 Direction panels face (clockwise from North)
-  ``ArrayTilt``                                            double             deg               0 - 90               Yes                 Tilt relative to horizontal
-  ``MaxPowerOutput``                                       double             W                 >= 0                 Yes                 Peak power
-  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600      No        0.14      System losses [#]_
-  ``AttachedToInverter``                                   idref                                See [#]_             Yes                 ID of attached inverter
-  ``extension/NumberofBedroomsServed``                     integer                              > 1                  See [#]_            Number of bedrooms served
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
+  =======================================================  =================  ================  ===================  ========  =========  ============================================
+  Element                                                  Type               Units             Constraints          Required  Default    Notes
+  =======================================================  =================  ================  ===================  ========  =========  ============================================
+  ``SystemIdentifier``                                     id                                                        Yes                  Unique identifier
+  ``IsSharedSystem``                                       boolean                                                   No        false      Whether it serves multiple dwelling units
+  ``Location``                                             string                               See [#]_             No        roof       Mounting location
+  ``ModuleType``                                           string                               See [#]_             No        standard   Type of module
+  ``Tracking``                                             string                               See [#]_             No        fixed      Type of tracking
+  ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or See [#]_  Yes                  Direction panels face (clockwise from North)
+  ``ArrayTilt``                                            double             deg               0 - 90               Yes                  Tilt relative to horizontal
+  ``MaxPowerOutput``                                       double             W                 >= 0                 Yes                  Peak power
+  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600      No        0.14 [#]_  System losses [#]_
+  ``AttachedToInverter``                                   idref                                See [#]_             Yes                  ID of attached inverter
+  ``extension/NumberofBedroomsServed``                     integer                              > 1                  See [#]_             Number of bedrooms served
+  =======================================================  =================  ================  ===================  ========  =========  ============================================
   
   .. [#] Location choices are "ground" or "roof" mounted.
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
-  .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
-         If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
+  .. [#] SystemLossesFraction default is derived from the `PVWatts documentation <https://www.nrel.gov/docs/fy14osti/62641.pdf>`_, which breaks down the losses as follows.
+         Note that the total loss (14%) is not the sum of the individual losses but is calculated by multiplying the reduction due to each loss.
+         
+         - **Soiling**: 2%
+         - **Shading**: 3%
+         - **Snow**: 0%
+         - **Mismatch**: 2%
+         - **Wiring**: 2%
+         - **Connections**: 0.5%
+         - **Light-induced degradation**: 1.5%
+         - **Nameplate rating**: 1%
+         - **Age**: 0%
+         - **Availability**: 3%
+
+         If YearModulesManufactured provided but not SystemLossesFraction, calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
+
+  .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
