@@ -667,7 +667,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
 
 .. note::
 
-  For attached and multifamily dwelling units, the provided infiltration rate should solely reflect the amount of air from outside (e.g., excluding air exchange from adjacent dwelling units).
+  For attached and multifamily dwelling units, the provided infiltration rate should exclude air exchange from, e.g., adjacent dwelling units.
 
 In addition, one of the following air leakage types must also be defined:
 
