@@ -72,7 +72,7 @@ These defaults will be reflected in the EnergyPlus simulation results.
  .. note::
 
   The OpenStudio-HPXML workflow generally treats missing *elements* differently than missing *values*.
-  For example, if there is no ``Refrigerator`` element defined, the model will proceed without refrigerator energy use.
+  For example, if there is no ``Refrigerator`` element defined, the simulation will proceed without refrigerator energy use.
   On the other hand, if there is a ``Refrigerator`` element but with no values defined (i.e., no ``Location`` or ``RatedAnnualkWh``), it is assumed that a refrigerator exists but its properties are unknown, so they will be defaulted in the model.
 
 See :ref:`hpxml_defaults` for information on how default values can be inspected.
@@ -427,7 +427,7 @@ HPXML Vacancy Periods
 *********************
 
 One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
-If not entered, occupant vacancies will not be modeled.
+If not entered, the simulation will not include occupant vacancies.
 Natural ventilation is always unavailable during a vacancy period.
 
   ====================================  ========  =======  =============  ========  ========  ===========
@@ -451,7 +451,7 @@ HPXML Power Outage Periods
 **************************
 
 One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
-If not entered, power outages will not be modeled.
+If not entered, the simulation will not include power outages.
 
   ====================================  ========  =======  =============  ========  ================  ===========
   Element                               Type      Units    Constraints    Required  Default           Description
@@ -3065,9 +3065,11 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-Lighting can be specified with lighting type fractions or annual energy consumption values.
+Lighting can be specified in one of two ways: using 1) lighting type fractions or 2) annual energy consumption values.
+Lighting is described using multiple ``LightingGroup`` elements for each location (interior, exterior, or garage).
+If no LightingGroup elements are provided for a given location (e.g., exterior), the simulation will not include that lighting use.
 
-If specifying **lighting type fractions**, nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided using every combination of ``LightingType`` and ``Location``:
+If specifying **lighting type fractions**, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements (one for each possible ``LightingType``) are entered for each lighting location:
 
   =============================  =======  ======  ===========  ========  =======  ===========================================================================
   Element                        Type     Units   Constraints  Required  Default  Notes
@@ -3086,7 +3088,7 @@ If specifying **lighting type fractions**, nine ``/HPXML/Building/BuildingDetail
 
   Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-If specifying **annual energy consumption** instead, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided using every ``Location``:
+If specifying **annual energy consumption** instead, a single ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` element is entered for each lighting location:
 
   ================================  =======  ======  ===========  ========  ========  ===========================================================================
   Element                           Type     Units   Constraints  Required  Default   Notes
@@ -3099,7 +3101,7 @@ If specifying **annual energy consumption** instead, three ``/HPXML/Building/Bui
   .. [#] Location choices are "interior", "garage", or "exterior".
   .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
 
-With either lighting specification, additional information can be entered in ``Lighting``.
+With either lighting specification, additional information can be entered in ``/HPXML/Building/BuildingDetails/Lighting``.
 
   ================================================  =======  ======  ===========  ========  ========  ===============================================
   Element                                           Type     Units   Constraints  Required  Default   Notes
@@ -3116,14 +3118,13 @@ With either lighting specification, additional information can be entered in ``L
   ``extension/ExteriorWeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated exterior weekday fractions
   ``extension/ExteriorWeekendScheduleFractions``    array                         No                  24 comma-separated exterior weekend fractions
   ``extension/ExteriorMonthlyScheduleMultipliers``  array                         No                  12 comma-separated exterior monthly multipliers
-  ``extension/ExteriorHolidayLighting``             element          0 - 1        No        <none>    Presence of additional holiday lighting?
   ================================================  =======  ======  ===========  ========  ========  ===============================================
 
   .. [#] If *interior* schedule values not provided (and :ref:`detailedschedules` not used), they will be calculated using Lighting Calculation Option 2 (location-dependent lighting profile) of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If *garage* schedule values not provided (and :ref:`detailedschedules` not used), they will be defaulted using Appendix C Table 8 of the `Title 24 2016 Res. ACM Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_.
   .. [#] If *exterior* schedule values not provided (and :ref:`detailedschedules` not used), they will be defaulted using Appendix C Table 8 of the `Title 24 2016 Res. ACM Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_.
 
-If exterior holiday lighting is specified, additional information is entered in ``extension/ExteriorHolidayLighting``.
+If exterior holiday lighting is specified, additional information is entered in ``/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting``.
 
   ===============================  =======  =======  ===========  ========  =============  ============================================
   Element                          Type     Units    Constraints  Required  Default        Notes
@@ -3138,7 +3139,7 @@ If exterior holiday lighting is specified, additional information is entered in 
   ===============================  =======  =======  ===========  ========  =============  ============================================
 
   .. [#] If Value not provided, defaults to 1.1 for single-family detached and 0.55 for others.
-  .. [#] If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults to "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019".
+  .. [#] If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults to: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019.
 
 HPXML Ceiling Fans
 ******************
