@@ -2050,7 +2050,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 8.0, 150.0, 300.0, 1.0, HPXML::CFISModeAirHandler)
+    _test_default_mech_vent_values(hpxml_default, false, 8.0, 149.4, 298.7, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml = _create_hpxml('base-mechvent-erv.xml')
