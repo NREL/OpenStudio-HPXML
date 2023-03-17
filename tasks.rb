@@ -1775,6 +1775,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-max-capacity-schedule.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-speed-ratios-constant.csv'
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
     args['heat_pump_heating_capacity'] = 18000.0
@@ -1841,6 +1843,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['cooling_system_cooling_efficiency'] = 24.0
     args['cooling_system_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.78
+  elsif ['base-hvac-central-ac-only-var-speed-max-capacity-schedule.xml'].include? hpxml_file
+    args['schedules_filepaths'] = '../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-speed-ratios-constant.csv'
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 7.7
