@@ -1928,8 +1928,7 @@ If a backup type of "integrated" is provided, additional information is entered 
   =============================================================================  ========  ======  ===========  ========  ==============  ==========================================
 
   .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
-  .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
-         (The autosized capacity is not affected by the HeatPumpSizingMethodology selected in :ref:`hvac_sizing_control`.)
+  .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load, unless HeatPumpSizingMethodology of "MaxLoad" is selected in :ref:`hvac_sizing_control`, in which case it is set to zero.
 
 If a backup type of "separate" is provided, additional information is entered in ``HeatPump``.
 
