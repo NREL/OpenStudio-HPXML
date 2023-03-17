@@ -465,6 +465,48 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_infiltration_values(hpxml_default.air_infiltration_measurements[0], 1350 * 12)
   end
 
+  def test_infiltration_compartmentaliztion_test_adjustment
+    # Test single-family detached
+    hpxml = _create_hpxml('base.xml')
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestCompartmentalization
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], nil)
+
+    # Test single-family attached not overridden by defaults
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestCompartmentalization
+    hpxml.air_infiltration_measurements[0].a_ext = 0.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], 0.5)
+
+    # Test single-family attached defaults
+    hpxml.air_infiltration_measurements[0].a_ext = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], 0.840)
+
+    hpxml.attics[0].within_infiltration_volume = true
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], 0.817)
+
+    # Test multifamily not overridden by defaults
+    hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestCompartmentalization
+    hpxml.air_infiltration_measurements[0].a_ext = 0.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], 0.5)
+
+    # Test multifamily defaults
+    hpxml.air_infiltration_measurements[0].a_ext = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], 0.247)
+  end
+
   def test_attics
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-atticroof-vented.xml')
@@ -3504,6 +3546,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_infiltration_values(air_infiltration_measurement, volume)
     assert_equal(volume, air_infiltration_measurement.infiltration_volume)
+  end
+
+  def _test_default_infiltration_compartmentalization_test_values(air_infiltration_measurement, a_ext)
+    if a_ext.nil?
+      assert_nil(air_infiltration_measurement.a_ext)
+    else
+      assert_in_delta(a_ext, air_infiltration_measurement.a_ext, 0.001)
+    end
   end
 
   def _test_default_attic_values(attic, sla)

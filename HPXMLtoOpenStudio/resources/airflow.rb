@@ -214,17 +214,20 @@ class Airflow
     else
       fail 'Unexpected error.'
     end
+
+    if measurement.type_of_multifamily_test == HPXML::InfiltrationTestCompartmentalization
+      if not measurement.a_ext.nil?
+        sla *= measurement.a_ext unless sla.nil?
+        ach50 *= measurement.a_ext unless ach50.nil?
+        nach *= measurement.a_ext unless nach.nil?
+      end
+    end
+
     return sla, ach50, nach, volume, height
   end
 
   def self.get_default_mech_vent_flow_rate(hpxml, vent_fan, weather, cfa, nbeds)
     # Calculates Qfan cfm requirement per ASHRAE 62.2-2019
-    infil_a_ext = 1.0
-    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? hpxml.building_construction.residential_facility_type
-      tot_cb_area, ext_cb_area = hpxml.compartmentalization_boundary_areas()
-      infil_a_ext = ext_cb_area / tot_cb_area
-    end
-
     sla, _ach50, _nach, _volume, height = get_values_from_air_infiltration_measurements(hpxml, cfa, weather)
 
     nl = get_infiltration_NL_from_SLA(sla, height)
@@ -237,7 +240,7 @@ class Airflow
     else
       phi = q_inf / q_tot
     end
-    q_fan = q_tot - phi * (q_inf * infil_a_ext)
+    q_fan = q_tot - phi * q_inf # Note: Aext is already included in q_inf
     q_fan = [q_fan, 0].max
 
     if not vent_fan.hours_in_operation.nil?

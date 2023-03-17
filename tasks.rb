@@ -65,7 +65,7 @@ def create_hpxmls
     'base-bldgtype-attached.xml' => 'base.xml',
     'base-bldgtype-attached-2stories.xml' => 'base-bldgtype-attached.xml',
     'base-bldgtype-attached-atticroof-cathedral.xml' => 'base-bldgtype-attached-2stories.xml',
-    'base-bldgtype-attached-infiltration-compartmentalization-test.xml' => 'base-bldgtype-attached.xml',
+    'base-bldgtype-attached-infil-compartmentalization-test.xml' => 'base-bldgtype-attached.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -73,7 +73,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-calctype-operational.xml' => 'base-bldgtype-multifamily.xml',
-    'base-bldgtype-multifamily-infiltration-compartmentalization-test.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-infil-compartmentalization-test.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml',
@@ -1299,8 +1299,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['ducts_return_location'] = HPXML::LocationLivingSpace
     args['ducts_supply_leakage_to_outside_value'] = 0
     args['ducts_return_leakage_to_outside_value'] = 0
-  elsif ['base-bldgtype-attached-infiltration-compartmentalization-test.xml'].include? hpxml_file
+  elsif ['base-bldgtype-attached-infil-compartmentalization-test.xml'].include? hpxml_file
     args['air_leakage_multifamily_value_type'] = HPXML::InfiltrationTestCompartmentalization
+    args['air_leakage_value'] = (args['air_leakage_value'] / 0.84014).round(5)
   end
 
   # Multifamily
@@ -1374,8 +1375,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['water_heater_efficiency'] = 0.59
     args['water_heater_recovery_efficiency'] = 0.76
     args['water_heater_heating_capacity'] = 40000
-  elsif ['base-bldgtype-multifamily-infiltration-compartmentalization-test.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-infil-compartmentalization-test.xml'].include? hpxml_file
     args['air_leakage_multifamily_value_type'] = HPXML::InfiltrationTestCompartmentalization
+    args['air_leakage_value'] = (args['air_leakage_value'] / 0.24674).round(5)
   end
 
   # Occ Calc Type
@@ -2774,6 +2776,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area -= 400 * 2
     hpxml.building_construction.conditioned_building_volume -= 400 * 2 * 8
     hpxml.air_infiltration_measurements[0].infiltration_volume = hpxml.building_construction.conditioned_building_volume
+  elsif ['base-bldgtype-multifamily-infil-compartmentalization-test.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].a_ext = 0.2
   end
 
   # --------------- #
