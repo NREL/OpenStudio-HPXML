@@ -656,7 +656,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   Element                                Type    Units  Constraints  Required   Default                    Notes
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
   ``SystemIdentifier``                   id                          Yes                                   Unique identifier
-  ``TypeOfInfiltrationTest``  string         See [#]_     See [#]_                              Type of multifamily infiltration test
+  ``TypeOfInfiltrationTest``             string         See [#]_     See [#]_                              Type of multifamily infiltration test
   ``InfiltrationVolume``                 double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement
   ``InfiltrationHeight``                 double  ft     > 0          No         See [#]_                   Height associated with infiltration measurement [#]_
   ``extension/Aext``                     double  frac   > 0          No         See [#]_                   Exterior area ratio for compartmentalization test
