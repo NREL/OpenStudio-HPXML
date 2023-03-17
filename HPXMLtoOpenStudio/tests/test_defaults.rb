@@ -1941,25 +1941,39 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.delivered_ventilation = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 24.0, 35.0, 100)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 34.9, 99.6)
 
-    # Test defaults w/ SFA building
+    # Test defaults w/ SFA building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestCompartmentalization
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.2, 78)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.4, 78.4)
 
-    # Test defaults w/ MF building
+    # Test defaults w/ SFA building, guarded test
+    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.2, 77.3)
+
+    # Test defaults w/ MF building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
+    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestCompartmentalization
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mech_vent_values(hpxml_default, false, 24.0, 19.8, 56.5)
+
+    # Test defaults w/ MF building, guarded test
+    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 19.2, 54.9)
 
     # Test defaults w/ nACH infiltration
     hpxml = _create_hpxml('base-enclosure-infil-natural-ach.xml')
@@ -4032,8 +4046,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
-    assert_in_epsilon(fan_power, vent_fan.fan_power, 0.01)
-    assert_in_epsilon(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.01)
+    assert_in_delta(fan_power, vent_fan.fan_power, 0.1)
+    assert_in_delta(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.1)
     if cfis_vent_mode_airflow_fraction.nil?
       assert_nil(vent_fan.cfis_vent_mode_airflow_fraction)
     else
