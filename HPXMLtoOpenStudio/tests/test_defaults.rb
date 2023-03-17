@@ -1842,6 +1842,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults w/ shared exhaust system
     hpxml = _create_hpxml('base-mechvent-exhaust.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
     vent_fan.is_shared_system = true
     vent_fan.fraction_recirculation = 0.0
@@ -2073,6 +2074,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.water_heating_systems.each do |wh|
       wh.is_shared_system = true
       wh.number_of_units_served = 2
@@ -2367,6 +2369,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-pv.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.pv_systems.each do |pv|
       pv.is_shared_system = true
       pv.number_of_bedrooms_served = 20
@@ -2515,6 +2518,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-generators.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.generators.each do |generator|
       generator.is_shared_system = true
       generator.number_of_bedrooms_served = 20
@@ -2536,6 +2540,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_washers[0].location = HPXML::LocationBasementConditioned
@@ -2592,6 +2597,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementConditioned
@@ -2667,6 +2673,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.air_infiltration_measurements[0].type_of_multifamily_test = HPXML::InfiltrationTestGuarded
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.dishwashers[0].location = HPXML::LocationBasementConditioned

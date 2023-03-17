@@ -1284,6 +1284,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['window_area_right'] = 0
     args['heating_system_heating_capacity'] = 24000.0
     args['misc_plug_loads_other_annual_kwh'] = 1638.0
+    args['air_leakage_multifamily_value_type'] = HPXML::InfiltrationTestGuarded
   elsif ['base-bldgtype-attached-2stories.xml'].include? hpxml_file
     args['geometry_unit_num_floors_above_grade'] = 2
     args['geometry_unit_cfa'] = 2700.0
