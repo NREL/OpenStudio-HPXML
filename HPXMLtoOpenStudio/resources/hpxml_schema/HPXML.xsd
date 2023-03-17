@@ -5351,9 +5351,9 @@
 			<xs:element minOccurs="0" name="WindConditions" type="WindConditions"/>
 			<xs:element name="TypeOfInfiltrationMeasurement" type="TypeofInfiltrationMeasurement" minOccurs="0"/>
 			<xs:element name="TypeOfBlowerDoorTest" type="TypeofBlowerDoorTest" minOccurs="0"/>
-			<xs:element minOccurs="0" name="TypeOfMultifamilyInfiltrationTest" type="TypeOfMultifamilyInfiltrationTest">
+			<xs:element minOccurs="0" name="TypeOfInfiltrationTest" type="TypeOfInfiltrationTest">
 				<xs:annotation>
-					<xs:documentation>Whole building tests measure the infiltration through the total exterior envelope of the multifamily building. Compartmentalization tests measure the infiltration for a single dwelling unit through both exterior (adjacent to outside) and interior/shared (adjacent to other spaces/units) surfaces. Guarded tests measure the infiltration for a single dwelling unit through only exterior (adjacent to outside) surfaces.</xs:documentation>
+					<xs:documentation>Applies to single-family attached and multifamily. Whole building tests measure the infiltration through the total exterior envelope of the building. Compartmentalization tests measure the infiltration for a single dwelling unit through both exterior (adjacent to outside) and interior/shared (adjacent to other spaces/units) surfaces. Guarded tests measure the infiltration for a single dwelling unit through only exterior (adjacent to outside) surfaces.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="HousePressure" type="HousePressure" minOccurs="0">
@@ -6668,7 +6668,7 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="TypeOfMultifamilyInfiltrationTest_simple">
+	<xs:simpleType name="TypeOfInfiltrationTest_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="whole building test"/>
 			<xs:enumeration value="compartmentalization test"/>
@@ -6676,9 +6676,9 @@
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="TypeOfMultifamilyInfiltrationTest">
+	<xs:complexType name="TypeOfInfiltrationTest">
 		<xs:simpleContent>
-			<xs:extension base="TypeOfMultifamilyInfiltrationTest_simple">
+			<xs:extension base="TypeOfInfiltrationTest_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>

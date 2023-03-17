@@ -656,20 +656,20 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   Element                                Type    Units  Constraints  Required   Default                    Notes
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
   ``SystemIdentifier``                   id                          Yes                                   Unique identifier
-  ``TypeOfMultifamilyInfiltrationTest``  string         See [#]_     See [#]_                              Type of multifamily infiltration test
+  ``TypeOfInfiltrationTest``  string         See [#]_     See [#]_                              Type of multifamily infiltration test
   ``InfiltrationVolume``                 double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement
   ``InfiltrationHeight``                 double  ft     > 0          No         See [#]_                   Height associated with infiltration measurement [#]_
   ``extension/Aext``                     double  frac   > 0          No         See [#]_                   Exterior area ratio for compartmentalization test
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
 
-  .. [#] TypeOfMultifamilyInfiltrationTest choices are "compartmentalization test" or "guarded test".
+  .. [#] TypeOfInfiltrationTest choices are "compartmentalization test" or "guarded test".
          If "compartmentalization test", represents the total infiltration to the dwelling unit, in which case the air leakage value will be adjusted by ``extension/Aext``.
          If "guarded test", represents the infiltration to the dwelling unit from outside only.
-  .. [#] TypeOfMultifamilyInfiltrationTest required if single-family attached or apartment unit.
+  .. [#] TypeOfInfiltrationTest required if single-family attached or apartment unit.
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
   .. [#] If Aext not provided, defaults to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF space) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
-         Aext is only applicable for single-family attached and apartment units when TypeOfMultifamilyInfiltrationTest is "compartmentalization test".
+         Aext is only applicable for single-family attached and apartment units when TypeOfInfiltrationTest is "compartmentalization test".
 
 In addition, one of the following air leakage types must also be defined:
 

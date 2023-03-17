@@ -46,7 +46,7 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <TypeOfMultifamilyInfiltrationTest>guarded test</TypeOfMultifamilyInfiltrationTest>
+            <TypeOfInfiltrationTest>guarded test</TypeOfInfiltrationTest>
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>CFM</UnitofMeasure>

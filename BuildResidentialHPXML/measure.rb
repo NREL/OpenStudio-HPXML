@@ -3964,7 +3964,7 @@ class HPXMLFile
                                             air_leakage: air_leakage,
                                             effective_leakage_area: effective_leakage_area,
                                             infiltration_volume: infiltration_volume,
-                                            type_of_multifamily_test: air_leakage_multifamily_value_type)
+                                            type_of_test: air_leakage_multifamily_value_type)
   end
 
   def self.set_roofs(hpxml, args, sorted_surfaces)

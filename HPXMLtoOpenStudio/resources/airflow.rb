@@ -215,7 +215,7 @@ class Airflow
       fail 'Unexpected error.'
     end
 
-    if measurement.type_of_multifamily_test == HPXML::InfiltrationTestCompartmentalization
+    if measurement.type_of_test == HPXML::InfiltrationTestCompartmentalization
       if not measurement.a_ext.nil?
         sla *= measurement.a_ext unless sla.nil?
         ach50 *= measurement.a_ext unless ach50.nil?

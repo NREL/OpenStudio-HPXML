@@ -75,7 +75,7 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <TypeOfMultifamilyInfiltrationTest>compartmentalization test</TypeOfMultifamilyInfiltrationTest>
+            <TypeOfInfiltrationTest>compartmentalization test</TypeOfInfiltrationTest>
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>ACH</UnitofMeasure>
