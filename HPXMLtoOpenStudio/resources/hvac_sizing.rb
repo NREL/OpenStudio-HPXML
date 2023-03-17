@@ -1130,6 +1130,11 @@ class HVACSizing
         # Override Manual S oversize allowances:
         hvac.OverSizeLimit = 1.0
         hvac.OverSizeDelta = 0.0
+
+        if @hpxml.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
+          # Heat pump sized to meet year-round load, no backup heating needed
+          hvac_sizing_values.Heat_Load_Supp = 0.0
+        end
       end
     end
   end
@@ -1595,7 +1600,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
       hvac_sizing_values.Heat_Airflow_Supp = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity_Supp, (hvac.BackupSupplyAirTemp - @heat_setpoint))
 
-    elsif (hvac.HeatType == HPXML::HVACTypeFurnace) || hvac.HasIntegratedHeating
+    elsif [HPXML::HVACTypeFurnace].include?(hvac.HeatType) || hvac.HasIntegratedHeating
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
