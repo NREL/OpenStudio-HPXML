@@ -3,8 +3,12 @@
 class HVAC
   def self.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                         control_zone, power_outage_periods)
+                                         control_zone, power_outage_periods, schedules_file)
     is_heatpump = false
+    if not schedules_file.nil?
+      max_cap_ratio_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnMaximumCapacityRatio)
+    end
+
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -165,6 +169,10 @@ class HVAC
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, power_outage_periods)
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
+
+    if not max_cap_ratio_sch.nil?
+      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary)
+    end
 
     return air_loop
   end
@@ -1240,6 +1248,9 @@ class HVAC
            HPXML::HVACTypeHeatPumpRoom,
            HPXML::HVACTypeRoomAirConditioner].include? hvac_type
       return HPXML::HVACCompressorTypeSingleStage
+    elsif [HPXML::HVACTypeMiniSplitAirConditioner,
+           HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_type
+      return HPXML::HVACCompressorTypeVariableSpeed
     end
     return
   end
@@ -1567,6 +1578,10 @@ class HVAC
         fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id) # Used by reporting measure
       end
     end
+  end
+
+  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary)
+    # Placeholder
   end
 
   def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)

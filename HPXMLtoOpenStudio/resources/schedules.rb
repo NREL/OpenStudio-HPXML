@@ -1362,6 +1362,7 @@ class SchedulesFile
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
+  ColumnMaximumCapacityRatio = 'maximum_capacity_ratio'
 
   def initialize(runner: nil,
                  model: nil,
@@ -1406,6 +1407,11 @@ class SchedulesFile
     end
 
     return false
+  end
+
+  def remove_col_name(col_name)
+    return unless @schedules.keys.include?(col_name)
+    @schedules.delete(col_name)
   end
 
   def import()
