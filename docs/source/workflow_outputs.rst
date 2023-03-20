@@ -89,35 +89,27 @@ Annual Energy Consumption
 
 Annual energy consumption outputs are listed below.
 
-  ====================================  ===========================
-  Type                                  Notes
-  ====================================  ===========================
-  Energy Use: Total (MBtu)              Includes any battery charging/discharging
-  Energy Use: Net (MBtu)                Subtracts any power produced by PV or generators.
-  ====================================  ===========================
+  .. csv-table::
+     :file: workflow_outputs/annual_energy_consumption.csv
+     :header-rows: 1
 
 Annual Energy Consumption by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Fuel uses are listed below.
 
-   ====================================  ===========================
-   Type                                  Notes
-   ====================================  ===========================
-   Fuel Use: Electricity: Total (MBtu)   Includes any battery charging/discharging
-   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV or generators.
-   Fuel Use: Natural Gas: Total (MBtu)
-   Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
-   Fuel Use: Propane: Total (MBtu)
-   Fuel Use: Wood: Total (MBtu)
-   Fuel Use: Wood Pellets: Total (MBtu)
-   Fuel Use: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke".
-   ====================================  ===========================
+  .. csv-table::
+     :file: workflow_outputs/annual_energy_consumption_by_fuel_use.csv
+     :header-rows: 1
 
 Annual Energy Consumption By End Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 End uses are listed below.
+
+  .. csv-table::
+     :file: workflow_outputs/annual_energy_consumption_by_end_use.csv
+     :header-rows: 1
 
 Note that all end uses are mutually exclusive -- the "Electricity: Heating" end use, for example, excludes energy reported in the "Electricity: Heating Fans/Pumps" end use.
 So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural Gas: \*") equal the above reported fuel use (e.g., "Fuel Use: Natural Gas: Total").

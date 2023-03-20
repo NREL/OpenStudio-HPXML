@@ -1,0 +1,3 @@
+Type,Notes
+Energy Use: Total (MBtu),Includes any battery charging/discharging
+Energy Use: Net (MBtu),Subtracts any power produced by PV or generators.

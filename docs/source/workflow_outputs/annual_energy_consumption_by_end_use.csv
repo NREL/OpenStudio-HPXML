@@ -1,0 +1,4 @@
+Type,Notes
+End Use: Electricity: Heating (MBtu)  ,Excludes heat pump backup and fans/pumps
+End Use: Electricity: Heating Heat Pump Backup (MBtu),Subtracts any power produced by PV or generators.
+End Use: Electricity: Heating Fans/Pumps (MBtu),Supply fan (air distribution) or circulating pump (hydronic distribution or geothermal loop)
