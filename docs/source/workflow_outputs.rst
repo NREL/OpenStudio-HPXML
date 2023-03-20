@@ -127,9 +127,9 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    ===================================================================  ====================================================
    End Use: Electricity: Heating (MBtu)                                 Excludes heat pump backup and fans/pumps
    End Use: Electricity: Heating Heat Pump Backup (MBtu)
-   End Use: Electricity: Heating Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (hydronic distribution or ground source heat pump)
+   End Use: Electricity: Heating Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (hydronic distribution or geothermal loop)
    End Use: Electricity: Cooling (MBtu)                                 Excludes fans/pumps
-   End Use: Electricity: Cooling Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (ground source heat pump)
+   End Use: Electricity: Cooling Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (geothermal loop)
    End Use: Electricity: Hot Water (MBtu)                               Excludes recirc pump and solar thermal pump
    End Use: Electricity: Hot Water Recirc Pump (MBtu)
    End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)            Non-zero only when using detailed (not simple) solar thermal inputs
