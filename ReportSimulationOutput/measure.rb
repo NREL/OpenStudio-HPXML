@@ -2328,6 +2328,31 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
+  def get_data_dictionary
+    data_dictionary_csv = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'data', 'data_dictionary.csv')
+    if not File.exist?(data_dictionary_csv)
+      fail 'Could not find data_dictionary.csv'
+    end
+
+    require 'csv'
+
+    data_dictionary = {}
+    data_dictionary_rows = CSV.open(data_dictionary_csv, headers: true)
+    data_dictionary_rows.each do |row|
+      key_ix = row.headers.index('Annual Name')
+
+      row_headers = row.headers
+      row_headers.delete_at(key_ix)
+
+      row_values = row[0..-1]
+      row_values.delete_at(key_ix)
+
+      data_dictionary[row[key_ix]] = row_headers.zip(row_values).to_h
+    end
+
+    return data_dictionary
+  end
+
   def setup_outputs(called_from_outputs_method, user_output_variables = nil)
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
@@ -2458,6 +2483,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Fuels
 
+    dd = get_data_dictionary
+
     @fuels = {}
     @fuels[FT::Elec] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
     @fuels[FT::Gas] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
@@ -2469,8 +2496,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @fuels.each do |fuel_type, fuel|
       fuel.name = "Fuel Use: #{fuel_type}: Total"
-      fuel.annual_units = 'MBtu'
-      fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
+
+      fuel.annual_units = dd[fuel.name]['Annual Units']
+      fuel.timeseries_units = dd[fuel.name]['Timeseries Units']
       if @end_uses.select { |key, end_use| key[0] == fuel_type && end_use.variables.size > 0 }.size == 0
         fuel.meters = []
       end
@@ -2481,8 +2509,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     [TE::Total, TE::Net].each do |energy_type|
       @totals[energy_type] = TotalEnergy.new
       @totals[energy_type].name = "Energy Use: #{energy_type}"
-      @totals[energy_type].annual_units = 'MBtu'
-      @totals[energy_type].timeseries_units = get_timeseries_units_from_fuel_type(FT::Gas)
+
+      @totals[energy_type].annual_units = dd[@totals[energy_type].name]['Annual Units']
+      @totals[energy_type].timeseries_units = dd[@totals[energy_type].name]['Timeseries Units']
     end
 
     # Emissions
