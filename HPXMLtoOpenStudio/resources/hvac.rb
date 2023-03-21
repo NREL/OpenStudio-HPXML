@@ -10,6 +10,9 @@ class HVAC
     end
 
     if not cooling_system.nil?
+      clg_ap = cooling_system.additional_properties
+      num_speeds = clg_ap.num_speeds
+      max_cap_ratio_sch = nil if num_speeds < 4
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
         if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
@@ -49,10 +52,9 @@ class HVAC
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
       end
-      clg_ap = cooling_system.additional_properties
-      num_speeds = clg_ap.num_speeds
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
+      max_cap_ratio_sch = nil
       num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
