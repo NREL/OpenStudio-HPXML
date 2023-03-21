@@ -436,7 +436,7 @@ class Waterheater
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Heating')
     sizing_plant.setDesignLoopExitTemperature(dhw_loop.sizingPlant.designLoopExitTemperature)
-    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'R', 'K'))
+    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'deltaF', 'deltaC'))
 
     setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, dhw_setpoint_manager.schedule)
     setpoint_manager.setName(obj_name + ' setpoint mgr')
@@ -1795,7 +1795,7 @@ class Waterheater
     loop = OpenStudio::Model::PlantLoop.new(model)
     loop.setName(name)
     loop.sizingPlant.setDesignLoopExitTemperature(t_set_c)
-    loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'R', 'K'))
+    loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'deltaF', 'deltaC'))
     loop.setPlantLoopVolume(0.003) # ~1 gal
     loop.setMaximumLoopFlowRate(0.01) # This size represents the physical limitations to flow due to losses in the piping system. We assume that the pipes are always adequately sized.
 
