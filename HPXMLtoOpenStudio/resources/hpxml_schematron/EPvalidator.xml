@@ -1244,6 +1244,7 @@
   </sch:pattern>
   
   <!-- FIXME: Need to ensure variable speed? Allow more flexibility below? -->
+  <!-- FIXME: Need to check that both heating and cooling performance data provided -->
   <sch:pattern>
     <sch:title>[HeatingDetailedPerformanceData]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:HeatingDetailedPerformanceData'>
