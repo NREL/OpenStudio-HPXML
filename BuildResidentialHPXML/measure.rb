@@ -68,7 +68,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
     arg.setDisplayName('Schedules: Vacancy Period')
-    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
+    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_period', false)
+    arg.setDisplayName('Schedules: Power Outage Period')
+    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
+    args << arg
+
+    natvent_availability_choices = OpenStudio::StringVector.new
+    natvent_availability_choices << HPXML::ScheduleRegular
+    natvent_availability_choices << HPXML::ScheduleAvailable
+    natvent_availability_choices << HPXML::ScheduleUnavailable
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_power_outage_window_natvent_availability', natvent_availability_choices, false)
+    arg.setDisplayName('Schedules: Power Outage Period Window Natural Ventilation Availability')
+    arg.setDescription('The availability of the natural ventilation schedule during the outage period.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
@@ -1051,6 +1066,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The heating load served by the heating system.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_pilot_light', false)
+    arg.setDisplayName('Heating System: Pilot Light')
+    arg.setDescription("The fuel usage of the pilot light. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeStove}, #{HPXML::HVACTypeBoiler}, and #{HPXML::HVACTypeFireplace} with non-electric fuel type. If not provided, assumes no pilot light.")
+    arg.setUnits('Btuh')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_airflow_defect_ratio', false)
@@ -3480,8 +3501,17 @@ class HPXMLFile
       hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
     if args[:schedules_vacancy_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
-      hpxml.header.vacancy_periods.add(begin_month: begin_month, begin_day: begin_day, end_month: end_month, end_day: end_day)
+      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
+      hpxml.header.vacancy_periods.add(begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour)
+    end
+    if args[:schedules_power_outage_period].is_initialized
+      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_power_outage_period].get)
+
+      if args[:schedules_power_outage_window_natvent_availability].is_initialized
+        natvent_availability = args[:schedules_power_outage_window_natvent_availability].get
+      end
+
+      hpxml.header.power_outage_periods.add(begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
     end
 
     if args[:software_info_program_used].is_initialized
@@ -3496,7 +3526,7 @@ class HPXMLFile
     end
 
     if args[:simulation_control_run_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:simulation_control_run_period].get)
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:simulation_control_run_period].get)
       hpxml.header.sim_begin_month = begin_month
       hpxml.header.sim_begin_day = begin_day
       hpxml.header.sim_end_month = end_month
@@ -3511,7 +3541,7 @@ class HPXMLFile
       hpxml.header.dst_enabled = args[:simulation_control_daylight_saving_enabled].get
     end
     if args[:simulation_control_daylight_saving_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:simulation_control_daylight_saving_period].get)
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:simulation_control_daylight_saving_period].get)
       hpxml.header.dst_begin_month = begin_month
       hpxml.header.dst_begin_day = begin_day
       hpxml.header.dst_end_month = end_month
@@ -4569,6 +4599,13 @@ class HPXMLFile
       end
     end
 
+    if args[:heating_system_pilot_light].is_initialized && heating_system_fuel != HPXML::FuelTypeElectricity
+      pilot_light_btuh = args[:heating_system_pilot_light].get
+      if pilot_light_btuh > 0
+        pilot_light = true
+      end
+    end
+
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
 
     if heating_system_type.include?('Shared')
@@ -4589,6 +4626,8 @@ class HPXMLFile
                               heating_efficiency_afue: heating_efficiency_afue,
                               heating_efficiency_percent: heating_efficiency_percent,
                               airflow_defect_ratio: airflow_defect_ratio,
+                              pilot_light: pilot_light,
+                              pilot_light_btuh: pilot_light_btuh,
                               is_shared_system: is_shared_system,
                               number_of_units_served: number_of_units_served,
                               primary_system: true)
@@ -5004,7 +5043,7 @@ class HPXMLFile
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
-          begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(hvac_control_heating_season_period)
+          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_heating_season_period)
         end
         seasons_heating_begin_month = begin_month
         seasons_heating_begin_day = begin_day
@@ -5037,7 +5076,7 @@ class HPXMLFile
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
-          begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(hvac_control_cooling_season_period)
+          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_cooling_season_period)
         end
         seasons_cooling_begin_month = begin_month
         seasons_cooling_begin_day = begin_day
@@ -5577,61 +5616,70 @@ class HPXMLFile
   end
 
   def self.set_lighting(hpxml, args)
-    return unless args[:lighting_present] || args[:ceiling_fan_present] # If ceiling fans present but not lighting present, need to continue and use lighting multipliers = 0 instead
-
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-
     if args[:lighting_present]
+      has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+
+      # Interior
       if args[:lighting_interior_usage_multiplier].is_initialized
-        hpxml.lighting.interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+        interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+      end
+      if interior_usage_multiplier.nil? || interior_usage_multiplier.to_f > 0
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
+                                  lighting_type: HPXML::LightingTypeCFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
+                                  lighting_type: HPXML::LightingTypeLFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_led],
+                                  lighting_type: HPXML::LightingTypeLED)
+        hpxml.lighting.interior_usage_multiplier = interior_usage_multiplier
       end
 
+      # Exterior
       if args[:lighting_exterior_usage_multiplier].is_initialized
-        hpxml.lighting.exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+        exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+      end
+      if exterior_usage_multiplier.nil? || exterior_usage_multiplier.to_f > 0
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
+                                  lighting_type: HPXML::LightingTypeCFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
+                                  lighting_type: HPXML::LightingTypeLFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
+                                  lighting_type: HPXML::LightingTypeLED)
+        hpxml.lighting.exterior_usage_multiplier = exterior_usage_multiplier
       end
 
-      if args[:lighting_garage_usage_multiplier].is_initialized
-        hpxml.lighting.garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
+      # Garage
+      if has_garage
+        if args[:lighting_garage_usage_multiplier].is_initialized
+          garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
+        end
+        if garage_usage_multiplier.nil? || garage_usage_multiplier.to_f > 0
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
+                                    lighting_type: HPXML::LightingTypeCFL)
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
+                                    lighting_type: HPXML::LightingTypeLFL)
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_led],
+                                    lighting_type: HPXML::LightingTypeLED)
+          hpxml.lighting.garage_usage_multiplier = garage_usage_multiplier
+        end
       end
-    elsif args[:ceiling_fan_present]
-      hpxml.lighting.interior_usage_multiplier = 0.0
-      hpxml.lighting.exterior_usage_multiplier = 0.0
-      hpxml.lighting.garage_usage_multiplier = 0.0
     end
 
     return unless args[:holiday_lighting_present]
@@ -5643,7 +5691,7 @@ class HPXMLFile
     end
 
     if args[:holiday_lighting_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:holiday_lighting_period].get)
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:holiday_lighting_period].get)
       hpxml.lighting.holiday_period_begin_month = begin_month
       hpxml.lighting.holiday_period_begin_day = begin_day
       hpxml.lighting.holiday_period_end_month = end_month
