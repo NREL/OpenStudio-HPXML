@@ -23,9 +23,11 @@ pool_pump,No,Yes
 pool_heater,No,Yes
 hot_tub_pump,No,Yes
 hot_tub_heater,No,Yes
-hot_water_dishwasher,Yes,Yes
-hot_water_clothes_washer,Yes,Yes
 hot_water_fixtures,Yes,Yes
 hvac,No,Yes
-dehumidifier,No,Yes
 water_heater,No,Yes
+dehumidifier,No,Yes
+house_fan,No,Yes
+kitchen_fan,Yes,Yes
+bath_fan,Yes,Yes
+whole_house_fan,No,Yes

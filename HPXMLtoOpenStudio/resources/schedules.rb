@@ -1357,14 +1357,18 @@ class SchedulesFile
   ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
-  ColumnHVAC = 'hvac'
-  ColumnDehumidifier = 'dehumidifier'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
-  ColumnWaterHeater = 'water_heater'
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
+  ColumnHVAC = 'hvac'
+  ColumnWaterHeater = 'water_heater'
+  ColumnDehumidifier = 'dehumidifier'
+  ColumnKitchenFan = 'kitchen_fan'
+  ColumnBathFan = 'bath_fan'
+  ColumnHouseFan = 'house_fan'
+  ColumnWholeHouseFan = 'whole_house_fan'
 
   def initialize(runner: nil,
                  model: nil,
