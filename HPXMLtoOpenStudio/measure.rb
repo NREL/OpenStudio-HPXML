@@ -1490,12 +1490,12 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,
-                                                                 living_zone, @hpxml.header.vacancy_periods, @hpxml.header.power_outage_periods)
+                                                                 living_zone, @hvac_off_periods)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system,
-                                                sequential_heat_load_fracs, living_zone, @hpxml.header.vacancy_periods, @hpxml.header.power_outage_periods)
+                                                sequential_heat_load_fracs, living_zone, @hvac_off_periods)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
@@ -1510,7 +1510,7 @@ class OSModel
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, heating_system,
-                               sequential_heat_load_fracs, living_zone, @hpxml.header.vacancy_periods, @hpxml.header.power_outage_periods)
+                               sequential_heat_load_fracs, living_zone, @hvac_off_periods)
       end
 
       next unless heating_system.is_heat_pump_backup_system
