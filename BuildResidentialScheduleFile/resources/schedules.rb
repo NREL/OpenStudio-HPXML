@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'csv'
-require 'json'
 require 'matrix'
 
 class ScheduleGenerator
@@ -239,9 +238,9 @@ class ScheduleGenerator
     sink_duration_probs = Schedule.validate_values(Constants.SinkDurationProbability, 9, 'sink_duration_probability')
     events_per_cluster_probs = Schedule.validate_values(Constants.SinkEventsPerClusterProbs, 15, 'sink_events_per_cluster_probs')
     hourly_onset_prob = Schedule.validate_values(Constants.SinkHourlyOnsetProb, 24, 'sink_hourly_onset_prob')
-    # Lookup avg_clusters_per_occ from json
+    # Lookup avg_sink_clusters_per_hh from constants
     avg_sink_clusters_per_hh = Constants.SinkAvgSinkClustersPerHH
-    # Adjust avg_clusters_per_hh for number of occupants in household
+    # Adjust avg_sink_clusters_per_hh for number of occupants in household
     total_clusters = avg_sink_clusters_per_hh * (0.29 * args[:geometry_num_occupants] + 0.26) # Eq based on cluster scaling in Building America DHW Event Schedule Generator (fewer sink draw clusters for larger households)
     sink_minutes_between_event_gap = Constants.SinkMinutesBetweenEventGap
     cluster_per_day = (total_clusters / @total_days_in_year).to_i
