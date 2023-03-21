@@ -1425,7 +1425,7 @@ class HVAC
     boiler_plr_sensor.setKeyName(boiler.name.to_s)
 
     # Actuator
-    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower)
+    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower, pilot_light_object.space.get)
     pilot_light_act.setName("#{boiler.name} pilot light act")
 
     # Program
