@@ -1312,9 +1312,9 @@ class Schedule
       next if schedule_affected['Schedule Name'] != col_name
 
       affected = schedule_affected[off_type].downcase.to_s
-      if affected == 'true'
+      if affected == 'yes'
         return true
-      elsif affected == 'false'
+      elsif affected == 'no'
         return false
       end
     end
@@ -1357,8 +1357,11 @@ class SchedulesFile
   ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
+  ColumnHVAC = 'hvac'
+  ColumnDehumidifier = 'dehumidifier'
   ColumnWaterHeaterSetpoint = 'water_heater_setpoint'
   ColumnWaterHeaterOperatingMode = 'water_heater_operating_mode'
+  ColumnWaterHeater = 'water_heater'
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
@@ -1666,18 +1669,28 @@ class SchedulesFile
       @tmp_schedules[off_name].each_with_index do |_ts, i|
         @tmp_schedules.keys.each do |col_name|
           next if col_name == off_name
+          next if col_name == SchedulesFile::ColumnWaterHeaterOperatingMode
 
-          # Temperature of tank < 2C indicates of possibility of freeze.
-          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
+          schedules_affected_col_name = col_name
+          if [SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnHVAC
+          elsif [SchedulesFile::ColumnWaterHeaterSetpoint].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnWaterHeater
+          end
 
           # Skip those unaffected
           next if off_name == ColumnVacancy && col_name == ColumnOutage
-          next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(col_name, 'Affected By Vacancy', schedules_affected)
+          next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(schedules_affected_col_name, 'Affected By Vacancy', schedules_affected)
 
           next if off_name == ColumnOutage && col_name == ColumnVacancy
-          next if off_name == ColumnOutage && !Schedule.affected_by_off_period(col_name, 'Affected By Power Outage', schedules_affected)
+          next if off_name == ColumnOutage && !Schedule.affected_by_off_period(schedules_affected_col_name, 'Affected By Power Outage', schedules_affected)
 
-          @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
+          if col_name == ColumnWaterHeaterSetpoint
+            # Temperature of tank < 2C indicates of possibility of freeze.
+            @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && @tmp_schedules[off_name][i] == 1.0
+          else
+            @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
+          end
         end
       end
     end
