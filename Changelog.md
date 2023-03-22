@@ -31,7 +31,6 @@ __Bugfixes__
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
 - BuildResidentialScheduleFile measure now:
   - Excludes columns for end uses that are not stochastically generated.
-  - Excludes exterior/holiday lighting schedules which weren't actually stochastic.
   - Garage lighting and TV plug load schedules use interior lighting and miscellaneous plug load schedules, respectively.
 - Fixes operational calculation when the number of residents is set to zero.
 - Fixes possible utility bill calculation error for a home with PV using a detailed electric utility rate.
