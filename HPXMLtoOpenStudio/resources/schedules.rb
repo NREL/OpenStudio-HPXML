@@ -1674,9 +1674,14 @@ class SchedulesFile
         @tmp_schedules.keys.each do |col_name|
           next if col_name == off_name
           next if col_name == SchedulesFile::ColumnWaterHeaterOperatingMode
+          next if col_name == SchedulesFile::ColumnBattery
 
           schedules_affected_col_name = col_name
-          if [SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(col_name)
+          if [SchedulesFile::ColumnHotWaterDishwasher].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnDishwasher
+          elsif [SchedulesFile::ColumnHotWaterClothesWasher].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnClothesWasher
+          elsif [SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(col_name)
             schedules_affected_col_name = SchedulesFile::ColumnHVAC
           elsif [SchedulesFile::ColumnWaterHeaterSetpoint].include?(col_name)
             schedules_affected_col_name = SchedulesFile::ColumnWaterHeater
