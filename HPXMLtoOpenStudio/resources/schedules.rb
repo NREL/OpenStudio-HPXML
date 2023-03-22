@@ -1673,8 +1673,8 @@ class SchedulesFile
       @tmp_schedules[off_name].each_with_index do |_ts, i|
         @tmp_schedules.keys.each do |col_name|
           next if col_name == off_name
-          next if col_name == SchedulesFile::ColumnWaterHeaterOperatingMode
-          next if col_name == SchedulesFile::ColumnBattery
+          next if SchedulesFile.OperatingModeColumnNames.include?(col_name)
+          next if SchedulesFile.BatteryColumnNames.include?(col_name)
 
           schedules_affected_col_name = col_name
           if [SchedulesFile::ColumnHotWaterDishwasher].include?(col_name)
