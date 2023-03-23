@@ -225,6 +225,20 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Coal: Fireplace (MBtu)
    ===================================================================  ====================================================
 
+Annual Energy Consumption By System Use
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
+
+   ==============================================  =============================================
+   Type                                            Notes
+   ==============================================  =============================================
+   System use: <HeatingSystem>: Total (MBtu)       Total energy use for the heating system
+   System use: <CoolingSystem>: Total (MBtu)       Total energy use for the cooling system
+   System use: <HeatPump>: Total (MBtu)            Total energy use for the heat pump
+   System use: <WaterHeatingSystem>: Total (MBtu)  Total energy use for the water heating system
+   ==============================================  =============================================
+
 Annual Emissions
 ~~~~~~~~~~~~~~~~
 
@@ -443,6 +457,7 @@ Depending on the outputs requested, the file may include:
    Total Consumptions                   Energy use for building total.
    Fuel Consumptions                    Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
    End Use Consumptions                 Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
+   System Use Consumptions              Energy use for each HVAC and water heating system (in kBtu).
    Emissions                            Emissions (e.g., CO2) for each scenario defined in the HPXML file.
    Emission Fuels                       Emissions (e.g., CO2) disaggregated by fuel type for each scenario defined in the HPXML file.
    Emission End Uses                    Emissions (e.g., CO2) disaggregated by end use for each scenario defined in the HPXML file.
