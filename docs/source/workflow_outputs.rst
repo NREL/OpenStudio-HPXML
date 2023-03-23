@@ -109,7 +109,7 @@ Fuel uses are listed below.
    Fuel Use: Natural Gas: Total (MBtu)
    Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Fuel Use: Propane: Total (MBtu)
-   Fuel Use: Wood: Total (MBtu)
+   Fuel Use: Wood Cord: Total (MBtu)
    Fuel Use: Wood Pellets: Total (MBtu)
    Fuel Use: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke".
    ====================================  ===========================
@@ -230,14 +230,14 @@ Annual Energy Consumption By System Use
 
 Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
 
-   ==============================================  =============================================
-   Type                                            Notes
-   ==============================================  =============================================
-   System use: <HeatingSystem>: Total (MBtu)       Total energy use for the heating system
-   System use: <CoolingSystem>: Total (MBtu)       Total energy use for the cooling system
-   System use: <HeatPump>: Total (MBtu)            Total energy use for the heat pump
-   System use: <WaterHeatingSystem>: Total (MBtu)  Total energy use for the water heating system
-   ==============================================  =============================================
+   ================================================  =============================================
+   Type                                              Notes
+   ================================================  =============================================
+   System use: <HeatingSystemID>: Total (MBtu)       Total energy use for the heating system
+   System use: <CoolingSystemID>: Total (MBtu)       Total energy use for the cooling system, including any *integrated* backup heating
+   System use: <HeatPumpID>: Total (MBtu)            Total energy use for the heat pump, including any *integrated* backup heating
+   System use: <WaterHeatingSystemID>: Total (MBtu)  Total energy use for the water heating system
+   ================================================  =============================================
 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
