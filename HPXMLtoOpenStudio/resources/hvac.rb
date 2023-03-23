@@ -6,7 +6,7 @@ class HVAC
                                          control_zone, power_outage_periods, schedules_file)
     is_heatpump = false
     if not schedules_file.nil?
-      max_cap_ratio_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnMaximumCapacityRatio)
+      max_cap_ratio_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnMaximumCapacityRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
     end
 
     if not cooling_system.nil?
@@ -173,7 +173,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if not max_cap_ratio_sch.nil?
-      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary)
+      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds)
     end
 
     return air_loop
@@ -1582,8 +1582,43 @@ class HVAC
     end
   end
 
-  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary)
-    # Placeholder
+  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds)
+    cap_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    cap_ratio_sensor.setName("#{air_loop_unitary.name} capacity_ratio")
+    cap_ratio_sensor.setKeyName(max_cap_ratio_sch.name.to_s)
+    coil_speed_level_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
+    coil_speed_level_sensor.setName("#{air_loop_unitary.name} speed_level_ss")
+    coil_speed_level_sensor.setKeyName(air_loop_unitary.name.to_s)
+    coil_speed_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Ratio')
+    coil_speed_ratio_sensor.setName("#{air_loop_unitary.name} speed_ratio_ss")
+    coil_speed_ratio_sensor.setKeyName(air_loop_unitary.name.to_s)
+    coil_cyc_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Cycling Ratio')
+    coil_cyc_ratio_sensor.setName("#{air_loop_unitary.name} cyc_ratio_ss")
+    coil_cyc_ratio_sensor.setKeyName(air_loop_unitary.name.to_s)
+
+    # actuator
+    coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
+    coil_speed_act.setName("#{air_loop_unitary.name} coil speed level")
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("#{air_loop_unitary.name} max capacity program")
+    program.addLine("Set target_speed = #{num_speeds} * #{cap_ratio_sensor.name}")
+    program.addLine("If #{coil_speed_level_sensor.name} == 1")
+    program.addLine("  Set current_speed = (#{coil_speed_level_sensor.name} - 1) + #{coil_cyc_ratio_sensor.name}")
+    program.addLine("ElseIf #{coil_speed_level_sensor.name} > 1")
+    program.addLine("  Set current_speed = (#{coil_speed_level_sensor.name} - 1) + #{coil_speed_ratio_sensor.name}")
+    program.addLine("Else")
+    program.addLine("  Set current_speed = 0")
+    program.addLine('EndIf')
+    program.addLine('If current_speed > target_speed')
+    program.addLine("  Set #{coil_speed_act.name} = target_speed")
+    program.addLine('EndIf')
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName(program.name.to_s + 'calling manager')
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(program)
   end
 
   def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)

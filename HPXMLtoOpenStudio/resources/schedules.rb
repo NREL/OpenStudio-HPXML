@@ -1411,6 +1411,7 @@ class SchedulesFile
 
   def remove_col_name(col_name)
     return unless @schedules.keys.include?(col_name)
+
     @schedules.delete(col_name)
   end
 
