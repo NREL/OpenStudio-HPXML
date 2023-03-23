@@ -565,25 +565,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return false
     end
 
-    # Set rounding precision for run period (e.g., annual) outputs.
-    if output_format == 'msgpack'
-      # No need to round; no file size penalty to storing full precision
-      runperiod_n_digits = 100
-    else
-      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
-      runperiod_n_digits = 3 # Default for annual (or near-annual) data
-      sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
-                    Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
-      if sim_n_days <= 10 # 10 days or less; add two decimal places
-        runperiod_n_digits += 2
-      elsif sim_n_days <= 100 # 100 days or less; add one decimal place
-        runperiod_n_digits += 1
-      end
-    end
-
     # Write/report results
-    report_runperiod_output_results(runner, outputs, output_format, annual_output_path, runperiod_n_digits,
-                                    generate_eri_outputs)
+    report_runperiod_output_results(runner, outputs, output_format, annual_output_path, generate_eri_outputs)
     report_timeseries_output_results(runner, outputs, output_format, timeseries_output_path, timeseries_frequency,
                                      timeseries_num_decimal_places, include_ts_total_consumptions, include_ts_fuel_consumptions,
                                      include_ts_end_use_consumptions, include_ts_system_use_consumptions, include_ts_emissions,
@@ -1235,7 +1218,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def report_runperiod_output_results(runner, outputs, output_format, annual_output_path, n_digits, generate_eri_outputs)
+  def report_runperiod_output_results(runner, outputs, output_format, annual_output_path, generate_eri_outputs)
+    # Set rounding precision for run period (e.g., annual) outputs.
+    if output_format == 'msgpack'
+      # No need to round; no file size penalty to storing full precision
+      n_digits = 100
+    else
+      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
+      n_digits = 3 # Default for annual (or near-annual) data
+      sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
+                    Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
+      if sim_n_days <= 10 # 10 days or less; add two decimal places
+        n_digits += 2
+      elsif sim_n_days <= 100 # 100 days or less; add one decimal place
+        n_digits += 1
+      end
+    end
+
     line_break = nil
 
     results_out = []
@@ -1271,16 +1270,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << [line_break]
       @emissions.each do |_scenario_key, emission|
         # Emissions total
-        results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(2)]
+        results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(n_digits - 1)]
         # Emissions by fuel
         @fuels.keys.each do |fuel|
-          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(2)]
+          results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(n_digits - 1)]
           # Emissions by end use
           @end_uses.keys.each do |key|
             fuel_type, end_use_type = key
             next unless fuel_type == fuel
 
-            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(2)]
+            results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(n_digits - 1)]
           end
         end
       end
@@ -1787,7 +1786,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @emissions.values.each do |emission|
         next if emission.timeseries_output.sum(0.0) == 0
 
-        emissions_data << ["#{emission.name}: Total", emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(5) }
+        emissions_data << ["#{emission.name}: Total", emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(n_digits + 2) }
       end
     else
       emissions_data = []
@@ -1798,7 +1797,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         emission.timeseries_output_by_fuel.each do |fuel, timeseries_output|
           next if timeseries_output.sum(0.0) == 0
 
-          emission_fuel_data << ["#{emission.name}: #{fuel}: Total", emission.timeseries_units] + timeseries_output.map { |v| v.round(5) }
+          emission_fuel_data << ["#{emission.name}: #{fuel}: Total", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
         end
       end
     else
@@ -1811,7 +1810,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           next if timeseries_output.sum(0.0) == 0
 
           fuel_type, end_use_type = key
-          emission_end_use_data << ["#{emission.name}: #{fuel_type}: #{end_use_type}", emission.timeseries_units] + timeseries_output.map { |v| v.round(5) }
+          emission_end_use_data << ["#{emission.name}: #{fuel_type}: #{end_use_type}", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
         end
       end
     else
