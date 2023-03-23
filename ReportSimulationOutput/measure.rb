@@ -869,6 +869,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     system_ids = @end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
     kwh_to_kbtu = UnitConversions.convert(1.0, 'kWh', 'kBtu')
     system_ids.each do |sys_id|
+      next unless is_hpxml_system(sys_id)
+
       system_output = BaseOutput.new
       system_output.name = "System Use: #{sys_id}: Total"
       @system_uses[sys_id] = system_output
@@ -2674,6 +2676,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @hpxml.heating_systems.each do |heating_system|
       next if sys_id != heating_system.id
       next unless heating_system.is_heat_pump_backup_system
+
+      return true
+    end
+
+    if sys_id.include? '_DFHPBackup'
+      return true
+    end
+
+    return false
+  end
+
+  def is_hpxml_system(sys_id)
+    # Returns true if sys_id corresponds to an HVAC or water heating system
+    return false if @hpxml.nil?
+
+    (@hpxml.hvac_systems + @hpxml.water_heating_systems).each do |system|
+      next if system.id != sys_id
 
       return true
     end
