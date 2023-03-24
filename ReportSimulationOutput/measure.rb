@@ -1465,6 +1465,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @hpxml.heat_pumps.each do |heat_pump|
         seed_id_map[heat_pump.id] = heat_pump.htg_seed_id
         next unless heat_pump.is_dual_fuel
+        next if heat_pump.htg_seed_id.nil?
 
         seed_id_map[heat_pump.id + '_DFHPBackup'] = heat_pump.htg_seed_id + '_DFHPBackup'
       end

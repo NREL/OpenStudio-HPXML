@@ -127,9 +127,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     'End Use: Coal: Fireplace (MBtu)',
     'End Use: Coal: Mech Vent Preheating (MBtu)',
     'End Use: Coal: Generator (MBtu)',
-    'System Use: CoolingSystem1: Total (MBtu)',
-    'System Use: HeatingSystem1: Total (MBtu)',
-    'System Use: WaterHeatingSystem1: Total (MBtu)',
+    'System Use: CoolingSystem1: Cooling (MBtu)',
+    'System Use: HeatingSystem1: Heating (MBtu)',
+    'System Use: WaterHeatingSystem1: Hot Water (MBtu)',
     'Load: Heating: Delivered (MBtu)',
     'Load: Cooling: Delivered (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -247,9 +247,9 @@ class ReportSimulationOutputTest < MiniTest::Test
   ]
 
   BaseHPXMLTimeseriesColsSystemUses = [
-    'System Use: CoolingSystem1: Total',
-    'System Use: HeatingSystem1: Total',
-    'System Use: WaterHeatingSystem1: Total',
+    'System Use: CoolingSystem1: Cooling',
+    'System Use: HeatingSystem1: Heating',
+    'System Use: WaterHeatingSystem1: Hot Water',
   ]
 
   BaseHPXMLTimeseriesColsWaterUses = [
