@@ -866,28 +866,46 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Calculate System Uses
     @system_uses = {}
-    system_ids = @end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
+    @system_use_map = {
+      'Heating' => [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump],
+      'Cooling' => [EUT::Cooling, EUT::CoolingFanPump],
+      'Hot Water' => [EUT::HotWater, EUT::HotWaterRecircPump, EUT::HotWaterSolarThermalPump],
+      'Mech Vent Preheating' => [EUT::MechVentPreheat],
+      'Mech Vent Precooling' => [EUT::MechVentPrecool]
+    }
     kwh_to_kbtu = UnitConversions.convert(1.0, 'kWh', 'kBtu')
-    system_ids.each do |sys_id|
-      next unless is_hpxml_system(sys_id)
+    @system_use_map.each do |system_use_type, end_use_types|
+      end_uses = @end_uses.select { |k, _eu| end_use_types.include? k[1] }
+      system_ids = end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
+      system_ids.each do |sys_id|
+        next unless is_hpxml_system(sys_id)
 
-      system_output = BaseOutput.new
-      system_output.name = "System Use: #{sys_id}: Total"
-      @system_uses[sys_id] = system_output
+        system_output = BaseOutput.new
+        @system_uses[[sys_id, system_use_type]] = system_output
 
-      # Annual
-      end_uses = @end_uses.select { |_key, eu| eu.variables.map { |v| v[0] }.include? sys_id }
-      system_output.annual_output = end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
-      system_output.annual_units = end_uses.values[0].annual_units
+        # Name
+        # For ERI, need to use seed ID if available
+        seed_id_map = get_eri_seed_id_map(system_use_type)
+        if not seed_id_map[sys_id].nil?
+          system_output.name = "System Use: #{seed_id_map[sys_id]}: #{system_use_type}"
+        else
+          system_output.name = "System Use: #{sys_id}: #{system_use_type}"
+        end
 
-      next unless include_ts_system_use_consumptions
+        # Annual
+        system_end_uses = end_uses.select { |_key, eu| eu.variables.map { |v| v[0] }.include? sys_id }
+        system_output.annual_output = system_end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
+        system_output.annual_units = system_end_uses.values[0].annual_units
 
-      # Timeseries
-      end_uses_elec = end_uses.select { |key, _eu| key[0] == FT::Elec }.values
-      end_uses_fuel = end_uses.select { |key, _eu| key[0] != FT::Elec }.values
-      system_output.timeseries_output = [*end_uses_elec.map { |seu| seu.timeseries_output_by_system[sys_id].map { |v| v * kwh_to_kbtu } },
-                                         *end_uses_fuel.map { |seu| seu.timeseries_output_by_system[sys_id] }].transpose.map(&:sum)
-      system_output.timeseries_units = 'kBtu'
+        next unless include_ts_system_use_consumptions
+
+        # Timeseries
+        system_end_uses_elec = system_end_uses.select { |key, _eu| key[0] == FT::Elec }.values
+        system_end_uses_fuel = system_end_uses.select { |key, _eu| key[0] != FT::Elec }.values
+        system_output.timeseries_output = [*system_end_uses_elec.map { |seu| seu.timeseries_output_by_system[sys_id].map { |v| v * kwh_to_kbtu } },
+                                           *system_end_uses_fuel.map { |seu| seu.timeseries_output_by_system[sys_id] }].transpose.map(&:sum)
+        system_output.timeseries_units = 'kBtu'
+      end
     end
 
     # Total/Net Electricity (Net includes, e.g., PV and generators)
@@ -1263,7 +1281,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     results_out << [line_break]
 
     # System uses
-    @system_uses.each do |_sys_id, system_use|
+    @system_uses.each do |_key, system_use|
       results_out << ["#{system_use.name} (#{system_use.annual_units})", system_use.annual_output.round(n_digits)]
     end
 
@@ -1434,6 +1452,32 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return results_out
   end
 
+  def get_eri_seed_id_map(type)
+    seed_id_map = {}
+    if type == 'Heating'
+      @hpxml.heating_systems.each do |htg_system|
+        seed_id_map[htg_system.id] = htg_system.htg_seed_id
+      end
+      @hpxml.cooling_systems.each do |clg_system|
+        seed_id_map[clg_system.id] = clg_system.htg_seed_id
+      end
+      @hpxml.heat_pumps.each do |heat_pump|
+        seed_id_map[heat_pump.id] = heat_pump.htg_seed_id
+        next unless heat_pump.is_dual_fuel
+
+        seed_id_map[heat_pump.id + '_DFHPBackup'] = heat_pump.htg_seed_id + '_DFHPBackup'
+      end
+    elsif type == 'Cooling'
+      @hpxml.cooling_systems.each do |clg_system|
+        seed_id_map[clg_system.id] = clg_system.clg_seed_id
+      end
+      @hpxml.heat_pumps.each do |heat_pump|
+        seed_id_map[heat_pump.id] = heat_pump.clg_seed_id
+      end
+    end
+    return seed_id_map
+  end
+
   def append_eri_results(results_out, line_break)
     def ordered_values(hash, sys_ids)
       vals = []
@@ -1472,12 +1516,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     htg_ids, clg_ids, dhw_ids, prehtg_ids, preclg_ids = [], [], [], [], []
     htg_eecs, clg_eecs, dhw_eecs, prehtg_eecs, preclg_eecs = {}, {}, {}, {}, {}
     htg_fuels, clg_fuels, dhw_fuels, prehtg_fuels, preclg_fuels = {}, {}, {}, {}, {}
-    htg_seed_id_map, clg_seed_id_map = {}, {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
 
       htg_ids << htg_system.id
-      htg_seed_id_map[htg_system.id] = htg_system.htg_seed_id
       htg_fuels[htg_system.id] = htg_system.heating_system_fuel
       if not htg_system.heating_efficiency_afue.nil?
         htg_eecs[htg_system.id] = get_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
@@ -1489,7 +1531,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if clg_system.has_integrated_heating && clg_system.integrated_heating_system_fraction_heat_load_served > 0
         # Cooling system w/ integrated heating (e.g., Room AC w/ electric resistance heating)
         htg_ids << clg_system.id
-        htg_seed_id_map[clg_system.id] = clg_system.htg_seed_id
         htg_fuels[clg_system.id] = clg_system.integrated_heating_system_fuel
         htg_eecs[clg_system.id] = get_eec_value_numerator('Percent') / clg_system.integrated_heating_system_efficiency_percent
       end
@@ -1497,7 +1538,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless clg_system.fraction_cool_load_served > 0
 
       clg_ids << clg_system.id
-      clg_seed_id_map[clg_system.id] = clg_system.clg_seed_id
       clg_fuels[clg_system.id] = clg_system.cooling_system_fuel
       if not clg_system.cooling_efficiency_seer.nil?
         clg_eecs[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
@@ -1515,7 +1555,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @hpxml.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
         htg_ids << heat_pump.id
-        htg_seed_id_map[heat_pump.id] = heat_pump.htg_seed_id
         htg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
         if not heat_pump.heating_efficiency_hspf.nil?
           htg_eecs[heat_pump.id] = get_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
@@ -1528,7 +1567,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless heat_pump.fraction_cool_load_served > 0
 
       clg_ids << heat_pump.id
-      clg_seed_id_map[heat_pump.id] = heat_pump.clg_seed_id
       clg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
       if not heat_pump.cooling_efficiency_seer.nil?
         clg_eecs[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
@@ -1603,7 +1641,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Create separate dual fuel heat pump backup system
       dfhp_backup_id = heat_pump.id + '_DFHPBackup'
       htg_ids << dfhp_backup_id
-      htg_seed_id_map[dfhp_backup_id] = heat_pump.htg_seed_id + '_DFHPBackup'
       htg_fuels[dfhp_backup_id] = heat_pump.backup_heating_fuel
       if not heat_pump.backup_heating_efficiency_afue.nil?
         htg_eecs[dfhp_backup_id] = get_eec_value_numerator('AFUE') / heat_pump.backup_heating_efficiency_afue
@@ -1643,26 +1680,25 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Collect energy consumption (EC) by system
     htg_ecs, clg_ecs, dhw_ecs, prehtg_ecs, preclg_ecs = {}, {}, {}, {}, {}
-    eut_map = { EUT::Heating => htg_ecs,
-                EUT::HeatingHeatPumpBackup => htg_ecs,
-                EUT::HeatingFanPump => htg_ecs,
-                EUT::Cooling => clg_ecs,
-                EUT::CoolingFanPump => clg_ecs,
-                EUT::HotWater => dhw_ecs,
-                EUT::HotWaterRecircPump => dhw_ecs,
-                EUT::HotWaterSolarThermalPump => dhw_ecs,
-                EUT::MechVentPreheat => prehtg_ecs,
-                EUT::MechVentPrecool => preclg_ecs }
+    ec_obj_map = { 'Heating' => htg_ecs,
+                   'Cooling' => clg_ecs,
+                   'Hot Water' => dhw_ecs,
+                   'Mech Vent Preheating' => prehtg_ecs,
+                   'Mech Vent Precooling' => preclg_ecs }
     @end_uses.each do |key, end_use|
       _fuel_type, end_use_type = key
-      ec_obj = eut_map[end_use_type]
-      next if ec_obj.nil?
+      system_use_type = @system_use_map.select { |_k, v| v.include? end_use_type }.keys
+      next if system_use_type.empty?
 
+      ec_obj = ec_obj_map[system_use_type[0]]
       end_use.annual_output_by_system.each do |sys_id, val|
         ec_obj[sys_id] = 0.0 if ec_obj[sys_id].nil?
         ec_obj[sys_id] += val
       end
     end
+
+    htg_seed_id_map = get_eri_seed_id_map('Heating')
+    clg_seed_id_map = get_eri_seed_id_map('Cooling')
 
     results_out << [line_break]
 

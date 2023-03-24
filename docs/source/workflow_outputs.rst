@@ -230,14 +230,15 @@ Annual Energy By System Use
 
 Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
 
-   ================================================  =============================================
-   Type                                              Notes
-   ================================================  =============================================
-   System Use: <HeatingSystemID>: Total (MBtu)       Total energy use for the heating system
-   System Use: <CoolingSystemID>: Total (MBtu)       Total energy use for the cooling system
-   System Use: <HeatPumpID>: Total (MBtu)            Total energy use for the heat pump (except when fossil fuel backup, in which case two rows will be reported)
-   System Use: <WaterHeatingSystemID>: Total (MBtu)  Total energy use for the water heating system
-   ================================================  =============================================
+   ====================================================  =============================================
+   Type                                                  Notes
+   ====================================================  =============================================
+   System Use: <HeatingSystemID>: Heating (MBtu)         Heating energy use for the heating system
+   System Use: <CoolingSystemID>: Cooling (MBtu)         Cooling energy use for the cooling system
+   System Use: <HeatPumpID>: Heating (MBtu)              Heating energy use for the heat pump (if fossil fuel backup, two rows will be reported)
+   System Use: <HeatPumpID>: Cooling (MBtu)              Cooling energy use for the heat pump
+   System Use: <WaterHeatingSystemID>: Hot Water (MBtu)  Hot water energy use for the water heating system
+   ====================================================  =============================================
 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
