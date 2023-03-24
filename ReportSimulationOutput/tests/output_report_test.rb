@@ -829,7 +829,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['System Use: HeatingSystem1: Total'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['System Use: HeatingSystem1: Heating'])
   end
 
   def test_timeseries_hourly_hotwateruses
