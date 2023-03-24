@@ -874,11 +874,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       'Mech Vent Precooling' => [EUT::MechVentPrecool]
     }
     kwh_to_kbtu = UnitConversions.convert(1.0, 'kWh', 'kBtu')
-    @system_use_map.each do |system_use_type, end_use_types|
-      end_uses = @end_uses.select { |k, _eu| end_use_types.include? k[1] }
-      system_ids = end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
-      system_ids.each do |sys_id|
-        next unless is_hpxml_system(sys_id)
+    system_ids = @end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
+    system_ids.each do |sys_id|
+      next unless is_hpxml_system(sys_id)
+
+      @system_use_map.each do |system_use_type, end_use_types|
+        system_end_uses = @end_uses.select { |k, eu| end_use_types.include?(k[1]) && eu.variables.map { |v| v[0] }.include?(sys_id) }
+        next if system_end_uses.empty?
 
         system_output = BaseOutput.new
         @system_uses[[sys_id, system_use_type]] = system_output
@@ -893,7 +895,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         # Annual
-        system_end_uses = end_uses.select { |_key, eu| eu.variables.map { |v| v[0] }.include? sys_id }
         system_output.annual_output = system_end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
         system_output.annual_units = system_end_uses.values[0].annual_units
 
