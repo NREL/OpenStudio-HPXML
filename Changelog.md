@@ -6,14 +6,12 @@ __New Features__
   - Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
   - Replaces `WaterHeatingSystem/extension/OperatingMode` with `WaterHeatingSystem/HPWHOperatingMode` for heat pump water heaters.
 - Output updates:
-  - **Breaking change**: Removes `End Use: Heating Fans/Pumps`, now included in `End Use: Heating` and `End Use: Heating Heat Pump Backup`.
-  - **Breaking change**: Removes `End Use: Cooling Fans/Pumps`, now included in `End Use: Cooling`.
-  - **Breaking change**: Removes `End Use: Hot Water Recirc Pump` and `End Use: Hot Water Solar Thermal Pump`, now included in `End Use: Hot Water`.
+  - **Breaking change**: Adds `End Use: Heating Heat Pump Backup Fans/Pumps` (disaggregated from `End Use: Heating Fans/Pumps`).
   - **Breaking change**: Replaces `Component Load: Windows` with `Component Load: Windows Conduction` and `Component Load: Windows Solar`.
   - **Breaking change**: Replaces `Component Load: Skylights` with `Component Load: Skylights Conduction` and `Component Load: Skylights Solar`.
   - **Breaking change**: Adds `Component Load: Lighting` (disaggregated from `Component Load: Internal Gains`).
-  - Adds system use outputs (annual energy outputs for each HVAC and water heating system); allows requesting timeseries output.
-  - Adds heating load delivered by heat pump backup systems (`Load: Heating: Heat Pump Backup`).
+  - Adds `Load: Heating: Heat Pump Backup` (heating load delivered by heat pump backup systems).
+  - Adds `System Use` outputs (energy use for each HVAC and water heating system); allows requesting timeseries output.
   - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).

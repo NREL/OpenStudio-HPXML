@@ -20,9 +20,14 @@ end
 class EUT
   # End Use Types
   Heating = 'Heating'
+  HeatingFanPump = 'Heating Fans/Pumps'
   HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
+  HeatingHeatPumpBackupFanPump = 'Heating Heat Pump Backup Fans/Pumps'
   Cooling = 'Cooling'
+  CoolingFanPump = 'Cooling Fans/Pumps'
   HotWater = 'Hot Water'
+  HotWaterRecircPump = 'Hot Water Recirc Pump'
+  HotWaterSolarThermalPump = 'Hot Water Solar Thermal Pump'
   LightsInterior = 'Lighting Interior'
   LightsGarage = 'Lighting Garage'
   LightsExterior = 'Lighting Exterior'

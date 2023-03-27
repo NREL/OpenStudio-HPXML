@@ -681,7 +681,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           vars = load.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
           load.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: load.is_negative)
-          if include_ts_total_loads && [LT::HotWaterDelivered, LT::HeatingHeatPumpBackup].include?(load_type)
+          if include_ts_total_loads && (load_type == LT::HotWaterDelivered)
             load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, is_negative: load.is_negative, ems_shift: true)
           end
         end
@@ -728,20 +728,22 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Disaggregate constant GSHP shared pump energy into heating vs cooling by
-    # applying proportionally to the GSHP heating & cooling energy uses.
+    # Disaggregate 8760 GSHP shared pump energy into heating vs cooling by
+    # applying proportionally to the GSHP heating & cooling fan/pump energy use.
     gshp_shared_loop_end_use = @end_uses[[FT::Elec, 'TempGSHPSharedPump']]
-    gshp_htg_end_use = @end_uses[[FT::Elec, EUT::Heating]]
-    gshp_clg_end_use = @end_uses[[FT::Elec, EUT::Cooling]]
+    htg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::HeatingFanPump]]
+    backup_htg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::HeatingHeatPumpBackupFanPump]]
+    clg_fan_pump_end_use = @end_uses[[FT::Elec, EUT::CoolingFanPump]]
     gshp_shared_loop_end_use.annual_output_by_system.keys.each do |sys_id|
       # Calculate heating & cooling fan/pump end use multiplier
-      gshp_htg_energy = gshp_htg_end_use.annual_output_by_system[sys_id]
-      gshp_clg_energy = gshp_clg_end_use.annual_output_by_system[sys_id]
+      htg_energy = htg_fan_pump_end_use.annual_output_by_system[sys_id].to_f + backup_htg_fan_pump_end_use.annual_output_by_system[sys_id].to_f
+      clg_energy = clg_fan_pump_end_use.annual_output_by_system[sys_id].to_f
       shared_pump_energy = gshp_shared_loop_end_use.annual_output_by_system[sys_id]
-      energy_multiplier = (gshp_htg_energy + gshp_clg_energy + shared_pump_energy) / (gshp_htg_energy + gshp_clg_energy)
+      energy_multiplier = (htg_energy + clg_energy + shared_pump_energy) / (htg_energy + clg_energy)
       # Apply multiplier
-      apply_multiplier_to_output(gshp_htg_end_use, nil, sys_id, energy_multiplier)
-      apply_multiplier_to_output(gshp_clg_end_use, nil, sys_id, energy_multiplier)
+      apply_multiplier_to_output(htg_fan_pump_end_use, nil, sys_id, energy_multiplier)
+      apply_multiplier_to_output(backup_htg_fan_pump_end_use, nil, sys_id, energy_multiplier)
+      apply_multiplier_to_output(clg_fan_pump_end_use, nil, sys_id, energy_multiplier)
     end
     @end_uses.delete([FT::Elec, 'TempGSHPSharedPump'])
 
@@ -767,7 +769,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       dse = htg_system.distribution_system.annual_heating_dse
       @fuels.each do |fuel_type, fuel|
-        [EUT::Heating, EUT::HeatingHeatPumpBackup].each do |end_use_type|
+        [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump, EUT::HeatingHeatPumpBackupFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
 
@@ -785,7 +787,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       dse = clg_system.distribution_system.annual_cooling_dse
       @fuels.each do |fuel_type, fuel|
-        [EUT::Cooling].each do |end_use_type|
+        [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
           next if end_use.annual_output_by_system[clg_system.id].nil?
@@ -836,24 +838,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Calculate System Uses from End Uses (by System)
     @system_uses = {}
-    system_use_end_uses = [EUT::Heating,
-                           EUT::HeatingHeatPumpBackup,
-                           EUT::Cooling,
-                           EUT::HotWater,
-                           EUT::MechVentPreheat,
-                           EUT::MechVentPrecool]
+    system_use_map = {
+      EUT::Heating => [EUT::Heating, EUT::HeatingFanPump],
+      EUT::Cooling => [EUT::Cooling, EUT::CoolingFanPump],
+      EUT::HeatingHeatPumpBackup => [EUT::HeatingHeatPumpBackup, EUT::HeatingHeatPumpBackupFanPump],
+      EUT::HotWater => [EUT::HotWater, EUT::HotWaterRecircPump, EUT::HotWaterSolarThermalPump],
+      EUT::MechVentPreheat => [EUT::MechVentPreheat],
+      EUT::MechVentPrecool => [EUT::MechVentPrecool]
+    }
     kwh_to_kbtu = UnitConversions.convert(1.0, 'kWh', 'kBtu')
     system_ids = @end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
     system_ids.each do |sys_id|
       next unless is_hpxml_system(sys_id)
 
-      system_use_end_uses.each do |end_use|
-        system_end_uses = @end_uses.select { |k, eu| (k[1] == end_use) && eu.variables.map { |v| v[0] }.include?(sys_id) }
+      system_use_map.each do |system_use_type, end_use_types|
+        system_end_uses = @end_uses.select { |k, eu| end_use_types.include?(k[1]) && eu.variables.map { |v| v[0] }.include?(sys_id) }
         next if system_end_uses.empty?
 
         system_output = BaseOutput.new
-        @system_uses[[sys_id, end_use]] = system_output
-        system_output.name = "System Use: #{sys_id}: #{end_use}"
+        @system_uses[[sys_id, system_use_type]] = system_output
+        system_output.name = "System Use: #{sys_id}: #{system_use_type}"
 
         # Annual
         system_output.annual_output = system_end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
@@ -2029,9 +2033,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @end_uses = {}
     @end_uses[[FT::Elec, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Heating]))
+    @end_uses[[FT::Elec, EUT::HeatingFanPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HeatingFanPump]))
     @end_uses[[FT::Elec, EUT::HeatingHeatPumpBackup]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HeatingHeatPumpBackup]))
+    @end_uses[[FT::Elec, EUT::HeatingHeatPumpBackupFanPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HeatingHeatPumpBackupFanPump]))
     @end_uses[[FT::Elec, EUT::Cooling]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Cooling]))
+    @end_uses[[FT::Elec, EUT::CoolingFanPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::CoolingFanPump]))
     @end_uses[[FT::Elec, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWater]))
+    @end_uses[[FT::Elec, EUT::HotWaterRecircPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWaterRecircPump]))
+    @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWaterSolarThermalPump]))
     @end_uses[[FT::Elec, EUT::LightsInterior]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsInterior]))
     @end_uses[[FT::Elec, EUT::LightsGarage]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsGarage]))
     @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsExterior]))
@@ -2499,7 +2508,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_PumpConstantSpeed.is_initialized
         if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
-          return { [FT::Elec, EUT::HotWater] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
+          return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_WaterHeaterMixed.is_initialized
@@ -2534,7 +2543,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
-        end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWater,
+        end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
                     Constants.ObjectNameGSHPSharedPump => 'TempGSHPSharedPump',
                     Constants.ObjectNameClothesWasher => EUT::ClothesWasher,
                     Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
@@ -2577,11 +2586,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
         if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat
-          return { [FT::Elec, EUT::Heating] => [object.name.to_s] }
+          return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
         elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
-          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => [object.name.to_s] }
+          return { [FT::Elec, EUT::HeatingHeatPumpBackupFanPump] => [object.name.to_s] }
         elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateCool
-          return { [FT::Elec, EUT::Cooling] => [object.name.to_s] }
+          return { [FT::Elec, EUT::CoolingFanPump] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }

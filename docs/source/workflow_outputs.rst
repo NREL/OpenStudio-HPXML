@@ -119,20 +119,25 @@ Annual Energy By End Use
 
 End uses are listed below.
 
-Note that all end uses are mutually exclusive -- the "Electricity: Heating" end use, for example, excludes energy reported in the "Electricity: Heating Heat Pump Backup" end use.
-So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural Gas: \*") equals the above reported fuel use (e.g., "Fuel Use: Natural Gas: Total").
+Note that all end uses are mutually exclusive -- the "Electricity: Heating" end use, for example, excludes energy reported in the "Electricity: Heating Fans/Pumps" end use.
+So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural Gas: \*") equal the above reported fuel use (e.g., "Fuel Use: Natural Gas: Total").
 
-   ======================================================  ====================================================
-   Type                                                    Notes
-   ======================================================  ====================================================
-   End Use: Electricity: Heating (MBtu)                    Includes supply fan (air distribution) and circulating pump (hydronic distribution or geothermal loop); Excludes heat pump backup
-   End Use: Electricity: Heating Heat Pump Backup (MBtu)   Includes supply fan (air distribution)
-   End Use: Electricity: Cooling (MBtu)                    Includes supply fan (air distribution) and circulating pump (geothermal loop)
-   End Use: Electricity: Hot Water (MBtu)                  Includes recirc pump and solar thermal pump
+   ================================================================  ====================================================
+   Type                                                              Notes
+   ================================================================  ====================================================
+   End Use: Electricity: Heating (MBtu)                              Excludes heat pump backup and fans/pumps
+   End Use: Electricity: Heating Fans/Pumps (MBtu)                   Includes supply fan (air distribution) or circulating pump (hydronic distribution or geothermal loop)
+   End Use: Electricity: Heating Heat Pump Backup (MBtu)             Excludes heat pump backup fans/pumps
+   End Use: Electricity: Heating Heat Pump Backup Fans/Pumps (MBtu)  Includes supply fan (air distribution) during heat pump backup
+   End Use: Electricity: Cooling (MBtu)                              Excludes fans/pumps
+   End Use: Electricity: Cooling Fans/Pumps (MBtu)                   Includes supply fan (air distribution) and circulating pump (geothermal loop)
+   End Use: Electricity: Hot Water (MBtu)                            Excludes recirc pump and solar thermal pump
+   End Use: Electricity: Hot Water Recirc Pump (MBtu)
+   End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)         Non-zero only when using detailed (not simple) solar thermal inputs
    End Use: Electricity: Lighting Interior (MBtu)
    End Use: Electricity: Lighting Garage (MBtu)
-   End Use: Electricity: Lighting Exterior (MBtu)          Includes exterior holiday lighting
-   End Use: Electricity: Mech Vent (MBtu)                  Excludes preheating/precooling
+   End Use: Electricity: Lighting Exterior (MBtu)                    Includes exterior holiday lighting
+   End Use: Electricity: Mech Vent (MBtu)                            Excludes preheating/precooling
    End Use: Electricity: Mech Vent Preheating (MBtu)
    End Use: Electricity: Mech Vent Precooling (MBtu)
    End Use: Electricity: Whole House Fan (MBtu)
@@ -145,17 +150,17 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Range/Oven (MBtu)
    End Use: Electricity: Ceiling Fan (MBtu)
    End Use: Electricity: Television (MBtu)
-   End Use: Electricity: Plug Loads (MBtu)                 Excludes independently reported plug loads (e.g., well pump)
+   End Use: Electricity: Plug Loads (MBtu)                           Excludes independently reported plug loads (e.g., well pump)
    End Use: Electricity: Electric Vehicle Charging (MBtu)
    End Use: Electricity: Well Pump (MBtu)
    End Use: Electricity: Pool Heater (MBtu)
    End Use: Electricity: Pool Pump (MBtu)
    End Use: Electricity: Hot Tub Heater (MBtu)
    End Use: Electricity: Hot Tub Pump (MBtu)
-   End Use: Electricity: PV (MBtu)                         Negative value for any power produced
-   End Use: Electricity: Generator (MBtu)                  Negative value for any power produced
-   End Use: Electricity: Battery (MBtu)                    Positive value for charging (including efficiency losses); negative value for discharging
-   End Use: Natural Gas: Heating (MBtu)                    Excludes heat pump backup
+   End Use: Electricity: PV (MBtu)                                   Negative value for any power produced
+   End Use: Electricity: Generator (MBtu)                            Negative value for any power produced
+   End Use: Electricity: Battery (MBtu)                              Positive value for charging (including efficiency losses); negative value for discharging
+   End Use: Natural Gas: Heating (MBtu)                              Excludes heat pump backup
    End Use: Natural Gas: Heating Heat Pump Backup (MBtu)
    End Use: Natural Gas: Hot Water (MBtu)
    End Use: Natural Gas: Clothes Dryer (MBtu)
@@ -167,8 +172,8 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Natural Gas: Grill (MBtu)
    End Use: Natural Gas: Lighting (MBtu)
    End Use: Natural Gas: Fireplace (MBtu)
-   End Use: Natural Gas: Generator (MBtu)                  Positive value for any fuel consumed
-   End Use: Fuel Oil: Heating (MBtu)                       Excludes heat pump backup
+   End Use: Natural Gas: Generator (MBtu)                            Positive value for any fuel consumed
+   End Use: Fuel Oil: Heating (MBtu)                                 Excludes heat pump backup
    End Use: Fuel Oil: Heating Heat Pump Backup (MBtu)
    End Use: Fuel Oil: Hot Water (MBtu)
    End Use: Fuel Oil: Clothes Dryer (MBtu)
@@ -178,7 +183,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Fuel Oil: Grill (MBtu)
    End Use: Fuel Oil: Lighting (MBtu)
    End Use: Fuel Oil: Fireplace (MBtu)
-   End Use: Propane: Heating (MBtu)                        Excludes heat pump backup
+   End Use: Propane: Heating (MBtu)                                  Excludes heat pump backup
    End Use: Propane: Heating Heat Pump Backup (MBtu)
    End Use: Propane: Hot Water (MBtu)
    End Use: Propane: Clothes Dryer (MBtu)
@@ -188,8 +193,8 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Propane: Grill (MBtu)
    End Use: Propane: Lighting (MBtu)
    End Use: Propane: Fireplace (MBtu)
-   End Use: Propane: Generator (MBtu)                      Positive value for any fuel consumed
-   End Use: Wood Cord: Heating (MBtu)                      Excludes heat pump backup
+   End Use: Propane: Generator (MBtu)                                Positive value for any fuel consumed
+   End Use: Wood Cord: Heating (MBtu)                                Excludes heat pump backup
    End Use: Wood Cord: Heating Heat Pump Backup (MBtu)
    End Use: Wood Cord: Hot Water (MBtu)
    End Use: Wood Cord: Clothes Dryer (MBtu)
@@ -199,7 +204,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Wood Cord: Grill (MBtu)
    End Use: Wood Cord: Lighting (MBtu)
    End Use: Wood Cord: Fireplace (MBtu)
-   End Use: Wood Pellets: Heating (MBtu)                   Excludes heat pump backup
+   End Use: Wood Pellets: Heating (MBtu)                             Excludes heat pump backup
    End Use: Wood Pellets: Heating Heat Pump Backup (MBtu)
    End Use: Wood Pellets: Hot Water (MBtu)
    End Use: Wood Pellets: Clothes Dryer (MBtu)
@@ -209,7 +214,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Wood Pellets: Grill (MBtu)
    End Use: Wood Pellets: Lighting (MBtu)
    End Use: Wood Pellets: Fireplace (MBtu)
-   End Use: Coal: Heating (MBtu)                           Excludes heat pump backup
+   End Use: Coal: Heating (MBtu)                                     Excludes heat pump backup
    End Use: Coal: Heating Heat Pump Backup (MBtu)
    End Use: Coal: Hot Water (MBtu)
    End Use: Coal: Clothes Dryer (MBtu)
@@ -219,7 +224,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Coal: Grill (MBtu)
    End Use: Coal: Lighting (MBtu)
    End Use: Coal: Fireplace (MBtu)
-   ======================================================  ====================================================
+   ================================================================  ====================================================
 
 Annual Energy By System Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
