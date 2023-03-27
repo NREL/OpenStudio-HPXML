@@ -18,6 +18,10 @@ OpenStudio-HPXML generates a number of workflow outputs:
   eplusout.*                                     EnergyPlus output files (e.g., msgpack output, error log). Defaults to a subset of possible files; use ``debug`` to produce ALL files.
   =============================================  ======================================
 
+.. note::
+
+  MBtu is defined as one million Btu.
+
 .. _hpxml_defaults:
 
 HPXML Defaults
@@ -80,10 +84,10 @@ Annual Outputs
 OpenStudio-HPXML will always generate an annual output file called ``results_annual.csv`` (or ``results_annual.json`` or ``results_annual.msgpack``), located in the run directory.
 The file includes the following sections of output:
 
-Annual Energy Consumption
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Annual Energy
+~~~~~~~~~~~~~
 
-Annual energy consumption outputs are listed below.
+Annual energy outputs are listed below.
 
   ====================================  ===========================
   Type                                  Notes
@@ -92,8 +96,8 @@ Annual energy consumption outputs are listed below.
   Energy Use: Net (MBtu)                Subtracts any power produced by PV or generators.
   ====================================  ===========================
 
-Annual Energy Consumption by Fuel Use
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Annual Energy by Fuel Use
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Fuel uses are listed below.
 
@@ -105,13 +109,13 @@ Fuel uses are listed below.
    Fuel Use: Natural Gas: Total (MBtu)
    Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Fuel Use: Propane: Total (MBtu)
-   Fuel Use: Wood: Total (MBtu)
+   Fuel Use: Wood Cord: Total (MBtu)
    Fuel Use: Wood Pellets: Total (MBtu)
    Fuel Use: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke".
    ====================================  ===========================
 
-Annual Energy Consumption By End Use
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Annual Energy By End Use
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 End uses are listed below.
 
@@ -123,9 +127,9 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    ===================================================================  ====================================================
    End Use: Electricity: Heating (MBtu)                                 Excludes heat pump backup and fans/pumps
    End Use: Electricity: Heating Heat Pump Backup (MBtu)
-   End Use: Electricity: Heating Fans/Pumps (MBtu)
+   End Use: Electricity: Heating Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (hydronic distribution or geothermal loop)
    End Use: Electricity: Cooling (MBtu)                                 Excludes fans/pumps
-   End Use: Electricity: Cooling Fans/Pumps (MBtu)
+   End Use: Electricity: Cooling Fans/Pumps (MBtu)                      Supply fan (air distribution) or circulating pump (geothermal loop)
    End Use: Electricity: Hot Water (MBtu)                               Excludes recirc pump and solar thermal pump
    End Use: Electricity: Hot Water Recirc Pump (MBtu)
    End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)            Non-zero only when using detailed (not simple) solar thermal inputs
@@ -220,6 +224,20 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Coal: Lighting (MBtu)
    End Use: Coal: Fireplace (MBtu)
    ===================================================================  ====================================================
+
+Annual Energy By System Use
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
+
+   ================================================  =============================================
+   Type                                              Notes
+   ================================================  =============================================
+   System Use: <HeatingSystemID>: Total (MBtu)       Total energy use for the heating system
+   System Use: <CoolingSystemID>: Total (MBtu)       Total energy use for the cooling system
+   System Use: <HeatPumpID>: Total (MBtu)            Total energy use for the heat pump (except when fossil fuel backup, in which case two rows will be reported)
+   System Use: <WaterHeatingSystemID>: Total (MBtu)  Total energy use for the water heating system
+   ================================================  =============================================
 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
@@ -439,6 +457,7 @@ Depending on the outputs requested, the file may include:
    Total Consumptions                   Energy use for building total.
    Fuel Consumptions                    Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
    End Use Consumptions                 Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
+   System Use Consumptions              Energy use for each HVAC and water heating system (in kBtu).
    Emissions                            Emissions (e.g., CO2) for each scenario defined in the HPXML file.
    Emission Fuels                       Emissions (e.g., CO2) disaggregated by fuel type for each scenario defined in the HPXML file.
    Emission End Uses                    Emissions (e.g., CO2) disaggregated by end use for each scenario defined in the HPXML file.
