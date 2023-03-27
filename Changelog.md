@@ -6,12 +6,13 @@ __New Features__
   - Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
   - Replaces `WaterHeatingSystem/extension/OperatingMode` with `WaterHeatingSystem/HPWHOperatingMode` for heat pump water heaters.
 - Output updates:
-  - **Breaking change**: End Uses: Removes `Heating Fans/Pumps`, now included in `Heating` and `Heating Heat Pump Backup`.
-  - **Breaking change**: End Uses: Removes `Cooling Fans/Pumps`, now included in `Cooling`.
-  - **Breaking change**: End Uses: Removes `Hot Water Recirc Pump` and `Hot Water Solar Thermal Pump`, now included in `Hot Water`.
-  - **Breaking change**: Component Loads: Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
-  - **Breaking change**: Component Loads: Adds `Lighting` (disaggregated from `Internal Gains`).
-  - Adds annual energy outputs for each HVAC and water heating system; allows requesting timeseries output.
+  - **Breaking change**: Removes `End Use: Heating Fans/Pumps`, now included in `End Use: Heating` and `End Use: Heating Heat Pump Backup`.
+  - **Breaking change**: Removes `End Use: Cooling Fans/Pumps`, now included in `End Use: Cooling`.
+  - **Breaking change**: Removes `End Use: Hot Water Recirc Pump` and `End Use: Hot Water Solar Thermal Pump`, now included in `End Use: Hot Water`.
+  - **Breaking change**: Replaces `Component Load: Windows` with `Component Load: Windows Conduction` and `Component Load: Windows Solar`.
+  - **Breaking change**: Replaces `Component Load: Skylights` with `Component Load: Skylights Conduction` and `Component Load: Skylights Solar`.
+  - **Breaking change**: Adds `Component Load: Lighting` (disaggregated from `Component Load: Internal Gains`).
+  - Adds system use outputs (annual energy outputs for each HVAC and water heating system); allows requesting timeseries output.
   - Adds heating load delivered by heat pump backup systems (`Load: Heating: Heat Pump Backup`).
   - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
   - Allows specifying the number of decimal places for timeseries output.
@@ -21,10 +22,12 @@ __New Features__
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
-- **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationTest` ("compartmentalization test" or "guarded test").
-- LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
-- LightingGroups for interior, exterior, and garage are no longer required; if not provided, these lighting uses will not be modeled.
-- Allows building air leakage to be specified using CFMnatural or EffectiveLeakageArea.
+- Infiltration changes:
+  - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationTest` ("compartmentalization test" or "guarded test").
+  - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
+- Lighting changes:
+  - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
+  - LightingGroups for interior, exterior, and garage are no longer required; if not provided, these lighting uses will not be modeled.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Window shading seasons now based on calendar dates (e.g., summer: May 1-Sep 30 in northern hemisphere) instead of monthly outdoor temperatures.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods`) and power outage periods (`PowerOutagePeriods`) in the HPXML file.
