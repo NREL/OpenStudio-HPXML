@@ -8,7 +8,7 @@ __New Features__
 - Output updates:
   - **Breaking change**: End Uses: Removes `Heating Fans/Pumps`, now included in `Heating` and `Heating Heat Pump Backup`.
   - **Breaking change**: End Uses: Removes `Cooling Fans/Pumps`, now included in `Cooling`.
-  - **Breaking change**: End Uses: Removes `Hot Water Recirc Pump` and `Hot Water Solar Thermal Pump`, now included in `HotWater`.
+  - **Breaking change**: End Uses: Removes `Hot Water Recirc Pump` and `Hot Water Solar Thermal Pump`, now included in `Hot Water`.
   - **Breaking change**: Component Loads: Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
   - **Breaking change**: Component Loads: Adds `Lighting` (disaggregated from `Internal Gains`).
   - Adds annual energy outputs for each HVAC and water heating system; allows requesting timeseries output.
