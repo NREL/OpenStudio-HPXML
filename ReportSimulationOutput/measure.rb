@@ -1148,7 +1148,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
-    if all_total == 0
+    if (all_total == 0) && (@hpxml.total_fraction_cool_load_served + @hpxml.total_fraction_heat_load_served > 0)
       runner.registerError('Simulation unsuccessful.')
       return false
     elsif all_total.infinite?
@@ -2499,7 +2499,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_PumpConstantSpeed.is_initialized
         if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
-          return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
+          return { [FT::Elec, EUT::HotWater] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_WaterHeaterMixed.is_initialized
