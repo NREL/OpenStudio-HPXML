@@ -21,171 +21,168 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   AnnualRows = [
-    'Energy Use: Total (MBtu)',
-    'Energy Use: Net (MBtu)',
-    'Fuel Use: Electricity: Total (MBtu)',
-    'Fuel Use: Electricity: Net (MBtu)',
-    'Fuel Use: Natural Gas: Total (MBtu)',
-    'Fuel Use: Fuel Oil: Total (MBtu)',
-    'Fuel Use: Propane: Total (MBtu)',
-    'Fuel Use: Wood Cord: Total (MBtu)',
-    'Fuel Use: Wood Pellets: Total (MBtu)',
-    'Fuel Use: Coal: Total (MBtu)',
-    'End Use: Electricity: Heating (MBtu)',
-    'End Use: Electricity: Heating Heat Pump Backup (MBtu)',
-    'End Use: Electricity: Heating Fans/Pumps (MBtu)',
-    'End Use: Electricity: Cooling (MBtu)',
-    'End Use: Electricity: Cooling Fans/Pumps (MBtu)',
-    'End Use: Electricity: Hot Water (MBtu)',
-    'End Use: Electricity: Hot Water Recirc Pump (MBtu)',
-    'End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)',
-    'End Use: Electricity: Lighting Interior (MBtu)',
-    'End Use: Electricity: Lighting Garage (MBtu)',
-    'End Use: Electricity: Lighting Exterior (MBtu)',
-    'End Use: Electricity: Mech Vent (MBtu)',
-    'End Use: Electricity: Mech Vent Preheating (MBtu)',
-    'End Use: Electricity: Mech Vent Precooling (MBtu)',
-    'End Use: Electricity: Whole House Fan (MBtu)',
-    'End Use: Electricity: Refrigerator (MBtu)',
-    'End Use: Electricity: Freezer (MBtu)',
-    'End Use: Electricity: Dehumidifier (MBtu)',
-    'End Use: Electricity: Dishwasher (MBtu)',
-    'End Use: Electricity: Clothes Washer (MBtu)',
-    'End Use: Electricity: Clothes Dryer (MBtu)',
-    'End Use: Electricity: Range/Oven (MBtu)',
-    'End Use: Electricity: Ceiling Fan (MBtu)',
-    'End Use: Electricity: Television (MBtu)',
-    'End Use: Electricity: Plug Loads (MBtu)',
-    'End Use: Electricity: Electric Vehicle Charging (MBtu)',
-    'End Use: Electricity: Well Pump (MBtu)',
-    'End Use: Electricity: Pool Heater (MBtu)',
-    'End Use: Electricity: Pool Pump (MBtu)',
-    'End Use: Electricity: Hot Tub Heater (MBtu)',
-    'End Use: Electricity: Hot Tub Pump (MBtu)',
-    'End Use: Electricity: PV (MBtu)',
-    'End Use: Electricity: Generator (MBtu)',
-    'End Use: Electricity: Battery (MBtu)',
-    'End Use: Natural Gas: Heating (MBtu)',
-    'End Use: Natural Gas: Heating Heat Pump Backup (MBtu)',
-    'End Use: Natural Gas: Hot Water (MBtu)',
-    'End Use: Natural Gas: Clothes Dryer (MBtu)',
-    'End Use: Natural Gas: Range/Oven (MBtu)',
-    'End Use: Natural Gas: Pool Heater (MBtu)',
-    'End Use: Natural Gas: Hot Tub Heater (MBtu)',
-    'End Use: Natural Gas: Grill (MBtu)',
-    'End Use: Natural Gas: Lighting (MBtu)',
-    'End Use: Natural Gas: Fireplace (MBtu)',
-    'End Use: Natural Gas: Mech Vent Preheating (MBtu)',
-    'End Use: Natural Gas: Generator (MBtu)',
-    'End Use: Fuel Oil: Heating (MBtu)',
-    'End Use: Fuel Oil: Heating Heat Pump Backup (MBtu)',
-    'End Use: Fuel Oil: Hot Water (MBtu)',
-    'End Use: Fuel Oil: Clothes Dryer (MBtu)',
-    'End Use: Fuel Oil: Range/Oven (MBtu)',
-    'End Use: Fuel Oil: Grill (MBtu)',
-    'End Use: Fuel Oil: Lighting (MBtu)',
-    'End Use: Fuel Oil: Fireplace (MBtu)',
-    'End Use: Fuel Oil: Mech Vent Preheating (MBtu)',
-    'End Use: Fuel Oil: Generator (MBtu)',
-    'End Use: Propane: Heating (MBtu)',
-    'End Use: Propane: Heating Heat Pump Backup (MBtu)',
-    'End Use: Propane: Hot Water (MBtu)',
-    'End Use: Propane: Clothes Dryer (MBtu)',
-    'End Use: Propane: Range/Oven (MBtu)',
-    'End Use: Propane: Grill (MBtu)',
-    'End Use: Propane: Lighting (MBtu)',
-    'End Use: Propane: Fireplace (MBtu)',
-    'End Use: Propane: Mech Vent Preheating (MBtu)',
-    'End Use: Propane: Generator (MBtu)',
-    'End Use: Wood Cord: Heating (MBtu)',
-    'End Use: Wood Cord: Heating Heat Pump Backup (MBtu)',
-    'End Use: Wood Cord: Hot Water (MBtu)',
-    'End Use: Wood Cord: Clothes Dryer (MBtu)',
-    'End Use: Wood Cord: Range/Oven (MBtu)',
-    'End Use: Wood Cord: Grill (MBtu)',
-    'End Use: Wood Cord: Lighting (MBtu)',
-    'End Use: Wood Cord: Fireplace (MBtu)',
-    'End Use: Wood Cord: Mech Vent Preheating (MBtu)',
-    'End Use: Wood Cord: Generator (MBtu)',
-    'End Use: Wood Pellets: Heating (MBtu)',
-    'End Use: Wood Pellets: Heating Heat Pump Backup (MBtu)',
-    'End Use: Wood Pellets: Hot Water (MBtu)',
-    'End Use: Wood Pellets: Clothes Dryer (MBtu)',
-    'End Use: Wood Pellets: Range/Oven (MBtu)',
-    'End Use: Wood Pellets: Grill (MBtu)',
-    'End Use: Wood Pellets: Lighting (MBtu)',
-    'End Use: Wood Pellets: Fireplace (MBtu)',
-    'End Use: Wood Pellets: Mech Vent Preheating (MBtu)',
-    'End Use: Wood Pellets: Generator (MBtu)',
-    'End Use: Coal: Heating (MBtu)',
-    'End Use: Coal: Heating Heat Pump Backup (MBtu)',
-    'End Use: Coal: Hot Water (MBtu)',
-    'End Use: Coal: Clothes Dryer (MBtu)',
-    'End Use: Coal: Range/Oven (MBtu)',
-    'End Use: Coal: Grill (MBtu)',
-    'End Use: Coal: Lighting (MBtu)',
-    'End Use: Coal: Fireplace (MBtu)',
-    'End Use: Coal: Mech Vent Preheating (MBtu)',
-    'End Use: Coal: Generator (MBtu)',
-    'System Use: CoolingSystem1: Cooling (MBtu)',
-    'System Use: HeatingSystem1: Heating (MBtu)',
-    'System Use: WaterHeatingSystem1: Hot Water (MBtu)',
-    'Load: Heating: Delivered (MBtu)',
-    'Load: Cooling: Delivered (MBtu)',
-    'Load: Hot Water: Delivered (MBtu)',
-    'Load: Hot Water: Tank Losses (MBtu)',
-    'Load: Hot Water: Desuperheater (MBtu)',
-    'Load: Hot Water: Solar Thermal (MBtu)',
-    'Unmet Hours: Heating (hr)',
-    'Unmet Hours: Cooling (hr)',
-    'Peak Electricity: Winter Total (W)',
-    'Peak Electricity: Summer Total (W)',
-    'Peak Load: Heating: Delivered (kBtu/hr)',
-    'Peak Load: Cooling: Delivered (kBtu/hr)',
-    'Component Load: Heating: Roofs (MBtu)',
-    'Component Load: Heating: Ceilings (MBtu)',
-    'Component Load: Heating: Walls (MBtu)',
-    'Component Load: Heating: Rim Joists (MBtu)',
-    'Component Load: Heating: Foundation Walls (MBtu)',
-    'Component Load: Heating: Doors (MBtu)',
-    'Component Load: Heating: Windows Conduction (MBtu)',
-    'Component Load: Heating: Windows Solar (MBtu)',
-    'Component Load: Heating: Skylights Conduction (MBtu)',
-    'Component Load: Heating: Skylights Solar (MBtu)',
-    'Component Load: Heating: Floors (MBtu)',
-    'Component Load: Heating: Slabs (MBtu)',
-    'Component Load: Heating: Internal Mass (MBtu)',
-    'Component Load: Heating: Infiltration (MBtu)',
-    'Component Load: Heating: Natural Ventilation (MBtu)',
-    'Component Load: Heating: Mechanical Ventilation (MBtu)',
-    'Component Load: Heating: Whole House Fan (MBtu)',
-    'Component Load: Heating: Ducts (MBtu)',
-    'Component Load: Heating: Internal Gains (MBtu)',
-    'Component Load: Heating: Lighting (MBtu)',
-    'Component Load: Cooling: Roofs (MBtu)',
-    'Component Load: Cooling: Ceilings (MBtu)',
-    'Component Load: Cooling: Walls (MBtu)',
-    'Component Load: Cooling: Rim Joists (MBtu)',
-    'Component Load: Cooling: Foundation Walls (MBtu)',
-    'Component Load: Cooling: Doors (MBtu)',
-    'Component Load: Cooling: Windows Conduction (MBtu)',
-    'Component Load: Cooling: Windows Solar (MBtu)',
-    'Component Load: Cooling: Skylights Conduction (MBtu)',
-    'Component Load: Cooling: Skylights Solar (MBtu)',
-    'Component Load: Cooling: Floors (MBtu)',
-    'Component Load: Cooling: Slabs (MBtu)',
-    'Component Load: Cooling: Internal Mass (MBtu)',
-    'Component Load: Cooling: Infiltration (MBtu)',
-    'Component Load: Cooling: Natural Ventilation (MBtu)',
-    'Component Load: Cooling: Mechanical Ventilation (MBtu)',
-    'Component Load: Cooling: Whole House Fan (MBtu)',
-    'Component Load: Cooling: Ducts (MBtu)',
-    'Component Load: Cooling: Internal Gains (MBtu)',
-    'Component Load: Cooling: Lighting (MBtu)',
-    'Hot Water: Clothes Washer (gal)',
-    'Hot Water: Dishwasher (gal)',
-    'Hot Water: Fixtures (gal)',
-    'Hot Water: Distribution Waste (gal)',
+    "Energy Use: #{TE::Total} (MBtu)",
+    "Energy Use: #{TE::Net} (MBtu)",
+    "Fuel Use: #{FT::Elec}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::Elec}: #{TE::Net} (MBtu)",
+    "Fuel Use: #{FT::Gas}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::Oil}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::Propane}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::WoodCord}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::WoodPellets}: #{TE::Total} (MBtu)",
+    "Fuel Use: #{FT::Coal}: #{TE::Total} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Cooling} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::LightsInterior} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::LightsGarage} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::LightsExterior} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::MechVent} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::MechVentPrecool} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::WholeHouseFan} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Refrigerator} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Freezer} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Dehumidifier} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Dishwasher} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::ClothesWasher} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::CeilingFan} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Television} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::PlugLoads} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Vehicle} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::WellPump} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::PoolHeater} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::PoolPump} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::HotTubHeater} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::HotTubPump} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::PV} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Battery} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::PoolHeater} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::HotTubHeater} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::Gas}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::Oil}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::Propane}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::WoodCord}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::WoodPellets}: #{EUT::Generator} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::Heating} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::HotWater} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::MechVentPreheat} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::ClothesDryer} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::RangeOven} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::Grill} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::Lighting} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::Fireplace} (MBtu)",
+    "End Use: #{FT::Coal}: #{EUT::Generator} (MBtu)",
+    "System Use: CoolingSystem1: #{EUT::Cooling} (MBtu)",
+    "System Use: HeatingSystem1: #{EUT::Heating} (MBtu)",
+    "System Use: WaterHeatingSystem1: #{EUT::HotWater} (MBtu)",
+    "Load: #{LT::Heating} (MBtu)",
+    "Load: #{LT::HeatingHeatPumpBackup} (MBtu)",
+    "Load: #{LT::Cooling} (MBtu)",
+    "Load: #{LT::HotWaterDelivered} (MBtu)",
+    "Load: #{LT::HotWaterTankLosses} (MBtu)",
+    "Load: #{LT::HotWaterDesuperheater} (MBtu)",
+    "Load: #{LT::HotWaterSolarThermal} (MBtu)",
+    "Unmet Hours: #{UHT::Heating} (hr)",
+    "Unmet Hours: #{UHT::Cooling} (hr)",
+    "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
+    "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
+    "Peak Load: #{PLT::Heating} (kBtu/hr)",
+    "Peak Load: #{PLT::Cooling} (kBtu/hr)",
+    "Component Load: Heating: #{CLT::Roofs} (MBtu)",
+    "Component Load: Heating: #{CLT::Ceilings} (MBtu)",
+    "Component Load: Heating: #{CLT::Walls} (MBtu)",
+    "Component Load: Heating: #{CLT::RimJoists} (MBtu)",
+    "Component Load: Heating: #{CLT::FoundationWalls} (MBtu)",
+    "Component Load: Heating: #{CLT::Doors} (MBtu)",
+    "Component Load: Heating: #{CLT::WindowsConduction} (MBtu)",
+    "Component Load: Heating: #{CLT::WindowsSolar} (MBtu)",
+    "Component Load: Heating: #{CLT::SkylightsConduction} (MBtu)",
+    "Component Load: Heating: #{CLT::SkylightsSolar} (MBtu)",
+    "Component Load: Heating: #{CLT::Floors} (MBtu)",
+    "Component Load: Heating: #{CLT::Slabs} (MBtu)",
+    "Component Load: Heating: #{CLT::InternalMass} (MBtu)",
+    "Component Load: Heating: #{CLT::Infiltration} (MBtu)",
+    "Component Load: Heating: #{CLT::NaturalVentilation} (MBtu)",
+    "Component Load: Heating: #{CLT::MechanicalVentilation} (MBtu)",
+    "Component Load: Heating: #{CLT::WholeHouseFan} (MBtu)",
+    "Component Load: Heating: #{CLT::Ducts} (MBtu)",
+    "Component Load: Heating: #{CLT::InternalGains} (MBtu)",
+    "Component Load: Heating: #{CLT::Lighting} (MBtu)",
+    "Component Load: Cooling: #{CLT::Roofs} (MBtu)",
+    "Component Load: Cooling: #{CLT::Ceilings} (MBtu)",
+    "Component Load: Cooling: #{CLT::Walls} (MBtu)",
+    "Component Load: Cooling: #{CLT::RimJoists} (MBtu)",
+    "Component Load: Cooling: #{CLT::FoundationWalls} (MBtu)",
+    "Component Load: Cooling: #{CLT::Doors} (MBtu)",
+    "Component Load: Cooling: #{CLT::WindowsConduction} (MBtu)",
+    "Component Load: Cooling: #{CLT::WindowsSolar} (MBtu)",
+    "Component Load: Cooling: #{CLT::SkylightsConduction} (MBtu)",
+    "Component Load: Cooling: #{CLT::SkylightsSolar} (MBtu)",
+    "Component Load: Cooling: #{CLT::Floors} (MBtu)",
+    "Component Load: Cooling: #{CLT::Slabs} (MBtu)",
+    "Component Load: Cooling: #{CLT::InternalMass} (MBtu)",
+    "Component Load: Cooling: #{CLT::Infiltration} (MBtu)",
+    "Component Load: Cooling: #{CLT::NaturalVentilation} (MBtu)",
+    "Component Load: Cooling: #{CLT::MechanicalVentilation} (MBtu)",
+    "Component Load: Cooling: #{CLT::WholeHouseFan} (MBtu)",
+    "Component Load: Cooling: #{CLT::Ducts} (MBtu)",
+    "Component Load: Cooling: #{CLT::InternalGains} (MBtu)",
+    "Component Load: Cooling: #{CLT::Lighting} (MBtu)",
+    "Hot Water: #{HWT::ClothesWasher} (gal)",
+    "Hot Water: #{HWT::Dishwasher} (gal)",
+    "Hot Water: #{HWT::Fixtures} (gal)",
+    "Hot Water: #{HWT::DistributionWaste} (gal)",
     'HVAC Capacity: Cooling (Btu/h)',
     'HVAC Capacity: Heating (Btu/h)',
     'HVAC Capacity: Heat Pump Backup (Btu/h)',
@@ -221,85 +218,84 @@ class ReportSimulationOutputTest < MiniTest::Test
   ]
 
   BaseHPXMLTimeseriesColsEnergy = [
-    'Energy Use: Total',
+    "Energy Use: #{TE::Total}",
   ]
 
   BaseHPXMLTimeseriesColsFuels = [
-    'Fuel Use: Electricity: Total',
-    'Fuel Use: Natural Gas: Total',
+    "Fuel Use: #{FT::Elec}: #{TE::Total}",
+    "Fuel Use: #{FT::Gas}: #{TE::Total}",
   ]
 
   BaseHPXMLTimeseriesColsEndUses = [
-    'End Use: Electricity: Clothes Dryer',
-    'End Use: Electricity: Clothes Washer',
-    'End Use: Electricity: Cooling',
-    'End Use: Electricity: Cooling Fans/Pumps',
-    'End Use: Electricity: Dishwasher',
-    'End Use: Electricity: Heating Fans/Pumps',
-    'End Use: Electricity: Hot Water',
-    'End Use: Electricity: Lighting Exterior',
-    'End Use: Electricity: Lighting Interior',
-    'End Use: Electricity: Plug Loads',
-    'End Use: Electricity: Range/Oven',
-    'End Use: Electricity: Refrigerator',
-    'End Use: Electricity: Television',
-    'End Use: Natural Gas: Heating',
+    "End Use: #{FT::Elec}: #{EUT::ClothesDryer}",
+    "End Use: #{FT::Elec}: #{EUT::ClothesWasher}",
+    "End Use: #{FT::Elec}: #{EUT::Cooling}",
+    "End Use: #{FT::Elec}: #{EUT::Dishwasher}",
+    "End Use: #{FT::Elec}: #{EUT::Heating}",
+    "End Use: #{FT::Elec}: #{EUT::HotWater}",
+    "End Use: #{FT::Elec}: #{EUT::LightsExterior}",
+    "End Use: #{FT::Elec}: #{EUT::LightsInterior}",
+    "End Use: #{FT::Elec}: #{EUT::PlugLoads}",
+    "End Use: #{FT::Elec}: #{EUT::RangeOven}",
+    "End Use: #{FT::Elec}: #{EUT::Refrigerator}",
+    "End Use: #{FT::Elec}: #{EUT::Television}",
+    "End Use: #{FT::Gas}: #{EUT::Heating}",
   ]
 
   BaseHPXMLTimeseriesColsSystemUses = [
-    'System Use: CoolingSystem1: Cooling',
-    'System Use: HeatingSystem1: Heating',
-    'System Use: WaterHeatingSystem1: Hot Water',
+    "System Use: CoolingSystem1: #{EUT::Cooling}",
+    "System Use: HeatingSystem1: #{EUT::Heating}",
+    "System Use: WaterHeatingSystem1: #{EUT::HotWater}",
   ]
 
   BaseHPXMLTimeseriesColsWaterUses = [
-    'Hot Water: Clothes Washer',
-    'Hot Water: Dishwasher',
-    'Hot Water: Distribution Waste',
-    'Hot Water: Fixtures',
+    "Hot Water: #{HWT::ClothesWasher}",
+    "Hot Water: #{HWT::Dishwasher}",
+    "Hot Water: #{HWT::Fixtures}",
+    "Hot Water: #{HWT::DistributionWaste}",
   ]
 
   BaseHPXMLTimeseriesColsTotalLoads = [
-    'Load: Heating: Delivered',
-    'Load: Cooling: Delivered',
-    'Load: Hot Water: Delivered',
+    "Load: #{LT::Heating}",
+    "Load: #{LT::Cooling}",
+    "Load: #{LT::HotWaterDelivered}",
   ]
 
   BaseHPXMLTimeseriesColsComponentLoads = [
-    'Component Load: Cooling: Ceilings',
-    'Component Load: Cooling: Doors',
-    'Component Load: Cooling: Ducts',
-    'Component Load: Cooling: Foundation Walls',
-    'Component Load: Cooling: Infiltration',
-    'Component Load: Cooling: Lighting',
-    'Component Load: Cooling: Internal Gains',
-    'Component Load: Cooling: Internal Mass',
-    'Component Load: Cooling: Mechanical Ventilation',
-    'Component Load: Cooling: Natural Ventilation',
-    'Component Load: Cooling: Rim Joists',
-    'Component Load: Cooling: Slabs',
-    'Component Load: Cooling: Walls',
-    'Component Load: Cooling: Windows Conduction',
-    'Component Load: Cooling: Windows Solar',
-    'Component Load: Heating: Ceilings',
-    'Component Load: Heating: Doors',
-    'Component Load: Heating: Ducts',
-    'Component Load: Heating: Foundation Walls',
-    'Component Load: Heating: Infiltration',
-    'Component Load: Heating: Lighting',
-    'Component Load: Heating: Internal Gains',
-    'Component Load: Heating: Internal Mass',
-    'Component Load: Heating: Mechanical Ventilation',
-    'Component Load: Heating: Rim Joists',
-    'Component Load: Heating: Slabs',
-    'Component Load: Heating: Walls',
-    'Component Load: Heating: Windows Conduction',
-    'Component Load: Heating: Windows Solar',
+    "Component Load: Cooling: #{CLT::Ceilings}",
+    "Component Load: Cooling: #{CLT::Doors}",
+    "Component Load: Cooling: #{CLT::Ducts}",
+    "Component Load: Cooling: #{CLT::FoundationWalls}",
+    "Component Load: Cooling: #{CLT::Infiltration}",
+    "Component Load: Cooling: #{CLT::Lighting}",
+    "Component Load: Cooling: #{CLT::InternalGains}",
+    "Component Load: Cooling: #{CLT::InternalMass}",
+    "Component Load: Cooling: #{CLT::MechanicalVentilation}",
+    "Component Load: Cooling: #{CLT::NaturalVentilation}",
+    "Component Load: Cooling: #{CLT::RimJoists}",
+    "Component Load: Cooling: #{CLT::Slabs}",
+    "Component Load: Cooling: #{CLT::Walls}",
+    "Component Load: Cooling: #{CLT::WindowsConduction}",
+    "Component Load: Cooling: #{CLT::WindowsSolar}",
+    "Component Load: Heating: #{CLT::Ceilings}",
+    "Component Load: Heating: #{CLT::Doors}",
+    "Component Load: Heating: #{CLT::Ducts}",
+    "Component Load: Heating: #{CLT::FoundationWalls}",
+    "Component Load: Heating: #{CLT::Infiltration}",
+    "Component Load: Heating: #{CLT::Lighting}",
+    "Component Load: Heating: #{CLT::InternalGains}",
+    "Component Load: Heating: #{CLT::InternalMass}",
+    "Component Load: Heating: #{CLT::MechanicalVentilation}",
+    "Component Load: Heating: #{CLT::RimJoists}",
+    "Component Load: Heating: #{CLT::Slabs}",
+    "Component Load: Heating: #{CLT::Walls}",
+    "Component Load: Heating: #{CLT::WindowsConduction}",
+    "Component Load: Heating: #{CLT::WindowsSolar}",
   ]
 
   BaseHPXMLTimeseriesColsUnmetHours = [
-    'Unmet Hours: Heating',
-    'Unmet Hours: Cooling',
+    "Unmet Hours: #{UHT::Heating}",
+    "Unmet Hours: #{UHT::Cooling}",
   ]
 
   BaseHPXMLTimeseriesColsZoneTemps = [
@@ -310,18 +306,18 @@ class ReportSimulationOutputTest < MiniTest::Test
   ]
 
   BaseHPXMLTimeseriesColsAirflows = [
-    'Airflow: Infiltration',
-    'Airflow: Mechanical Ventilation',
-    'Airflow: Natural Ventilation',
+    "Airflow: #{AFT::Infiltration}",
+    "Airflow: #{AFT::MechanicalVentilation}",
+    "Airflow: #{AFT::NaturalVentilation}",
   ]
 
   BaseHPXMLTimeseriesColsWeather = [
-    'Weather: Drybulb Temperature',
-    'Weather: Wetbulb Temperature',
-    'Weather: Relative Humidity',
-    'Weather: Wind Speed',
-    'Weather: Diffuse Solar Radiation',
-    'Weather: Direct Solar Radiation',
+    "Weather: #{WT::DrybulbTemp}",
+    "Weather: #{WT::WetbulbTemp}",
+    "Weather: #{WT::RelativeHumidity}",
+    "Weather: #{WT::WindSpeed}",
+    "Weather: #{WT::DiffuseSolar}",
+    "Weather: #{WT::DirectSolar}",
   ]
 
   BaseHPXMLTimeseriesColsStandardOutputVariables = [
@@ -396,110 +392,106 @@ class ReportSimulationOutputTest < MiniTest::Test
   def emission_annual_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: Total (lb)",
-               "Emissions: #{scenario}: Electricity: Total (lb)",
-               "Emissions: #{scenario}: Electricity: Heating (lb)",
-               "Emissions: #{scenario}: Electricity: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Electricity: Heating Fans/Pumps (lb)",
-               "Emissions: #{scenario}: Electricity: Cooling (lb)",
-               "Emissions: #{scenario}: Electricity: Cooling Fans/Pumps (lb)",
-               "Emissions: #{scenario}: Electricity: Hot Water (lb)",
-               "Emissions: #{scenario}: Electricity: Hot Water Recirc Pump (lb)",
-               "Emissions: #{scenario}: Electricity: Hot Water Solar Thermal Pump (lb)",
-               "Emissions: #{scenario}: Electricity: Lighting Interior (lb)",
-               "Emissions: #{scenario}: Electricity: Lighting Garage (lb)",
-               "Emissions: #{scenario}: Electricity: Lighting Exterior (lb)",
-               "Emissions: #{scenario}: Electricity: Mech Vent (lb)",
-               "Emissions: #{scenario}: Electricity: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Electricity: Mech Vent Precooling (lb)",
-               "Emissions: #{scenario}: Electricity: Whole House Fan (lb)",
-               "Emissions: #{scenario}: Electricity: Refrigerator (lb)",
-               "Emissions: #{scenario}: Electricity: Freezer (lb)",
-               "Emissions: #{scenario}: Electricity: Dehumidifier (lb)",
-               "Emissions: #{scenario}: Electricity: Dishwasher (lb)",
-               "Emissions: #{scenario}: Electricity: Clothes Washer (lb)",
-               "Emissions: #{scenario}: Electricity: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Electricity: Range/Oven (lb)",
-               "Emissions: #{scenario}: Electricity: Ceiling Fan (lb)",
-               "Emissions: #{scenario}: Electricity: Television (lb)",
-               "Emissions: #{scenario}: Electricity: Plug Loads (lb)",
-               "Emissions: #{scenario}: Electricity: Electric Vehicle Charging (lb)",
-               "Emissions: #{scenario}: Electricity: Well Pump (lb)",
-               "Emissions: #{scenario}: Electricity: Pool Heater (lb)",
-               "Emissions: #{scenario}: Electricity: Pool Pump (lb)",
-               "Emissions: #{scenario}: Electricity: Hot Tub Heater (lb)",
-               "Emissions: #{scenario}: Electricity: Hot Tub Pump (lb)",
-               "Emissions: #{scenario}: Electricity: PV (lb)",
-               "Emissions: #{scenario}: Electricity: Generator (lb)",
-               "Emissions: #{scenario}: Electricity: Battery (lb)",
-               "Emissions: #{scenario}: Natural Gas: Total (lb)",
-               "Emissions: #{scenario}: Natural Gas: Heating (lb)",
-               "Emissions: #{scenario}: Natural Gas: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Natural Gas: Hot Water (lb)",
-               "Emissions: #{scenario}: Natural Gas: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Natural Gas: Range/Oven (lb)",
-               "Emissions: #{scenario}: Natural Gas: Pool Heater (lb)",
-               "Emissions: #{scenario}: Natural Gas: Hot Tub Heater (lb)",
-               "Emissions: #{scenario}: Natural Gas: Grill (lb)",
-               "Emissions: #{scenario}: Natural Gas: Lighting (lb)",
-               "Emissions: #{scenario}: Natural Gas: Fireplace (lb)",
-               "Emissions: #{scenario}: Natural Gas: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Natural Gas: Generator (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Total (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Heating (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Hot Water (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Range/Oven (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Grill (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Lighting (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Fireplace (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Fuel Oil: Generator (lb)",
-               "Emissions: #{scenario}: Propane: Total (lb)",
-               "Emissions: #{scenario}: Propane: Heating (lb)",
-               "Emissions: #{scenario}: Propane: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Propane: Hot Water (lb)",
-               "Emissions: #{scenario}: Propane: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Propane: Range/Oven (lb)",
-               "Emissions: #{scenario}: Propane: Grill (lb)",
-               "Emissions: #{scenario}: Propane: Lighting (lb)",
-               "Emissions: #{scenario}: Propane: Fireplace (lb)",
-               "Emissions: #{scenario}: Propane: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Propane: Generator (lb)",
-               "Emissions: #{scenario}: Wood Cord: Total (lb)",
-               "Emissions: #{scenario}: Wood Cord: Heating (lb)",
-               "Emissions: #{scenario}: Wood Cord: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Wood Cord: Hot Water (lb)",
-               "Emissions: #{scenario}: Wood Cord: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Wood Cord: Range/Oven (lb)",
-               "Emissions: #{scenario}: Wood Cord: Grill (lb)",
-               "Emissions: #{scenario}: Wood Cord: Lighting (lb)",
-               "Emissions: #{scenario}: Wood Cord: Fireplace (lb)",
-               "Emissions: #{scenario}: Wood Cord: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Wood Cord: Generator (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Total (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Heating (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Hot Water (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Range/Oven (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Grill (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Lighting (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Fireplace (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Wood Pellets: Generator (lb)",
-               "Emissions: #{scenario}: Coal: Total (lb)",
-               "Emissions: #{scenario}: Coal: Heating (lb)",
-               "Emissions: #{scenario}: Coal: Heating Heat Pump Backup (lb)",
-               "Emissions: #{scenario}: Coal: Hot Water (lb)",
-               "Emissions: #{scenario}: Coal: Clothes Dryer (lb)",
-               "Emissions: #{scenario}: Coal: Range/Oven (lb)",
-               "Emissions: #{scenario}: Coal: Grill (lb)",
-               "Emissions: #{scenario}: Coal: Lighting (lb)",
-               "Emissions: #{scenario}: Coal: Fireplace (lb)",
-               "Emissions: #{scenario}: Coal: Mech Vent Preheating (lb)",
-               "Emissions: #{scenario}: Coal: Generator (lb)"]
+      cols += ["Emissions: #{scenario}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsGarage} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVent} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPrecool} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WholeHouseFan} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Freezer} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dehumidifier} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CeilingFan} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WellPump} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolHeater} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolPump} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotTubHeater} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotTubPump} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::PoolHeater} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotTubHeater} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Generator} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Heating} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HeatingHeatPumpBackup} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HotWater} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::ClothesDryer} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::RangeOven} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Grill} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Lighting} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Fireplace} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::MechVentPreheat} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Generator} (lb)"]
     end
     return cols
   end
@@ -507,7 +499,7 @@ class ReportSimulationOutputTest < MiniTest::Test
   def emissions_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: Total"]
+      cols += ["Emissions: #{scenario}: #{TE::Total}"]
     end
     return cols
   end
@@ -515,8 +507,8 @@ class ReportSimulationOutputTest < MiniTest::Test
   def emission_fuels_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: Electricity: Total",
-               "Emissions: #{scenario}: Natural Gas: Total"]
+      cols += ["Emissions: #{scenario}: #{FT::Elec}: #{TE::Total}",
+               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total}"]
     end
     return cols
   end
@@ -524,22 +516,21 @@ class ReportSimulationOutputTest < MiniTest::Test
   def emission_end_uses_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: Electricity: Heating Fans/Pumps",
-               "Emissions: #{scenario}: Electricity: Cooling",
-               "Emissions: #{scenario}: Electricity: Cooling Fans/Pumps",
-               "Emissions: #{scenario}: Electricity: Hot Water",
-               "Emissions: #{scenario}: Electricity: Lighting Interior",
-               "Emissions: #{scenario}: Electricity: Lighting Exterior",
-               "Emissions: #{scenario}: Electricity: Refrigerator",
-               "Emissions: #{scenario}: Electricity: Dishwasher",
-               "Emissions: #{scenario}: Electricity: Clothes Washer",
-               "Emissions: #{scenario}: Electricity: Clothes Dryer",
-               "Emissions: #{scenario}: Electricity: Range/Oven",
-               "Emissions: #{scenario}: Electricity: Television",
-               "Emissions: #{scenario}: Electricity: Plug Loads",
-               "Emissions: #{scenario}: Electricity: PV",
-               "Emissions: #{scenario}: Electricity: Battery",
-               "Emissions: #{scenario}: Natural Gas: Heating"]
+      cols += ["Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Heating}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery}",
+               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating}"]
     end
     return cols
   end
@@ -612,7 +603,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Energy Use: Total'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Energy Use: #{TE::Total}"])
   end
 
   def test_timeseries_hourly_total_energy_pv
@@ -622,15 +613,15 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEnergy + ['Energy Use: Net']
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEnergy + ["Energy Use: #{TE::Net}"]
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Energy Use: Total',
-                                                             'Energy Use: Net'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Energy Use: #{TE::Total}",
+                                                             "Energy Use: #{TE::Net}"])
   end
 
   def test_timeseries_hourly_fuels
@@ -647,7 +638,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Fuel Use: #{FT::Elec}: #{TE::Total}"])
   end
 
   def test_timeseries_hourly_fuels_pv
@@ -657,15 +648,15 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels + ['Fuel Use: Electricity: Net']
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels + ["Fuel Use: #{FT::Elec}: #{TE::Net}"]
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total',
-                                                             'Fuel Use: Electricity: Net'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Fuel Use: #{FT::Elec}: #{TE::Total}",
+                                                             "Fuel Use: #{FT::Elec}: #{TE::Net}"])
   end
 
   def test_timeseries_hourly_emissions
@@ -733,7 +724,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"])
   end
 
   def test_timeseries_hourly_enduses_vacancy
@@ -750,9 +741,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], 0, 31 * 24 - 1) # Jan
-    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 1, -1) # Dec
-    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_zero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"], 0, 31 * 24 - 1) # Jan
+    _check_for_zero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 1, -1) # Dec
+    _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
   end
 
   def test_timeseries_hourly_enduses_power_outage
@@ -769,11 +760,11 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_zero_timeseries_values(timeseries_csv, ['End Use: Electricity: Plug Loads'], (31 + 28 + 31 + 30 + 31 + 30) * 24 + 4, (31 + 28 + 31 + 30 + 31 + 30 + 31) * 24 - 12) # Jul
+    _check_for_zero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"], (31 + 28 + 31 + 30 + 31 + 30) * 24 + 4, (31 + 28 + 31 + 30 + 31 + 30 + 31) * 24 - 12) # Jul
   end
 
   def test_timeseries_hourly_enduses_power_outage_natvent_availability
-    energy_use_total_col = 'Energy Use: Total'
+    energy_use_total_col = "Energy Use: #{TE::Total}"
     temperature_living_space_col = 'Temperature: Living Space'
 
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-schedules-simple-power-outage.xml'),
@@ -829,7 +820,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['System Use: HeatingSystem1: Heating'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["System Use: HeatingSystem1: #{EUT::Heating}"])
   end
 
   def test_timeseries_hourly_hotwateruses
@@ -881,7 +872,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Component Load: Heating: #{CLT::InternalGains}",
+                                                             "Component Load: Cooling: #{CLT::InternalGains}"])
   end
 
   def test_timeseries_hourly_unmet_hours
@@ -899,7 +891,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Unmet Hours: Heating', 'Unmet Hours: Cooling'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Unmet Hours: #{UHT::Heating}",
+                                                             "Unmet Hours: #{UHT::Cooling}"])
   end
 
   def test_timeseries_hourly_zone_temperatures
@@ -1010,7 +1003,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Airflow: #{AFT::MechanicalVentilation}"])
   end
 
   def test_timeseries_hourly_airflows_with_balanced_mechvent
@@ -1027,7 +1020,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Airflow: #{AFT::MechanicalVentilation}"])
   end
 
   def test_timeseries_hourly_airflows_with_cfis
@@ -1044,7 +1037,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Airflow: #{AFT::MechanicalVentilation}"])
   end
 
   def test_timeseries_hourly_weather
@@ -1089,7 +1082,10 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ["End Use: #{FT::Elec}: #{EUT::PV}",
+                                "End Use: #{FT::Elec}: #{EUT::Battery}",
+                                "Energy Use: #{TE::Net}",
+                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1097,7 +1093,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
   end
 
   def test_timeseries_daily_ALL
@@ -1125,7 +1121,10 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ["End Use: #{FT::Elec}: #{EUT::PV}",
+                                "End Use: #{FT::Elec}: #{EUT::Battery}",
+                                "Energy Use: #{TE::Net}",
+                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1133,7 +1132,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
   end
 
   def test_timeseries_monthly_ALL
@@ -1161,13 +1160,16 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ['End Use: Electricity: PV', 'End Use: Electricity: Battery', 'Energy Use: Net', 'Fuel Use: Electricity: Net']
+                               ["End Use: #{FT::Elec}: #{EUT::PV}",
+                                "End Use: #{FT::Elec}: #{EUT::Battery}",
+                                "Energy Use: #{TE::Net}",
+                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(12, timeseries_rows.size - 2)
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
-    _check_for_nonzero_timeseries_values(timeseries_csv, ['End Use: Electricity: Refrigerator'])
+    _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
   end
 
   def test_timeseries_timestep
@@ -1431,16 +1433,6 @@ class ReportSimulationOutputTest < MiniTest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAdvancedOutputVariables)
-  end
-
-  def test_eri_output
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
-                  'generate_eri_outputs' => true }
-    annual_csv, timeseries_csv = _test_measure(args_hash)
-    assert(File.exist?(annual_csv))
-    assert(!File.exist?(timeseries_csv))
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert(actual_annual_rows.include? 'ERI: Building: CFA')
   end
 
   def test_for_unsuccessful_simulation_infinity
