@@ -855,12 +855,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         system_end_uses = @end_uses.select { |k, eu| end_use_types.include?(k[1]) && eu.variables.map { |v| v[0] }.include?(sys_id) }
         next if system_end_uses.empty?
 
+        annual_output = system_end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
+        next if annual_output <= 0
+
         system_output = BaseOutput.new
         @system_uses[[sys_id, system_use_type]] = system_output
         system_output.name = "System Use: #{sys_id}: #{system_use_type}"
 
         # Annual
-        system_output.annual_output = system_end_uses.values.map { |eu| eu.annual_output_by_system[sys_id] }.sum
+        system_output.annual_output = annual_output
         system_output.annual_units = system_end_uses.values[0].annual_units
 
         next unless include_ts_system_use_consumptions
@@ -2644,16 +2647,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_CoilWaterHeatingDesuperheater.is_initialized
         return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
 
-      elsif object.to_CoilHeatingGas.is_initialized
+      elsif object.to_CoilHeatingGas.is_initialized || object.to_CoilHeatingElectric.is_initialized
         if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized
-          is_hp_backup = object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+            return { LT::HeatingHeatPumpBackup => ['Heating Coil Heating Energy'] }
+          end
         end
-        if is_hp_backup
-          return { LT::HeatingHeatPumpBackup => ['Heating Coil Heating Energy'] }
+
+      elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized || object.to_ZoneHVACBaseboardConvectiveWater.is_initialized
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized
+          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+            return { LT::HeatingHeatPumpBackup => ['Baseboard Total Heating Energy'] }
+          end
         end
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
         if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
+          # Fan/pump energy is contributing to the load
           return { LT::HeatingHeatPumpBackup => [object.name.to_s] }
         end
 

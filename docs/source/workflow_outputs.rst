@@ -231,18 +231,21 @@ Annual Energy By System Use
 
 Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
 
-   ===========================================================  =============================================
-   Type                                                         Notes
-   ===========================================================  =============================================
-   System Use: <HeatingSystemID>: Heating (MBtu)                Heating energy use for the heating system
-   System Use: <CoolingSystemID>: Cooling (MBtu)                Cooling energy use for the cooling system
-   System Use: <HeatPumpID>: Heating (MBtu)                     Heating energy use for the heat pump, excluding heat pump backup
-   System Use: <HeatPumpID>: Heating Heat Pump Backup (MBtu)    Heating energy use for the heat pump backup
-   System Use: <HeatPumpID>: Cooling (MBtu)                     Cooling energy use for the heat pump
-   System Use: <WaterHeatingSystemID>: Hot Water (MBtu)         Hot water energy use for the water heating system
-   System Use: <VentilationFanID>: Mech Vent Preheating (MBtu)  Preheating energy use for the mechanical ventilation system
-   System Use: <VentilationFanID>: Mech Vent Precooling (MBtu)  Precooling energy use for the mechanical ventilation system
-   ===========================================================  =============================================
+Note that all systems uses are mutually exclusive -- the "<HeatPumpID>: Heating" system use, for example, excludes energy reported in the "<HeatPumpID>: Heating Heat Pump Backup" end use.
+
+   ==============================================================  =============================================
+   Type                                                            Notes
+   ==============================================================  =============================================
+   System Use: <HeatingSystemID>: Heating (MBtu)                   Heating energy use for the heating system if not a heat pump separate backup system
+   System Use: <HeatingSystemID>: Heating Heat Pump Backup (MBtu)  Heating energy use for the heating system if a heat pump separate backup system
+   System Use: <CoolingSystemID>: Cooling (MBtu)                   Cooling energy use for the cooling system
+   System Use: <HeatPumpID>: Heating (MBtu)                        Heating energy use for the heat pump, excluding heat pump integrated backup
+   System Use: <HeatPumpID>: Heating Heat Pump Backup (MBtu)       Heating energy use for the heat pump integrated backup
+   System Use: <HeatPumpID>: Cooling (MBtu)                        Cooling energy use for the heat pump
+   System Use: <WaterHeatingSystemID>: Hot Water (MBtu)            Hot water energy use for the water heating system
+   System Use: <VentilationFanID>: Mech Vent Preheating (MBtu)     Preheating energy use for the mechanical ventilation system
+   System Use: <VentilationFanID>: Mech Vent Precooling (MBtu)     Precooling energy use for the mechanical ventilation system
+   ==============================================================  =============================================
 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
