@@ -5,6 +5,18 @@ __New Features__
   - Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
   - Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
   - Replaces `WaterHeatingSystem/extension/OperatingMode` with `WaterHeatingSystem/HPWHOperatingMode` for heat pump water heaters.
+- Output updates:
+  - **Breaking change**: End Uses: Removes `Heating Fans/Pumps`, now included in `Heating` and `Heating Heat Pump Backup`.
+  - **Breaking change**: End Uses: Removes `Cooling Fans/Pumps`, now included in `Cooling`.
+  - **Breaking change**: End Uses: Removes `Hot Water Recirc Pump` and `Hot Water Solar Thermal Pump`, now included in `HotWater`.
+  - **Breaking change**: Component Loads: Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
+  - **Breaking change**: Component Loads: Adds `Lighting` (disaggregated from `Internal Gains`).
+  - Adds annual energy outputs for each HVAC and water heating system; allows requesting timeseries output.
+  - Adds heating load delivered by heat pump backup systems (`Load: Heating: Heat Pump Backup`).
+  - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
+  - Allows specifying the number of decimal places for timeseries output.
+  - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
+  - Annual emissions and utility bills now include all fuel/end uses, even if zero.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.
@@ -16,17 +28,6 @@ __New Features__
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Window shading seasons now based on calendar dates (e.g., summer: May 1-Sep 30 in northern hemisphere) instead of monthly outdoor temperatures.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods`) and power outage periods (`PowerOutagePeriods`) in the HPXML file.
-- ReportSimulationOutput measure:
-  - Adds annual energy outputs per HVAC and water heating system; allows requesting timeseries output.
-  - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
-  - Annual emissions outputs now include all fuel/end uses, even if zero.
-  - Allows specifying the number of decimal places for timeseries output.
-  - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
-- ReportUtilityBills measure:
-  - Utility bill outputs now include all fuels, even if zero.
-- **Breaking change**: Updates component loads outputs:
-  - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
-  - Disaggregates `Lighting` from `Internal Gains`.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
