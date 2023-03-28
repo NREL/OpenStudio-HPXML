@@ -407,6 +407,7 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
 
+      # Validate against XSD schema
       if not schema_path.nil?
         xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
         @errors += xsd_errors
@@ -418,14 +419,10 @@ class HPXML < Object
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
 
-      if not schematron_path.nil?
-        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml)
-        @errors += sct_errors
-        @warnings += sct_warnings
-        return unless @errors.empty?
-      end
-
       # Handle multiple buildings
+      # Do this before schematron validation so that:
+      # 1. We don't give schematron warnings for Building elements that are not of interest.
+      # 2. The schematron validation occurs faster (as we're only validating one Building).
       if XMLHelper.get_elements(hpxml, 'Building').size > 1
         if building_id.nil?
           @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.'
@@ -442,6 +439,18 @@ class HPXML < Object
           @errors << "Could not find Building element with ID '#{building_id}'."
           return unless @errors.empty?
         end
+
+        # Write new HPXML file with all other Building elements removed
+        hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
+        XMLHelper.write_file(hpxml, hpxml_path)
+      end
+
+      # Validate against Schematron
+      if not schematron_path.nil?
+        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml)
+        @errors += sct_errors
+        @warnings += sct_warnings
+        return unless @errors.empty?
       end
     end
 
