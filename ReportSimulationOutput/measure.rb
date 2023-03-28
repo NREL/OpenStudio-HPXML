@@ -741,9 +741,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       shared_pump_energy = gshp_shared_loop_end_use.annual_output_by_system[sys_id]
       energy_multiplier = (htg_energy + clg_energy + shared_pump_energy) / (htg_energy + clg_energy)
       # Apply multiplier
-      apply_multiplier_to_output(htg_fan_pump_end_use, nil, sys_id, energy_multiplier)
-      apply_multiplier_to_output(backup_htg_fan_pump_end_use, nil, sys_id, energy_multiplier)
-      apply_multiplier_to_output(clg_fan_pump_end_use, nil, sys_id, energy_multiplier)
+      [htg_fan_pump_end_use, backup_htg_fan_pump_end_use, clg_fan_pump_end_use].each do |end_use|
+        next if end_use.annual_output_by_system[sys_id].nil?
+
+        apply_multiplier_to_output(end_use, nil, sys_id, energy_multiplier)
+      end
     end
     @end_uses.delete([FT::Elec, 'TempGSHPSharedPump'])
 
