@@ -231,17 +231,21 @@ class HPXMLDefaults
     end
 
     if hpxml.header.shading_summer_begin_month.nil? || hpxml.header.shading_summer_begin_day.nil? || hpxml.header.shading_summer_end_month.nil? || hpxml.header.shading_summer_end_day.nil?
-      # Default based on Building America seasons
-      _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
-      begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, sim_calendar_year)
-      hpxml.header.shading_summer_begin_month = begin_month
-      hpxml.header.shading_summer_begin_day = begin_day
-      hpxml.header.shading_summer_end_month = end_month
-      hpxml.header.shading_summer_end_day = end_day
-      hpxml.header.shading_summer_begin_month_isdefaulted = true
-      hpxml.header.shading_summer_begin_day_isdefaulted = true
-      hpxml.header.shading_summer_end_month_isdefaulted = true
-      hpxml.header.shading_summer_end_day_isdefaulted = true
+      if not weather.nil?
+        # Default based on Building America seasons
+        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, sim_calendar_year)
+        if not begin_month.nil? # Check if no summer
+          hpxml.header.shading_summer_begin_month = begin_month
+          hpxml.header.shading_summer_begin_day = begin_day
+          hpxml.header.shading_summer_end_month = end_month
+          hpxml.header.shading_summer_end_day = end_day
+          hpxml.header.shading_summer_begin_month_isdefaulted = true
+          hpxml.header.shading_summer_begin_day_isdefaulted = true
+          hpxml.header.shading_summer_end_month_isdefaulted = true
+          hpxml.header.shading_summer_end_day_isdefaulted = true
+        end
+      end
     end
   end
 

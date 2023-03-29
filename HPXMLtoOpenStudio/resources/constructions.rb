@@ -1633,30 +1633,38 @@ class Constructions
       shading_surface.additionalProperties.setFeature('Azimuth', window_or_skylight.azimuth)
       shading_surface.additionalProperties.setFeature('ParentSurface', parent_surface.name.to_s)
 
-      # Create transmittance schedule for heating/cooling seasons
+      # Determine transmittance values throughout the year
       trans_values = []
-      year = hpxml.header.sim_calendar_year
-      summer_start_day_num = Schedule.get_day_num_from_month_day(year,
-                                                                 hpxml.header.shading_summer_begin_month,
-                                                                 hpxml.header.shading_summer_begin_day)
-      summer_end_day_num = Schedule.get_day_num_from_month_day(year,
-                                                               hpxml.header.shading_summer_end_month,
-                                                               hpxml.header.shading_summer_end_day)
-      for i in 0..(Constants.NumDaysInYear(year) - 1)
-        day_num = i + 1
-        if summer_end_day_num >= summer_start_day_num
-          if (day_num >= summer_start_day_num) && (day_num <= summer_end_day_num)
-            trans_values << [sf_summer] * 24
-            next
+      num_days_in_year = Constants.NumDaysInYear(hpxml.header.sim_calendar_year)
+      if not hpxml.header.shading_summer_begin_month.nil?
+        summer_start_day_num = Schedule.get_day_num_from_month_day(hpxml.header.sim_calendar_year,
+                                                                   hpxml.header.shading_summer_begin_month,
+                                                                   hpxml.header.shading_summer_begin_day)
+        summer_end_day_num = Schedule.get_day_num_from_month_day(hpxml.header.sim_calendar_year,
+                                                                 hpxml.header.shading_summer_end_month,
+                                                                 hpxml.header.shading_summer_end_day)
+        for i in 0..(num_days_in_year - 1)
+          day_num = i + 1
+          if summer_end_day_num >= summer_start_day_num
+            if (day_num >= summer_start_day_num) && (day_num <= summer_end_day_num)
+              trans_values << [sf_summer] * 24
+              next
+            end
+          else
+            if (day_num >= summer_start_day_num) || (day_num <= summer_end_day_num)
+              trans_values << [sf_summer] * 24
+              next
+            end
           end
-        else
-          if (day_num >= summer_start_day_num) || (day_num <= summer_end_day_num)
-            trans_values << [sf_summer] * 24
-            next
-          end
+          # If we got this far, winter
+          trans_values << [sf_winter] * 24
         end
-        trans_values << [sf_winter] * 24
+      else
+        # No summer (year-round winter)
+        trans_values = [[sf_winter] * 24] * num_days_in_year
       end
+
+      # Create transmittance schedule
       if shading_schedules[trans_values].nil?
         sch_name = "trans schedule winter=#{sf_winter} summer=#{sf_summer}"
         if trans_values.flatten.uniq.size == 1

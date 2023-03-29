@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ddae94ee-487f-496e-b825-1548f1b9a27c</version_id>
-  <version_modified>20230329T195532Z</version_modified>
+  <version_id>11c93023-cbb2-4dc9-80b3-4c4e5b90d393</version_id>
+  <version_modified>20230329T212203Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -518,12 +518,6 @@
       <checksum>58D699C5</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CDF8E658</checksum>
-    </file>
-    <file>
       <filename>schedule_files/occupancy-non-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -536,12 +530,6 @@
       <checksum>C9DF5B7C</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6019B3EF</checksum>
-    </file>
-    <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -552,12 +540,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>8346F1FF</checksum>
-    </file>
-    <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4900ED64</checksum>
     </file>
     <file>
       <version>
@@ -581,6 +563,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F6910BE3</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1857E2B7</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>ADA97901</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F6E89CBA</checksum>
     </file>
   </files>
 </measure>
