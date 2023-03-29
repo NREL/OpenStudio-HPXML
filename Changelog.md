@@ -14,7 +14,7 @@ __New Features__
 - LightingGroups for interior, exterior, and garage are no longer required; if not provided, these lighting uses will not be modeled.
 - Allows building air leakage to be specified using CFMnatural or EffectiveLeakageArea.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
-- Window shading seasons now based on calendar dates (e.g., summer: May 1-Sep 30 in northern hemisphere) instead of monthly outdoor temperatures.
+- Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods`) and power outage periods (`PowerOutagePeriods`) in the HPXML file.
 - ReportSimulationOutput measure:
   - Adds annual energy outputs per HVAC and water heating system; allows requesting timeseries output.

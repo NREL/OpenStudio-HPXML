@@ -944,8 +944,9 @@ class HPXML < Object
              :heat_pump_sizing_methodology, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths,
              :occupancy_calculation_type, :extension_properties, :iecc_eri_calculation_version,
-             :zerh_calculation_version, :temperature_capacitance_multiplier,
-             :natvent_days_per_week]
+             :zerh_calculation_version, :temperature_capacitance_multiplier, :natvent_days_per_week,
+             :shading_summer_begin_month, :shading_summer_begin_day,
+             :shading_summer_end_month, :shading_summer_end_day]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -970,6 +971,7 @@ class HPXML < Object
       end
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
+      errors += HPXML::check_dates('Shading Summer Season', @shading_summer_begin_month, @shading_summer_begin_day, @shading_summer_end_month, @shading_summer_end_day)
       errors += @emissions_scenarios.check_for_errors
       errors += @utility_bill_scenarios.check_for_errors
       errors += @vacancy_periods.check_for_errors
@@ -1029,6 +1031,13 @@ class HPXML < Object
         @schedules_filepaths.each do |schedules_filepath|
           XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
         end
+      end
+      if (not @shading_summer_begin_month.nil?) || (not @shading_summer_begin_day.nil?) || (not @shading_summer_end_month.nil?) || (not @shading_summer_end_day.nil?)
+        window_shading_season = XMLHelper.create_elements_as_needed(software_info, ['extension', 'ShadingControl'])
+        XMLHelper.add_element(window_shading_season, 'SummerBeginMonth', @shading_summer_begin_month, :integer, @shading_summer_begin_month_isdefaulted) unless @shading_summer_begin_month.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerBeginDayOfMonth', @shading_summer_begin_day, :integer, @shading_summer_begin_day_isdefaulted) unless @shading_summer_begin_day.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerEndMonth', @shading_summer_end_month, :integer, @shading_summer_end_month_isdefaulted) unless @shading_summer_end_month.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerEndDayOfMonth', @shading_summer_end_day, :integer, @shading_summer_end_day_isdefaulted) unless @shading_summer_end_day.nil?
       end
       if (not @extension_properties.nil?) && (not @extension_properties.empty?)
         properties = XMLHelper.create_elements_as_needed(software_info, ['extension', 'AdditionalProperties'])
@@ -1098,6 +1107,10 @@ class HPXML < Object
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @occupancy_calculation_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancyCalculationType', :string)
       @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
+      @shading_summer_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginMonth', :integer)
+      @shading_summer_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginDayOfMonth', :integer)
+      @shading_summer_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerEndMonth', :integer)
+      @shading_summer_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerEndDayOfMonth', :integer)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @heat_pump_sizing_methodology = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/HeatPumpSizingMethodology', :string)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
