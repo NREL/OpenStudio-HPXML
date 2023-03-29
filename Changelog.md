@@ -27,6 +27,7 @@ __New Features__
 - **Breaking change**: Updates component loads outputs:
   - Replaces `Windows` and `Skylights` with `Windows Conduction`, `Windows Solar`, `Skylights Conduction`, and `Skylights Solar`.
   - Disaggregates `Lighting` from `Internal Gains`.
+- Performance improvement for HPXML files w/ large numbers of `Building` elements.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
@@ -37,6 +38,7 @@ __Bugfixes__
 - Fixes operational calculation when the number of residents is set to zero.
 - Fixes possible utility bill calculation error for a home with PV using a detailed electric utility rate.
 - Fixes defaulted mechanical ventilation flow rate for SFA/MF buildings, with respect to infiltration credit.
+- HPXML files w/ multiple `Building` elements now only show warnings for the single `Building` being simulated.
 
 ## OpenStudio-HPXML v1.5.1
 

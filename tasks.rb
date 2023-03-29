@@ -2449,6 +2449,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args['misc_plug_loads_other_annual_kwh'] = 0.0
     args.delete('misc_plug_loads_other_frac_sensible')
     args.delete('misc_plug_loads_other_frac_latent')
+  elsif ['base-multiple-buildings.xml'].include? hpxml_file
+    args['clothes_dryer_present'] = false
   end
 
   # PV
