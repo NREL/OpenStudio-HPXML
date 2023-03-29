@@ -131,9 +131,9 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
 HPXML Shading Control
 *********************
 
-Shading controls for windows and skylight summer/winter shading coefficients are entered in ``/HPXML/SoftwareInfo/extension/ShadingControl``.
-If not provided, the summer season for shading will default based on the cooling season defined in the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_, which is based on monthly average temperatures.
-The remainder of the year is assumed to be winter.
+Shading controls for window and skylight summer/winter shading coefficients are entered in ``/HPXML/SoftwareInfo/extension/ShadingControl``.
+If not provided, summer will be default based on the cooling season defined in the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_, using monthly average temperatures.
+The remainder of the year is winter.
 
   ====================================  ========  =======  =============  ========  =======  =====================================
   Element                               Type      Units    Constraints    Required  Default  Description
@@ -1076,7 +1076,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrols`.
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] GlassType choices are "clear" or "low-e".
@@ -1183,7 +1183,7 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrols`.
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] GlassType choices are "clear" or "low-e".
          The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          - **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
