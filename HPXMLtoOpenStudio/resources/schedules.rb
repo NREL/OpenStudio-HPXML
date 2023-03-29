@@ -36,6 +36,7 @@ class ScheduleConstant
     else
       schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
       schedule.setName(@sch_name)
+      schedule.defaultDaySchedule.setName(@sch_name + ' default day')
 
       default_day_sch = schedule.defaultDaySchedule
       default_day_sch.clearValues
@@ -131,6 +132,7 @@ class HourlyByMonthSchedule
 
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
+    schedule.defaultDaySchedule.setName(@sch_name + ' default day')
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
@@ -297,6 +299,7 @@ class HourlyByDaySchedule
 
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
+    schedule.defaultDaySchedule.setName(@sch_name + ' default day')
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
@@ -501,6 +504,7 @@ class MonthWeekdayWeekendSchedule
 
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
+    schedule.defaultDaySchedule.setName(@sch_name + ' default day')
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
