@@ -396,9 +396,9 @@ class MonthWeekdayWeekendSchedule
     @year = model.getYearDescription.assumedYear
     @sch_name = sch_name
     @schedule = nil
-    @weekday_hourly_values = validate_values(weekday_hourly_values, 24, 'weekday')
-    @weekend_hourly_values = validate_values(weekend_hourly_values, 24, 'weekend')
-    @monthly_values = validate_values(monthly_values, 12, 'monthly')
+    @weekday_hourly_values = Schedule.validate_values(weekday_hourly_values, 24, 'weekday')
+    @weekend_hourly_values = Schedule.validate_values(weekend_hourly_values, 24, 'weekend')
+    @monthly_values = Schedule.validate_values(monthly_values, 12, 'monthly')
     @schedule_type_limits_name = schedule_type_limits_name
     @begin_month = begin_month
     @begin_day = begin_day
@@ -438,44 +438,6 @@ class MonthWeekdayWeekendSchedule
   end
 
   private
-
-  def validate_values(values, num_values, sch_name)
-    err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
-    if values.is_a?(Array)
-      if values.length != num_values
-        fail err_msg
-      end
-
-      values.each do |val|
-        if not valid_float?(val)
-          fail err_msg
-        end
-      end
-      floats = values.map { |i| i.to_f }
-    elsif values.is_a?(String)
-      begin
-        vals = values.split(',')
-        vals.each do |val|
-          if not valid_float?(val)
-            fail err_msg
-          end
-        end
-        floats = vals.map { |i| i.to_f }
-        if floats.length != num_values
-          fail err_msg
-        end
-      rescue
-        fail err_msg
-      end
-    else
-      fail err_msg
-    end
-    return floats
-  end
-
-  def valid_float?(str)
-    !!Float(str) rescue false
-  end
 
   def normalize_sum_to_one(values)
     sum = values.reduce(:+).to_f
@@ -1278,15 +1240,19 @@ class Schedule
   end
 
   def self.get_begin_and_end_dates_from_monthly_array(months, year)
-    if months[0] == 1 && months[11] == 1 # Wrap around year
+    num_days_in_month = Constants.NumDaysInMonths(year)
+
+    if months.uniq.size == 1 && months[0] == 1 # Year-round
+      return 1, 1, 12, num_days_in_month[11]
+    elsif months.uniq.size == 1 && months[0] == 0 # Never
+      return
+    elsif months[0] == 1 && months[11] == 1 # Wrap around year
       begin_month = 12 - months.reverse.index(0) + 1
       end_month = months.index(0)
     else
       begin_month = months.index(1) + 1
       end_month = 12 - months.reverse.index(1)
     end
-
-    num_days_in_month = Constants.NumDaysInMonths(year)
 
     begin_day = 1
     end_day = num_days_in_month[end_month - 1]
@@ -1312,14 +1278,52 @@ class Schedule
       next if schedule_affected['Schedule Name'] != col_name
 
       affected = schedule_affected[off_type].downcase.to_s
-      if affected == 'true'
+      if affected == 'yes'
         return true
-      elsif affected == 'false'
+      elsif affected == 'no'
         return false
       end
     end
 
     fail "Could not find #{col_name} in schedules_affected.csv"
+  end
+
+  def self.validate_values(values, num_values, sch_name)
+    err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
+    if values.is_a?(Array)
+      if values.length != num_values
+        fail err_msg
+      end
+
+      values.each do |val|
+        if not valid_float?(val)
+          fail err_msg
+        end
+      end
+      floats = values.map { |i| i.to_f }
+    elsif values.is_a?(String)
+      begin
+        vals = values.split(',')
+        vals.each do |val|
+          if not valid_float?(val)
+            fail err_msg
+          end
+        end
+        floats = vals.map { |i| i.to_f }
+        if floats.length != num_values
+          fail err_msg
+        end
+      rescue
+        fail err_msg
+      end
+    else
+      fail err_msg
+    end
+    return floats
+  end
+
+  def self.valid_float?(str)
+    !!Float(str) rescue false
   end
 end
 
@@ -1362,6 +1366,13 @@ class SchedulesFile
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
+  ColumnHVAC = 'hvac'
+  ColumnWaterHeater = 'water_heater'
+  ColumnDehumidifier = 'dehumidifier'
+  ColumnKitchenFan = 'kitchen_fan'
+  ColumnBathFan = 'bath_fan'
+  ColumnHouseFan = 'house_fan'
+  ColumnWholeHouseFan = 'whole_house_fan'
 
   def initialize(runner: nil,
                  model: nil,
@@ -1666,18 +1677,33 @@ class SchedulesFile
       @tmp_schedules[off_name].each_with_index do |_ts, i|
         @tmp_schedules.keys.each do |col_name|
           next if col_name == off_name
+          next if SchedulesFile.OperatingModeColumnNames.include?(col_name)
+          next if SchedulesFile.BatteryColumnNames.include?(col_name)
 
-          # Temperature of tank < 2C indicates of possibility of freeze.
-          @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && col_name == ColumnWaterHeaterSetpoint && @tmp_schedules[off_name][i] == 1.0
+          schedules_affected_col_name = col_name
+          if [SchedulesFile::ColumnHotWaterDishwasher].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnDishwasher
+          elsif [SchedulesFile::ColumnHotWaterClothesWasher].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnClothesWasher
+          elsif [SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnHVAC
+          elsif [SchedulesFile::ColumnWaterHeaterSetpoint].include?(col_name)
+            schedules_affected_col_name = SchedulesFile::ColumnWaterHeater
+          end
 
           # Skip those unaffected
           next if off_name == ColumnVacancy && col_name == ColumnOutage
-          next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(col_name, 'Affected By Vacancy', schedules_affected)
+          next if off_name == ColumnVacancy && !Schedule.affected_by_off_period(schedules_affected_col_name, 'Affected By Vacancy', schedules_affected)
 
           next if off_name == ColumnOutage && col_name == ColumnVacancy
-          next if off_name == ColumnOutage && !Schedule.affected_by_off_period(col_name, 'Affected By Power Outage', schedules_affected)
+          next if off_name == ColumnOutage && !Schedule.affected_by_off_period(schedules_affected_col_name, 'Affected By Power Outage', schedules_affected)
 
-          @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
+          if col_name == ColumnWaterHeaterSetpoint
+            # Temperature of tank < 2C indicates of possibility of freeze.
+            @tmp_schedules[col_name][i] = UnitConversions.convert(2.0, 'C', 'F') if off_name == ColumnOutage && @tmp_schedules[off_name][i] == 1.0
+          else
+            @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[off_name][i])
+          end
         end
       end
     end

@@ -794,25 +794,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_winter', false)
     arg.setDisplayName('Windows: Winter Interior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Interior shading multiplier for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Interior shading coefficient for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_summer', false)
     arg.setDisplayName('Windows: Summer Interior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Interior shading multiplier for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Interior shading coefficient for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_winter', false)
     arg.setDisplayName('Windows: Winter Exterior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Exterior shading multiplier for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Exterior shading coefficient for the winter season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_summer', false)
     arg.setDisplayName('Windows: Summer Exterior Shading')
     arg.setUnits('Frac')
-    arg.setDescription('Exterior shading multiplier for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Exterior shading coefficient for the summer season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default is used.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('window_shading_summer_season', false)
+    arg.setDisplayName('Windows: Shading Summer Season')
+    arg.setDescription('Enter a date like "May 1 - Sep 30". Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default is used.')
     args << arg
 
     storm_window_type_choices = OpenStudio::StringVector.new
@@ -992,6 +997,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Air Leakage: Value')
     arg.setDescription("Air exchange rate value. For '#{HPXML::UnitsELA}', provide value in sq. in.")
     arg.setDefaultValue(3)
+    args << arg
+
+    air_leakage_mf_value_type_choices = OpenStudio::StringVector.new
+    air_leakage_mf_value_type_choices << HPXML::InfiltrationTestCompartmentalization
+    air_leakage_mf_value_type_choices << HPXML::InfiltrationTestGuarded
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_multifamily_value_type', air_leakage_mf_value_type_choices, false)
+    arg.setDisplayName('Air Leakage: Multifamily Value Type')
+    arg.setDescription("Type of air leakage value for a SFA/MF dwelling unit. If '#{HPXML::InfiltrationTestCompartmentalization}', represents the total infiltration to the unit, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTestGuarded}', represents the infiltration to the unit from outside only. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
     heating_system_type_choices = OpenStudio::StringVector.new
@@ -3488,6 +3502,8 @@ class HPXMLFile
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
+    hpxml.header.building_id = 'MyBuilding'
+    hpxml.header.event_type = 'proposed workscope'
 
     if args[:occupancy_calculation_type].is_initialized
       hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
@@ -3552,8 +3568,13 @@ class HPXMLFile
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier].get
     end
 
-    hpxml.header.building_id = 'MyBuilding'
-    hpxml.header.event_type = 'proposed workscope'
+    if args[:window_shading_summer_season].is_initialized
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:window_shading_summer_season].get)
+      hpxml.header.shading_summer_begin_month = begin_month
+      hpxml.header.shading_summer_begin_day = begin_day
+      hpxml.header.shading_summer_end_month = end_month
+      hpxml.header.shading_summer_end_day = end_day
+    end
 
     if args[:site_zip_code].is_initialized
       hpxml.header.zip_code = args[:site_zip_code].get
@@ -3942,6 +3963,11 @@ class HPXMLFile
         house_pressure = args[:air_leakage_house_pressure]
       end
     end
+    if args[:air_leakage_multifamily_value_type].is_initialized
+      if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+        air_leakage_multifamily_value_type = args[:air_leakage_multifamily_value_type]
+      end
+    end
     infiltration_volume = hpxml.building_construction.conditioned_building_volume
 
     hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
@@ -3949,7 +3975,8 @@ class HPXMLFile
                                             unit_of_measure: unit_of_measure,
                                             air_leakage: air_leakage,
                                             effective_leakage_area: effective_leakage_area,
-                                            infiltration_volume: infiltration_volume)
+                                            infiltration_volume: infiltration_volume,
+                                            type_of_test: air_leakage_multifamily_value_type)
   end
 
   def self.set_roofs(hpxml, args, sorted_surfaces)
@@ -5616,61 +5643,70 @@ class HPXMLFile
   end
 
   def self.set_lighting(hpxml, args)
-    return unless args[:lighting_present] || args[:ceiling_fan_present] # If ceiling fans present but not lighting present, need to continue and use lighting multipliers = 0 instead
-
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
-                              lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
-                              lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationInterior,
-                              fraction_of_units_in_location: args[:lighting_interior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationExterior,
-                              fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
-                              location: HPXML::LocationGarage,
-                              fraction_of_units_in_location: args[:lighting_garage_fraction_led],
-                              lighting_type: HPXML::LightingTypeLED)
-
     if args[:lighting_present]
+      has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+
+      # Interior
       if args[:lighting_interior_usage_multiplier].is_initialized
-        hpxml.lighting.interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+        interior_usage_multiplier = args[:lighting_interior_usage_multiplier].get
+      end
+      if interior_usage_multiplier.nil? || interior_usage_multiplier.to_f > 0
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
+                                  lighting_type: HPXML::LightingTypeCFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
+                                  lighting_type: HPXML::LightingTypeLFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationInterior,
+                                  fraction_of_units_in_location: args[:lighting_interior_fraction_led],
+                                  lighting_type: HPXML::LightingTypeLED)
+        hpxml.lighting.interior_usage_multiplier = interior_usage_multiplier
       end
 
+      # Exterior
       if args[:lighting_exterior_usage_multiplier].is_initialized
-        hpxml.lighting.exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+        exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier].get
+      end
+      if exterior_usage_multiplier.nil? || exterior_usage_multiplier.to_f > 0
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
+                                  lighting_type: HPXML::LightingTypeCFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
+                                  lighting_type: HPXML::LightingTypeLFL)
+        hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                  location: HPXML::LocationExterior,
+                                  fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
+                                  lighting_type: HPXML::LightingTypeLED)
+        hpxml.lighting.exterior_usage_multiplier = exterior_usage_multiplier
       end
 
-      if args[:lighting_garage_usage_multiplier].is_initialized
-        hpxml.lighting.garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
+      # Garage
+      if has_garage
+        if args[:lighting_garage_usage_multiplier].is_initialized
+          garage_usage_multiplier = args[:lighting_garage_usage_multiplier].get
+        end
+        if garage_usage_multiplier.nil? || garage_usage_multiplier.to_f > 0
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
+                                    lighting_type: HPXML::LightingTypeCFL)
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
+                                    lighting_type: HPXML::LightingTypeLFL)
+          hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
+                                    location: HPXML::LocationGarage,
+                                    fraction_of_units_in_location: args[:lighting_garage_fraction_led],
+                                    lighting_type: HPXML::LightingTypeLED)
+          hpxml.lighting.garage_usage_multiplier = garage_usage_multiplier
+        end
       end
-    elsif args[:ceiling_fan_present]
-      hpxml.lighting.interior_usage_multiplier = 0.0
-      hpxml.lighting.exterior_usage_multiplier = 0.0
-      hpxml.lighting.garage_usage_multiplier = 0.0
     end
 
     return unless args[:holiday_lighting_present]

@@ -13,8 +13,6 @@ class HPXMLDefaults
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml.air_infiltration_measurements)
-    infil_volume = infil_measurement.infiltration_volume
-    infil_height = infil_measurement.infiltration_height
 
     # Check for presence of fuels once
     has_fuel = {}
@@ -23,15 +21,15 @@ class HPXMLDefaults
       has_fuel[fuel] = hpxml.has_fuel(fuel, hpxml_doc)
     end
 
-    apply_header(hpxml, epw_file)
+    apply_header(hpxml, epw_file, weather)
     apply_emissions_scenarios(hpxml, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml, has_fuel)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
-    apply_building_construction(hpxml, cfa, nbeds, infil_volume)
+    apply_building_construction(hpxml, cfa, nbeds, infil_measurement)
     apply_climate_and_risk_zones(hpxml, epw_file)
-    apply_infiltration(hpxml, infil_volume, infil_height, infil_measurement)
+    apply_infiltration(hpxml, infil_measurement)
     apply_attics(hpxml)
     apply_foundations(hpxml)
     apply_roofs(hpxml)
@@ -106,7 +104,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file)
+  def self.apply_header(hpxml, epw_file, weather)
     if hpxml.header.occupancy_calculation_type.nil?
       hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeAsset
       hpxml.header.occupancy_calculation_type_isdefaulted = true
@@ -229,6 +227,24 @@ class HPXMLDefaults
       if power_outage_period.natvent_availability.nil?
         power_outage_period.natvent_availability = HPXML::ScheduleRegular
         power_outage_period.natvent_availability_isdefaulted = true
+      end
+    end
+
+    if hpxml.header.shading_summer_begin_month.nil? || hpxml.header.shading_summer_begin_day.nil? || hpxml.header.shading_summer_end_month.nil? || hpxml.header.shading_summer_end_day.nil?
+      if not weather.nil?
+        # Default based on Building America seasons
+        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, sim_calendar_year)
+        if not begin_month.nil? # Check if no summer
+          hpxml.header.shading_summer_begin_month = begin_month
+          hpxml.header.shading_summer_begin_day = begin_day
+          hpxml.header.shading_summer_end_month = end_month
+          hpxml.header.shading_summer_end_day = end_day
+          hpxml.header.shading_summer_begin_month_isdefaulted = true
+          hpxml.header.shading_summer_begin_day_isdefaulted = true
+          hpxml.header.shading_summer_end_month_isdefaulted = true
+          hpxml.header.shading_summer_end_day_isdefaulted = true
+        end
       end
     end
   end
@@ -472,11 +488,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_construction(hpxml, cfa, nbeds, infil_volume)
+  def self.apply_building_construction(hpxml, cfa, nbeds, infil_measurement)
     cond_crawl_volume = hpxml.inferred_conditioned_crawlspace_volume()
     if hpxml.building_construction.conditioned_building_volume.nil? && hpxml.building_construction.average_ceiling_height.nil?
-      if not infil_volume.nil?
-        hpxml.building_construction.average_ceiling_height = [infil_volume / cfa, 8.0].min
+      if not infil_measurement.infiltration_volume.nil?
+        hpxml.building_construction.average_ceiling_height = [infil_measurement.infiltration_volume / cfa, 8.0].min
       else
         hpxml.building_construction.average_ceiling_height = 8.0
       end
@@ -538,16 +554,22 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_infiltration(hpxml, infil_volume, infil_height, infil_measurement)
-    if infil_volume.nil?
-      infil_volume = hpxml.building_construction.conditioned_building_volume
-      infil_measurement.infiltration_volume = infil_volume
+  def self.apply_infiltration(hpxml, infil_measurement)
+    if infil_measurement.infiltration_volume.nil?
+      infil_measurement.infiltration_volume = hpxml.building_construction.conditioned_building_volume
       infil_measurement.infiltration_volume_isdefaulted = true
     end
-    if infil_height.nil?
-      infil_height = hpxml.inferred_infiltration_height(infil_volume)
-      infil_measurement.infiltration_height = infil_height
+    if infil_measurement.infiltration_height.nil?
+      infil_measurement.infiltration_height = hpxml.inferred_infiltration_height(infil_measurement.infiltration_volume)
       infil_measurement.infiltration_height_isdefaulted = true
+    end
+    if infil_measurement.a_ext.nil?
+      if (infil_measurement.type_of_test == HPXML::InfiltrationTestCompartmentalization) &&
+         [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml.building_construction.residential_facility_type)
+        tot_cb_area, ext_cb_area = hpxml.compartmentalization_boundary_areas()
+        infil_measurement.a_ext = (ext_cb_area / tot_cb_area).round(5)
+        infil_measurement.a_ext_isdefaulted = true
+      end
     end
   end
 
