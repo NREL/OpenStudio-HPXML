@@ -1321,7 +1321,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
       elsif ['schedule-file-max-capacity-with-single-speed-system'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
-        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-speed-ratios-constant.csv')
+        hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-speed-ratios-varied.csv')
       else
         fail "Unhandled case: #{warning_case}."
       end
