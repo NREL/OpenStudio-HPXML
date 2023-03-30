@@ -883,9 +883,8 @@ class HVAC
     # to prevent unmet hours being reported. This is a dangerous idea. These setpoints are used
     # by natural ventilation, Kiva initialization, and probably other things.
 
-    num_days = Constants.NumDaysInYear(year)
     warning = false
-    for i in 0..(num_days - 1)
+    for i in 0..(Constants.NumDaysInYear(year) - 1)
       if (heating_days[i] == cooling_days[i]) # both (or neither) heating/cooling seasons
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
         htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
