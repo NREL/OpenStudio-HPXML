@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-speed-ratios-constant.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-speed-ratios-varied.csv</SchedulesFilePath>
       <AdditionalProperties>
         <ParentHPXMLFile>base-hvac-air-to-air-heat-pump-var-speed.xml</ParentHPXMLFile>
       </AdditionalProperties>

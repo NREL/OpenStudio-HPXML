@@ -1620,7 +1620,7 @@ class HVAC
     program.addLine('Else')
     program.addLine('  Set current_speed = 0')
     program.addLine('EndIf')
-    program.addLine('If current_speed > target_speed')
+    program.addLine('If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
     program.addLine("  Set #{coil_speed_act.name} = target_speed")
     program.addLine('Else')
     program.addLine("  Set #{coil_speed_act.name} = NULL")
