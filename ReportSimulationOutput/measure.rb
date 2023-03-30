@@ -667,7 +667,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Total loads
-    @loads.each do |load_type, load|
+    @loads.each do |_load_type, load|
       if not load.ems_variable.nil?
         # Obtain from EMS output variable
         load.annual_output = get_report_variable_data_annual(['EMS'], ["#{load.ems_variable}_annual_outvar"])
@@ -681,7 +681,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           vars = load.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
           load.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: load.is_negative)
-          if include_ts_total_loads && (load_type == LT::HotWaterDelivered)
+          if include_ts_total_loads
             load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, is_negative: load.is_negative, ems_shift: true)
           end
         end
