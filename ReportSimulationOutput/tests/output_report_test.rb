@@ -1234,7 +1234,9 @@ class ReportSimulationOutputTest < MiniTest::Test
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-misc-emissions.xml'),
                   'skip_validation' => true,
                   'timeseries_frequency' => 'timestep',
-                  'include_timeseries_emissions' => true }
+                  'include_timeseries_emissions' => true,
+                  'include_timeseries_emission_fuels' => true,
+                  'include_timeseries_emission_end_uses' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
