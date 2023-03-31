@@ -79,6 +79,11 @@ class WeatherProcess
       rescue
         fail "Cannot retrieve relativeHumidity from the EPW for hour #{rownum + 1}."
       end
+      begin
+        rowdict['ws'] = epwdata.windSpeed.get
+      rescue
+        fail "Cannot retrieve windSpeed from the EPW for hour #{rownum + 1}."
+      end
       monthdbs << [] if rowdict['day'] == 1
       monthdbs[rowdict['month'] - 1] << rowdict['db']
 
