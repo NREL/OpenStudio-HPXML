@@ -124,14 +124,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       return false unless hpxml.errors.empty?
 
-      epw_path, cache_path = process_weather(hpxml, runner, hpxml_path)
+      epw_path, weather = process_weather(hpxml, hpxml_path)
 
       if debug
         epw_output_path = File.join(output_dir, 'in.epw')
         FileUtils.cp(epw_path, epw_output_path)
       end
 
-      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir,
+      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
                      add_component_loads, building_id, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
@@ -141,29 +141,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def process_weather(hpxml, runner, hpxml_path)
+  def process_weather(hpxml, hpxml_path)
     epw_path = Location.get_epw_path(hpxml, hpxml_path)
-
-    cache_path = epw_path.gsub('.epw', '-cache.csv')
-    if not File.exist?(cache_path)
-      # Process weather file to create cache .csv
-      begin
-        File.open(cache_path, 'wb') do |file|
-          runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-          weather = WeatherProcess.new(epw_path: epw_path)
-          weather.dump_to_csv(file)
-        end
-      rescue SystemCallError
-        runner.registerWarning("#{cache_path} could not be written, skipping.")
-      end
-    end
-
-    return epw_path, cache_path
+    weather = WeatherProcess.new(epw_path: epw_path)
+    return epw_path, weather
   end
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir,
+  def self.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
                   add_component_loads, building_id, debug)
     @hpxml = hpxml
     @debug = debug
@@ -192,7 +178,7 @@ class OSModel
     # Init
 
     check_file_references(hpxml_path)
-    weather, epw_file = Location.apply_weather_file(model, epw_path, cache_path)
+    epw_file = Location.apply_weather_file(model, epw_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
