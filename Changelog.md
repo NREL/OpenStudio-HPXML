@@ -30,7 +30,8 @@ __New Features__
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows modeling one or more occupant vacancy periods (`VacancyPeriods`) and power outage periods (`PowerOutagePeriods`) in the HPXML file.
-- Performance improvement for HPXML files w/ large numbers of `Building` elements.
+- Performance improvements for HPXML files w/ large numbers of `Building` elements.
+- Performance improvements for weather processing; weather cache files (\*foo-cache.csv) are no longer used.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
