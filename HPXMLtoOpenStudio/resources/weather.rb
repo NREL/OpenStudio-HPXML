@@ -107,7 +107,7 @@ class WeatherProcess
     @data.AnnualAvgDrybulb = UnitConversions.convert(rowdata.map { |x| x['db'] }.sum(0.0) / rowdata.length, 'C', 'F')
     @data.MonthlyAvgDrybulbs = []
     for i in 1..12
-      @data.MonthlyAvgDrybulbs << monthdbs[i - 1].sum / monthdbs[i - 1].length
+      @data.MonthlyAvgDrybulbs << UnitConversions.convert(monthdbs[i - 1].sum / monthdbs[i - 1].length, 'C', 'F')
     end
 
     calc_heat_cool_degree_days(dailydbs)
