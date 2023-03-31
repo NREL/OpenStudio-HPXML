@@ -216,6 +216,7 @@ class HPXML < Object
   LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
+  LocationMobileHomeBelly = 'mobile home belly'
   LocationExterior = 'exterior'
   LocationExteriorWall = 'exterior wall'
   LocationGarage = 'garage'
