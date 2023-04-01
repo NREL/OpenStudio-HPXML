@@ -17,6 +17,7 @@ __New Features__
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
+  - ReportSimulationOutput measure: Allows disabling individual annual output sections.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.

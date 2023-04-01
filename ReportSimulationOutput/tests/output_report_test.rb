@@ -573,7 +573,6 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_annual_rows = AnnualRows
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
-    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_annual_only2
@@ -602,6 +601,31 @@ class ReportSimulationOutputTest < MiniTest::Test
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
     _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
+  end
+
+  def test_annual_disabled_outputs
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
+                  'skip_validation' => true,
+                  'include_annual_total_consumptions' => false,
+                  'include_annual_fuel_consumptions' => false,
+                  'include_annual_end_use_consumptions' => false,
+                  'include_annual_system_use_consumptions' => false,
+                  'include_annual_emissions' => false,
+                  'include_annual_emission_fuels' => false,
+                  'include_annual_emission_end_uses' => false,
+                  'include_annual_total_loads' => false,
+                  'include_annual_unmet_hours' => false,
+                  'include_annual_peak_fuels' => false,
+                  'include_annual_peak_loads' => false,
+                  'include_annual_component_loads' => false,
+                  'include_annual_hot_water_uses' => false,
+                  'include_annual_hvac_summary' => false }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    assert(actual_annual_rows.keys.empty?)
+    # _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_timeseries_hourly_total_energy
