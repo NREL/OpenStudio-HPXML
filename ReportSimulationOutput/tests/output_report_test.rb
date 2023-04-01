@@ -573,6 +573,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_annual_rows = AnnualRows
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
+    _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_annual_only2
@@ -625,7 +626,6 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert(!File.exist?(timeseries_csv))
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
     assert(actual_annual_rows.keys.empty?)
-    # _check_for_runner_registered_values(File.join(File.dirname(annual_csv), 'results.json'), actual_annual_rows)
   end
 
   def test_timeseries_hourly_total_energy
