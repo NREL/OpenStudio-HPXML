@@ -10,6 +10,7 @@ __New Features__
   - **Breaking change**: Replaces `Component Load: Windows` with `Component Load: Windows Conduction` and `Component Load: Windows Solar`.
   - **Breaking change**: Replaces `Component Load: Skylights` with `Component Load: Skylights Conduction` and `Component Load: Skylights Solar`.
   - **Breaking change**: Adds `Component Load: Lighting` (disaggregated from `Component Load: Internal Gains`).
+  - **Breaking change**: Adds "net" values for emissions; "total" values now exclude generation (e.g., PV).
   - Adds `Load: Heating: Heat Pump Backup` (heating load delivered by heat pump backup systems).
   - Adds `System Use` outputs (energy use for each HVAC and water heating system); allows requesting timeseries output.
   - All annual load outputs are now provided as timeseries outputs; previously only "Delivered" loads were available.

@@ -1121,25 +1121,38 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         # Roll up end use emissions to fuel emissions
         @fuels.each do |fuel_type, _fuel|
-          @emissions[key].annual_output_by_fuel[fuel_type] = 0.0
-          @emissions[key].annual_output_by_end_use.keys.each do |eu_key|
-            next unless eu_key[0] == fuel_type
-            next if @emissions[key].annual_output_by_end_use[eu_key] == 0
+          if fuel_type == FT::Elec
+            emission_types = [TE::Total, TE::Net]
+          else
+            emission_types = [TE::Total]
+          end
+          emission_types.each do |emission_type|
+            fuel_key = [fuel_type, emission_type]
+            @emissions[key].annual_output_by_fuel[fuel_key] = 0.0
+            @emissions[key].annual_output_by_end_use.keys.each do |eu_key|
+              next unless eu_key[0] == fuel_type
+              next if emission_type == TE::Total && @end_uses[eu_key].is_negative # Generation not included in total
+              next if @emissions[key].annual_output_by_end_use[eu_key] == 0
 
-            @emissions[key].annual_output_by_fuel[fuel_type] += @emissions[key].annual_output_by_end_use[eu_key]
+              @emissions[key].annual_output_by_fuel[fuel_key] += @emissions[key].annual_output_by_end_use[eu_key]
 
-            next unless args[:include_timeseries_emissions] || args[:include_timeseries_emission_end_uses] || args[:include_timeseries_emission_fuels]
+              next unless args[:include_timeseries_emissions] || args[:include_timeseries_emission_fuels]
 
-            @emissions[key].timeseries_output_by_fuel[fuel_type] = [0.0] * @emissions[key].timeseries_output_by_end_use[eu_key].size if @emissions[key].timeseries_output_by_fuel[fuel_type].nil?
-            @emissions[key].timeseries_output_by_fuel[fuel_type] = @emissions[key].timeseries_output_by_fuel[fuel_type].zip(@emissions[key].timeseries_output_by_end_use[eu_key]).map { |x, y| x + y }
+              @emissions[key].timeseries_output_by_fuel[fuel_key] = [0.0] * @emissions[key].timeseries_output_by_end_use[eu_key].size if @emissions[key].timeseries_output_by_fuel[fuel_key].nil?
+              @emissions[key].timeseries_output_by_fuel[fuel_key] = @emissions[key].timeseries_output_by_fuel[fuel_key].zip(@emissions[key].timeseries_output_by_end_use[eu_key]).map { |x, y| x + y }
+            end
           end
         end
 
-        # Sum individual fuel results for total
-        @emissions[key].annual_output = @emissions[key].annual_output_by_fuel.values.sum()
-        next unless not @emissions[key].timeseries_output_by_fuel.empty?
-
-        @emissions[key].timeseries_output = @emissions[key].timeseries_output_by_fuel.values.transpose.map(&:sum)
+        # Sum individual fuel results for total/net
+        total_keys = @emissions[key].annual_output_by_fuel.keys.select { |k| k[0] != FT::Elec || (k[0] == FT::Elec && k[1] == TE::Total) }
+        net_keys = @emissions[key].annual_output_by_fuel.keys.select { |k| k[0] != FT::Elec || (k[0] == FT::Elec && k[1] == TE::Net) }
+        @emissions[key].annual_output = @emissions[key].annual_output_by_fuel.select { |k, _v| total_keys.include? k }.values.sum()
+        @emissions[key].net_annual_output = @emissions[key].annual_output_by_fuel.select { |k, _v| net_keys.include? k }.values.sum()
+        if args[:include_timeseries_emissions]
+          @emissions[key].timeseries_output = @emissions[key].timeseries_output_by_fuel.select { |k, _v| total_keys.include? k }.values.transpose.map(&:sum)
+          @emissions[key].net_timeseries_output = @emissions[key].timeseries_output_by_fuel.select { |k, _v| net_keys.include? k }.values.transpose.map(&:sum)
+        end
       end
     end
 
@@ -1279,27 +1292,40 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out << [line_break]
     end
 
-    # Emissions
-    if args[:include_annual_emissions] || args[:include_annual_emission_fuels] || args[:include_annual_emission_end_uses]
+    # Total Emissions
+    if args[:include_annual_emissions]
       if not @emissions.empty?
         @emissions.each do |_scenario_key, emission|
-          # Emissions total
-          if args[:include_annual_emissions]
-            results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(n_digits - 1)]
+          results_out << ["#{emission.name}: Total (#{emission.annual_units})", emission.annual_output.to_f.round(n_digits - 1)]
+          results_out << ["#{emission.name}: Net (#{emission.annual_units})", emission.net_annual_output.to_f.round(n_digits - 1)]
+        end
+        results_out << [line_break]
+      end
+    end
+
+    # Fuel Emissions
+    if args[:include_annual_emission_fuels]
+      if not @emissions.empty?
+        @emissions.each do |_scenario_key, emission|
+          emission.annual_output_by_fuel.keys.each do |fuel_key|
+            fuel, emission_type = fuel_key
+            results_out << ["#{emission.name}: #{fuel}: #{emission_type} (#{emission.annual_units})", emission.annual_output_by_fuel[fuel_key].to_f.round(n_digits - 1)]
           end
+        end
+        results_out << [line_break]
+      end
+    end
+
+    # End Use Emissions
+    if args[:include_annual_emission_end_uses]
+      if not @emissions.empty?
+        @emissions.each do |_scenario_key, emission|
           @fuels.keys.each do |fuel|
-            # Emissions by fuel
-            if args[:include_annual_emission_fuels]
-              results_out << ["#{emission.name}: #{fuel}: Total (#{emission.annual_units})", emission.annual_output_by_fuel[fuel].to_f.round(n_digits - 1)]
-            end
             @end_uses.keys.each do |key|
               fuel_type, end_use_type = key
               next unless fuel_type == fuel
 
-              # Emissions by end use
-              if args[:include_annual_emission_end_uses]
-                results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(n_digits - 1)]
-              end
+              results_out << ["#{emission.name}: #{fuel_type}: #{end_use_type} (#{emission.annual_units})", emission.annual_output_by_end_use[key].to_f.round(n_digits - 1)]
             end
           end
         end
@@ -1537,6 +1563,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if emission.timeseries_output.sum(0.0) == 0
 
         emissions_data << ["#{emission.name}: Total", emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(n_digits + 2) }
+        emissions_data << ["#{emission.name}: Net", emission.timeseries_units] + emission.net_timeseries_output.map { |v| v.round(n_digits + 2) }
       end
     else
       emissions_data = []
@@ -1544,10 +1571,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_emission_fuels]
       emission_fuel_data = []
       @emissions.values.each do |emission|
-        emission.timeseries_output_by_fuel.each do |fuel, timeseries_output|
+        emission.timeseries_output_by_fuel.each do |fuel_key, timeseries_output|
+          fuel, emission_type = fuel_key
           next if timeseries_output.sum(0.0) == 0
 
-          emission_fuel_data << ["#{emission.name}: #{fuel}: Total", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
+          emission_fuel_data << ["#{emission.name}: #{fuel}: #{emission_type}", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
         end
       end
     else
@@ -1959,8 +1987,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @timeseries_output_by_fuel = {}
       @annual_output_by_fuel = {}
       @annual_output_by_end_use = {}
+      @net_annual_output = 0.0
+      @net_timeseries_output = []
     end
-    attr_accessor(:annual_output_by_fuel, :annual_output_by_end_use, :timeseries_output_by_fuel, :timeseries_output_by_end_use)
+    attr_accessor(:annual_output_by_fuel, :annual_output_by_end_use, :timeseries_output_by_fuel, :timeseries_output_by_end_use,
+                  :net_annual_output, :net_timeseries_output)
   end
 
   class HotWater < BaseOutput
