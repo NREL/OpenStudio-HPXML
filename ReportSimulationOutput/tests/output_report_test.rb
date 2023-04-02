@@ -400,7 +400,15 @@ class ReportSimulationOutputTest < MiniTest::Test
     cols = []
     emission_scenarios.each do |scenario|
       cols += ["Emissions: #{scenario}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{TE::Net} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net} (lb)",
+               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Oil}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Propane}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodCord}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::WoodPellets}: #{TE::Total} (lb)",
+               "Emissions: #{scenario}: #{FT::Coal}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingFanPump} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackup} (lb)",
@@ -436,7 +444,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Generator} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotWater} (lb)",
@@ -449,7 +456,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Fireplace} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::MechVentPreheat} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HotWater} (lb)",
@@ -460,7 +466,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Fireplace} (lb)",
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::MechVentPreheat} (lb)",
                "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HotWater} (lb)",
@@ -471,7 +476,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Fireplace} (lb)",
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::MechVentPreheat} (lb)",
                "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HotWater} (lb)",
@@ -482,7 +486,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Fireplace} (lb)",
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::MechVentPreheat} (lb)",
                "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HotWater} (lb)",
@@ -493,7 +496,6 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Fireplace} (lb)",
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::MechVentPreheat} (lb)",
                "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{TE::Total} (lb)",
                "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HotWater} (lb)",
@@ -511,7 +513,8 @@ class ReportSimulationOutputTest < MiniTest::Test
   def emissions_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: #{TE::Total}"]
+      cols += ["Emissions: #{scenario}: #{TE::Total}",
+               "Emissions: #{scenario}: #{TE::Net}"]
     end
     return cols
   end
@@ -520,6 +523,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     cols = []
     emission_scenarios.each do |scenario|
       cols += ["Emissions: #{scenario}: #{FT::Elec}: #{TE::Total}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net}",
                "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total}"]
     end
     return cols
@@ -546,6 +550,13 @@ class ReportSimulationOutputTest < MiniTest::Test
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating}"]
     end
     return cols
+  end
+
+  def pv_battery_timeseries_cols
+    return ["End Use: #{FT::Elec}: #{EUT::PV}",
+            "End Use: #{FT::Elec}: #{EUT::Battery}",
+            "Energy Use: #{TE::Net}",
+            "Fuel Use: #{FT::Elec}: #{TE::Net}"]
   end
 
   def test_annual_only
@@ -1149,10 +1160,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ["End Use: #{FT::Elec}: #{EUT::PV}",
-                                "End Use: #{FT::Elec}: #{EUT::Battery}",
-                                "Energy Use: #{TE::Net}",
-                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
+                               pv_battery_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1189,10 +1197,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ["End Use: #{FT::Elec}: #{EUT::PV}",
-                                "End Use: #{FT::Elec}: #{EUT::Battery}",
-                                "Energy Use: #{TE::Net}",
-                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
+                               pv_battery_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
@@ -1229,10 +1234,7 @@ class ReportSimulationOutputTest < MiniTest::Test
                                emissions_timeseries_cols +
                                emission_fuels_timeseries_cols +
                                emission_end_uses_timeseries_cols +
-                               ["End Use: #{FT::Elec}: #{EUT::PV}",
-                                "End Use: #{FT::Elec}: #{EUT::Battery}",
-                                "Energy Use: #{TE::Net}",
-                                "Fuel Use: #{FT::Elec}: #{TE::Net}"]
+                               pv_battery_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
