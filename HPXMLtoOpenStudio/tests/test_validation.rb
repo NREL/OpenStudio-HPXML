@@ -1016,7 +1016,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.header.shading_summer_end_day = 31
       elsif ['invalid-unavailable-period'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.unavailable_periods.add(begin_month: 3,
+        hpxml.header.unavailable_periods.add(column_name: 'Power Outage',
+                                             begin_month: 3,
                                              begin_day: 10,
                                              end_month: 4,
                                              end_day: 31)

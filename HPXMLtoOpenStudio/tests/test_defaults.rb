@@ -50,7 +50,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeOperational
     hpxml.header.temperature_capacitance_multiplier = 1.5
     hpxml.header.natvent_days_per_week = 7
-    hpxml.header.unavailable_periods.add(begin_month: 1, begin_day: 1, begin_hour: 3, end_month: 12, end_day: 31, end_hour: 4, natvent_availability: HPXML::ScheduleUnavailable)
+    hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 1, begin_day: 1, begin_hour: 3, end_month: 12, end_day: 31, end_hour: 4, natvent_availability: HPXML::ScheduleUnavailable)
     hpxml.header.shading_summer_begin_month = 2
     hpxml.header.shading_summer_begin_day = 3
     hpxml.header.shading_summer_end_month = 4
