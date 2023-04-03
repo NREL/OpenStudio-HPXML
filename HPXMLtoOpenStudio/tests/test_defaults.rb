@@ -1898,19 +1898,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_mech_ventilation_fans
     # Test inputs not overridden by defaults w/ shared exhaust system
-    hpxml = _create_hpxml('base-mechvent-exhaust.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
-    vent_fan.is_shared_system = true
-    vent_fan.fraction_recirculation = 0.0
-    vent_fan.in_unit_flow_rate = 10.0
-    vent_fan.hours_in_operation = 22.0
-    vent_fan.fan_power = 12.5
-    vent_fan.tested_flow_rate = nil
-    vent_fan.rated_flow_rate = nil
-    vent_fan.calculated_flow_rate = nil
-    vent_fan.delivered_ventilation = 89
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: true,
+                               fraction_recirculation: 0.0,
+                               in_unit_flow_rate: 10.0,
+                               hours_in_operation: 22.0,
+                               fan_power: 12.5,
+                               delivered_ventilation: 89)
+    vent_fan = hpxml.ventilation_fans[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mech_vent_values(hpxml_default, true, 22.0, 12.5, 89)
@@ -1957,7 +1955,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.delivered_ventilation = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 24.0, 34.9, 99.6)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.1, 77.3)
 
     # Test defaults w/ SFA building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-attached.xml')
@@ -2144,9 +2142,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_storage_water_heaters
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems.each do |wh|
       wh.is_shared_system = true
       wh.number_of_units_served = 2
@@ -2439,46 +2435,41 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_pv_systems
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-pv.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    hpxml.pv_systems.each do |pv|
-      pv.is_shared_system = true
-      pv.number_of_bedrooms_served = 20
-      pv.system_losses_fraction = 0.20
-      pv.location = HPXML::LocationGround
-      pv.tracking = HPXML::PVTrackingType1Axis
-      pv.module_type = HPXML::PVModuleTypePremium
-      pv.array_azimuth = 123
-    end
-    hpxml.inverters.each do |inv|
-      inv.inverter_efficiency = 0.90
-    end
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.pv_systems.add(id: 'PVSystem',
+                         is_shared_system: true,
+                         number_of_bedrooms_served: 20,
+                         system_losses_fraction: 0.20,
+                         location: HPXML::LocationGround,
+                         tracking: HPXML::PVTrackingType1Axis,
+                         module_type: HPXML::PVModuleTypePremium,
+                         array_azimuth: 123,
+                         array_tilt: 0,
+                         max_power_output: 1000,
+                         inverter_idref: 'Inverter')
+    hpxml.inverters.add(id: 'Inverter',
+                        inverter_efficiency: 0.90)
+    pv = hpxml.pv_systems[0]
+    inv = hpxml.inverters[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.90, 0.20, true, HPXML::LocationGround, HPXML::PVTrackingType1Axis, HPXML::PVModuleTypePremium, 123)
 
     # Test defaults w/o year modules manufactured
-    hpxml.pv_systems.each do |pv|
-      pv.is_shared_system = nil
-      pv.system_losses_fraction = nil
-      pv.location = nil
-      pv.tracking = nil
-      pv.module_type = nil
-      pv.array_orientation = HPXML::OrientationSoutheast
-      pv.array_azimuth = nil
-    end
-    hpxml.inverters.each do |inv|
-      inv.inverter_efficiency = nil
-    end
+    pv.is_shared_system = nil
+    pv.system_losses_fraction = nil
+    pv.location = nil
+    pv.tracking = nil
+    pv.module_type = nil
+    pv.array_orientation = HPXML::OrientationSoutheast
+    pv.array_azimuth = nil
+    inv.inverter_efficiency = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
 
     # Test defaults w/ year modules manufactured
-    hpxml.pv_systems.each do |pv|
-      pv.year_modules_manufactured = 2010
-    end
+    pv.year_modules_manufactured = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.96, 0.194, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
@@ -2588,21 +2579,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_generators
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-misc-generators.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    hpxml.generators.each do |generator|
-      generator.is_shared_system = true
-      generator.number_of_bedrooms_served = 20
-    end
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.generators.add(id: 'Generator',
+                         is_shared_system: true,
+                         number_of_bedrooms_served: 20,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+    generator = hpxml.generators[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_generator_values(hpxml_default, true)
 
     # Test defaults
-    hpxml.generators.each do |generator|
-      generator.is_shared_system = nil
-    end
+    generator.is_shared_system = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_generator_values(hpxml_default, false)
@@ -2610,9 +2600,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_clothes_washers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_washers[0].location = HPXML::LocationBasementConditioned
@@ -2667,9 +2655,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_clothes_dryers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementConditioned
@@ -2743,9 +2729,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_dishwashers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.dishwashers[0].location = HPXML::LocationBasementConditioned
