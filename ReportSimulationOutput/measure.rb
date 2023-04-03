@@ -864,7 +864,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       EUT::MechVentPrecool => [EUT::MechVentPrecool]
     }
     kwh_to_kbtu = UnitConversions.convert(1.0, 'kWh', 'kBtu')
-    system_ids = @end_uses.values.map { |eu| eu.variables.map { |v| v[0] } }.flatten.uniq - [nil]
+    system_ids = [] # Unique systems of interest
+    @end_uses.values.each do |eu|
+      eu.variables.each do |v|
+        next if system_ids.include? v[0]
+
+        system_ids << v[0]
+      end
+    end
     system_ids.each do |sys_id|
       next unless is_hpxml_system(sys_id)
 
