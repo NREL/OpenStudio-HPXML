@@ -443,55 +443,37 @@ If the PV compensation type is feed-in tariff, additional information can be ent
          Some utilities/regions may have a feed-in tariff policy where compensation occurs for excess PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than full PV production.
          OpenStudio-HPXML is currently unable to calculate utility bills for such a feed-in tariff policy.
 
-HPXML Vacancy Periods
-*********************
+HPXML Unavailable Periods
+*************************
 
-One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
-If not entered, the simulation will not include occupant vacancies.
-Natural ventilation is always unavailable during a vacancy period.
-
-  ====================================  ========  =======  =============  ========  ========  ===========
-  Element                               Type      Units    Constraints    Required  Default   Description
-  ====================================  ========  =======  =============  ========  ========  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
-  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
-  ``EndMonth``                          integer            1 - 12         Yes                 End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
-  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
-  ====================================  ========  =======  =============  ========  ========  ===========
-
-See the "Affected By Vacancy" column in the table below to understand which components are affected by vacancy periods.
-
-.. csv-table::
-   :file: ../../HPXMLtoOpenStudio/resources/data/schedules_affected.csv
-   :header-rows: 1
-
-HPXML Power Outage Periods
-**************************
-
-One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
-If not entered, the simulation will not include power outages.
+One or more unavailable periods (e.g., vacancies, power outages) can be entered as an ``/HPXML/SoftwareInfo/extension/UnavailablePeriods/UnavailablePeriod``.
+If not entered, the simulation will not include unavailable periods.
 
   ====================================  ========  =======  =============  ========  ================  ===========
   Element                               Type      Units    Constraints    Required  Default           Description
   ====================================  ========  =======  =============  ========  ================  ===========
+  ``ColumnName``                        string                            Yes                         Column name associated with unavailable_periods.csv below
   ``BeginMonth``                        integer            1 - 12         Yes                         Begin month
   ``BeginDayOfMonth``                   integer            1 - 31         Yes                         Begin day
   ``BeginHourOfDay``                    integer            0 - 23         No        0                 Begin hour
   ``EndMonth``                          integer            1 - 12         Yes                         End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                         End day
   ``EndHourOfDay``                      integer            1 - 24         No        24                End hour
-  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability during the power outage period
+  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability
   ====================================  ========  =======  =============  ========  ================  ===========
 
   .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
 
-See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
+See the table below to understand which components are affected by an unavailable period with a given ``ColumnName``.
+You can create an additional column in the CSV file to define another unavailable period type.
+
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/unavailable_periods.csv
+   :header-rows: 1
 
 .. warning::
 
-  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.
+  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
 .. _buildingsite:
 
