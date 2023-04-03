@@ -29,6 +29,7 @@
         "include_timeseries_total_consumptions": false,
         "include_timeseries_fuel_consumptions": false,
         "include_timeseries_end_use_consumptions": false,
+        "include_timeseries_system_use_consumptions": false,
         "include_timeseries_emissions": false,
         "include_timeseries_emission_fuels": false,
         "include_timeseries_emission_end_uses": false,
@@ -42,8 +43,7 @@
         "timeseries_timestamp_convention": "start",
         "add_timeseries_dst_column": false,
         "add_timeseries_utc_column": false,
-        "user_output_variables": "",
-        "generate_eri_outputs": false
+        "user_output_variables": ""
       },
       "measure_dir_name": "ReportSimulationOutput"
     },
