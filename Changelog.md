@@ -29,7 +29,7 @@ __New Features__
   - LightingGroups for interior, exterior, and garage are no longer required; if not provided, these lighting uses will not be modeled.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
-- Allows modeling one or more occupant vacancy periods (`VacancyPeriods`) and power outage periods (`PowerOutagePeriods`) in the HPXML file.
+- Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
 - Performance improvement for HPXML files w/ large numbers of `Building` elements.
 
 __Bugfixes__

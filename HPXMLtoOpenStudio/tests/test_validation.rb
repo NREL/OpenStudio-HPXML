@@ -802,8 +802,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-skylights-physical-properties' => ["Could not lookup UFactor and SHGC for skylight 'Skylight2'."],
                             'invalid-runperiod' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-shading-season' => ['Shading Summer Season End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-vacancy-period' => ['Vacancy Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-power-outage-period' => ['Power Outage Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
+                            'invalid-unavailable-period' => ['Unavailable Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
                             'inverter-unequal-efficiencies' => ['Expected all InverterEfficiency values to be equal.'],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
@@ -1015,18 +1014,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.header.shading_summer_begin_day = 10
         hpxml.header.shading_summer_end_month = 4
         hpxml.header.shading_summer_end_day = 31
-      elsif ['invalid-vacancy-period'].include? error_case
+      elsif ['invalid-unavailable-period'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.vacancy_periods.add(begin_month: 3,
-                                         begin_day: 10,
-                                         end_month: 4,
-                                         end_day: 31)
-      elsif ['invalid-power-outage-period'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.power_outage_periods.add(begin_month: 3,
-                                              begin_day: 10,
-                                              end_month: 4,
-                                              end_day: 31)
+        hpxml.header.unavailable_periods.add(begin_month: 3,
+                                             begin_day: 10,
+                                             end_month: 4,
+                                             end_day: 31)
       elsif ['invalid-schema-version'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
       elsif ['invalid-skylights-physical-properties'].include? error_case
