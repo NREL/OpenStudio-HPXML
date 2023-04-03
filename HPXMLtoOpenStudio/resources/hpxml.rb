@@ -1986,7 +1986,7 @@ class HPXML < Object
 
   class Foundation < BaseElement
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
-             :skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
+             :belly_wing_skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
              :attached_to_foundation_wall_idrefs, :attached_to_wall_idrefs,
              :attached_to_rim_joist_idrefs]
     attr_accessor(*ATTRS)
@@ -2135,7 +2135,7 @@ class HPXML < Object
           XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
         elsif @foundation_type == FoundationTypeBellyAndWing
           belly_and_wing = XMLHelper.add_element(foundation_type_el, 'BellyAndWing')
-          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @skirt_present, :boolean)
+          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean)
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
@@ -2195,7 +2195,7 @@ class HPXML < Object
         @foundation_type = FoundationTypeAboveApartment
       elsif XMLHelper.has_element(foundation, 'FoundationType/BellyAndWing')
         @foundation_type = FoundationTypeBellyAndWing
-        @skirt_present = XMLHelper.get_value(foundation, 'FoundationType/BellyAndWing/SkirtPresent', :boolean)
+        @belly_wing_skirt_present = XMLHelper.get_value(foundation, 'FoundationType/BellyAndWing/SkirtPresent', :boolean)
       end
       if @foundation_type == FoundationTypeCrawlspaceVented
         @vented_crawlspace_sla = XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='#{UnitsSLA}']/Value", :float)
