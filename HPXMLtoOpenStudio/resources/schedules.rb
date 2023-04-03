@@ -1270,10 +1270,14 @@ class Schedule
     @unavailable_periods_csv_data.each do |csv_row|
       next if csv_row['Schedule Name'] != schedule_name
 
+      if not csv_row.keys.include? col_name
+        fail "Could not find column='#{col_name}' in unavailable_periods.csv."
+      end
+
       begin
         applies = Integer(csv_row[col_name])
       rescue
-        fail "Could not find valid value for #{schedule_name} and #{col_name}."
+        fail "Value is not a valid integer for row='#{schedule_name}' and column='#{col_name}' in unavailable_periods.csv."
       end
       if applies == 1
         return true
@@ -1282,7 +1286,7 @@ class Schedule
       end
     end
 
-    fail "Could not find #{schedule_name} in unavailable_periods.csv"
+    fail "Could not find row='#{schedule_name}' in unavailable_periods.csv"
   end
 
   def self.validate_values(values, num_values, sch_name)

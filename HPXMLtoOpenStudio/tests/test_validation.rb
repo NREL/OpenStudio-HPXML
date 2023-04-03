@@ -834,7 +834,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'unattached-shared-clothes-washer-water-heater' => ["Attached water heating system 'foobar' not found for clothes washer"],
                             'unattached-shared-dishwasher-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for dishwasher"],
                             'unattached-shared-dishwasher-water-heater' => ["Attached water heating system 'foobar' not found for dishwasher"],
-                            'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."] }
+                            'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."],
+                            'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -1182,6 +1183,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['unattached-window'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.windows[0].wall_idref = 'foobar'
+      elsif ['unavailable-period-missing-column'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple-vacancy.xml'))
+        hpxml.header.unavailable_periods[0].column_name = 'foobar'
       else
         fail "Unhandled case: #{error_case}."
       end
