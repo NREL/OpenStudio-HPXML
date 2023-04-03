@@ -673,6 +673,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
   .. [#] If Aext not provided and TypeOfInfiltrationTest is "compartmentalization test", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF space) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
+         Note that all attached surfaces, even adiabatic surfaces, must be defined in the HPXML file.
          If single-family detached or TypeOfInfiltrationTest is "guarded test", Aext is 1.
 
 In addition, one of the following air leakage types must also be defined:
