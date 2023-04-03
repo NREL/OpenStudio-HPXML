@@ -279,6 +279,7 @@ def create_hpxmls
     'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-maxload.xml' => 'base-hvac-room-ac-with-reverse-cycle.xml',
     'base-hvac-autosize-room-ac-with-heating.xml' => 'base-hvac-room-ac-with-heating.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-autosize-sizing-controls.xml' => 'base-hvac-autosize.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
     'base-hvac-boiler-coal-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -1403,7 +1404,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
     args.delete('misc_fuel_loads_grill_annual_therm')
     args.delete('misc_fuel_loads_lighting_annual_therm')
     args.delete('misc_fuel_loads_fireplace_annual_therm')
-  elsif ['base-calctype-operational-misc-defaults.xml'].include? hpxml_file
+  elsif ['base-calctype-operational-misc-defaults.xml',
+         'base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
     args['occupancy_calculation_type'] = HPXML::OccupancyCalculationTypeOperational
     args['geometry_unit_num_occupants'] = 5
   elsif ['base-calctype-operational-residents-0.xml'].include? hpxml_file
@@ -1746,6 +1748,25 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # HVAC
+ if hpxml_file.include? 'autosize'
+    args.delete('heating_system_heating_capacity')
+    args.delete('heating_system_2_heating_capacity')
+    args.delete('cooling_system_cooling_capacity')
+    args.delete('heat_pump_heating_capacity')
+    args.delete('cooling_system_integrated_heating_system_capacity')
+    if hpxml_file.include? 'sizing-methodology-hers'
+      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
+    elsif hpxml_file.include? 'sizing-methodology-maxload'
+      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingMaxLoad
+    elsif hpxml_file.include? 'sizing-methodology-acca'
+      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingACCA
+    else
+      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
+    end
+    args.delete('heat_pump_heating_capacity_17_f')
+    args.delete('heat_pump_backup_heating_capacity')
+    args.delete('heat_pump_cooling_capacity')
+  end
   if ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
@@ -1801,24 +1822,6 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml'].include? hpxml_file
     args['heat_pump_compressor_lockout_temp'] = 30.0
     args['heat_pump_backup_heating_lockout_temp'] = 30.0
-  elsif hpxml_file.include? 'autosize'
-    args.delete('heating_system_heating_capacity')
-    args.delete('heating_system_2_heating_capacity')
-    args.delete('cooling_system_cooling_capacity')
-    args.delete('heat_pump_heating_capacity')
-    args.delete('cooling_system_integrated_heating_system_capacity')
-    if hpxml_file.include? 'sizing-methodology-hers'
-      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
-    elsif hpxml_file.include? 'sizing-methodology-maxload'
-      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingMaxLoad
-    elsif hpxml_file.include? 'sizing-methodology-acca'
-      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingACCA
-    else
-      args['heat_pump_sizing_methodology'] = HPXML::HeatPumpSizingHERS
-    end
-    args.delete('heat_pump_heating_capacity_17_f')
-    args.delete('heat_pump_backup_heating_capacity')
-    args.delete('heat_pump_cooling_capacity')
   elsif ['base-hvac-boiler-coal-only.xml',
          'base-hvac-furnace-coal-only.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeCoal
@@ -2081,7 +2084,8 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
       args['cooling_system_integrated_heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['cooling_system_integrated_heating_system_efficiency_percent'] = 1.0
     end
-  elsif ['base-hvac-setpoints.xml'].include? hpxml_file
+  elsif ['base-hvac-setpoints.xml',
+         'base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = 60
     args['hvac_control_heating_weekend_setpoint'] = 60
     args['hvac_control_cooling_weekday_setpoint'] = 80
@@ -4173,6 +4177,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
     hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
+  end
+  if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
+    hpxml.header.manualj_heating_design_temp = 0
+    hpxml.header.manualj_cooling_design_temp = 100
+    hpxml.header.manualj_heating_setpoint = 60
+    hpxml.header.manualj_cooling_setpoint = 80
+    hpxml.header.manualj_humidity_setpoint = 0.55
+    hpxml.header.manualj_internal_loads_sensible = 4000
+    hpxml.header.manualj_internal_loads_latent = 200
+    hpxml.header.manualj_num_occupants = 5
   end
 
   # ------------------ #
