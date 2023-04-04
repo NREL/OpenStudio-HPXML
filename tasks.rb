@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+
 Dir["#{File.dirname(__FILE__)}/HPXMLtoOpenStudio/resources/*.rb"].each do |resource_file|
   next if resource_file.include? 'minitest_helper.rb'
 
