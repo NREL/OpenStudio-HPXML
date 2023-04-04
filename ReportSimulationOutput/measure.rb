@@ -2458,17 +2458,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_hpxml_system_ids
-    # Returns true if sys_id corresponds to an HVAC or water heating system
+    # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
     return [] if @hpxml.nil?
 
     system_ids = []
-    (@hpxml.hvac_systems + @hpxml.water_heating_systems).each do |system|
+    (@hpxml.hvac_systems + @hpxml.water_heating_systems + @hpxml.ventilation_fans).each do |system|
       system_ids << system.id
     end
-    @hpxml.ventilation_fans.each do |system|
-      system_ids << system.id
-    end
-
     return system_ids
   end
 
