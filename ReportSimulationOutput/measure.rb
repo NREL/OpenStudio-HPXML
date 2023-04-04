@@ -555,12 +555,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Set paths
     if not args[:annual_output_file_name].nil?
-      annual_output_path = File.join(output_dir, args[:annual_output_file_name].get)
+      annual_output_path = File.join(output_dir, args[:annual_output_file_name])
     else
       annual_output_path = File.join(output_dir, "results_annual.#{args[:output_format]}")
     end
     if not args[:timeseries_output_file_name].nil?
-      timeseries_output_path = File.join(output_dir, args[:timeseries_output_file_name].get)
+      timeseries_output_path = File.join(output_dir, args[:timeseries_output_file_name])
     else
       timeseries_output_path = File.join(output_dir, "results_timeseries.#{args[:output_format]}")
     end
