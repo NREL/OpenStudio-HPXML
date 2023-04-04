@@ -10,6 +10,7 @@ __New Features__
   - **Breaking change**: Replaces `Component Load: Windows` with `Component Load: Windows Conduction` and `Component Load: Windows Solar`.
   - **Breaking change**: Replaces `Component Load: Skylights` with `Component Load: Skylights Conduction` and `Component Load: Skylights Solar`.
   - **Breaking change**: Adds `Component Load: Lighting` (disaggregated from `Component Load: Internal Gains`).
+  - **Breaking change**: Adds "net" values for emissions; "total" values now exclude generation (e.g., PV).
   - Adds `Load: Heating: Heat Pump Backup` (heating load delivered by heat pump backup systems).
   - Adds `System Use` outputs (energy use for each HVAC and water heating system); allows requesting timeseries output.
   - All annual load outputs are now provided as timeseries outputs; previously only "Delivered" loads were available.
@@ -17,6 +18,7 @@ __New Features__
   - Allows specifying the number of decimal places for timeseries output.
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
+  - ReportSimulationOutput measure: Allows disabling individual annual output sections.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.

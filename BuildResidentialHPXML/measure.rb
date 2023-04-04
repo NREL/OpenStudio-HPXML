@@ -3075,7 +3075,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
-    args = Hash[args.collect { |k, v| [k.to_sym, v] }]
 
     args[:apply_validation] = args[:apply_validation].is_initialized ? args[:apply_validation].get : false
     args[:apply_defaults] = args[:apply_defaults].is_initialized ? args[:apply_defaults].get : false
