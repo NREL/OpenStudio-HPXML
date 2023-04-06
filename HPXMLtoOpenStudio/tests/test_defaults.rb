@@ -3318,17 +3318,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, heat_pump_sizing_methodology,
                                   allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
-<<<<<<< HEAD
-                                  temperature_capacitance_multiplier, natvent_days_per_week, vacancy_period_begin_hour, vacancy_period_end_hour,
-                                  power_outage_period_begin_hour, power_outage_period_end_hour, power_outage_period_natvent_availability,
+                                  temperature_capacitance_multiplier, natvent_days_per_week, unavailable_period_begin_hour,
+                                  unavailable_period_end_hour, unavailable_period_natvent_availability,
                                   shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day,
                                   manualj_heating_design_temp, manualj_cooling_design_temp, manualj_heating_setpoint, manualj_cooling_setpoint,
                                   manualj_humidity_setpoint, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants)
-=======
-                                  temperature_capacitance_multiplier, natvent_days_per_week, unavailable_period_begin_hour,
-                                  unavailable_period_end_hour, unavailable_period_natvent_availability,
-                                  shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day)
->>>>>>> 4df8bff5b3cd2d82e21e43cde1d4dbddb272a9ac
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
