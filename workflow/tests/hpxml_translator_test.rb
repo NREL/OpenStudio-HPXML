@@ -371,8 +371,8 @@ class HPXMLTest < MiniTest::Test
     results = {}
     CSV.foreach(annual_csv_path) do |row|
       next if row.nil? || (row.size < 2)
-      next if row.start_with?('System Use:')
-      next if row.start_with?('Emissions:')
+      next if row[0].start_with? 'System Use:'
+      next if row[0].start_with? 'Emissions:'
 
       results[row[0]] = Float(row[1])
     end
