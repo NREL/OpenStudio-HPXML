@@ -231,23 +231,18 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
 Annual Energy By System Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Results for each HVAC and water heating system defined in the HPXML file are listed as shown below.
+Results for each end use of each heating, cooling, and water heating system defined in the HPXML file are listed as shown below.
+Non-zero end uses from :ref:`annualenduses` will be included.
 
-Note that all systems uses are mutually exclusive -- the "<HeatPumpID>: Heating" system use, for example, excludes energy reported in the "<HeatPumpID>: Heating Heat Pump Backup" end use.
-
-   ==============================================================  =============================================
-   Type                                                            Notes
-   ==============================================================  =============================================
-   System Use: <HeatingSystemID>: Heating (MBtu)                   Heating energy use for the heating system if not a heat pump separate backup system
-   System Use: <HeatingSystemID>: Heating Heat Pump Backup (MBtu)  Heating energy use for the heating system if a heat pump separate backup system
-   System Use: <CoolingSystemID>: Cooling (MBtu)                   Cooling energy use for the cooling system
-   System Use: <HeatPumpID>: Heating (MBtu)                        Heating energy use for the heat pump, excluding heat pump integrated backup
-   System Use: <HeatPumpID>: Heating Heat Pump Backup (MBtu)       Heating energy use for the heat pump integrated backup
-   System Use: <HeatPumpID>: Cooling (MBtu)                        Cooling energy use for the heat pump
-   System Use: <WaterHeatingSystemID>: Hot Water (MBtu)            Hot water energy use for the water heating system
-   System Use: <VentilationFanID>: Mech Vent Preheating (MBtu)     Preheating energy use for the mechanical ventilation system
-   System Use: <VentilationFanID>: Mech Vent Precooling (MBtu)     Precooling energy use for the mechanical ventilation system
-   ==============================================================  =============================================
+   ===============================================================  =============================================
+   Type                                                             Notes
+   ===============================================================  =============================================
+   System Use: <HeatingSystemID>: <FuelType>: <EndUse> (MBtu)       End use energy for the heating system
+   System Use: <CoolingSystemID>: <FuelType>: <EndUse> (MBtu)       End use energy for the cooling system
+   System Use: <HeatPumpID>: <FuelType>: <EndUse> (MBtu)            End use energy for the heat pump system
+   System Use: <WaterHeatingSystemID>: <FuelType>: <EndUse> (MBtu)  End use energy for the water heating system
+   System Use: <VentilationFanID>: <FuelType>: <EndUse> (MBtu)      End use energy for the ventilation fan system (preheating/precooling only)
+   ===============================================================  =============================================
 
 Annual Emissions
 ~~~~~~~~~~~~~~~~
