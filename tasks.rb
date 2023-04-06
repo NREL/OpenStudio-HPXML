@@ -1748,7 +1748,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args, orig_parent)
   end
 
   # HVAC
- if hpxml_file.include? 'autosize'
+  if hpxml_file.include? 'autosize'
     args.delete('heating_system_heating_capacity')
     args.delete('heating_system_2_heating_capacity')
     args.delete('cooling_system_cooling_capacity')
