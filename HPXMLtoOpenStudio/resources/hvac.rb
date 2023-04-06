@@ -178,7 +178,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if not max_cap_ratio_sch.nil?
-      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds)
+      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil)
     end
 
     return air_loop
@@ -1594,7 +1594,7 @@ class HVAC
     end
   end
 
-  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds)
+  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil = nil)
     cap_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     cap_ratio_sensor.setName("#{air_loop_unitary.name} capacity_ratio")
     cap_ratio_sensor.setKeyName(max_cap_ratio_sch.name.to_s)
@@ -1607,10 +1607,24 @@ class HVAC
     coil_cyc_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Cycling Ratio')
     coil_cyc_ratio_sensor.setName("#{air_loop_unitary.name} cyc_ratio_ss")
     coil_cyc_ratio_sensor.setKeyName(air_loop_unitary.name.to_s)
+    indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+    indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
+    indoor_temp_sensor.setKeyName(control_zone.name.to_s)
+    setpoint_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
+    setpoint_temp_sensor.setName("#{control_zone.name} spt_temp")
+    setpoint_temp_sensor.setKeyName(control_zone.name.to_s)
 
     # actuator
     coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
     coil_speed_act.setName("#{air_loop_unitary.name} coil speed level")
+    if not htg_supp_coil.nil?
+      # create a clone of availability schedule to actuate
+      avail_sch = htg_supp_coil.availabilitySchedule.to_ScheduleConstant.get
+      new_avail_sch = avail_sch.clone(model).to_ScheduleConstant.get
+      htg_supp_coil.setAvailabilitySchedule(new_avail_sch)
+      supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
+      supp_coil_avail_act.setName("#{htg_supp_coil.name} coil avail sch")
+    end
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1623,10 +1637,32 @@ class HVAC
     program.addLine('Else')
     program.addLine('  Set current_speed = 0')
     program.addLine('EndIf')
-    program.addLine('If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
-    program.addLine("  Set #{coil_speed_act.name} = target_speed")
-    program.addLine('Else')
-    program.addLine("  Set #{coil_speed_act.name} = NULL")
+    program.addLine("If #{cap_ratio_sensor.name} > 0.7") # general curtailment, operation refers to AHRI Standard 1380 2019
+    program.addLine("  If (@Abs (#{indoor_temp_sensor.name} - #{setpoint_temp_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}")
+    program.addLine("    Set #{coil_speed_act.name} = NULL")
+    program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
+    program.addLine('  Else')
+    program.addLine('    If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine("      Set #{coil_speed_act.name} = target_speed")
+    program.addLine("      Set #{supp_coil_avail_act.name} = 0") unless htg_supp_coil.nil?
+    program.addLine('    Else')
+    program.addLine("      Set #{coil_speed_act.name} = NULL")
+    program.addLine("      Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
+    program.addLine('    EndIf')
+    program.addLine('  EndIf')
+    program.addLine('Else') # critical curtailment, operation refers to AHRI Standard 1380 2019
+    program.addLine('  If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine("    Set #{coil_speed_act.name} = target_speed")
+    if not htg_supp_coil.nil?
+      program.addLine("    If #{indoor_temp_sensor.name} < #{UnitConversions.convert(62, 'F', 'C')}")
+      program.addLine("      Set #{supp_coil_avail_act.name} = 1")
+      program.addLine('    Else')
+      program.addLine("      Set #{supp_coil_avail_act.name} = 0")
+      program.addLine('    EndIf')
+    end
+    program.addLine('  Else')
+    program.addLine("    Set #{coil_speed_act.name} = NULL")
+    program.addLine('  EndIf')
     program.addLine('EndIf')
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
