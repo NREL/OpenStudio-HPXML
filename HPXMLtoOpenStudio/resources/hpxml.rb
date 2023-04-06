@@ -225,7 +225,7 @@ class HPXML < Object
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
   LocationManufacturedHomeBelly = 'manufactured home belly'
-  LocationManufacturedHomeUnderbelly = 'manufactured home underbelly'
+  LocationManufacturedHomeUnderBelly = 'manufactured home underbelly'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
