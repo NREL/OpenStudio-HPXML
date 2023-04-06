@@ -217,7 +217,6 @@ class HPXML < Object
   LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
-  LocationMobileHomeBelly = 'mobile home belly'
   LocationExterior = 'exterior'
   LocationExteriorWall = 'exterior wall'
   LocationGarage = 'garage'
@@ -225,6 +224,8 @@ class HPXML < Object
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
+  LocationManufacturedHomeBelly = 'manufactured home belly'
+  LocationManufacturedHomeUnderbelly = 'manufactured home underbelly'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
@@ -2066,7 +2067,7 @@ class HPXML < Object
       elsif @foundation_type == FoundationTypeSlab
         return LocationLivingSpace
       elsif @foundation_type == FoundationTypeBellyAndWing
-        return LocationMobileHomeBelly
+        return LocationManufacturedHomeUnderBelly
       else
         fail "Unexpected foundation type: '#{@foundation_type}'."
       end
