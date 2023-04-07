@@ -2740,7 +2740,7 @@ class HPXMLDefaults
     hvacpl.cdl_sens_windows = bldg_design_loads.Cool_Windows.round
     hvacpl.cdl_sens_skylights = bldg_design_loads.Cool_Skylights.round
     hvacpl.cdl_sens_doors = bldg_design_loads.Cool_Doors.round
-    hvacpl.cdl_sens_infilvent = bldg_design_loads.Cool_Infilvent_Sens.round
+    hvacpl.cdl_sens_infilvent = bldg_design_loads.Cool_InfilVent_Sens.round
     hvacpl.cdl_sens_ducts = bldg_design_loads.Cool_Ducts_Sens.round
     hvacpl.cdl_sens_intgains = bldg_design_loads.Cool_IntGains_Sens.round
     cdl_sens_sum = (hvacpl.cdl_sens_walls + hvacpl.cdl_sens_ceilings +
@@ -2756,7 +2756,7 @@ class HPXMLDefaults
     # Assign cooling latent design loads to HPXML object
     hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
     hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
-    hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infilvent_Lat.round
+    hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_InfilVent_Lat.round
     hvacpl.cdl_lat_intgains = bldg_design_loads.Cool_IntGains_Lat.round
     cdl_lat_sum = (hvacpl.cdl_lat_ducts + hvacpl.cdl_lat_infilvent +
                    hvacpl.cdl_lat_intgains)

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>01efa934-6a2a-4c6f-ad8c-762eef6a43d4</version_id>
-  <version_modified>20230406T231936Z</version_modified>
+  <version_id>594df004-adc5-4b75-887e-96ecf26bfe95</version_id>
+  <version_modified>20230407T184656Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -266,12 +266,6 @@
       <checksum>B0CF4C83</checksum>
     </file>
     <file>
-      <filename>test_weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>89B1B71D</checksum>
-    </file>
-    <file>
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -350,12 +344,6 @@
       <checksum>F3DBC2BD</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8522A420</checksum>
-    </file>
-    <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -422,12 +410,6 @@
       <checksum>DEED74EA</checksum>
     </file>
     <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0B3208F4</checksum>
-    </file>
-    <file>
       <filename>xmlvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -456,12 +438,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>344A99CB</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A6B33345</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -536,17 +512,6 @@
       <checksum>2C9F00FA</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.3.0</identifier>
-        <min_compatible>3.3.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>69F7C511</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -557,12 +522,6 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>812AA399</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2FA0FAB1</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -581,6 +540,41 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>95D21C2A</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8786A75C</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC5D650B</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0233D147</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>55F9F6DD</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2EBB3C59</checksum>
     </file>
   </files>
 </measure>
