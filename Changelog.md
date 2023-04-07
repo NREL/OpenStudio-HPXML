@@ -29,6 +29,10 @@ __New Features__
 - Lighting changes:
   - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
   - LightingGroups for interior, exterior, and garage are no longer required; if not provided, these lighting uses will not be modeled.
+- HVAC sizing enhancements:
+  - Allows optional inputs under `HVACSizingControl/ManualJInputs` to override Manual J defaults for HVAC autosizing calculations.
+  - Updates to better align various default values and algorithms with Manual J.
+  - Updates design load calculations to handle conditioned basements with insulated slabs.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
@@ -45,6 +49,7 @@ __Bugfixes__
 - Fixes defaulted mechanical ventilation flow rate for SFA/MF buildings, with respect to infiltration credit.
 - HPXML files w/ multiple `Building` elements now only show warnings for the single `Building` being simulated.
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
+- Fixes window/skylight design loads for Manual J HVAC autosizing calculations.
 
 ## OpenStudio-HPXML v1.5.1
 

@@ -1435,8 +1435,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # HVAC design temperatures
     results_out << [line_break]
-    results_out << ['HVAC Design Temperature: Heating (F)', @hpxml.hvac_plant.temp_heating.round(2)]
-    results_out << ['HVAC Design Temperature: Cooling (F)', @hpxml.hvac_plant.temp_cooling.round(2)]
+    results_out << ['HVAC Design Temperature: Heating (F)', @hpxml.header.manualj_heating_design_temp.round(2)]
+    results_out << ['HVAC Design Temperature: Cooling (F)', @hpxml.header.manualj_cooling_design_temp.round(2)]
 
     # HVAC design loads
     results_out << [line_break]
