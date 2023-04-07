@@ -54,8 +54,8 @@
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <NumberofBathrooms>2</NumberofBathrooms>
-          <ConditionedFloorArea>1100.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>8800.0</ConditionedBuildingVolume>
+          <ConditionedFloorArea>1350.0</ConditionedFloorArea>
+          <ConditionedBuildingVolume>10800.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -102,7 +102,7 @@
             <SystemIdentifier id='Foundation1'/>
             <FoundationType>
               <BellyAndWing>
-                <SkirtPresent>true</SkirtPresent>
+                <SkirtPresent>false</SkirtPresent>
               </BellyAndWing>
             </FoundationType>
             <AttachedToFloor idref='Floor1'/>
@@ -171,7 +171,7 @@
             <FloorType>
               <WoodFrame/>
             </FloorType>
-            <Area>1100.0</Area>
+            <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
@@ -185,7 +185,7 @@
             <FloorType>
               <WoodFrame/>
             </FloorType>
-            <Area>1100.0</Area>
+            <Area>1350.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>

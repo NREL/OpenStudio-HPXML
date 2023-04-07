@@ -667,7 +667,16 @@ class OSModel
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure('NoSun')
-        surface.setWindExposure('NoWind')
+        if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
+          foundation = @hpxml.foundations.find {|foundation| foundation.to_location == floor.exterior_adjacent_to}
+          if foundation.belly_wing_skirt_present
+            surface.setWindExposure('NoWind')
+          else
+            surface.setWindExposure('WindExposed')
+          end
+        else
+          surface.setWindExposure('NoWind')
+        end
       elsif floor.is_floor
         surface.setSunExposure('NoSun')
       end
@@ -686,6 +695,7 @@ class OSModel
         mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
       else # Floor
         if @apply_ashrae140_assumptions
+          p "ashrae 140"
           # Raised floor
           inside_film = Material.AirFilmFloorASHRAE140
           outside_film = Material.AirFilmFloorZeroWindASHRAE140
@@ -2465,7 +2475,7 @@ class OSModel
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
-    if exterior_adjacent_to == HPXML::LocationOutside
+    if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
