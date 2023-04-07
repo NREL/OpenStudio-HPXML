@@ -1894,15 +1894,13 @@ class HVACSizing
       else
         # Search for first valid bore field
         new_bore_config = nil
-        valid_field_found = false
         valid_configs.keys.each do |bore_config|
           next unless valid_configs[bore_config].include? num_bore_holes
 
-          valid_field_found = true
           new_bore_config = bore_config
           break
         end
-        if valid_field_found
+        if not new_bore_config.nil?
           bore_config = new_bore_config
         else
           fail 'Could not construct a valid GSHP bore field configuration.'
