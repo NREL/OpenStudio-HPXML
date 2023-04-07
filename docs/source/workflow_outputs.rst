@@ -419,9 +419,7 @@ Capacities for individual HVAC systems can be found in the `in.xml` file.
 HVAC Design Temperatures
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Design temperatures are used in the design load calculations for autosizing of HVAC equipment.
-1%/99% design temperatures are obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
-If they are not available in the EPW header, the design temperatures are calculated from the 8760 hourly temperatures in the EPW.
+Design temperatures are used in the design load calculations for autosizing of HVAC equipment; see :ref:`hvac_sizing_control` for how they are derived.
 Design temperatures can also be found in the `in.xml` file.
 
    =====================================================================  ====================

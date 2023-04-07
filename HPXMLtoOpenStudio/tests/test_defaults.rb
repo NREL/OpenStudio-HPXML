@@ -55,11 +55,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.shading_summer_begin_day = 3
     hpxml.header.shading_summer_end_month = 4
     hpxml.header.shading_summer_end_day = 5
+    hpxml.header.manualj_heating_design_temp = 0.0
+    hpxml.header.manualj_cooling_design_temp = 100.0
+    hpxml.header.manualj_heating_setpoint = 68.0
+    hpxml.header.manualj_cooling_setpoint = 78.0
+    hpxml.header.manualj_humidity_setpoint = 0.44
+    hpxml.header.manualj_internal_loads_sensible = 1600.0
+    hpxml.header.manualj_internal_loads_latent = 60.0
+    hpxml.header.manualj_num_occupants = 8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, HPXML::HeatPumpSizingMaxLoad,
                                 true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5, 7,
-                                3, 4, HPXML::ScheduleUnavailable, 2, 3, 4, 5)
+                                3, 4, HPXML::ScheduleUnavailable, 2, 3, 4, 5, 0.0, 100.0, 68.0, 78.0, 0.44, 1600.0, 60.0, 8)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -87,11 +95,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.shading_summer_begin_day = nil
     hpxml.header.shading_summer_end_month = nil
     hpxml.header.shading_summer_end_day = nil
+    hpxml.header.manualj_heating_design_temp = nil
+    hpxml.header.manualj_cooling_design_temp = nil
+    hpxml.header.manualj_heating_setpoint = nil
+    hpxml.header.manualj_cooling_setpoint = nil
+    hpxml.header.manualj_humidity_setpoint = nil
+    hpxml.header.manualj_internal_loads_sensible = nil
+    hpxml.header.manualj_internal_loads_latent = nil
+    hpxml.header.manualj_num_occupants = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                0, 24, HPXML::ScheduleRegular, 5, 1, 10, 31)
+                                0, 24, HPXML::ScheduleRegular, 5, 1, 10, 31, 6.8, 91.8, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -120,7 +136,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, 5, 1, 9, 30)
+                                nil, nil, nil, 5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - calendar year override by AMY year
     hpxml.header.sim_calendar_year = 2020
@@ -128,7 +144,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, 5, 1, 9, 30)
+                                nil, nil, nil, 5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - southern hemisphere, invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -157,7 +173,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
                                 false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, 12, 1, 4, 30)
+                                nil, nil, nil, 12, 1, 4, 30, 41.0, 84.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
   end
 
   def test_emissions_factors
@@ -3304,7 +3320,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                   allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
                                   temperature_capacitance_multiplier, natvent_days_per_week, unavailable_period_begin_hour,
                                   unavailable_period_end_hour, unavailable_period_natvent_availability,
-                                  shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day)
+                                  shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day,
+                                  manualj_heating_design_temp, manualj_cooling_design_temp, manualj_heating_setpoint, manualj_cooling_setpoint,
+                                  manualj_humidity_setpoint, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -3342,6 +3360,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(shading_summer_begin_day, hpxml.header.shading_summer_begin_day)
     assert_equal(shading_summer_end_month, hpxml.header.shading_summer_end_month)
     assert_equal(shading_summer_end_day, hpxml.header.shading_summer_end_day)
+    assert_in_epsilon(manualj_heating_design_temp, hpxml.header.manualj_heating_design_temp, 0.01)
+    assert_in_epsilon(manualj_cooling_design_temp, hpxml.header.manualj_cooling_design_temp, 0.01)
+    assert_equal(manualj_heating_setpoint, hpxml.header.manualj_heating_setpoint)
+    assert_equal(manualj_cooling_setpoint, hpxml.header.manualj_cooling_setpoint)
+    assert_equal(manualj_humidity_setpoint, hpxml.header.manualj_humidity_setpoint)
+    assert_equal(manualj_internal_loads_sensible, hpxml.header.manualj_internal_loads_sensible)
+    assert_equal(manualj_internal_loads_latent, hpxml.header.manualj_internal_loads_latent)
+    assert_equal(manualj_num_occupants, hpxml.header.manualj_num_occupants)
   end
 
   def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,
