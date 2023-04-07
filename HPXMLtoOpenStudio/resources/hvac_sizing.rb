@@ -1146,7 +1146,8 @@ class HVACSizing
       dse_Fregain = 0.0
 
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? duct.Location
+           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
+          HPXML::LocationManufacturedHomeBelly].include? duct.Location
       space_values = Geometry.get_temperature_scheduled_space_values(duct.Location)
       dse_Fregain = space_values[:f_regain]
 
@@ -1230,6 +1231,7 @@ class HVACSizing
       dse_Fregains[duct.Location] = get_duct_regain_factor(duct)
     end
     fregain_values = { HPXML::DuctTypeSupply => dse_Fregains, HPXML::DuctTypeReturn => dse_Fregains }
+    p fregain_values
     dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
 
     # Initialize for the iteration
