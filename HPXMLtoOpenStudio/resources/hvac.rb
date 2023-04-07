@@ -1488,7 +1488,7 @@ class HVAC
       if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         var = 'Evaporative Cooler Water Volume'
       else
-        var = "Cooling Coil #{EPlus::FuelTypeElectricity} Energy"
+        var = 'Cooling Coil Total Cooling Energy'
       end
       clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_object_sensor.setName("#{clg_object.name} s")
@@ -1498,13 +1498,12 @@ class HVAC
     if htg_object.nil?
       htg_object_sensor = nil
     else
-      var = "Heating Coil #{EPlus::FuelTypeElectricity} Energy"
-      if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = "Heating Coil #{htg_object.fuelType} Energy"
-      elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+      if htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
         var = 'Fan Coil Heating Energy'
+      else
+        var = 'Heating Coil Heating Energy'
       end
 
       htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1515,11 +1514,10 @@ class HVAC
     if backup_htg_object.nil?
       backup_htg_object_sensor = nil
     else
-      var = "Heating Coil #{EPlus::FuelTypeElectricity} Energy"
-      if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = "Heating Coil #{backup_htg_object.fuelType} Energy"
-      elsif backup_htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+      if backup_htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
+      else
+        var = 'Heating Coil Heating Energy'
       end
 
       backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1549,6 +1547,13 @@ class HVAC
       end
       sensors.each_with_index do |(mode, sensor), i|
         str_prefix = (i == 0 ? 'If' : 'ElseIf')
+        if mode == 'primary_htg' && sensors.keys[i + 1] == 'backup_htg'
+          # HP with both primary and backup heating
+          # If both are operating, apportion energy use
+          fan_or_pump_program.addLine("#{str_prefix} (#{sensor.name} > 0) && (#{sensors.values[i + 1].name} > 0)")
+          fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name} * #{sensor.name} / (#{sensor.name} + #{sensors.values[i + 1].name})")
+          fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{sensors.keys[i + 1]} = #{fan_or_pump_sensor.name} * #{sensors.values[i + 1].name} / (#{sensor.name} + #{sensors.values[i + 1].name})")
+        end
         fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
         fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
       end
@@ -4059,7 +4064,7 @@ class HVAC
         chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
         if distribution_type == HPXML::HVACDistributionTypeHydronic
           if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }[0]
+            wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
             aux_dweq = wlhp.cooling_capacity / wlhp.cooling_efficiency_eer
           else
             aux_dweq = 0.0
@@ -4077,7 +4082,7 @@ class HVAC
         # Cooling tower w/ water loop heat pump
         if distribution_type == HPXML::HVACDistributionTypeHydronic
           if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }[0]
+            wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
             wlhp_cap = wlhp.cooling_capacity
             wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
           end
@@ -4178,7 +4183,7 @@ class HVAC
 
         # Heat pump
         # If this approach is ever removed, also remove code in HVACSizing.apply_hvac_loads()
-        wlhp = hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }[0]
+        wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
         wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
         wlhp.fraction_cool_load_served = 0.0
 
