@@ -4808,7 +4808,7 @@ def download_utility_rates
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :cache_weather, :create_release_zips, :download_utility_rates]
+command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4921,21 +4921,6 @@ if ARGV[0].to_sym == :update_hpxmls
   # Create sample/test HPXMLs
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   create_hpxmls()
-end
-
-if ARGV[0].to_sym == :cache_weather
-  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
-  puts 'Creating cache *.csv for weather files...'
-
-  Dir['weather/*.epw'].each do |epw|
-    next if File.exist? epw.gsub('.epw', '.cache')
-
-    puts "Processing #{epw}..."
-    weather = WeatherProcess.new(epw_path: epw)
-    File.open(epw.gsub('.epw', '-cache.csv'), 'wb') do |file|
-      weather.dump_to_csv(file)
-    end
-  end
 end
 
 if ARGV[0].to_sym == :download_utility_rates
