@@ -32,13 +32,14 @@ __New Features__
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
+- Stochastic schedules for garage lighting and TV plug loads now use interior lighting and miscellaneous plug load schedules, respectively.
 - Performance improvement for HPXML files w/ large numbers of `Building` elements.
-- BuildResidentialScheduleFile measure: Garage lighting and TV plug loads now use interior lighting and miscellaneous plug load schedules, respectively.
+- Weather cache files (\*foo-cache.csv) are no longer used/needed.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
 - Fixes error if calculating utility bills for an all-electric home with a detailed JSON utility rate.
-- BuildResidentialScheduleFile measure now excludes columns for end uses that are not stochastically generated.
+- Stochastic schedules now excludes columns for end uses that are not stochastically generated.
 - Fixes operational calculation when the number of residents is set to zero.
 - Fixes possible utility bill calculation error for a home with PV using a detailed electric utility rate.
 - Fixes defaulted mechanical ventilation flow rate for SFA/MF buildings, with respect to infiltration credit.

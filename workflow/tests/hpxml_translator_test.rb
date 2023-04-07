@@ -436,7 +436,6 @@ class HPXMLTest < MiniTest::Test
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
-      next if log_line.include? "-cache.csv' could not be found; regenerating it."
       next if log_line.include? 'Could not find state average'
 
       if hpxml_path.include? 'base-atticroof-conditioned.xml'
