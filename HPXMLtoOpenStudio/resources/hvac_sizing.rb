@@ -1155,7 +1155,7 @@ class HVACSizing
 
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
-          HPXML::LocationManufacturedHomeBelly].include? duct.Location
+           HPXML::LocationManufacturedHomeBelly].include? duct.Location
       space_values = Geometry.get_temperature_scheduled_space_values(duct.Location)
       dse_Fregain = space_values[:f_regain]
 
