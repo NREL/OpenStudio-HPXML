@@ -4437,7 +4437,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
                                cfis_addtl_runtime_operating_mode: HPXML::CFISModeSupplementalFan,
-                               cfis_supplemental_fan_idref: hpxml.ventilation_fans.select { |f| f.fan_type == HPXML::MechVentTypeExhaust }[0].id,
+                               cfis_supplemental_fan_idref: hpxml.ventilation_fans.find { |f| f.fan_type == HPXML::MechVentTypeExhaust }.id,
                                distribution_system_idref: 'HVACDistribution2')
     # Test ventilation system w/ zero airflow and hours
     hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",

@@ -2040,7 +2040,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml = _create_hpxml('base-mechvent-cfis.xml')
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
@@ -2081,7 +2081,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml = _create_hpxml('base-mechvent-erv.xml')
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 20.0
     vent_fan.fan_power = 45.0
@@ -2101,13 +2101,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_local_ventilation_fans
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-mechvent-bath-kitchen-fans.xml')
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
     kitchen_fan.rated_flow_rate = 300
     kitchen_fan.fan_power = 20
     kitchen_fan.start_hour = 12
     kitchen_fan.count = 2
     kitchen_fan.hours_in_operation = 2
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
     bath_fan.rated_flow_rate = 80
     bath_fan.fan_power = 33
     bath_fan.start_hour = 6
@@ -2138,7 +2138,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_whole_house_fan
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-mechvent-whole-house-fan.xml')
-    whf = hpxml.ventilation_fans.select { |f| f.used_for_seasonal_cooling_load_reduction }[0]
+    whf = hpxml.ventilation_fans.find { |f| f.used_for_seasonal_cooling_load_reduction }
     whf.rated_flow_rate = 3000
     whf.fan_power = 321
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -3173,7 +3173,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_plug_loads
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
-    tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
+    tv_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }
     tv_pl.kwh_per_year = 1000
     tv_pl.usage_multiplier = 1.1
     tv_pl.frac_sensible = 0.6
@@ -3181,7 +3181,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     tv_pl.weekday_fractions = ConstantDaySchedule
     tv_pl.weekend_fractions = ConstantDaySchedule
     tv_pl.monthly_multipliers = ConstantMonthSchedule
-    other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
+    other_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }
     other_pl.kwh_per_year = 2000
     other_pl.usage_multiplier = 1.2
     other_pl.frac_sensible = 0.5
@@ -3189,7 +3189,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     other_pl.weekday_fractions = ConstantDaySchedule
     other_pl.weekend_fractions = ConstantDaySchedule
     other_pl.monthly_multipliers = ConstantMonthSchedule
-    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }[0]
+    veh_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
     veh_pl.kwh_per_year = 4000
     veh_pl.usage_multiplier = 1.3
     veh_pl.frac_sensible = 0.4
@@ -3197,7 +3197,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     veh_pl.weekday_fractions = ConstantDaySchedule
     veh_pl.weekend_fractions = ConstantDaySchedule
     veh_pl.monthly_multipliers = ConstantMonthSchedule
-    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
+    wellpump_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }
     wellpump_pl.kwh_per_year = 3000
     wellpump_pl.usage_multiplier = 1.4
     wellpump_pl.frac_sensible = 0.3
@@ -3233,7 +3233,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_fuel_loads
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
-    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
+    gg_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }
     gg_fl.therm_per_year = 1000
     gg_fl.usage_multiplier = 0.9
     gg_fl.frac_sensible = 0.6
@@ -3241,7 +3241,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     gg_fl.weekday_fractions = ConstantDaySchedule
     gg_fl.weekend_fractions = ConstantDaySchedule
     gg_fl.monthly_multipliers = ConstantMonthSchedule
-    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
+    gl_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }
     gl_fl.therm_per_year = 2000
     gl_fl.usage_multiplier = 0.8
     gl_fl.frac_sensible = 0.5
@@ -3249,7 +3249,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     gl_fl.weekday_fractions = ConstantDaySchedule
     gl_fl.weekend_fractions = ConstantDaySchedule
     gl_fl.monthly_multipliers = ConstantMonthSchedule
-    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
+    gf_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }
     gf_fl.therm_per_year = 3000
     gf_fl.usage_multiplier = 0.7
     gf_fl.frac_sensible = 0.4
@@ -4063,7 +4063,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate,
                                      cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
@@ -4082,7 +4082,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_mech_vent_suppl_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate)
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     if hours_in_operation.nil?
@@ -4095,7 +4095,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_kitchen_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
 
     assert_equal(count, kitchen_fan.count)
     assert_equal(flow_rate, kitchen_fan.rated_flow_rate.to_f + kitchen_fan.calculated_flow_rate.to_f + kitchen_fan.tested_flow_rate.to_f + kitchen_fan.delivered_ventilation.to_f)
@@ -4105,7 +4105,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_bath_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
 
     assert_equal(count, bath_fan.count)
     assert_equal(flow_rate, bath_fan.rated_flow_rate.to_f + bath_fan.calculated_flow_rate.to_f + bath_fan.tested_flow_rate.to_f + bath_fan.delivered_ventilation.to_f)
@@ -4115,7 +4115,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_whole_house_fan_values(hpxml, flow_rate, fan_power)
-    whf = hpxml.ventilation_fans.select { |f| f.used_for_seasonal_cooling_load_reduction }[0]
+    whf = hpxml.ventilation_fans.find { |f| f.used_for_seasonal_cooling_load_reduction }
 
     assert_equal(flow_rate, whf.rated_flow_rate.to_f + whf.calculated_flow_rate.to_f + whf.tested_flow_rate.to_f + whf.delivered_ventilation.to_f)
     assert_equal(fan_power, whf.fan_power)
@@ -4626,7 +4626,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_plug_load_values(hpxml, load_type, kwh_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == load_type }[0]
+    pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == load_type }
 
     assert_in_epsilon(kwh_per_year, pl.kwh_per_year, 0.01)
     assert_equal(usage_multiplier, pl.usage_multiplier)
@@ -4638,7 +4638,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_fuel_load_values(hpxml, load_type, therm_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == load_type }[0]
+    fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == load_type }
 
     assert_in_epsilon(therm_per_year, fl.therm_per_year, 0.01)
     assert_equal(usage_multiplier, fl.usage_multiplier)
