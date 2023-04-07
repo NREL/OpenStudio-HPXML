@@ -490,7 +490,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.windows[1].overhangs_distance_to_bottom_of_window = 1.0
       elsif ['lighting-fractions'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        int_cfl = hpxml.lighting_groups.select { |lg| lg.location == HPXML::LocationInterior && lg.lighting_type == HPXML::LightingTypeCFL }[0]
+        int_cfl = hpxml.lighting_groups.find { |lg| lg.location == HPXML::LocationInterior && lg.lighting_type == HPXML::LightingTypeCFL }
         int_cfl.fraction_of_units_in_location = 0.8
       elsif ['missing-cfis-supplemental-fan'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis.xml'))
@@ -865,22 +865,22 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                    distribution_system_idref: hpxml.hvac_distributions[0].id)
       elsif ['cfis-invalid-supplemental-fan'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
-        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.fan_type = HPXML::MechVentTypeBalanced
       elsif ['cfis-invalid-supplemental-fan2'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
-        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.used_for_whole_building_ventilation = false
         suppl_fan.used_for_garage_ventilation = true
       elsif ['cfis-invalid-supplemental-fan3'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
-        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.is_shared_system = true
         suppl_fan.fraction_recirculation = 0.0
         suppl_fan.in_unit_flow_rate = suppl_fan.tested_flow_rate / 2.0
       elsif ['cfis-invalid-supplemental-fan4'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
-        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.hours_in_operation = 12.0
       elsif ['dehumidifier-setpoints'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-dehumidifier-multiple.xml'))
@@ -1296,7 +1296,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       # Create HPXML object
       if ['cfis-undersized-supplemental-fan'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
-        suppl_fan = hpxml.ventilation_fans.select { |f| f.is_cfis_supplemental_fan? }[0]
+        suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.tested_flow_rate = 90.0
       elsif ['hvac-setpoint-adjustments'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))

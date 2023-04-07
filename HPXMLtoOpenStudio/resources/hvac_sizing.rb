@@ -2308,7 +2308,7 @@ class HVACSizing
       end
       if hpxml_hvac.is_a?(HPXML::HeatingSystem) && hpxml_hvac.is_heat_pump_backup_system
         # Use the same load fractions as the heat pump
-        heat_pump = @hpxml.heat_pumps.select { |hp| hp.backup_system_idref == hpxml_hvac.id }[0]
+        heat_pump = @hpxml.heat_pumps.find { |hp| hp.backup_system_idref == hpxml_hvac.id }
         hvac.HeatingLoadFraction = heat_pump.fraction_heat_load_served
         hvac.CoolingLoadFraction = heat_pump.fraction_cool_load_served
       end
@@ -2627,10 +2627,10 @@ class HVACSizing
     if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? location
       # Vented space
       if location == HPXML::LocationCrawlspaceVented
-        vented_crawl = @hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }[0]
+        vented_crawl = @hpxml.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
         sla = vented_crawl.vented_crawlspace_sla
       else
-        vented_attic = @hpxml.attics.select { |f| f.attic_type == HPXML::AtticTypeVented }[0]
+        vented_attic = @hpxml.attics.find { |f| f.attic_type == HPXML::AtticTypeVented }
         if not vented_attic.vented_attic_sla.nil?
           sla = vented_attic.vented_attic_sla
         else
