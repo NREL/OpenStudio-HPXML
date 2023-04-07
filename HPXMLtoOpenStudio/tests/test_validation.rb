@@ -112,6 +112,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
+                            'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
                             'incomplete-integrated-heating' => ['Expected 1 element(s) for xpath: IntegratedHeatingSystemFractionHeatLoadServed'],
                             'invalid-assembly-effective-rvalue' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-battery-capacities-ah' => ['Expected UsableCapacity to be less than NominalCapacity'],
@@ -358,6 +359,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.cooling_systems[0].primary_system = true
         hpxml.heat_pumps[-1].primary_heating_system = false
         hpxml.heat_pumps[-1].primary_cooling_system = false
+      elsif ['hvac-sizing-humidity-setpoint'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.header.manualj_humidity_setpoint = 50
       elsif ['incomplete-integrated-heating'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ptac-with-heating-electricity.xml'))
         hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = nil
@@ -626,6 +630,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                               'lighting-groups-missing' => ['No interior lighting specified, the model will not include interior lighting energy use.',
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
+                              'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
@@ -736,6 +741,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.lighting_groups.reverse_each do |lg|
           lg.delete
         end
+      elsif ['missing-attached-surfaces'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+        hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0
@@ -802,8 +811,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-skylights-physical-properties' => ["Could not lookup UFactor and SHGC for skylight 'Skylight2'."],
                             'invalid-runperiod' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-shading-season' => ['Shading Summer Season End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-vacancy-period' => ['Vacancy Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-power-outage-period' => ['Power Outage Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
+                            'invalid-unavailable-period' => ['Unavailable Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
                             'inverter-unequal-efficiencies' => ['Expected all InverterEfficiency values to be equal.'],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
@@ -835,7 +843,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'unattached-shared-clothes-washer-water-heater' => ["Attached water heating system 'foobar' not found for clothes washer"],
                             'unattached-shared-dishwasher-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for dishwasher"],
                             'unattached-shared-dishwasher-water-heater' => ["Attached water heating system 'foobar' not found for dishwasher"],
-                            'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."] }
+                            'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."],
+                            'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -1015,18 +1024,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.header.shading_summer_begin_day = 10
         hpxml.header.shading_summer_end_month = 4
         hpxml.header.shading_summer_end_day = 31
-      elsif ['invalid-vacancy-period'].include? error_case
+      elsif ['invalid-unavailable-period'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.vacancy_periods.add(begin_month: 3,
-                                         begin_day: 10,
-                                         end_month: 4,
-                                         end_day: 31)
-      elsif ['invalid-power-outage-period'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.header.power_outage_periods.add(begin_month: 3,
-                                              begin_day: 10,
-                                              end_month: 4,
-                                              end_day: 31)
+        hpxml.header.unavailable_periods.add(column_name: 'Power Outage',
+                                             begin_month: 3,
+                                             begin_day: 10,
+                                             end_month: 4,
+                                             end_day: 31)
       elsif ['invalid-schema-version'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
       elsif ['invalid-skylights-physical-properties'].include? error_case
@@ -1188,6 +1192,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['unattached-window'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.windows[0].wall_idref = 'foobar'
+      elsif ['unavailable-period-missing-column'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple-vacancy.xml'))
+        hpxml.header.unavailable_periods[0].column_name = 'foobar'
       else
         fail "Unhandled case: #{error_case}."
       end
