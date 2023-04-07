@@ -2646,11 +2646,16 @@ class OSModel
 
   def self.set_foundation_and_walls_top()
     @foundation_top = 0
+    @hpxml.foundations.each do |foundation|
+      if [HPXML::FoundationTypeAmbient, HPXML::FoundationTypeBellyAndWing].include?(foundation.foundation_type)
+        @foundation_top = 2.0
+      end
+    end
     @hpxml.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       @foundation_top = top if top > @foundation_top
     end
-    @walls_top = @foundation_top + 8.0 * @ncfl_ag
+    @walls_top = @foundation_top + @hpxml.building_construction.average_ceiling_height * @ncfl_ag
   end
 
   def self.set_heating_and_cooling_seasons()
