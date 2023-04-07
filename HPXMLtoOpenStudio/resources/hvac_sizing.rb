@@ -1239,7 +1239,6 @@ class HVACSizing
       dse_Fregains[duct.Location] = get_duct_regain_factor(duct)
     end
     fregain_values = { HPXML::DuctTypeSupply => dse_Fregains, HPXML::DuctTypeReturn => dse_Fregains }
-    p fregain_values
     dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
 
     # Initialize for the iteration
