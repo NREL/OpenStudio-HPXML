@@ -50,7 +50,6 @@
               <NeighborBuilding>
                 <Azimuth>0</Azimuth>
                 <Distance>10.0</Distance>
-                <Height>0.0</Height>
               </NeighborBuilding>
             </Neighbors>
           </extension>

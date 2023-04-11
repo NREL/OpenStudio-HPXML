@@ -202,25 +202,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     level_choices << 'Middle'
     level_choices << 'Top'
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_left_wall_is_adiabatic', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_left_wall_is_adiabatic', false)
     arg.setDisplayName('Geometry: Unit Left Wall Is Adiabatic')
     arg.setDescription('Presence of an adiabatic left wall.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_right_wall_is_adiabatic', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_right_wall_is_adiabatic', false)
     arg.setDisplayName('Geometry: Unit Right Wall Is Adiabatic')
     arg.setDescription('Presence of an adiabatic right wall.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_front_wall_is_adiabatic', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_front_wall_is_adiabatic', false)
     arg.setDisplayName('Geometry: Unit Front Wall Is Adiabatic')
     arg.setDescription('Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_back_wall_is_adiabatic', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_back_wall_is_adiabatic', false)
     arg.setDisplayName('Geometry: Unit Back Wall Is Adiabatic')
     arg.setDescription('Presence of an adiabatic back wall.')
     arg.setDefaultValue(false)
@@ -648,9 +648,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     roof_radiant_barrier_grade_choices << '2'
     roof_radiant_barrier_grade_choices << '3'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, false)
     arg.setDisplayName('Roof: Radiant Barrier Grade')
-    arg.setDescription('The grade of the radiant barrier, if it exists.')
+    arg.setDescription('The grade of the radiant barrier. If not provided, the OS-HPXML default is used.')
     arg.setDefaultValue('1')
     args << arg
 
@@ -1136,7 +1136,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_is_ducted', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_is_ducted', false)
     arg.setDisplayName('Cooling System: Is Ducted')
     arg.setDescription("Whether the cooling system is ducted or not. Only used for #{HPXML::HVACTypeMiniSplitAirConditioner} and #{HPXML::HVACTypeEvaporativeCooler}. It's assumed that #{HPXML::HVACTypeCentralAirConditioner} is ducted, and #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} are not ducted.")
     arg.setDefaultValue(false)
@@ -1905,7 +1905,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     recirculation_control_type_choices << HPXML::DHWRecirControlTypeSensor
     recirculation_control_type_choices << HPXML::DHWRecirControlTypeManual
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_recirc_control_type', recirculation_control_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_recirc_control_type', recirculation_control_type_choices, false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Control Type')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the type of hot water recirculation control, if any.")
     arg.setDefaultValue(HPXML::DHWRecirControlTypeNone)
@@ -1946,13 +1946,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('none')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dwhr_equal_flow', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dwhr_equal_flow', false)
     arg.setDisplayName('Drain Water Heat Recovery: Equal Flow')
     arg.setDescription('Whether the drain water heat recovery has equal flow.')
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dwhr_efficiency', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dwhr_efficiency', false)
     arg.setDisplayName('Drain Water Heat Recovery: Efficiency')
     arg.setUnits('Frac')
     arg.setDescription('The efficiency of the drain water heat recovery.')
@@ -3085,6 +3085,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args[:apply_validation] = args[:apply_validation].is_initialized ? args[:apply_validation].get : false
     args[:apply_defaults] = args[:apply_defaults].is_initialized ? args[:apply_defaults].get : false
     args[:apply_validation] = true if args[:apply_defaults]
+    args[:geometry_unit_left_wall_is_adiabatic] = (args[:geometry_unit_left_wall_is_adiabatic].is_initialized && args[:geometry_unit_left_wall_is_adiabatic].get)
+    args[:geometry_unit_right_wall_is_adiabatic] = (args[:geometry_unit_right_wall_is_adiabatic].is_initialized && args[:geometry_unit_right_wall_is_adiabatic].get)
+    args[:geometry_unit_front_wall_is_adiabatic] = (args[:geometry_unit_front_wall_is_adiabatic].is_initialized && args[:geometry_unit_front_wall_is_adiabatic].get)
+    args[:geometry_unit_back_wall_is_adiabatic] = (args[:geometry_unit_back_wall_is_adiabatic].is_initialized && args[:geometry_unit_back_wall_is_adiabatic].get)
+    args[:cooling_system_is_ducted] = (args[:cooling_system_is_ducted].is_initialized && args[:cooling_system_is_ducted].get)
+    args[:heat_pump_is_ducted] = (args[:heat_pump_is_ducted].is_initialized && args[:heat_pump_is_ducted].get)
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -3989,8 +3995,8 @@ class HPXMLFile
       end
 
       radiant_barrier = args[:roof_radiant_barrier]
-      if args[:roof_radiant_barrier]
-        radiant_barrier_grade = args[:roof_radiant_barrier_grade]
+      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
+        radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
       end
 
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
@@ -4938,8 +4944,8 @@ class HPXMLFile
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         air_distribution_systems << heat_pump
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump.heat_pump_type)
-        if args[:heat_pump_is_ducted].is_initialized
-          air_distribution_systems << heat_pump if args[:heat_pump_is_ducted].get
+        if args[:heat_pump_is_ducted]
+          air_distribution_systems << heat_pump if args[:heat_pump_is_ducted]
         end
       end
     end
@@ -5450,8 +5456,12 @@ class HPXMLFile
 
     if args[:dwhr_facilities_connected] != 'none'
       dwhr_facilities_connected = args[:dwhr_facilities_connected]
-      dwhr_equal_flow = args[:dwhr_equal_flow]
-      dwhr_efficiency = args[:dwhr_efficiency]
+      if args[:dwhr_equal_flow].is_initialized
+        dwhr_equal_flow = args[:dwhr_equal_flow].get
+      end
+      if args[:dwhr_efficiency].is_initialized
+        dwhr_efficiency = args[:dwhr_efficiency].get
+      end
     end
 
     if args[:hot_water_distribution_system_type] == HPXML::DHWDistTypeStandard
@@ -5459,7 +5469,9 @@ class HPXMLFile
         standard_piping_length = args[:hot_water_distribution_standard_piping_length].get
       end
     else
-      recirculation_control_type = args[:hot_water_distribution_recirc_control_type]
+      if args[:hot_water_distribution_recirc_control_type].is_initialized
+        recirculation_control_type = args[:hot_water_distribution_recirc_control_type].get
+      end
 
       if args[:hot_water_distribution_recirc_piping_length].is_initialized
         recirculation_piping_length = args[:hot_water_distribution_recirc_piping_length].get
