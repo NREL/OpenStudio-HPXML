@@ -1490,7 +1490,7 @@ class OSModel
       next unless heating_system.is_heat_pump_backup_system
 
       # Store OS object for later use
-      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+      equipment_list = model.getZoneHVACEquipmentLists.find { |el| el.thermalZone == living_zone }
       @heat_pump_backup_system_object = equipment_list.equipment[-1]
     end
   end
@@ -1538,7 +1538,7 @@ class OSModel
 
       next unless not heat_pump.backup_system.nil?
 
-      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+      equipment_list = model.getZoneHVACEquipmentLists.find { |el| el.thermalZone == living_zone }
 
       # Set priority to be last (i.e., after the heat pump that it is backup for)
       equipment_list.setHeatingPriority(@heat_pump_backup_system_object, 99)

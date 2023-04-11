@@ -1847,7 +1847,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if table['TableName'] != table_name
 
         cols = table['Cols']
-        index = cols.each_index.select { |i| cols[i] == "#{col_name} [#{units}]" }[0]
+        index = cols.each_index.find { |i| cols[i] == "#{col_name} [#{units}]" }
         row_names.each do |row_name|
           vals << table['Rows'][row_name][index].to_f
         end

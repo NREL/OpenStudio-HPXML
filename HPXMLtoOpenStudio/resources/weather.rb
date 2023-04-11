@@ -22,7 +22,7 @@ class WeatherDesign
 end
 
 class WeatherProcess
-  def initialize(epw_path: nil, runner: nil)
+  def initialize(epw_path:, runner: nil)
     @header = WeatherHeader.new
     @data = WeatherData.new
     @design = WeatherDesign.new
@@ -53,6 +53,9 @@ class WeatherProcess
     @header.Altitude = UnitConversions.convert(epw_file.elevation, 'm', 'ft')
     @header.LocalPressure = Math::exp(-0.0000368 * @header.Altitude) # atm
     @header.RecordsPerHour = epw_file.recordsPerHour
+    if @header.RecordsPerHour != 1
+      fail "Unexpected records per hour: #{@header.RecordsPerHour}."
+    end
 
     epw_file_data = epw_file.data
 
