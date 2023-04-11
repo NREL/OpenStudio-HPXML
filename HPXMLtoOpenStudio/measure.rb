@@ -177,22 +177,14 @@ class OSModel
 
     # Init
     check_file_references(hpxml_path)
-<<<<<<< HEAD
-	#Fixme: do we need to check system number of speed?
+    # Fixme: do we need to check system number of speed?
     offset_db = @hpxml.hvac_controls.size == 0 ? nil : @hpxml.hvac_controls[0].onoff_thermostat_deadband
-    weather, epw_file = Location.apply_weather_file(model, epw_path, cache_path)
-    @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml.header.schedules_filepaths,
-                                        year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
-                                        vacancy_periods: @hpxml.header.vacancy_periods,
-                                        offset_db: offset_db)
-=======
     epw_file = Location.apply_weather_file(model, epw_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
-                                        unavailable_periods: @hpxml.header.unavailable_periods)
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
+                                        unavailable_periods: @hpxml.header.unavailable_periods,
+                                        offset_db: offset_db)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
     validate_emissions_files()
     Location.apply(model, weather, epw_file, @hpxml)
@@ -1427,11 +1419,7 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
-<<<<<<< HEAD
-                                                                 living_zone, is_ddb_control)
-=======
-                                                                 living_zone, @hvac_unavailable_periods)
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
+                                                                 living_zone, @hvac_unavailable_periods, is_ddb_control)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -1530,23 +1518,15 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                                                      sequential_heat_load_fracs, sequential_cool_load_fracs,
-<<<<<<< HEAD
-                                                                     living_zone)
-=======
                                                                      living_zone, @hvac_unavailable_periods)
 
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
              HPXML::HVACTypeHeatPumpPTHP,
              HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
-<<<<<<< HEAD
-                                                                 living_zone, @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
-=======
-                                                                 living_zone, @hvac_unavailable_periods)
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
+                                                                 living_zone, @hvac_unavailable_periods, @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
@@ -1941,7 +1921,8 @@ class OSModel
       else
         line = "If ((DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day}))"
       end
-<<<<<<< HEAD
+      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
+      program.addLine(line)
       if onoff_thermostat_deadband > 0.0
         program.addLine("  If #{zone_air_temp_sensor.name} < (#{sensor_htg_spt.name} - #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
         program.addLine("    Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
@@ -1949,11 +1930,6 @@ class OSModel
       else
         program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
       end
-=======
-      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
-      program.addLine(line)
-      program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
       program.addLine('EndIf')
     end
     if @hpxml.total_fraction_cool_load_served > 0
@@ -1962,7 +1938,8 @@ class OSModel
       else
         line = "If ((DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day}))"
       end
-<<<<<<< HEAD
+      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
+      program.addLine(line)
       if onoff_thermostat_deadband > 0.0
         program.addLine("  If #{zone_air_temp_sensor.name} > (#{sensor_clg_spt.name} + #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
         program.addLine("    Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
@@ -1970,11 +1947,6 @@ class OSModel
       else
         program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
       end
-=======
-      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
-      program.addLine(line)
-      program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
->>>>>>> a7a86bc09105701710fce8fb6c8177f94700d414
       program.addLine('EndIf')
     end
 
