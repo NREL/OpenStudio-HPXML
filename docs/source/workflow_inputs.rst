@@ -69,7 +69,7 @@ Default values would be used for the refrigerator energy use, location, and sche
 
 These defaults will be reflected in the EnergyPlus simulation results.
 
- .. note::
+.. note::
 
   The OpenStudio-HPXML workflow generally treats missing *elements* differently than missing *values*.
   For example, if there is no ``Refrigerator`` element defined, the simulation will proceed without refrigerator energy use.
@@ -125,6 +125,52 @@ HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HV
   .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
          If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
+
+If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl/ManualJInputs``.
+
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  Element                            Type      Units   Constraints  Required  Default       Description
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
+  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
+  ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
+  ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
+  ``HumiditySetpoint``               double    frac    0 - 1        No        See [#]_      Conditioned space relative humidity
+  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
+  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
+  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
+  =================================  ========  ======  ===========  ========  ============  ============================================
+
+  .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
+  .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
+  .. [#] If HumiditySetpoint not provided, defaults to 0.5 unless there is a dehumidifier with a lower setpoint, in which case that value is used.
+  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
+         This default represents loads that normally occur during the early evening in mid-summer.
+         Additional adjustments or custom internal loads can instead be specified here.
+  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
+         Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
+
+.. _shadingcontrol:
+
+HPXML Shading Control
+*********************
+
+Shading controls for window and skylight summer/winter shading coefficients are entered in ``/HPXML/SoftwareInfo/extension/ShadingControl``.
+If not provided, summer will be default based on the cooling season defined in the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_, using monthly average temperatures.
+The remainder of the year is winter.
+
+  ====================================  ========  =======  =============  ========  =======  =====================================
+  Element                               Type      Units    Constraints    Required  Default  Description
+  ====================================  ========  =======  =============  ========  =======  =====================================
+  ``SummerBeginMonth``                  integer            1 - 12         Yes                Summer shading start date
+  ``SummerBeginDayOfMonth``             integer            1 - 31         Yes                Summer shading start date
+  ``SummerEndMonth``                    integer            1 - 12         Yes                Summer shading end date
+  ``SummerEndDayOfMonth``               integer            1 - 31         Yes                Summer shading end date
+  ====================================  ========  =======  =============  ========  =======  =====================================
 
 HPXML Schedules
 ***************
@@ -425,55 +471,37 @@ If the PV compensation type is feed-in tariff, additional information can be ent
          Some utilities/regions may have a feed-in tariff policy where compensation occurs for excess PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than full PV production.
          OpenStudio-HPXML is currently unable to calculate utility bills for such a feed-in tariff policy.
 
-HPXML Vacancy Periods
-*********************
+HPXML Unavailable Periods
+*************************
 
-One or more vacancy periods can be entered as an ``/HPXML/SoftwareInfo/extension/VacancyPeriods/VacancyPeriod``.
-If not entered, the simulation will not include occupant vacancies.
-Natural ventilation is always unavailable during a vacancy period.
-
-  ====================================  ========  =======  =============  ========  ========  ===========
-  Element                               Type      Units    Constraints    Required  Default   Description
-  ====================================  ========  =======  =============  ========  ========  ===========
-  ``BeginMonth``                        integer            1 - 12         Yes                 Begin month
-  ``BeginDayOfMonth``                   integer            1 - 31         Yes                 Begin day
-  ``BeginHourOfDay``                    integer            0 - 23         No        0         Begin hour
-  ``EndMonth``                          integer            1 - 12         Yes                 End month
-  ``EndDayOfMonth``                     integer            1 - 31         Yes                 End day
-  ``EndHourOfDay``                      integer            1 - 24         No        24        End hour
-  ====================================  ========  =======  =============  ========  ========  ===========
-
-See the "Affected By Vacancy" column in the table below to understand which components are affected by vacancy periods.
-
-.. csv-table::
-   :file: ../../HPXMLtoOpenStudio/resources/data/schedules_affected.csv
-   :header-rows: 1
-
-HPXML Power Outage Periods
-**************************
-
-One or more power outage periods can be entered as an ``/HPXML/SoftwareInfo/extension/PowerOutagePeriods/PowerOutagePeriod``.
-If not entered, the simulation will not include power outages.
+One or more unavailable periods (e.g., vacancies, power outages) can be entered as an ``/HPXML/SoftwareInfo/extension/UnavailablePeriods/UnavailablePeriod``.
+If not entered, the simulation will not include unavailable periods.
 
   ====================================  ========  =======  =============  ========  ================  ===========
   Element                               Type      Units    Constraints    Required  Default           Description
   ====================================  ========  =======  =============  ========  ================  ===========
+  ``ColumnName``                        string                            Yes                         Column name associated with unavailable_periods.csv below
   ``BeginMonth``                        integer            1 - 12         Yes                         Begin month
   ``BeginDayOfMonth``                   integer            1 - 31         Yes                         Begin day
   ``BeginHourOfDay``                    integer            0 - 23         No        0                 Begin hour
   ``EndMonth``                          integer            1 - 12         Yes                         End month
   ``EndDayOfMonth``                     integer            1 - 31         Yes                         End day
   ``EndHourOfDay``                      integer            1 - 24         No        24                End hour
-  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability during the power outage period
+  ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability
   ====================================  ========  =======  =============  ========  ================  ===========
 
   .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
 
-See the "Affected By Outage" column in the table above to understand which components are affected by power outage periods.
+See the table below to understand which components are affected by an unavailable period with a given ``ColumnName``.
+You can create an additional column in the CSV file to define another unavailable period type.
+
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/unavailable_periods.csv
+   :header-rows: 1
 
 .. warning::
 
-  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during a power outage.
+  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
 .. _buildingsite:
 
@@ -673,6 +701,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
   .. [#] If Aext not provided and TypeOfInfiltrationTest is "compartmentalization test", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF space) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
+         Note that all attached surfaces, even adiabatic surfaces, must be defined in the HPXML file.
          If single-family detached or TypeOfInfiltrationTest is "guarded test", Aext is 1.
 
 In addition, one of the following air leakage types must also be defined:
@@ -1058,8 +1087,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
-  .. [#] Summer season defined as May 1 - Sep 30 in the northern hemisphere and Nov 1 - Mar 31 in the southern hemisphere.
-         Winter season defined as the remainder of the year.
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] GlassType choices are "clear" or "low-e".
@@ -1166,8 +1194,7 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
-  .. [#] Summer season defined as May 1 - Sep 30 in the northern hemisphere and Nov 1 - Mar 31 in the southern hemisphere.
-         Winter season defined as the remainder of the year.
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] GlassType choices are "clear" or "low-e".
          The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          - **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
@@ -1385,7 +1412,11 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
-         
+
+  .. note::
+
+    The choice of hydronic distribution type (radiator vs baseboard vs radiant panels) does not affect simulation results;
+    it is currently only used to know if there's an attached water loop heat pump or not.
 
 If an in-unit boiler if specified, additional information is entered in ``HeatingSystem``.
 

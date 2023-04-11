@@ -11,24 +11,22 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
-      </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
         </UtilityBillScenario>
       </UtilityBillScenarios>
-      <PowerOutagePeriods>
-        <PowerOutagePeriod>
+      <UnavailablePeriods>
+        <UnavailablePeriod>
+          <ColumnName>Power Outage</ColumnName>
           <BeginMonth>7</BeginMonth>
           <BeginDayOfMonth>1</BeginDayOfMonth>
           <BeginHourOfDay>5</BeginHourOfDay>
           <EndMonth>7</EndMonth>
           <EndDayOfMonth>31</EndDayOfMonth>
           <EndHourOfDay>14</EndHourOfDay>
-        </PowerOutagePeriod>
-      </PowerOutagePeriods>
+        </UnavailablePeriod>
+      </UnavailablePeriods>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -129,7 +127,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1509.4</Area>
+            <Area>1509.3</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
