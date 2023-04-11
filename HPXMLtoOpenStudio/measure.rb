@@ -178,6 +178,7 @@ class OSModel
     # Init
     check_file_references(hpxml_path)
     # Fixme: do we need to check system number of speed?
+    offset_db = @hpxml.hvac_controls.size == 0 ? nil : @hpxml.hvac_controls[0].onoff_thermostat_deadband
     epw_file = Location.apply_weather_file(model, epw_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
