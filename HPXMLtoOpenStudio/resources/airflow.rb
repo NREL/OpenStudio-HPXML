@@ -205,7 +205,7 @@ class Airflow
       fail 'Unexpected error.'
     end
 
-    if measurement.type_of_test == HPXML::InfiltrationTestCompartmentalization
+    if measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal
       a_ext = measurement.a_ext # Adjustment ratio for SFA/MF units; exterior envelope area divided by total envelope area
     end
     a_ext = 1.0 if a_ext.nil?
