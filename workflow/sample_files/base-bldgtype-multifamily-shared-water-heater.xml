@@ -11,9 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <AdditionalProperties>
-        <ParentHPXMLFile>base-bldgtype-multifamily.xml</ParentHPXMLFile>
-      </AdditionalProperties>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
@@ -316,7 +313,7 @@
             <NumberofUnitsServed>6</NumberofUnitsServed>
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
+            <HeatingCapacity>18767.0</HeatingCapacity>
             <EnergyFactor>0.59</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
             <HotWaterTemperature>125.0</HotWaterTemperature>

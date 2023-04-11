@@ -3045,6 +3045,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('combine_like_surfaces', false)
+    arg.setDisplayName('Combine like surfaces?')
+    arg.setDescription('If true, combines like surfaces to simplify the HPXML file generated.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply Default Values?')
     arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file. Setting to true will also force validation of the HPXML output file before applying OS-HPXML default values.')
@@ -3376,25 +3382,8 @@ class HPXMLFile
     set_misc_fuel_loads_fireplace(hpxml, args)
     set_pool(hpxml, args)
     set_hot_tub(hpxml, args)
-
-    # Collapse surfaces so that we don't get, e.g., individual windows
-    # or the front wall split because of the door. Exclude foundation walls
-    # from the list so we get all 4 foundation walls.
-    hpxml.collapse_enclosure_surfaces([:roofs, :walls, :rim_joists, :floors,
-                                       :slabs, :windows, :skylights, :doors])
-
-    # After surfaces are collapsed, round all areas
-    (hpxml.roofs +
-     hpxml.rim_joists +
-     hpxml.walls +
-     hpxml.foundation_walls +
-     hpxml.floors +
-     hpxml.slabs +
-     hpxml.windows +
-     hpxml.skylights +
-     hpxml.doors).each do |s|
-      s.area = s.area.round(1)
-    end
+    collapse_surfaces(hpxml, args)
+    renumber_hpxml_ids(hpxml)
 
     hpxml_doc = hpxml.to_oga()
     XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -6226,6 +6215,91 @@ class HPXMLFile
                        heater_load_units: heater_load_units,
                        heater_load_value: heater_load_value,
                        heater_usage_multiplier: heater_usage_multiplier)
+  end
+
+  def self.collapse_surfaces(hpxml, args)
+    if args[:combine_like_surfaces].is_initialized && args[:combine_like_surfaces].get
+      # Collapse some surfaces whose azimuth is a minor effect to simplify HPXMLs.
+      (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
+        surface.azimuth = nil
+      end
+      hpxml.collapse_enclosure_surfaces()
+    else
+      # Collapse surfaces so that we don't get, e.g., individual windows
+      # or the front wall split because of the door. Exclude foundation walls
+      # from the list so we get all 4 foundation walls.
+      hpxml.collapse_enclosure_surfaces([:roofs, :walls, :rim_joists, :floors,
+                                         :slabs, :windows, :skylights, :doors])
+    end
+
+    # After surfaces are collapsed, round all areas
+    (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+      s.area = s.area.round(1)
+    end
+  end
+
+  def self.renumber_hpxml_ids(hpxml)
+    # Renumber surfaces
+    { hpxml.walls => 'Wall',
+      hpxml.foundation_walls => 'FoundationWall',
+      hpxml.rim_joists => 'RimJoist',
+      hpxml.floors => 'Floor',
+      hpxml.roofs => 'Roof',
+      hpxml.slabs => 'Slab',
+      hpxml.windows => 'Window',
+      hpxml.doors => 'Door',
+      hpxml.skylights => 'Skylight' }.each do |surfs, surf_name|
+      surfs.each_with_index do |surf, i|
+        (hpxml.attics + hpxml.foundations).each do |attic_or_fnd|
+          if attic_or_fnd.respond_to?(:attached_to_roof_idrefs) && !attic_or_fnd.attached_to_roof_idrefs.nil? && !attic_or_fnd.attached_to_roof_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_roof_idrefs << "#{surf_name}#{i + 1}"
+          end
+          if attic_or_fnd.respond_to?(:attached_to_wall_idrefs) && !attic_or_fnd.attached_to_wall_idrefs.nil? && !attic_or_fnd.attached_to_wall_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_wall_idrefs << "#{surf_name}#{i + 1}"
+          end
+          if attic_or_fnd.respond_to?(:attached_to_rim_joist_idrefs) && !attic_or_fnd.attached_to_rim_joist_idrefs.nil? && !attic_or_fnd.attached_to_rim_joist_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_rim_joist_idrefs << "#{surf_name}#{i + 1}"
+          end
+          if attic_or_fnd.respond_to?(:attached_to_floor_idrefs) && !attic_or_fnd.attached_to_floor_idrefs.nil? && !attic_or_fnd.attached_to_floor_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_floor_idrefs << "#{surf_name}#{i + 1}"
+          end
+          if attic_or_fnd.respond_to?(:attached_to_slab_idrefs) && !attic_or_fnd.attached_to_slab_idrefs.nil? && !attic_or_fnd.attached_to_slab_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_slab_idrefs << "#{surf_name}#{i + 1}"
+          end
+          if attic_or_fnd.respond_to?(:attached_to_foundation_wall_idrefs) && !attic_or_fnd.attached_to_foundation_wall_idrefs.nil? && !attic_or_fnd.attached_to_foundation_wall_idrefs.delete(surf.id).nil?
+            attic_or_fnd.attached_to_foundation_wall_idrefs << "#{surf_name}#{i + 1}"
+          end
+        end
+        (hpxml.windows + hpxml.doors).each do |subsurf|
+          if subsurf.respond_to?(:wall_idref) && (subsurf.wall_idref == surf.id)
+            subsurf.wall_idref = "#{surf_name}#{i + 1}"
+          end
+        end
+        hpxml.skylights.each do |subsurf|
+          if subsurf.respond_to?(:roof_idref) && (subsurf.roof_idref == surf.id)
+            subsurf.roof_idref = "#{surf_name}#{i + 1}"
+          end
+        end
+        surf.id = "#{surf_name}#{i + 1}"
+        if surf.respond_to? :insulation_id
+          surf.insulation_id = "#{surf_name}#{i + 1}Insulation"
+        end
+        if surf.respond_to? :perimeter_insulation_id
+          surf.perimeter_insulation_id = "#{surf_name}#{i + 1}PerimeterInsulation"
+        end
+        if surf.respond_to? :under_slab_insulation_id
+          surf.under_slab_insulation_id = "#{surf_name}#{i + 1}UnderSlabInsulation"
+        end
+      end
+    end
   end
 end
 
