@@ -497,14 +497,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_infiltration_compartmentaliztion_test_adjustment
     # Test single-family detached
     hpxml = _create_hpxml('base.xml')
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitTotal
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_infiltration_compartmentalization_test_values(hpxml_default.air_infiltration_measurements[0], nil)
 
     # Test single-family attached not overridden by defaults
     hpxml = _create_hpxml('base-bldgtype-attached.xml')
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitTotal
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
     hpxml.air_infiltration_measurements[0].a_ext = 0.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -523,7 +523,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test multifamily not overridden by defaults
     hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitTotal
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
     hpxml.air_infiltration_measurements[0].a_ext = 0.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1972,7 +1972,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults w/ SFA building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-attached.xml')
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitTotal
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)
@@ -1981,14 +1981,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.4, 78.4)
 
     # Test defaults w/ SFA building, guarded test
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitExterior
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.2, 77.3)
 
     # Test defaults w/ MF building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
-    hpxml.air_infiltration_measurements[0].infiltration_test = HPXML::InfiltrationTypeUnitTotal
+    hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)
