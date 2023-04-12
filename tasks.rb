@@ -19,6 +19,7 @@ def create_hpxmls
   puts "Generating #{csv_data.size} HPXML files..."
 
   csv_data.each_with_index do |csv_row, i|
+    # next unless csv_row['hpxml_file'] == 'base-foundation-belly-wing-skirt.xml'
     puts "[#{i + 1}/#{csv_data.size}] Generating #{csv_row['hpxml_file']}..."
     hpxml_file = csv_row['hpxml_file']
     csv_row['hpxml_path'] = File.join(workflow_dir, csv_row['hpxml_path'], hpxml_file)

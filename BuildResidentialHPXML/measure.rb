@@ -190,6 +190,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeSFD
     unit_type_choices << HPXML::ResidentialTypeSFA
     unit_type_choices << HPXML::ResidentialTypeApartment
+    unit_type_choices << HPXML::ResidentialTypeManufactured
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
     arg.setDisplayName('Geometry: Unit Type')
@@ -326,6 +327,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_type_choices << HPXML::FoundationTypeBasementConditioned
     foundation_type_choices << HPXML::FoundationTypeAmbient
     foundation_type_choices << HPXML::FoundationTypeAboveApartment # I.e., adiabatic
+    foundation_type_choices << HPXML::FoundationTypeBellyAndWing
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', foundation_type_choices, true)
     arg.setDisplayName('Geometry: Foundation Type')
@@ -1439,6 +1441,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherHeatedSpace
     duct_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
+    duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Leakage Units')
@@ -3480,6 +3483,8 @@ class HPXMLFile
       success = Geometry.create_single_family_attached(model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       success = Geometry.create_apartment(model: model, **args)
+    elsif args[:geometry_unit_type] == HPXML::ResidentialTypeManufactured
+      success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     end
     return false if not success
 

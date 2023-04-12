@@ -2103,7 +2103,7 @@ class HPXML < Object
           XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
         elsif @foundation_type == FoundationTypeBellyAndWing
           belly_and_wing = XMLHelper.add_element(foundation_type_el, 'BellyAndWing')
-          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean)
+          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean, @belly_wing_skirt_present_isdefaulted) unless @belly_wing_skirt_present.nil?
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
