@@ -655,7 +655,7 @@ class Airflow
 
   def self.apply_ducts(model, ducts, object, vent_fans_mech)
     ducts.each do |duct|
-      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side, duct.duct_buried_insulation_level) # Convert from nominal to actual R-value
+      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side, duct.buried_level) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
         duct.location = duct.loc_schedule.name.to_s
@@ -2058,7 +2058,7 @@ class Airflow
 end
 
 class Duct
-  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, rvalue)
+  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, rvalue, buried_level)
     @side = side
     @loc_space = loc_space
     @loc_schedule = loc_schedule
@@ -2067,6 +2067,7 @@ class Duct
     @leakage_cfm50 = leakage_cfm50
     @area = area
     @rvalue = rvalue
+    @buried_level = buried_level
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :zone, :location)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :zone, :location, :buried_level)
 end
