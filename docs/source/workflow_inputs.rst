@@ -2151,7 +2151,7 @@ Additional information is entered in each ``Ducts``.
   .. [#] DuctInsulationRValue should not include an exterior air film (i.e., use 0 for an uninsulated duct).
          For buried ducts in attic loose-fill insulation, do not include the attic insulation R-value here; instead use the ``DuctBuriedInsulationLevel`` element.
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
-  .. [#} Whether the ducts are buried in, e.g., attic loose-fill insulation.
+  .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.
          Fully buried ducts have insulation that just covers the top of the ducts.
          Deeply buried ducts have insulation that continues above the top of the ducts.

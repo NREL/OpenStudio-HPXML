@@ -2521,7 +2521,7 @@ class HVACSizing
         d.Area = duct.duct_surface_area * duct.duct_surface_area_multiplier
 
         # Calculate R-value w/ air film
-        d.Rvalue = Airflow.get_duct_insulation_rvalue(duct.duct_insulation_r_value, duct.duct_type, duct.duct_buried_insulation_level)
+        d.Rvalue = Airflow.get_duct_effective_rvalue(duct.duct_insulation_r_value, duct.duct_type, duct.duct_buried_insulation_level)
 
         # Leakage to Outside apportioned to this duct
         if d.Side == HPXML::DuctTypeSupply
@@ -2541,7 +2541,7 @@ class HVACSizing
         d.Side = HPXML::DuctTypeSupply
         d.Location = HPXML::LocationOutside
         d.Area = 0.0
-        d.Rvalue = Airflow.get_duct_insulation_rvalue(0.0, d.Side, HPXML::DuctBuriedInsulationNone)
+        d.Rvalue = Airflow.get_duct_effective_rvalue(0.0, d.Side, HPXML::DuctBuriedInsulationNone)
         d.LeakageFrac = lto[:supply_percent]
         d.LeakageCFM25 = lto[:supply_cfm25]
         d.LeakageCFM50 = lto[:supply_cfm50]
@@ -2553,7 +2553,7 @@ class HVACSizing
       d.Side = HPXML::DuctTypeReturn
       d.Location = HPXML::LocationOutside
       d.Area = 0.0
-      d.Rvalue = Airflow.get_duct_insulation_rvalue(0.0, d.Side, HPXML::DuctBuriedInsulationNone)
+      d.Rvalue = Airflow.get_duct_effective_rvalue(0.0, d.Side, HPXML::DuctBuriedInsulationNone)
       d.LeakageFrac = lto[:return_percent]
       d.LeakageCFM25 = lto[:return_cfm25]
       d.LeakageCFM50 = lto[:return_cfm50]

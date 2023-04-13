@@ -655,7 +655,7 @@ class Airflow
 
   def self.apply_ducts(model, ducts, object, vent_fans_mech)
     ducts.each do |duct|
-      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side, duct.buried_level) # Convert from nominal to actual R-value
+      duct.rvalue = get_duct_effective_rvalue(duct.rvalue, duct.side, duct.buried_level) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
         duct.location = duct.loc_schedule.name.to_s
@@ -2010,7 +2010,7 @@ class Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  def self.get_duct_insulation_rvalue(nominal_rvalue, side, buried_level)
+  def self.get_duct_effective_rvalue(nominal_rvalue, side, buried_level)
     if buried_level == HPXML::DuctBuriedInsulationNone
       # Insulated duct values based on "True R-Values of Round Residential Ductwork"
       # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
