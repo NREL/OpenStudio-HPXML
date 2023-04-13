@@ -603,7 +603,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_delta(33.4, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
     assert_in_delta(29.4, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
   end
-  
+
   def test_ducts_ua_buried
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ducts-buried.xml'))
