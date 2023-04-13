@@ -655,7 +655,7 @@ class Airflow
 
   def self.apply_ducts(model, ducts, object, vent_fans_mech)
     ducts.each do |duct|
-      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
+      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side, duct.duct_buried_insulation_level) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
         duct.location = duct.loc_schedule.name.to_s
@@ -2010,24 +2010,44 @@ class Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  def self.get_duct_insulation_rvalue(nominal_rvalue, side)
-    # Insulated duct values based on "True R-Values of Round Residential Ductwork"
-    # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
-    # worksheet in, e.g., ExistingResidentialSingleFamily_SEEMRuns_v05.xlsm.
-    #
-    # Nominal | 4.2 | 6.0 | 8.0 | 11.0
-    # --------|-----|-----|-----|----
-    # Supply  | 4.5 | 5.7 | 6.8 | 8.4
-    # Return  | 4.9 | 6.3 | 7.8 | 9.7
-    #
-    # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
-    if nominal_rvalue <= 0
-      return 1.7
-    end
-    if side == HPXML::DuctTypeSupply
-      return 2.2438 + 0.5619 * nominal_rvalue
-    elsif side == HPXML::DuctTypeReturn
-      return 2.0388 + 0.7053 * nominal_rvalue
+  def self.get_duct_insulation_rvalue(nominal_rvalue, side, buried_level)
+    if buried_level == HPXML::DuctBuriedInsulationNone
+      # Insulated duct values based on "True R-Values of Round Residential Ductwork"
+      # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
+      # worksheet in, e.g., ExistingResidentialSingleFamily_SEEMRuns_v05.xlsm.
+      #
+      # Nominal | 4.2 | 6.0 | 8.0 | 11.0
+      # --------|-----|-----|-----|----
+      # Supply  | 4.5 | 5.7 | 6.8 | 8.4
+      # Return  | 4.9 | 6.3 | 7.8 | 9.7
+      #
+      # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
+
+      if nominal_rvalue <= 0
+        return 1.7
+      end
+      if side == HPXML::DuctTypeSupply
+        return 2.2438 + 0.5619 * nominal_rvalue
+      elsif side == HPXML::DuctTypeReturn
+        return 2.0388 + 0.7053 * nominal_rvalue
+      end
+    else
+      # Equations derived from Table 12 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+      # assuming 8-in Diameter
+      #
+      # Duct configuration | 4.2  | 6.0  | 8.0
+      # -------------------|------|------|-----
+      # Partially-buried   | 8.1  | 10.2 | 12.3
+      # Fully buried       | 12.0 | 14.1 | 16.2
+      # Deeply buried      | 20.7 | 22.1 | 23.5
+
+      if buried_level == HPXML::DuctBuriedInsulationPartial
+        return 3.5009 + 1.1042 * nominal_rvalue
+      elsif buried_level == HPXML::DuctBuriedInsulationFull
+        return 7.4009 + 1.1042 * nominal_rvalue
+      elsif buried_level == HPXML::DuctBuriedInsulationDeep
+        return 17.634 + 0.7362 * nominal_rvalue
+      end
     end
   end
 

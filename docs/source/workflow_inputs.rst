@@ -2137,17 +2137,24 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
 
 Additional information is entered in each ``Ducts``.
 
-  ===============================================  =======  ============  ================  ========  =========  ======================================
-  Element                                          Type     Units         Constraints       Required  Default    Notes
-  ===============================================  =======  ============  ================  ========  =========  ======================================
-  ``SystemIdentifier``                             id                                       Yes                  Unique identifier
-  ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                  R-value of duct insulation [#]_
-  ``DuctLocation``                                 string                 See [#]_          No        See [#]_   Duct location
-  ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_   Duct fraction/surface area in location
-  ``extension/DuctSurfaceAreaMultiplier``          double                 >= 0              No        1.0        Duct surface area multiplier
-  ===============================================  =======  ============  ================  ========  =========  ======================================
+  ===============================================  =======  ============  ================  ========  ==========  ======================================
+  Element                                          Type     Units         Constraints       Required  Default     Notes
+  ===============================================  =======  ============  ================  ========  ==========  ======================================
+  ``SystemIdentifier``                             id                                       Yes                   Unique identifier
+  ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                   R-value of duct insulation [#]_
+  ``DuctBuriedInsulationLevel``                    string                 See [#]_          No        not buried  Duct buried insulation level [#]_
+  ``DuctLocation``                                 string                 See [#]_          No        See [#]_    Duct location
+  ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_    Duct fraction/surface area in location
+  ``extension/DuctSurfaceAreaMultiplier``          double                 >= 0              No        1.0         Duct surface area multiplier
+  ===============================================  =======  ============  ================  ========  ==========  ======================================
 
-  .. [#] DuctInsulationRValue should not include air films (i.e., use 0 for an uninsulated duct).
+  .. [#] DuctInsulationRValue should not include an exterior air film (i.e., use 0 for an uninsulated duct).
+         For buried ducts in attic loose-fill insulation, do not include the attic insulation R-value here; instead use the ``DuctBuriedInsulationLevel`` element.
+  .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
+  .. [#} Whether the ducts are buried in, e.g., attic loose-fill insulation.
+         Partially buried ducts have insulation that does not cover the top of the ducts.
+         Fully buried ducts have insulation that just covers the top of the ducts.
+         Deeply buried ducts have insulation that continues above the top of the ducts.
   .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
@@ -2163,6 +2170,24 @@ Additional information is entered in each ``Ducts``.
 
          where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
          If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
+
+.. note::
+
+  The effective duct R-value for modeling purposes is calculated as follows:
+  
+  ====================  ======================================  ============
+  Duct Configuration    Effective R-value                       Source
+  ====================  ======================================  ============
+  Uninsulated           1.7                                     ASHRAE Handbook of Fundamentals
+  Supply, Insulated     2.2438 + 0.5619 * DuctInsulationRValue  `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_
+  Return, Insulated     2.0388 + 0.7053 * DuctInsulationRValue  `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_
+  Partially Buried      3.5009 + 1.1042 * DuctInsulationRValue  `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts in Hot-Humid Climates <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_
+  Fully Buried          7.4009 + 1.1042 * DuctInsulationRValue  `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts in Hot-Humid Climates <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_
+  Deeply Buried         17.634 + 0.7362 * DuctInsulationRValue  `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts in Hot-Humid Climates <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_
+  ====================  ======================================  ============
+
+  Duct effective R-values account for exterior air film resistance and duct shape.
+  For buried ducts, effective R-values account for how the loose-fill insulation level affects the duct heat loss.
 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~

@@ -1567,8 +1567,6 @@ class HPXMLDefaults
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
 
-      # Default ducts
-
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
 
@@ -1644,6 +1642,14 @@ class HPXMLDefaults
 
         ducts.duct_surface_area_multiplier = 1.0
         ducts.duct_surface_area_multiplier_isdefaulted = true
+      end
+
+      # Default buried insulation level
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_buried_insulation_level.nil?
+
+        ducts.duct_buried_insulation_level = HPXML::DuctBuriedInsulationNone
+        ducts.duct_buried_insulation_level_isdefaulted = true
       end
     end
   end

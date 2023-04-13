@@ -93,6 +93,10 @@ class HPXML < Object
   ColorReflective = 'reflective'
   DehumidifierTypePortable = 'portable'
   DehumidifierTypeWholeHome = 'whole-home'
+  DuctBuriedInsulationNone = 'not buried'
+  DuctBuriedInsulationPartial = 'partially buried'
+  DuctBuriedInsulationFull = 'fully buried'
+  DuctBuriedInsulationDeep = 'deeply buried'
   DHWRecirControlTypeManual = 'manual demand control'
   DHWRecirControlTypeNone = 'no control'
   DHWRecirControlTypeSensor = 'presence sensor demand control'
@@ -4602,7 +4606,8 @@ class HPXML < Object
 
   class Duct < BaseElement
     ATTRS = [:id, :duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
-             :duct_fraction_area, :duct_surface_area, :duct_surface_area_multiplier]
+             :duct_fraction_area, :duct_surface_area, :duct_surface_area_multiplier,
+             :duct_buried_insulation_level]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4628,6 +4633,7 @@ class HPXML < Object
         XMLHelper.add_element(ins_material_el, @duct_insulation_material)
       end
       XMLHelper.add_element(ducts_el, 'DuctInsulationRValue', @duct_insulation_r_value, :float) unless @duct_insulation_r_value.nil?
+      XMLHelper.add_element(ducts_el, 'DuctBuriedInsulationLevel', @duct_buried_insulation_level, :string, @duct_buried_insulation_level_isdefaulted) unless @duct_buried_insulation_level.nil?
       XMLHelper.add_element(ducts_el, 'DuctLocation', @duct_location, :string, @duct_location_isdefaulted) unless @duct_location.nil?
       XMLHelper.add_element(ducts_el, 'FractionDuctArea', @duct_fraction_area, :float, @duct_fraction_area_isdefaulted) unless @duct_fraction_area.nil?
       XMLHelper.add_element(ducts_el, 'DuctSurfaceArea', @duct_surface_area, :float, @duct_surface_area_isdefaulted) unless @duct_surface_area.nil?
@@ -4641,6 +4647,7 @@ class HPXML < Object
       @duct_type = XMLHelper.get_value(duct, 'DuctType', :string)
       @duct_insulation_material = XMLHelper.get_child_name(duct, 'DuctInsulationMaterial')
       @duct_insulation_r_value = XMLHelper.get_value(duct, 'DuctInsulationRValue', :float)
+      @duct_buried_insulation_level = XMLHelper.get_value(duct, 'DuctBuriedInsulationLevel', :string)
       @duct_location = XMLHelper.get_value(duct, 'DuctLocation', :string)
       @duct_fraction_area = XMLHelper.get_value(duct, 'FractionDuctArea', :float)
       @duct_surface_area = XMLHelper.get_value(duct, 'DuctSurfaceArea', :float)
