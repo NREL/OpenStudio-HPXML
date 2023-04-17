@@ -378,7 +378,7 @@ class Airflow
     whf_equip_def.setFractionLost(1)
     whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
     whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
-    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower)
+    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower, whf_equip.space.get)
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
@@ -556,7 +556,7 @@ class Airflow
     other_equip_def.setFractionLost(frac_lost)
     other_equip_def.setFractionLatent(frac_lat)
     other_equip_def.setFractionRadiant(0.0)
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower)
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
     actuator.setName("#{other_equip.name} act")
     if not is_duct_load_for_report.nil?
       other_equip.additionalProperties.setFeature(Constants.IsDuctLoadForReport, is_duct_load_for_report)
@@ -1539,7 +1539,7 @@ class Airflow
     equip_actuator = nil
     if [Constants.ObjectNameMechanicalVentilationHouseFanCFIS,
         Constants.ObjectNameMechanicalVentilationHouseFanCFISSupplFan].include? obj_name # actuate its power level in EMS
-      equip_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower)
+      equip_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower, equip.space.get)
       equip_actuator.setName("#{equip.name} act")
     end
     if not tot_fans_w.nil?
