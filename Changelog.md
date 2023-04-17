@@ -25,7 +25,7 @@ __New Features__
   - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
 - Infiltration changes:
-  - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationTest` ("compartmentalization test" or "guarded test").
+  - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
   - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
 - Lighting changes:
   - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
