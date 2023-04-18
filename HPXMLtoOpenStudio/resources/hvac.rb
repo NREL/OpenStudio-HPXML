@@ -3148,9 +3148,22 @@ class HVAC
     program_calling_manager.addProgram(supp_coil_avail_program)
   end
 
+  def self.calc_time_to_full_cap(model, c_d)
+    #assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
+    time = (20.0 * c_d + 0.4).round
+    time = [time, 2].max
+    time = [time, 5].min
+    return time
+
+  end
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
-    cap_time = 2 # Assumed minutes to take to ramp up to full capacity
+    if is_cooling
+      c_d = system_ap.cool_c_d
+    else
+      c_d = system_ap.heat_c_d
+    end
+    cap_time = calc_time_to_full_cap(model, c_d)
     power_time = 1 # Assumed minutes to take to ramp up to full power
     number_of_timestep_logged = [cap_time, power_time].max
 
