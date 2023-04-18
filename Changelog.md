@@ -21,7 +21,8 @@ __New Features__
   - ReportSimulationOutput measure: Allows disabling individual annual output sections.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
-  - Updates defaults for `CompressorLockoutTemperature` and `BackupHeatingLockoutTemperature`.
+  - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
+  - Defaults for `BackupHeatingLockoutTemperature`: 50F for dual-fuel, 40F for all other heat pumps.
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
 - Infiltration changes:
   - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
