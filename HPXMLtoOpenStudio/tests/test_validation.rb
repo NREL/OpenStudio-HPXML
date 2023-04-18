@@ -774,7 +774,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['missing-attached-surfaces'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-        hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+        hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
       elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
         hpxml.header.timestep = 10

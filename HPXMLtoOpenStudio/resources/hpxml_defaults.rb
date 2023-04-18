@@ -604,7 +604,7 @@ class HPXMLDefaults
       infil_measurement.infiltration_height_isdefaulted = true
     end
     if infil_measurement.a_ext.nil?
-      if (infil_measurement.type_of_test == HPXML::InfiltrationTestCompartmentalization) &&
+      if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
          [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml.building_construction.residential_facility_type)
         tot_cb_area, ext_cb_area = hpxml.compartmentalization_boundary_areas()
         infil_measurement.a_ext = (ext_cb_area / tot_cb_area).round(5)

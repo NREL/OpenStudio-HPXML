@@ -12,7 +12,6 @@
         <Timestep>1</Timestep>
         <TemperatureCapacitanceMultiplier>4.0</TemperatureCapacitanceMultiplier>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv</SchedulesFilePath>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
