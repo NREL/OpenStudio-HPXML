@@ -422,7 +422,7 @@
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Thickness) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Thickness</sch:assert>
       <sch:assert role='ERROR' test='count(h:Pitch) = 1'>Expected 1 element(s) for xpath: Pitch</sch:assert>
       <sch:assert role='ERROR' test='count(h:RadiantBarrier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RadiantBarrier</sch:assert> <!-- See [RadiantBarrier] -->
-      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) + count(h:DetailedConstruction) &gt;= 1'>Expected 1 or more element(s) for xpath: Insulation/AssemblyEffectiveRValue | DetailedConstruction</sch:assert> <!-- See [DetailedConstruction] -->
     </sch:rule>
   </sch:pattern>
 
@@ -453,7 +453,7 @@
       <sch:assert role='ERROR' test='h:Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding" or text()="masonite siding" or text()="composite shingle siding" or text()="asbestos siding" or text()="synthetic stucco" or text()="none"] or not(h:Siding)'>Expected Siding to be 'wood siding' or 'vinyl siding' or 'stucco' or 'fiber cement siding' or 'brick veneer' or 'aluminum siding' or 'masonite siding' or 'composite shingle siding' or 'asbestos siding' or 'synthetic stucco' or 'none'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Color) + count(h:SolarAbsorptance) &gt;= 0'>Expected 0 or more element(s) for xpath: Color | SolarAbsorptance</sch:assert>
       <sch:assert role='ERROR' test='count(h:Emittance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Emittance</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) + count(h:DetailedConstruction) &gt;= 1'>Expected 1 or more element(s) for xpath: Insulation/AssemblyEffectiveRValue | DetailedConstruction</sch:assert> <!-- See [DetailedConstruction] -->
     </sch:rule>
   </sch:pattern>
 
@@ -474,7 +474,7 @@
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Type) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Type</sch:assert>
       <sch:assert role='ERROR' test='h:InteriorFinish/h:Type[text()="gypsum board" or text()="gypsum composite board" or text()="plaster" or text()="wood" or text()="none"] or not(h:InteriorFinish/h:Type)'>Expected InteriorFinish/Type to be 'gypsum board' or 'gypsum composite board' or 'plaster' or 'wood' or 'none'</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Thickness) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Thickness</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) + count(h:DetailedConstruction) &gt;= 1'>Expected 1 or more element(s) for xpath: Insulation/AssemblyEffectiveRValue | DetailedConstruction</sch:assert> <!-- See [DetailedConstruction] -->
     </sch:rule>
   </sch:pattern>
 
@@ -498,6 +498,7 @@
       <sch:assert role='ERROR' test='count(h:DepthBelowGrade) = 1'>Expected 1 element(s) for xpath: DepthBelowGrade</sch:assert>
       <sch:assert role='ERROR' test='number(h:DepthBelowGrade) &lt;= number(h:Height) or not(h:DepthBelowGrade) or not(h:Height)'>Expected DepthBelowGrade to be less than or equal to Height</sch:assert>
       <!-- Insulation: either specify interior and exterior layers OR assembly R-value: -->
+      <!-- FIXME: Allow DetailedConstruction here too -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - interior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - interior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsulationLayer] -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - exterior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - exterior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsulationLayer] -->
       <!-- Warnings -->
@@ -536,7 +537,7 @@
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Type) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Type</sch:assert>
       <sch:assert role='ERROR' test='h:InteriorFinish/h:Type[text()="gypsum board" or text()="gypsum composite board" or text()="plaster" or text()="wood" or text()="none"] or not(h:InteriorFinish/h:Type)'>Expected InteriorFinish/Type to be 'gypsum board' or 'gypsum composite board' or 'plaster' or 'wood' or 'none'</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Thickness) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Thickness</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) + count(h:DetailedConstruction) &gt;= 1'>Expected 1 or more element(s) for xpath: Insulation/AssemblyEffectiveRValue | DetailedConstruction</sch:assert> <!-- See [DetailedConstruction] -->
     </sch:rule>
   </sch:pattern>
 
@@ -687,6 +688,32 @@
     </sch:rule>
   </sch:pattern>
   
+  <sch:pattern>
+    <sch:title>[DetailedConstruction]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/h:DetailedConstruction'>
+      <sch:assert role='ERROR' test='count(h:ConstructionLayer) &gt;= 1'>Expected 1 or more element(s) for xpath: ConstructionLayer</sch:assert> <!-- See [DetailedConstructionLayer] -->
+    </sch:rule>
+  </sch:pattern>  
+  
+  <sch:pattern>
+    <sch:title>[DetailedConstructionLayer]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/h:DetailedConstruction/h:ConstructionLayer'>
+      <sch:assert role='ERROR' test='count(h:LayerMaterial) &gt;= 1'>Expected 1 or more element(s) for xpath: LayerMaterial</sch:assert> <!-- See [DetailedConstructionLayerMaterial] -->
+      <sch:assert role='ERROR' test='sum(h:LayerMaterial/h:AreaFraction) &lt;= 1.01 and sum(h:LayerMaterial/h:AreaFraction) &gt;= 0.99'>Expected sum(LayerMaterial/AreaFraction) to be 1</sch:assert>
+    </sch:rule>
+  </sch:pattern>  
+
+  <sch:pattern>
+    <sch:title>[DetailedConstructionLayerMaterial]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/h:DetailedConstruction/h:ConstructionLayer/h:LayerMaterial'>
+      <sch:assert role='ERROR' test='count(h:AreaFraction) = 1'>Expected 1 element(s) for xpath: AreaFraction</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Thickness) = 1'>Expected 1 element(s) for xpath: Thickness</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Conductivity) + count(h:RValue) &gt;= 1'>Expected 1 or more element(s) for xpath: Conductivity | RValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Density) = 1'>Expected 1 element(s) for xpath: Density</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SpecificHeat) = 1'>Expected 1 element(s) for xpath: SpecificHeat</sch:assert>
+    </sch:rule>
+  </sch:pattern>  
+
   <sch:pattern>
     <sch:title>[PartitionWallMass]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:extension/h:PartitionWallMass'>
