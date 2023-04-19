@@ -1119,7 +1119,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems)
     @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
 
-    @measure.report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+    @measure.report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name, @hpxml.header)
 
     # Check written values exist and are registered
     assert(File.exist?(@bills_csv))
@@ -1199,8 +1199,11 @@ class ReportUtilityBillsTest < MiniTest::Test
       next if line.strip.empty?
 
       key, value = line.split(',').map { |x| x.strip }
+      next if (1..12).to_a.any? { |month| key.include?("#{month}") }
+
       actual_bills[key] = Float(value)
     end
+
     return actual_bills
   end
 
