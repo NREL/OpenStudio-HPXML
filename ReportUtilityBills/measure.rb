@@ -266,6 +266,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     elsif ['json', 'msgpack'].include? output_format
       h = {}
       results_out.each do |out|
+        next if out == [line_break]
+
         if out[0].include? ':'
           grp, name = out[0].split(':', 2)
           h[grp] = {} if h[grp].nil?

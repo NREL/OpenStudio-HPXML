@@ -1199,7 +1199,7 @@ class ReportUtilityBillsTest < MiniTest::Test
       next if line.strip.empty?
 
       key, value = line.split(',').map { |x| x.strip }
-      next if (1..12).to_a.any? { |month| key.include?("#{month}") }
+      next if (1..12).to_a.any? { |month| key.include?(": #{month}:") }
 
       actual_bills[key] = Float(value)
     end
