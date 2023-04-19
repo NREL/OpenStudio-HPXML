@@ -238,23 +238,27 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def report_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
-    segment = utility_bills.keys[0].split(':', 2)[0]
-    segment = segment.strip
+    line_break = nil
 
     results_out = []
     results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
 
     utility_bills.each do |fuel_type, bill|
-      new_segment = fuel_type.split(':', 2)[0]
-      new_segment = new_segment.strip
-      if new_segment != segment
-        segment = new_segment
-      end
-
       results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)]
       results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)]
       results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
       results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)]
+    end
+    results_out << [line_break]
+
+    utility_bills.each do |fuel_type, bill|
+      bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, i|
+        results_out << ["#{bill_scenario_name}: #{i + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
+      end
+      bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, i|
+        results_out << ["#{bill_scenario_name}: #{i + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+      end
+      results_out << [line_break]
     end
 
     if ['csv'].include? output_format
