@@ -406,11 +406,12 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _get_bill_results(bill_csv_path)
-    # Grab all outputs from reporting measure CSV bill results
+    # Grab all outputs (except monthly) from reporting measure CSV bill results
     results = {}
     if File.exist? bill_csv_path
       CSV.foreach(bill_csv_path) do |row|
         next if row.nil? || (row.size < 2)
+        next if (1..12).to_a.any? { |month| row[0].include?(": #{month}:") }
 
         results[row[0]] = Float(row[1])
       end
