@@ -79,7 +79,7 @@ class CalculateUtilityBill
         bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
         if not rate.fixedmonthlycharge.nil?
           # If the run period doesn't span the entire month, prorate the fixed charges
-          prorate_fraction = calculate_monthly_prorate(header, month + 1)
+          prorate_fraction = calculate_monthly_prorate(header, month + header.sim_begin_month)
           bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
         end
       end
