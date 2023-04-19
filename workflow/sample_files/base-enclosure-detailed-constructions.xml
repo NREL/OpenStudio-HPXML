@@ -160,30 +160,30 @@
             <DetailedConstruction>
               <SystemIdentifier id='WallConstruction1'/>
               <ConstructionLayer>
+                <LayerThickness>0.375</LayerThickness>
                 <LayerMaterial>
                   <AreaFraction>1.0</AreaFraction>
                   <MaterialType>vinyl siding</MaterialType>
-                  <Thickness>0.375</Thickness>
                   <Conductivity>0.052</Conductivity>
                   <Density>11.1</Density>
                   <SpecificHeat>0.25</SpecificHeat>
                 </LayerMaterial>
               </ConstructionLayer>
               <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
                 <LayerMaterial>
                   <AreaFraction>1.0</AreaFraction>
                   <MaterialType>osb</MaterialType>
-                  <Thickness>0.5</Thickness>
                   <Conductivity>0.067</Conductivity>
                   <Density>32.0</Density>
                   <SpecificHeat>0.29</SpecificHeat>
                 </LayerMaterial>
               </ConstructionLayer>
               <ConstructionLayer>
+                <LayerThickness>3.5</LayerThickness>
                 <LayerMaterial>
                   <AreaFraction>0.25</AreaFraction>
                   <MaterialType>wood stud</MaterialType>
-                  <Thickness>3.5</Thickness>
                   <Conductivity>0.067</Conductivity>
                   <Density>32.0</Density>
                   <SpecificHeat>0.29</SpecificHeat>
@@ -191,17 +191,16 @@
                 <LayerMaterial>
                   <AreaFraction>0.75</AreaFraction>
                   <MaterialType>fiberglass batt</MaterialType>
-                  <Thickness>3.5</Thickness>
                   <Conductivity>0.022</Conductivity>
                   <Density>2.85</Density>
                   <SpecificHeat>0.25</SpecificHeat>
                 </LayerMaterial>
               </ConstructionLayer>
               <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
                 <LayerMaterial>
                   <AreaFraction>1.0</AreaFraction>
                   <MaterialType>drywall</MaterialType>
-                  <Thickness>0.5</Thickness>
                   <Conductivity>0.093</Conductivity>
                   <Density>50.0</Density>
                   <SpecificHeat>0.2</SpecificHeat>

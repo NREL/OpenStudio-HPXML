@@ -1145,37 +1145,32 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   end
   if ['base-enclosure-detailed-constructions.xml'].include? hpxml_file
     hpxml.walls[0].detailed_construction.id = hpxml.walls[0].id.gsub('Wall', 'WallConstruction')
-    hpxml.walls[0].detailed_construction.construction_layers.add()
+    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.375)
     hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
                                                                                      material_type: 'vinyl siding',
-                                                                                     thickness: 0.375,
                                                                                      conductivity: 0.052,
                                                                                      density: 11.1,
                                                                                      specific_heat: 0.25)
-    hpxml.walls[0].detailed_construction.construction_layers.add()
+    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.5)
     hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
                                                                                      material_type: 'osb',
-                                                                                     thickness: 0.5,
                                                                                      conductivity: 0.067,
                                                                                      density: 32.0,
                                                                                      specific_heat: 0.29)
-    hpxml.walls[0].detailed_construction.construction_layers.add()
+    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 3.5)
     hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.25,
                                                                                      material_type: 'wood stud',
-                                                                                     thickness: 3.5,
                                                                                      conductivity: 0.067,
                                                                                      density: 32.0,
                                                                                      specific_heat: 0.29)
     hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.75,
                                                                                      material_type: 'fiberglass batt',
-                                                                                     thickness: 3.5,
                                                                                      conductivity: 0.022,
                                                                                      density: 2.85,
                                                                                      specific_heat: 0.25)
-    hpxml.walls[0].detailed_construction.construction_layers.add()
+    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.5)
     hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
                                                                                      material_type: 'drywall',
-                                                                                     thickness: 0.5,
                                                                                      conductivity: 0.093,
                                                                                      density: 50.0,
                                                                                      specific_heat: 0.2)

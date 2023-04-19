@@ -3579,7 +3579,7 @@ class HPXML < Object
       @layer_materials = DetailedConstructionLayerMaterials.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:layer_type, :layer_materials]
+    ATTRS = [:layer_type, :layer_thickness, :layer_materials]
     attr_accessor(*ATTRS)
 
     def to_oga(detailed_construction)
@@ -3587,8 +3587,7 @@ class HPXML < Object
 
       construction_layer = XMLHelper.add_element(detailed_construction, 'ConstructionLayer')
       XMLHelper.add_element(construction_layer, 'LayerType', @layer_type, :string) unless @layer_type.nil?
-
-      return if @layer_materials.empty?
+      XMLHelper.add_element(construction_layer, 'LayerThickness', @layer_thickness, :string) unless @layer_thickness.nil?
 
       @layer_materials.to_oga(construction_layer)
     end
@@ -3614,7 +3613,7 @@ class HPXML < Object
   end
 
   class DetailedConstructionLayerMaterial < BaseElement
-    ATTRS = [:area_fraction, :material_type, :thickness, :conductivity, :density, :specific_heat, :r_value]
+    ATTRS = [:area_fraction, :material_type, :conductivity, :density, :specific_heat, :r_value]
     attr_accessor(*ATTRS)
 
     def to_oga(construction_layer)
@@ -3623,7 +3622,6 @@ class HPXML < Object
       layer_material = XMLHelper.add_element(construction_layer, 'LayerMaterial')
       XMLHelper.add_element(layer_material, 'AreaFraction', @area_fraction, :float) unless @area_fraction.nil?
       XMLHelper.add_element(layer_material, 'MaterialType', @material_type, :string) unless @material_type.nil?
-      XMLHelper.add_element(layer_material, 'Thickness', @thickness, :float) unless @thickness.nil?
       XMLHelper.add_element(layer_material, 'Conductivity', @conductivity, :float) unless @conductivity.nil?
       XMLHelper.add_element(layer_material, 'Density', @density, :float) unless @density.nil?
       XMLHelper.add_element(layer_material, 'SpecificHeat', @specific_heat, :float) unless @specific_heat.nil?
@@ -3635,7 +3633,6 @@ class HPXML < Object
 
       @area_fraction = XMLHelper.get_value(layer_material, 'AreaFraction', :float)
       @material_type = XMLHelper.get_value(layer_material, 'MaterialType', :string)
-      @thickness = XMLHelper.get_value(layer_material, 'Thickness', :float)
       @conductivity = XMLHelper.get_value(layer_material, 'Conductivity', :float)
       @density = XMLHelper.get_value(layer_material, 'Density', :float)
       @specific_heat = XMLHelper.get_value(layer_material, 'SpecificHeat', :float)

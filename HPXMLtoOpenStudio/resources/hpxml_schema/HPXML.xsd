@@ -213,6 +213,11 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element minOccurs="0" name="LayerType" type="ConstructionLayerType"/>
+						<xs:element minOccurs="0" name="LayerThickness" type="LengthMeasurement">
+							<xs:annotation>
+								<xs:documentation>[in]</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element maxOccurs="unbounded" name="LayerMaterial">
 							<xs:complexType>
 								<xs:sequence>
@@ -224,11 +229,6 @@
 									<xs:element minOccurs="0" name="MaterialType" type="xs:string">
 										<xs:annotation>
 											<xs:documentation>E.g., "wood", "concrete", "drywall", etc.</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="Thickness" type="LengthMeasurement">
-										<xs:annotation>
-											<xs:documentation>[in]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="Conductivity" type="HPXMLDoubleGreaterThanZero">
