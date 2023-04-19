@@ -514,51 +514,51 @@ The utility bills output file is called ``results_bills.csv`` (or ``results_bill
 
 Results for each utility bill scenario defined in the HPXML file are listed as shown below.
 
-   ================================================  ====================
-   Type                                              Notes
-   ================================================  ====================
-   <ScenarioName>: Total ($)                         Scenario annual total charges.
-   <ScenarioName>: Electricity: Fixed ($)            Scenario annual fixed charges for electricity.
-   <ScenarioName>: Electricity: Energy ($)           Scenario annual energy charges for electricity.
-   <ScenarioName>: Electricity: PV Credit ($)        Scenario annual production credit (negative value) for PV.
-   <ScenarioName>: Electricity: Total ($)            Scenario annual total charges for electricity.
-   <ScenarioName>: Natural Gas: Fixed ($)            Scenario annual fixed charges for natural gas.
-   <ScenarioName>: Natural Gas: Energy ($)           Scenario annual energy charges for natural gas.
-   <ScenarioName>: Natural Gas: Total ($)            Scenario annual total charges for natural gas.
-   <ScenarioName>: Fuel Oil: Fixed ($)               Scenario annual fixed charges for fuel oil.
-   <ScenarioName>: Fuel Oil: Energy ($)              Scenario annual energy charges for fuel oil.
-   <ScenarioName>: Fuel Oil: Total ($)               Scenario annual total charges for fuel oil.
-   <ScenarioName>: Propane: Fixed ($)                Scenario annual fixed charges for propane.
-   <ScenarioName>: Propane: Energy ($)               Scenario annual energy charges for propane.
-   <ScenarioName>: Propane: Total ($)                Scenario annual total charges for propane.
-   <ScenarioName>: Wood Cord: Fixed ($)              Scenario annual fixed charges for wood cord.
-   <ScenarioName>: Wood Cord: Energy ($)             Scenario annual energy charges for wood cord.
-   <ScenarioName>: Wood Cord: Total ($)              Scenario annual total charges for wood cord.
-   <ScenarioName>: Wood Pellets: Fixed ($)           Scenario annual fixed charges for wood pellets.
-   <ScenarioName>: Wood Pellets: Energy ($)          Scenario annual energy charges for wood pellets.
-   <ScenarioName>: Wood Pellets: Total ($)           Scenario annual total charges for wood pellets.
-   <ScenarioName>: Coal: Fixed ($)                   Scenario annual fixed charges for coal.
-   <ScenarioName>: Coal: Energy ($)                  Scenario annual energy charges for coal.
-   <ScenarioName>: Coal: Total ($)                   Scenario annual total charges for coal.
+   =================================================  ====================
+   Type                                               Notes
+   =================================================  ====================
+   <ScenarioName>: Total ($)                          Scenario annual total charges.
+   <ScenarioName>: Electricity: Fixed ($)             Scenario annual fixed charges for electricity.
+   <ScenarioName>: Electricity: Energy ($)            Scenario annual energy charges for electricity.
+   <ScenarioName>: Electricity: PV Credit ($)         Scenario annual production credit (negative value) for PV.
+   <ScenarioName>: Electricity: Total ($)             Scenario annual total charges for electricity.
+   <ScenarioName>: Natural Gas: Fixed ($)             Scenario annual fixed charges for natural gas.
+   <ScenarioName>: Natural Gas: Energy ($)            Scenario annual energy charges for natural gas.
+   <ScenarioName>: Natural Gas: Total ($)             Scenario annual total charges for natural gas.
+   <ScenarioName>: Fuel Oil: Fixed ($)                Scenario annual fixed charges for fuel oil.
+   <ScenarioName>: Fuel Oil: Energy ($)               Scenario annual energy charges for fuel oil.
+   <ScenarioName>: Fuel Oil: Total ($)                Scenario annual total charges for fuel oil.
+   <ScenarioName>: Propane: Fixed ($)                 Scenario annual fixed charges for propane.
+   <ScenarioName>: Propane: Energy ($)                Scenario annual energy charges for propane.
+   <ScenarioName>: Propane: Total ($)                 Scenario annual total charges for propane.
+   <ScenarioName>: Wood Cord: Fixed ($)               Scenario annual fixed charges for wood cord.
+   <ScenarioName>: Wood Cord: Energy ($)              Scenario annual energy charges for wood cord.
+   <ScenarioName>: Wood Cord: Total ($)               Scenario annual total charges for wood cord.
+   <ScenarioName>: Wood Pellets: Fixed ($)            Scenario annual fixed charges for wood pellets.
+   <ScenarioName>: Wood Pellets: Energy ($)           Scenario annual energy charges for wood pellets.
+   <ScenarioName>: Wood Pellets: Total ($)            Scenario annual total charges for wood pellets.
+   <ScenarioName>: Coal: Fixed ($)                    Scenario annual fixed charges for coal.
+   <ScenarioName>: Coal: Energy ($)                   Scenario annual energy charges for coal.
+   <ScenarioName>: Coal: Total ($)                    Scenario annual total charges for coal.
 
-   <ScenarioName>: <Month>: Electricity: Energy ($)  Scenario monthly energy charges for electricity.
-   <ScenarioName>: <Month>: Electricity: Fixed ($)   Scenario monthly fixed charges for electricity.
+   <ScenarioName>: <Month>: Electricity: Energy ($)   Scenario monthly energy charges for electricity.
+   <ScenarioName>: <Month>: Electricity: Fixed ($)    Scenario monthly fixed charges for electricity.
 
-   <ScenarioName>: <Month>: Natural Gas: Energy ($)  Scenario monthly energy charges for natural gas.
-   <ScenarioName>: <Month>: Natural Gas: Fixed ($)   Scenario monthly fixed charges for natural gas.
+   <ScenarioName>: <Month>: Natural Gas: Energy ($)   Scenario monthly energy charges for natural gas.
+   <ScenarioName>: <Month>: Natural Gas: Fixed ($)    Scenario monthly fixed charges for natural gas.
 
-   <ScenarioName>: <Month>: Fuel Oil: Energy ($)     Scenario monthly energy charges for fuel oil.
-   <ScenarioName>: <Month>: Fuel Oil: Fixed ($)      Scenario monthly fixed charges for fuel oil.
+   <ScenarioName>: <Month>: Fuel Oil: Energy ($)      Scenario monthly energy charges for fuel oil.
+   <ScenarioName>: <Month>: Fuel Oil: Fixed ($)       Scenario monthly fixed charges for fuel oil.
 
-   <ScenarioName>: <Month>: Propane: Energy ($)      Scenario monthly energy charges for propane.
-   <ScenarioName>: <Month>: Propane: Fixed ($)       Scenario monthly fixed charges for propane.
+   <ScenarioName>: <Month>: Propane: Energy ($)       Scenario monthly energy charges for propane.
+   <ScenarioName>: <Month>: Propane: Fixed ($)        Scenario monthly fixed charges for propane.
 
-   <ScenarioName>: <Month>: Wood Cord: Energy ($)    Scenario monthly energy charges for wood cord.
-   <ScenarioName>: <Month>: Wood Cord: Fixed ($)     Scenario monthly fixed charges for wood cord.
+   <ScenarioName>: <Month>: Wood Cord: Energy ($)     Scenario monthly energy charges for wood cord.
+   <ScenarioName>: <Month>: Wood Cord: Fixed ($)      Scenario monthly fixed charges for wood cord.
 
-   <ScenarioName>: <Month>: Wood Pellets: Energy ($) Scenario monthly energy charges for wood pellets.
-   <ScenarioName>: <Month>: Wood Pellets: Fixed ($)  Scenario monthly fixed charges for wood pellets.
+   <ScenarioName>: <Month>: Wood Pellets: Energy ($)  Scenario monthly energy charges for wood pellets.
+   <ScenarioName>: <Month>: Wood Pellets: Fixed ($)   Scenario monthly fixed charges for wood pellets.
 
-   <ScenarioName>: <Month>: Coal: Energy ($)         Scenario monthly energy charges for coal.
-   <ScenarioName>: <Month>: Coal: Fixed ($)          Scenario monthly fixed charges for coal.
-   ================================================  ====================
+   <ScenarioName>: <Month>: Coal: Energy ($)          Scenario monthly energy charges for coal.
+   <ScenarioName>: <Month>: Coal: Fixed ($)           Scenario monthly fixed charges for coal.
+   =================================================  ====================
