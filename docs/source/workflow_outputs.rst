@@ -547,18 +547,18 @@ Results for each utility bill scenario defined in the HPXML file are listed as s
    <ScenarioName>: <Month>: Natural Gas: Energy ($)  Scenario monthly energy charges for natural gas.
    <ScenarioName>: <Month>: Natural Gas: Fixed ($)   Scenario monthly fixed charges for natural gas.
 
-   <ScenarioName>: <Month>: Fuel Oil: Energy ($)  Scenario monthly energy charges for fuel oil.
-   <ScenarioName>: <Month>: Fuel Oil: Fixed ($)   Scenario monthly fixed charges for fuel oil.
+   <ScenarioName>: <Month>: Fuel Oil: Energy ($)     Scenario monthly energy charges for fuel oil.
+   <ScenarioName>: <Month>: Fuel Oil: Fixed ($)      Scenario monthly fixed charges for fuel oil.
 
-   <ScenarioName>: <Month>: Propane: Energy ($)  Scenario monthly energy charges for propane.
-   <ScenarioName>: <Month>: Propane: Fixed ($)   Scenario monthly fixed charges for propane.
+   <ScenarioName>: <Month>: Propane: Energy ($)      Scenario monthly energy charges for propane.
+   <ScenarioName>: <Month>: Propane: Fixed ($)       Scenario monthly fixed charges for propane.
 
-   <ScenarioName>: <Month>: Wood Cord: Energy ($)  Scenario monthly energy charges for wood cord.
-   <ScenarioName>: <Month>: Wood Cord: Fixed ($)   Scenario monthly fixed charges for wood cord.
+   <ScenarioName>: <Month>: Wood Cord: Energy ($)    Scenario monthly energy charges for wood cord.
+   <ScenarioName>: <Month>: Wood Cord: Fixed ($)     Scenario monthly fixed charges for wood cord.
 
-   <ScenarioName>: <Month>: Wood Pellets: Energy ($)  Scenario monthly energy charges for wood pellets.
-   <ScenarioName>: <Month>: Wood Pellets: Fixed ($)   Scenario monthly fixed charges for wood pellets.
+   <ScenarioName>: <Month>: Wood Pellets: Energy ($) Scenario monthly energy charges for wood pellets.
+   <ScenarioName>: <Month>: Wood Pellets: Fixed ($)  Scenario monthly fixed charges for wood pellets.
 
-   <ScenarioName>: <Month>: Coal: Energy ($)  Scenario monthly energy charges for coal.
-   <ScenarioName>: <Month>: Coal: Fixed ($)   Scenario monthly fixed charges for coal.
+   <ScenarioName>: <Month>: Coal: Energy ($)         Scenario monthly energy charges for coal.
+   <ScenarioName>: <Month>: Coal: Fixed ($)          Scenario monthly fixed charges for coal.
    ================================================  ====================

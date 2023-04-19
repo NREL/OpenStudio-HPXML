@@ -20,6 +20,7 @@ __New Features__
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
   - ReportSimulationOutput measure: Allows disabling individual annual output sections.
+  - ReportUtilityBills measure: Outputs monthly fixed/energy charges.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
@@ -52,6 +53,7 @@ __Bugfixes__
 - HPXML files w/ multiple `Building` elements now only show warnings for the single `Building` being simulated.
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
 - Fixes window/skylight design loads for Manual J HVAC autosizing calculations.
+- Fixes error for calculating zero fixed costs for simulations with abbreviated run periods.
 
 ## OpenStudio-HPXML v1.5.1
 
