@@ -129,13 +129,48 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>115.6</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <DetailedConstruction>
+              <SystemIdentifier id='RimJoistConstruction1'/>
+              <ConstructionLayer>
+                <LayerThickness>0.375</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>vinyl siding</MaterialType>
+                  <Conductivity>0.052</Conductivity>
+                  <Density>11.1</Density>
+                  <SpecificHeat>0.25</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>osb</MaterialType>
+                  <Conductivity>0.067</Conductivity>
+                  <Density>32.0</Density>
+                  <SpecificHeat>0.29</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>5.5</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>0.22</AreaFraction>
+                  <MaterialType>wood stud</MaterialType>
+                  <Conductivity>0.067</Conductivity>
+                  <Density>32.0</Density>
+                  <SpecificHeat>0.29</SpecificHeat>
+                </LayerMaterial>
+                <LayerMaterial>
+                  <AreaFraction>0.78</AreaFraction>
+                  <MaterialType>spray foam</MaterialType>
+                  <Density>2.85</Density>
+                  <SpecificHeat>0.25</SpecificHeat>
+                  <RValue>36.0</RValue>
+                </LayerMaterial>
+              </ConstructionLayer>
+            </DetailedConstruction>
           </RimJoist>
         </RimJoists>
         <Walls>
@@ -147,16 +182,8 @@
               <WoodStud/>
             </WallType>
             <Area>1200.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
             <DetailedConstruction>
               <SystemIdentifier id='WallConstruction1'/>
               <ConstructionLayer>
@@ -180,27 +207,27 @@
                 </LayerMaterial>
               </ConstructionLayer>
               <ConstructionLayer>
-                <LayerThickness>3.5</LayerThickness>
+                <LayerThickness>5.5</LayerThickness>
                 <LayerMaterial>
-                  <AreaFraction>0.25</AreaFraction>
+                  <AreaFraction>0.22</AreaFraction>
                   <MaterialType>wood stud</MaterialType>
                   <Conductivity>0.067</Conductivity>
                   <Density>32.0</Density>
                   <SpecificHeat>0.29</SpecificHeat>
                 </LayerMaterial>
                 <LayerMaterial>
-                  <AreaFraction>0.75</AreaFraction>
-                  <MaterialType>fiberglass batt</MaterialType>
-                  <Conductivity>0.022</Conductivity>
+                  <AreaFraction>0.78</AreaFraction>
+                  <MaterialType>spray foam</MaterialType>
                   <Density>2.85</Density>
                   <SpecificHeat>0.25</SpecificHeat>
+                  <RValue>36.0</RValue>
                 </LayerMaterial>
               </ConstructionLayer>
               <ConstructionLayer>
                 <LayerThickness>0.5</LayerThickness>
                 <LayerMaterial>
                   <AreaFraction>1.0</AreaFraction>
-                  <MaterialType>drywall</MaterialType>
+                  <MaterialType>gypsum board</MaterialType>
                   <Conductivity>0.093</Conductivity>
                   <Density>50.0</Density>
                   <SpecificHeat>0.2</SpecificHeat>
@@ -217,13 +244,31 @@
               <WoodStud/>
             </WallType>
             <Area>225.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <DetailedConstruction>
+              <SystemIdentifier id='WallConstruction2'/>
+              <ConstructionLayer>
+                <LayerThickness>0.375</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>vinyl siding</MaterialType>
+                  <Conductivity>0.052</Conductivity>
+                  <Density>11.1</Density>
+                  <SpecificHeat>0.25</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>osb</MaterialType>
+                  <Conductivity>0.067</Conductivity>
+                  <Density>32.0</Density>
+                  <SpecificHeat>0.29</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+            </DetailedConstruction>
           </Wall>
         </Walls>
         <FoundationWalls>

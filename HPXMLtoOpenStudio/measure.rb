@@ -511,26 +511,31 @@ class OSModel
       next if surfaces.empty?
 
       # Apply construction
-      # The code below constructs a reasonable wall construction based on the
-      # wall type while ensuring the correct assembly R-value.
 
-      inside_film = Material.AirFilmVertical
-      if wall.is_exterior
-        outside_film = Material.AirFilmOutside
-        mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding)
+      inside_film = wall.additional_properties.inside_film
+      outside_film = wall.additional_properties.outside_film
+
+      if wall.has_detailed_construction
+        # Layer-by-layer construction
+
+        Constructions.apply_detailed_construction(model, surfaces, wall.detailed_construction, inside_film,
+                                                  outside_film, wall.solar_absorptance, wall.emittance)
       else
-        outside_film = Material.AirFilmVertical
-        mat_ext_finish = nil
-      end
-      if @apply_ashrae140_assumptions
-        inside_film = Material.AirFilmVerticalASHRAE140
-        outside_film = Material.AirFilmOutsideASHRAE140
-      end
-      mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
+        # Assembly R-value
+        # The code below constructs a reasonable wall construction based on the
+        # wall type while ensuring the correct assembly R-value.
 
-      Constructions.apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
-                                            mat_int_finish, inside_film, outside_film, mat_ext_finish, wall.solar_absorptance,
-                                            wall.emittance)
+        if wall.is_exterior
+          mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding)
+        else
+          mat_ext_finish = nil
+        end
+        mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
+
+        Constructions.apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
+                                              mat_int_finish, inside_film, outside_film, mat_ext_finish, wall.solar_absorptance,
+                                              wall.emittance)
+      end
     end
   end
 
@@ -576,33 +581,42 @@ class OSModel
 
       # Apply construction
 
-      inside_film = Material.AirFilmVertical
-      if rim_joist.is_exterior
-        outside_film = Material.AirFilmOutside
-        mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding)
+      inside_film = rim_joist.additional_properties.inside_film
+      outside_film = rim_joist.additional_properties.outside_film
+
+      if rim_joist.has_detailed_construction
+        # Layer-by-layer construction
+
+        Constructions.apply_detailed_construction(model, surfaces, rim_joist.detailed_construction, inside_film,
+                                                  outside_film, rim_joist.solar_absorptance, rim_joist.emittance)
       else
-        outside_film = Material.AirFilmVertical
-        mat_ext_finish = nil
+        # Assembly R-value
+
+        if rim_joist.is_exterior
+          mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding)
+        else
+          mat_ext_finish = nil
+        end
+
+        assembly_r = rim_joist.insulation_assembly_r_value
+
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 20.0, 2.0, nil, mat_ext_finish),  # 2x4 + R20
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, nil, mat_ext_finish),  # 2x4 + R10
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, nil, mat_ext_finish),   # 2x4
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, nil, mat_ext_finish),   # Fallback
+        ]
+        match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+        install_grade = 1
+
+        Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction",
+                                      cavity_r, install_grade, constr_set.framing_factor,
+                                      constr_set.mat_int_finish, constr_set.osb_thick_in,
+                                      constr_set.rigid_r, constr_set.mat_ext_finish,
+                                      inside_film, outside_film, rim_joist.solar_absorptance,
+                                      rim_joist.emittance)
+        Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
       end
-
-      assembly_r = rim_joist.insulation_assembly_r_value
-
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 20.0, 2.0, nil, mat_ext_finish),  # 2x4 + R20
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, nil, mat_ext_finish),  # 2x4 + R10
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, nil, mat_ext_finish),   # 2x4
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, nil, mat_ext_finish),   # Fallback
-      ]
-      match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
-      install_grade = 1
-
-      Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction",
-                                    cavity_r, install_grade, constr_set.framing_factor,
-                                    constr_set.mat_int_finish, constr_set.osb_thick_in,
-                                    constr_set.rigid_r, constr_set.mat_ext_finish,
-                                    inside_film, outside_film, rim_joist.solar_absorptance,
-                                    rim_joist.emittance)
-      Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
   end
 

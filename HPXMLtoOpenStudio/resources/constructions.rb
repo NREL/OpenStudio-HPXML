@@ -3,6 +3,103 @@
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
+  # Generic layer-by-layer construction from an HPXML DetailedConstruction element
+  def self.apply_detailed_construction(model, surfaces, detailed_construction,
+                                       inside_film, outside_film, solar_absorptance, emittance)
+
+    return if surfaces.empty?
+
+    # Define construction
+    constr = create_from_detailed_construction(detailed_construction, inside_film, outside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
+    constr.set_interior_material_properties()
+
+    # Create and assign construction to surfaces
+    constr.create_and_assign_constructions(surfaces, model)
+  end
+
+  def self.create_from_detailed_construction(detailed_construction, inside_film, outside_film)
+    # FIXME: Need to re-normalize area_fractions to sum to 1
+
+    # Define materials
+    mats = {}
+    detailed_construction.construction_layers.each_with_index do |layer, i|
+      layer.layer_materials.each_with_index do |material, j|
+        if material.material_type.nil?
+          material_name = "#{detailed_construction.id} - Layer #{i + 1}, Material #{j + 1}"
+        else
+          material_name = "#{detailed_construction.id} - #{material.material_type}"
+        end
+        if not material.conductivity.nil?
+          k_in = UnitConversions.convert(material.conductivity, 'ft', 'in')
+        else
+          k_in = layer.layer_thickness / material.r_value
+        end
+        mat = Material.new(name: material_name, thick_in: layer.layer_thickness, k_in: k_in, rho: material.density, cp: material.specific_heat)
+        mats[[i, j]] = mat
+      end
+    end
+
+    # Determine unique paths
+    cumulative_area_fracs = []
+    detailed_construction.construction_layers.each do |layer|
+      layer_area_fracs = []
+      frac = 0.0
+      layer.layer_materials.each do |material|
+        frac += material.area_fraction
+        layer_area_fracs << frac
+      end
+      cumulative_area_fracs << layer_area_fracs
+    end
+    cumulative_area_fracs = cumulative_area_fracs.flatten.uniq.sort
+    path_fracs = []
+    cumulative_area_fracs.each_with_index do |area_frac, i|
+      if i == 0
+        path_fracs << area_frac
+      else
+        path_fracs << area_frac - cumulative_area_fracs[0..i - 1].sum
+      end
+    end
+
+    # Define construction
+    constr = Construction.new(detailed_construction.id, path_fracs)
+    constr.add_layer(outside_film)
+    detailed_construction.construction_layers.each_with_index do |layer, i|
+      if layer.layer_type.nil?
+        material_names = layer.layer_materials.map { |m| m.material_type }
+        if material_names.any? { |m| m.nil? }
+          layer_name = "#{detailed_construction.id} - Layer #{i + 1}"
+        else
+          layer_name = "#{detailed_construction.id} - #{material_names.join('|')}"
+        end
+      else
+        layer_name = "#{detailed_construction.id} - #{layer.layer_type}"
+      end
+      if layer.layer_materials.size == 1
+        # Single material for entire layer
+        constr.add_layer(mats[[i, 0]], layer_name)
+      else
+        # Create array of materials that align with path_fracs
+        layer_mats = []
+        path_fracs.each do |area_frac|
+          frac = 0.0
+          mat = nil
+          layer.layer_materials.each_with_index do |material, j|
+            frac += material.area_fraction
+            mat = mats[[i, j]]
+            break if frac >= area_frac
+          end
+          layer_mats << mat
+        end
+        constr.add_layer(layer_mats, layer_name)
+      end
+    end
+    constr.add_layer(inside_film)
+
+    return constr
+  end
+
   def self.apply_wood_stud_wall(model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, mat_int_finish, osb_thick_in,

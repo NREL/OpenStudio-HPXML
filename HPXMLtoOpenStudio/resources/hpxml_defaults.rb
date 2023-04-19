@@ -13,6 +13,8 @@ class HPXMLDefaults
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml.air_infiltration_measurements)
+    apply_ashrae140_assumptions = hpxml.header.apply_ashrae140_assumptions # Hidden feature
+    apply_ashrae140_assumptions = false if apply_ashrae140_assumptions.nil?
 
     # Check for presence of fuels once
     has_fuel = {}
@@ -35,7 +37,7 @@ class HPXMLDefaults
     apply_foundations(hpxml)
     apply_roofs(hpxml)
     apply_rim_joists(hpxml)
-    apply_walls(hpxml)
+    apply_walls(hpxml, apply_ashrae140_assumptions)
     apply_foundation_walls(hpxml)
     apply_floors(hpxml)
     apply_slabs(hpxml)
@@ -714,13 +716,25 @@ class HPXMLDefaults
         rim_joist.orientation_isdefaulted = true
       end
 
+      rim_joist.additional_properties.inside_film = Material.AirFilmVertical
+      if rim_joist.is_exterior
+        rim_joist.additional_properties.outside_film = Material.AirFilmOutside
+      else
+        rim_joist.additional_properties.outside_film = Material.AirFilmVertical
+      end
+
+      if rim_joist.insulation_assembly_r_value.nil?
+        rim_joist.insulation_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(rim_joist)
+        rim_joist.insulation_assembly_r_value_isdefaulted = true
+      end
+
       next unless rim_joist.is_exterior
 
       if rim_joist.emittance.nil?
         rim_joist.emittance = 0.90
         rim_joist.emittance_isdefaulted = true
       end
-      if rim_joist.siding.nil?
+      if rim_joist.siding.nil? && !rim_joist.has_detailed_construction
         rim_joist.siding = HPXML::SidingTypeWood
         rim_joist.siding_isdefaulted = true
       end
@@ -738,7 +752,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_walls(hpxml)
+  def self.apply_walls(hpxml, apply_ashrae140_assumptions)
     hpxml.walls.each do |wall|
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
@@ -749,12 +763,28 @@ class HPXMLDefaults
         wall.orientation_isdefaulted = true
       end
 
+      wall.additional_properties.inside_film = Material.AirFilmVertical
+      if wall.is_exterior
+        wall.additional_properties.outside_film = Material.AirFilmOutside
+      else
+        wall.additional_properties.outside_film = Material.AirFilmVertical
+      end
+      if apply_ashrae140_assumptions
+        wall.additional_properties.inside_film = Material.AirFilmVerticalASHRAE140
+        wall.additional_properties.outside_film = Material.AirFilmOutsideASHRAE140
+      end
+
+      if wall.insulation_assembly_r_value.nil?
+        wall.insulation_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(wall)
+        wall.insulation_assembly_r_value_isdefaulted = true
+      end
+
       if wall.is_exterior
         if wall.emittance.nil?
           wall.emittance = 0.90
           wall.emittance_isdefaulted = true
         end
-        if wall.siding.nil?
+        if wall.siding.nil? && !wall.has_detailed_construction
           wall.siding = HPXML::SidingTypeWood
           wall.siding_isdefaulted = true
         end
@@ -770,7 +800,8 @@ class HPXMLDefaults
           wall.solar_absorptance_isdefaulted = true
         end
       end
-      if wall.interior_finish_type.nil?
+
+      if wall.interior_finish_type.nil? && !wall.has_detailed_construction
         if HPXML::conditioned_finished_locations.include? wall.interior_adjacent_to
           wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
         else
@@ -780,7 +811,7 @@ class HPXMLDefaults
       end
       next unless wall.interior_finish_thickness.nil?
 
-      if wall.interior_finish_type != HPXML::InteriorFinishNone
+      if wall.interior_finish_type != HPXML::InteriorFinishNone && !wall.has_detailed_construction
         wall.interior_finish_thickness = 0.5
         wall.interior_finish_thickness_isdefaulted = true
       end
@@ -2906,5 +2937,12 @@ class HPXMLDefaults
         return -1.47 + 1.69 * noccs
       end
     end
+  end
+
+  def self.calculate_assembly_r_value_from_detailed_construction(surface)
+    constr = Constructions.create_from_detailed_construction(surface.detailed_construction,
+                                                             surface.additional_properties.inside_film,
+                                                             surface.additional_properties.outside_film)
+    return constr.assembly_rvalue.round(1)
   end
 end

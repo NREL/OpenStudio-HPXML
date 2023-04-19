@@ -1144,36 +1144,48 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     r_value: 4.4)
   end
   if ['base-enclosure-detailed-constructions.xml'].include? hpxml_file
-    hpxml.walls[0].detailed_construction.id = hpxml.walls[0].id.gsub('Wall', 'WallConstruction')
-    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.375)
-    hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
-                                                                                     material_type: 'vinyl siding',
-                                                                                     conductivity: 0.052,
-                                                                                     density: 11.1,
-                                                                                     specific_heat: 0.25)
-    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.5)
-    hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
-                                                                                     material_type: 'osb',
-                                                                                     conductivity: 0.067,
-                                                                                     density: 32.0,
-                                                                                     specific_heat: 0.29)
-    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 3.5)
-    hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.25,
-                                                                                     material_type: 'wood stud',
-                                                                                     conductivity: 0.067,
-                                                                                     density: 32.0,
-                                                                                     specific_heat: 0.29)
-    hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.75,
-                                                                                     material_type: 'fiberglass batt',
-                                                                                     conductivity: 0.022,
-                                                                                     density: 2.85,
-                                                                                     specific_heat: 0.25)
-    hpxml.walls[0].detailed_construction.construction_layers.add(layer_thickness: 0.5)
-    hpxml.walls[0].detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
-                                                                                     material_type: 'drywall',
-                                                                                     conductivity: 0.093,
-                                                                                     density: 50.0,
-                                                                                     specific_heat: 0.2)
+    (hpxml.walls + hpxml.rim_joists).each_with_index do |surface, i|
+      # Wall 1 (exterior): R-36 Closed Cell Spray Foam, 2x6, 24 in o.c.
+      # Wall 2 (attic gable): Uninsulated, 2x6, 24 in o.c.
+      # RimJoist 1: Same as Wall 1
+      surface.insulation_assembly_r_value = nil
+      surface.siding = nil
+      surface.interior_finish_type = nil if surface.is_a? HPXML::Wall
+      surface.detailed_construction.id = surface.id.gsub('Wall', 'WallConstruction').gsub('RimJoist', 'RimJoistConstruction')
+      surface.detailed_construction.construction_layers.add(layer_thickness: 0.375)
+      surface.detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
+                                                                                material_type: 'vinyl siding',
+                                                                                conductivity: 0.052,
+                                                                                density: 11.1,
+                                                                                specific_heat: 0.25)
+      surface.detailed_construction.construction_layers.add(layer_thickness: 0.5)
+      surface.detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
+                                                                                material_type: 'osb',
+                                                                                conductivity: 0.067,
+                                                                                density: 32.0,
+                                                                                specific_heat: 0.29)
+      if (i == 0) || (i == 2)
+        surface.detailed_construction.construction_layers.add(layer_thickness: 5.5)
+        surface.detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.22,
+                                                                                  material_type: 'wood stud',
+                                                                                  conductivity: 0.067,
+                                                                                  density: 32.0,
+                                                                                  specific_heat: 0.29)
+        surface.detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 0.78,
+                                                                                  material_type: 'spray foam',
+                                                                                  r_value: 36.0,
+                                                                                  density: 2.85,
+                                                                                  specific_heat: 0.25)
+      end
+      next unless i == 0
+
+      surface.detailed_construction.construction_layers.add(layer_thickness: 0.5)
+      surface.detailed_construction.construction_layers[-1].layer_materials.add(area_fraction: 1.0,
+                                                                                material_type: 'gypsum board',
+                                                                                conductivity: 0.093,
+                                                                                density: 50.0,
+                                                                                specific_heat: 0.2)
+    end
   end
 
   # ---------- #

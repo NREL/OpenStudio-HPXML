@@ -2740,10 +2740,17 @@ class HVACSizing
     end
 
     wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+    if not wall.siding.nil?
+      wall_siding_is_brick = (wall.siding == HPXML::SidingTypeBrick)
+    else
+      # Assume brick if at least 50% of the outermost construction layer is very high density
+      exterior_layer = wall.detailed_construction.construction_layers[0]
+      wall_siding_is_brick = exterior_layer.layer_materials.any? { |m| m.area_fraction >= 0.5 && m.density >= 100.0 }
+    end
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
     if wall_type == HPXML::WallTypeWoodStud
-      if wall.siding == HPXML::SidingTypeBrick
+      if wall_siding_is_brick
         if wall_ufactor <= 0.070
           wall_group = 11 # K
         elsif wall_ufactor <= 0.083
@@ -2784,7 +2791,7 @@ class HVACSizing
       end
 
     elsif wall_type == HPXML::WallTypeSteelStud
-      if wall.siding == HPXML::SidingTypeBrick
+      if wall_siding_is_brick
         if wall_ufactor <= 0.090
           wall_group = 11 # K
         elsif wall_ufactor <= 0.105
@@ -2826,20 +2833,20 @@ class HVACSizing
 
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
       wall_group = 10 # J (assumed since MJ8 does not include double stud constructions)
-      if wall.siding == HPXML::SidingTypeBrick
+      if wall_siding_is_brick
         wall_group = 11 # K
       end
 
     elsif wall_type == HPXML::WallTypeSIP
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
       if wall_ufactor >= (0.072 + 0.050) / 2
-        if wall.siding == HPXML::SidingTypeBrick
+        if wall_siding_is_brick
           wall_group = 10 # J
         else
           wall_group = 7 # G
         end
       elsif wall_ufactor >= 0.050
-        if wall.siding == HPXML::SidingTypeBrick
+        if wall_siding_is_brick
           wall_group = 11 # K
         else
           wall_group = 9 # I
