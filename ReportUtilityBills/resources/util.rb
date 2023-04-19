@@ -59,10 +59,12 @@ class CalculateUtilityBill
 
     monthly_fuel_cost = [0] * 12
     for month in 0..fuel_time_series.size - 1
+      month_ix = month + header.sim_begin_month - 1
+
       if is_production && fuel_type == FT::Elec && rate.feed_in_tariff_rate
-        monthly_fuel_cost[month] = fuel_time_series[month] * rate.feed_in_tariff_rate
+        monthly_fuel_cost[month_ix] = fuel_time_series[month] * rate.feed_in_tariff_rate
       else
-        monthly_fuel_cost[month] = fuel_time_series[month] * rate.flatratebuy
+        monthly_fuel_cost[month_ix] = fuel_time_series[month] * rate.flatratebuy
       end
 
       if fuel_type == FT::Elec
@@ -74,13 +76,13 @@ class CalculateUtilityBill
       end
 
       if is_production
-        bill.monthly_production_credit[month] = monthly_fuel_cost[month]
+        bill.monthly_production_credit[month_ix] = monthly_fuel_cost[month_ix]
       else
-        bill.monthly_energy_charge[month] = monthly_fuel_cost[month]
+        bill.monthly_energy_charge[month_ix] = monthly_fuel_cost[month_ix]
         if not rate.fixedmonthlycharge.nil?
           # If the run period doesn't span the entire month, prorate the fixed charges
-          prorate_fraction = calculate_monthly_prorate(header, month + header.sim_begin_month)
-          bill.monthly_fixed_charge[month] = rate.fixedmonthlycharge * prorate_fraction
+          prorate_fraction = calculate_monthly_prorate(header, month_ix + 1)
+          bill.monthly_fixed_charge[month_ix] = rate.fixedmonthlycharge * prorate_fraction
         end
       end
     end

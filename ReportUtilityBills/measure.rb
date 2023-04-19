@@ -231,13 +231,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
       # Write/report results
-      report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name)
+      report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name, @hpxml.header)
     end
 
     return true
   end
 
-  def report_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name)
+  def report_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name, _header)
     line_break = nil
 
     results_out = []
@@ -252,11 +252,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     results_out << [line_break]
 
     utility_bills.each do |fuel_type, bill|
-      bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, i|
-        results_out << ["#{bill_scenario_name}: #{i + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
+      bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
+        results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
       end
-      bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, i|
-        results_out << ["#{bill_scenario_name}: #{i + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+      bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
+        results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
       end
       results_out << [line_break]
     end
