@@ -1328,15 +1328,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_temp = 80
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
-  elsif hpxml_file.include? 'onoff-thermostat-deadband' || hpxml_file.include? 'hvac-realistic-control'
+  elsif (hpxml_file.include? 'onoff-thermostat-deadband') || (hpxml_file.include? 'hvac-realistic-control')
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
     if ['base-hvac-realistic-control-2-speed-ashp.xml',
         'base-hvac-realistic-control-2-speed-central-ac.xml'].include? hpxml_file
       hpxml.hvac_controls[0].realistic_staging = true
-    end
-    if ['base-hvac-realistic-control-2-speed-ashp.xml'].include? hpxml_file
-      hpxml.heat_pumps[0].heating_capacity = 10000
-      hpxml.heat_pumps[0].heating_capacity_17F = 5900.0
     end
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml',
