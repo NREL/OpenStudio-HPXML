@@ -53,7 +53,7 @@ __Bugfixes__
 - HPXML files w/ multiple `Building` elements now only show warnings for the single `Building` being simulated.
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
 - Fixes window/skylight design loads for Manual J HVAC autosizing calculations.
-- Fixes error for calculating zero fixed costs for simulations with abbreviated run periods.
+- Fixes error for calculating zero utility bill fixed costs for simulations with abbreviated run periods.
 
 ## OpenStudio-HPXML v1.5.1
 
