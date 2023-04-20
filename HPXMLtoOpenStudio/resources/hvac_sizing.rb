@@ -2742,10 +2742,12 @@ class HVACSizing
     wall_ufactor = 1.0 / wall.insulation_assembly_r_value
     if not wall.siding.nil?
       wall_siding_is_brick = (wall.siding == HPXML::SidingTypeBrick)
-    else
+    elsif wall.has_detailed_construction
       # Assume brick if at least 50% of the outermost construction layer is very high density
       exterior_layer = wall.detailed_construction.construction_layers[0]
       wall_siding_is_brick = exterior_layer.layer_materials.any? { |m| m.area_fraction >= 0.5 && m.density >= 100.0 }
+    else
+      wall_siding_is_brick = false
     end
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
