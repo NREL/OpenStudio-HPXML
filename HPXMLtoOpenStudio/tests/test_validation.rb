@@ -191,7 +191,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0'],
-                            'onoff-thermostat-wrong-system-type' => ['Unexpected cooling system types, only support central AC or air source heat pump'],
+                            'onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support single speed dx systems'],
                             'onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system',
                                                                   'Expected at maximum one heating system'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -540,20 +540,20 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
       elsif ['onoff-thermostat-heat-load-fraction'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
       elsif ['onoff-thermostat-cool-load-fraction'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].fraction_cool_load_served = 0.5
       elsif ['onoff-thermostat-negative-value'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.hvac_controls[0].onoff_thermostat_deadband = -1.0
-      elsif ['onoff-thermostat-wrong-system-type'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+      elsif ['onoff-thermostat-wrong-cooling-system-type'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
         hpxml.heat_pumps[0].compressor_type = nil
       elsif ['onoff-thermostat-two-heat-pumps'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].fraction_cool_load_served = 0.5
         hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
         hpxml.heat_pumps << hpxml.heat_pumps[0].dup
@@ -776,13 +776,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
       elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.header.timestep = 10
       elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['onoff-thermostat-num-speeds-greater-than-one'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband.xml'))
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))

@@ -1390,12 +1390,6 @@ class OSModel
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
-      if cooling_system.additional_properties.respond_to? :num_speeds
-        is_ddb_control = (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) && (cooling_system.additional_properties.num_speeds == 1)
-      else
-        is_ddb_control = false
-      end
-
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
       @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served.to_f
@@ -1419,7 +1413,7 @@ class OSModel
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                 living_zone, @hvac_unavailable_periods, is_ddb_control)
+                                                                 living_zone, @hvac_unavailable_periods, @hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -1872,13 +1866,14 @@ class OSModel
     # We do our own unmet hours calculation via EMS so that we can incorporate,
     # e.g., heating/cooling seasons into the logic.
     hvac_control = @hpxml.hvac_controls[0]
+    is_ddb_control = false
     if not hvac_control.nil?
       sim_year = @hpxml.header.sim_calendar_year
       htg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
       htg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
       clg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
       clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
-      onoff_thermostat_deadband = hvac_control.onoff_thermostat_deadband
+      is_ddb_control = (hvac_control.onoff_thermostat_deadband.to_f > 0)
     end
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
@@ -1892,7 +1887,7 @@ class OSModel
     clg_sensor.setName('zone clg unmet s')
     clg_sensor.setKeyName(living_zone.name.to_s)
 
-    if onoff_thermostat_deadband.to_f > 0.0
+    if is_ddb_control
       zone_air_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
       zone_air_temp_sensor.setName('living_space_temp')
       zone_air_temp_sensor.setKeyName(spaces[HPXML::LocationLivingSpace].thermalZone.get.name.to_s)
@@ -1923,8 +1918,8 @@ class OSModel
       end
       line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
       program.addLine(line)
-      if onoff_thermostat_deadband > 0.0
-        program.addLine("  If #{zone_air_temp_sensor.name} < (#{sensor_htg_spt.name} - #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
+      if is_ddb_control
+        program.addLine("  If #{zone_air_temp_sensor.name} < (#{sensor_htg_spt.name} - #{UnitConversions.convert(hvac_control.onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
         program.addLine("    Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
         program.addLine('  EndIf')
       else
@@ -1940,8 +1935,8 @@ class OSModel
       end
       line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
       program.addLine(line)
-      if onoff_thermostat_deadband > 0.0
-        program.addLine("  If #{zone_air_temp_sensor.name} > (#{sensor_clg_spt.name} + #{UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
+      if is_ddb_control
+        program.addLine("  If #{zone_air_temp_sensor.name} > (#{sensor_clg_spt.name} + #{UnitConversions.convert(hvac_control.onoff_thermostat_deadband, 'deltaF', 'deltaC')})")
         program.addLine("    Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
         program.addLine('  EndIf')
       else

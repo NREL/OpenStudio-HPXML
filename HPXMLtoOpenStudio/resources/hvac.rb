@@ -3148,14 +3148,14 @@ class HVAC
     program_calling_manager.addProgram(supp_coil_avail_program)
   end
 
-  def self.calc_time_to_full_cap(model, c_d)
-    #assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
+  def self.calc_time_to_full_cap(c_d)
+    # assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
     time = (20.0 * c_d + 0.4).round
     time = [time, 2].max
     time = [time, 5].min
     return time
-
   end
+
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     if is_cooling
@@ -3163,9 +3163,7 @@ class HVAC
     else
       c_d = system_ap.heat_c_d
     end
-    cap_time = calc_time_to_full_cap(model, c_d)
-    power_time = 1 # Assumed minutes to take to ramp up to full power
-    number_of_timestep_logged = [cap_time, power_time].max
+    number_of_timestep_logged = calc_time_to_full_cap(c_d)
 
     # Sensors
     cap_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
@@ -3234,7 +3232,7 @@ class HVAC
         cycling_degrad_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
       end
     end
-    (1..cap_time).each do |t_i|
+    (1..number_of_timestep_logged).each do |t_i|
       if t_i == 1
         cycling_degrad_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
       else
@@ -3249,15 +3247,13 @@ class HVAC
       # use average curve value ( ~ at 0.5 min).
       cycling_degrad_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i - 0.5})")
       cycling_degrad_program.addLine('  Set cc_mult = -1.0125 * exp + 1.0125')
-      # power is ramped up in less than 1 min, only second level simulation can capture power startup behavior
-      cycling_degrad_program.addLine('  Set ec_mult = 1.0')
     end
     cycling_degrad_program.addLine('Else')
     cycling_degrad_program.addLine('  Set cc_mult = 1.0')
-    cycling_degrad_program.addLine('  Set ec_mult = 1.0')
     cycling_degrad_program.addLine('EndIf')
     cycling_degrad_program.addLine("Set #{cc_actuator.name} = cc_mult * cc_out")
-    cycling_degrad_program.addLine("Set #{ec_actuator.name} = ec_mult * ec_out / cc_mult")
+    # power is ramped up in less than 1 min, only second level simulation can capture power startup behavior
+    cycling_degrad_program.addLine("Set #{ec_actuator.name} = ec_out / cc_mult")
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
