@@ -544,6 +544,7 @@ Annual results for each utility bill scenario defined in the HPXML file are list
    <ScenarioName>: Coal: Fixed ($)                    Scenario annual fixed charges for coal.
    <ScenarioName>: Coal: Energy ($)                   Scenario annual energy charges for coal.
    <ScenarioName>: Coal: Total ($)                    Scenario annual total charges for coal.
+   =================================================  ====================
 
 Monthly Bills by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -483,6 +483,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     utility_bills.values.each do |bill|
       if bill.annual_production_credit != 0
         bill.annual_production_credit *= -1
+        bill.monthly_production_credit = bill.monthly_production_credit.map { |x| x * -1 }
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
