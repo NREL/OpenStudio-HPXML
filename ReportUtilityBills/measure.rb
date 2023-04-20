@@ -52,7 +52,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_monthly_bills', false)
     arg.setDisplayName('Generate Monthly Utility Bills')
     arg.setDescription('Generates monthly utility bills.')
-    arg.setDefaultValue(false)
+    arg.setDefaultValue(true)
     args << arg
 
     return args
@@ -112,7 +112,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       elsif k.start_with?('include_annual')
         args[k] = true # default if not provided
       elsif k.start_with?('include_monthly')
-        args[k] = false # default if not provided
+        args[k] = true # default if not provided
       else
         args[k] = nil # default if not provided
       end

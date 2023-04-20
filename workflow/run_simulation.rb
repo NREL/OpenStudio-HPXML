@@ -71,8 +71,6 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   measure_subdir = 'ReportUtilityBills'
   args = {}
   args['output_format'] = output_format
-  args['include_annual_bills'] = true
-  args['include_monthly_bills'] = true
   update_args_hash(measures, measure_subdir, args)
 
   results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)
