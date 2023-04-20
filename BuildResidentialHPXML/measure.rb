@@ -327,7 +327,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_type_choices << HPXML::FoundationTypeBasementConditioned
     foundation_type_choices << HPXML::FoundationTypeAmbient
     foundation_type_choices << HPXML::FoundationTypeAboveApartment # I.e., adiabatic
-    foundation_type_choices << HPXML::FoundationTypeBellyAndWing
+    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}WithSkirt"
+    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}NoSkirt"
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', foundation_type_choices, true)
     arg.setDisplayName('Geometry: Foundation Type')
@@ -3468,7 +3469,7 @@ class HPXMLFile
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
       args[:geometry_rim_joist_height] = 0.0
-    elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
+    elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient or args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       args[:geometry_rim_joist_height] = 0.0
     end
 
@@ -4583,13 +4584,26 @@ class HPXMLFile
       end
     end
 
+    if args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+      foundation_type = HPXML::FoundationTypeBellyAndWing
+      if args[:geometry_foundation_type].end_with?('WithSkirt')
+        kw = {belly_wing_skirt_present: true}
+      elsif args[:geometry_foundation_type].end_with?('NoSkirt')
+        kw = {belly_wing_skirt_present: false}
+      end
+    else
+      foundation_type = args[:geometry_foundation_type]
+      kw = {}
+    end
+
     hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
-                          foundation_type: args[:geometry_foundation_type],
+                          foundation_type: foundation_type,
                           attached_to_slab_idrefs: surf_ids['slabs']['ids'],
                           attached_to_floor_idrefs: surf_ids['floors']['ids'],
                           attached_to_foundation_wall_idrefs: surf_ids['foundation_walls']['ids'],
                           attached_to_wall_idrefs: surf_ids['walls']['ids'],
-                          attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'])
+                          attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'],
+                          **kw)
   end
 
   def self.set_heating_systems(hpxml, args)
