@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>f3d0671c-af96-42cc-8e11-020fb1997cc5</version_id>
-  <version_modified>20230419T180440Z</version_modified>
+  <version_id>fc8badfa-ad4d-45fb-add1-38430ce1d127</version_id>
+  <version_modified>20230420T154924Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -31,6 +31,44 @@
         <choice>
           <value>msgpack</value>
           <display_name>msgpack</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_annual_bills</name>
+      <display_name>Generate Annual Utility Bills</display_name>
+      <description>Generates annual utility bills.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>true</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_monthly_bills</name>
+      <display_name>Generate Monthly Utility Bills</display_name>
+      <description>Generates monthly utility bills.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
@@ -231,13 +269,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C4EFFA93</checksum>
+      <checksum>FA6A1B30</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>929466BE</checksum>
+      <checksum>41B9E5B1</checksum>
     </file>
   </files>
 </measure>

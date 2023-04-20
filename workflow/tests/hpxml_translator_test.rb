@@ -411,7 +411,6 @@ class HPXMLTest < MiniTest::Test
     if File.exist? bill_csv_path
       CSV.foreach(bill_csv_path) do |row|
         next if row.nil? || (row.size < 2)
-        next if (1..12).to_a.any? { |month| row[0].include?(": #{month}:") }
 
         results[row[0]] = Float(row[1])
       end

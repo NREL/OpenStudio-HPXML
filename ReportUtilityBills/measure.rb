@@ -43,6 +43,18 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('csv')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_bills', false)
+    arg.setDisplayName('Generate Annual Utility Bills')
+    arg.setDescription('Generates annual utility bills.')
+    arg.setDefaultValue(true)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_monthly_bills', false)
+    arg.setDisplayName('Generate Monthly Utility Bills')
+    arg.setDescription('Generates monthly utility bills.')
+    arg.setDefaultValue(false)
+    args << arg
+
     return args
   end
 
@@ -90,6 +102,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     return warnings.uniq
+  end
+
+  def get_arguments(runner, arguments, user_arguments)
+    args = get_argument_values(runner, arguments, user_arguments)
+    args.each do |k, val|
+      if val.respond_to?(:is_initialized) && val.is_initialized
+        args[k] = val.get
+      elsif k.start_with?('include_annual')
+        args[k] = true # default if not provided
+      elsif k.start_with?('include_monthly')
+        args[k] = false # default if not provided
+      else
+        args[k] = nil # default if not provided
+      end
+    end
+    return args
   end
 
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
@@ -178,9 +206,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return false
     end
 
-    # assign the user inputs to variables
-    args = get_argument_values(runner, arguments(model), user_arguments)
-    output_format = args[:output_format].get
+    args = get_arguments(runner, arguments(model), user_arguments)
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
 
@@ -203,7 +229,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Set paths
-    output_path = File.join(output_dir, "results_bills.#{output_format}")
+    output_path = File.join(output_dir, "results_bills.#{args[:output_format]}")
     FileUtils.rm(output_path) if File.exist?(output_path)
 
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
@@ -231,39 +257,44 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
       # Write/report results
-      report_runperiod_output_results(runner, utility_bills, output_format, output_path, utility_bill_scenario.name, @hpxml.header)
+      report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name, @hpxml.header)
     end
 
     return true
   end
 
-  def report_runperiod_output_results(runner, utility_bills, output_format, output_path, bill_scenario_name, _header)
+  def report_runperiod_output_results(runner, args, utility_bills, output_path, bill_scenario_name, _header)
     line_break = nil
 
     results_out = []
-    results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
 
-    utility_bills.each do |fuel_type, bill|
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)]
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)]
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
-      results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)]
-    end
-    results_out << [line_break]
+    if args[:include_annual_bills]
+      results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
 
-    utility_bills.each do |fuel_type, bill|
-      bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
-        results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
-      end
-      bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
-        results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+      utility_bills.each do |fuel_type, bill|
+        results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)]
+        results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)]
+        results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
+        results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)]
       end
       results_out << [line_break]
     end
 
-    if ['csv'].include? output_format
+    if args[:include_monthly_bills]
+      utility_bills.each do |fuel_type, bill|
+        bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
+          results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
+        end
+        bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
+          results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+        end
+        results_out << [line_break]
+      end
+    end
+
+    if ['csv'].include? args[:output_format]
       CSV.open(output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
-    elsif ['json', 'msgpack'].include? output_format
+    elsif ['json', 'msgpack'].include? args[:output_format]
       h = {}
       results_out.each do |out|
         next if out == [line_break]
@@ -277,10 +308,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         end
       end
 
-      if output_format == 'json'
+      if args[:output_format] == 'json'
         require 'json'
         File.open(output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
-      elsif output_format == 'msgpack'
+      elsif args[:output_format] == 'msgpack'
         File.open(output_path, 'a') { |json| h.to_msgpack(json) }
       end
     end
