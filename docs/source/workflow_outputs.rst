@@ -511,8 +511,12 @@ Utility Bill Outputs
 
 OpenStudio-HPXML can optionally generate a utility bills output file.
 The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
+The utility bills output file can report annual bills, monthly bills, or both.
 
-Results for each utility bill scenario defined in the HPXML file are listed as shown below.
+Annual Bills by Fuel Use
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Annual results for each utility bill scenario defined in the HPXML file are listed as shown below.
 
    =================================================  ====================
    Type                                               Notes
@@ -541,24 +545,40 @@ Results for each utility bill scenario defined in the HPXML file are listed as s
    <ScenarioName>: Coal: Energy ($)                   Scenario annual energy charges for coal.
    <ScenarioName>: Coal: Total ($)                    Scenario annual total charges for coal.
 
-   <ScenarioName>: <Month>: Electricity: Energy ($)   Scenario monthly energy charges for electricity.
-   <ScenarioName>: <Month>: Electricity: Fixed ($)    Scenario monthly fixed charges for electricity.
+Monthly Bills by Fuel Use
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   <ScenarioName>: <Month>: Natural Gas: Energy ($)   Scenario monthly energy charges for natural gas.
-   <ScenarioName>: <Month>: Natural Gas: Fixed ($)    Scenario monthly fixed charges for natural gas.
+Monthly results for each utility bill scenario defined in the HPXML file are listed as shown below.
 
-   <ScenarioName>: <Month>: Fuel Oil: Energy ($)      Scenario monthly energy charges for fuel oil.
-   <ScenarioName>: <Month>: Fuel Oil: Fixed ($)       Scenario monthly fixed charges for fuel oil.
+   =========================================================  ====================
+   Type                                                       Notes
+   =========================================================  ====================
+   <ScenarioName>: Month <Month>: Electricity: Fixed ($)      Scenario monthly fixed charges for electricity.
+   <ScenarioName>: Month <Month>: Electricity: Energy ($)     Scenario monthly energy charges for electricity.
+   <ScenarioName>: Month <Month>: Electricity: PV Credit ($)  Scenario monthly production credit (negative value) for PV.
+   <ScenarioName>: Month <Month>: Electricity: Total ($)      Scenario monthly total charges for electricity.
 
-   <ScenarioName>: <Month>: Propane: Energy ($)       Scenario monthly energy charges for propane.
-   <ScenarioName>: <Month>: Propane: Fixed ($)        Scenario monthly fixed charges for propane.
+   <ScenarioName>: Month <Month>: Natural Gas: Fixed ($)      Scenario monthly fixed charges for natural gas.
+   <ScenarioName>: Month <Month>: Natural Gas: Energy ($)     Scenario monthly energy charges for natural gas.
+   <ScenarioName>: Month <Month>: Natural Gas: Total ($)      Scenario monthly total charges for natural gas.
 
-   <ScenarioName>: <Month>: Wood Cord: Energy ($)     Scenario monthly energy charges for wood cord.
-   <ScenarioName>: <Month>: Wood Cord: Fixed ($)      Scenario monthly fixed charges for wood cord.
+   <ScenarioName>: Month <Month>: Fuel Oil: Fixed ($)         Scenario monthly fixed charges for fuel oil.
+   <ScenarioName>: Month <Month>: Fuel Oil: Energy ($)        Scenario monthly energy charges for fuel oil.
+   <ScenarioName>: Month <Month>: Fuel Oil: Total ($)         Scenario monthly total charges for fuel oil.
 
-   <ScenarioName>: <Month>: Wood Pellets: Energy ($)  Scenario monthly energy charges for wood pellets.
-   <ScenarioName>: <Month>: Wood Pellets: Fixed ($)   Scenario monthly fixed charges for wood pellets.
+   <ScenarioName>: Month <Month>: Propane: Fixed ($)          Scenario monthly fixed charges for propane.
+   <ScenarioName>: Month <Month>: Propane: Energy ($)         Scenario monthly energy charges for propane.
+   <ScenarioName>: Month <Month>: Propane: Total ($)          Scenario monthly total charges for propane.
 
-   <ScenarioName>: <Month>: Coal: Energy ($)          Scenario monthly energy charges for coal.
-   <ScenarioName>: <Month>: Coal: Fixed ($)           Scenario monthly fixed charges for coal.
-   =================================================  ====================
+   <ScenarioName>: Month <Month>: Wood Cord: Fixed ($)        Scenario monthly fixed charges for wood cord.
+   <ScenarioName>: Month <Month>: Wood Cord: Energy ($)       Scenario monthly energy charges for wood cord.
+   <ScenarioName>: Month <Month>: Wood Cord: Total ($)        Scenario monthly total charges for wood cord.
+
+   <ScenarioName>: Month <Month>: Wood Pellets: Fixed ($)     Scenario monthly fixed charges for wood pellets.
+   <ScenarioName>: Month <Month>: Wood Pellets: Energy ($)    Scenario monthly energy charges for wood pellets.
+   <ScenarioName>: Month <Month>: Wood Pellets: Total ($)     Scenario monthly total charges for wood pellets.
+
+   <ScenarioName>: Month <Month>: Coal: Fixed ($)             Scenario monthly fixed charges for coal.
+   <ScenarioName>: Month <Month>: Coal: Energy ($)            Scenario monthly energy charges for coal.
+   <ScenarioName>: Month <Month>: Coal: Total ($)             Scenario monthly total charges for coal.
+   =========================================================  ====================
