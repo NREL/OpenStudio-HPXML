@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>fc8badfa-ad4d-45fb-add1-38430ce1d127</version_id>
-  <version_modified>20230420T154924Z</version_modified>
+  <version_id>6f9eb7da-c153-4b5d-872d-3d81ac088b88</version_id>
+  <version_modified>20230420T161127Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -255,10 +255,16 @@
       <checksum>387337AD</checksum>
     </file>
     <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>41B9E5B1</checksum>
+    </file>
+    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>22F2E955</checksum>
+      <checksum>103DBD9B</checksum>
     </file>
     <file>
       <version>
@@ -269,13 +275,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FA6A1B30</checksum>
+      <checksum>F56D931A</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
-      <filetype>rb</filetype>
+      <filename>results_bills.csv</filename>
+      <filetype>csv</filetype>
       <usage_type>test</usage_type>
-      <checksum>41B9E5B1</checksum>
+      <checksum>D492E470</checksum>
     </file>
   </files>
 </measure>

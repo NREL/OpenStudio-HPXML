@@ -41,12 +41,13 @@ class UtilityBill
 
     @monthly_energy_charge = [0] * 12
     @monthly_fixed_charge = [0] * 12
+    @monthly_total = [0] * 12
 
     @monthly_production_credit = [0] * 12
     @annual_production_credit = 0.0
   end
   attr_accessor(:annual_energy_charge, :annual_fixed_charge, :annual_total,
-                :monthly_energy_charge, :monthly_fixed_charge,
+                :monthly_energy_charge, :monthly_fixed_charge, :monthly_total,
                 :monthly_production_credit, :annual_production_credit)
 end
 

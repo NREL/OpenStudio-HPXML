@@ -283,10 +283,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     if args[:include_monthly_bills]
       utility_bills.each do |fuel_type, bill|
         bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
-          results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
+          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
         end
         bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
-          results_out << ["#{bill_scenario_name}: #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+        end
+        bill.monthly_production_credit.each_with_index do |monthly_production_credit, month|
+          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: PV Credit (USD)", monthly_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
+        end
+        bill.monthly_total.each_with_index do |monthly_total, month|
+          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Total (USD)", monthly_total.round(2)]
         end
         results_out << [line_break]
       end
@@ -480,6 +486,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
+      bill.monthly_total = [bill.monthly_fixed_charge, bill.monthly_energy_charge, bill.monthly_production_credit].transpose.map { |x| x.reduce(:+) }
     end
   end
 
@@ -543,15 +550,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
       fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timeseries_freq)
     end
-  end
-
-  def reporting_frequency_map
-    return {
-      'timestep' => 'Zone Timestep',
-      'hourly' => 'Hourly',
-      'daily' => 'Daily',
-      'monthly' => 'Monthly',
-    }
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_freq)
