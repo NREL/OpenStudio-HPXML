@@ -1221,6 +1221,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def test_ruby_warning_messages
     # Test case => Error message
     all_expected_warnings = { 'cfis-undersized-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' is undersized (90.0 cfm) compared to the target hourly ventilation rate (110.0 cfm)."],
+                              'detailed-construction-assembly-rvalue' => ["For rim joist 'RimJoist1', assembly R-value calculated from detailed construction (22.2) differs from AssemblyEffectiveRValue (10.0). The latter will be overridden.",
+                                                                          "For wall 'Wall1', assembly R-value calculated from detailed construction (22.9) differs from AssemblyEffectiveRValue (10.0). The latter will be overridden."],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
@@ -1302,6 +1304,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis-supplemental-fan-exhaust.xml'))
         suppl_fan = hpxml.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
         suppl_fan.tested_flow_rate = 90.0
+      elsif ['detailed-construction-assembly-rvalue'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-enclosure-detailed-constructions.xml'))
+        hpxml.walls[0].insulation_assembly_r_value = 10
+        hpxml.rim_joists[0].insulation_assembly_r_value = 10
       elsif ['hvac-setpoint-adjustments'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_controls[0].heating_setpoint_temp = 76.0

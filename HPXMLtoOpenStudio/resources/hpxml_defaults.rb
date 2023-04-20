@@ -36,8 +36,8 @@ class HPXMLDefaults
     apply_attics(hpxml)
     apply_foundations(hpxml)
     apply_roofs(hpxml)
-    apply_rim_joists(hpxml)
-    apply_walls(hpxml, apply_ashrae140_assumptions)
+    apply_rim_joists(runner, hpxml)
+    apply_walls(runner, hpxml, apply_ashrae140_assumptions)
     apply_foundation_walls(hpxml)
     apply_floors(hpxml)
     apply_slabs(hpxml)
@@ -705,7 +705,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_rim_joists(hpxml)
+  def self.apply_rim_joists(runner, hpxml)
     hpxml.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
         rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
@@ -723,9 +723,19 @@ class HPXMLDefaults
         rim_joist.additional_properties.outside_film = Material.AirFilmVertical
       end
 
-      if rim_joist.insulation_assembly_r_value.nil?
-        rim_joist.insulation_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(rim_joist)
-        rim_joist.insulation_assembly_r_value_isdefaulted = true
+      if rim_joist.has_detailed_construction
+        detailed_construction_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(rim_joist)
+        if rim_joist.insulation_assembly_r_value.nil?
+          rim_joist.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          rim_joist.insulation_assembly_r_value_isdefaulted = true
+        elsif (detailed_construction_assembly_r_value - rim_joist.insulation_assembly_r_value).abs > 1
+          # Detailed construction is more than R-1 different from user-specified assembly R-value
+          if not runner.nil?
+            runner.registerWarning("For rim joist '#{rim_joist.id}', assembly R-value calculated from detailed construction (#{detailed_construction_assembly_r_value}) differs from AssemblyEffectiveRValue (#{rim_joist.insulation_assembly_r_value}). The latter will be overridden.")
+          end
+          rim_joist.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          rim_joist.insulation_assembly_r_value_isdefaulted = true
+        end
       end
 
       next unless rim_joist.is_exterior
@@ -752,7 +762,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_walls(hpxml, apply_ashrae140_assumptions)
+  def self.apply_walls(runner, hpxml, apply_ashrae140_assumptions)
     hpxml.walls.each do |wall|
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
@@ -774,9 +784,19 @@ class HPXMLDefaults
         wall.additional_properties.outside_film = Material.AirFilmOutsideASHRAE140
       end
 
-      if wall.insulation_assembly_r_value.nil?
-        wall.insulation_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(wall)
-        wall.insulation_assembly_r_value_isdefaulted = true
+      if wall.has_detailed_construction
+        detailed_construction_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(wall)
+        if wall.insulation_assembly_r_value.nil?
+          wall.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          wall.insulation_assembly_r_value_isdefaulted = true
+        elsif (detailed_construction_assembly_r_value - wall.insulation_assembly_r_value).abs > 1
+          # Detailed construction is more than R-1 different from user-specified assembly R-value
+          if not runner.nil?
+            runner.registerWarning("For wall '#{wall.id}', assembly R-value calculated from detailed construction (#{detailed_construction_assembly_r_value}) differs from AssemblyEffectiveRValue (#{wall.insulation_assembly_r_value}). The latter will be overridden.")
+          end
+          wall.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          wall.insulation_assembly_r_value_isdefaulted = true
+        end
       end
 
       if wall.is_exterior
