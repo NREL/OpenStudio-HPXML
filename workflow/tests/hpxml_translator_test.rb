@@ -491,7 +491,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
       if !hpxml.header.unavailable_periods.empty?
-        next if log_line.include? 'It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
+        next if log_line.include? 'It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
       end
 
       flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
