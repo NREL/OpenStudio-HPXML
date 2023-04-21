@@ -744,7 +744,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['missing-attached-surfaces'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-        hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+        hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0
