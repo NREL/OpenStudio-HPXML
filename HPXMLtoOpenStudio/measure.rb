@@ -397,72 +397,80 @@ class OSModel
       next if surfaces.empty?
 
       # Apply construction
-      has_radiant_barrier = roof.radiant_barrier
-      if has_radiant_barrier
-        radiant_barrier_grade = roof.radiant_barrier_grade
-      end
-      # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
-      inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
-      outside_film = Material.AirFilmOutside
-      mat_roofing = Material.RoofMaterial(roof.roof_type)
-      if @apply_ashrae140_assumptions
-        inside_film = Material.AirFilmRoofASHRAE140
-        outside_film = Material.AirFilmOutsideASHRAE140
-      end
-      mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
-      if mat_int_finish.nil?
-        fallback_mat_int_finish = nil
+
+      inside_film = roof.additional_properties.inside_film
+      outside_film = roof.additional_properties.outside_film
+
+      if roof.has_detailed_construction
+        # Layer-by-layer construction
+
+        Constructions.apply_detailed_construction(model, surfaces, roof.detailed_construction, inside_film,
+                                                  outside_film, roof.solar_absorptance, roof.emittance)
+
       else
-        fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
-      end
+        # Assembly R-value
 
-      install_grade = 1
-      assembly_r = roof.insulation_assembly_r_value
+        has_radiant_barrier = roof.radiant_barrier
+        if has_radiant_barrier
+          radiant_barrier_grade = roof.radiant_barrier_grade
+        end
+        # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
+        mat_roofing = Material.RoofMaterial(roof.roof_type)
+        mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
+        if mat_int_finish.nil?
+          fallback_mat_int_finish = nil
+        else
+          fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
+        end
 
-      if not mat_int_finish.nil?
-        # Closed cavity
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),     # 2x8, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),         # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),          # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, mat_roofing), # Fallback
-        ]
-        match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+        install_grade = 1
+        assembly_r = roof.insulation_assembly_r_value
 
-        Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
-                                               cavity_r, install_grade,
-                                               constr_set.stud.thick_in,
-                                               true, constr_set.framing_factor,
-                                               constr_set.mat_int_finish,
-                                               constr_set.osb_thick_in, constr_set.rigid_r,
+        if not mat_int_finish.nil?
+          # Closed cavity
+          constr_sets = [
+            WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
+            WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R10
+            WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),     # 2x8, 24" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),         # 2x6, 24" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),          # 2x4, 16" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, mat_roofing), # Fallback
+          ]
+          match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+
+          Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
+                                                 cavity_r, install_grade,
+                                                 constr_set.stud.thick_in,
+                                                 true, constr_set.framing_factor,
+                                                 constr_set.mat_int_finish,
+                                                 constr_set.osb_thick_in, constr_set.rigid_r,
+                                                 constr_set.mat_ext_finish, has_radiant_barrier,
+                                                 inside_film, outside_film, radiant_barrier_grade,
+                                                 roof.solar_absorptance, roof.emittance)
+        else
+          # Open cavity
+          constr_sets = [
+            GenericConstructionSet.new(10.0, 0.5, nil, mat_roofing), # w/R-10 rigid
+            GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
+            GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
+          ]
+          match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+
+          cavity_r = 0
+          cavity_ins_thick_in = 0
+          framing_factor = 0
+          framing_thick_in = 0
+
+          Constructions.apply_open_cavity_roof(model, surfaces, "#{roof.id} construction",
+                                               cavity_r, install_grade, cavity_ins_thick_in,
+                                               framing_factor, framing_thick_in,
+                                               constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
                                                constr_set.mat_ext_finish, has_radiant_barrier,
                                                inside_film, outside_film, radiant_barrier_grade,
                                                roof.solar_absorptance, roof.emittance)
-      else
-        # Open cavity
-        constr_sets = [
-          GenericConstructionSet.new(10.0, 0.5, nil, mat_roofing), # w/R-10 rigid
-          GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
-          GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
-        ]
-        match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
-
-        cavity_r = 0
-        cavity_ins_thick_in = 0
-        framing_factor = 0
-        framing_thick_in = 0
-
-        Constructions.apply_open_cavity_roof(model, surfaces, "#{roof.id} construction",
-                                             cavity_r, install_grade, cavity_ins_thick_in,
-                                             framing_factor, framing_thick_in,
-                                             constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
-                                             constr_set.mat_ext_finish, has_radiant_barrier,
-                                             inside_film, outside_film, radiant_barrier_grade,
-                                             roof.solar_absorptance, roof.emittance)
+        end
+        Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
       end
-      Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
   end
 

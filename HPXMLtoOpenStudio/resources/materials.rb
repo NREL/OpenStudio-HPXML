@@ -424,6 +424,21 @@ class BaseMaterial
   end
 end
 
+class NoMassMaterial
+  # name - NoMassMaterial name
+  # rvalue - R-value (h-ft^2-F/Btu)
+  # tAbs - thermal absorptance (emittance); 0.9 is EnergyPlus default
+  # sAbs - solar absorptance; 0.7 is EnergyPlus default
+  def initialize(name: nil, rvalue:, tAbs: 0.9, sAbs: 0.7)
+    @name = name
+    @rvalue = rvalue
+    @tAbs = tAbs
+    @sAbs = sAbs
+  end
+
+  attr_accessor :name, :rvalue, :tAbs, :sAbs
+end
+
 class GlazingMaterial
   def initialize(name:, ufactor:, shgc:)
     @name = name

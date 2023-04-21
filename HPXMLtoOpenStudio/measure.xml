@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d6ed34bb-e63b-495d-8f39-016b11e1bef0</version_id>
-  <version_modified>20230420T195945Z</version_modified>
+  <version_id>1df8f125-8fab-4ae0-ae40-88f23f1e51a5</version_id>
+  <version_modified>20230421T165351Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -264,12 +264,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>B0CF4C83</checksum>
-    </file>
-    <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>24DCB986</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
@@ -536,22 +530,22 @@
       <checksum>CA905BB5</checksum>
     </file>
     <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>37C4E003</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>499AD1D2</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>433F44E9</checksum>
+    </file>
+    <file>
+      <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B6318566</checksum>
+      <checksum>49C655B4</checksum>
     </file>
     <file>
       <version>
@@ -562,25 +556,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D82C0BA0</checksum>
+      <checksum>5D282B98</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0C36E521</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E0149C54</checksum>
+      <checksum>03B9DA68</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B2D9CF83</checksum>
+      <checksum>F976248C</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AD38F94E</checksum>
+      <checksum>4E449B9A</checksum>
     </file>
   </files>
 </measure>

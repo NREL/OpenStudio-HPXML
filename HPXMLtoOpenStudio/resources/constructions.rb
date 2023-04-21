@@ -33,10 +33,14 @@ class Constructions
         end
         if not material.conductivity.nil?
           k_in = UnitConversions.convert(material.conductivity, 'ft', 'in')
-        else
+        elsif not layer.layer_thickness.nil?
           k_in = layer.layer_thickness / material.r_value
         end
-        mat = Material.new(name: material_name, thick_in: layer.layer_thickness, k_in: k_in, rho: material.density, cp: material.specific_heat)
+        if not k_in.nil?
+          mat = Material.new(name: material_name, thick_in: layer.layer_thickness, k_in: k_in, rho: material.density, cp: material.specific_heat)
+        else
+          mat = NoMassMaterial.new(name: material_name, rvalue: material.r_value)
+        end
         mats[[i, j]] = mat
       end
     end
@@ -2562,8 +2566,8 @@ class Construction
     # Check for valid object types
     @layers_materials.each do |layer_materials|
       layer_materials.each do |mat|
-        if (not mat.is_a? Material)
-          fail 'Invalid construction: Materials must be instances of Material classes.'
+        if (not mat.is_a? Material) && (not mat.is_a? NoMassMaterial)
+          fail 'Invalid construction: Materials must be instances of Material or NoMassMaterial classes.'
         end
       end
     end
@@ -2637,27 +2641,44 @@ class Construction
       mat.setSolarHeatGainCoefficient(material.shgc)
     else
       # Material already exists?
-      model.getStandardOpaqueMaterials.each do |mat|
-        next if !mat.name.to_s.start_with?(material.name)
-        next if mat.roughness.downcase.to_s != 'rough'
-        next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
-        next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
-        next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
-        next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
-        next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
-        next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
+      if material.is_a? Material
+        model.getStandardOpaqueMaterials.each do |mat|
+          next if !mat.name.to_s.start_with?(material.name)
+          next if mat.roughness.downcase.to_s != 'rough'
+          next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
+          next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
+          next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
+          next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
+          next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
+          next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
 
-        return mat
+          return mat
+        end
+      elsif material.is_a? NoMassMaterial
+        model.getMasslessOpaqueMaterials.each do |mat|
+          next if !mat.name.to_s.start_with?(material.name)
+          next if mat.roughness.downcase.to_s != 'rough'
+          next if (mat.thermalResistance - UnitConversions.convert(material.rvalue, 'hr*ft^2*F/Btu', 'm^2*K/W')).abs > tolerance
+          next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
+          next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
+
+          return mat
+        end
       end
 
       # New material
-      mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+      if material.is_a? Material
+        mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+        mat.setThickness(UnitConversions.convert(material.thick_in, 'in', 'm'))
+        mat.setConductivity(UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+        mat.setDensity(UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'))
+        mat.setSpecificHeat(UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
+      elsif material.is_a? NoMassMaterial
+        mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model)
+        mat.setThermalResistance(UnitConversions.convert(material.rvalue, 'hr*ft^2*F/Btu', 'm^2*K/W'))
+      end
       mat.setName(name)
       mat.setRoughness('Rough')
-      mat.setThickness(UnitConversions.convert(material.thick_in, 'in', 'm'))
-      mat.setConductivity(UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-      mat.setDensity(UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'))
-      mat.setSpecificHeat(UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
       if not material.tAbs.nil?
         mat.setThermalAbsorptance(material.tAbs)
       end

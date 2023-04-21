@@ -742,14 +742,19 @@ class HVACSizing
         wall_area = wall.net_area
       end
 
+      solar_absorptance = wall.solar_absorptance
+      if solar_absorptance.nil?
+        solar_absorptance = 0.9 # FIXME: Temporary
+      end
+
       azimuths.each do |azimuth|
         if wall.is_exterior
 
           # Adjust base Cooling Load Temperature Difference (CLTD)
           # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
-          if wall.solar_absorptance <= 0.5
+          if solar_absorptance <= 0.5
             colorMultiplier = 0.65      # MJ8 Table 4B Notes, pg 348
-          elsif wall.solar_absorptance <= 0.75
+          elsif solar_absorptance <= 0.75
             colorMultiplier = 0.83      # MJ8 Appendix 12, pg 519
           else
             colorMultiplier = 1.0
@@ -3457,10 +3462,10 @@ end
 
 class Numeric
   def deg2rad
-    self * Math::PI / 180
+    self * UnitConversions.convert(1.0, 'deg', 'rad')
   end
 
   def rad2deg
-    self * 180 / Math::PI
+    self * UnitConversions.convert(1.0, 'rad', 'deg')
   end
 end

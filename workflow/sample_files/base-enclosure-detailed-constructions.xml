@@ -112,15 +112,27 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1509.3</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof1Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
+            <DetailedConstruction>
+              <SystemIdentifier id='RoofConstruction1'/>
+              <ConstructionLayer>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>asphalt shingles</MaterialType>
+                  <RValue>0.44</RValue>
+                </LayerMaterial>
+              </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>0.75</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>osb</MaterialType>
+                  <Conductivity>0.067</Conductivity>
+                  <Density>32.0</Density>
+                  <SpecificHeat>0.29</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+            </DetailedConstruction>
           </Roof>
         </Roofs>
         <RimJoists>
@@ -129,8 +141,6 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>115.6</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
             <DetailedConstruction>
               <SystemIdentifier id='RimJoistConstruction1'/>
               <ConstructionLayer>
@@ -170,6 +180,16 @@
                   <RValue>36.0</RValue>
                 </LayerMaterial>
               </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>gypsum board</MaterialType>
+                  <Conductivity>0.093</Conductivity>
+                  <Density>50.0</Density>
+                  <SpecificHeat>0.2</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
             </DetailedConstruction>
           </RimJoist>
         </RimJoists>
@@ -182,8 +202,6 @@
               <WoodStud/>
             </WallType>
             <Area>1200.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
             <DetailedConstruction>
               <SystemIdentifier id='WallConstruction1'/>
               <ConstructionLayer>
@@ -244,8 +262,6 @@
               <WoodStud/>
             </WallType>
             <Area>225.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
             <DetailedConstruction>
               <SystemIdentifier id='WallConstruction2'/>
               <ConstructionLayer>
@@ -266,6 +282,16 @@
                   <Conductivity>0.067</Conductivity>
                   <Density>32.0</Density>
                   <SpecificHeat>0.29</SpecificHeat>
+                </LayerMaterial>
+              </ConstructionLayer>
+              <ConstructionLayer>
+                <LayerThickness>0.5</LayerThickness>
+                <LayerMaterial>
+                  <AreaFraction>1.0</AreaFraction>
+                  <MaterialType>gypsum board</MaterialType>
+                  <Conductivity>0.093</Conductivity>
+                  <Density>50.0</Density>
+                  <SpecificHeat>0.2</SpecificHeat>
                 </LayerMaterial>
               </ConstructionLayer>
             </DetailedConstruction>
