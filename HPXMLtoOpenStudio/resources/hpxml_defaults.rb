@@ -835,7 +835,7 @@ class HPXMLDefaults
             wall.siding = HPXML::SidingTypeWood
             wall.siding_isdefaulted = true
           end
-          if wall.color.nil?
+          if wall.color.nil? && wall.solar_absorptance.nil?
             wall.color = HPXML::ColorMedium
             wall.color_isdefaulted = true
           end

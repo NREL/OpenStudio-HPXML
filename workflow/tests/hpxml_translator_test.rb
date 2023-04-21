@@ -667,10 +667,12 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Solar absorptance
-      hpxml_value = roof.solar_absorptance
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Reflectance'"
-      sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if not roof.solar_absorptance.nil?
+        hpxml_value = roof.solar_absorptance
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Reflectance'"
+        sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # Tilt
       hpxml_value = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
