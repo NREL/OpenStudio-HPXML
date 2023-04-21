@@ -5439,9 +5439,9 @@
 			<xs:element minOccurs="0" name="WindConditions" type="WindConditions"/>
 			<xs:element name="TypeOfInfiltrationMeasurement" type="TypeofInfiltrationMeasurement" minOccurs="0"/>
 			<xs:element name="TypeOfBlowerDoorTest" type="TypeofBlowerDoorTest" minOccurs="0"/>
-			<xs:element minOccurs="0" name="TypeOfInfiltrationTest" type="TypeOfInfiltrationTest">
+			<xs:element minOccurs="0" name="TypeOfInfiltrationLeakage" type="TypeofInfiltrationLeakage">
 				<xs:annotation>
-					<xs:documentation>Applies to single-family attached and multifamily. Whole building tests measure the infiltration through the total exterior envelope of the building. Compartmentalization tests measure the infiltration for a single dwelling unit through both exterior (adjacent to outside) and interior/shared (adjacent to other spaces/units) surfaces. Guarded tests measure the infiltration for a single dwelling unit through only exterior (adjacent to outside) surfaces.</xs:documentation>
+					<xs:documentation>This element is intended to describe the type of infiltration measured, e.g., for an individual single-family attached or multifamily dwelling unit. Either whole building or single unit infiltration can be measured. For single unit infiltration, leakage can occur through exterior surfaces (adjacent to outside) only, interior surfaces (adjacent to other units or common spaces) only, or both. For example, guarded tests measure unit exterior leakage, unguarded or compartmentalization tests measure unit total leakage, and combining both tests can measure unit interior leakage.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="HousePressure" type="HousePressure" minOccurs="0">
@@ -6707,6 +6707,21 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="TypeofInfiltrationLeakage_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="building total"/>
+			<xs:enumeration value="unit total"/>
+			<xs:enumeration value="unit exterior only"/>
+			<xs:enumeration value="unit interior only"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="TypeofInfiltrationLeakage">
+		<xs:simpleContent>
+			<xs:extension base="TypeofInfiltrationLeakage_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="FanPressure_simple">
 		<xs:restriction base="xs:double"/>
 	</xs:simpleType>
@@ -6752,21 +6767,6 @@
 	<xs:complexType name="HousePressure">
 		<xs:simpleContent>
 			<xs:extension base="HousePressure_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="TypeOfInfiltrationTest_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="whole building test"/>
-			<xs:enumeration value="compartmentalization test"/>
-			<xs:enumeration value="guarded test"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="TypeOfInfiltrationTest">
-		<xs:simpleContent>
-			<xs:extension base="TypeOfInfiltrationTest_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
