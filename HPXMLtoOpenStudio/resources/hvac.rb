@@ -1638,11 +1638,11 @@ class HVAC
     program.addLine('  Set current_speed = 0')
     program.addLine('EndIf')
     program.addLine("If #{cap_ratio_sensor.name} > 0.7") # general curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine("  If (@Abs (#{indoor_temp_sensor.name} - #{setpoint_temp_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}")
+    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{setpoint_temp_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
     program.addLine("    Set #{coil_speed_act.name} = NULL")
     program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
     program.addLine('  Else')
-    program.addLine('    If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine('    If current_speed >= target_speed') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
     program.addLine("      Set #{coil_speed_act.name} = target_speed")
     program.addLine("      Set #{supp_coil_avail_act.name} = 0") unless htg_supp_coil.nil?
     program.addLine('    Else')
@@ -1651,7 +1651,7 @@ class HVAC
     program.addLine('    EndIf')
     program.addLine('  EndIf')
     program.addLine('Else') # critical curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine('  If current_speed >= (target_speed - 0.0001)') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine('  If current_speed >= target_speed') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
     program.addLine("    Set #{coil_speed_act.name} = target_speed")
     if not htg_supp_coil.nil?
       program.addLine("    If #{indoor_temp_sensor.name} < #{UnitConversions.convert(62, 'F', 'C')}")
@@ -1662,6 +1662,7 @@ class HVAC
     end
     program.addLine('  Else')
     program.addLine("    Set #{coil_speed_act.name} = NULL")
+    program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
     program.addLine('  EndIf')
     program.addLine('EndIf')
 
