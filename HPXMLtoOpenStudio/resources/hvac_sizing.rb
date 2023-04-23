@@ -1235,11 +1235,11 @@ class HVACSizing
     ducts = hvac_heating.distribution_system.ducts
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    dse_As, dse_Ar = calc_ducts_areas(ducts)
-    supply_r, return_r = calc_ducts_rvalues(ducts)
+    dse_As, dse_Ar = calc_duct_areas(ducts)
+    supply_r, return_r = calc_duct_rvalues(ducts)
 
     design_temp_values = { HPXML::DuctTypeSupply => @heat_design_temps, HPXML::DuctTypeReturn => @heat_design_temps }
-    dse_Tamb_heating_s, dse_Tamb_heating_r = calc_ducts_area_weighted_average(ducts, design_temp_values)
+    dse_Tamb_heating_s, dse_Tamb_heating_r = calc_duct_area_weighted_average(ducts, design_temp_values)
 
     # ASHRAE 152 6.5.2
     # For systems with ducts in several locations, F_regain shall be weighted by the fraction of exposed duct area
@@ -1249,7 +1249,7 @@ class HVACSizing
       dse_f_regains[duct.duct_location] = get_duct_regain_factor(duct)
     end
     fregain_values = { HPXML::DuctTypeSupply => dse_f_regains, HPXML::DuctTypeReturn => dse_f_regains }
-    dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(ducts, fregain_values)
+    dse_Fregain_s, dse_Fregain_r = calc_duct_area_weighted_average(ducts, fregain_values)
 
     # Initialize for the iteration
     delta = 1
@@ -1263,7 +1263,7 @@ class HVACSizing
       # Calculate the new heating air flow rate
       heat_cfm = calc_airflow_rate_manual_s(heat_load_next, (@supply_air_temp - @heat_setpoint))
 
-      dse_Qs, dse_Qr = calc_ducts_leakages(hvac_heating.distribution_system, heat_cfm)
+      dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
       dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heat_load_next, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
 
@@ -1292,11 +1292,11 @@ class HVACSizing
     ducts = hvac_cooling.distribution_system.ducts
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    dse_As, dse_Ar = calc_ducts_areas(ducts)
-    supply_r, return_r = calc_ducts_rvalues(ducts)
+    dse_As, dse_Ar = calc_duct_areas(ducts)
+    supply_r, return_r = calc_duct_rvalues(ducts)
 
     design_temp_values = { HPXML::DuctTypeSupply => @cool_design_temps, HPXML::DuctTypeReturn => @cool_design_temps }
-    dse_Tamb_cooling_s, dse_Tamb_cooling_r = calc_ducts_area_weighted_average(ducts, design_temp_values)
+    dse_Tamb_cooling_s, dse_Tamb_cooling_r = calc_duct_area_weighted_average(ducts, design_temp_values)
 
     # ASHRAE 152 6.5.2
     # For systems with ducts in several locations, F_regain shall be weighted by the fraction of exposed duct area
@@ -1306,7 +1306,7 @@ class HVACSizing
       dse_f_regains[duct.duct_location] = get_duct_regain_factor(duct)
     end
     fregain_values = { HPXML::DuctTypeSupply => dse_f_regains, HPXML::DuctTypeReturn => dse_f_regains }
-    dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(ducts, fregain_values)
+    dse_Fregain_s, dse_Fregain_r = calc_duct_area_weighted_average(ducts, fregain_values)
 
     # Calculate the air enthalpy in the return duct location for DSE calculations
     dse_h_r = (1.006 * UnitConversions.convert(dse_Tamb_cooling_r, 'F', 'C') + weather.design.CoolingHumidityRatio * (2501.0 + 1.86 * UnitConversions.convert(dse_Tamb_cooling_r, 'F', 'C'))) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
@@ -1316,7 +1316,7 @@ class HVACSizing
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
     cool_cfm = calc_airflow_rate_manual_s(init_cool_load_sens, (@cool_setpoint - @leaving_air_temp))
-    _dse_Qs, dse_Qr = calc_ducts_leakages(hvac_cooling.distribution_system, cool_cfm)
+    _dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
     for _iter in 1..50
       break if delta.abs <= 0.001
@@ -1329,7 +1329,7 @@ class HVACSizing
       # Calculate the new cooling air flow rate
       cool_cfm = calc_airflow_rate_manual_s(cool_load_sens, (@cool_setpoint - @leaving_air_temp))
 
-      dse_Qs, dse_Qr = calc_ducts_leakages(hvac_cooling.distribution_system, cool_cfm)
+      dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
       dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, @leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
@@ -2202,9 +2202,9 @@ class HVACSizing
     '''
     Calculate the Delivery Effectiveness for heating (using the method of ASHRAE Standard 152).
     '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
-    dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
-    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
+    dse_Bs, dse_Br, dse_As, dse_Ar, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
+    dse_DE = _calc_dse_DE_heating(dse_As, dse_Bs, dse_Ar, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
+    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_Ar, dse_dT_r, dse_dTe)
 
     return dse_DEcorr
   end
@@ -2213,10 +2213,10 @@ class HVACSizing
     '''
     Calculate the Delivery Effectiveness for cooling (using the method of ASHRAE Standard 152).
     '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, _dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
+    dse_Bs, dse_Br, dse_As, dse_Ar, dse_dTe, _dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     dse_dTe *= -1.0
-    dse_DE, cooling_load_ducts_sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leaving_air_temp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
-    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
+    dse_DE, cooling_load_ducts_sens = _calc_dse_DE_cooling(dse_As, system_cfm, load_total, dse_Ar, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leaving_air_temp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
+    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_Ar, dse_dT_r, dse_dTe)
 
     return dse_DEcorr, dse_dTe, cooling_load_ducts_sens
   end
@@ -2226,22 +2226,22 @@ class HVACSizing
     dse_Bs = Math.exp((-1.0 * dse_As) / (60.0 * system_cfm * air_dens * air_cp * supply_r))
     dse_Br = Math.exp((-1.0 * dse_Ar) / (60.0 * system_cfm * air_dens * air_cp * return_r))
 
-    dse_a_s = (system_cfm - dse_Qs) / system_cfm
-    dse_a_r = (system_cfm - dse_Qr) / system_cfm
+    dse_As = (system_cfm - dse_Qs) / system_cfm
+    dse_Ar = (system_cfm - dse_Qr) / system_cfm
 
     dse_dTe = load_sens / (60.0 * system_cfm * air_dens * air_cp)
     dse_dT_s = t_setpoint - dse_Tamb_s
     dse_dT_r = t_setpoint - dse_Tamb_r
 
-    return dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r
+    return dse_Bs, dse_Br, dse_As, dse_Ar, dse_dTe, dse_dT_s, dse_dT_r
   end
 
-  def self._calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leaving_air_temp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
+  def self._calc_dse_DE_cooling(dse_As, system_cfm, load_total, dse_Ar, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leaving_air_temp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     # Calculate the delivery effectiveness (Equation 6-25)
-    dse_DE = ((dse_a_s * 60.0 * system_cfm * air_dens) / (-1.0 * load_total)) * \
+    dse_DE = ((dse_As * 60.0 * system_cfm * air_dens) / (-1.0 * load_total)) * \
              (((-1.0 * load_total) / (60.0 * system_cfm * air_dens)) + \
-              (1.0 - dse_a_r) * (dse_h_r - h_in) + \
-              dse_a_r * air_cp * (dse_Br - 1.0) * dse_dT_r + \
+              (1.0 - dse_Ar) * (dse_h_r - h_in) + \
+              dse_Ar * air_cp * (dse_Br - 1.0) * dse_dT_r + \
               air_cp * (dse_Bs - 1.0) * (leaving_air_temp - dse_Tamb_s))
 
     # Calculate the sensible heat transfer from surroundings
@@ -2250,19 +2250,19 @@ class HVACSizing
     return dse_DE, cooling_load_ducts_sens
   end
 
-  def self._calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
+  def self._calc_dse_DE_heating(dse_As, dse_Bs, dse_Ar, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness (Equation 6-23)
-    dse_DE = (dse_a_s * dse_Bs -
-              dse_a_s * dse_Bs * (1.0 - dse_a_r * dse_Br) * (dse_dT_r / dse_dTe) -
-              dse_a_s * (1.0 - dse_Bs) * (dse_dT_s / dse_dTe))
+    dse_DE = (dse_As * dse_Bs -
+              dse_As * dse_Bs * (1.0 - dse_Ar * dse_Br) * (dse_dT_r / dse_dTe) -
+              dse_As * (1.0 - dse_Bs) * (dse_dT_s / dse_dTe))
 
     return dse_DE
   end
 
-  def self._calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
+  def self._calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_Ar, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness corrector for regain (Equation 6-40)
     dse_DEcorr = (dse_DE + dse_Fregain_s * (1.0 - dse_DE) - (dse_Fregain_s - dse_Fregain_r -
-                  dse_Br * (dse_a_r * dse_Fregain_s - dse_Fregain_r)) * dse_dT_r / dse_dTe)
+                  dse_Br * (dse_Ar * dse_Fregain_s - dse_Fregain_r)) * dse_dT_r / dse_dTe)
 
     # Limit the DE to a reasonable value to prevent negative values and huge equipment
     dse_DEcorr = [dse_DEcorr, 0.25].max
@@ -2282,7 +2282,7 @@ class HVACSizing
     return cool_load_lat, cool_load_sens
   end
 
-  def self.calc_ducts_area_weighted_average(ducts, values)
+  def self.calc_duct_area_weighted_average(ducts, values)
     '''
     Calculate area-weighted average values for unconditioned duct(s)
     '''
@@ -2307,7 +2307,7 @@ class HVACSizing
     return value[HPXML::DuctTypeSupply], value[HPXML::DuctTypeReturn]
   end
 
-  def self.calc_ducts_areas(ducts)
+  def self.calc_duct_areas(ducts)
     '''
     Calculate supply & return duct areas in unconditioned space
     '''
@@ -2322,36 +2322,32 @@ class HVACSizing
     return areas[HPXML::DuctTypeSupply], areas[HPXML::DuctTypeReturn]
   end
 
-  def self.calc_ducts_leakages(distribution_system, system_cfm)
+  def self.calc_duct_leakages_cfm25(distribution_system, system_cfm)
     '''
-    Calculate supply & return duct leakage in cfm.
+    Calculate supply & return duct leakage in cfm25.
     '''
 
     cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
-    distribution_system.ducts.each do |duct|
-      next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
 
-      # Apportion duct leakage to this duct
-      leakage_fraction = duct.duct_surface_area * duct.duct_surface_area_multiplier / distribution_system.total_unconditioned_duct_areas[duct.duct_type]
+    distribution_system.duct_leakage_measurements.each do |m|
+      next if m.duct_leakage_total_or_to_outside != HPXML::DuctLeakageToOutside
+      next unless [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].include? m.duct_type
 
-      distribution_system.duct_leakage_measurements.each do |m|
-        next if m.duct_leakage_total_or_to_outside != HPXML::DuctLeakageToOutside
-        next if m.duct_type != duct.duct_type
-
-        if m.duct_leakage_units == HPXML::UnitsPercent
-          cfms[m.duct_type] += m.duct_leakage_value * system_cfm * leakage_fraction
-        elsif m.duct_leakage_units == HPXML::UnitsCFM25
-          cfms[m.duct_type] += m.duct_leakage_value * leakage_fraction
-        elsif m.duct_leakage_units == HPXML::UnitsCFM50
-          cfms[m.duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, m.duct_leakage_value, 50.0, 25.0) * leakage_fraction
-        end
+      if m.duct_leakage_units == HPXML::UnitsPercent
+        cfms[m.duct_type] += m.duct_leakage_value * system_cfm
+      elsif m.duct_leakage_units == HPXML::UnitsCFM25
+        cfms[m.duct_type] += m.duct_leakage_value
+      elsif m.duct_leakage_units == HPXML::UnitsCFM50
+        cfms[m.duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, m.duct_leakage_value, 50.0, 25.0)
       end
     end
+
+    puts cfms.to_s
 
     return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
-  def self.calc_ducts_rvalues(ducts)
+  def self.calc_duct_rvalues(ducts)
     '''
     Calculate UA-weighted average R-value for supply & return ducts.
     '''
@@ -2364,7 +2360,7 @@ class HVACSizing
       u_factors[duct.duct_type][duct.duct_location] = 1.0 / effective_rvalue
     end
 
-    supply_u, return_u = calc_ducts_area_weighted_average(ducts, u_factors)
+    supply_u, return_u = calc_duct_area_weighted_average(ducts, u_factors)
 
     return 1.0 / supply_u, 1.0 / return_u
   end
