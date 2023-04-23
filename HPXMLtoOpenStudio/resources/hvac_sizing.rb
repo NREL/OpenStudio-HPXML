@@ -1232,24 +1232,10 @@ class HVACSizing
 
     init_heat_load = system_design_loads.Heat_Tot * @fraction_heat_load_served
 
-    ducts = hvac_heating.distribution_system.ducts
-
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    dse_As, dse_Ar = calc_duct_areas(ducts)
-    supply_r, return_r = calc_duct_rvalues(ducts)
 
-    design_temp_values = { HPXML::DuctTypeSupply => @heat_design_temps, HPXML::DuctTypeReturn => @heat_design_temps }
-    dse_Tamb_heating_s, dse_Tamb_heating_r = calc_duct_area_weighted_average(ducts, design_temp_values)
-
-    # ASHRAE 152 6.5.2
-    # For systems with ducts in several locations, F_regain shall be weighted by the fraction of exposed duct area
-    # in each space. F_regain shall be calculated separately for supply and return locations.
-    dse_f_regains = {}
-    ducts.each do |duct|
-      dse_f_regains[duct.duct_location] = get_duct_regain_factor(duct)
-    end
-    fregain_values = { HPXML::DuctTypeSupply => dse_f_regains, HPXML::DuctTypeReturn => dse_f_regains }
-    dse_Fregain_s, dse_Fregain_r = calc_duct_area_weighted_average(ducts, fregain_values)
+    duct_values = calc_duct_conduction_values(hvac_heating.distribution_system, @heat_design_temps)
+    dse_As, dse_Ar, supply_r, return_r, dse_Tamb_s, dse_Tamb_r, dse_Fregain_s, dse_Fregain_r = duct_values
 
     # Initialize for the iteration
     delta = 1
@@ -1265,7 +1251,7 @@ class HVACSizing
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
-      dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heat_load_next, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+      dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heat_load_next, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
 
       # Calculate the increase in heating load due to ducts (Approach: DE = Qload/Qequip -> Qducts = Qequip-Qload)
       heat_load_next = init_heat_load / dse_DE
@@ -1289,27 +1275,13 @@ class HVACSizing
     init_cool_load_sens = system_design_loads.Cool_Sens * @fraction_cool_load_served
     init_cool_load_lat = system_design_loads.Cool_Lat * @fraction_cool_load_served
 
-    ducts = hvac_cooling.distribution_system.ducts
-
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    dse_As, dse_Ar = calc_duct_areas(ducts)
-    supply_r, return_r = calc_duct_rvalues(ducts)
 
-    design_temp_values = { HPXML::DuctTypeSupply => @cool_design_temps, HPXML::DuctTypeReturn => @cool_design_temps }
-    dse_Tamb_cooling_s, dse_Tamb_cooling_r = calc_duct_area_weighted_average(ducts, design_temp_values)
-
-    # ASHRAE 152 6.5.2
-    # For systems with ducts in several locations, F_regain shall be weighted by the fraction of exposed duct area
-    # in each space. F_regain shall be calculated separately for supply and return locations.
-    dse_f_regains = {}
-    ducts.each do |duct|
-      dse_f_regains[duct.duct_location] = get_duct_regain_factor(duct)
-    end
-    fregain_values = { HPXML::DuctTypeSupply => dse_f_regains, HPXML::DuctTypeReturn => dse_f_regains }
-    dse_Fregain_s, dse_Fregain_r = calc_duct_area_weighted_average(ducts, fregain_values)
+    duct_values = calc_duct_conduction_values(hvac_cooling.distribution_system, @cool_design_temps)
+    dse_As, dse_Ar, supply_r, return_r, dse_Tamb_s, dse_Tamb_r, dse_Fregain_s, dse_Fregain_r = duct_values
 
     # Calculate the air enthalpy in the return duct location for DSE calculations
-    dse_h_r = (1.006 * UnitConversions.convert(dse_Tamb_cooling_r, 'F', 'C') + weather.design.CoolingHumidityRatio * (2501.0 + 1.86 * UnitConversions.convert(dse_Tamb_cooling_r, 'F', 'C'))) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
+    dse_h_r = (1.006 * UnitConversions.convert(dse_Tamb_r, 'F', 'C') + weather.design.CoolingHumidityRatio * (2501.0 + 1.86 * UnitConversions.convert(dse_Tamb_r, 'F', 'C'))) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
 
     # Initialize for the iteration
     delta = 1
@@ -1331,7 +1303,7 @@ class HVACSizing
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
-      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, @leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
+      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, @leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
       cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
@@ -2282,44 +2254,51 @@ class HVACSizing
     return cool_load_lat, cool_load_sens
   end
 
-  def self.calc_duct_area_weighted_average(ducts, values)
-    '''
-    Calculate area-weighted average values for unconditioned duct(s)
-    '''
-    uncond_area = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
-    ducts.each do |duct|
-      next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
+  def self.calc_duct_conduction_values(distribution_system, design_temps)
+    dse_A = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
+    dse_Ufactor = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
+    dse_Tamb = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
+    dse_Fregain = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
 
-      uncond_area[duct.duct_type] += duct.duct_surface_area * duct.duct_surface_area_multiplier
-    end
+    [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
+      # Calculate total area outside this unit's conditioned space
+      total_area = 0.0
+      distribution_system.ducts.each do |duct|
+        next if duct.duct_type != duct_type
+        next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
 
-    value = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
-    ducts.each do |duct|
-      next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
+        total_area += duct.duct_surface_area * duct.duct_surface_area_multiplier
+      end
 
-      if uncond_area[duct.duct_type] > 0
-        value[duct.duct_type] += values[duct.duct_type][duct.duct_location] * duct.duct_surface_area * duct.duct_surface_area_multiplier / uncond_area[duct.duct_type]
+      if total_area == 0
+        # There still may be leakage to the outside, so set Tamb to outside environment
+        dse_Tamb[duct_type] = design_temps[HPXML::LocationOutside]
       else
-        value[duct.duct_type] += values[duct.duct_type][duct.duct_location]
+        distribution_system.ducts.each do |duct|
+          next if duct.duct_type != duct_type
+          next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
+
+          duct_area = duct.duct_surface_area * duct.duct_surface_area_multiplier
+          dse_A[duct_type] += duct_area
+
+          # Calculate area-weighted values:
+
+          duct_area_fraction = duct_area / total_area
+
+          effective_rvalue = Airflow.get_duct_insulation_rvalue(duct.duct_insulation_r_value, duct_type)
+          dse_Ufactor[duct_type] = 1.0 / effective_rvalue * duct_area_fraction
+
+          dse_Tamb[duct_type] = design_temps[duct.duct_location] * duct_area_fraction
+
+          dse_Fregain[duct_type] = get_duct_regain_factor(duct) * duct_area_fraction
+        end
       end
     end
 
-    return value[HPXML::DuctTypeSupply], value[HPXML::DuctTypeReturn]
-  end
-
-  def self.calc_duct_areas(ducts)
-    '''
-    Calculate supply & return duct areas in unconditioned space
-    '''
-
-    areas = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
-    ducts.each do |duct|
-      next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
-
-      areas[duct.duct_type] += duct.duct_surface_area * duct.duct_surface_area_multiplier
-    end
-
-    return areas[HPXML::DuctTypeSupply], areas[HPXML::DuctTypeReturn]
+    return dse_A[HPXML::DuctTypeSupply], dse_A[HPXML::DuctTypeReturn],
+           1.0 / dse_Ufactor[HPXML::DuctTypeSupply], 1.0 / dse_Ufactor[HPXML::DuctTypeReturn],
+           dse_Tamb[HPXML::DuctTypeSupply], dse_Tamb[HPXML::DuctTypeReturn],
+           dse_Fregain[HPXML::DuctTypeSupply], dse_Fregain[HPXML::DuctTypeReturn]
   end
 
   def self.calc_duct_leakages_cfm25(distribution_system, system_cfm)
@@ -2342,27 +2321,7 @@ class HVACSizing
       end
     end
 
-    puts cfms.to_s
-
     return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
-  end
-
-  def self.calc_duct_rvalues(ducts)
-    '''
-    Calculate UA-weighted average R-value for supply & return ducts.
-    '''
-
-    u_factors = { HPXML::DuctTypeSupply => {}, HPXML::DuctTypeReturn => {} }
-    ducts.each do |duct|
-      next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
-
-      effective_rvalue = Airflow.get_duct_insulation_rvalue(duct.duct_insulation_r_value, duct.duct_type)
-      u_factors[duct.duct_type][duct.duct_location] = 1.0 / effective_rvalue
-    end
-
-    supply_u, return_u = calc_duct_area_weighted_average(ducts, u_factors)
-
-    return 1.0 / supply_u, 1.0 / return_u
   end
 
   def self.process_curve_fit(airFlowRate, capacity, temp)
