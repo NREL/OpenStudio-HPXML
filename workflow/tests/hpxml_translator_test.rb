@@ -708,7 +708,8 @@ class HPXMLTest < MiniTest::Test
     else
       num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                # no foundation in contact w/ ground
                                       'base-enclosure-floortypes.xml' => 0,              # no foundation in contact w/ ground
-                                      'base-foundation-belly-wing.xml' => 0,             # no foundation in contact w/ ground
+                                      'base-foundation-belly-wing-skirt.xml' => 0,       # no foundation in contact w/ ground
+                                      'base-foundation-belly-wing-no-skirt.xml' => 0,    # no foundation in contact w/ ground
                                       'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
                                       'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
                                       'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
