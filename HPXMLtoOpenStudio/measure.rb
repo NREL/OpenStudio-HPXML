@@ -636,8 +636,8 @@ class OSModel
       elsif floor.is_floor
         surface.setSunExposure('NoSun')
         if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
-          foundation = @hpxml.foundations.find {|x| x.to_location == floor.exterior_adjacent_to}
-          if foundation.nil? or foundation.belly_wing_skirt_present
+          foundation = @hpxml.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
+          if foundation.nil? || foundation.belly_wing_skirt_present
             # Assume skirt present if no foundation found
             surface.setWindExposure('NoWind')
           else
@@ -2652,7 +2652,7 @@ class OSModel
   def self.set_foundation_and_walls_top()
     @foundation_top = 0
     @hpxml.floors.each do |floor|
-      if floor.is_floor and floor.is_exterior
+      if floor.is_floor && floor.is_exterior
         @foundation_top = 2.0
       end
     end

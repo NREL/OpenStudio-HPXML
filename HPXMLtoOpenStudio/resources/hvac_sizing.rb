@@ -143,7 +143,7 @@ class HVACSizing
       next if [HPXML::LocationGround].include? location
 
       if [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab, 
+          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
           HPXML::LocationManufacturedHomeBelly].include? location
         @cool_design_temps[location] = calculate_scheduled_space_design_temps(location, @cool_setpoint, @hpxml.header.manualj_cooling_design_temp, weather.data.GroundMonthlyTemps.max)
         @heat_design_temps[location] = calculate_scheduled_space_design_temps(location, @heat_setpoint, @hpxml.header.manualj_heating_design_temp, weather.data.GroundMonthlyTemps.min)

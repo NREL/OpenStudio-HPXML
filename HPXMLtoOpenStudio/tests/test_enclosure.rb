@@ -461,23 +461,23 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     hpxml = _create_hpxml('base-foundation-belly-wing-skirt.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
-    hpxml_floor = hpxml.floors.find {|x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly}
+    hpxml_floor = hpxml.floors.find { |x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly }
     os_surface = model.getSurfaces.find { |s| s.name.to_s.start_with? "#{hpxml_floor.id}" }
-    assert_equal("NoWind", os_surface.windExposure)
+    assert_equal('NoWind', os_surface.windExposure)
 
     hpxml.foundations.clear
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
-    hpxml_floor = hpxml.floors.find {|x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly}
+    hpxml_floor = hpxml.floors.find { |x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly }
     os_surface = model.getSurfaces.find { |s| s.name.to_s.start_with? "#{hpxml_floor.id}" }
-    assert_equal("NoWind", os_surface.windExposure)
+    assert_equal('NoWind', os_surface.windExposure)
 
     hpxml = _create_hpxml('base-foundation-belly-wing-no-skirt.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
-    hpxml_floor = hpxml.floors.find {|x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly}
+    hpxml_floor = hpxml.floors.find { |x| x.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly }
     os_surface = model.getSurfaces.find { |s| s.name.to_s.start_with? "#{hpxml_floor.id}" }
-    assert_equal("WindExposed", os_surface.windExposure)
+    assert_equal('WindExposed', os_surface.windExposure)
   end
 
   def test_slabs

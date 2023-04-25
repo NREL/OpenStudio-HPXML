@@ -547,7 +547,7 @@ class Geometry
         HPXML::FoundationTypeCrawlspaceConditioned,
         HPXML::FoundationTypeBasementUnconditioned,
         HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeAmbient].include? foundation_type or foundation_type.start_with?(HPXML::FoundationTypeBellyAndWing)
+        HPXML::FoundationTypeAmbient].include?(foundation_type) || foundation_type.start_with?(HPXML::FoundationTypeBellyAndWing)
 
       z = -foundation_height
 

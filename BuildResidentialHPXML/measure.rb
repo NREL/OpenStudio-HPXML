@@ -3469,7 +3469,7 @@ class HPXMLFile
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
       args[:geometry_rim_joist_height] = 0.0
-    elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient or args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+    elsif (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       args[:geometry_rim_joist_height] = 0.0
     end
 
@@ -4587,9 +4587,9 @@ class HPXMLFile
     if args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       foundation_type = HPXML::FoundationTypeBellyAndWing
       if args[:geometry_foundation_type].end_with?('WithSkirt')
-        kw = {belly_wing_skirt_present: true}
+        kw = { belly_wing_skirt_present: true }
       elsif args[:geometry_foundation_type].end_with?('NoSkirt')
-        kw = {belly_wing_skirt_present: false}
+        kw = { belly_wing_skirt_present: false }
       end
     else
       foundation_type = args[:geometry_foundation_type]
