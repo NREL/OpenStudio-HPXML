@@ -173,6 +173,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if is_realistic_staging
+      # supp coil control in staing EMS
       apply_two_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, is_heatpump)
     elsif is_ddb_control && is_heatpump
       apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
@@ -1660,9 +1661,6 @@ class HVAC
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
-    if is_ddb_control
-      apply_supp_control_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
-    end
     if heat_pump.is_dual_fuel
       htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id + '_DFHPBackup') # Used by reporting measure
     else
