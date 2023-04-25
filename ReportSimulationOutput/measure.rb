@@ -1682,7 +1682,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       weather_data = []
     end
-    if include_timeseries_resilience
+    if args[:include_timeseries_resilience]
       resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
     else
       resilience_data = []
