@@ -50,17 +50,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.occupancy_calculation_type = HPXML::OccupancyCalculationTypeOperational
     hpxml.header.temperature_capacitance_multiplier = 1.5
     hpxml.header.natvent_days_per_week = 7
-    hpxml.header.vacancy_periods.add(begin_month: 1, begin_day: 1, begin_hour: 1, end_month: 12, end_day: 31, end_hour: 2)
-    hpxml.header.power_outage_periods.add(begin_month: 1, begin_day: 1, begin_hour: 3, end_month: 12, end_day: 31, end_hour: 4, natvent_availability: HPXML::ScheduleUnavailable)
+    hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 1, begin_day: 1, begin_hour: 3, end_month: 12, end_day: 31, end_hour: 4, natvent_availability: HPXML::ScheduleUnavailable)
     hpxml.header.shading_summer_begin_month = 2
     hpxml.header.shading_summer_begin_day = 3
     hpxml.header.shading_summer_end_month = 4
     hpxml.header.shading_summer_end_day = 5
+    hpxml.header.manualj_heating_design_temp = 0.0
+    hpxml.header.manualj_cooling_design_temp = 100.0
+    hpxml.header.manualj_heating_setpoint = 68.0
+    hpxml.header.manualj_cooling_setpoint = 78.0
+    hpxml.header.manualj_humidity_setpoint = 0.44
+    hpxml.header.manualj_internal_loads_sensible = 1600.0
+    hpxml.header.manualj_internal_loads_latent = 60.0
+    hpxml.header.manualj_num_occupants = 8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2009, false, 3, 3, 10, 10, HPXML::HeatPumpSizingMaxLoad,
                                 true, 'CA', -8, HPXML::OccupancyCalculationTypeOperational, 1.5, 7,
-                                1, 2, 3, 4, HPXML::ScheduleUnavailable, 2, 3, 4, 5)
+                                3, 4, HPXML::ScheduleUnavailable, 2, 3, 4, 5, 0.0, 100.0, 68.0, 78.0, 0.44, 1600.0, 60.0, 8)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -81,20 +88,26 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.occupancy_calculation_type = nil
     hpxml.header.temperature_capacitance_multiplier = nil
     hpxml.header.natvent_days_per_week = nil
-    hpxml.header.vacancy_periods[-1].begin_hour = nil
-    hpxml.header.vacancy_periods[-1].end_hour = nil
-    hpxml.header.power_outage_periods[-1].begin_hour = nil
-    hpxml.header.power_outage_periods[-1].end_hour = nil
-    hpxml.header.power_outage_periods[-1].natvent_availability = nil
+    hpxml.header.unavailable_periods[-1].begin_hour = nil
+    hpxml.header.unavailable_periods[-1].end_hour = nil
+    hpxml.header.unavailable_periods[-1].natvent_availability = nil
     hpxml.header.shading_summer_begin_month = nil
     hpxml.header.shading_summer_begin_day = nil
     hpxml.header.shading_summer_end_month = nil
     hpxml.header.shading_summer_end_day = nil
+    hpxml.header.manualj_heating_design_temp = nil
+    hpxml.header.manualj_cooling_design_temp = nil
+    hpxml.header.manualj_heating_setpoint = nil
+    hpxml.header.manualj_cooling_setpoint = nil
+    hpxml.header.manualj_humidity_setpoint = nil
+    hpxml.header.manualj_internal_loads_sensible = nil
+    hpxml.header.manualj_internal_loads_latent = nil
+    hpxml.header.manualj_num_occupants = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, HPXML::HeatPumpSizingHERS,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                0, 24, 0, 24, HPXML::ScheduleRegular, 5, 1, 10, 31)
+                                0, 24, HPXML::ScheduleRegular, 5, 1, 10, 31, 6.8, 91.8, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -123,7 +136,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, nil, nil, 5, 1, 9, 30)
+                                nil, nil, nil, 5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - calendar year override by AMY year
     hpxml.header.sim_calendar_year = 2020
@@ -131,7 +144,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, nil,
                                 false, 'CO', -7, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, nil, nil, 5, 1, 9, 30)
+                                nil, nil, nil, 5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
 
     # Test defaults - southern hemisphere, invalid state code
     hpxml = _create_hpxml('base-location-capetown-zaf.xml')
@@ -160,7 +173,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, nil,
                                 false, nil, 2, HPXML::OccupancyCalculationTypeAsset, 1.0, 3,
-                                nil, nil, nil, nil, nil, 12, 1, 4, 30)
+                                nil, nil, nil, 12, 1, 4, 30, 41.0, 84.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4)
   end
 
   def test_emissions_factors
@@ -1898,19 +1911,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_mech_ventilation_fans
     # Test inputs not overridden by defaults w/ shared exhaust system
-    hpxml = _create_hpxml('base-mechvent-exhaust.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
-    vent_fan.is_shared_system = true
-    vent_fan.fraction_recirculation = 0.0
-    vent_fan.in_unit_flow_rate = 10.0
-    vent_fan.hours_in_operation = 22.0
-    vent_fan.fan_power = 12.5
-    vent_fan.tested_flow_rate = nil
-    vent_fan.rated_flow_rate = nil
-    vent_fan.calculated_flow_rate = nil
-    vent_fan.delivered_ventilation = 89
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: true,
+                               fraction_recirculation: 0.0,
+                               in_unit_flow_rate: 10.0,
+                               hours_in_operation: 22.0,
+                               fan_power: 12.5,
+                               delivered_ventilation: 89)
+    vent_fan = hpxml.ventilation_fans[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mech_vent_values(hpxml_default, true, 22.0, 12.5, 89)
@@ -1957,7 +1968,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.delivered_ventilation = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 24.0, 34.9, 99.6)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 27.1, 77.3)
 
     # Test defaults w/ SFA building, compartmentalization test
     hpxml = _create_hpxml('base-bldgtype-attached.xml')
@@ -2029,7 +2040,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml = _create_hpxml('base-mechvent-cfis.xml')
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
@@ -2070,7 +2081,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml = _create_hpxml('base-mechvent-erv.xml')
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 20.0
     vent_fan.fan_power = 45.0
@@ -2090,13 +2101,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_local_ventilation_fans
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-mechvent-bath-kitchen-fans.xml')
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
     kitchen_fan.rated_flow_rate = 300
     kitchen_fan.fan_power = 20
     kitchen_fan.start_hour = 12
     kitchen_fan.count = 2
     kitchen_fan.hours_in_operation = 2
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
     bath_fan.rated_flow_rate = 80
     bath_fan.fan_power = 33
     bath_fan.start_hour = 6
@@ -2127,7 +2138,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_whole_house_fan
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-mechvent-whole-house-fan.xml')
-    whf = hpxml.ventilation_fans.select { |f| f.used_for_seasonal_cooling_load_reduction }[0]
+    whf = hpxml.ventilation_fans.find { |f| f.used_for_seasonal_cooling_load_reduction }
     whf.rated_flow_rate = 3000
     whf.fan_power = 321
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -2144,9 +2155,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_storage_water_heaters
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems.each do |wh|
       wh.is_shared_system = true
       wh.number_of_units_served = 2
@@ -2439,46 +2448,41 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_pv_systems
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-pv.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    hpxml.pv_systems.each do |pv|
-      pv.is_shared_system = true
-      pv.number_of_bedrooms_served = 20
-      pv.system_losses_fraction = 0.20
-      pv.location = HPXML::LocationGround
-      pv.tracking = HPXML::PVTrackingType1Axis
-      pv.module_type = HPXML::PVModuleTypePremium
-      pv.array_azimuth = 123
-    end
-    hpxml.inverters.each do |inv|
-      inv.inverter_efficiency = 0.90
-    end
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.pv_systems.add(id: 'PVSystem',
+                         is_shared_system: true,
+                         number_of_bedrooms_served: 20,
+                         system_losses_fraction: 0.20,
+                         location: HPXML::LocationGround,
+                         tracking: HPXML::PVTrackingType1Axis,
+                         module_type: HPXML::PVModuleTypePremium,
+                         array_azimuth: 123,
+                         array_tilt: 0,
+                         max_power_output: 1000,
+                         inverter_idref: 'Inverter')
+    hpxml.inverters.add(id: 'Inverter',
+                        inverter_efficiency: 0.90)
+    pv = hpxml.pv_systems[0]
+    inv = hpxml.inverters[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.90, 0.20, true, HPXML::LocationGround, HPXML::PVTrackingType1Axis, HPXML::PVModuleTypePremium, 123)
 
     # Test defaults w/o year modules manufactured
-    hpxml.pv_systems.each do |pv|
-      pv.is_shared_system = nil
-      pv.system_losses_fraction = nil
-      pv.location = nil
-      pv.tracking = nil
-      pv.module_type = nil
-      pv.array_orientation = HPXML::OrientationSoutheast
-      pv.array_azimuth = nil
-    end
-    hpxml.inverters.each do |inv|
-      inv.inverter_efficiency = nil
-    end
+    pv.is_shared_system = nil
+    pv.system_losses_fraction = nil
+    pv.location = nil
+    pv.tracking = nil
+    pv.module_type = nil
+    pv.array_orientation = HPXML::OrientationSoutheast
+    pv.array_azimuth = nil
+    inv.inverter_efficiency = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
 
     # Test defaults w/ year modules manufactured
-    hpxml.pv_systems.each do |pv|
-      pv.year_modules_manufactured = 2010
-    end
+    pv.year_modules_manufactured = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pv_system_values(hpxml_default, 0.96, 0.194, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
@@ -2588,21 +2592,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_generators
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-misc-generators.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
-    hpxml.generators.each do |generator|
-      generator.is_shared_system = true
-      generator.number_of_bedrooms_served = 20
-    end
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
+    hpxml.generators.add(id: 'Generator',
+                         is_shared_system: true,
+                         number_of_bedrooms_served: 20,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+    generator = hpxml.generators[0]
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_generator_values(hpxml_default, true)
 
     # Test defaults
-    hpxml.generators.each do |generator|
-      generator.is_shared_system = nil
-    end
+    generator.is_shared_system = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_generator_values(hpxml_default, false)
@@ -2610,9 +2613,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_clothes_washers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_washers[0].location = HPXML::LocationBasementConditioned
@@ -2667,9 +2668,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_clothes_dryers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementConditioned
@@ -2743,9 +2742,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_dishwashers
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
-    hpxml.air_infiltration_measurements[0].type_of_test = HPXML::InfiltrationTestGuarded
+    hpxml = _create_hpxml('base-bldgtype-attached.xml')
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.dishwashers[0].location = HPXML::LocationBasementConditioned
@@ -3176,7 +3173,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_plug_loads
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
-    tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
+    tv_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }
     tv_pl.kwh_per_year = 1000
     tv_pl.usage_multiplier = 1.1
     tv_pl.frac_sensible = 0.6
@@ -3184,7 +3181,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     tv_pl.weekday_fractions = ConstantDaySchedule
     tv_pl.weekend_fractions = ConstantDaySchedule
     tv_pl.monthly_multipliers = ConstantMonthSchedule
-    other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
+    other_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }
     other_pl.kwh_per_year = 2000
     other_pl.usage_multiplier = 1.2
     other_pl.frac_sensible = 0.5
@@ -3192,7 +3189,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     other_pl.weekday_fractions = ConstantDaySchedule
     other_pl.weekend_fractions = ConstantDaySchedule
     other_pl.monthly_multipliers = ConstantMonthSchedule
-    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }[0]
+    veh_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
     veh_pl.kwh_per_year = 4000
     veh_pl.usage_multiplier = 1.3
     veh_pl.frac_sensible = 0.4
@@ -3200,7 +3197,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     veh_pl.weekday_fractions = ConstantDaySchedule
     veh_pl.weekend_fractions = ConstantDaySchedule
     veh_pl.monthly_multipliers = ConstantMonthSchedule
-    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
+    wellpump_pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }
     wellpump_pl.kwh_per_year = 3000
     wellpump_pl.usage_multiplier = 1.4
     wellpump_pl.frac_sensible = 0.3
@@ -3236,7 +3233,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_fuel_loads
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
-    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
+    gg_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }
     gg_fl.therm_per_year = 1000
     gg_fl.usage_multiplier = 0.9
     gg_fl.frac_sensible = 0.6
@@ -3244,7 +3241,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     gg_fl.weekday_fractions = ConstantDaySchedule
     gg_fl.weekend_fractions = ConstantDaySchedule
     gg_fl.monthly_multipliers = ConstantMonthSchedule
-    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
+    gl_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }
     gl_fl.therm_per_year = 2000
     gl_fl.usage_multiplier = 0.8
     gl_fl.frac_sensible = 0.5
@@ -3252,7 +3249,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     gl_fl.weekday_fractions = ConstantDaySchedule
     gl_fl.weekend_fractions = ConstantDaySchedule
     gl_fl.monthly_multipliers = ConstantMonthSchedule
-    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
+    gf_fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }
     gf_fl.therm_per_year = 3000
     gf_fl.usage_multiplier = 0.7
     gf_fl.frac_sensible = 0.4
@@ -3321,9 +3318,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, heat_pump_sizing_methodology,
                                   allow_increased_fixed_capacities, state_code, time_zone_utc_offset, occupancy_calculation_type,
-                                  temperature_capacitance_multiplier, natvent_days_per_week, vacancy_period_begin_hour, vacancy_period_end_hour,
-                                  power_outage_period_begin_hour, power_outage_period_end_hour, power_outage_period_natvent_availability,
-                                  shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day)
+                                  temperature_capacitance_multiplier, natvent_days_per_week, unavailable_period_begin_hour,
+                                  unavailable_period_end_hour, unavailable_period_natvent_availability,
+                                  shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day,
+                                  manualj_heating_design_temp, manualj_cooling_design_temp, manualj_heating_setpoint, manualj_cooling_setpoint,
+                                  manualj_humidity_setpoint, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -3350,23 +3349,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(occupancy_calculation_type, hpxml.header.occupancy_calculation_type)
     assert_equal(temperature_capacitance_multiplier, hpxml.header.temperature_capacitance_multiplier)
     assert_equal(natvent_days_per_week, hpxml.header.natvent_days_per_week)
-    if vacancy_period_begin_hour.nil? && vacancy_period_end_hour.nil?
-      assert_equal(0, hpxml.header.vacancy_periods.size)
+    if unavailable_period_begin_hour.nil? && unavailable_period_end_hour.nil? && unavailable_period_natvent_availability.nil?
+      assert_equal(0, hpxml.header.unavailable_periods.size)
     else
-      assert_equal(vacancy_period_begin_hour, hpxml.header.vacancy_periods[-1].begin_hour)
-      assert_equal(vacancy_period_end_hour, hpxml.header.vacancy_periods[-1].end_hour)
-    end
-    if power_outage_period_begin_hour.nil? && power_outage_period_end_hour.nil? && power_outage_period_natvent_availability.nil?
-      assert_equal(0, hpxml.header.power_outage_periods.size)
-    else
-      assert_equal(power_outage_period_begin_hour, hpxml.header.power_outage_periods[-1].begin_hour)
-      assert_equal(power_outage_period_end_hour, hpxml.header.power_outage_periods[-1].end_hour)
-      assert_equal(power_outage_period_natvent_availability, hpxml.header.power_outage_periods[-1].natvent_availability)
+      assert_equal(unavailable_period_begin_hour, hpxml.header.unavailable_periods[-1].begin_hour)
+      assert_equal(unavailable_period_end_hour, hpxml.header.unavailable_periods[-1].end_hour)
+      assert_equal(unavailable_period_natvent_availability, hpxml.header.unavailable_periods[-1].natvent_availability)
     end
     assert_equal(shading_summer_begin_month, hpxml.header.shading_summer_begin_month)
     assert_equal(shading_summer_begin_day, hpxml.header.shading_summer_begin_day)
     assert_equal(shading_summer_end_month, hpxml.header.shading_summer_end_month)
     assert_equal(shading_summer_end_day, hpxml.header.shading_summer_end_day)
+    assert_in_epsilon(manualj_heating_design_temp, hpxml.header.manualj_heating_design_temp, 0.01)
+    assert_in_epsilon(manualj_cooling_design_temp, hpxml.header.manualj_cooling_design_temp, 0.01)
+    assert_equal(manualj_heating_setpoint, hpxml.header.manualj_heating_setpoint)
+    assert_equal(manualj_cooling_setpoint, hpxml.header.manualj_cooling_setpoint)
+    assert_equal(manualj_humidity_setpoint, hpxml.header.manualj_humidity_setpoint)
+    assert_equal(manualj_internal_loads_sensible, hpxml.header.manualj_internal_loads_sensible)
+    assert_equal(manualj_internal_loads_latent, hpxml.header.manualj_internal_loads_latent)
+    assert_equal(manualj_num_occupants, hpxml.header.manualj_num_occupants)
   end
 
   def _test_default_emissions_values(scenario, elec_schedule_number_of_header_rows, elec_schedule_column_number,
@@ -4062,7 +4063,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate,
                                      cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
@@ -4081,7 +4082,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_mech_vent_suppl_values(hpxml, is_shared_system, hours_in_operation, fan_power, flow_rate)
-    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }[0]
+    vent_fan = hpxml.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     if hours_in_operation.nil?
@@ -4094,7 +4095,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_kitchen_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
 
     assert_equal(count, kitchen_fan.count)
     assert_equal(flow_rate, kitchen_fan.rated_flow_rate.to_f + kitchen_fan.calculated_flow_rate.to_f + kitchen_fan.tested_flow_rate.to_f + kitchen_fan.delivered_ventilation.to_f)
@@ -4104,7 +4105,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_bath_fan_values(hpxml, count, flow_rate, hours_in_operation, fan_power, start_hour)
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.find { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
 
     assert_equal(count, bath_fan.count)
     assert_equal(flow_rate, bath_fan.rated_flow_rate.to_f + bath_fan.calculated_flow_rate.to_f + bath_fan.tested_flow_rate.to_f + bath_fan.delivered_ventilation.to_f)
@@ -4114,7 +4115,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_whole_house_fan_values(hpxml, flow_rate, fan_power)
-    whf = hpxml.ventilation_fans.select { |f| f.used_for_seasonal_cooling_load_reduction }[0]
+    whf = hpxml.ventilation_fans.find { |f| f.used_for_seasonal_cooling_load_reduction }
 
     assert_equal(flow_rate, whf.rated_flow_rate.to_f + whf.calculated_flow_rate.to_f + whf.tested_flow_rate.to_f + whf.delivered_ventilation.to_f)
     assert_equal(fan_power, whf.fan_power)
@@ -4625,7 +4626,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_plug_load_values(hpxml, load_type, kwh_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == load_type }[0]
+    pl = hpxml.plug_loads.find { |pl| pl.plug_load_type == load_type }
 
     assert_in_epsilon(kwh_per_year, pl.kwh_per_year, 0.01)
     assert_equal(usage_multiplier, pl.usage_multiplier)
@@ -4637,7 +4638,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_fuel_load_values(hpxml, load_type, therm_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == load_type }[0]
+    fl = hpxml.fuel_loads.find { |fl| fl.fuel_load_type == load_type }
 
     assert_in_epsilon(therm_per_year, fl.therm_per_year, 0.01)
     assert_equal(usage_multiplier, fl.usage_multiplier)
