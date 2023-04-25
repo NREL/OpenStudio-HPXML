@@ -578,7 +578,7 @@ class Geometry
       elsif foundation_type == HPXML::FoundationTypeAmbient
         foundation_space_name = HPXML::LocationOutside
       elsif foundation_type.start_with?(HPXML::FoundationTypeBellyAndWing)
-        foundation_space_name = HPXML::LocationOutside
+        foundation_space_name = HPXML::LocationManufacturedHomeUnderBelly
       end
       foundation_zone.setName(foundation_space_name)
       foundation_space.setName(foundation_space_name)

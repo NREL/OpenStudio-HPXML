@@ -160,7 +160,7 @@
         <Floors>
           <Floor>
             <SystemIdentifier id='Floor1'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>manufactured home underbelly</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <FloorOrCeiling>floor</FloorOrCeiling>
             <FloorType>

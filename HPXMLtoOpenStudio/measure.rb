@@ -632,18 +632,18 @@ class OSModel
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure('NoSun')
+        surface.setWindExposure('NoWind')
+      elsif floor.is_floor
+        surface.setSunExposure('NoSun')
         if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
-          foundation = @hpxml.foundations.find {|foundation| foundation.to_location == floor.exterior_adjacent_to}
-          if foundation.belly_wing_skirt_present
+          foundation = @hpxml.foundations.find {|x| x.to_location == floor.exterior_adjacent_to}
+          if foundation.nil? or foundation.belly_wing_skirt_present
+            # Assume skirt present if no foundation found
             surface.setWindExposure('NoWind')
           else
             surface.setWindExposure('WindExposed')
           end
-        else
-          surface.setWindExposure('NoWind')
         end
-      elsif floor.is_floor
-        surface.setSunExposure('NoSun')
       end
 
       # Apply construction
@@ -660,7 +660,6 @@ class OSModel
         mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
       else # Floor
         if @apply_ashrae140_assumptions
-          p "ashrae 140"
           # Raised floor
           inside_film = Material.AirFilmFloorASHRAE140
           outside_film = Material.AirFilmFloorZeroWindASHRAE140
@@ -2652,8 +2651,8 @@ class OSModel
 
   def self.set_foundation_and_walls_top()
     @foundation_top = 0
-    @hpxml.foundations.each do |foundation|
-      if [HPXML::FoundationTypeAmbient, HPXML::FoundationTypeBellyAndWing].include?(foundation.foundation_type)
+    @hpxml.floors.each do |floor|
+      if floor.is_floor and floor.is_exterior
         @foundation_top = 2.0
       end
     end
