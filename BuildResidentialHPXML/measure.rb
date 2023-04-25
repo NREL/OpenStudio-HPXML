@@ -999,13 +999,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(3)
     args << arg
 
-    air_leakage_mf_value_type_choices = OpenStudio::StringVector.new
-    air_leakage_mf_value_type_choices << HPXML::InfiltrationTestCompartmentalization
-    air_leakage_mf_value_type_choices << HPXML::InfiltrationTestGuarded
+    air_leakage_type_choices = OpenStudio::StringVector.new
+    air_leakage_type_choices << HPXML::InfiltrationTypeUnitTotal
+    air_leakage_type_choices << HPXML::InfiltrationTypeUnitExterior
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_multifamily_value_type', air_leakage_mf_value_type_choices, false)
-    arg.setDisplayName('Air Leakage: Multifamily Value Type')
-    arg.setDescription("Type of air leakage value for a SFA/MF dwelling unit. If '#{HPXML::InfiltrationTestCompartmentalization}', represents the total infiltration to the unit, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTestGuarded}', represents the infiltration to the unit from outside only. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_type', air_leakage_type_choices, false)
+    arg.setDisplayName('Air Leakage: Type')
+    arg.setDescription("Type of air leakage. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
     heating_system_type_choices = OpenStudio::StringVector.new
@@ -3969,9 +3969,9 @@ class HPXMLFile
         house_pressure = args[:air_leakage_house_pressure]
       end
     end
-    if args[:air_leakage_multifamily_value_type].is_initialized
+    if args[:air_leakage_type].is_initialized
       if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-        air_leakage_multifamily_value_type = args[:air_leakage_multifamily_value_type]
+        air_leakage_type = args[:air_leakage_type]
       end
     end
     infiltration_volume = hpxml.building_construction.conditioned_building_volume
@@ -3982,7 +3982,7 @@ class HPXMLFile
                                             air_leakage: air_leakage,
                                             effective_leakage_area: effective_leakage_area,
                                             infiltration_volume: infiltration_volume,
-                                            type_of_test: air_leakage_multifamily_value_type)
+                                            infiltration_type: air_leakage_type)
   end
 
   def self.set_roofs(hpxml, args, sorted_surfaces)

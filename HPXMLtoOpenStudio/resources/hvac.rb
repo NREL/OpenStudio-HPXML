@@ -1477,7 +1477,7 @@ class HVAC
     boiler_plr_sensor.setKeyName(boiler.name.to_s)
 
     # Actuator
-    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower)
+    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower, pilot_light_object.space.get)
     pilot_light_act.setName("#{boiler.name} pilot light act")
 
     # Program
@@ -1643,7 +1643,7 @@ class HVAC
     dehumidifier_load_adj.setSpace(living_space)
     dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
 
-    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower)
+    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower, dehumidifier_load_adj.space.get)
     dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
 
     # EMS program
