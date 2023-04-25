@@ -1525,6 +1525,7 @@ If a central air conditioner is specified, additional information is entered in 
   ``extension/FanPowerWattsPerCFM``                                 double  W/cfm        >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
   ``extension/AirflowDefectRatio``                                  double  frac         -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double  frac         -0.9 - 9     No        0.0             Deviation between design/installed charges [#]_
+  ``extension/CrankcasePowerWatts``                                 double  W                         No        See [#]_        Crankcase power in watts
   ================================================================  ======  ===========  ===========  ========  ==============  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1540,6 +1541,7 @@ If a central air conditioner is specified, additional information is entered in 
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] If crankcasePowerWatts not provided, defaults to using calculation from RESNET Publication No. 002-2017.
 
 Room Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~
@@ -1553,10 +1555,12 @@ If a room air conditioner is specified, additional information is entered in ``C
   ``CoolingCapacity``                                                 double  Btu/hr  >= 0         No        autosized [#]_  Cooling output capacity
   ``SensibleHeatFraction``                                            double  frac    0 - 1        No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>          Fuel type of integrated heater
+  ``extension/CrankcasePowerWatts``                                   double  W                    No        See [#]_        Crankcase power in watts
   ==================================================================  ======  ======  ===========  ========  ==============  ============================================
 
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
+  .. [#] If crankcasePowerWatts not provided, defaults to be 0.0.
 
 If the room air conditioner has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a room air conditioner with reverse cycle heating should be entered as a heat pump; see :ref:`room_ac_reverse_cycle`.
@@ -1584,10 +1588,12 @@ If a PTAC is specified, additional information is entered in ``CoolingSystem``.
   ``CoolingCapacity``                                                 double  Btu/hr  >= 0         No        autosized [#]_  Cooling output capacity
   ``SensibleHeatFraction``                                            double  frac    0 - 1        No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                     string          See [#]_     No        <none>          Fuel type of integrated heater
+  ``extension/CrankcasePowerWatts``                                   double  W                    No        See [#]_        Crankcase power in watts
   ==================================================================  ======  ======  ===========  ========  ==============  ==========================================
 
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] If crankcasePowerWatts not provided, defaults to be 0.0.
 
 If the PTAC has integrated heating, additional information is entered in ``CoolingSystem``.
 Note that a packaged terminal heat pump should be entered as a heat pump; see :ref:`pthp`.
@@ -1633,6 +1639,7 @@ If a mini-split air conditioner is specified, additional information is entered 
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    -0.9 - 9     No        0.0             Deviation between design/installed charges [#]_
+  ``extension/CrankcasePowerWatts``                                   double  W                    No        See [#]_        Crankcase power in watts
   ================================================================  ========  ======  ===========  ========  ==============  ===============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1645,6 +1652,7 @@ If a mini-split air conditioner is specified, additional information is entered 
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] If crankcasePowerWatts not provided, defaults to using calculation from RESNET Publication No. 002-2017.
 
 .. note::
 
@@ -1744,6 +1752,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``extension/FanPowerWattsPerCFM``                                 double  W/cfm    >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double  frac     -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double  frac     -0.9 - 9                  No        0.0             Deviation between design/installed charges [#]_
+  ``extension/CrankcasePowerWatts``                                 double  W                                  No        See [#]_        Crankcase power in watts
   ================================================================  ======  =======  ========================  ========  ==============  =================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1763,6 +1772,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] If crankcasePowerWatts not provided, defaults to using calculation from RESNET Publication No. 002-2017.
 
 Mini-Split Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
@@ -1785,6 +1795,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac    -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    -0.9 - 9                  No        0.0             Deviation between design/installed charges [#]_
+  ``extension/CrankcasePowerWatts``                                 double    W                                 No        See [#]_        Crankcase power in watts
   ================================================================  ========  ======  ========================  ========  ==============  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1802,6 +1813,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] If crankcasePowerWatts not provided, defaults to using calculation from RESNET Publication No. 002-2017.
 
 .. note::
 
@@ -1825,6 +1837,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   ``FractionCoolLoadServed``                                       double    frac    0 - 1 [#]_   Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh  > 0          Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                       Rated heating efficiency
+  ``extension/CrankcasePowerWatts``                                double    W                    No        See [#]_        Crankcase power in watts
   ===============================================================  ========  ======  ===========  ========  ==============  ==============================================
 
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
@@ -1832,6 +1845,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
+  .. [#] If crankcasePowerWatts not provided, defaults to be 0.0.
 
 .. _room_ac_reverse_cycle:
   
@@ -1851,6 +1865,7 @@ If a room air conditioner with reverse cycle is specified, additional informatio
   ``FractionCoolLoadServed``                                       double    frac    0 - 1 [#]_   Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh  > 0          Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                       Rated heating efficiency
+  ``extension/CrankcasePowerWatts``                                double    W                    No        See [#]_        Crankcase power in watts
   ===============================================================  ========  ======  ===========  ========  ==============  ==============================================
 
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
@@ -1858,6 +1873,7 @@ If a room air conditioner with reverse cycle is specified, additional informatio
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
+  .. [#] If crankcasePowerWatts not provided, defaults to be 0.0.
 
 Ground-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~

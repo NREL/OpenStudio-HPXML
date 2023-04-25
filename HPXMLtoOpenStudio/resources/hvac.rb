@@ -3636,20 +3636,6 @@ class HVAC
     end
   end
 
-  def self.set_crankcase_assumptions(hvac_system)
-    clg_sys_type = hvac_system.is_a?(HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
-
-    if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_heat_load_served <= 0)
-      hvac_system.crankcase_watts = 0.0
-    else
-      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include? clg_sys_type
-        hvac_system.crankcase_watts = 0.0
-      else
-        hvac_system.crankcase_watts = 0.05 * hvac_system.fraction_cool_load_served * 1000 # From RESNET Publication No. 002-2017
-      end
-    end
-  end
-
   def self.set_heat_pump_temperatures(heat_pump, runner = nil)
     hp_ap = heat_pump.additional_properties
 
