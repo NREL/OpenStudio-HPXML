@@ -202,8 +202,8 @@ class HPXML < Object
   InteriorFinishNone = 'none'
   InteriorFinishPlaster = 'plaster'
   InteriorFinishWood = 'wood'
-  InfiltrationTestCompartmentalization = 'compartmentalization test'
-  InfiltrationTestGuarded = 'guarded test'
+  InfiltrationTypeUnitTotal = 'unit total'
+  InfiltrationTypeUnitExterior = 'unit exterior only'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
   LightingTypeCFL = 'CompactFluorescent'
@@ -617,7 +617,7 @@ class HPXML < Object
   def compartmentalization_boundary_areas()
     # Returns the infiltration compartmentalization boundary areas
     total_area = 0.0 # Total surface area that bounds the Infiltration Volume
-    exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
+    exterior_area = 0.0 # Same as above excluding surfaces attached to garage, other housing units, or other multifamily spaces (see 301-2019 Addendum B)
 
     # Determine which spaces are within infiltration volume
     spaces_within_infil_volume = HPXML::conditioned_locations_this_unit
@@ -1720,7 +1720,7 @@ class HPXML < Object
 
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area, :type_of_measurement,
-             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext, :type_of_test]
+             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext, :infiltration_type]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1736,7 +1736,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(air_infiltration_measurement, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationMeasurement', @type_of_measurement, :string) unless @type_of_measurement.nil?
-      XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationTest', @type_of_test, :string) unless @type_of_test.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationLeakage', @infiltration_type, :string) unless @infiltration_type.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'HousePressure', @house_pressure, :float) unless @house_pressure.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'LeakinessDescription', @leakiness_description, :string) unless @leakiness_description.nil?
       if (not @unit_of_measure.nil?) && (not @air_leakage.nil?)
@@ -1755,7 +1755,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(air_infiltration_measurement)
       @type_of_measurement = XMLHelper.get_value(air_infiltration_measurement, 'TypeOfInfiltrationMeasurement', :string)
-      @type_of_test = XMLHelper.get_value(air_infiltration_measurement, 'TypeOfInfiltrationTest', :string)
+      @infiltration_type = XMLHelper.get_value(air_infiltration_measurement, 'TypeOfInfiltrationLeakage', :string)
       @house_pressure = XMLHelper.get_value(air_infiltration_measurement, 'HousePressure', :float)
       @leakiness_description = XMLHelper.get_value(air_infiltration_measurement, 'LeakinessDescription', :string)
       @unit_of_measure = XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/UnitofMeasure', :string)
