@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a15f2c9e-1d83-4ca2-b103-a3f01c285c6e</version_id>
-  <version_modified>20230411T165632Z</version_modified>
+  <version_id>92c554bc-1f8c-4a41-acd8-6e6948529623</version_id>
+  <version_modified>20230425T215426Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2045,20 +2045,20 @@
       <default_value>3</default_value>
     </argument>
     <argument>
-      <name>air_leakage_multifamily_value_type</name>
-      <display_name>Air Leakage: Multifamily Value Type</display_name>
-      <description>Type of air leakage value for a SFA/MF dwelling unit. If 'compartmentalization test', represents the total infiltration to the unit, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'guarded test', represents the infiltration to the unit from outside only. Required when unit type is single-family attached or apartment unit.</description>
+      <name>air_leakage_type</name>
+      <display_name>Air Leakage: Type</display_name>
+      <description>Type of air leakage. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
         <choice>
-          <value>compartmentalization test</value>
-          <display_name>compartmentalization test</display_name>
+          <value>unit total</value>
+          <display_name>unit total</display_name>
         </choice>
         <choice>
-          <value>guarded test</value>
-          <display_name>guarded test</display_name>
+          <value>unit exterior only</value>
+          <display_name>unit exterior only</display_name>
         </choice>
       </choices>
     </argument>
@@ -6629,7 +6629,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>FC779758</checksum>
+      <checksum>7F6A3D85</checksum>
     </file>
     <file>
       <version>
@@ -6640,7 +6640,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E3666A5B</checksum>
+      <checksum>E348C148</checksum>
     </file>
   </files>
 </measure>

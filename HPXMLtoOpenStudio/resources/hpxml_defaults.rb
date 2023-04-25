@@ -1403,7 +1403,7 @@ class HPXMLDefaults
       if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         heat_pump.crankcase_watts = 0.0
       else
-        heat_pump.crankcase_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0: 0.05 * heat_pump.fraction_cool_load_served * 1000 # From RESNET Publication No. 002-2017
+        heat_pump.crankcase_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 0.05 * heat_pump.fraction_cool_load_served * 1000 # From RESNET Publication No. 002-2017
       end
       heat_pump.crankcase_watts_isdefaulted = true
     end
