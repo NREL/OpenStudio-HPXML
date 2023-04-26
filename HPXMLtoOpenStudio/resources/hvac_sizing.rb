@@ -2340,12 +2340,12 @@ class HVACSizing
   end
 
   def self.get_sizing_speed(hvac_cooling_ap)
-    if hvac_cooling_ap.respond_to?(:capacity_ratios_cooling) && (hvac_cooling_ap.capacity_ratios_cooling.size > 1)
-      sizing_speed = capacity_ratios_cooling.size # Default
+    if hvac_cooling_ap.respond_to?(:cool_capacity_ratios) && (hvac_cooling_ap.cool_capacity_ratios.size > 1)
+      sizing_speed = hvac_cooling_ap.cool_capacity_ratios.size # Default
       sizing_speed_delta = 10 # Initialize
-      for speed in 0..(capacity_ratios_cooling.size - 1)
+      for speed in 0..(hvac_cooling_ap.cool_capacity_ratios.size - 1)
         # Select curves for sizing using the speed with the capacity ratio closest to 1
-        delta = (capacity_ratios_cooling[speed] - 1).abs
+        delta = (hvac_cooling_ap.cool_capacity_ratios[speed] - 1).abs
         if delta <= sizing_speed_delta
           sizing_speed = speed
           sizing_speed_delta = delta
