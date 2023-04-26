@@ -1140,7 +1140,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems)
     @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
 
-    @measure.report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name, @hpxml.header)
+    @measure.report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name)
 
     # Check written values exist and are registered
     assert(File.exist?(@bills_csv))

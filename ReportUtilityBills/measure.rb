@@ -257,13 +257,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
       # Write/report results
-      report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name, @hpxml.header)
+      report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name)
     end
 
     return true
   end
 
-  def report_runperiod_output_results(runner, args, utility_bills, output_path, bill_scenario_name, _header)
+  def report_runperiod_output_results(runner, args, utility_bills, output_path, bill_scenario_name)
     line_break = nil
 
     results_out = []
