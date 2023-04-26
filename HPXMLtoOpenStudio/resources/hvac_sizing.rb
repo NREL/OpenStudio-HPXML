@@ -2510,8 +2510,16 @@ class HVACSizing
           lto[:return_cfm50] = m.duct_leakage_value
         end
       end
-      total_uncond_supply_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeSupply]
-      total_uncond_return_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeReturn]
+      total_uncond_supply_area, total_uncond_return_area = 0.0, 0.0
+      hpxml_hvac.distribution_system.ducts.each do |duct|
+        next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
+
+        if duct.duct_type == HPXML::DuctTypeSupply
+          total_uncond_supply_area += duct.duct_surface_area * duct.duct_surface_area_multiplier
+        elsif duct.duct_type == HPXML::DuctTypeReturn
+          total_uncond_return_area += duct.duct_surface_area * duct.duct_surface_area_multiplier
+        end
+      end
       hpxml_hvac.distribution_system.ducts.each do |duct|
         next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
 
