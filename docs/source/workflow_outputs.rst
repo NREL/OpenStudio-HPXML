@@ -551,9 +551,9 @@ Monthly Bills by Fuel Use
 
 Monthly results for each utility bill scenario defined in the HPXML file are listed as shown below.
 
-   =========================================================  ====================
-   Type                                                       Notes
-   =========================================================  ====================
+   ==========================================================  ====================
+   Type                                                        Notes
+   ==========================================================  ====================
    <ScenarioName>: Month <Number>: Electricity: Fixed ($)      Scenario monthly fixed charges for electricity.
    <ScenarioName>: Month <Number>: Electricity: Energy ($)     Scenario monthly energy charges for electricity.
    <ScenarioName>: Month <Number>: Electricity: PV Credit ($)  Scenario monthly production credit (negative value) for PV.
@@ -582,4 +582,4 @@ Monthly results for each utility bill scenario defined in the HPXML file are lis
    <ScenarioName>: Month <Number>: Coal: Fixed ($)             Scenario monthly fixed charges for coal.
    <ScenarioName>: Month <Number>: Coal: Energy ($)            Scenario monthly energy charges for coal.
    <ScenarioName>: Month <Number>: Coal: Total ($)             Scenario monthly total charges for coal.
-   =========================================================  ====================
+   ==========================================================  ====================
