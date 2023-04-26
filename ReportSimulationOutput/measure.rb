@@ -127,6 +127,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(true)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_resilience', false)
+    arg.setDisplayName('Generate Annual Output: Resilience')
+    arg.setDescription('Generates annual resilience.')
+    arg.setDefaultValue(true)
+    args << arg
+
     timeseries_frequency_chs = OpenStudio::StringVector.new
     timeseries_frequency_chs << 'none'
     timeseries_frequency_chs << 'timestep'
@@ -1364,9 +1370,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         results_out << [line_break]
       end
     end
-    results_out << [line_break]
-    @resilience.each do |_type, resilience|
-      results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
+
+    # Resilience
+    if args[:include_annual_resilience]
+      @resilience.each do |_type, resilience|
+        results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
+      end
+      results_out << [line_break]
     end
 
     # End Use Emissions

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>172df49f-d49b-461b-aca5-12a85f140800</version_id>
-  <version_modified>20230425T230735Z</version_modified>
+  <version_id>cb12f2a1-9086-437c-8dc6-fbe068ebdb75</version_id>
+  <version_modified>20230426T000033Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -289,6 +289,25 @@
       <name>include_annual_hvac_summary</name>
       <display_name>Generate Annual Output: HVAC Summary</display_name>
       <description>Generates HVAC capacities, design temperatures, and design loads.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>true</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_annual_resilience</name>
+      <display_name>Generate Annual Output: Resilience</display_name>
+      <description>Generates annual resilience.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1886,7 +1905,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4A9312EC</checksum>
+      <checksum>B60D9672</checksum>
     </file>
     <file>
       <version>
@@ -1897,7 +1916,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>39441E04</checksum>
+      <checksum>7BE57D3A</checksum>
     </file>
   </files>
 </measure>

@@ -640,11 +640,13 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_annual_peak_loads' => false,
                   'include_annual_component_loads' => false,
                   'include_annual_hot_water_uses' => false,
-                  'include_annual_hvac_summary' => false }
+                  'include_annual_hvac_summary' => false,
+                  'include_annual_resilience' => false }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    puts actual_annual_rows.keys
     assert(actual_annual_rows.keys.empty?)
   end
 
