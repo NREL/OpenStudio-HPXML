@@ -39,9 +39,9 @@ class UtilityBill
     @annual_fixed_charge = 0.0
     @annual_total = 0.0
 
-    @monthly_energy_charge = [0] * 12
-    @monthly_fixed_charge = [0] * 12
-    @monthly_total = [0] * 12
+    @monthly_energy_charge = [0.0] * 12
+    @monthly_fixed_charge = [0.0] * 12
+    @monthly_total = [0.0] * 12
 
     @monthly_production_credit = [0] * 12
     @annual_production_credit = 0.0
