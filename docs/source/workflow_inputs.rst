@@ -501,7 +501,7 @@ You can create an additional column in the CSV file to define another unavailabl
 
 .. warning::
 
-  It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
+  It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
 .. _buildingsite:
 
