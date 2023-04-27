@@ -2314,10 +2314,10 @@ class HVACSizing
         hvac.CoolingLoadFraction = hpxml_hvac.fraction_cool_load_served
       end
       if hpxml_hvac.is_a?(HPXML::HeatingSystem) && hpxml_hvac.is_heat_pump_backup_system
-        # Use the same load fractions as the heat pump
+        # Use the same heating load fraction as the heat pump
         heat_pump = @hpxml.heat_pumps.find { |hp| hp.backup_system_idref == hpxml_hvac.id }
         hvac.HeatingLoadFraction = heat_pump.fraction_heat_load_served
-        hvac.CoolingLoadFraction = heat_pump.fraction_cool_load_served
+        hvac.CoolingLoadFraction = 0
       end
 
       # Capacities
@@ -2510,8 +2510,16 @@ class HVACSizing
           lto[:return_cfm50] = m.duct_leakage_value
         end
       end
-      total_uncond_supply_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeSupply]
-      total_uncond_return_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeReturn]
+      total_uncond_supply_area, total_uncond_return_area = 0.0, 0.0
+      hpxml_hvac.distribution_system.ducts.each do |duct|
+        next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
+
+        if duct.duct_type == HPXML::DuctTypeSupply
+          total_uncond_supply_area += duct.duct_surface_area * duct.duct_surface_area_multiplier
+        elsif duct.duct_type == HPXML::DuctTypeReturn
+          total_uncond_return_area += duct.duct_surface_area * duct.duct_surface_area_multiplier
+        end
+      end
       hpxml_hvac.distribution_system.ducts.each do |duct|
         next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
 
