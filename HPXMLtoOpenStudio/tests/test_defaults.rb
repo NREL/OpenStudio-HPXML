@@ -3771,6 +3771,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(cooling_efficiency_seer, cooling_system.cooling_efficiency_seer)
     end
+    assert_equal(HPXML::HVACCompressorTypeVariableSpeed, cooling_system.compressor_type)
   end
 
   def _test_default_furnace_values(heating_system, fan_watts_per_cfm, airflow_defect_ratio, heating_capacity,
@@ -3970,6 +3971,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heating_efficiency_hspf, heat_pump.heating_efficiency_hspf)
     end
+    assert_equal(HPXML::HVACCompressorTypeVariableSpeed, heat_pump.compressor_type)
   end
 
   def _test_default_heat_pump_temperature_values(heat_pump, compressor_lockout_temp, backup_heating_lockout_temp,

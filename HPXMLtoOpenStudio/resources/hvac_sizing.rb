@@ -1107,14 +1107,14 @@ class HVACSizing
 
     # Cooling
     system_design_loads.Cool_Load_Tot = bldg_design_loads.Cool_Tot * @fraction_cool_load_served
-    system_design_loads.cool_load_sens = bldg_design_loads.Cool_Sens * @fraction_cool_load_served
-    system_design_loads.cool_load_lat = bldg_design_loads.Cool_Lat * @fraction_cool_load_served
+    system_design_loads.Cool_Load_Sens = bldg_design_loads.Cool_Sens * @fraction_cool_load_served
+    system_design_loads.Cool_Load_Lat = bldg_design_loads.Cool_Lat * @fraction_cool_load_served
 
     # After applying load fraction to building design loads (w/o ducts), add duct load specific to this HVAC system
     system_design_loads.Heat_Load += ducts_heat_load.to_f
     system_design_loads.Heat_Load_Supp += ducts_heat_load.to_f
-    system_design_loads.cool_load_sens += ducts_cool_load_sens.to_f
-    system_design_loads.cool_load_lat += ducts_cool_load_lat.to_f
+    system_design_loads.Cool_Load_Sens += ducts_cool_load_sens.to_f
+    system_design_loads.Cool_Load_Lat += ducts_cool_load_lat.to_f
     system_design_loads.Cool_Load_Tot += ducts_cool_load_sens.to_f + ducts_cool_load_lat.to_f
   end
 
@@ -1142,8 +1142,8 @@ class HVACSizing
       # Note: Heat_Load_Supp should NOT be adjusted; we only want to adjust the HP capacity, not the HP backup heating capacity.
       max_load = [hvac_sizing_values.Heat_Load, hvac_sizing_values.Cool_Load_Tot].max
       hvac_sizing_values.Heat_Load = max_load
-      hvac_sizing_values.cool_load_sens *= max_load / hvac_sizing_values.Cool_Load_Tot
-      hvac_sizing_values.cool_load_lat *= max_load / hvac_sizing_values.Cool_Load_Tot
+      hvac_sizing_values.Cool_Load_Sens *= max_load / hvac_sizing_values.Cool_Load_Tot
+      hvac_sizing_values.Cool_Load_Lat *= max_load / hvac_sizing_values.Cool_Load_Tot
       hvac_sizing_values.Cool_Load_Tot = max_load
 
       # Override Manual S oversize allowances:
@@ -1338,7 +1338,7 @@ class HVACSizing
     end
 
     # Calculate the air flow rate required for design conditions
-    hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.cool_load_sens, (@cool_setpoint - @leaving_air_temp))
+    hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - @leaving_air_temp))
 
     if hvac_sizing_values.Cool_Load_Tot <= 0
 
@@ -1370,7 +1370,7 @@ class HVACSizing
       d_sens = shr_biquadratic[5]
 
       # Adjust Sizing
-      if lat_cap_design < hvac_sizing_values.cool_load_lat
+      if lat_cap_design < hvac_sizing_values.Cool_Load_Lat
         # Size by MJ8 Latent load, return to rated conditions
 
         # Solve for the new sensible and total capacity at design conditions:
@@ -1378,12 +1378,12 @@ class HVACSizing
         # solve the following for cool_cap_design: sens_cap_design = SHRRated * cool_cap_design / total_cap_curve_value * function(CFM/cool_cap_design, ODB)
         # substituting in CFM = cool_load_sens_cap_design / (1.1 * ACF * (cool_setpoint - LAT))
 
-        cool_load_sens_cap_design = hvac_sizing_values.cool_load_lat / ((total_cap_curve_value / hvac_cooling_shr - \
+        cool_load_sens_cap_design = hvac_sizing_values.Cool_Load_Lat / ((total_cap_curve_value / hvac_cooling_shr - \
                                   (UnitConversions.convert(b_sens, 'ton', 'Btu/hr') + UnitConversions.convert(d_sens, 'ton', 'Btu/hr') * entering_temp) / \
                                   (1.1 * @acf * (@cool_setpoint - @leaving_air_temp))) / \
                                   (a_sens + c_sens * entering_temp) - 1.0)
 
-        cool_cap_design = cool_load_sens_cap_design + hvac_sizing_values.cool_load_lat
+        cool_cap_design = cool_load_sens_cap_design + hvac_sizing_values.Cool_Load_Lat
 
         # The SHR of the equipment at the design condition
         shr_design = cool_load_sens_cap_design / cool_cap_design
@@ -1407,11 +1407,11 @@ class HVACSizing
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
 
-      elsif sens_cap_design < @undersize_limit * hvac_sizing_values.cool_load_sens
+      elsif sens_cap_design < @undersize_limit * hvac_sizing_values.Cool_Load_Sens
         # Size by MJ8 Sensible load, return to rated conditions, find Sens with SHRRated. Limit total
         # capacity to oversizing limit
 
-        sens_cap_design = @undersize_limit * hvac_sizing_values.cool_load_sens
+        sens_cap_design = @undersize_limit * hvac_sizing_values.Cool_Load_Sens
 
         # Solve for the new total system capacity at design conditions:
         # sens_cap_design   = sens_cap_rated * sensible_cap_curve_value
@@ -1504,8 +1504,8 @@ class HVACSizing
       cool_load_lat_cap_design = hvac_sizing_values.Cool_Load_Tot - cool_load_sens_cap_design
 
       # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
-      cool_load_sens_cap_design = [cool_load_sens_cap_design, hvac_sizing_values.cool_load_sens].max
-      cool_load_lat_cap_design = [cool_load_lat_cap_design, hvac_sizing_values.cool_load_lat].max
+      cool_load_sens_cap_design = [cool_load_sens_cap_design, hvac_sizing_values.Cool_Load_Sens].max
+      cool_load_lat_cap_design = [cool_load_lat_cap_design, hvac_sizing_values.Cool_Load_Lat].max
       cool_cap_design = cool_load_sens_cap_design + cool_load_lat_cap_design
 
       # Limit total capacity via oversizing limit
@@ -1522,9 +1522,9 @@ class HVACSizing
     elsif HPXML::HVACTypeEvaporativeCooler == @cooling_type
 
       hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot
-      hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.cool_load_sens
+      hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Load_Sens
       if @cool_setpoint - @leaving_air_temp > 0
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.cool_load_sens, (@cool_setpoint - @leaving_air_temp))
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - @leaving_air_temp))
       else
         hvac_sizing_values.Cool_Airflow = @cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
@@ -2041,7 +2041,7 @@ class HVACSizing
         hvac_sizing_values.Cool_Capacity = heat_cap_rated
       else
         # Size based on cooling, but with ACCA oversizing allowances for heating
-        load_shr = hvac_sizing_values.cool_load_sens / hvac_sizing_values.Cool_Load_Tot
+        load_shr = hvac_sizing_values.Cool_Load_Sens / hvac_sizing_values.Cool_Load_Tot
         if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
           # Mild winter or has a latent cooling load
           hvac_sizing_values.Cool_Capacity = [(@oversize_limit * hvac_sizing_values.Cool_Load_Tot) / total_cap_curve_value, heat_cap_rated].min
@@ -3196,7 +3196,7 @@ end
 class HVACSizingValues
   def initialize
   end
-  attr_accessor(:cool_load_sens, :cool_load_lat, :Cool_Load_Tot,
+  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot,
                 :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp,
                 :Heat_Airflow, :Heat_Airflow_Supp,
