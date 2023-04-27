@@ -154,12 +154,6 @@ class OSModel
     @hpxml = hpxml
     @debug = debug
 
-    # Set the working directory so that any files OS creates (e.g., external files
-    # in the 'files' dir) end up in a writable directory.
-    # Has a secondary benefit of creating the 'files' dir next to the 'run' dir.
-    # See https://github.com/NREL/OpenStudio/issues/4763
-    Dir.chdir(File.dirname(hpxml_path))
-
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
@@ -181,7 +175,8 @@ class OSModel
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
                                         year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
-                                        unavailable_periods: @hpxml.header.unavailable_periods)
+                                        unavailable_periods: @hpxml.header.unavailable_periods,
+                                        output_path: File.join(output_dir, 'in.schedules.csv'))
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
     validate_emissions_files()
     Location.apply(model, weather, epw_file, @hpxml)
