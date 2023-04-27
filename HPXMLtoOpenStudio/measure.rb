@@ -1720,7 +1720,6 @@ class OSModel
     end
 
     # Create HVAC availability sensor
-    # FIXME: Check if the 0 vs 1 convention is correct
     @hvac_availability_sensor = nil
     if not @hvac_unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, SchedulesFile::ColumnHVAC, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)

@@ -670,20 +670,6 @@ class Airflow
 
     return if ducts.size == 0 # No ducts
 
-    # get duct located zone or ambient temperature schedule objects
-    duct_locations = ducts.map { |duct| if duct.zone.nil? then duct.loc_schedule else duct.zone end }.uniq
-
-    # All duct zones are in living space?
-    all_ducts_conditioned = true
-    duct_locations.each do |duct_zone|
-      if duct_locations.is_a? OpenStudio::Model::ThermalZone
-        next if Geometry.is_living(duct_zone)
-      end
-
-      all_ducts_conditioned = false
-    end
-    return if all_ducts_conditioned
-
     if object.is_a? OpenStudio::Model::AirLoopHVAC
       # Most system types
 
@@ -756,6 +742,9 @@ class Airflow
       ra_w_sensor.setName("#{ra_w_var.name} s")
       ra_w_sensor.setKeyName(@living_zone.name.to_s)
     end
+
+    # Get duct located zone or ambient temperature schedule objects
+    duct_locations = ducts.map { |duct| if duct.zone.nil? then duct.loc_schedule else duct.zone end }.uniq
 
     # Create one duct program for each duct location zone
     duct_locations.each_with_index do |duct_location, i|
