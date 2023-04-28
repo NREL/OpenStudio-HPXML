@@ -4435,18 +4435,6 @@ class HPXML < Object
       return list
     end
 
-    def total_unconditioned_duct_areas
-      areas = { HPXML::DuctTypeSupply => 0,
-                HPXML::DuctTypeReturn => 0 }
-      @ducts.each do |duct|
-        next if HPXML::conditioned_locations.include? duct.duct_location
-        next if duct.duct_type.nil?
-
-        areas[duct.duct_type] += duct.duct_surface_area
-      end
-      return areas
-    end
-
     def delete
       @hpxml_object.hvac_distributions.delete(self)
       @hpxml_object.hvac_systems.each do |hvac_system|
