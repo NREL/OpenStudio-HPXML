@@ -52,6 +52,7 @@ __Bugfixes__
 - HPXML files w/ multiple `Building` elements now only show warnings for the single `Building` being simulated.
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
 - Various fixes for window/skylight/duct design loads for Manual J HVAC autosizing calculations.
+- Ensure that ductless HVAC systems do not have a non-zero airflow defect ratio specified.
 
 ## OpenStudio-HPXML v1.5.1
 

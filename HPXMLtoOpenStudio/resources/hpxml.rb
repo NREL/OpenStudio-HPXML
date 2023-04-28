@@ -936,7 +936,7 @@ class HPXML < Object
     end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
-             :timestep, :building_id, :event_type, :state_code, :zip_code,
+             :co2index_calculation_version, :timestep, :building_id, :event_type, :state_code, :zip_code,
              :egrid_region, :egrid_subregion, :cambium_region_gea, :time_zone_utc_offset,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
@@ -998,10 +998,11 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       XMLHelper.add_extension(software_info, 'OccupancyCalculationType', @occupancy_calculation_type, :string, @occupancy_calculation_type_isdefaulted) unless @occupancy_calculation_type.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
-      { @eri_calculation_version => 'ERICalculation',
-        @energystar_calculation_version => 'EnergyStarCalculation',
-        @iecc_eri_calculation_version => 'IECCERICalculation',
-        @zerh_calculation_version => 'ZERHCalculation' }.each do |calculation_version, element_name|
+      { 'ERICalculation' => @eri_calculation_version,
+        'CO2IndexCalculation' => @co2index_calculation_version,
+        'EnergyStarCalculation' => @energystar_calculation_version,
+        'IECCERICalculation' => @iecc_eri_calculation_version,
+        'ZERHCalculation' => @zerh_calculation_version }.each do |element_name, calculation_version|
         next if calculation_version.nil?
 
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
@@ -1104,6 +1105,7 @@ class HPXML < Object
       @software_program_used = XMLHelper.get_value(hpxml, 'SoftwareInfo/SoftwareProgramUsed', :string)
       @software_program_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/SoftwareProgramVersion', :string)
       @eri_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ERICalculation/Version', :string)
+      @co2index_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/CO2IndexCalculation/Version', :string)
       @iecc_eri_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/IECCERICalculation/Version', :string)
       @energystar_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/EnergyStarCalculation/Version', :string)
       @zerh_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ZERHCalculation/Version', :string)
