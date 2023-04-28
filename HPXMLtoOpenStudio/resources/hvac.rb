@@ -2898,6 +2898,7 @@ class HVAC
     end
 
     clg_coil = nil
+    crankcase_temp = 50 # F
 
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
@@ -2921,7 +2922,7 @@ class HVAC
         else
           clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
         end
-        clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(50, 'F', 'C')) if cooling_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
+        clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C')) if cooling_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
         clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
@@ -2936,7 +2937,7 @@ class HVAC
           clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
           clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(50, 'F', 'C')) if cooling_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
+          clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C')) if cooling_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
@@ -2968,6 +2969,7 @@ class HVAC
     end
 
     htg_coil = nil
+    crankcase_temp = 50 # F
 
     for i in 0..(htg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
@@ -3013,7 +3015,7 @@ class HVAC
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
-    htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(50, 'F', 'C')) if heating_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
+    htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C')) if heating_system.crankcase_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
     htg_coil.setCrankcaseHeaterCapacity(heating_system.crankcase_watts)
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
 
@@ -3049,7 +3051,6 @@ class HVAC
       dB_rated = 80.0 # deg-F
       wB_rated = 67.0 # deg-F
 
-      #    cool_nominal_cfm_per_ton = 400
       if clg_ap.num_speeds > 1
         cool_nominal_cfm_per_ton = (clg_ap.cool_rated_airflow_rate - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
       else
