@@ -1156,7 +1156,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_crankcase_watts', false)
     arg.setDisplayName('Cooling System: Crankcase Power Watts')
-    arg.setDescription("Cooling system crankcase power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
+    arg.setDescription("Cooling system crankcase power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}. If not provided, the OS-HPXML default is used.")
     arg.setUnits('W')
     args << arg
 
