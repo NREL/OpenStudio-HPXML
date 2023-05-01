@@ -317,7 +317,7 @@ class OSModel
     @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
     # If zero occupants, ensure end uses of interest are zeroed out
-    if @hpxml.building_occupancy.number_of_residents == 0
+    if (@hpxml.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
       @hpxml.header.unavailable_periods.add(column_name: 'Vacancy',
                                             begin_month: @hpxml.header.sim_begin_month,
                                             begin_day: @hpxml.header.sim_begin_day,
