@@ -1624,7 +1624,7 @@ If an evaporative cooler is specified, additional information is entered in ``Co
 Mini-Split Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a mini-split air conditioner is specified, additional information is entered in ``CoolingSystem``. Each ``CoolingSystem`` is expected to represent a single outdoor unit, whether connected to one indoor heat or multiple indoor heads.
+If a mini-split air conditioner is specified, additional information is entered in ``CoolingSystem``. Each ``CoolingSystem`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
 
   ================================================================  ========  ======  ===========  ========  ==============  ===========================================================
   Element                                                           Type      Units   Constraints  Required  Default         Notes
@@ -1772,7 +1772,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
 Mini-Split Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
-If a mini-split heat pump is specified, additional information is entered in ``HeatPump``. Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor heat or multiple indoor heads.
+If a mini-split heat pump is specified, additional information is entered in ``HeatPump``. Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
 
   ================================================================  ========  ======  ========================  ========  ==============  ===========================================================
   Element                                                           Type      Units   Constraints               Required  Default         Notes
