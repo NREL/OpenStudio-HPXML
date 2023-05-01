@@ -3432,14 +3432,14 @@ class HPXMLFile
     is_valid = true
 
     # Validate input HPXML against schema
-    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
-    schema_path = File.join(schema_dir, 'HPXML.xsd')
-    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+    schema_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    schema_validator = XMLValidator.get_schema_validator(schema_path)
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
 
     # Validate input HPXML against schematron docs
-    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
-    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
-    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
+    schematron_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml_doc)
 
     # Handle errors/warnings
     (xsd_errors + sct_errors).each do |error|

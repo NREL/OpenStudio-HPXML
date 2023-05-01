@@ -397,7 +397,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
 
-  def initialize(hpxml_path: nil, schema_path: nil, schematron_path: nil, building_id: nil)
+  def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -408,8 +408,8 @@ class HPXML < Object
       @doc = XMLHelper.parse_file(hpxml_path)
 
       # Validate against XSD schema
-      if not schema_path.nil?
-        xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+      if not schema_validator.nil?
+        xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
         @errors += xsd_errors
         @warnings += xsd_warnings
         return unless @errors.empty?
@@ -446,8 +446,8 @@ class HPXML < Object
       end
 
       # Validate against Schematron
-      if not schematron_path.nil?
-        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml)
+      if not schematron_validator.nil?
+        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml)
         @errors += sct_errors
         @warnings += sct_warnings
         return unless @errors.empty?

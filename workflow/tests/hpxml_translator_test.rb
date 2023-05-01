@@ -11,6 +11,11 @@ class HPXMLTest < MiniTest::Test
     @this_dir = File.dirname(__FILE__)
     @results_dir = File.join(@this_dir, 'results')
     FileUtils.mkdir_p @results_dir
+
+    schema_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    @schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schematron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    @schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
   end
 
   def test_simulations
@@ -350,9 +355,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    xsd_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    stron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_path: xsd_path, schematron_path: stron_path) # Validate in.xml to ensure it can be run back through OS-HPXML
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
     if not hpxml.errors.empty?
       puts 'ERRORS:'
       hpxml.errors.each do |error|
