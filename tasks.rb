@@ -16,6 +16,9 @@ def create_hpxmls
   abs_hpxml_files = []
   dirs = csv_data.map { |r| r['hpxml_path'] }.uniq
 
+  schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+  schema_validator = XMLValidator.get_schema_validator(schema_path)
+
   puts "Generating #{csv_data.size} HPXML files..."
 
   csv_data.each_with_index do |csv_row, i|
@@ -86,8 +89,7 @@ def create_hpxmls
 
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
-    schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    errors, _ = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+    errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
     next unless errors.size > 0
 
     puts errors.to_s
