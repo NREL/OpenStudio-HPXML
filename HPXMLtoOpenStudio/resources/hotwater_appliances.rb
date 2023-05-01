@@ -11,7 +11,7 @@ class HotWaterAndAppliances
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
-    nbeds = HPXMLDefaults.get_nbeds_adjusted_for_operational_calculation(hpxml)
+    nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
 
     # Get appliances, etc.
     if not hpxml.clothes_washers.empty?

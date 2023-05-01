@@ -257,18 +257,6 @@ If neither simple nor detailed inputs are provided, then schedules are defaulted
 Default schedules are typically smooth, averaged schedules.
 These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
 
-HPXML Occupancy Calculation Type
-********************************
-
-The occupancy calculation type is entered in ``/HPXML/SoftwareInfo/extension/OccupancyCalculationType``: either "asset" or "operational"; it defaults to "asset".
-
-If OccupancyCalculationType is "asset", various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
-
-If OccupancyCalculationType is "operational", end uses based on number of bedrooms are adjusted for the number of occupants using the relationship from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
-
-- single-family detached or manufactured home: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
-- single-family attached or apartment unit: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
-
 HPXML Emissions Scenarios
 *************************
 
@@ -577,18 +565,19 @@ HPXML Building Occupancy
 
 Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy``.
 
-  ========================================  ========  =====  ===========  ========  ====================  ========================
-  Element                                   Type      Units  Constraints  Required  Default               Notes
-  ========================================  ========  =====  ===========  ========  ====================  ========================
-  ``NumberofResidents``                     double           >= 0         See [#]_  <number of bedrooms>  Number of occupants [#]_
-  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_              24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``    array                         No                              24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_              12 comma-separated monthly multipliers
-  ========================================  ========  =====  ===========  ========  ====================  ========================
+  ========================================  ========  =====  ===========  ========  ========  ========================
+  Element                                   Type      Units  Constraints  Required  Default   Notes
+  ========================================  ========  =====  ===========  ========  ========  ========================
+  ``NumberofResidents``                     double           >= 0         No        See [#]_  Number of occupants
+  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``    array                         No                  24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated monthly multipliers
+  ========================================  ========  =====  ===========  ========  ========  ========================
 
-  .. [#] NumberofResidents is required if OccupancyCalculationType is "operational", .
-  .. [#] If OccupancyCalculationType is "asset", NumberofResidents is only used to define the heat gain from occupants; various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area.
-         If OccupancyCalculationType is "operational", end uses based on number of bedrooms are adjusted for the number of occupants.
+  .. [#] | If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end uses (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+         | If NumberofResidents is provided, an *operational* calculation is instead performed in which the end uses are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
+         | - **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
+         | - **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
@@ -3280,7 +3269,7 @@ If not entered, the simulation will not include a pool heater.
   .. [#] Type choices are "single speed", "multi speed", "variable speed", "variable flow", "other", "unknown", or "none".
          If "none" is entered, the simulation will not include a pool pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 158.5 / 0.070 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
-         If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
@@ -3308,7 +3297,7 @@ If not entered, the simulation will not include a pool heater.
          | - **gas fired [therm/year]**: 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
-         | If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
@@ -3349,7 +3338,7 @@ If not entered, the simulation will not include a hot tub pump.
   .. [#] Type choices are "single speed", "multi speed", "variable speed", "variable flow", "other", "unknown", or "none".
          If "none" is entered, the simulation will not include a hot tub pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 59.5 / 0.059 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
-         If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921".
 
@@ -3377,7 +3366,7 @@ If not entered, the simulation will not include a hot tub heater.
          | - **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
-         | If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
 
@@ -3416,7 +3405,7 @@ If not entered, the simulation will not include that type of plug load.
          | - **TV other**: 413.0 + 69.0 * NumberofBedrooms (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
          | - **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
-         | If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] | If FracSensible not provided, defaults as:
          | - **other**: 0.855
          | - **TV other**: 1.0
@@ -3472,7 +3461,7 @@ If not entered, the simulation will not include that type of fuel load.
          | - **grill**: 0.87 / 0.029 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          | - **fireplace**: 1.95 / 0.032 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          | - **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
-         | If OccupancyCalculationType is "operational", this value will be adjusted for the NumberofResidents.
+         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
   .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
