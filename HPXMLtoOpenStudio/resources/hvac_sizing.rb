@@ -2154,24 +2154,6 @@ class HVACSizing
     return total_cap_curve_value, sensible_cap_curve_value
   end
 
-  # FIXME: This method isn't used. Should it be?
-  def self.calc_gshp_htg_curve_value(heat_cap_ft_spec, db_temp, w_temp, vfr_air, loop_flow)
-    # Reference conditions in thesis with largest capacity:
-    # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
-    ref_temp = 283 # K
-    ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
-    ref_vfr_water = 0.000284
-
-    a_1 = heat_cap_ft_spec[0]
-    a_2 = heat_cap_ft_spec[1]
-    a_3 = heat_cap_ft_spec[2]
-    a_4 = heat_cap_ft_spec[3]
-    a_5 = heat_cap_ft_spec[4]
-
-    cap_curve_value = a_1 + db_temp / ref_temp * a_2 + w_temp / ref_temp * a_3 + vfr_air / ref_vfr_air * a_4 + loop_flow / ref_vfr_water * a_5
-    return cap_curve_value
-  end
-
   def self.calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r, air_dens = @inside_air_dens, air_cp = Gas.Air.cp)
     '''
     Calculate the Delivery Effectiveness for heating (using the method of ASHRAE Standard 152).
