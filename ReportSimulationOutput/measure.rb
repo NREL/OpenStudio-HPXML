@@ -1850,19 +1850,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @object_variables_by_key = {}
     return if @model.nil?
 
-    @model.getModelObjects.each do |object|
+    @model.getModelObjects.sort.each do |object|
       next if object.to_AdditionalProperties.is_initialized
 
       [EUT, HWT, LT].each do |class_name|
-        vars_by_key = get_object_output_variables_by_key(@model, object, class_name)
-        next if vars_by_key.size == 0
-
         sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
-        if sys_id.is_initialized
-          sys_id = sys_id.get
-        else
-          sys_id = nil
-        end
+        sys_id = sys_id.is_initialized ? sys_id.get : nil
+        vars_by_key = get_object_output_variables_by_key(@model, object, sys_id, class_name)
+        next if vars_by_key.size == 0
 
         vars_by_key.each do |key, output_vars|
           output_vars.each do |output_var|
@@ -2419,7 +2414,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return system_ids
   end
 
-  def get_object_output_variables_by_key(model, object, class_name)
+  def get_object_output_variables_by_key(model, object, sys_id, class_name)
+    # For a given object, returns the output variables to be requested and associates
+    # them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
+
     to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
               EPlus::FuelTypeNaturalGas => FT::Gas,
               EPlus::FuelTypeOil => FT::Oil,
@@ -2427,16 +2425,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
               EPlus::FuelTypeWoodCord => FT::WoodCord,
               EPlus::FuelTypeWoodPellets => FT::WoodPellets,
               EPlus::FuelTypeCoal => FT::Coal }
-
-    # For a given object, returns the output variables to be requested and associates
-    # them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
-
-    sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
-    if sys_id.is_initialized
-      sys_id = sys_id.get
-    else
-      sys_id = nil
-    end
 
     if class_name == EUT
 

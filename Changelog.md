@@ -20,6 +20,9 @@ __New Features__
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
   - ReportSimulationOutput measure: Allows disabling individual annual output sections.
+- **Breaking change**: Deprecates `OccupancyCalculationType` ("asset" or "operational").
+   - If `NumberofResidents` not provided, an *asset* calculation is performed assuming standard occupancy per ANSI/RESNET/ICC 301.
+   - If `NumberofResidents` is provided, an *operational* calculation is performed using a relationship between #Bedrooms and #Occupants from RECS 2015.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
