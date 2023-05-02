@@ -11,6 +11,11 @@ class HPXMLTest < MiniTest::Test
     @this_dir = File.dirname(__FILE__)
     @results_dir = File.join(@this_dir, 'results')
     FileUtils.mkdir_p @results_dir
+
+    schema_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    @schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schematron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    @schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
   end
 
   def test_simulations
@@ -164,6 +169,7 @@ class HPXMLTest < MiniTest::Test
       # Check for output files
       assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'in.schedules.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'stochastic.csv'))
 
       # Check stochastic.csv headers
@@ -349,9 +355,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    xsd_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    stron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_path: xsd_path, schematron_path: stron_path) # Validate in.xml to ensure it can be run back through OS-HPXML
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
     if not hpxml.errors.empty?
       puts 'ERRORS:'
       hpxml.errors.each do |error|
@@ -491,7 +495,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
       if !hpxml.header.unavailable_periods.empty?
-        next if log_line.include? 'It is not possible to eliminate all desired end uses (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
+        next if log_line.include? 'It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
       end
 
       flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
