@@ -27,7 +27,7 @@ class HPXMLDefaults
     apply_utility_bill_scenarios(runner, hpxml, has_fuel)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
-    apply_building_occupancy(hpxml, nbeds, schedules_file)
+    apply_building_occupancy(hpxml, schedules_file)
     apply_building_construction(hpxml, cfa, nbeds, infil_measurement)
     apply_climate_and_risk_zones(hpxml, epw_file)
     apply_infiltration(hpxml, infil_measurement)
@@ -502,10 +502,8 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_occupancy(hpxml, nbeds, schedules_file)
+  def self.apply_building_occupancy(hpxml, schedules_file)
     if hpxml.building_occupancy.number_of_residents.nil?
-      hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds)
-      hpxml.building_occupancy.number_of_residents_isdefaulted = true
       hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms = hpxml.building_construction.number_of_bedrooms
     else
       # Set adjusted number of bedrooms for operational calculation; this is an adjustment on
@@ -2896,16 +2894,13 @@ class HPXMLDefaults
 
   def self.get_nbeds_adjusted_for_operational_calculation(hpxml)
     n_occs = hpxml.building_occupancy.number_of_residents
-    if not n_occs.nil?
-      unit_type = hpxml.building_construction.residential_facility_type
-      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-        return -0.68 + 1.09 * n_occs
-      elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
-        return -1.47 + 1.69 * n_occs
-      else
-        fail "Unexpected residential facility type: #{unit_type}."
-      end
+    unit_type = hpxml.building_construction.residential_facility_type
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
+      return -0.68 + 1.09 * n_occs
+    elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
+      return -1.47 + 1.69 * n_occs
+    else
+      fail "Unexpected residential facility type: #{unit_type}."
     end
-    return hpxml.building_construction.number_of_bedrooms
   end
 end
