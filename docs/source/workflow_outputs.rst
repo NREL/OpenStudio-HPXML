@@ -509,9 +509,9 @@ Most outputs will be summed over the hour (e.g., energy) but some will be averag
 Utility Bill Outputs
 --------------------
 
-OpenStudio-HPXML can optionally generate a utility bills output file.
-The utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
-The utility bills output file can report annual bills, monthly bills, or both.
+OpenStudio-HPXML can optionally generate utility bill output files (annual, monthly, or both).
+The annual utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
+The monthly utility bills output file is called ``results_bills_monthly.csv`` (or ``results_bills_monthly.json`` or ``results_bills_monthly.msgpack``) and location in the run directory.
 
 Annual Bills by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -549,37 +549,4 @@ Annual results for each utility bill scenario defined in the HPXML file are list
 Monthly Bills by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Monthly results for each utility bill scenario defined in the HPXML file are listed as shown below.
-
-   ==========================================================  ====================
-   Type                                                        Notes
-   ==========================================================  ====================
-   <ScenarioName>: Month <Number>: Electricity: Fixed ($)      Scenario monthly fixed charges for electricity.
-   <ScenarioName>: Month <Number>: Electricity: Energy ($)     Scenario monthly energy charges for electricity.
-   <ScenarioName>: Month <Number>: Electricity: PV Credit ($)  Scenario monthly production credit (negative value) for PV.
-   <ScenarioName>: Month <Number>: Electricity: Total ($)      Scenario monthly total charges for electricity.
-
-   <ScenarioName>: Month <Number>: Natural Gas: Fixed ($)      Scenario monthly fixed charges for natural gas.
-   <ScenarioName>: Month <Number>: Natural Gas: Energy ($)     Scenario monthly energy charges for natural gas.
-   <ScenarioName>: Month <Number>: Natural Gas: Total ($)      Scenario monthly total charges for natural gas.
-
-   <ScenarioName>: Month <Number>: Fuel Oil: Fixed ($)         Scenario monthly fixed charges for fuel oil.
-   <ScenarioName>: Month <Number>: Fuel Oil: Energy ($)        Scenario monthly energy charges for fuel oil.
-   <ScenarioName>: Month <Number>: Fuel Oil: Total ($)         Scenario monthly total charges for fuel oil.
-
-   <ScenarioName>: Month <Number>: Propane: Fixed ($)          Scenario monthly fixed charges for propane.
-   <ScenarioName>: Month <Number>: Propane: Energy ($)         Scenario monthly energy charges for propane.
-   <ScenarioName>: Month <Number>: Propane: Total ($)          Scenario monthly total charges for propane.
-
-   <ScenarioName>: Month <Number>: Wood Cord: Fixed ($)        Scenario monthly fixed charges for wood cord.
-   <ScenarioName>: Month <Number>: Wood Cord: Energy ($)       Scenario monthly energy charges for wood cord.
-   <ScenarioName>: Month <Number>: Wood Cord: Total ($)        Scenario monthly total charges for wood cord.
-
-   <ScenarioName>: Month <Number>: Wood Pellets: Fixed ($)     Scenario monthly fixed charges for wood pellets.
-   <ScenarioName>: Month <Number>: Wood Pellets: Energy ($)    Scenario monthly energy charges for wood pellets.
-   <ScenarioName>: Month <Number>: Wood Pellets: Total ($)     Scenario monthly total charges for wood pellets.
-
-   <ScenarioName>: Month <Number>: Coal: Fixed ($)             Scenario monthly fixed charges for coal.
-   <ScenarioName>: Month <Number>: Coal: Energy ($)            Scenario monthly energy charges for coal.
-   <ScenarioName>: Month <Number>: Coal: Total ($)             Scenario monthly total charges for coal.
-   ==========================================================  ====================
+Monthly results for each utility bill scenario defined in the HPXML file are listed as rows corresponding to Month, and columns corresponding to Type.
