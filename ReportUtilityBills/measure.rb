@@ -232,6 +232,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     output_path = File.join(output_dir, "results_bills.#{args[:output_format]}")
     FileUtils.rm(output_path) if File.exist?(output_path)
 
+    monthly_output_path = File.join(output_dir, "results_bills_monthly.#{args[:output_format]}")
+    FileUtils.rm(monthly_output_path) if File.exist?(monthly_output_path)
+
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       warnings = check_for_next_type_warnings(utility_bill_scenario)
       if register_warnings(runner, warnings)
@@ -258,6 +261,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       # Write/report results
       report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name)
+      report_runperiod_monthly_output_results(runner, args, utility_bills, monthly_output_path, utility_bill_scenario.name)
     end
 
     return true
@@ -280,23 +284,75 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       results_out << [line_break]
     end
 
+    if ['csv'].include? args[:output_format]
+      CSV.open(output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
+    elsif ['json', 'msgpack'].include? args[:output_format]
+      h = {}
+      results_out.each do |out|
+        next if out == [line_break]
+
+        if out[0].include? ':'
+          grp, name = out[0].split(':', 2)
+          h[grp] = {} if h[grp].nil?
+          h[grp][name.strip] = out[1]
+        else
+          h[out[0]] = out[1]
+        end
+      end
+
+      if args[:output_format] == 'json'
+        require 'json'
+        File.open(output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif args[:output_format] == 'msgpack'
+        File.open(output_path, 'a') { |json| h.to_msgpack(json) }
+      end
+    end
+    runner.registerInfo("Wrote bills output to #{output_path}.")
+
+    results_out.each do |name, value|
+      next if name.nil? || value.nil?
+
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      runner.registerValue(name, value)
+      runner.registerInfo("Registering #{value} for #{name}.")
+    end
+  end
+
+  def report_runperiod_monthly_output_results(runner, args, utility_bills, output_path, bill_scenario_name)
+    line_break = nil
+
+    monthly_results = {}
+    (1..12).to_a.each do |month|
+      monthly_results["#{month}"] = {}
+    end
+
     if args[:include_monthly_bills]
       utility_bills.each do |fuel_type, bill|
         bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
-          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Fixed (USD)", monthly_fixed_charge.round(2)]
+          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)"] = monthly_fixed_charge.round(2)
         end
         bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
-          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Energy (USD)", monthly_energy_charge.round(2)]
+          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Energy (USD)"] = monthly_energy_charge.round(2)
         end
         bill.monthly_production_credit.each_with_index do |monthly_production_credit, month|
-          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: PV Credit (USD)", monthly_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
+          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)"] = monthly_production_credit.round(2) if [FT::Elec].include?(fuel_type)
         end
         bill.monthly_total.each_with_index do |monthly_total, month|
-          results_out << ["#{bill_scenario_name}: Month #{month + 1}: #{fuel_type}: Total (USD)", monthly_total.round(2)]
+          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Total (USD)"] = monthly_total.round(2)
         end
-        results_out << [line_break]
       end
     end
+
+    results_out = [['Month']]
+    monthly_results.each do |row_name, results|
+      results_out << [row_name]
+      results.each do |col_name, val|
+        results_out[0] << col_name if !results_out[0].include?(col_name)
+        results_out[-1] << val
+      end
+    end
+    results_out << [line_break]
 
     if ['csv'].include? args[:output_format]
       CSV.open(output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
