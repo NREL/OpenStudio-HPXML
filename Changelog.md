@@ -21,11 +21,15 @@ __New Features__
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
   - ReportSimulationOutput measure: Allows disabling individual annual output sections.
   - ReportUtilityBills measure: New optional arguments for reporting annual and monthly utility bill outputs. Both default to true.
+- **Breaking change**: Deprecates `OccupancyCalculationType` ("asset" or "operational").
+   - If `NumberofResidents` not provided, an *asset* calculation is performed assuming standard occupancy per ANSI/RESNET/ICC 301.
+   - If `NumberofResidents` is provided, an *operational* calculation is performed using a relationship between #Bedrooms and #Occupants from RECS 2015.
 - Heat pump enhancements:
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
   - Defaults for `BackupHeatingLockoutTemperature`: 50F for dual-fuel, 40F for all other heat pumps.
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
+  - `BackupHeatingCapacity` can now be defaulted (autosized) even when the heat pump capacities are provided (hard-sized).
 - Infiltration changes:
   - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
   - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
