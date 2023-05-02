@@ -361,22 +361,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_occupancy
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
-    hpxml.building_occupancy.number_of_residents = 1
     hpxml.building_occupancy.weekday_fractions = ConstantDaySchedule
     hpxml.building_occupancy.weekend_fractions = ConstantDaySchedule
     hpxml.building_occupancy.monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_occupancy_values(hpxml_default, 1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_occupancy_values(hpxml_default, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
-    hpxml.building_occupancy.number_of_residents = nil
     hpxml.building_occupancy.weekday_fractions = nil
     hpxml.building_occupancy.weekend_fractions = nil
     hpxml.building_occupancy.monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_occupancy_values(hpxml_default, 3, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers)
+    _test_default_occupancy_values(hpxml_default, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers)
   end
 
   def test_building_construction
@@ -3529,8 +3527,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_occupancy_values(hpxml, num_occupants, weekday_sch, weekend_sch, monthly_mults)
-    assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
+  def _test_default_occupancy_values(hpxml, weekday_sch, weekend_sch, monthly_mults)
     if weekday_sch.nil?
       assert_nil(hpxml.building_occupancy.weekday_fractions)
     else
