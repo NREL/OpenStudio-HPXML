@@ -267,37 +267,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  # define the outputs that the measure will create
-  def outputs
-    outs = OpenStudio::Measure::OSOutputVector.new
-
-    setup_outputs(true)
-
-    all_outputs = []
-    all_outputs << @totals
-    all_outputs << @fuels
-    all_outputs << @end_uses
-    all_outputs << @loads
-    all_outputs << @unmet_hours
-    all_outputs << @peak_fuels
-    all_outputs << @peak_loads
-    all_outputs << @component_loads
-    all_outputs << @hot_water_uses
-
-    output_names = []
-    all_outputs.each do |outputs|
-      outputs.values.each do |obj|
-        output_names << get_runner_output_name(obj.name, obj.annual_units)
-      end
-    end
-
-    output_names.each do |output_name|
-      outs << OpenStudio::Measure::OSOutput.makeDoubleOutput(output_name)
-    end
-
-    return outs
-  end
-
   def get_arguments(runner, arguments, user_arguments)
     args = get_argument_values(runner, arguments, user_arguments)
     args.each do |k, val|
@@ -1400,10 +1369,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       runner.registerValue(name, value)
       runner.registerInfo("Registering #{value} for #{name}.")
     end
-  end
-
-  def get_runner_output_name(name, annual_units)
-    return "#{name} #{annual_units}"
   end
 
   def append_sizing_results(results_out, line_break)
