@@ -224,6 +224,29 @@ class HPXMLTest < MiniTest::Test
     end
   end
 
+  def test_run_defaulted_in_xml
+    # Check that if we simulate the in.xml file (HPXML w/ defaults), we get
+    # the same results as the original HPXML.
+
+    # Run base.xml
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+    base_results = CSV.read(File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+    # Run in.xml (generated from base.xml)
+    xml2 = File.join(File.dirname(xml), 'run', 'in.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml2}\""
+    system(command, err: File::NULL)
+    assert(File.exist? File.join(File.dirname(xml2), 'run', 'results_annual.csv'))
+    default_results = CSV.read(File.join(File.dirname(xml2), 'run', 'results_annual.csv'))
+
+    # Check two output files are identical
+    assert_equal(base_results, default_results)
+  end
+
   def test_template_osws
     # Check that simulation works using template-*.osw
     require 'json'

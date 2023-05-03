@@ -316,6 +316,13 @@ class OSModel
     @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
+    # We don't want this to be written to in.xml, because then if you ran the in.xml
+    # file, you would get different results (operational calculation) relative to the
+    # original file (asset calculation).
+    if @hpxml.building_occupancy.number_of_residents.nil?
+      @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
+    end
+
     # If zero occupants, ensure end uses of interest are zeroed out
     if (@hpxml.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
       @hpxml.header.unavailable_periods.add(column_name: 'Vacancy',
