@@ -3858,7 +3858,7 @@ class HPXMLFile
           hpxml.site.vertical_surroundings = HPXML::VerticalSurroundingsNoAboveOrBelow
         end
       end
-    elsif [HPXML::ResidentialTypeSFD].include? args[:geometry_unit_type]
+    elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? args[:geometry_unit_type]
       hpxml.site.surroundings = HPXML::SurroundingsStandAlone
       hpxml.site.vertical_surroundings = HPXML::VerticalSurroundingsNoAboveOrBelow
     end
