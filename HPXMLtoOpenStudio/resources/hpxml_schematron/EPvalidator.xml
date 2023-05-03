@@ -14,8 +14,6 @@
   <sch:pattern>
     <sch:title>[SoftwareInfo]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo'>
-      <sch:assert role='ERROR' test='count(h:extension/h:OccupancyCalculationType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OccupancyCalculationType</sch:assert>
-      <sch:assert role='ERROR' test='h:extension/h:OccupancyCalculationType[text()="asset" or text()="operational"] or not(h:extension/h:OccupancyCalculationType)'>Expected extension/OccupancyCalculationType to be "asset" or "operational"</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
       <sch:assert role='ERROR' test='count(h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
       <sch:assert role='ERROR' test='count(h:extension/h:ShadingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ShadingControl</sch:assert> <!-- See [ShadingControl] -->
@@ -329,13 +327,6 @@
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[OccupancyCalculationType=Operational]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:OccupancyCalculationType[text()="operational"]'>
-      <sch:assert role='ERROR' test='count(../../../h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingOccupancy/h:NumberofResidents) = 1'>Expected 1 element(s) for xpath: NumberofResidents</sch:assert>
     </sch:rule>
   </sch:pattern>
 

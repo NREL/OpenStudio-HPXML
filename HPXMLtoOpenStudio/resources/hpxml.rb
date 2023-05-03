@@ -239,8 +239,6 @@ class HPXML < Object
   MechVentTypeExhaust = 'exhaust only'
   MechVentTypeHRV = 'heat recovery ventilator'
   MechVentTypeSupply = 'supply only'
-  OccupancyCalculationTypeAsset = 'asset'
-  OccupancyCalculationTypeOperational = 'operational'
   OrientationEast = 'east'
   OrientationNorth = 'north'
   OrientationNortheast = 'northeast'
@@ -940,9 +938,8 @@ class HPXML < Object
              :egrid_region, :egrid_subregion, :cambium_region_gea, :time_zone_utc_offset,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
-             :heat_pump_sizing_methodology, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths,
-             :occupancy_calculation_type, :extension_properties, :iecc_eri_calculation_version,
+             :heat_pump_sizing_methodology, :allow_increased_fixed_capacities, :apply_ashrae140_assumptions,
+             :energystar_calculation_version, :schedules_filepaths, :extension_properties, :iecc_eri_calculation_version,
              :zerh_calculation_version, :temperature_capacitance_multiplier, :natvent_days_per_week,
              :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
@@ -996,7 +993,6 @@ class HPXML < Object
       software_info = XMLHelper.add_element(hpxml, 'SoftwareInfo')
       XMLHelper.add_element(software_info, 'SoftwareProgramUsed', @software_program_used, :string) unless @software_program_used.nil?
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
-      XMLHelper.add_extension(software_info, 'OccupancyCalculationType', @occupancy_calculation_type, :string, @occupancy_calculation_type_isdefaulted) unless @occupancy_calculation_type.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
       { 'ERICalculation' => @eri_calculation_version,
         'CO2IndexCalculation' => @co2index_calculation_version,
@@ -1116,7 +1112,6 @@ class HPXML < Object
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
-      @occupancy_calculation_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancyCalculationType', :string)
       @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
       @shading_summer_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginMonth', :integer)
       @shading_summer_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginDayOfMonth', :integer)
