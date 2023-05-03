@@ -1057,30 +1057,12 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def _check_bills(expected_bills, actual_bills)
-    actual_monthly = {}
     bills = expected_bills.keys | actual_bills.keys
-    bills.each do |bill|
-      if expected_bills.keys.include?(bill) # annual
-        if expected_bills[bill] != 0
-          assert(actual_bills.keys.include?(bill))
-          assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
-        end
-      else # monthly
-        assert(bill.include?('Month'))
-        name, _month, fuel_type, charge = bill.split(':').map(&:strip)
-        key = "#{name}: #{fuel_type}: #{charge}"
-        actual_monthly[key] = 0 if !actual_monthly.keys.include?(key)
-        actual_monthly[key] += actual_bills[bill]
-      end
-    end
-
-    actual_monthly['Test: Total (USD)'] = actual_monthly['Test: Electricity: Total (USD)'] + actual_monthly['Test: Natural Gas: Total (USD)'] + actual_monthly['Test: Fuel Oil: Total (USD)'] + actual_monthly['Test: Propane: Total (USD)'] + actual_monthly['Test: Coal: Total (USD)'] + actual_monthly['Test: Wood Cord: Total (USD)'] + actual_monthly['Test: Wood Pellets: Total (USD)']
-    bills = expected_bills.keys | actual_monthly.keys
     bills.each do |bill|
       assert(expected_bills.keys.include?(bill))
       if expected_bills[bill] != 0
-        assert(actual_monthly.keys.include?(bill))
-        assert_in_delta(expected_bills[bill], actual_monthly[bill], 1.50) # within a dollar fifty
+        assert(actual_bills.keys.include?(bill))
+        assert_in_delta(expected_bills[bill], actual_bills[bill], 1) # within a dollar
       end
     end
   end
@@ -1147,7 +1129,6 @@ class ReportUtilityBillsTest < MiniTest::Test
     actual_bills = _get_actual_bills(@bills_csv)
 
     _check_for_runner_registered_values(runner, nil, actual_bills)
-
     return actual_bills
   end
 
