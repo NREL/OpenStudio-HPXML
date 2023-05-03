@@ -1336,6 +1336,9 @@
   "sample_files/base-enclosure-ceilingtypes.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-enclosure-detailed-constructions.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-enclosure-floortypes.xml": {
     "parent_hpxml": "sample_files/base-foundation-ambient.xml"
   },

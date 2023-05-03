@@ -13,6 +13,8 @@ class HPXMLDefaults
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml.air_infiltration_measurements)
+    apply_ashrae140_assumptions = hpxml.header.apply_ashrae140_assumptions # Hidden feature
+    apply_ashrae140_assumptions = false if apply_ashrae140_assumptions.nil?
 
     # Check for presence of fuels once
     has_fuel = {}
@@ -33,9 +35,9 @@ class HPXMLDefaults
     apply_infiltration(hpxml, infil_measurement)
     apply_attics(hpxml)
     apply_foundations(hpxml)
-    apply_roofs(hpxml)
-    apply_rim_joists(hpxml)
-    apply_walls(hpxml)
+    apply_roofs(runner, hpxml, apply_ashrae140_assumptions)
+    apply_rim_joists(runner, hpxml)
+    apply_walls(runner, hpxml, apply_ashrae140_assumptions)
     apply_foundation_walls(hpxml)
     apply_floors(hpxml)
     apply_slabs(hpxml)
@@ -646,7 +648,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_roofs(hpxml)
+  def self.apply_roofs(runner, hpxml, apply_ashrae140_assumptions)
     hpxml.roofs.each do |roof|
       if roof.azimuth.nil?
         roof.azimuth = get_azimuth_from_orientation(roof.orientation)
@@ -656,51 +658,75 @@ class HPXMLDefaults
         roof.orientation = get_orientation_from_azimuth(roof.azimuth)
         roof.orientation_isdefaulted = true
       end
-      if roof.roof_type.nil?
-        roof.roof_type = HPXML::RoofTypeAsphaltShingles
-        roof.roof_type_isdefaulted = true
-      end
-      if roof.emittance.nil?
-        roof.emittance = 0.90
-        roof.emittance_isdefaulted = true
-      end
-      if roof.radiant_barrier.nil?
-        roof.radiant_barrier = false
-        roof.radiant_barrier_isdefaulted = true
-      end
-      if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
-        roof.radiant_barrier_grade = 1
-        roof.radiant_barrier_grade_isdefaulted = true
-      end
-      if roof.roof_color.nil? && roof.solar_absorptance.nil?
-        roof.roof_color = HPXML::ColorMedium
-        roof.roof_color_isdefaulted = true
-      end
-      if roof.roof_color.nil?
-        roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
-        roof.roof_color_isdefaulted = true
-      elsif roof.solar_absorptance.nil?
-        roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
-        roof.solar_absorptance_isdefaulted = true
-      end
-      if roof.interior_finish_type.nil?
-        if HPXML::conditioned_finished_locations.include? roof.interior_adjacent_to
-          roof.interior_finish_type = HPXML::InteriorFinishGypsumBoard
-        else
-          roof.interior_finish_type = HPXML::InteriorFinishNone
-        end
-        roof.interior_finish_type_isdefaulted = true
-      end
-      next unless roof.interior_finish_thickness.nil?
 
-      if roof.interior_finish_type != HPXML::InteriorFinishNone
-        roof.interior_finish_thickness = 0.5
-        roof.interior_finish_thickness_isdefaulted = true
+      roof_pitch_in_deg = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
+      roof.additional_properties.inside_film = Material.AirFilmRoof(roof_pitch_in_deg)
+      roof.additional_properties.outside_film = Material.AirFilmOutside
+      if apply_ashrae140_assumptions
+        roof.additional_properties.inside_film = Material.AirFilmRoofASHRAE140
+        roof.additional_properties.outside_film = Material.AirFilmOutsideASHRAE140
+      end
+
+      if roof.has_detailed_construction
+        # Detailed construction inputs
+        detailed_construction_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(roof)
+        if roof.insulation_assembly_r_value.nil?
+          roof.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          roof.insulation_assembly_r_value_isdefaulted = true
+        elsif (detailed_construction_assembly_r_value - roof.insulation_assembly_r_value).abs > 1
+          # Detailed construction is more than R-1 different from user-specified assembly R-value
+          if not runner.nil?
+            runner.registerWarning("For roof '#{roof.id}', assembly R-value calculated from detailed construction (#{detailed_construction_assembly_r_value}) differs from AssemblyEffectiveRValue (#{roof.insulation_assembly_r_value}). The latter will be overridden.")
+          end
+          roof.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          roof.insulation_assembly_r_value_isdefaulted = true
+        end
+      else
+        # Simple inputs
+        if roof.roof_type.nil?
+          roof.roof_type = HPXML::RoofTypeAsphaltShingles
+          roof.roof_type_isdefaulted = true
+        end
+        if roof.emittance.nil?
+          roof.emittance = 0.90
+          roof.emittance_isdefaulted = true
+        end
+        if roof.radiant_barrier.nil?
+          roof.radiant_barrier = false
+          roof.radiant_barrier_isdefaulted = true
+        end
+        if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
+          roof.radiant_barrier_grade = 1
+          roof.radiant_barrier_grade_isdefaulted = true
+        end
+        if roof.roof_color.nil? && roof.solar_absorptance.nil?
+          roof.roof_color = HPXML::ColorMedium
+          roof.roof_color_isdefaulted = true
+        end
+        if roof.roof_color.nil?
+          roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
+          roof.roof_color_isdefaulted = true
+        elsif roof.solar_absorptance.nil?
+          roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
+          roof.solar_absorptance_isdefaulted = true
+        end
+        if roof.interior_finish_type.nil?
+          if HPXML::conditioned_finished_locations.include? roof.interior_adjacent_to
+            roof.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+          else
+            roof.interior_finish_type = HPXML::InteriorFinishNone
+          end
+          roof.interior_finish_type_isdefaulted = true
+        end
+        if roof.interior_finish_thickness.nil? && roof.interior_finish_type != HPXML::InteriorFinishNone
+          roof.interior_finish_thickness = 0.5
+          roof.interior_finish_thickness_isdefaulted = true
+        end
       end
     end
   end
 
-  def self.apply_rim_joists(hpxml)
+  def self.apply_rim_joists(runner, hpxml)
     hpxml.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
         rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
@@ -711,31 +737,55 @@ class HPXMLDefaults
         rim_joist.orientation_isdefaulted = true
       end
 
-      next unless rim_joist.is_exterior
+      rim_joist.additional_properties.inside_film = Material.AirFilmVertical
+      if rim_joist.is_exterior
+        rim_joist.additional_properties.outside_film = Material.AirFilmOutside
+      else
+        rim_joist.additional_properties.outside_film = Material.AirFilmVertical
+      end
 
-      if rim_joist.emittance.nil?
-        rim_joist.emittance = 0.90
-        rim_joist.emittance_isdefaulted = true
-      end
-      if rim_joist.siding.nil?
-        rim_joist.siding = HPXML::SidingTypeWood
-        rim_joist.siding_isdefaulted = true
-      end
-      if rim_joist.color.nil? && rim_joist.solar_absorptance.nil?
-        rim_joist.color = HPXML::ColorMedium
-        rim_joist.color_isdefaulted = true
-      end
-      if rim_joist.color.nil?
-        rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
-        rim_joist.color_isdefaulted = true
-      elsif rim_joist.solar_absorptance.nil?
-        rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
-        rim_joist.solar_absorptance_isdefaulted = true
+      if rim_joist.has_detailed_construction
+        # Detailed construction inputs
+        detailed_construction_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(rim_joist)
+        if rim_joist.insulation_assembly_r_value.nil?
+          rim_joist.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          rim_joist.insulation_assembly_r_value_isdefaulted = true
+        elsif (detailed_construction_assembly_r_value - rim_joist.insulation_assembly_r_value).abs > 1
+          # Detailed construction is more than R-1 different from user-specified assembly R-value
+          if not runner.nil?
+            runner.registerWarning("For rim joist '#{rim_joist.id}', assembly R-value calculated from detailed construction (#{detailed_construction_assembly_r_value}) differs from AssemblyEffectiveRValue (#{rim_joist.insulation_assembly_r_value}). The latter will be overridden.")
+          end
+          rim_joist.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          rim_joist.insulation_assembly_r_value_isdefaulted = true
+        end
+      else
+        # Simple inputs
+        if rim_joist.is_exterior
+          if rim_joist.emittance.nil?
+            rim_joist.emittance = 0.90
+            rim_joist.emittance_isdefaulted = true
+          end
+          if rim_joist.siding.nil?
+            rim_joist.siding = HPXML::SidingTypeWood
+            rim_joist.siding_isdefaulted = true
+          end
+          if rim_joist.color.nil? && rim_joist.solar_absorptance.nil?
+            rim_joist.color = HPXML::ColorMedium
+            rim_joist.color_isdefaulted = true
+          end
+          if rim_joist.color.nil?
+            rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
+            rim_joist.color_isdefaulted = true
+          elsif rim_joist.solar_absorptance.nil?
+            rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
+            rim_joist.solar_absorptance_isdefaulted = true
+          end
+        end
       end
     end
   end
 
-  def self.apply_walls(hpxml)
+  def self.apply_walls(runner, hpxml, apply_ashrae140_assumptions)
     hpxml.walls.each do |wall|
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
@@ -746,40 +796,66 @@ class HPXMLDefaults
         wall.orientation_isdefaulted = true
       end
 
+      wall.additional_properties.inside_film = Material.AirFilmVertical
       if wall.is_exterior
-        if wall.emittance.nil?
-          wall.emittance = 0.90
-          wall.emittance_isdefaulted = true
-        end
-        if wall.siding.nil?
-          wall.siding = HPXML::SidingTypeWood
-          wall.siding_isdefaulted = true
-        end
-        if wall.color.nil? && wall.solar_absorptance.nil?
-          wall.color = HPXML::ColorMedium
-          wall.color_isdefaulted = true
-        end
-        if wall.color.nil?
-          wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
-          wall.color_isdefaulted = true
-        elsif wall.solar_absorptance.nil?
-          wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
-          wall.solar_absorptance_isdefaulted = true
-        end
+        wall.additional_properties.outside_film = Material.AirFilmOutside
+      else
+        wall.additional_properties.outside_film = Material.AirFilmVertical
       end
-      if wall.interior_finish_type.nil?
-        if HPXML::conditioned_finished_locations.include? wall.interior_adjacent_to
-          wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
-        else
-          wall.interior_finish_type = HPXML::InteriorFinishNone
-        end
-        wall.interior_finish_type_isdefaulted = true
+      if apply_ashrae140_assumptions
+        wall.additional_properties.inside_film = Material.AirFilmVerticalASHRAE140
+        wall.additional_properties.outside_film = Material.AirFilmOutsideASHRAE140
       end
-      next unless wall.interior_finish_thickness.nil?
 
-      if wall.interior_finish_type != HPXML::InteriorFinishNone
-        wall.interior_finish_thickness = 0.5
-        wall.interior_finish_thickness_isdefaulted = true
+      if wall.has_detailed_construction
+        # Detailed construction inputs
+        detailed_construction_assembly_r_value = calculate_assembly_r_value_from_detailed_construction(wall)
+        if wall.insulation_assembly_r_value.nil?
+          wall.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          wall.insulation_assembly_r_value_isdefaulted = true
+        elsif (detailed_construction_assembly_r_value - wall.insulation_assembly_r_value).abs > 1
+          # Detailed construction is more than R-1 different from user-specified assembly R-value
+          if not runner.nil?
+            runner.registerWarning("For wall '#{wall.id}', assembly R-value calculated from detailed construction (#{detailed_construction_assembly_r_value}) differs from AssemblyEffectiveRValue (#{wall.insulation_assembly_r_value}). The latter will be overridden.")
+          end
+          wall.insulation_assembly_r_value = detailed_construction_assembly_r_value
+          wall.insulation_assembly_r_value_isdefaulted = true
+        end
+      else
+        # Simple inputs
+        if wall.is_exterior
+          if wall.emittance.nil?
+            wall.emittance = 0.90
+            wall.emittance_isdefaulted = true
+          end
+          if wall.siding.nil?
+            wall.siding = HPXML::SidingTypeWood
+            wall.siding_isdefaulted = true
+          end
+          if wall.color.nil? && wall.solar_absorptance.nil?
+            wall.color = HPXML::ColorMedium
+            wall.color_isdefaulted = true
+          end
+          if wall.color.nil?
+            wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
+            wall.color_isdefaulted = true
+          elsif wall.solar_absorptance.nil?
+            wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
+            wall.solar_absorptance_isdefaulted = true
+          end
+        end
+        if wall.interior_finish_type.nil?
+          if HPXML::conditioned_finished_locations.include? wall.interior_adjacent_to
+            wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+          else
+            wall.interior_finish_type = HPXML::InteriorFinishNone
+          end
+          wall.interior_finish_type_isdefaulted = true
+        end
+        if wall.interior_finish_thickness.nil? && wall.interior_finish_type != HPXML::InteriorFinishNone
+          wall.interior_finish_thickness = 0.5
+          wall.interior_finish_thickness_isdefaulted = true
+        end
       end
     end
   end
@@ -2902,5 +2978,12 @@ class HPXMLDefaults
     else
       fail "Unexpected residential facility type: #{unit_type}."
     end
+  end
+
+  def self.calculate_assembly_r_value_from_detailed_construction(surface)
+    constr = Constructions.create_from_detailed_construction(surface.detailed_construction,
+                                                             surface.additional_properties.inside_film,
+                                                             surface.additional_properties.outside_film)
+    return constr.assembly_rvalue.round(1)
   end
 end

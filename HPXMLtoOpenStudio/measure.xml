@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4816c10b-5a41-436e-a355-cfd8edd5b044</version_id>
-  <version_modified>20230502T201104Z</version_modified>
+  <version_id>9ceb2d4d-cab8-437a-88c0-99e65f1bbff0</version_id>
+  <version_modified>20230503T221427Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -260,12 +260,6 @@
       <checksum>03FE784E</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>24DCB986</checksum>
-    </file>
-    <file>
       <filename>test_simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -392,12 +386,6 @@
       <checksum>9E02B1C4</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F6E89CBA</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -485,7 +473,25 @@
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>75097E83</checksum>
+      <checksum>CA905BB5</checksum>
+    </file>
+    <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>49C655B4</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0C36E521</checksum>
+    </file>
+    <file>
+      <filename>xmlvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CFCD83CD</checksum>
     </file>
     <file>
       <filename>test_schedules.rb</filename>
@@ -515,13 +521,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1AD76DC6</checksum>
-    </file>
-    <file>
-      <filename>xmlvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CFCD83CD</checksum>
+      <checksum>218EA20F</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
@@ -542,28 +542,22 @@
       <checksum>EA5F3E1B</checksum>
     </file>
     <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>811F4F08</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6E7B4D41</checksum>
+      <checksum>3104449F</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>63A11C83</checksum>
-    </file>
-    <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F0B3DCEF</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F1FEF43F</checksum>
+      <checksum>69B938B4</checksum>
     </file>
     <file>
       <version>
@@ -574,13 +568,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1E7FB5AF</checksum>
+      <checksum>BD97DFD4</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
+      <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A466A879</checksum>
+      <usage_type>test</usage_type>
+      <checksum>8D65BD7F</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F1FEF43F</checksum>
     </file>
   </files>
 </measure>

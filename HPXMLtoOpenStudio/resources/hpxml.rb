@@ -2192,6 +2192,10 @@ class HPXML < Object
   end
 
   class Roof < BaseElement
+    def initialize(hpxml_object, *args)
+      @detailed_construction = DetailedConstruction.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
@@ -2199,6 +2203,7 @@ class HPXML < Object
              :interior_finish_type, :interior_finish_thickness, :framing_factor,
              :framing_size, :framing_spacing]
     attr_accessor(*ATTRS)
+    attr_reader(:detailed_construction)
 
     def skylights
       return @hpxml_object.skylights.select { |skylight| skylight.roof_idref == @id }
@@ -2241,6 +2246,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def has_detailed_construction
+      return !@detailed_construction.construction_layers.empty?
+    end
+
     def delete
       @hpxml_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
@@ -2254,6 +2263,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
+      errors += @detailed_construction.check_for_errors
       return errors
     end
 
@@ -2286,25 +2296,28 @@ class HPXML < Object
       XMLHelper.add_element(roof, 'Pitch', @pitch, :float) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
       XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
-      insulation = XMLHelper.add_element(roof, 'Insulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+      if (not @insulation_assembly_r_value.nil?) || (not @insulation_cavity_r_value.nil?) || (not @insulation_continuous_r_value.nil?)
+        insulation = XMLHelper.add_element(roof, 'Insulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+        end
+        XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
+        XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float, @insulation_assembly_r_value_isdefaulted) unless @insulation_assembly_r_value.nil?
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
+        end
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+        end
       end
-      XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
-      if not @insulation_cavity_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
-      end
-      if not @insulation_continuous_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
+      @detailed_construction.to_oga(roof)
     end
 
     def from_oga(roof)
@@ -2338,6 +2351,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @detailed_construction.from_oga(XMLHelper.get_element(roof, 'DetailedConstruction'))
     end
   end
 
@@ -2356,10 +2370,15 @@ class HPXML < Object
   end
 
   class RimJoist < BaseElement
+    def initialize(hpxml_object, *args)
+      @detailed_construction = DetailedConstruction.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :orientation, :azimuth, :siding,
              :color, :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
              :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size]
     attr_accessor(*ATTRS)
+    attr_reader(:detailed_construction)
 
     def is_exterior
       if @exterior_adjacent_to == LocationOutside
@@ -2389,6 +2408,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def has_detailed_construction
+      return !@detailed_construction.construction_layers.empty?
+    end
+
     def delete
       @hpxml_object.rim_joists.delete(self)
       @hpxml_object.foundations.each do |foundation|
@@ -2398,6 +2421,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      errors += @detailed_construction.check_for_errors
       return errors
     end
 
@@ -2417,28 +2441,31 @@ class HPXML < Object
       XMLHelper.add_element(rim_joist, 'Color', @color, :string, @color_isdefaulted) unless @color.nil?
       XMLHelper.add_element(rim_joist, 'SolarAbsorptance', @solar_absorptance, :float, @solar_absorptance_isdefaulted) unless @solar_absorptance.nil?
       XMLHelper.add_element(rim_joist, 'Emittance', @emittance, :float, @emittance_isdefaulted) unless @emittance.nil?
-      insulation = XMLHelper.add_element(rim_joist, 'Insulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
-      end
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
-      if not @insulation_cavity_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
-      end
-      if not @insulation_continuous_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+      if (not @insulation_assembly_r_value.nil?) || (not @insulation_cavity_r_value.nil?) || (not @insulation_continuous_r_value.nil?)
+        insulation = XMLHelper.add_element(rim_joist, 'Insulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+        end
+        XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float, @insulation_assembly_r_value_isdefaulted) unless @insulation_assembly_r_value.nil?
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
+        end
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+        end
       end
       if not @framing_size.nil?
         floor_joists = XMLHelper.add_element(rim_joist, 'FloorJoists')
         XMLHelper.add_element(floor_joists, 'Size', @framing_size, :string) unless @framing_size.nil?
       end
+      @detailed_construction.to_oga(rim_joist)
     end
 
     def from_oga(rim_joist)
@@ -2462,6 +2489,7 @@ class HPXML < Object
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
       @framing_size = XMLHelper.get_value(rim_joist, 'FloorJoists/Size', :string)
+      @detailed_construction.from_oga(XMLHelper.get_element(rim_joist, 'DetailedConstruction'))
     end
   end
 
@@ -2480,12 +2508,17 @@ class HPXML < Object
   end
 
   class Wall < BaseElement
+    def initialize(hpxml_object, *args)
+      @detailed_construction = DetailedConstruction.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :interior_finish_type, :interior_finish_thickness, :attic_wall_type, :framing_factor,
              :framing_size, :framing_spacing, :insulation_grade]
     attr_accessor(*ATTRS)
+    attr_reader(:detailed_construction)
 
     def windows
       return @hpxml_object.windows.select { |window| window.wall_idref == @id }
@@ -2536,6 +2569,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def has_detailed_construction
+      return !@detailed_construction.construction_layers.empty?
+    end
+
     def delete
       @hpxml_object.walls.delete(self)
       windows.reverse_each do |window|
@@ -2555,6 +2592,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
+      errors += @detailed_construction.check_for_errors
       return errors
     end
 
@@ -2593,25 +2631,28 @@ class HPXML < Object
         XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
         XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
       end
-      insulation = XMLHelper.add_element(wall, 'Insulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+      if (not @insulation_assembly_r_value.nil?) || (not @insulation_cavity_r_value.nil?) || (not @insulation_continuous_r_value.nil?)
+        insulation = XMLHelper.add_element(wall, 'Insulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+        end
+        XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
+        XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float, @insulation_assembly_r_value_isdefaulted) unless @insulation_assembly_r_value.nil?
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
+        end
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+        end
       end
-      XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
-      if not @insulation_cavity_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
-      end
-      if not @insulation_continuous_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
+      @detailed_construction.to_oga(wall)
     end
 
     def from_oga(wall)
@@ -2648,6 +2689,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @detailed_construction.from_oga(XMLHelper.get_element(wall, 'DetailedConstruction'))
     end
   end
 
@@ -2766,27 +2808,29 @@ class HPXML < Object
         XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
         XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
       end
-      insulation = XMLHelper.add_element(foundation_wall, 'Insulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
-      end
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
-      if not @insulation_exterior_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous - exterior', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_exterior_r_value, :float)
-        XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_exterior_distance_to_top, :float, @insulation_exterior_distance_to_top_isdefaulted) unless @insulation_exterior_distance_to_top.nil?
-        XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_exterior_distance_to_bottom, :float, @insulation_exterior_distance_to_bottom_isdefaulted) unless @insulation_exterior_distance_to_bottom.nil?
-      end
-      if not @insulation_interior_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous - interior', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_interior_r_value, :float)
-        XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float, @insulation_interior_distance_to_top_isdefaulted) unless @insulation_interior_distance_to_top.nil?
-        XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float, @insulation_interior_distance_to_bottom_isdefaulted) unless @insulation_interior_distance_to_bottom.nil?
+      if (not @insulation_assembly_r_value.nil?) || (not @insulation_exterior_r_value.nil?) || (not @insulation_interior_r_value.nil?)
+        insulation = XMLHelper.add_element(foundation_wall, 'Insulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+        end
+        XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float, @insulation_assembly_r_value_isdefaulted) unless @insulation_assembly_r_value.nil?
+        if not @insulation_exterior_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous - exterior', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_exterior_r_value, :float)
+          XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_exterior_distance_to_top, :float, @insulation_exterior_distance_to_top_isdefaulted) unless @insulation_exterior_distance_to_top.nil?
+          XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_exterior_distance_to_bottom, :float, @insulation_exterior_distance_to_bottom_isdefaulted) unless @insulation_exterior_distance_to_bottom.nil?
+        end
+        if not @insulation_interior_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous - interior', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_interior_r_value, :float)
+          XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float, @insulation_interior_distance_to_top_isdefaulted) unless @insulation_interior_distance_to_top.nil?
+          XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float, @insulation_interior_distance_to_bottom_isdefaulted) unless @insulation_interior_distance_to_bottom.nil?
+        end
       end
     end
 
@@ -2839,11 +2883,16 @@ class HPXML < Object
   end
 
   class Floor < BaseElement
+    def initialize(hpxml_object, *args)
+      @detailed_construction = DetailedConstruction.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness, :insulation_grade,
              :framing_factor, :framing_size, :framing_spacing]
     attr_accessor(*ATTRS)
+    attr_reader(:detailed_construction)
 
     def is_ceiling
       # From the perspective of the living space
@@ -2893,6 +2942,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def has_detailed_construction
+      return !@detailed_construction.construction_layers.empty?
+    end
+
     def delete
       @hpxml_object.floors.delete(self)
       @hpxml_object.attics.each do |attic|
@@ -2908,6 +2961,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      errors += @detailed_construction.check_for_errors
       return errors
     end
 
@@ -2937,25 +2991,28 @@ class HPXML < Object
         XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
         XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
       end
-      insulation = XMLHelper.add_element(floor, 'Insulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+      if (not @insulation_assembly_r_value.nil?) || (not @insulation_cavity_r_value.nil?) || (not @insulation_continuous_r_value.nil?)
+        insulation = XMLHelper.add_element(floor, 'Insulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+        end
+        XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
+        XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float, @insulation_assembly_r_value_isdefaulted) unless @insulation_assembly_r_value.nil?
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
+        end
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
+          XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+        end
       end
-      XMLHelper.add_element(insulation, 'InsulationGrade', @insulation_grade, :integer) unless @insulation_grade.nil?
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
-      if not @insulation_cavity_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
-      end
-      if not @insulation_continuous_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
-        XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
+      @detailed_construction.to_oga(floor)
     end
 
     def from_oga(floor)
@@ -2983,6 +3040,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @detailed_construction.from_oga(XMLHelper.get_element(floor, 'DetailedConstruction'))
     end
   end
 
@@ -3490,6 +3548,119 @@ class HPXML < Object
       @azimuth = XMLHelper.get_value(door, 'Azimuth', :integer)
       @orientation = XMLHelper.get_value(door, 'Orientation', :string)
       @r_value = XMLHelper.get_value(door, 'RValue', :float)
+    end
+  end
+
+  class DetailedConstruction < BaseElement
+    def initialize(hpxml_object, *args)
+      @construction_layers = DetailedConstructionLayers.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
+    ATTRS = [:id, :construction_layers]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(surface)
+      return if surface.nil?
+      return if @construction_layers.empty?
+
+      detailed_construction = XMLHelper.add_element(surface, 'DetailedConstruction')
+      sys_id = XMLHelper.add_element(detailed_construction, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+
+      @construction_layers.to_oga(detailed_construction)
+    end
+
+    def from_oga(detailed_construction)
+      return if detailed_construction.nil?
+
+      @id = HPXML::get_id(detailed_construction)
+      @construction_layers.from_oga(detailed_construction)
+    end
+  end
+
+  class DetailedConstructionLayers < BaseArrayElement
+    def add(**kwargs)
+      self << DetailedConstructionLayer.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(detailed_construction)
+      return if detailed_construction.nil?
+
+      XMLHelper.get_elements(detailed_construction, 'ConstructionLayer').each do |construction_layer|
+        self << DetailedConstructionLayer.new(@hpxml_object, construction_layer)
+      end
+    end
+  end
+
+  class DetailedConstructionLayer < BaseElement
+    def initialize(hpxml_object, *args)
+      @layer_materials = DetailedConstructionLayerMaterials.new(hpxml_object)
+      super(hpxml_object, *args)
+    end
+    ATTRS = [:layer_type, :layer_thickness, :layer_materials]
+    attr_accessor(*ATTRS)
+
+    def to_oga(detailed_construction)
+      return if detailed_construction.nil?
+
+      construction_layer = XMLHelper.add_element(detailed_construction, 'ConstructionLayer')
+      XMLHelper.add_element(construction_layer, 'LayerType', @layer_type, :string) unless @layer_type.nil?
+      XMLHelper.add_element(construction_layer, 'LayerThickness', @layer_thickness, :float) unless @layer_thickness.nil?
+
+      @layer_materials.to_oga(construction_layer)
+    end
+
+    def from_oga(construction_layer)
+      return if construction_layer.nil?
+
+      @layer_type = XMLHelper.get_value(construction_layer, 'LayerType', :string)
+      @layer_thickness = XMLHelper.get_value(construction_layer, 'LayerThickness', :float)
+      @layer_materials.from_oga(construction_layer)
+    end
+  end
+
+  class DetailedConstructionLayerMaterials < BaseArrayElement
+    def add(**kwargs)
+      self << DetailedConstructionLayerMaterial.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(construction_layer)
+      XMLHelper.get_elements(construction_layer, 'LayerMaterial').each do |layer_material|
+        self << DetailedConstructionLayerMaterial.new(@hpxml_object, layer_material)
+      end
+    end
+  end
+
+  class DetailedConstructionLayerMaterial < BaseElement
+    ATTRS = [:area_fraction, :material_type, :conductivity, :density, :specific_heat, :r_value]
+    attr_accessor(*ATTRS)
+
+    def to_oga(construction_layer)
+      return if construction_layer.nil?
+
+      layer_material = XMLHelper.add_element(construction_layer, 'LayerMaterial')
+      XMLHelper.add_element(layer_material, 'AreaFraction', @area_fraction, :float) unless @area_fraction.nil?
+      XMLHelper.add_element(layer_material, 'MaterialType', @material_type, :string) unless @material_type.nil?
+      XMLHelper.add_element(layer_material, 'Conductivity', @conductivity, :float) unless @conductivity.nil?
+      XMLHelper.add_element(layer_material, 'Density', @density, :float) unless @density.nil?
+      XMLHelper.add_element(layer_material, 'SpecificHeat', @specific_heat, :float) unless @specific_heat.nil?
+      XMLHelper.add_element(layer_material, 'RValue', @r_value, :float) unless @r_value.nil?
+    end
+
+    def from_oga(layer_material)
+      return if layer_material.nil?
+
+      @area_fraction = XMLHelper.get_value(layer_material, 'AreaFraction', :float)
+      @material_type = XMLHelper.get_value(layer_material, 'MaterialType', :string)
+      @conductivity = XMLHelper.get_value(layer_material, 'Conductivity', :float)
+      @density = XMLHelper.get_value(layer_material, 'Density', :float)
+      @specific_heat = XMLHelper.get_value(layer_material, 'SpecificHeat', :float)
+      @r_value = XMLHelper.get_value(layer_material, 'RValue', :float)
     end
   end
 

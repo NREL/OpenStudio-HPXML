@@ -3,6 +3,107 @@
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
+  # Generic layer-by-layer construction from an HPXML DetailedConstruction element
+  def self.apply_detailed_construction(model, surfaces, detailed_construction,
+                                       inside_film, outside_film, solar_absorptance, emittance)
+
+    return if surfaces.empty?
+
+    # Define construction
+    constr = create_from_detailed_construction(detailed_construction, inside_film, outside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
+    constr.set_interior_material_properties()
+
+    # Create and assign construction to surfaces
+    constr.create_and_assign_constructions(surfaces, model)
+  end
+
+  def self.create_from_detailed_construction(detailed_construction, inside_film, outside_film)
+    # FIXME: Need to re-normalize area_fractions to sum to 1
+
+    # Define materials
+    mats = {}
+    detailed_construction.construction_layers.each_with_index do |layer, i|
+      layer.layer_materials.each_with_index do |material, j|
+        if material.material_type.nil?
+          material_name = "#{detailed_construction.id} - Layer #{i + 1}, Material #{j + 1}"
+        else
+          material_name = "#{detailed_construction.id} - #{material.material_type}"
+        end
+        if not material.conductivity.nil?
+          k_in = UnitConversions.convert(material.conductivity, 'ft', 'in')
+        elsif not layer.layer_thickness.nil?
+          k_in = layer.layer_thickness / material.r_value
+        end
+        if not k_in.nil?
+          mat = Material.new(name: material_name, thick_in: layer.layer_thickness, k_in: k_in, rho: material.density, cp: material.specific_heat)
+        else
+          mat = NoMassMaterial.new(name: material_name, rvalue: material.r_value)
+        end
+        mats[[i, j]] = mat
+      end
+    end
+
+    # Determine unique paths
+    cumulative_area_fracs = []
+    detailed_construction.construction_layers.each do |layer|
+      layer_area_fracs = []
+      frac = 0.0
+      layer.layer_materials.each do |material|
+        frac += material.area_fraction
+        layer_area_fracs << frac
+      end
+      cumulative_area_fracs << layer_area_fracs
+    end
+    cumulative_area_fracs = cumulative_area_fracs.flatten.uniq.sort
+    path_fracs = []
+    cumulative_area_fracs.each_with_index do |area_frac, i|
+      if i == 0
+        path_fracs << area_frac
+      else
+        path_fracs << area_frac - cumulative_area_fracs[0..i - 1].sum
+      end
+    end
+
+    # Define construction
+    constr = Construction.new(detailed_construction.id, path_fracs)
+    constr.add_layer(outside_film)
+    detailed_construction.construction_layers.each_with_index do |layer, i|
+      if layer.layer_type.nil?
+        material_names = layer.layer_materials.map { |m| m.material_type }
+        if material_names.any? { |m| m.nil? }
+          layer_name = "#{detailed_construction.id} - Layer #{i + 1}"
+        else
+          layer_name = "#{detailed_construction.id} - #{material_names.join('|')}"
+        end
+      else
+        layer_name = "#{detailed_construction.id} - #{layer.layer_type}"
+      end
+      if layer.layer_materials.size == 1
+        # Single material for entire layer
+        constr.add_layer(mats[[i, 0]], layer_name)
+      else
+        # Create array of materials that align with path_fracs
+        layer_mats = []
+        path_fracs.each do |area_frac|
+          frac = 0.0
+          mat = nil
+          layer.layer_materials.each_with_index do |material, j|
+            frac += material.area_fraction
+            mat = mats[[i, j]]
+            break if frac >= area_frac
+          end
+          layer_mats << mat
+        end
+        constr.add_layer(layer_mats, layer_name)
+      end
+    end
+    constr.add_layer(inside_film)
+
+    return constr
+  end
+
   def self.apply_wood_stud_wall(model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, mat_int_finish, osb_thick_in,
@@ -2465,8 +2566,8 @@ class Construction
     # Check for valid object types
     @layers_materials.each do |layer_materials|
       layer_materials.each do |mat|
-        if (not mat.is_a? Material)
-          fail 'Invalid construction: Materials must be instances of Material classes.'
+        if (not mat.is_a? Material) && (not mat.is_a? NoMassMaterial)
+          fail 'Invalid construction: Materials must be instances of Material or NoMassMaterial classes.'
         end
       end
     end
@@ -2540,27 +2641,44 @@ class Construction
       mat.setSolarHeatGainCoefficient(material.shgc)
     else
       # Material already exists?
-      model.getStandardOpaqueMaterials.each do |mat|
-        next if !mat.name.to_s.start_with?(material.name)
-        next if mat.roughness.downcase.to_s != 'rough'
-        next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
-        next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
-        next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
-        next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
-        next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
-        next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
+      if material.is_a? Material
+        model.getStandardOpaqueMaterials.each do |mat|
+          next if !mat.name.to_s.start_with?(material.name)
+          next if mat.roughness.downcase.to_s != 'rough'
+          next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
+          next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
+          next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
+          next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
+          next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
+          next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
 
-        return mat
+          return mat
+        end
+      elsif material.is_a? NoMassMaterial
+        model.getMasslessOpaqueMaterials.each do |mat|
+          next if !mat.name.to_s.start_with?(material.name)
+          next if mat.roughness.downcase.to_s != 'rough'
+          next if (mat.thermalResistance - UnitConversions.convert(material.rvalue, 'hr*ft^2*F/Btu', 'm^2*K/W')).abs > tolerance
+          next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
+          next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
+
+          return mat
+        end
       end
 
       # New material
-      mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+      if material.is_a? Material
+        mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+        mat.setThickness(UnitConversions.convert(material.thick_in, 'in', 'm'))
+        mat.setConductivity(UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+        mat.setDensity(UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'))
+        mat.setSpecificHeat(UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
+      elsif material.is_a? NoMassMaterial
+        mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model)
+        mat.setThermalResistance(UnitConversions.convert(material.rvalue, 'hr*ft^2*F/Btu', 'm^2*K/W'))
+      end
       mat.setName(name)
       mat.setRoughness('Rough')
-      mat.setThickness(UnitConversions.convert(material.thick_in, 'in', 'm'))
-      mat.setConductivity(UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-      mat.setDensity(UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'))
-      mat.setSpecificHeat(UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
       if not material.tAbs.nil?
         mat.setThermalAbsorptance(material.tAbs)
       end
