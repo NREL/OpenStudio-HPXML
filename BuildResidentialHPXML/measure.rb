@@ -4591,7 +4591,7 @@ class HPXMLFile
                           attached_to_foundation_wall_idrefs: surf_ids['foundation_walls']['ids'],
                           attached_to_wall_idrefs: surf_ids['walls']['ids'],
                           attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'],
-                         belly_wing_skirt_present: belly_wing_skirt_present)
+                          belly_wing_skirt_present: belly_wing_skirt_present)
   end
 
   def self.set_heating_systems(hpxml, args)
