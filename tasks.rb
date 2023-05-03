@@ -28,23 +28,23 @@ def create_hpxmls
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
 
-    # Build up json_input from parent_json(s)
-    parent_json_filenames = []
-    parent_json_filename = json_inputs[hpxml_filename]['parent_json']
-    while not parent_json_filename.nil?
-      if not json_inputs.keys.include? parent_json_filename
-        fail "Could not find parent_json: #{parent_json_filename}."
+    # Build up json_input from parent_hpxml(s)
+    parent_hpxml_filenames = []
+    parent_hpxml_filename = json_inputs[hpxml_filename]['parent_hpxml']
+    while not parent_hpxml_filename.nil?
+      if not json_inputs.keys.include? parent_hpxml_filename
+        fail "Could not find parent_hpxml: #{parent_hpxml_filename}."
       end
 
-      parent_json_filenames << parent_json_filename
-      parent_json_filename = json_inputs[parent_json_filename]['parent_json']
+      parent_hpxml_filenames << parent_hpxml_filename
+      parent_hpxml_filename = json_inputs[parent_hpxml_filename]['parent_hpxml']
     end
     json_input = { 'hpxml_path' => hpxml_path }
-    for parent_json_filename in parent_json_filenames.reverse
-      json_input.merge!(json_inputs[parent_json_filename])
+    for parent_hpxml_filename in parent_hpxml_filenames.reverse
+      json_input.merge!(json_inputs[parent_hpxml_filename])
     end
     json_input.merge!(json_inputs[hpxml_filename])
-    json_input.delete('parent_json')
+    json_input.delete('parent_hpxml')
 
     measures = {}
     measures['BuildResidentialHPXML'] = [json_input]
