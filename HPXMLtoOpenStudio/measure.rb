@@ -639,11 +639,8 @@ class OSModel
         surface.setSunExposure('NoSun')
         if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
           foundation = @hpxml.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
-          if foundation.nil? || foundation.belly_wing_skirt_present
-            # Assume skirt present if no foundation found
+          if foundation.belly_wing_skirt_present
             surface.setWindExposure('NoWind')
-          else
-            surface.setWindExposure('WindExposed')
           end
         end
       end

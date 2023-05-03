@@ -645,13 +645,18 @@ class HPXMLDefaults
       end
     end
 
-    belly_and_wing_foundations = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
-    belly_and_wing_foundations.each do |foundation|
-      if foundation.belly_wing_skirt_present.nil?
-        foundation.belly_wing_skirt_present_isdefaulted = true
-        foundation.belly_wing_skirt_present = true
-      else
-        foundation.belly_wing_skirt_present_isdefaulted = false
+    if hpxml.has_location(HPXML::LocationManufacturedHomeUnderBelly)
+      belly_and_wing_foundations = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+      if belly_and_wing_foundations.empty?
+        hpxml.foundations.add(id: 'BellyAndWing',
+                              foundation_type: HPXML::FoundationTypeBellyAndWing)
+        belly_and_wing_foundations << hpxml.foundations[-1]
+      end
+      belly_and_wing_foundations.each do |foundation|
+        if foundation.belly_wing_skirt_present.nil?
+          foundation.belly_wing_skirt_present_isdefaulted = true
+          foundation.belly_wing_skirt_present = true
+        end
       end
     end
   end

@@ -4574,13 +4574,14 @@ class HPXMLFile
     if args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       foundation_type = HPXML::FoundationTypeBellyAndWing
       if args[:geometry_foundation_type].end_with?('WithSkirt')
-        kw = { belly_wing_skirt_present: true }
+        belly_wing_skirt_present = true
       elsif args[:geometry_foundation_type].end_with?('NoSkirt')
-        kw = { belly_wing_skirt_present: false }
+        belly_wing_skirt_present = false
+      else
+        fail 'Unepected belly and wing foundation type.'
       end
     else
       foundation_type = args[:geometry_foundation_type]
-      kw = {}
     end
 
     hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
@@ -4590,7 +4591,7 @@ class HPXMLFile
                           attached_to_foundation_wall_idrefs: surf_ids['foundation_walls']['ids'],
                           attached_to_wall_idrefs: surf_ids['walls']['ids'],
                           attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'],
-                          **kw)
+                         belly_wing_skirt_present: belly_wing_skirt_present)
   end
 
   def self.set_heating_systems(hpxml, args)
