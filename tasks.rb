@@ -19,6 +19,8 @@ def create_hpxmls
   schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
   schema_validator = XMLValidator.get_schema_validator(schema_path)
 
+  schedules_regenerated = []
+
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
@@ -46,6 +48,16 @@ def create_hpxmls
 
     measures = {}
     measures['BuildResidentialHPXML'] = [json_input]
+
+    # Re-generate stochastic schedule CSV?
+    csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
+    if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
+      sch_args = { 'hpxml_path' => hpxml_path,
+                   'output_csv_path' => csv_path,
+                   'hpxml_output_path' => hpxml_path }
+      measures['BuildResidentialScheduleFile'] = [sch_args]
+      schedules_regenerated << csv_path
+    end
 
     measures_dir = File.dirname(__FILE__)
     model = OpenStudio::Model::Model.new
