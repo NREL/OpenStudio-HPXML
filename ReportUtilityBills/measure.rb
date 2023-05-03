@@ -307,7 +307,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         File.open(output_path, 'a') { |json| h.to_msgpack(json) }
       end
     end
-    runner.registerInfo("Wrote bills output to #{output_path}.")
+    runner.registerInfo("Wrote annual bills output to #{output_path}.")
 
     results_out.each do |name, value|
       next if name.nil? || value.nil?
@@ -377,16 +377,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         File.open(output_path, 'a') { |json| h.to_msgpack(json) }
       end
     end
-    runner.registerInfo("Wrote bills output to #{output_path}.")
-
-    results_out.each do |name, value|
-      next if name.nil? || value.nil?
-
-      name = OpenStudio::toUnderscoreCase(name).chomp('_')
-
-      runner.registerValue(name, value)
-      runner.registerInfo("Registering #{value} for #{name}.")
-    end
+    runner.registerInfo("Wrote monthly bills output to #{output_path}.")
   end
 
   def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems)
