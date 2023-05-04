@@ -1371,6 +1371,7 @@ class SchedulesFile
                  schedules_paths:,
                  year:,
                  unavailable_periods: [],
+                 output_path:,
                  offset_db: nil)
     return if schedules_paths.empty?
 
@@ -1384,15 +1385,8 @@ class SchedulesFile
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(unavailable_periods)
     convert_setpoints(offset_db)
-
-    tmpdir = Dir.tmpdir
-    tmpdir = ENV['LOCAL_SCRATCH'] if ENV.keys.include?('LOCAL_SCRATCH')
-    tmpfile = Tempfile.new(['schedules', '.csv'], tmpdir)
-    tmp_schedules_path = tmpfile.path.to_s
-
-    export(tmp_schedules_path)
-
-    get_external_file(tmp_schedules_path)
+    @output_schedules_path = output_path
+    export()
   end
 
   def nil?
@@ -1466,10 +1460,10 @@ class SchedulesFile
     end
   end
 
-  def export(tmp_schedules_path)
-    return false if tmp_schedules_path.nil?
+  def export()
+    return false if @output_schedules_path.nil?
 
-    CSV.open(tmp_schedules_path, 'wb') do |csv|
+    CSV.open(@output_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
       rows.each do |row|
@@ -1486,10 +1480,6 @@ class SchedulesFile
 
   def tmp_schedules
     return @tmp_schedules
-  end
-
-  def external_file
-    return @external_file
   end
 
   def get_col_index(col_name:)
@@ -1517,7 +1507,7 @@ class SchedulesFile
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
-    schedule_file = OpenStudio::Model::ScheduleFile.new(@external_file)
+    schedule_file = OpenStudio::Model::ScheduleFile.new(@model, @output_schedules_path)
     schedule_file.setName(col_name)
     schedule_file.setColumnNumber(col_index + 1)
     schedule_file.setRowstoSkipatTop(rows_to_skip)
@@ -1614,22 +1604,6 @@ class SchedulesFile
     return peak_flow
   end
 
-  def get_external_file(tmp_schedules_path)
-    if File.exist? tmp_schedules_path
-      @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, tmp_schedules_path)
-      if @external_file.is_initialized
-        @external_file = @external_file.get
-        # ExternalFile creates a new file, so delete our temporary one immediately if we can
-        begin
-          File.delete(tmp_schedules_path)
-        rescue
-        end
-      else
-        fail "Could not get external file for path '#{tmp_schedules_path}'."
-      end
-    end
-  end
-
   def create_column_values_from_periods(col_name, periods)
     # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
@@ -1711,11 +1685,11 @@ class SchedulesFile
       next unless col_names.include?(setpoint_col_name)
 
       @tmp_schedules[setpoint_col_name].each_with_index do |setpoint_value, i|
-        @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(setpoint_value, 'f', 'c')
+        @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(setpoint_value, 'f', 'c').round(4)
         next if offset_db_c == 0.0
 
-        @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] - offset_db_c if (setpoint_col_name == ColumnHeatingSetpoint)
-        @tmp_schedules[setpoint_col_name][i] = @tmp_schedules[setpoint_col_name][i] + offset_db_c if (setpoint_col_name == ColumnCoolingSetpoint)
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] - offset_db_c).round(4) if (setpoint_col_name == ColumnHeatingSetpoint)
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] + offset_db_c).round(4) if (setpoint_col_name == ColumnCoolingSetpoint)
       end
     end
   end

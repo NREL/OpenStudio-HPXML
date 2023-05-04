@@ -1265,6 +1265,9 @@ class HVAC
       elsif seer > 21
         return HPXML::HVACCompressorTypeVariableSpeed
       end
+    elsif [HPXML::HVACTypeMiniSplitAirConditioner,
+           HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_type
+      return HPXML::HVACCompressorTypeVariableSpeed
     elsif [HPXML::HVACTypePTAC,
            HPXML::HVACTypeHeatPumpPTHP,
            HPXML::HVACTypeHeatPumpRoom,
