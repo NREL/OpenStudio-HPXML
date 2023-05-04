@@ -393,7 +393,7 @@ class HPXMLTest < MiniTest::Test
     return results, bill_results
   end
 
-  def _get_simulation_results(annual_csv_path, _xml, _hpxml)
+  def _get_simulation_results(annual_csv_path, xml, hpxml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
