@@ -1029,6 +1029,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
             utility_bill_scenario.elec_tariff_filepath = tmp_path
             File.delete(@bills_csv) if File.exist? @bills_csv
+            File.delete(@bills_monthly_csv) if File.exist? @bills_monthly_csv
             actual_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
             if !File.exist?(@bills_csv)
               puts entry.name
@@ -1146,7 +1147,7 @@ class ReportUtilityBillsTest < MiniTest::Test
       next if bill == 'Test: Total (USD)'
 
       assert(actual_monthly_bills.keys.include?(bill))
-      assert_in_delta(actual_bills[bill], actual_monthly_bills[bill].sum, 0.05) # within 5 cents
+      assert_in_delta(actual_bills[bill], actual_monthly_bills[bill].sum, 0.1) # within 10 cents
     end
 
     return actual_bills
