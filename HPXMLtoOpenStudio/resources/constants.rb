@@ -102,8 +102,16 @@ class Constants
     return 'backup htg coil'
   end
 
+  def self.ObjectNameBatteryLossesAdjustment(battery_name)
+    return "#{battery_name} losses adjustment"
+  end
+
   def self.ObjectNameBoiler
     return 'boiler'
+  end
+
+  def self.ObjectNameBoilerPilotLight(boiler_name)
+    return "#{boiler_name} pilot light"
   end
 
   def self.ObjectNameCeilingFan
@@ -412,6 +420,10 @@ class Constants
 
   def self.ObjectNameWaterHeater
     return 'water heater'
+  end
+
+  def self.ObjectNameWaterHeaterSetpoint
+    return 'water heater setpoint'
   end
 
   def self.ObjectNameWaterLatent

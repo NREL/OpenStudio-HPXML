@@ -371,7 +371,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.find { |wh| (not wh.name.get.include? 'storage tank') }
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -384,7 +384,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
+    preheat_tank = model.getWaterHeaterMixeds.find { |wh| wh.name.get.include? 'storage tank' }
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXSingleSpeed.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -409,7 +409,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.find { |wh| (not wh.name.get.include? 'storage tank') }
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -422,7 +422,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
+    preheat_tank = model.getWaterHeaterMixeds.find { |wh| wh.name.get.include? 'storage tank' }
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXMultiSpeed.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -447,7 +447,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.find { |wh| (not wh.name.get.include? 'storage tank') }
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -460,7 +460,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
+    preheat_tank = model.getWaterHeaterMixeds.find { |wh| wh.name.get.include? 'storage tank' }
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -534,7 +534,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
+    pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -607,7 +607,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
+    pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -680,7 +680,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_equal(plant_loop.fluidType, 'PropyleneGlycol')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
+    pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -753,7 +753,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
+    pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -821,7 +821,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
+    pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -942,7 +942,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u =  0.925
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
     cop = 2.820
     tank_height = 1.598
@@ -960,7 +959,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
     # Check heat pump cooling coil cop
@@ -979,7 +977,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u =  1.045
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
     cop = 4.004
     tank_height = 1.0335
@@ -997,7 +994,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
     # Check heat pump cooling coil cop
@@ -1107,7 +1103,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u =  1.045
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
     cop = 4.004
     tank_height = 1.0335
@@ -1125,7 +1120,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
     # Check heat pump cooling coil cop

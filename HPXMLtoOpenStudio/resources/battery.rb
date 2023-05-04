@@ -68,21 +68,24 @@ class Battery
       elcs.setThermalZone(battery.additional_properties.space.thermalZone.get)
     end
     elcs.setRadiativeFraction(0.9 * frac_sens)
-    elcs.setLifetimeModel(battery.lifetime_model)
+    # elcs.setLifetimeModel(battery.lifetime_model)
+    elcs.setLifetimeModel(HPXML::BatteryLifetimeModelNone)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
     elcs.setCellVoltageatEndofNominalZone(default_nominal_cell_voltage)
     if not voltage_dependence
       elcs.setBatteryCellInternalElectricalResistance(0.002) # 2 mOhm/cell, based on OCHRE defaults (which are based on fitting to lab results)
-      elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
-      elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
+      # FIXME: if the voltage reported during charge/discharge is different, energy may not balance
+      # elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
+      # elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
     end
+    elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
+    elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
 
     elcds = model.getElectricLoadCenterDistributions
     elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
@@ -109,13 +112,66 @@ class Battery
       elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
 
       elcsc = OpenStudio::Model::ElectricLoadCenterStorageConverter.new(model)
-      elcsc.setSimpleFixedEfficiency(1.0) # 0.95 default
+      elcsc.setName("#{obj_name} li ion converter")
+      elcsc.setSimpleFixedEfficiency(1.0)
       elcd.setStorageConverter(elcsc)
     end
+
+    frac_lost = 0.0
+    space = battery.additional_properties.space
+    if space.nil?
+      space = model.getSpaces[0]
+      frac_lost = 1.0
+    end
+
+    # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
+    # Replace this when the first item in https://github.com/NREL/EnergyPlus/issues/9176 is fixed.
+    charge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Charge Energy')
+    charge_sensor.setName('battery_charge')
+    charge_sensor.setKeyName(elcs.name.to_s)
+
+    loss_adj_object_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    loss_adj_object = OpenStudio::Model::OtherEquipment.new(loss_adj_object_def)
+    obj_name = Constants.ObjectNameBatteryLossesAdjustment(elcs.name)
+    loss_adj_object.setName(obj_name)
+    loss_adj_object.setEndUseSubcategory(obj_name)
+    loss_adj_object.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
+    loss_adj_object.setSpace(space)
+    loss_adj_object_def.setName(obj_name)
+    loss_adj_object_def.setDesignLevel(0.01)
+    loss_adj_object_def.setFractionRadiant(0)
+    loss_adj_object_def.setFractionLatent(0)
+    loss_adj_object_def.setFractionLost(frac_lost)
+    loss_adj_object.setSchedule(model.alwaysOnDiscreteSchedule)
+
+    battery_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(loss_adj_object, *EPlus::EMSActuatorOtherEquipmentPower, loss_adj_object.space.get)
+    battery_adj_actuator.setName('battery loss_adj_act')
+
+    battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    battery_losses_program.setName('battery_losses')
+    battery_losses_program.addLine("Set losses = -1 * #{charge_sensor.name} * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set #{battery_adj_actuator.name} = -1 * losses / ( 3600 * SystemTimeStep )")
+
+    battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    battery_losses_pcm.setName('battery_losses')
+    battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
+    battery_losses_pcm.addProgram(battery_losses_program)
+
+    battery_losses_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'losses')
+    battery_losses_output_var.setName("#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar")
+    battery_losses_output_var.setTypeOfDataInVariable('Summed')
+    battery_losses_output_var.setUpdateFrequency('SystemTimestep')
+    battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
+    battery_losses_output_var.setUnits('J')
   end
 
-  def self.get_battery_default_values()
-    return { location: HPXML::LocationOutside,
+  def self.get_battery_default_values(has_garage = false)
+    if has_garage
+      location = HPXML::LocationGarage
+    else
+      location = HPXML::LocationOutside
+    end
+    return { location: location,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,

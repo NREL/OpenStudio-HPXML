@@ -1480,7 +1480,7 @@ class Constructions
   end
 
   def self.apply_kiva_initial_temp(foundation, slab, weather, conditioned_zone,
-                                   sim_begin_month, sim_begin_day, sim_year,
+                                   sim_begin_month, sim_begin_day, sim_year, schedules_file,
                                    foundation_walls_insulated, foundation_ceiling_insulated)
     # Set Kiva foundation initial temperature
 
@@ -1491,6 +1491,7 @@ class Constructions
       # Building has HVAC system
       setpoint_sch = conditioned_zone.thermostatSetpointDualSetpoint.get
       sim_begin_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(sim_begin_month), sim_begin_day, sim_year)
+      sim_begin_hour = (Schedule.get_day_num_from_month_day(sim_year, sim_begin_month, sim_begin_day) - 1) * 24
 
       # Get heating/cooling setpoints for the simulation start
       htg_setpoint_sch = setpoint_sch.heatingSetpointTemperatureSchedule.get
@@ -1498,14 +1499,14 @@ class Constructions
         htg_day_sch = htg_setpoint_sch.to_ScheduleRuleset.get.getDaySchedules(sim_begin_date, sim_begin_date)[0]
         heat_setpoint = UnitConversions.convert(htg_day_sch.values[0], 'C', 'F')
       else
-        heat_setpoint = 78.0 # F, from ASHRAE 152 (avoids runtime impact from processing ScheduleFile CSV)
+        heat_setpoint = schedules_file.schedules[SchedulesFile::ColumnHeatingSetpoint][sim_begin_hour]
       end
       clg_setpoint_sch = setpoint_sch.coolingSetpointTemperatureSchedule.get
       if clg_setpoint_sch.to_ScheduleRuleset.is_initialized
         clg_day_sch = clg_setpoint_sch.to_ScheduleRuleset.get.getDaySchedules(sim_begin_date, sim_begin_date)[0]
         cool_setpoint = UnitConversions.convert(clg_day_sch.values[0], 'C', 'F')
       else
-        cool_setpoint = 68.0 # F, from ASHRAE 152 (avoids runtime impact from processing ScheduleFile CSV)
+        cool_setpoint = schedules_file.schedules[SchedulesFile::ColumnCoolingSetpoint][sim_begin_hour]
       end
 
       # Methodology adapted from https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
@@ -1616,20 +1617,52 @@ class Constructions
     constr.create_and_assign_constructions([subsurface], model)
   end
 
-  def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, cooling_season)
+  def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
-      # Create shading schedule for heating/cooling seasons
-      sf_values = cooling_season.map { |c| c == 1 ? sf_summer : sf_winter }
+      # Apply shading
+
+      # Determine transmittance values throughout the year
+      sf_values = []
+      num_days_in_year = Constants.NumDaysInYear(hpxml.header.sim_calendar_year)
+      if not hpxml.header.shading_summer_begin_month.nil?
+        summer_start_day_num = Schedule.get_day_num_from_month_day(hpxml.header.sim_calendar_year,
+                                                                   hpxml.header.shading_summer_begin_month,
+                                                                   hpxml.header.shading_summer_begin_day)
+        summer_end_day_num = Schedule.get_day_num_from_month_day(hpxml.header.sim_calendar_year,
+                                                                 hpxml.header.shading_summer_end_month,
+                                                                 hpxml.header.shading_summer_end_day)
+        for i in 0..(num_days_in_year - 1)
+          day_num = i + 1
+          if summer_end_day_num >= summer_start_day_num
+            if (day_num >= summer_start_day_num) && (day_num <= summer_end_day_num)
+              sf_values << [sf_summer] * 24
+              next
+            end
+          else
+            if (day_num >= summer_start_day_num) || (day_num <= summer_end_day_num)
+              sf_values << [sf_summer] * 24
+              next
+            end
+          end
+          # If we got this far, winter
+          sf_values << [sf_winter] * 24
+        end
+      else
+        # No summer (year-round winter)
+        sf_values = [[sf_winter] * 24] * num_days_in_year
+      end
+
+      # Create transmittance schedule
       if shading_schedules[sf_values].nil?
-        sch_name = "shading schedule winter=#{sf_winter} summer=#{sf_summer}"
-        if sf_values.uniq.size == 1
+        sch_name = "trans schedule winter=#{sf_winter} summer=#{sf_summer}"
+        if sf_values.flatten.uniq.size == 1
           sf_sch = OpenStudio::Model::ScheduleConstant.new(model)
-          sf_sch.setValue(sf_values[0])
+          sf_sch.setValue(sf_values[0][0])
           sf_sch.setName(sch_name)
         else
-          sf_sch = MonthWeekdayWeekendSchedule.new(model, sch_name, Array.new(24, 1), Array.new(24, 1), sf_values, Constants.ScheduleTypeLimitsFraction, false).schedule
+          sf_sch = HourlyByDaySchedule.new(model, sch_name, sf_values, sf_values, Constants.ScheduleTypeLimitsFraction, false).schedule
         end
         shading_schedules[sf_values] = sf_sch
       end
