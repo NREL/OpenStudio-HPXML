@@ -1266,9 +1266,6 @@ class HVAC
            HPXML::HVACTypeHeatPumpRoom,
            HPXML::HVACTypeRoomAirConditioner].include? hvac_type
       return HPXML::HVACCompressorTypeSingleStage
-    elsif [HPXML::HVACTypeMiniSplitAirConditioner,
-           HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_type
-      return HPXML::HVACCompressorTypeVariableSpeed
     end
     return
   end
