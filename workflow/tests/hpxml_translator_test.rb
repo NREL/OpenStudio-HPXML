@@ -525,93 +525,102 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Check for unexpected warnings
+    warnings = []
+    warning = nil
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
-      next unless err_line.include? '** Warning **'
+      if err_line.include? '** Warning **'
+        warnings << warning unless warning.nil?
+        warning = err_line
+      else
+        warning += err_line unless warning.nil?
+      end
+    end
 
+    warnings.each do |warning|
       # General
-      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
-      next if err_line.include? 'PerformancePrecisionTradeoffs: Carroll MRT radiant exchange method is selected.'
-      next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
-      next if err_line.include? 'do not define an enclosure'
-      next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
-      next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
-      next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
-      next if err_line.include? 'Timestep: Requested number'
-      next if err_line.include? 'The Standard Ratings is calculated for'
-      next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
-      next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
-      next if err_line.include? 'Inside surface heat balance convergence problem continues'
-      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
-      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
-      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
-      next if err_line.include? 'Plant loop exceeding upper temperature limit'
-      next if err_line.include? 'Plant loop falling below lower temperature limit'
-      next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
-      next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
-      next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
-      next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
-      next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
-      next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
-      next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
-      next if err_line.include? 'Coil control failed'
-      next if err_line.include? 'sensible part-load ratio out of range error continues'
-      next if err_line.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues'
-      next if err_line.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && err_line.include?('are not available.')
-      next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
-      next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
-      next if err_line.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
-      next if err_line.include? 'View factors not complete'
-      next if err_line.include?('CheckSimpleWAHPRatedCurvesOutputs') && err_line.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
-      next if err_line.include?('For object = Coil:Cooling:DX:MultiSpeed,') # FIXME: The warning is not descriptive
+      next if warning.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
+      next if warning.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
+      next if warning.include? 'Entered Zone Volumes differ from calculated zone volume'
+      next if warning.include? 'PerformancePrecisionTradeoffs: Carroll MRT radiant exchange method is selected.'
+      next if warning.include?('CalculateZoneVolume') && warning.include?('not fully enclosed')
+      next if warning.include? 'do not define an enclosure'
+      next if warning.include? 'Pump nominal power or motor efficiency is set to 0'
+      next if warning.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
+      next if warning.include? 'volume flow rate per watt of rated total heating capacity is out of range'
+      next if warning.include? 'Timestep: Requested number'
+      next if warning.include? 'The Standard Ratings is calculated for'
+      next if warning.include?('WetBulb not converged after') && warning.include?('iterations(PsyTwbFnTdbWPb)')
+      next if warning.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+      next if warning.include? 'Inside surface heat balance convergence problem continues'
+      next if warning.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
+      next if warning.include?('Glycol: Temperature') && warning.include?('out of range (too low) for fluid')
+      next if warning.include?('Glycol: Temperature') && warning.include?('out of range (too high) for fluid')
+      next if warning.include? 'Plant loop exceeding upper temperature limit'
+      next if warning.include? 'Plant loop falling below lower temperature limit'
+      next if warning.include?('Foundation:Kiva') && warning.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
+      next if warning.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
+      next if warning.include? 'Enthalpy out of range (PsyTsatFnHPb)'
+      next if warning.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
+      next if warning.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
+      next if warning.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
+      next if warning.include? 'Low condenser dry-bulb temperature error continues.'
+      next if warning.include? 'Coil control failed'
+      next if warning.include? 'sensible part-load ratio out of range error continues'
+      next if warning.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues'
+      next if warning.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && warning.include?('are not available.')
+      next if warning.include?('setupIHGOutputs: Output variables=Space Other Equipment') && warning.include?('are not available')
+      next if warning.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
+      next if warning.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
+      next if warning.include? 'View factors not complete'
+      next if warning.include?('CheckSimpleWAHPRatedCurvesOutputs') && warning.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
+      next if warning.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues')
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
-        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
-        next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
-        next if err_line.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
-        next if err_line.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
-        next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
+        next if warning.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+        next if warning.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
+        next if warning.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
+        next if warning.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
+        next if warning.include? 'Enthalpy out of range (PsyTsatFnHPb)'
       end
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior }.size > 0
-        next if err_line.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
+        next if warning.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
       end
       # Stratified tank WHs
       if hpxml.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
-        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+        next if warning.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       end
       # HP defrost curves
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type }.size > 0
-        next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
+        next if warning.include?('GetDXCoils: Coil:Heating:DX') && warning.include?('curve values')
       end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
         # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
         # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
         # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
         # FUTURE: Can we update OS to allow removing it?
-        next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
-        next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+        next if warning.include?('Zone') && warning.include?('is not accounted for by Controller:MechanicalVentilation object')
+        next if warning.include?('PEOPLE object for zone') && warning.include?('is not accounted for by Controller:MechanicalVentilation object')
         # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
-        next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
+        next if warning.include?('GetAirPathData: AirLoopHVAC') && warning.include?('has no Controllers')
         # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
-        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+        next if warning.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
       end
       if hpxml.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
-        next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
+        next if warning.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
       if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
-        next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
+        next if warning.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
       if hpxml.solar_thermal_systems.size > 0
-        next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
+        next if warning.include? 'Supply Side is storing excess heat the majority of the time.'
       end
       if !hpxml.header.unavailable_periods.empty?
-        next if err_line.include? 'Target water temperature is greater than the hot water temperature'
-        next if err_line.include? 'Target water temperature should be less than or equal to the hot water temperature'
+        next if warning.include? 'Target water temperature is greater than the hot water temperature'
+        next if warning.include? 'Target water temperature should be less than or equal to the hot water temperature'
       end
 
-      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
+      flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{warning}"
     end
 
     # Check for unused objects/schedules/constructions warnings
