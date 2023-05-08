@@ -47,6 +47,7 @@ class HPXMLDefaults
     apply_hvac(runner, hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
+    apply_hvac_location(hpxml)
     apply_ventilation_fans(hpxml, weather, cfa, nbeds)
     apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml)
@@ -1617,6 +1618,56 @@ class HPXMLDefaults
     end
   end
 
+  def self.apply_hvac_location(hpxml)
+    # This needs to come after we have applied defaults for ducts
+    hpxml.hvac_systems.each do |hvac_system|
+      next unless hvac_system.location.nil?
+
+      hvac_system.location_isdefaulted = true
+
+      # Set default location based on distribution system
+      dist_system = hvac_system.distribution_system
+      if dist_system.nil?
+        hvac_system.location = HPXML::LocationLivingSpace
+      else
+        dist_type = dist_system.distribution_system_type
+        if dist_type == HPXML::HVACDistributionTypeAir
+          # Find largest unconditioned supply duct location
+          uncond_duct_locations = {}
+          dist_system.ducts.select { |d| d.duct_type == HPXML::DuctTypeSupply }.each do |d|
+            next if HPXML::conditioned_locations_this_unit.include? d.duct_location
+            next if [HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? d.duct_location # air handler won't be here
+
+            uncond_duct_locations[d.duct_location] = 0.0 if uncond_duct_locations[d.duct_location].nil?
+            uncond_duct_locations[d.duct_location] += d.duct_surface_area
+          end
+          if uncond_duct_locations.empty?
+            hvac_system.location = HPXML::LocationLivingSpace
+          else
+            hvac_system.location = uncond_duct_locations.key(uncond_duct_locations.values.max)
+          end
+        elsif dist_type == HPXML::HVACDistributionTypeHydronic
+          # Assume same default logic as a water heater
+          hvac_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0])
+        elsif dist_type == HPXML::HVACDistributionTypeDSE
+          # DSE=1 implies distribution system in conditioned space
+          has_dse_of_one = true
+          if (hvac_system.respond_to? :fraction_heat_load_served) && (dist_system.annual_heating_dse != 1)
+            has_dse_of_one = false
+          end
+          if (hvac_system.respond_to? :fraction_cool_load_served) && (dist_system.annual_cooling_dse != 1)
+            has_dse_of_one = false
+          end
+          if has_dse_of_one
+            hvac_system.location = HPXML::LocationLivingSpace
+          else
+            hvac_system.location = HPXML::LocationUnconditionedSpace
+          end
+        end
+      end
+    end
+  end
+
   def self.apply_ventilation_fans(hpxml, weather, cfa, nbeds)
     # Default mech vent systems
     hpxml.ventilation_fans.each do |vent_fan|
@@ -2887,6 +2938,8 @@ class HPXMLDefaults
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml)
     # Check for atmospheric heating system in conditioned space
     hpxml.heating_systems.each do |heating_system|
+      next unless HPXML::conditioned_locations_this_unit.include? heating_system.location
+
       if [HPXML::HVACTypeFurnace,
           HPXML::HVACTypeBoiler,
           HPXML::HVACTypeWallFurnace,

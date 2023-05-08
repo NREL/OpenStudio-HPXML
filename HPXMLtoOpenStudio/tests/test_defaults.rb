@@ -1633,6 +1633,61 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_ground_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 30.0, 0.375, 0, nil, nil, nil)
   end
 
+  def test_hvac_location
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-foundation-unconditioned-basement.xml')
+    hpxml.heating_systems[0].location = HPXML::LocationAtticUnvented
+    hpxml.cooling_systems[0].delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationAtticUnvented)
+
+    # Test defaults
+    hpxml.heating_systems[0].location = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationBasementUnconditioned)
+
+    # Test defaults -- multiple duct locations
+    hpxml.heating_systems[0].distribution_system.ducts.add(id: "Ducts#{hpxml.heating_systems[0].distribution_system.ducts.size + 1}",
+                                                           duct_type: HPXML::DuctTypeSupply,
+                                                           duct_insulation_r_value: 0,
+                                                           duct_location: HPXML::LocationAtticUnvented,
+                                                           duct_surface_area: 151)
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationAtticUnvented)
+
+    # Test defaults -- hydronic
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
+    hpxml.heating_systems[0].distribution_system.distribution_system_type = HPXML::HVACDistributionTypeHydronic
+    hpxml.heating_systems[0].distribution_system.hydronic_type = HPXML::HydronicTypeBaseboard
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationBasementUnconditioned)
+
+    # Test defaults -- DSE = 1
+    hpxml.heating_systems[0].distribution_system.distribution_system_type = HPXML::HVACDistributionTypeDSE
+    hpxml.heating_systems[0].distribution_system.annual_heating_dse = 1.0
+    hpxml.heating_systems[0].distribution_system.annual_cooling_dse = 0.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationLivingSpace)
+
+    # Test defaults -- DSE < 1
+    hpxml.heating_systems[0].distribution_system.annual_heating_dse = 0.8
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationUnconditionedSpace)
+
+    # Test defaults -- ductless
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeWallFurnace
+    hpxml.heating_systems[0].distribution_system.delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationLivingSpace)
+  end
+
   def test_hvac_controls
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
@@ -4008,6 +4063,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(backup_heating_capacity, heat_pump.backup_heating_capacity)
     end
+  end
+
+  def _test_default_hvac_location_values(hvac_system, location)
+    assert_equal(location, hvac_system.location)
   end
 
   def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp)

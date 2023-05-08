@@ -1314,14 +1314,21 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   Element                            Type      Units   Constraints  Required  Default         Notes
   =================================  ========  ======  ===========  ========  ==============  ===============================
   ``SystemIdentifier``               id                             Yes                       Unique identifier
+  ``UnitLocation``                   string            See [#]_     No        See [#]_        Location of heating system (e.g., air handler)
   ``HeatingSystemType``              element           1 [#]_       Yes                       Type of heating system
   ``HeatingSystemFuel``              string            See [#]_     Yes                       Fuel type
   ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized [#]_  Heating output capacity
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
+         | - **dse**: "living space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
-  .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1489,15 +1496,21 @@ HPXML Cooling Systems
 
 Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
-  ==========================  ========  ======  ===========  ========  =======  ===============================
-  Element                     Type      Units   Constraints  Required  Default  Notes
-  ==========================  ========  ======  ===========  ========  =======  ===============================
-  ``SystemIdentifier``        id                             Yes                Unique identifier
-  ``CoolingSystemType``       string            See [#]_     Yes                Type of cooling system
-  ``CoolingSystemFuel``       string            See [#]_     Yes                Fuel type
-  ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                Fraction of cooling load served
-  ==========================  ========  ======  ===========  ========  =======  ===============================
+  ==========================  ========  ======  ===========  ========  ========  ===============================
+  Element                     Type      Units   Constraints  Required  Default   Notes
+  ==========================  ========  ======  ===========  ========  ========  ===============================
+  ``SystemIdentifier``        id                             Yes                 Unique identifier
+  ``UnitLocation``            string            See [#]_     No        See [#]_  Location of cooling system (e.g., air handler)
+  ``CoolingSystemType``       string            See [#]_     Yes                 Type of cooling system
+  ``CoolingSystemFuel``       string            See [#]_     Yes                 Fuel type
+  ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                 Fraction of cooling load served
+  ==========================  ========  ======  ===========  ========  ========  ===============================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **dse**: "living space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1704,11 +1717,18 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
   ``SystemIdentifier``               id                             Yes                  Unique identifier
+  ``UnitLocation``                   string            See [#]_     No        See [#]_   Location of heat pump (e.g., air handler)
   ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
   ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
   ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
+         | - **dse**: "living space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
@@ -2396,6 +2416,8 @@ If not entered, the simulation will not include whole house fans.
 .. note::
 
   The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
+
+.. _waterheatingsystems:
 
 HPXML Water Heating Systems
 ***************************
