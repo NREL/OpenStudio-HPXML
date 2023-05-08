@@ -691,23 +691,10 @@ In addition, one of the following air leakage types must also be defined:
 - :ref:`infil_natural_ach_cfm`
 - :ref:`infil_ela`
 
-Finally, the presence of a flue or chimney can be entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration``.
-
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-  Element                                           Type    Units  Constraints  Required   Default   Notes
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-  ``extension/HasFlueOrChimneyInConditionedSpace``  boolean                     No         See [#]_  Flue or chimney with combustion air from conditioned space
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-
-  .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, assumed to be true if any of the following conditions are met, otherwise false: 
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
-         | - heating system is non-electric Fireplace, or
-         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
-
 .. note::
 
   Infiltration airflow rates are calculated using the `Alberta Air Infiltration Model (AIM-2) <https://www.aivc.org/sites/default/files/airbase_3705.pdf>`_ (also known as the ASHRAE Enhanced model).
-  When there is a flue or chimney present with combustion air from conditioned space, higher infiltration airflow rates are modeled.
+  When there is a flue or chimney present (see :ref:`flueorchimney`) with combustion air from conditioned space, higher infiltration airflow rates are modeled.
 
 .. _infil_ach_cfm:
 
@@ -759,6 +746,24 @@ Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
+
+.. _flueorchimney:
+
+Flue or Chimney
+~~~~~~~~~~~~~~~
+
+The presence of a flue or chimney with combustion air from conditioned space can be entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration``.
+
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+  Element                                           Type     Units  Constraints  Required   Default   Notes
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+  ``extension/HasFlueOrChimneyInConditionedSpace``  boolean                      No         See [#]_  Flue or chimney with combustion air from conditioned space
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+
+  .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
+         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
+         | - heating system is non-electric Fireplace, or
+         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
 HPXML Attics
 ************
