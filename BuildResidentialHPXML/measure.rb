@@ -394,6 +394,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_has_flue_or_chimney', false)
+    arg.setDisplayName('Geometry: Has Flue or Chimney')
+    arg.setDescription('Presence of flue or chimney for infiltration model. If not provided, the OS-HPXML default is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
     arg.setDisplayName('Neighbor: Front Distance')
     arg.setUnits('ft')
@@ -992,11 +997,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_type', air_leakage_type_choices, false)
     arg.setDisplayName('Air Leakage: Type')
     arg.setDescription("Type of air leakage. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('air_leakage_has_flue_or_chimney_in_conditioned_space', false)
-    arg.setDisplayName('Air Leakage: Has Flue or Chimney in Conditioned Space')
-    arg.setDescription('Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default is used.')
     args << arg
 
     heating_system_type_choices = OpenStudio::StringVector.new
@@ -3916,6 +3916,9 @@ class HPXMLFile
     if args[:year_built].is_initialized
       hpxml.building_construction.year_built = args[:year_built].get
     end
+    if args[:geometry_has_flue_or_chimney].is_initialized
+      hpxml.building_construction.has_flue_or_chimney = args[:geometry_has_flue_or_chimney].get
+    end
   end
 
   def self.set_climate_and_risk_zones(hpxml, args)
@@ -3955,10 +3958,6 @@ class HPXMLFile
                                             effective_leakage_area: effective_leakage_area,
                                             infiltration_volume: infiltration_volume,
                                             infiltration_type: air_leakage_type)
-
-    if args[:air_leakage_has_flue_or_chimney_in_conditioned_space].is_initialized
-      hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:air_leakage_has_flue_or_chimney_in_conditioned_space].get
-    end
   end
 
   def self.set_roofs(hpxml, args, sorted_surfaces)

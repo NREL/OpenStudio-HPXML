@@ -110,12 +110,11 @@ class Airflow
     end
     living_const_ach *= a_ext unless living_const_ach.nil?
     living_ach50 *= a_ext unless living_ach50.nil?
-    has_flue_chimney_in_cond_space = hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml.header.natvent_days_per_week,
                                                   infil_volume, infil_height, unavailable_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                            has_flue_chimney_in_cond_space, living_ach50, living_const_ach, infil_volume, infil_height,
+                                            hpxml.building_construction.has_flue_or_chimney, living_ach50, living_const_ach, infil_volume, infil_height,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
   end
 
@@ -1744,7 +1743,7 @@ class Airflow
   end
 
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, living_ach50, living_const_ach, infil_volume, infil_height, weather,
-                                                         vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
+                                                         vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, clg_ssn_sensor, schedules_file,
                                                          vent_fans_cfis_suppl, unavailable_periods)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
@@ -1789,7 +1788,7 @@ class Airflow
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
-    apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height)
+    apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney, infil_volume, infil_height)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -1826,7 +1825,7 @@ class Airflow
   end
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                   has_flue_chimney_in_cond_space, living_ach50, living_const_ach, infil_volume, infil_height, vented_attic,
+                                                   has_flue_chimney, living_ach50, living_const_ach, infil_volume, infil_height, vented_attic,
                                                    vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
 
     # Infiltration for unconditioned spaces
@@ -1839,11 +1838,11 @@ class Airflow
 
     # Infiltration/ventilation for conditioned space
     apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, living_ach50, living_const_ach, infil_volume, infil_height, weather,
-                                                  vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
+                                                  vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney, clg_ssn_sensor, schedules_file,
                                                   vent_fans_cfis_suppl, unavailable_periods)
   end
 
-  def self.apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height)
+  def self.apply_infiltration_to_conditioned(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney, infil_volume, infil_height)
     site_ap = site.additional_properties
 
     if living_ach50.to_f > 0
@@ -1861,7 +1860,7 @@ class Airflow
       delta_pref = 0.016 # inH2O
       c_i = a_o * (2.0 / outside_air_density)**0.5 * delta_pref**(0.5 - n_i) * inf_conv_factor
 
-      if has_flue_chimney_in_cond_space
+      if has_flue_chimney
         y_i = 0.2 # Fraction of leakage through the flue; 0.2 is a "typical" value according to THE ALBERTA AIR INFIL1RATION MODEL, Walker and Wilson, 1990
         s_wflue = 1.0 # Flue Shelter Coefficient
       else
@@ -1892,7 +1891,7 @@ class Airflow
       else
         m_i = 1.0 # eq. 11
       end
-      if has_flue_chimney_in_cond_space
+      if has_flue_chimney
         if @ncfl_ag <= 0
           z_f = 1.0
         else

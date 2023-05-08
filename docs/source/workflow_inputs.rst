@@ -596,12 +596,17 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
+  ``extension/HasFlueOrChimney``                             boolean                                                 No        See [#]_  Presence of flue or chimney for infiltration model
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] | If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
+         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
+         | - heating system is non-electric Fireplace, or
+         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63.
 
 HPXML Climate Zones
 -------------------
@@ -690,24 +695,6 @@ In addition, one of the following air leakage types must also be defined:
 - :ref:`infil_ach_cfm`
 - :ref:`infil_natural_ach_cfm`
 - :ref:`infil_ela`
-
-Finally, the presence of a flue or chimney can be entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration``.
-
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-  Element                                           Type    Units  Constraints  Required   Default   Notes
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-  ``extension/HasFlueOrChimneyInConditionedSpace``  boolean                     No         See [#]_  Flue or chimney with combustion air from conditioned space
-  ================================================  ======  =====  ===========  =========  ========  ===============================================
-
-  .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, assumed to be true if any of the following conditions are met, otherwise false: 
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
-         | - heating system is non-electric Fireplace, or
-         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
-
-.. note::
-
-  Infiltration airflow rates are calculated using the `Alberta Air Infiltration Model (AIM-2) <https://www.aivc.org/sites/default/files/airbase_3705.pdf>`_ (also known as the ASHRAE Enhanced model).
-  When there is a flue or chimney present with combustion air from conditioned space, higher infiltration airflow rates are modeled.
 
 .. _infil_ach_cfm:
 

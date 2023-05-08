@@ -379,56 +379,57 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_building_construction
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-enclosure-infil-flue.xml')
     hpxml.building_construction.number_of_bathrooms = 4
     hpxml.building_construction.conditioned_building_volume = 20000
     hpxml.building_construction.average_ceiling_height = 7
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 20000, 7, 4)
+    _test_default_building_construction_values(hpxml_default, 20000, 7, true, 4)
 
     # Test defaults
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = nil
+    hpxml.building_construction.has_flue_or_chimney = nil
     hpxml.building_construction.number_of_bathrooms = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 21600, 8, 2)
+    _test_default_building_construction_values(hpxml_default, 21600, 8, false, 2)
 
     # Test defaults w/ average ceiling height
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = 10
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 27000, 10, 2)
+    _test_default_building_construction_values(hpxml_default, 27000, 10, false, 2)
 
     # Test defaults w/ conditioned building volume
     hpxml.building_construction.conditioned_building_volume = 20000
     hpxml.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 20000, 7.4, 2)
+    _test_default_building_construction_values(hpxml_default, 20000, 7.4, false, 2)
 
     # Test defaults w/ infiltration volume
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.air_infiltration_measurements[0].infiltration_volume = 25650
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 21600, 8, 2)
+    _test_default_building_construction_values(hpxml_default, 21600, 8, false, 2)
 
     # Test defaults w/ infiltration volume
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.air_infiltration_measurements[0].infiltration_volume = 18000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 18000, 6.67, 2)
+    _test_default_building_construction_values(hpxml_default, 18000, 6.67, false, 2)
 
     # Test defaults w/ conditioned crawlspace
     hpxml = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml.building_construction.conditioned_building_volume = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 16200, 8, 2)
+    _test_default_building_construction_values(hpxml_default, 16200, 8, false, 2)
   end
 
   def test_climate_and_risk_zones
@@ -457,38 +458,29 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.air_infiltration_measurements[0].infiltration_volume = 25000
-    hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_infiltration_values(hpxml_default, 25000, true)
+    _test_default_infiltration_values(hpxml_default.air_infiltration_measurements[0], 25000)
 
     # Test defaults w/ conditioned basement
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil
-    hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_infiltration_values(hpxml_default, 2700 * 8, false)
-
-    # Test defaults w/ conditioned basement and atmospheric water heater w/ flue
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
-    hpxml.water_heating_systems[0].energy_factor = 0.6
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_infiltration_values(hpxml_default, 2700 * 8, true)
+    _test_default_infiltration_values(hpxml_default.air_infiltration_measurements[0], 2700 * 8)
 
     # Test defaults w/o conditioned basement
     hpxml = _create_hpxml('base-foundation-slab.xml')
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_infiltration_values(hpxml_default, 1350 * 8, false)
+    _test_default_infiltration_values(hpxml_default.air_infiltration_measurements[0], 1350 * 8)
 
     # Test defaults w/ conditioned crawlspace
     hpxml = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_infiltration_values(hpxml_default, 1350 * 12, false)
+    _test_default_infiltration_values(hpxml_default.air_infiltration_measurements[0], 1350 * 12)
   end
 
   def test_infiltration_compartmentaliztion_test_adjustment
@@ -3566,15 +3558,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_building_construction_values(hpxml, building_volume, average_ceiling_height, n_bathrooms)
+  def _test_default_building_construction_values(hpxml, building_volume, average_ceiling_height, has_flue_or_chimney, n_bathrooms)
     assert_equal(building_volume, hpxml.building_construction.conditioned_building_volume)
     assert_in_epsilon(average_ceiling_height, hpxml.building_construction.average_ceiling_height, 0.01)
+    assert_equal(has_flue_or_chimney, hpxml.building_construction.has_flue_or_chimney)
     assert_equal(n_bathrooms, hpxml.building_construction.number_of_bathrooms)
   end
 
-  def _test_default_infiltration_values(hpxml, volume, has_flue_or_chimney_in_conditioned_space)
-    assert_equal(volume, hpxml.air_infiltration_measurements[0].infiltration_volume)
-    assert_equal(has_flue_or_chimney_in_conditioned_space, hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space)
+  def _test_default_infiltration_values(air_infiltration_measurement, volume)
+    assert_equal(volume, air_infiltration_measurement.infiltration_volume)
   end
 
   def _test_default_infiltration_compartmentalization_test_values(air_infiltration_measurement, a_ext)

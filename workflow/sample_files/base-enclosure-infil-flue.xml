@@ -50,6 +50,9 @@
           <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <HasFlueOrChimney>true</HasFlueOrChimney>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -76,9 +79,6 @@
             </BuildingAirLeakage>
             <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
-          <extension>
-            <HasFlueOrChimneyInConditionedSpace>true</HasFlueOrChimneyInConditionedSpace>
-          </extension>
         </AirInfiltration>
         <Attics>
           <Attic>
