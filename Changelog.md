@@ -31,6 +31,7 @@ __New Features__
   - `BackupHeatingCapacity` can now be defaulted (autosized) even when the heat pump capacities are provided (hard-sized).
 - Infiltration changes:
   - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
+  - **Breaking change**: Replaces `BuildingConstruction/extension/HasFlueOrChimney` with `AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace`; defaults now incorporate HVAC/water heater location.
   - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
 - Lighting changes:
   - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.

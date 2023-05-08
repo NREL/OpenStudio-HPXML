@@ -49,8 +49,8 @@ XMLHelper.write_file(hpxml.to_oga, "out.xml")
 
 class HPXML < Object
   HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
-                 :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
-                 :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
+                 :climate_and_risk_zones, :air_infiltration, :air_infiltration_measurements, :attics,
+                 :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                  :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
                  :cooling_systems, :heat_pumps, :hvac_plant, :hvac_controls, :hvac_distributions,
                  :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
@@ -713,6 +713,7 @@ class HPXML < Object
     @building_construction.to_oga(@doc)
     @climate_and_risk_zones.to_oga(@doc)
     @air_infiltration_measurements.to_oga(@doc)
+    @air_infiltration.to_oga(@doc)
     @attics.to_oga(@doc)
     @foundations.to_oga(@doc)
     @roofs.to_oga(@doc)
@@ -768,6 +769,7 @@ class HPXML < Object
     @building_construction = BuildingConstruction.new(self, hpxml)
     @climate_and_risk_zones = ClimateandRiskZones.new(self, hpxml)
     @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, hpxml)
+    @air_infiltration = AirInfiltration.new(self, hpxml)
     @attics = Attics.new(self, hpxml)
     @foundations = Foundations.new(self, hpxml)
     @roofs = Roofs.new(self, hpxml)
@@ -1563,7 +1565,7 @@ class HPXML < Object
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
-             :building_footprint_area, :has_flue_or_chimney]
+             :building_footprint_area]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1585,7 +1587,6 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'BuildingFootprintArea', @building_footprint_area, :float, @building_footprint_area_isdefaulted) unless @building_footprint_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', @conditioned_floor_area, :float) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', @conditioned_building_volume, :float, @conditioned_building_volume_isdefaulted) unless @conditioned_building_volume.nil?
-      XMLHelper.add_extension(building_construction, 'HasFlueOrChimney', @has_flue_or_chimney, :boolean, @has_flue_or_chimney_isdefaulted) unless @has_flue_or_chimney.nil?
     end
 
     def from_oga(hpxml)
@@ -1604,7 +1605,6 @@ class HPXML < Object
       @building_footprint_area = XMLHelper.get_value(building_construction, 'BuildingFootprintArea', :float)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
-      @has_flue_or_chimney = XMLHelper.get_value(building_construction, 'extension/HasFlueOrChimney', :boolean)
     end
   end
 
@@ -1696,6 +1696,32 @@ class HPXML < Object
 
       @year = XMLHelper.get_value(climate_zone_iecc, 'Year', :integer)
       @zone = XMLHelper.get_value(climate_zone_iecc, 'ClimateZone', :string)
+    end
+  end
+
+  class AirInfiltration < BaseElement
+    ATTRS = [:has_flue_or_chimney_in_conditioned_space]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      air_infiltration = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'AirInfiltration'])
+      XMLHelper.add_extension(air_infiltration, 'HasFlueOrChimneyInConditionedSpace', @has_flue_or_chimney_in_conditioned_space, :boolean, @has_flue_or_chimney_in_conditioned_space_isdefaulted) unless @has_flue_or_chimney_in_conditioned_space.nil?
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      air_infiltration = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Enclosure/AirInfiltration')
+      return if air_infiltration.nil?
+
+      @has_flue_or_chimney_in_conditioned_space = XMLHelper.get_value(air_infiltration, 'extension/HasFlueOrChimneyInConditionedSpace', :boolean)
     end
   end
 
