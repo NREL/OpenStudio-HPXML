@@ -97,9 +97,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
-    unless (Pathname.new output_dir).absolute?
+    output_dir = Pathname.new output_dir
+    unless output_dir.absolute?
       output_dir = File.expand_path(output_dir)
     end
+    cwd = Pathname.new(Dir.getwd)
+    output_dir = output_dir.relative_path_from(cwd)
 
     if building_id.is_initialized
       building_id = building_id.get
