@@ -1658,6 +1658,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationAtticUnvented)
 
+    # Test defaults -- ducts outside
+    hpxml.heating_systems[0].distribution_system.ducts.each do |d|
+      d.duct_location = HPXML::LocationOutside
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_location_values(hpxml_default.heating_systems[0], HPXML::LocationOtherExterior)
+
     # Test defaults -- hydronic
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].distribution_system.distribution_system_type = HPXML::HVACDistributionTypeHydronic

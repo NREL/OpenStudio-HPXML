@@ -1645,6 +1645,10 @@ class HPXMLDefaults
             hvac_system.location = HPXML::LocationLivingSpace
           else
             hvac_system.location = uncond_duct_locations.key(uncond_duct_locations.values.max)
+            if hvac_system.location == HPXML::LocationOutside
+              # DuctLocation "outside" needs to be converted to a valid UnitLocation enumeration
+              hvac_system.location = HPXML::LocationOtherExterior
+            end
           end
         elsif dist_type == HPXML::HVACDistributionTypeHydronic
           # Assume same default logic as a water heater
