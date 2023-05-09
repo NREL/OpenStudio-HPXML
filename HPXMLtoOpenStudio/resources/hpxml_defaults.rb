@@ -1648,6 +1648,14 @@ class HPXMLDefaults
         ducts.duct_buried_insulation_level = HPXML::DuctBuriedInsulationNone
         ducts.duct_buried_insulation_level_isdefaulted = true
       end
+
+      # Default effective R-value
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_effective_r_value.nil?
+
+        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value, ducts.duct_type, ducts.duct_buried_insulation_level)
+        ducts.duct_effective_r_value_isdefaulted = true
+      end
     end
   end
 

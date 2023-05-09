@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>24341667-a2dd-435e-866f-a890bbf51aeb</version_id>
-  <version_modified>20230503T222914Z</version_modified>
+  <version_id>03240a8f-6a5b-4013-a2e1-0d7623888ed5</version_id>
+  <version_modified>20230509T225324Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -452,18 +452,6 @@
       <checksum>26D01154</checksum>
     </file>
     <file>
-      <filename>hpxml_schema/HPXML.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F5A720E6</checksum>
-    </file>
-    <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6D2E1147</checksum>
-    </file>
-    <file>
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -536,28 +524,40 @@
       <checksum>F0B3DCEF</checksum>
     </file>
     <file>
+      <filename>hpxml_schema/HPXML.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E0A455E1</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>54B57F89</checksum>
+    </file>
+    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C68F915C</checksum>
+      <checksum>EFE16FCB</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CBBBE520</checksum>
+      <checksum>13FB81F5</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A2E5D57F</checksum>
+      <checksum>2E4F4CBF</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>19332946</checksum>
+      <checksum>6B26CF3B</checksum>
     </file>
     <file>
       <version>
@@ -568,19 +568,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B0F1DFC3</checksum>
+      <checksum>BBB04D3B</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D3C4A9F1</checksum>
+      <checksum>9C7DC22E</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>34168DF8</checksum>
+      <checksum>8D6E7834</checksum>
     </file>
   </files>
 </measure>

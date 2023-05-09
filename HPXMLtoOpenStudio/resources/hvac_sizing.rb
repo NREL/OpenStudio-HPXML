@@ -2267,8 +2267,7 @@ class HVACSizing
 
           duct_area_fraction = duct_area / total_area
 
-          effective_rvalue = Airflow.get_duct_effective_rvalue(duct.duct_insulation_r_value, duct_type, duct.duct_buried_insulation_level)
-          dse_Ufactor[duct_type] += 1.0 / effective_rvalue * duct_area_fraction
+          dse_Ufactor[duct_type] += 1.0 / duct.duct_effective_r_value * duct_area_fraction
 
           dse_Tamb[duct_type] += design_temps[duct.duct_location] * duct_area_fraction
 

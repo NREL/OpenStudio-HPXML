@@ -655,7 +655,6 @@ class Airflow
 
   def self.apply_ducts(model, ducts, object, vent_fans_mech)
     ducts.each do |duct|
-      duct.rvalue = get_duct_effective_rvalue(duct.rvalue, duct.side, duct.buried_level) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
         duct.location = duct.loc_schedule.name.to_s
@@ -946,7 +945,7 @@ class Airflow
           leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
           leakage_cfm25s[duct.side] += calc_air_leakage_at_diff_pressure(InfilPressureExponent, duct.leakage_cfm50, 50.0, 25.0)
         end
-        ua_values[duct.side] += duct.area / duct.rvalue
+        ua_values[duct.side] += duct.area / duct.effective_rvalue
       end
 
       # Calculate fraction of outside air specific to this duct location
@@ -1999,7 +1998,7 @@ class Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  def self.get_duct_effective_rvalue(nominal_rvalue, side, buried_level)
+  def self.get_duct_effective_r_value(nominal_rvalue, side, buried_level)
     if buried_level == HPXML::DuctBuriedInsulationNone
       # Insulated duct values based on "True R-Values of Round Residential Ductwork"
       # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
@@ -2047,7 +2046,7 @@ class Airflow
 end
 
 class Duct
-  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, rvalue, buried_level)
+  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space
     @loc_schedule = loc_schedule
@@ -2055,8 +2054,8 @@ class Duct
     @leakage_cfm25 = leakage_cfm25
     @leakage_cfm50 = leakage_cfm50
     @area = area
-    @rvalue = rvalue
+    @effective_rvalue = effective_rvalue
     @buried_level = buried_level
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :zone, :location, :buried_level)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :effective_rvalue, :zone, :location, :buried_level)
 end

@@ -594,14 +594,24 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
   end
 
   def test_ducts_ua
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    ['base.xml',
+     'base-hvac-ducts-area-multipliers.xml',
+     'base-hvac-ducts-effective-rvalue.xml'].each do |hpxml_name|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
+      model, hpxml = _test_measure(args_hash)
 
-    # Check ducts program
-    program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
-    assert_in_delta(33.4, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
-    assert_in_delta(29.4, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+      # Get HPXML values
+      supply_area_multiplier = hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier
+      return_area_multiplier = hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier
+      supply_area_multiplier = 1.0 if supply_area_multiplier.nil?
+      return_area_multiplier = 1.0 if return_area_multiplier.nil?
+
+      # Check ducts program
+      program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
+      assert_in_delta(33.4 * supply_area_multiplier, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+      assert_in_delta(29.4 * return_area_multiplier, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+    end
   end
 
   def test_ducts_ua_buried
@@ -613,21 +623,6 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
     assert_in_delta(7.3, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
     assert_in_delta(2.4, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
-  end
-
-  def test_ducts_ua_surface_area_multipliers
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ducts-area-multipliers.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    supply_area_multiplier = hpxml.hvac_distributions[0].ducts[0].duct_surface_area_multiplier
-    return_area_multiplier = hpxml.hvac_distributions[0].ducts[1].duct_surface_area_multiplier
-
-    # Check ducts program
-    program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
-    assert_in_delta(33.4 * supply_area_multiplier, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
-    assert_in_delta(29.4 * return_area_multiplier, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
   end
 
   def test_infiltration_compartmentalization_area
