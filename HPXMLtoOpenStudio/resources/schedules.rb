@@ -1384,7 +1384,12 @@ class SchedulesFile
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(unavailable_periods)
     convert_setpoints
+
+    output_path = Pathname.new output_path
+    cwd = Pathname.new(Dir.getwd)
+    output_path = output_path.relative_path_from(cwd)
     @output_schedules_path = output_path
+
     export()
   end
 
@@ -1506,7 +1511,7 @@ class SchedulesFile
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
-    schedule_file = OpenStudio::Model::ScheduleFile.new(@model, @output_schedules_path)
+    schedule_file = OpenStudio::Model::ScheduleFile.new(@model, "#{@output_schedules_path}")
     schedule_file.setName(col_name)
     schedule_file.setColumnNumber(col_index + 1)
     schedule_file.setRowstoSkipatTop(rows_to_skip)
