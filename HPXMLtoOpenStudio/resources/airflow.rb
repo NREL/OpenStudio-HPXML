@@ -2020,21 +2020,40 @@ class Airflow
         return 2.0388 + 0.7053 * nominal_rvalue
       end
     else
-      # Equations derived from Table 12 in https://www.nrel.gov/docs/fy13osti/55876.pdf
-      # assuming 8-in Diameter
-      #
-      # Duct configuration | 4.2  | 6.0  | 8.0
-      # -------------------|------|------|-----
-      # Partially-buried   | 8.1  | 10.2 | 12.3
-      # Fully buried       | 12.0 | 14.1 | 16.2
-      # Deeply buried      | 20.7 | 22.1 | 23.5
+      if side == HPXML::DuctTypeSupply
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 8-in supply diameter
+        #
+        # Duct configuration | 4.2  | 6.0  | 8.0
+        # -------------------|------|------|-----
+        # Partially-buried   | 7.8  | 9.9  | 11.8
+        # Fully buried       | 11.3 | 13.2 | 15.1
+        # Deeply buried      | 18.1 | 19.6 | 21.0
 
-      if buried_level == HPXML::DuctBuriedInsulationPartial
-        return 3.5009 + 1.1042 * nominal_rvalue
-      elsif buried_level == HPXML::DuctBuriedInsulationFull
-        return 7.4009 + 1.1042 * nominal_rvalue
-      elsif buried_level == HPXML::DuctBuriedInsulationDeep
-        return 17.634 + 0.7362 * nominal_rvalue
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return 5.83 + 2.0 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return 9.4 + 1.9 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return 16.67 + 1.45 * nominal_rvalue
+        end
+      elsif side == HPXML::DuctTypeReturn
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 14-in return diameter
+        #
+        # Duct configuration | 4.2  | 6.0  | 8.0
+        # -------------------|------|------|-----
+        # Partially-buried   | 10.1 | 12.6 | 15.1
+        # Fully buried       | 14.3 | 16.7 | 19.2
+        # Deeply buried      | 22.8 | 24.7 | 26.6
+
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return 7.6 + 2.5 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return 11.83 + 2.45 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return 20.9 + 1.9 * nominal_rvalue
+        end
       end
     end
   end
