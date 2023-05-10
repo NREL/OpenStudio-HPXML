@@ -2123,9 +2123,7 @@ Additional information is entered in each ``Ducts``.
   ``extension/DuctSurfaceAreaMultiplier``                  double                 >= 0              No        1.0         Duct surface area multiplier
   =======================================================  =======  ============  ================  ========  ==========  ======================================
 
-  .. [#] | It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct). For ducts buried in insulation (using DuctBuriedInsulationLevel), this should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value. DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
-         |
-         | The effective duct R-value is used for modeling purposes; when not provided, it is calculated as follows:
+  .. [#] | It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct). For ducts buried in insulation (using DuctBuriedInsulationLevel), this should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value. DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation. The effective duct R-value is used for modeling purposes, and when not provided is calculated as follows:
          | - **Uninsulated**: 1.7                                     
          | - **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
          | - **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
@@ -2135,12 +2133,7 @@ Additional information is entered in each ``Ducts``.
          | - **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
          | - **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
          | - **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
-         |
-         | The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals.
-         | The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_.
-         | The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_.
-         | The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter
-         
+         | The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals. The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_. The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_. The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.
