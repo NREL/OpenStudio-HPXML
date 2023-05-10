@@ -2182,6 +2182,15 @@
   "sample_files/base-hvac-ducts-area-multipliers.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-hvac-ducts-buried.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "ducts_supply_buried_insulation_level": "deeply buried",
+    "ducts_return_buried_insulation_level": "deeply buried",
+    "ducts_return_insulation_r": 4
+  },
+  "sample_files/base-hvac-ducts-effective-rvalue.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "ElectricResistance",

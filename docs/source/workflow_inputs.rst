@@ -2112,17 +2112,34 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
 
 Additional information is entered in each ``Ducts``.
 
-  ===============================================  =======  ============  ================  ========  =========  ======================================
-  Element                                          Type     Units         Constraints       Required  Default    Notes
-  ===============================================  =======  ============  ================  ========  =========  ======================================
-  ``SystemIdentifier``                             id                                       Yes                  Unique identifier
-  ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                  R-value of duct insulation [#]_
-  ``DuctLocation``                                 string                 See [#]_          No        See [#]_   Duct location
-  ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_   Duct fraction/surface area in location
-  ``extension/DuctSurfaceAreaMultiplier``          double                 >= 0              No        1.0        Duct surface area multiplier
-  ===============================================  =======  ============  ================  ========  =========  ======================================
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
+  Element                                                  Type     Units         Constraints       Required  Default     Notes
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
+  ``SystemIdentifier``                                     id                                       Yes                   Unique identifier
+  ``DuctInsulationRValue`` and/or ``DuctEffectiveRValue``  double   F-ft2-hr/Btu  >= 0              Yes                   Duct R-value [#]_
+  ``DuctBuriedInsulationLevel``                            string                 See [#]_          No        not buried  Duct buried insulation level [#]_
+  ``DuctLocation``                                         string                 See [#]_          No        See [#]_    Duct location
+  ``FractionDuctArea`` and/or ``DuctSurfaceArea``          double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_    Duct fraction/surface area in location
+  ``extension/DuctSurfaceAreaMultiplier``                  double                 >= 0              No        1.0         Duct surface area multiplier
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
 
-  .. [#] DuctInsulationRValue should not include air films (i.e., use 0 for an uninsulated duct).
+  .. [#] | It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct). For ducts buried in insulation (using DuctBuriedInsulationLevel), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value. On the other hand, DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation. DuctEffectiveRValue is used for the actual model heat transfer, and when not provided is calculated as follows:
+         | - **Uninsulated**: 1.7                                     
+         | - **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
+         | - **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
+         | - **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
+         | - **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
+         | - **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
+         | - **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
+         | - **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
+         | - **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
+         | The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals. The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_. The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_. The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter
+  .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
+  .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
+         Partially buried ducts have insulation that does not cover the top of the ducts.
+         Fully buried ducts have insulation that just covers the top of the ducts.
+         Deeply buried ducts have insulation that continues above the top of the ducts.
+         See the `Building America Solution Center <https://basc.pnnl.gov/resource-guides/ducts-buried-attic-insulation>`_ for more information.
   .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".

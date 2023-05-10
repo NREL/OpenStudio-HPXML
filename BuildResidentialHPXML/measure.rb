@@ -1461,6 +1461,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
+    duct_buried_level_choices = OpenStudio::StringVector.new
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationNone
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationPartial
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationFull
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationDeep
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_buried_insulation_level', duct_buried_level_choices, false)
+    arg.setDisplayName('Ducts: Supply Buried Insulation Level')
+    arg.setDescription('Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_surface_area', false)
     arg.setDisplayName('Ducts: Supply Surface Area')
     arg.setDescription('The surface area of the supply ducts. If not provided, the OS-HPXML default is used.')
@@ -1477,6 +1488,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The insulation r-value of the return ducts excluding air films.')
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_return_buried_insulation_level', duct_buried_level_choices, false)
+    arg.setDisplayName('Ducts: Return Buried Insulation Level')
+    arg.setDescription('Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_surface_area', false)
@@ -5009,9 +5025,18 @@ class HPXMLFile
       ducts_return_surface_area = args[:ducts_return_surface_area].get
     end
 
+    if args[:ducts_supply_buried_insulation_level].is_initialized
+      ducts_supply_buried_insulation_level = args[:ducts_supply_buried_insulation_level].get
+    end
+
+    if args[:ducts_return_buried_insulation_level].is_initialized
+      ducts_return_buried_insulation_level = args[:ducts_return_buried_insulation_level].get
+    end
+
     hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                 duct_type: HPXML::DuctTypeSupply,
                                 duct_insulation_r_value: args[:ducts_supply_insulation_r],
+                                duct_buried_insulation_level: ducts_supply_buried_insulation_level,
                                 duct_location: ducts_supply_location,
                                 duct_surface_area: ducts_supply_surface_area)
 
@@ -5019,6 +5044,7 @@ class HPXMLFile
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeReturn,
                                   duct_insulation_r_value: args[:ducts_return_insulation_r],
+                                  duct_buried_insulation_level: ducts_return_buried_insulation_level,
                                   duct_location: ducts_return_location,
                                   duct_surface_area: ducts_return_surface_area)
     end
