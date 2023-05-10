@@ -694,7 +694,7 @@ In addition, one of the following air leakage types must also be defined:
 .. note::
 
   Infiltration airflow rates are calculated using the `Alberta Air Infiltration Model (AIM-2) <https://www.aivc.org/sites/default/files/airbase_3705.pdf>`_ (also known as the ASHRAE Enhanced model).
-  When there is a flue or chimney present (see :ref:`flueorchimney`) with combustion air from conditioned space, higher infiltration airflow rates are modeled.
+  When there is a flue or chimney present (see :ref:`flueorchimney`) with combustion air from conditioned space, higher infiltration airflow rates are modeled because the flue leakage is at a different height for stack effect.
 
 .. _infil_ach_cfm:
 
