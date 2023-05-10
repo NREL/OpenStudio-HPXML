@@ -1665,9 +1665,6 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml"
-  },
   "sample_files/base-hvac-autosize.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_heating_capacity": null,
@@ -2444,9 +2441,6 @@
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml"
-  },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_heating_capacity": 0,
@@ -2468,9 +2462,6 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
-  },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",

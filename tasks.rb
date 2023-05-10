@@ -1671,8 +1671,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.manualj_internal_loads_latent = 200
     hpxml.header.manualj_num_occupants = 5
   end
-  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml',
-      'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml'].include? hpxml_file
+  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'].include? hpxml_file
     # YORK HMH7
     # https://ashp.neep.org/#!/product/64253/7/25000///0
     hpxml.heat_pumps[0].cooling_capacity = 36000
@@ -1722,8 +1721,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 2.28)
   end
-  if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml',
-      'base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml'].include? hpxml_file
+  if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml'].include? hpxml_file
     # FUJITSU Halcyon Single-room Mini-Split Systems Slim
     # https://ashp.neep.org/#!/product/25352/7/25000///0
     hpxml.heat_pumps[0].cooling_capacity = 36000
@@ -1773,8 +1771,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 1.93)
   end
-  if ['base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml',
-      'base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml'].include? hpxml_file
+  if ['base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'].include? hpxml_file
     # BOSCH Bosch Climate 5000 ductless minisplit series
     # https://ashp.neep.org/#!/product/66076/7/25000///0
     hpxml.heat_pumps[0].cooling_capacity = 36000
@@ -1823,19 +1820,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity: 36037,
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 1.96)
-  end
-  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml',
-      'base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml',
-      'base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml'].include? hpxml_file
-    # Convert from Capacity to CapacityFractionOfNominal
-    hpxml.heat_pumps[0].cooling_detailed_performance_data.each do |data_point|
-      data_point.capacity_fraction_of_nominal = (Float(data_point.capacity) / hpxml.heat_pumps[0].cooling_capacity).round(3)
-      data_point.capacity = nil
-    end
-    hpxml.heat_pumps[0].heating_detailed_performance_data.each do |data_point|
-      data_point.capacity_fraction_of_nominal = (Float(data_point.capacity) / hpxml.heat_pumps[0].heating_capacity).round(3)
-      data_point.capacity = nil
-    end
   end
 
   # ------------------ #

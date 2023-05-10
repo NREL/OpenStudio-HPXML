@@ -1295,8 +1295,8 @@
   <sch:pattern>
     <sch:title>[PerformanceDataPoint]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/*/h:PerformanceDataPoint'>
-      <!-- FIXME: If Capacity is provided, need to make sure parent HVAC object as nominal capacity specified -->
-      <sch:assert role='ERROR' test='count(h:Capacity) + count(h:CapacityFractionOfNominal) &gt;= 1'>Expected 1 or more element(s) for xpath: Capacity | CapacityFractionOfNominal</sch:assert>
+      <!-- FIXME: If Capacity is provided, do we need to make sure parent HVAC object has nominal capacity specified? -->
+      <sch:assert role='ERROR' test='count(h:Capacity) = 1'>Expected 1 element(s) for xpath: Capacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:Efficiency[h:Units="COP"]/h:Value) = 1'>Expected 1 element(s) for xpath: Efficiency[Units="COP"]/Value</sch:assert>
     </sch:rule>
   </sch:pattern>
