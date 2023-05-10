@@ -2112,21 +2112,22 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
 
 Additional information is entered in each ``Ducts``.
 
-  ===================================================  =======  ============  ================  ========  ==========  ======================================
-  Element                                              Type     Units         Constraints       Required  Default     Notes
-  ===================================================  =======  ============  ================  ========  ==========  ======================================
-  ``SystemIdentifier``                                 id                                       Yes                   Unique identifier
-  ``DuctInsulationRValue`` or ``DuctEffectiveRValue``  double   F-ft2-hr/Btu  >= 0              Yes                   Duct R-value [#]_
-  ``DuctBuriedInsulationLevel``                        string                 See [#]_          No        not buried  Duct buried insulation level [#]_
-  ``DuctLocation``                                     string                 See [#]_          No        See [#]_    Duct location
-  ``FractionDuctArea`` and/or ``DuctSurfaceArea``      double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_    Duct fraction/surface area in location
-  ``extension/DuctSurfaceAreaMultiplier``              double                 >= 0              No        1.0         Duct surface area multiplier
-  ===================================================  =======  ============  ================  ========  ==========  ======================================
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
+  Element                                                  Type     Units         Constraints       Required  Default     Notes
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
+  ``SystemIdentifier``                                     id                                       Yes                   Unique identifier
+  ``DuctInsulationRValue`` and/or ``DuctEffectiveRValue``  double   F-ft2-hr/Btu  >= 0              Yes                   Duct R-value [#]_
+  ``DuctBuriedInsulationLevel``                            string                 See [#]_          No        not buried  Duct buried insulation level [#]_
+  ``DuctLocation``                                         string                 See [#]_          No        See [#]_    Duct location
+  ``FractionDuctArea`` and/or ``DuctSurfaceArea``          double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_    Duct fraction/surface area in location
+  ``extension/DuctSurfaceAreaMultiplier``                  double                 >= 0              No        1.0         Duct surface area multiplier
+  =======================================================  =======  ============  ================  ========  ==========  ======================================
 
-  .. [#] If DuctInsulationRValue provided, should not include the exterior air film (i.e., use 0 for an uninsulated duct).
+  .. [#] It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue.
+         DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct).
          For ducts buried in insulation (using the ``DuctBuriedInsulationLevel`` element), this should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value.
          The effective R-value used for modeling purposes will be calculated as described in the table below.
-         If DuctEffectiveRValue provided instead, should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
+         DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.
