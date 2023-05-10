@@ -4839,7 +4839,7 @@ class HPXMLFile
     if args[:heat_pump_charge_defect_ratio].is_initialized
       charge_defect_ratio = args[:heat_pump_charge_defect_ratio].get
     end
-    
+
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 

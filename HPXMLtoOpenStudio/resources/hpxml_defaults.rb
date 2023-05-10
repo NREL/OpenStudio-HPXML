@@ -1092,7 +1092,7 @@ class HPXMLDefaults
         hvac_system.backup_heating_capacity = nil
       end
     end
-    
+
     # Convert SEER2/HSPF2 to SEER/HSPF
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1144,7 +1144,7 @@ class HPXMLDefaults
       next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       next unless heat_pump.heating_capacity_17F.nil?
       next unless heat_pump.heating_capacity_retention_fraction.nil?
-      
+
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
         heat_pump.heating_capacity_retention_temp = -5.0
         heat_pump.heating_capacity_retention_fraction = 0.25
