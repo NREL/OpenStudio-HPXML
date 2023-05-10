@@ -1562,13 +1562,13 @@ class HPXMLDefaults
         if (cooling_system_num_speeds != 2 && heat_pump_num_speeds != 2)
           hvac_control.realistic_staging = false
           hvac_control.realistic_staging_isdefaulted = true
+        # Two speed system but no realistic staging or no deadband control, override to default E+ control
+        elsif not (hvac_control.realistic_staging && hvac_control.onoff_thermostat_deadband > 0.0)
+          hvac_control.onoff_thermostat_deadband = 0.0
+          hvac_control.onoff_thermostat_deadband_isdefaulted = true
+          hvac_control.realistic_staging = false
+          hvac_control.realistic_staging_isdefaulted = true
         end
-      end
-      if hvac_control.realistic_staging && hvac_control.onoff_thermostat_deadband > 0.0
-        hvac_control.onoff_thermostat_deadband = 0.0
-        hvac_control.onoff_thermostat_deadband_isdefaulted = true
-        hvac_control.realistic_staging = false
-        hvac_control.realistic_staging_isdefaulted = true
       end
 
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
