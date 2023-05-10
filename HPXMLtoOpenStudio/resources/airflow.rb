@@ -655,7 +655,6 @@ class Airflow
 
   def self.apply_ducts(model, ducts, object, vent_fans_mech)
     ducts.each do |duct|
-      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
         duct.location = duct.loc_schedule.name.to_s
@@ -946,7 +945,7 @@ class Airflow
           leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
           leakage_cfm25s[duct.side] += calc_air_leakage_at_diff_pressure(InfilPressureExponent, duct.leakage_cfm50, 50.0, 25.0)
         end
-        ua_values[duct.side] += duct.area / duct.rvalue
+        ua_values[duct.side] += duct.area / duct.effective_rvalue
       end
 
       # Calculate fraction of outside air specific to this duct location
@@ -1999,24 +1998,63 @@ class Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  def self.get_duct_insulation_rvalue(nominal_rvalue, side)
-    # Insulated duct values based on "True R-Values of Round Residential Ductwork"
-    # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
-    # worksheet in, e.g., ExistingResidentialSingleFamily_SEEMRuns_v05.xlsm.
-    #
-    # Nominal | 4.2 | 6.0 | 8.0 | 11.0
-    # --------|-----|-----|-----|----
-    # Supply  | 4.5 | 5.7 | 6.8 | 8.4
-    # Return  | 4.9 | 6.3 | 7.8 | 9.7
-    #
-    # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
-    if nominal_rvalue <= 0
-      return 1.7
-    end
-    if side == HPXML::DuctTypeSupply
-      return 2.2438 + 0.5619 * nominal_rvalue
-    elsif side == HPXML::DuctTypeReturn
-      return 2.0388 + 0.7053 * nominal_rvalue
+  def self.get_duct_effective_r_value(nominal_rvalue, side, buried_level)
+    if buried_level == HPXML::DuctBuriedInsulationNone
+      # Insulated duct values based on "True R-Values of Round Residential Ductwork"
+      # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
+      # worksheet in, e.g., ExistingResidentialSingleFamily_SEEMRuns_v05.xlsm.
+      #
+      # Nominal | 4.2 | 6.0 | 8.0 | 11.0
+      # --------|-----|-----|-----|----
+      # Supply  | 4.5 | 5.7 | 6.8 | 8.4
+      # Return  | 4.9 | 6.3 | 7.8 | 9.7
+      #
+      # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
+
+      if nominal_rvalue <= 0
+        return 1.7
+      end
+      if side == HPXML::DuctTypeSupply
+        return 2.2438 + 0.5619 * nominal_rvalue
+      elsif side == HPXML::DuctTypeReturn
+        return 2.0388 + 0.7053 * nominal_rvalue
+      end
+    else
+      if side == HPXML::DuctTypeSupply
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 8-in supply diameter
+        #
+        # Duct configuration | 4.2  | 6.0  | 8.0
+        # -------------------|------|------|-----
+        # Partially-buried   | 7.8  | 9.9  | 11.8
+        # Fully buried       | 11.3 | 13.2 | 15.1
+        # Deeply buried      | 18.1 | 19.6 | 21.0
+
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return 5.83 + 2.0 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return 9.4 + 1.9 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return 16.67 + 1.45 * nominal_rvalue
+        end
+      elsif side == HPXML::DuctTypeReturn
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 14-in return diameter
+        #
+        # Duct configuration | 4.2  | 6.0  | 8.0
+        # -------------------|------|------|-----
+        # Partially-buried   | 10.1 | 12.6 | 15.1
+        # Fully buried       | 14.3 | 16.7 | 19.2
+        # Deeply buried      | 22.8 | 24.7 | 26.6
+
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return 7.6 + 2.5 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return 11.83 + 2.45 * nominal_rvalue
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return 20.9 + 1.9 * nominal_rvalue
+        end
+      end
     end
   end
 
@@ -2027,7 +2065,7 @@ class Airflow
 end
 
 class Duct
-  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, rvalue)
+  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space
     @loc_schedule = loc_schedule
@@ -2035,7 +2073,8 @@ class Duct
     @leakage_cfm25 = leakage_cfm25
     @leakage_cfm50 = leakage_cfm50
     @area = area
-    @rvalue = rvalue
+    @effective_rvalue = effective_rvalue
+    @buried_level = buried_level
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :rvalue, :zone, :location)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :effective_rvalue, :zone, :location, :buried_level)
 end
