@@ -41,7 +41,7 @@ __New Features__
   - Updates design load calculations to handle conditioned basements with insulated slabs.
 - Duct enhancements:
   - Allows modeling ducts buried in attic loose-fill insulation using `Ducts/DuctBuriedInsulationLevel`.
-  - Allows specifying `Ducts/DuctEffectiveRValue` (the value that will be used in the model) instead of `Ducts/DuctInsulationRValue`.
+  - Allows specifying `Ducts/DuctEffectiveRValue`, the value that will be used in the model, though its use is not recommended.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
