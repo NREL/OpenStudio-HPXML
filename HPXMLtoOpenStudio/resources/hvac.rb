@@ -2775,6 +2775,32 @@ class HVAC
     curve.setMaximumValueofy(max_y)
     return curve
   end
+  
+  def self.calculate_biquadratic_output(x, y, coeff)
+    return coeff[0] + coeff[1]*x + coeff[2]*x*x + coeff[3]*y + coeff[4]*y*y + coeff[5]*x*y
+  end
+  
+  def self.calculate_quadratic_output(x, coeff)
+    return coeff[0] + coeff[1]*x + coeff[2]*x*x
+  end
+
+  def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil)
+    table = OpenStudio::Model::TableLookup.new(model)
+    table.setName(name)
+    independent_vars.each do |var|
+      ind_var = OpenStudio::Model::TableIndependentVariable.new(model)
+      ind_var.setName(var[:name])
+      ind_var.setMinimumValue(var[:min])
+      ind_var.setMaximumValue(var[:max])
+      ind_var.setExtrapolationMethod('Linear')
+      ind_var.setValues(var[:values])
+      table.addIndependentVariable(ind_var)
+    end
+    table.setMinimumOutput(output_min) unless output_min.nil?
+    table.setMaximumOutput(output_max) unless output_max.nil?
+    table.setOutputValues(output_values)
+    return table
+  end
 
   def self.create_curve_bicubic(model, coeff, name, min_x, max_x, min_y, max_y)
     curve = OpenStudio::Model::CurveBicubic.new(model)
@@ -2883,11 +2909,42 @@ class HVAC
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", -100, 100, -100, 100)
-      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", -100, 100, -100, 100)
-      plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[i], "Cool-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
-      cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-CAP-fFF#{i + 1}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+      var_wb = {:name => 'wet_bulb_temp', :min => -100, :max => 100, :values => []}
+      var_db = {:name => 'dry_bulb_temp', :min => -100, :max => 100, :values => []}
+      var_fff = {:name => 'air_flow_rate_ratio', :min => 0.0, :max => 2.0, :values => []}
+      var_fplr = {:name => 'part_load_ratio', :min => 0.0, :max => 1.0, :values => []}
+      cap_ft_output_values = []
+      eir_ft_output_values = []
+      cap_fff_output_values = []
+      eir_fff_output_values = []
+      plf_fplr_output_values = []
+      # temperature independent variable values
+      for wb_temp in (57...72).step(5)
+        wb_temp_c = UnitConversions.convert(wb_temp, 'F', 'C')
+        var_wb[:values] << wb_temp_c
+        for db_temp in (75...125).step(5)
+          db_temp_c = UnitConversions.convert(db_temp, 'F', 'C')
+          var_db[:values] << db_temp_c unless var_db[:values].include? db_temp_c
+          cap_ft_output_values << calculate_biquadratic_output(wb_temp_c, db_temp_c, cap_ft_spec_si)
+          eir_ft_output_values << calculate_biquadratic_output(wb_temp_c, db_temp_c, eir_ft_spec_si)
+        end
+      end
+      # air flow ratio independent variable values
+      for fff in (0...2).step(0.1)
+        var_fff[:values] << fff
+        cap_fff_output_values << calculate_quadratic_output(fff, clg_ap.cool_cap_fflow_spec[i])
+        eir_fff_output_values << calculate_quadratic_output(fff, clg_ap.cool_eir_fflow_spec[i])
+      end
+      # part load ratio independent variable values
+      for plr in (0...1).step(0.1)
+        var_fplr[:values] << plr
+        plf_fplr_output_values << calculate_quadratic_output(plr, clg_ap.cool_plf_fplr_spec[i])
+      end
+      cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", [var_wb, var_db], cap_ft_output_values)
+      eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", [var_wb, var_db], eir_ft_output_values)
+      plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", [var_fplr], plf_fplr_output_values, 0.7, 1)
+      cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", [var_fff], cap_fff_output_values, 0, 2)
+      eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", [var_fff], eir_fff_output_values, 0, 2)
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
