@@ -1104,11 +1104,7 @@ class HVAC
       cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
       hp_ap.heat_cap_fflow_spec = [cap_fflow_spec]
       hp_ap.heat_eir_fflow_spec = [eir_fflow_spec]
-      if heat_pump.heating_capacity_17F.nil?
-        hp_ap.heat_cap_ft_spec = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
-      else
-        hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
-      end
+      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
       if not use_cop
         hp_ap.heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)]
       end
@@ -1124,12 +1120,7 @@ class HVAC
                                    [0.76634609, 0.32840943, -0.094701495]]
       hp_ap.heat_eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
                                    [2.001041353, -1.58869128, 0.587593517]]
-      if heat_pump.heating_capacity_17F.nil?
-        hp_ap.heat_cap_ft_spec = [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
-                                  [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
-      else
-        hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
-      end
+      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
       hp_ap.heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
       # From manufacturers data
@@ -1142,14 +1133,7 @@ class HVAC
                                 [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
       hp_ap.heat_cap_fflow_spec = [[1, 0, 0]] * 4
       hp_ap.heat_eir_fflow_spec = [[1, 0, 0]] * 4
-      if heat_pump.heating_capacity_17F.nil?
-        hp_ap.heat_cap_ft_spec = [[0.304192655, -0.003972566, 0.0000196432, 0.024471251, -0.000000774126, -0.0000841323],
-                                  [0.496381324, -0.00144792, 0.0, 0.016020855, 0.0000203447, -0.0000584118],
-                                  [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
-                                  [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
-      else
-        hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
-      end
+      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(heat_pump)
       hp_ap.heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     end
   end
@@ -1178,12 +1162,16 @@ class HVAC
     hp_ap.heat_eir_fflow_spec = [[1, 0, 0]] * num_speeds
 
     # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
-    if heat_pump.heating_capacity_17F.nil? || ((heat_pump.heating_capacity_17F == 0) && (heat_pump.heating_capacity == 0))
-      cap_retention_frac = 0.25 # frac
-      cap_retention_temp = -5.0 # deg-F
-    else
-      cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+    if not heat_pump.heating_capacity_17F.nil?
       cap_retention_temp = 17.0 # deg-F
+      if heat_pump.heating_capacity > 0
+        cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      else
+        cap_retention_frac = 0.5 # Arbitrary
+      end
+    else
+      cap_retention_temp = heat_pump.heating_capacity_retention_temp
+      cap_retention_frac = heat_pump.heating_capacity_retention_fraction
     end
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
@@ -1860,11 +1848,17 @@ class HVAC
 
     # Derive coefficients from user input for heating capacity at 47F and 17F
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    x_A = 17.0
-    if heat_pump.heating_capacity > 0
-      y_A = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+    # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
+    if not heat_pump.heating_capacity_17F.nil?
+      x_A = 17.0 # deg-F
+      if heat_pump.heating_capacity > 0
+        y_A = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      else
+        y_A = 0.5 # Arbitrary
+      end
     else
-      y_A = 0.5 # Arbitrary
+      x_A = heat_pump.heating_capacity_retention_temp
+      y_A = heat_pump.heating_capacity_retention_fraction
     end
     x_B = 47.0 # 47F is the rating point
     y_B = 1.0

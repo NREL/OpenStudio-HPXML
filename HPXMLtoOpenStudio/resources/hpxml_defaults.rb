@@ -1092,7 +1092,7 @@ class HPXMLDefaults
         hvac_system.backup_heating_capacity = nil
       end
     end
-
+    
     # Convert SEER2/HSPF2 to SEER/HSPF
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1104,7 +1104,6 @@ class HPXMLDefaults
       cooling_system.cooling_efficiency_seer_isdefaulted = true
       cooling_system.cooling_efficiency_seer2 = nil
     end
-
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
@@ -1138,6 +1137,30 @@ class HPXMLDefaults
 
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
       heat_pump.compressor_type_isdefaulted = true
+    end
+
+    # Default HP heating capacity retention
+    hpxml.heat_pumps.each do |heat_pump|
+      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless heat_pump.heating_capacity_17F.nil?
+      next unless heat_pump.heating_capacity_retention_fraction.nil?
+      
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+        heat_pump.heating_capacity_retention_temp = -5.0
+        heat_pump.heating_capacity_retention_fraction = 0.25
+      else
+        # FIXME: Reconsider these. Currently aligns closely w/ Cutler curves.
+        heat_pump.heating_capacity_retention_temp = 5.0
+        if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
+          heat_pump.heating_capacity_retention_fraction = 0.45
+        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
+          heat_pump.heating_capacity_retention_fraction = 0.4
+        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+          heat_pump.heating_capacity_retention_fraction = 0.5
+        end
+      end
+      heat_pump.heating_capacity_retention_fraction_isdefaulted = true
+      heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
 
     # Default HP compressor lockout temp

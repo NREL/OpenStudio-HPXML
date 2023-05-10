@@ -1247,10 +1247,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_17_f', false)
-    arg.setDisplayName('Heat Pump: Heating Capacity 17F')
-    arg.setDescription("The output heating capacity of the heat pump at 17F. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default is used.")
-    arg.setUnits('Btu/hr')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
+    arg.setDisplayName('Heat Pump: Heating Capacity Retention Fraction')
+    arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_temp', false)
+    arg.setDisplayName('Heat Pump: Heating Capacity Retention Temperature')
+    arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_capacity', false)
@@ -4749,10 +4755,12 @@ class HPXMLFile
       heating_capacity = args[:heat_pump_heating_capacity].get
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      if args[:heat_pump_heating_capacity_17_f].is_initialized
-        heating_capacity_17F = args[:heat_pump_heating_capacity_17_f].get
-      end
+    if args[:heat_pump_heating_capacity_retention_fraction].is_initialized
+      heating_capacity_retention_fraction = args[:heat_pump_heating_capacity_retention_fraction].get
+    end
+
+    if args[:heat_pump_heating_capacity_retention_temp].is_initialized
+      heating_capacity_retention_temp = args[:heat_pump_heating_capacity_retention_temp].get
     end
 
     if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
@@ -4831,7 +4839,7 @@ class HPXMLFile
     if args[:heat_pump_charge_defect_ratio].is_initialized
       charge_defect_ratio = args[:heat_pump_charge_defect_ratio].get
     end
-
+    
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 
@@ -4851,7 +4859,8 @@ class HPXMLFile
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: heating_capacity,
-                         heating_capacity_17F: heating_capacity_17F,
+                         heating_capacity_retention_fraction: heating_capacity_retention_fraction,
+                         heating_capacity_retention_temp: heating_capacity_retention_temp,
                          compressor_type: compressor_type,
                          compressor_lockout_temp: compressor_lockout_temp,
                          cooling_shr: cooling_shr,
