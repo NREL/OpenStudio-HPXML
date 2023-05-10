@@ -596,17 +596,12 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
-  ``extension/HasFlueOrChimney``                             boolean                                                 No        See [#]_  Presence of flue or chimney for infiltration model
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
-  .. [#] | If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
-         | - heating system is non-electric Fireplace, or
-         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63.
 
 HPXML Climate Zones
 -------------------
@@ -696,6 +691,11 @@ In addition, one of the following air leakage types must also be defined:
 - :ref:`infil_natural_ach_cfm`
 - :ref:`infil_ela`
 
+.. note::
+
+  Infiltration airflow rates are calculated using the `Alberta Air Infiltration Model (AIM-2) <https://www.aivc.org/sites/default/files/airbase_3705.pdf>`_ (also known as the ASHRAE Enhanced model).
+  When there is a flue or chimney present (see :ref:`flueorchimney`) with combustion air from conditioned space, higher infiltration airflow rates are modeled because the flue leakage is at a different height for stack effect.
+
 .. _infil_ach_cfm:
 
 ACH or CFM
@@ -746,6 +746,24 @@ Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
+
+.. _flueorchimney:
+
+Flue or Chimney
+~~~~~~~~~~~~~~~
+
+The presence of a flue or chimney with combustion air from conditioned space can be entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration``.
+
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+  Element                                           Type     Units  Constraints  Required   Default   Notes
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+  ``extension/HasFlueOrChimneyInConditionedSpace``  boolean                      No         See [#]_  Flue or chimney with combustion air from conditioned space
+  ================================================  =======  =====  ===========  =========  ========  ===============================================
+
+  .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
+         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         | - heating system is non-electric Fireplace located in conditioned space, or
+         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
 HPXML Attics
 ************
@@ -1296,14 +1314,21 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   Element                            Type      Units   Constraints  Required  Default         Notes
   =================================  ========  ======  ===========  ========  ==============  ===============================
   ``SystemIdentifier``               id                             Yes                       Unique identifier
+  ``UnitLocation``                   string            See [#]_     No        See [#]_        Location of heating system (e.g., air handler)
   ``HeatingSystemType``              element           1 [#]_       Yes                       Type of heating system
   ``HeatingSystemFuel``              string            See [#]_     Yes                       Fuel type
   ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized [#]_  Heating output capacity
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
+         | - **dse**: "living space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
-  .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1471,15 +1496,21 @@ HPXML Cooling Systems
 
 Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
-  ==========================  ========  ======  ===========  ========  =======  ===============================
-  Element                     Type      Units   Constraints  Required  Default  Notes
-  ==========================  ========  ======  ===========  ========  =======  ===============================
-  ``SystemIdentifier``        id                             Yes                Unique identifier
-  ``CoolingSystemType``       string            See [#]_     Yes                Type of cooling system
-  ``CoolingSystemFuel``       string            See [#]_     Yes                Fuel type
-  ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                Fraction of cooling load served
-  ==========================  ========  ======  ===========  ========  =======  ===============================
+  ==========================  ========  ======  ===========  ========  ========  ===============================
+  Element                     Type      Units   Constraints  Required  Default   Notes
+  ==========================  ========  ======  ===========  ========  ========  ===============================
+  ``SystemIdentifier``        id                             Yes                 Unique identifier
+  ``UnitLocation``            string            See [#]_     No        See [#]_  Location of cooling system (e.g., air handler)
+  ``CoolingSystemType``       string            See [#]_     Yes                 Type of cooling system
+  ``CoolingSystemFuel``       string            See [#]_     Yes                 Fuel type
+  ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                 Fraction of cooling load served
+  ==========================  ========  ======  ===========  ========  ========  ===============================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **dse**: "living space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1686,11 +1717,18 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
   ``SystemIdentifier``               id                             Yes                  Unique identifier
+  ``UnitLocation``                   string            See [#]_     No        See [#]_   Location of heat pump (e.g., air handler)
   ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
   ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
   ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
+         | - **none**: "living space"
+         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
+         | - **dse**: "living space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
@@ -2395,6 +2433,8 @@ If not entered, the simulation will not include whole house fans.
 .. note::
 
   The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
+
+.. _waterheatingsystems:
 
 HPXML Water Heating Systems
 ***************************
