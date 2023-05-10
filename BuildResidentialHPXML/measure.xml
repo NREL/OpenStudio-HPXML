@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a7a247b0-c7b0-432c-999c-8a822fc0a86b</version_id>
-  <version_modified>20230508T192824Z</version_modified>
+  <version_id>35aa6a0f-1652-40e5-a79d-19f78ec9b96e</version_id>
+  <version_modified>20230510T181859Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3030,6 +3030,32 @@
       <default_value>0</default_value>
     </argument>
     <argument>
+      <name>ducts_supply_buried_insulation_level</name>
+      <display_name>Ducts: Supply Buried Insulation Level</display_name>
+      <description>Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>not buried</value>
+          <display_name>not buried</display_name>
+        </choice>
+        <choice>
+          <value>partially buried</value>
+          <display_name>partially buried</display_name>
+        </choice>
+        <choice>
+          <value>fully buried</value>
+          <display_name>fully buried</display_name>
+        </choice>
+        <choice>
+          <value>deeply buried</value>
+          <display_name>deeply buried</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>ducts_supply_surface_area</name>
       <display_name>Ducts: Supply Surface Area</display_name>
       <description>The surface area of the supply ducts. If not provided, the OS-HPXML default is used.</description>
@@ -3125,6 +3151,32 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>ducts_return_buried_insulation_level</name>
+      <display_name>Ducts: Return Buried Insulation Level</display_name>
+      <description>Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>not buried</value>
+          <display_name>not buried</display_name>
+        </choice>
+        <choice>
+          <value>partially buried</value>
+          <display_name>partially buried</display_name>
+        </choice>
+        <choice>
+          <value>fully buried</value>
+          <display_name>fully buried</display_name>
+        </choice>
+        <choice>
+          <value>deeply buried</value>
+          <display_name>deeply buried</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>ducts_return_surface_area</name>
@@ -6604,7 +6656,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CF2BC3F3</checksum>
+      <checksum>74318562</checksum>
     </file>
   </files>
 </measure>
