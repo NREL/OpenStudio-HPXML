@@ -1799,7 +1799,7 @@ class OSModel
       next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
 
       duct_area = 0.0
-      duct_effective_r_value = 0.0
+      duct_effective_r_value = 99 # arbitrary
       duct_loc_space = nil # outside
       duct_loc_schedule = nil # outside
       duct_leakage_value = leakage_to_outside[duct_side][0]
