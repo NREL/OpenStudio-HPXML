@@ -1820,8 +1820,17 @@ class HVAC
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
     # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
-    x_A = heat_pump.heating_capacity_retention_temp
-    y_A = heat_pump.heating_capacity_retention_fraction
+    if not heat_pump.heating_capacity_17F.nil?
+      x_A = 17.0
+      if heat_pump.heating_capacity > 0
+        y_A = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      else
+        y_A = 0.0
+      end
+    else
+      x_A = heat_pump.heating_capacity_retention_temp
+      y_A = heat_pump.heating_capacity_retention_fraction
+    end
     x_B = 47.0 # 47F is the rating point
     y_B = 1.0
 

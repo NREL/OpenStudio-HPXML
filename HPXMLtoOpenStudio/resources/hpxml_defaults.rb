@@ -1114,23 +1114,15 @@ class HPXMLDefaults
 
     # Default HP heating capacity retention
     hpxml.heat_pumps.each do |heat_pump|
-      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_capacity_retention_fraction.nil?
+      next unless heat_pump.heating_capacity_17F.nil?
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
-      if not heat_pump.heating_capacity_17F.nil?
-        heat_pump.heating_capacity_retention_temp = 17.0
-        if heat_pump.heating_capacity > 0
-          heat_pump.heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
-        else
-          heat_pump.heating_capacity_retention_fraction = 0.0
-        end
-      else
-        heat_pump.heating_capacity_retention_temp = 5.0
-        if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
-          heat_pump.heating_capacity_retention_fraction = 0.425
-        elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
-          heat_pump.heating_capacity_retention_fraction = 0.5
-        end
+      heat_pump.heating_capacity_retention_temp = 5.0
+      if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.425
+      elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.5
       end
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
