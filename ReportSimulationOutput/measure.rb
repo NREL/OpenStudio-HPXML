@@ -229,9 +229,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_resilience', false)
-    arg.setDisplayName('Generate Timeseries Output: Resilience')
-    arg.setDescription('Generates timeseries resilience.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_resilience_hours', false)
+    arg.setDisplayName('Generate Resilience Output: Hours')
+    arg.setDescription('Generates resilience hours for battery.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -274,6 +274,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('timeseries_output_file_name', false)
     arg.setDisplayName('Timeseries Output File Name')
     arg.setDescription("If not provided, defaults to 'results_timeseries.csv' (or 'results_timeseries.json' or 'results_timeseries.msgpack').")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('resilience_output_file_name', false)
+    arg.setDisplayName('Resilience Output File Name')
+    arg.setDescription("If not provided, defaults to 'results_resilience.csv' (or 'results_resilience.json' or 'results_resilience.msgpack').")
     args << arg
 
     return args
@@ -555,6 +560,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       timeseries_output_path = File.join(output_dir, "results_timeseries.#{args[:output_format]}")
     end
+    if not args[:resilience_output_file_name].nil?
+      resilience_output_path = File.join(output_dir, args[:resilience_output_file_name])
+    else
+      resilience_output_path = File.join(output_dir, "results_resilience.#{args[:output_format]}")
+    end
 
     if args[:timeseries_frequency] != 'none'
       @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml, args)
@@ -570,6 +580,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Write/report results
     report_runperiod_output_results(runner, outputs, args, annual_output_path)
     report_timeseries_output_results(runner, outputs, timeseries_output_path, args, timestamps_dst, timestamps_utc)
+
+    if args[:include_resilience_hours]
+      args[:timeseries_frequency] = 'hourly'
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataHourly, @hpxml, args)
+    end
+    report_resilience_output_results(runner, resilience_output_path, args, timestamps_dst, timestamps_utc)
 
     return true
   end
@@ -939,7 +955,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         resilience.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
-        resilience.timeseries_output = resilience_hours if args[:timeseries_frequency] == 'hourly'
+        resilience.timeseries_output = resilience_hours
       end
     end
 
@@ -1656,11 +1672,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       weather_data = []
     end
-    if args[:include_timeseries_resilience]
-      resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      resilience_data = []
-    end
 
     # EnergyPlus output variables
     if not @output_variables.empty?
@@ -1671,7 +1682,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     return if (total_energy_data.size + fuel_data.size + end_use_data.size + system_use_data.size + emissions_data.size + emission_fuel_data.size +
                emission_end_use_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + unmet_hours_data.size +
-               zone_temps_data.size + airflows_data.size + weather_data.size + resilience_data.size + output_variables_data.size) == 0
+               zone_temps_data.size + airflows_data.size + weather_data.size + output_variables_data.size) == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
@@ -1679,7 +1690,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *end_use_data, *system_use_data, *emissions_data,
                       *emission_fuel_data, *emission_end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data,
-                      *unmet_hours_data, *zone_temps_data, *airflows_data, *weather_data, *resilience_data, *output_variables_data)
+                      *unmet_hours_data, *zone_temps_data, *airflows_data, *weather_data, *output_variables_data)
 
       # Error-check
       n_elements = []
@@ -1741,7 +1752,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       [total_energy_data, fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
-       zone_temps_data, airflows_data, weather_data, resilience_data, output_variables_data].each do |d|
+       zone_temps_data, airflows_data, weather_data, output_variables_data].each do |d|
         d.each do |o|
           grp, name = o[0].split(':', 2)
           h[grp] = {} if h[grp].nil?
@@ -1758,6 +1769,114 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
     runner.registerInfo("Wrote timeseries output results to #{timeseries_output_path}.")
+  end
+
+  def report_resilience_output_results(runner, resilience_output_path, args, timestamps_dst, timestamps_utc)
+    return if @timestamps.nil?
+
+    if args[:output_format] == 'msgpack'
+      # No need to round; no file size penalty to storing full precision
+      n_digits = 100
+    elsif not args[:timeseries_num_decimal_places].nil?
+      n_digits = args[:timeseries_num_decimal_places]
+    else
+      # Set rounding precision for timeseries (e.g., hourly) outputs.
+      # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
+      n_digits = 3 # Default for hourly (or longer) data
+    end
+
+    # Initial output data w/ Time column(s)
+    data = ['Time', nil] + @timestamps
+    if args[:add_timeseries_dst_column]
+      timestamps2 = [['TimeDST', nil] + timestamps_dst]
+    else
+      timestamps2 = []
+    end
+    if args[:add_timeseries_utc_column]
+      timestamps3 = [['TimeUTC', nil] + timestamps_utc]
+    else
+      timestamps3 = []
+    end
+
+    if args[:include_resilience_hours]
+      resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
+    else
+      resilience_data = []
+    end
+
+    return if (resilience_data.size) == 0
+
+    fail 'Unable to obtain timestamps.' if @timestamps.empty?
+
+    if ['csv'].include? args[:output_format]
+      # Assemble data
+      data = data.zip(*timestamps2, *timestamps3, *resilience_data)
+
+      # Error-check
+      n_elements = []
+      data.each do |data_array|
+        n_elements << data_array.size
+      end
+      if n_elements.uniq.size > 1
+        fail "Inconsistent number of array elements: #{n_elements.uniq}."
+      end
+
+      if args[:use_dview_format]
+        # Remove Time column(s)
+        while data[0][0].include? 'Time'
+          data = data.map { |a| a[1..-1] }
+        end
+
+        # Add header per DataFileTemplate.pdf; see https://github.com/NREL/wex/wiki/DView
+        year = @hpxml.header.sim_calendar_year
+        start_day = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
+        start_hr = (start_day - 1) * 24
+        interval_hrs = 1.0
+        header_data = [['wxDVFileHeaderVer.1'],
+                       data[0].map { |d| d.sub(':', '|') }, # Series name (series can be organized into groups by entering Group Name|Series Name)
+                       data[0].map { |_d| start_hr + interval_hrs / 2.0 }, # Start time of the first data point; 0.5 implies average over the first hour
+                       data[0].map { |_d| interval_hrs }, # Time interval in hours
+                       data[1]] # Units
+        data.delete_at(1) # Remove units, added to header data above
+        data.delete_at(0) # Remove series name, added to header data above
+
+        # Apply daylight savings
+        if @hpxml.header.dst_enabled
+          dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
+          dst_end_ix.downto(dst_start_ix + 1) do |i|
+            data[i + 1] = data[i]
+          end
+        end
+
+        data.insert(0, *header_data) # Add header data to beginning
+      end
+
+      # Write file
+      CSV.open(resilience_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << elem } }
+    elsif ['json', 'msgpack'].include? args[:output_format]
+      # Assemble data
+      h = {}
+      h['Time'] = data[2..-1]
+      h['TimeDST'] = timestamps2[2..-1] if timestamps_dst
+      h['TimeUTC'] = timestamps3[2..-1] if timestamps_utc
+
+      [resilience_data].each do |d|
+        d.each do |o|
+          grp, name = o[0].split(':', 2)
+          h[grp] = {} if h[grp].nil?
+          h[grp]["#{name.strip} (#{o[1]})"] = o[2..-1]
+        end
+      end
+
+      # Write file
+      if args[:output_format] == 'json'
+        require 'json'
+        File.open(resilience_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif args[:output_format] == 'msgpack'
+        File.open(resilience_output_path, 'w') { |json| h.to_msgpack(json) }
+      end
+    end
+    runner.registerInfo("Wrote resilience output results to #{resilience_output_path}.")
   end
 
   def get_dst_start_end_indexes(timestamps, timestamps_dst)

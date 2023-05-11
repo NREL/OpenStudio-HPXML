@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>7ba1576e-4cf7-4b2b-895d-1add9a508d20</version_id>
-  <version_modified>20230511T165525Z</version_modified>
+  <version_id>dd140ff8-58b3-40f9-ad41-6327de872a65</version_id>
+  <version_modified>20230511T203348Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -621,9 +621,9 @@
       </choices>
     </argument>
     <argument>
-      <name>include_timeseries_resilience</name>
-      <display_name>Generate Timeseries Output: Resilience</display_name>
-      <description>Generates timeseries resilience.</description>
+      <name>include_resilience_hours</name>
+      <display_name>Generate Resilience Output: Hours</display_name>
+      <description>Generates resilience hours for battery.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -728,6 +728,14 @@
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
+    <argument>
+      <name>resilience_output_file_name</name>
+      <display_name>Resilience Output File Name</display_name>
+      <description>If not provided, defaults to 'results_resilience.csv' (or 'results_resilience.json' or 'results_resilience.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
   </arguments>
   <outputs />
   <provenances />
@@ -756,7 +764,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B60D9672</checksum>
+      <checksum>6024D066</checksum>
     </file>
     <file>
       <version>
@@ -767,7 +775,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3D7887A1</checksum>
+      <checksum>54E43D26</checksum>
     </file>
   </files>
 </measure>
