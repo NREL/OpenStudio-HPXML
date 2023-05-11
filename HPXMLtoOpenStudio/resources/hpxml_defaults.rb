@@ -1114,7 +1114,7 @@ class HPXMLDefaults
 
     # Default HP heating capacity retention
     hpxml.heat_pumps.each do |heat_pump|
-      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_capacity_retention_fraction.nil?
 
       if not heat_pump.heating_capacity_17F.nil?

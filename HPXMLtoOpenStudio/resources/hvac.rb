@@ -1803,8 +1803,8 @@ class HVAC
   def self.calc_heat_cap_ft_spec(heat_pump, num_speeds)
     if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
       # Coefficients for the indoor temperature relationship are retained from the generic curve (Daikin lab data).
-      iat_slope = -0.010386676170938
-      iat_intercept = 0.219274275
+      iat_slope = -0.005770375
+      iat_intercept = 0.403926296
     else
       if num_speeds == 1
         iat_slope = -0.002303414
