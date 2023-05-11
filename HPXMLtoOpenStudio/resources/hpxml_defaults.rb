@@ -1124,17 +1124,11 @@ class HPXMLDefaults
         else
           heat_pump.heating_capacity_retention_fraction = 0.0
         end
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
-        heat_pump.heating_capacity_retention_temp = -5.0
-        heat_pump.heating_capacity_retention_fraction = 0.25
       else
-        # FIXME: Reconsider these. Currently aligns closely w/ Cutler curves.
         heat_pump.heating_capacity_retention_temp = 5.0
-        if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
-          heat_pump.heating_capacity_retention_fraction = 0.45
-        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
-          heat_pump.heating_capacity_retention_fraction = 0.4
-        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
+          heat_pump.heating_capacity_retention_fraction = 0.425
+        elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
           heat_pump.heating_capacity_retention_fraction = 0.5
         end
       end
