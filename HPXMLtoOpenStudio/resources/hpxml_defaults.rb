@@ -1115,10 +1115,16 @@ class HPXMLDefaults
     # Default HP heating capacity retention
     hpxml.heat_pumps.each do |heat_pump|
       next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      next unless heat_pump.heating_capacity_17F.nil?
       next unless heat_pump.heating_capacity_retention_fraction.nil?
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+      if not heat_pump.heating_capacity_17F.nil?
+        heat_pump.heating_capacity_retention_temp = 17.0
+        if heat_pump.heating_capacity > 0
+          heat_pump.heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+        else
+          heat_pump.heating_capacity_retention_fraction = 0.0
+        end
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
         heat_pump.heating_capacity_retention_temp = -5.0
         heat_pump.heating_capacity_retention_fraction = 0.25
       else
@@ -2855,11 +2861,6 @@ class HPXMLDefaults
                 htg_sys.heating_capacity_17F = htg_cap_17f.round
                 htg_sys.heating_capacity_17F_isdefaulted = true
               end
-            else
-              # Autosized
-              # FUTURE: Calculate HeatingCapacity17F from heat_cap_ft_spec? Might be confusing
-              # since user would not be able to replicate the results using this value, as the
-              # default curves are non-linear.
             end
           end
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round
