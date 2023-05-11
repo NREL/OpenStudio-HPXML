@@ -52,15 +52,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The version of the software program used.')
     args << arg
 
-    occupancy_calculation_type_choices = OpenStudio::StringVector.new
-    occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeAsset
-    occupancy_calculation_type_choices << HPXML::OccupancyCalculationTypeOperational
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('occupancy_calculation_type', occupancy_calculation_type_choices, false)
-    arg.setDisplayName('Occupancy Calculation Type')
-    arg.setDescription("The type of occupancy calculation type. If '#{HPXML::OccupancyCalculationTypeAsset}' is chosen, various end uses (e.g., clothes washer) are calculated using number of bedrooms and/or conditioned floor area. If '#{HPXML::OccupancyCalculationTypeOperational}' is chosen, end uses based on number of bedrooms are adjusted for the number of occupants. If not provided, the OS-HPXML default is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
     arg.setDisplayName('Schedules: CSV File Paths')
     arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
@@ -257,7 +248,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_bedrooms', true)
     arg.setDisplayName('Geometry: Unit Number of Bedrooms')
     arg.setUnits('#')
-    arg.setDescription('The number of bedrooms in the unit. Used to determine the energy usage of appliances and plug loads, hot water usage, etc.')
+    arg.setDescription('The number of bedrooms in the unit.')
     arg.setDefaultValue(3)
     args << arg
 
@@ -270,7 +261,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_num_occupants', false)
     arg.setDisplayName('Geometry: Unit Number of Occupants')
     arg.setUnits('#')
-    arg.setDescription("The number of occupants in the unit. If not provided, the OS-HPXML default is used. Required if Occupancy Calculation Type is '#{HPXML::OccupancyCalculationTypeOperational}'.")
+    arg.setDescription('The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301-2019. If provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between Number of Bedrooms and Number of Occupants from RECS 2015.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_building_num_units', false)
@@ -401,11 +392,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('ft')
     arg.setDescription('The eaves depth of the roof.')
     arg.setDefaultValue(2.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_has_flue_or_chimney', false)
-    arg.setDisplayName('Geometry: Has Flue or Chimney')
-    arg.setDescription('Presence of flue or chimney for infiltration model. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
@@ -1008,6 +994,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Type of air leakage. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('air_leakage_has_flue_or_chimney_in_conditioned_space', false)
+    arg.setDisplayName('Air Leakage: Has Flue or Chimney in Conditioned Space')
+    arg.setDescription('Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default is used.')
+    args << arg
+
     heating_system_type_choices = OpenStudio::StringVector.new
     heating_system_type_choices << 'none'
     heating_system_type_choices << HPXML::HVACTypeFurnace
@@ -1470,6 +1461,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
+    duct_buried_level_choices = OpenStudio::StringVector.new
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationNone
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationPartial
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationFull
+    duct_buried_level_choices << HPXML::DuctBuriedInsulationDeep
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_buried_insulation_level', duct_buried_level_choices, false)
+    arg.setDisplayName('Ducts: Supply Buried Insulation Level')
+    arg.setDescription('Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_surface_area', false)
     arg.setDisplayName('Ducts: Supply Surface Area')
     arg.setDescription('The surface area of the supply ducts. If not provided, the OS-HPXML default is used.')
@@ -1486,6 +1488,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The insulation r-value of the return ducts excluding air films.')
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_return_buried_insulation_level', duct_buried_level_choices, false)
+    arg.setDisplayName('Ducts: Return Buried Insulation Level')
+    arg.setDescription('Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_surface_area', false)
@@ -3420,14 +3427,14 @@ class HPXMLFile
     is_valid = true
 
     # Validate input HPXML against schema
-    schema_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
-    schema_path = File.join(schema_dir, 'HPXML.xsd')
-    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+    schema_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    schema_validator = XMLValidator.get_schema_validator(schema_path)
+    xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
 
     # Validate input HPXML against schematron docs
-    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
-    schematron_path = File.join(schematron_dir, 'EPvalidator.xml')
-    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_path, hpxml_doc)
+    schematron_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
+    sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml_doc)
 
     # Handle errors/warnings
     (xsd_errors + sct_errors).each do |error|
@@ -3498,10 +3505,6 @@ class HPXMLFile
     hpxml.header.transaction = 'create'
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.event_type = 'proposed workscope'
-
-    if args[:occupancy_calculation_type].is_initialized
-      hpxml.header.occupancy_calculation_type = args[:occupancy_calculation_type].get
-    end
 
     if args[:window_natvent_availability].is_initialized
       hpxml.header.natvent_days_per_week = args[:window_natvent_availability].get
@@ -3929,9 +3932,6 @@ class HPXMLFile
     if args[:year_built].is_initialized
       hpxml.building_construction.year_built = args[:year_built].get
     end
-    if args[:geometry_has_flue_or_chimney].is_initialized
-      hpxml.building_construction.has_flue_or_chimney = args[:geometry_has_flue_or_chimney].get
-    end
   end
 
   def self.set_climate_and_risk_zones(hpxml, args)
@@ -3971,6 +3971,10 @@ class HPXMLFile
                                             effective_leakage_area: effective_leakage_area,
                                             infiltration_volume: infiltration_volume,
                                             infiltration_type: air_leakage_type)
+
+    if args[:air_leakage_has_flue_or_chimney_in_conditioned_space].is_initialized
+      hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:air_leakage_has_flue_or_chimney_in_conditioned_space].get
+    end
   end
 
   def self.set_roofs(hpxml, args, sorted_surfaces)
@@ -5022,9 +5026,18 @@ class HPXMLFile
       ducts_return_surface_area = args[:ducts_return_surface_area].get
     end
 
+    if args[:ducts_supply_buried_insulation_level].is_initialized
+      ducts_supply_buried_insulation_level = args[:ducts_supply_buried_insulation_level].get
+    end
+
+    if args[:ducts_return_buried_insulation_level].is_initialized
+      ducts_return_buried_insulation_level = args[:ducts_return_buried_insulation_level].get
+    end
+
     hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                 duct_type: HPXML::DuctTypeSupply,
                                 duct_insulation_r_value: args[:ducts_supply_insulation_r],
+                                duct_buried_insulation_level: ducts_supply_buried_insulation_level,
                                 duct_location: ducts_supply_location,
                                 duct_surface_area: ducts_supply_surface_area)
 
@@ -5032,6 +5045,7 @@ class HPXMLFile
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeReturn,
                                   duct_insulation_r_value: args[:ducts_return_insulation_r],
+                                  duct_buried_insulation_level: ducts_return_buried_insulation_level,
                                   duct_location: ducts_return_location,
                                   duct_surface_area: ducts_return_surface_area)
     end
