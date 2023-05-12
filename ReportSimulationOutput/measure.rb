@@ -1011,6 +1011,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           resilience_hours << get_resilience_hours(init_time_step, batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh[init_time_step], crit_load, n_timesteps)
         end
 
+        puts("Resilience Hours = #{resilience_hours[0..23]}")
+        #puts("critical loads = #{crit_load[0..23]}")
+        #puts("elec_prod = #{elec_prod[0..23]}")
+        #puts("elec_stor = #{elec_stor[0..23]}")
+
         resilience.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
         resilience.timeseries_output = resilience_hours
       end
@@ -2085,21 +2090,37 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
-      if load_kw < 0 # load is met
-        if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
-          batt_soc_kwh += [
-            batt_kwh - batt_soc_kwh, # room available
-            batt_kw * batt_roundtrip_efficiency, # inverter capacity
-            -load_kw * batt_roundtrip_efficiency, # excess energy
-          ].min
-        end
-      else # check if we can meet load with generator then storage
+      #Original Code
+      #if load_kw < 0 # load is met
+      #  if batt_soc_kwh < batt_kwh # charge battery if theres room in the battery
+      #    batt_soc_kwh += [
+      #      batt_kwh - batt_soc_kwh, # room available
+      #      batt_kw * batt_roundtrip_efficiency, # inverter capacity
+      #      -load_kw * batt_roundtrip_efficiency, # excess energy
+      #    ].min
+      #  end
+      #else # check if we can meet load with generator then storage
+      if load_kw > 0
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
-          # prevent battery charge from going negative
-          batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
-          load_kw = 0
-        end
+            # prevent battery charge from going negative
+            batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
+            load_kw = 0
+          end
       end
+
+      #Attempt2
+      #if load_kw < batt_soc_kwh
+      #  batt_soc_kwh = batt_soc_kwh - load_kw
+      #end
+
+      #Attempt 3
+      #if load_kw > 0
+      #  if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
+      #    # prevent battery charge from going negative
+      #    batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
+      #    load_kw = 0
+      #  end
+      #end
 
       if load_kw > 0 # failed to meet load in this time step
         return i
