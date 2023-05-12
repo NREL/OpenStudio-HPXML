@@ -11,6 +11,11 @@ class HPXMLTest < MiniTest::Test
     @this_dir = File.dirname(__FILE__)
     @results_dir = File.join(@this_dir, 'results')
     FileUtils.mkdir_p @results_dir
+
+    schema_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+    @schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schematron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    @schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
   end
 
   def test_simulations
@@ -164,6 +169,7 @@ class HPXMLTest < MiniTest::Test
       # Check for output files
       assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'in.schedules.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'stochastic.csv'))
 
       # Check stochastic.csv headers
@@ -216,6 +222,29 @@ class HPXMLTest < MiniTest::Test
       log_lines = File.readlines(File.join(File.dirname(xml), 'run', 'run.log')).map(&:strip)
       assert(log_lines.include? "Warning: Request for output variable 'Foobar Variable' returned no key values.")
     end
+  end
+
+  def test_run_defaulted_in_xml
+    # Check that if we simulate the in.xml file (HPXML w/ defaults), we get
+    # the same results as the original HPXML.
+
+    # Run base.xml
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+    base_results = CSV.read(File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+    # Run in.xml (generated from base.xml)
+    xml2 = File.join(File.dirname(xml), 'run', 'in.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml2}\""
+    system(command, err: File::NULL)
+    assert(File.exist? File.join(File.dirname(xml2), 'run', 'results_annual.csv'))
+    default_results = CSV.read(File.join(File.dirname(xml2), 'run', 'results_annual.csv'))
+
+    # Check two output files are identical
+    assert_equal(base_results, default_results)
   end
 
   def test_template_osws
@@ -278,17 +307,20 @@ class HPXMLTest < MiniTest::Test
     system(command, err: File::NULL)
     assert_equal(true, File.exist?(csv_output_path))
 
+    # Check that we have exactly one warning (i.e., check we are only validating a single Building element against schematron)
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.' }.size)
+
     # Check unsuccessful simulation when providing incorrect building ID
     command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyFoo"
     system(command, err: File::NULL)
     assert_equal(false, File.exist?(csv_output_path))
-    assert(File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size > 0)
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size)
 
     # Check unsuccessful simulation when not providing building ID
     command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
     system(command, err: File::NULL)
     assert_equal(false, File.exist?(csv_output_path))
-    assert(File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size > 0)
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size)
   end
 
   def test_release_zips
@@ -346,9 +378,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    xsd_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    stron_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_path: xsd_path, schematron_path: stron_path) # Validate in.xml to ensure it can be run back through OS-HPXML
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
     if not hpxml.errors.empty?
       puts 'ERRORS:'
       hpxml.errors.each do |error|
@@ -368,6 +398,8 @@ class HPXMLTest < MiniTest::Test
     results = {}
     CSV.foreach(annual_csv_path) do |row|
       next if row.nil? || (row.size < 2)
+      next if row[0].start_with? 'System Use:'
+      next if row[0].start_with? 'Emissions:'
 
       results[row[0]] = Float(row[1])
     end
@@ -424,13 +456,13 @@ class HPXMLTest < MiniTest::Test
       window.fraction_operable = nil
     end
     hpxml.collapse_enclosure_surfaces()
+    hpxml.delete_adiabatic_subsurfaces()
 
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
-      next if log_line.include? "-cache.csv' could not be found; regenerating it."
       next if log_line.include? 'Could not find state average'
 
       if hpxml_path.include? 'base-atticroof-conditioned.xml'
@@ -467,7 +499,9 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
       end
       if hpxml.lighting_groups.empty?
-        next if log_line.include? 'No lighting specified, the model will not include lighting energy use.'
+        next if log_line.include? 'No interior lighting specified, the model will not include interior lighting energy use.'
+        next if log_line.include? 'No exterior lighting specified, the model will not include exterior lighting energy use.'
+        next if log_line.include? 'No garage lighting specified, the model will not include garage lighting energy use.'
       end
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
@@ -482,6 +516,9 @@ class HPXMLTest < MiniTest::Test
       end
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
+      end
+      if !hpxml.header.unavailable_periods.empty?
+        next if log_line.include? 'It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
       end
 
       flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
@@ -567,6 +604,10 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
+      end
+      if !hpxml.header.unavailable_periods.empty?
+        next if err_line.include? 'Target water temperature is greater than the hot water temperature'
+        next if err_line.include? 'Target water temperature should be less than or equal to the hot water temperature'
       end
 
       flunk "Unexpected eplusout.err warning found for #{File.basename(hpxml_path)}: #{err_line}"
@@ -959,11 +1000,11 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
-      if subsurface.respond_to? :wall_idref
+      if subsurface.is_a? HPXML::Window
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(90.0, sql_value, 0.01)
-      elsif subsurface.respond_to? :roof_idref
+      elsif subsurface.is_a? HPXML::Skylight
         hpxml_value = nil
         hpxml.roofs.each do |roof|
           next if roof.id != subsurface.roof_idref
