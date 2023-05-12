@@ -1827,20 +1827,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
       end
 
-      #Attempt2
-      #if load_kw < batt_soc_kwh
-      #  batt_soc_kwh = batt_soc_kwh - load_kw
-      #end
-
-      #Attempt 3
-      #if load_kw > 0
-      #  if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
-      #    # prevent battery charge from going negative
-      #    batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
-      #    load_kw = 0
-      #  end
-      #end
-
       if load_kw > 0 # failed to meet load in this time step
         return i
       end
