@@ -1162,7 +1162,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     r_value: 4.4)
   end
   if ['base-misc-neighbor-shading-bldgtype-multifamily.xml'].include? hpxml_file
-    wall = hpxml.walls.select{ |w| w.azimuth == hpxml.neighbor_buildings[0].azimuth }[0]
+    wall = hpxml.walls.select { |w| w.azimuth == hpxml.neighbor_buildings[0].azimuth }[0]
     wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
   end
 
