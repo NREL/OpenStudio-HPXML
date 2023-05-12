@@ -556,6 +556,7 @@ For each neighboring building defined, additional information is entered in a ``
   ==============================  =================  ================  ===================  ========  ========  =============================================
   
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+         The azimuth/orientation of the neighboring building must match the azimuth/orientation of at least one wall in the home, otherwise an error will be thrown.
   .. [#] If Height not provided, assumed to be same height as the dwelling unit.
 
 .. _buildingoccupancy:
