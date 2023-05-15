@@ -64,6 +64,7 @@ __Bugfixes__
 - Various fixes for window/skylight/duct design loads for Manual J HVAC autosizing calculations.
 - Ensure that ductless HVAC systems do not have a non-zero airflow defect ratio specified.
 - Fixes possible "A neighbor building has an azimuth (XX) not equal to the azimuth of any wall" for SFA/MF units with neighboring buildings for shade.
+- Fixes reported loads when no/partial HVAC system (e.g., room air conditioner that meets 30% of the cooling load).
 
 ## OpenStudio-HPXML v1.5.1
 
