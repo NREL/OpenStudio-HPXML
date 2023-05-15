@@ -1280,6 +1280,7 @@
   <sch:pattern>
     <sch:title>[GeothermalLoop]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:GeothermalLoop'>
+      <sch:assert role='ERROR' test='count(h:Pipe/h:Conductivity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pipe/Conductivity</sch:assert>
     </sch:rule>
   </sch:pattern>
 

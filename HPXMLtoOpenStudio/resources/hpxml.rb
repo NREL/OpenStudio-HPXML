@@ -3987,7 +3987,7 @@ class HPXML < Object
   end
 
   class GeothermalLoop < BaseElement
-    ATTRS = [:id]
+    ATTRS = [:id, :pipe_cond]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4006,12 +4006,17 @@ class HPXML < Object
       geothermal_loop = XMLHelper.add_element(hvac_plant, 'GeothermalLoop')
       sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @pipe_cond.nil?
+        pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
+        XMLHelper.add_element(pipe, 'Conductivity', @pipe_cond, :float, @pipe_cond_isdefaulted) unless @pipe_cond.nil?
+      end
     end
 
     def from_oga(geothermal_loop)
       return if geothermal_loop.nil?
 
       @id = HPXML::get_id(geothermal_loop)
+      @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
     end
   end
 
@@ -4055,7 +4060,7 @@ class HPXML < Object
     def geothermal_loop
       return if @geothermal_loop_idref.nil?
 
-      @hpxml.geothermal_loops.each do |geothermal_loop|
+      @hpxml_object.geothermal_loops.each do |geothermal_loop|
         next unless geothermal_loop.id == @geothermal_loop_idref
 
         return geothermal_loop

@@ -1486,6 +1486,15 @@ class HPXMLDefaults
         HVAC.set_gshp_assumptions(heat_pump, weather)
         HVAC.set_curves_gshp(heat_pump)
 
+        if heat_pump.geothermal_loop.nil?
+          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
+          heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
+        end
+
+        if heat_pump.geothermal_loop.pipe_cond.nil?
+          heat_pump.geothermal_loop.pipe_cond = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
+          heat_pump.geothermal_loop.pipe_cond_isdefaulted = true
+        end
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 

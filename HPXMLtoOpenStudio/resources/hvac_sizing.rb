@@ -1886,7 +1886,7 @@ class HVACSizing
 
     # Autosize ground loop heat exchanger length
     bore_spacing = 20.0 # ft, distance between bores
-    pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling_ap)
+    pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
     nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, pipe_r_value)
 
     bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
@@ -2653,9 +2653,11 @@ class HVACSizing
     return [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
   end
 
-  def self.gshp_hx_pipe_rvalue(hvac_cooling_ap)
+  def self.gshp_hx_pipe_rvalue(hvac_cooling)
+    hvac_cooling_ap = hvac_cooling.additional_properties
+
     # Thermal Resistance of Pipe
-    return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling_ap.pipe_cond
+    return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_cond
   end
 
   def self.gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, pipe_r_value)
