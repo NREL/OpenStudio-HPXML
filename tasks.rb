@@ -1295,6 +1295,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.cooling_systems.reverse_each do |cooling_system|
       cooling_system.delete
     end
+    hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: hpxml.hvac_distributions[-1].id,
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -1314,7 +1315,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          cooling_shr: 0.73,
                          primary_heating_system: true,
                          primary_cooling_system: true,
-                         pump_watts_per_ton: 0.0)
+                         pump_watts_per_ton: 0.0,
+                         geothermal_loop_idref: hpxml.geothermal_loops[-1].id)
 
   end
   if hpxml_file.include? 'eae'
