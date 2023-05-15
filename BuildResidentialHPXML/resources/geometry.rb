@@ -1281,16 +1281,15 @@ class Geometry
 
     if width_for_windows > wall_width
       surface_area = UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-      runner.registerWarning("Surface #{surface.nameString} has an area of #{surface_area}, params: window_area=#{window_area} ft^2, window_gap_y=#{window_gap_y} ft, window_gap_x=#{window_gap_x} ft, window_aspect_ratio=#{window_aspect_ratio}, max_single_window_area=#{max_single_window_area} ft^2, facade=#{facade}")
-      runner.registerWarning("Could not fit windows on #{surface.name}. Fall back to WWR")
       wwr = window_area / surface_area
-      if wwr >= 0.90
+      if wwr > 0.90
+        runner.registerWarning("Could not fit windows on #{surface.name}; reducing window area to 90% WWR.")
         wwr = 0.90
       end
 
       # Instead of using this
       # ss_ = surface.setWindowToWallRatio(wwr, offset, true)
-      # We offset the vertices towards the centroid
+      # We offset the vertices towards the centroid to maximize the likelihood of fitting the window area on the surface
       window_vertices = []
       g = surface.centroid
       scale_factor = wwr**0.5
