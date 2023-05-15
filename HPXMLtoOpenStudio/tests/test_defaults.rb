@@ -1522,7 +1522,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].crankcase_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil, nil, 0.425, 5.0, 50.0)
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil, nil, 0.425, 5.0, 0.0)
   end
 
   def test_mini_split_heat_pumps
