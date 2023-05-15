@@ -3981,7 +3981,7 @@ class HPXML < Object
       return if hpxml.nil?
 
       XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop').each do |geothermal_loop|
-        self << HeatPump.new(@hpxml_object, geothermal_loop)
+        self << GeothermalLoop.new(@hpxml_object, geothermal_loop)
       end
     end
   end
