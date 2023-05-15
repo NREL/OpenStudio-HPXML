@@ -1964,13 +1964,13 @@ class OSModel
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
+    s = "  Set loads_htg_tot = (#{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}) * #{@hpxml.total_fraction_heat_load_served}"
     if not intgain_dehumidifier.nil?
       s += " - #{intgain_dehumidifier.name}"
     end
     program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
+    s = "  Set loads_clg_tot = (#{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}) * #{@hpxml.total_fraction_cool_load_served}"
     if not intgain_dehumidifier.nil?
       s += " + #{intgain_dehumidifier.name}"
     end
@@ -2382,13 +2382,13 @@ class OSModel
     program.addLine('Set htg_mode = 0')
     program.addLine('Set clg_mode = 0')
     program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
-    program.addLine('  Set htg_mode = 1')
+    program.addLine("  Set htg_mode = #{@hpxml.total_fraction_heat_load_served}")
     program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
-    program.addLine('  Set clg_mode = 1')
+    program.addLine("  Set clg_mode = #{@hpxml.total_fraction_cool_load_served}")
     program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
-    program.addLine('  Set clg_mode = 1')
+    program.addLine("  Set clg_mode = #{@hpxml.total_fraction_cool_load_served}")
     program.addLine('Else') # No load, assign hour to heating if not in cooling season definition
-    program.addLine('  Set htg_mode = 1')
+    program.addLine("  Set htg_mode = #{@hpxml.total_fraction_heat_load_served}")
     program.addLine('EndIf')
 
     [:htg, :clg].each do |mode|

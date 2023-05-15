@@ -310,6 +310,7 @@ Annual building loads are listed below.
    ======================================  ==================================================================
 
 Note that the "Delivered" loads represent the energy delivered by the HVAC/DHW system; if a system is significantly undersized, there will be unmet load not reflected by these values.
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported load will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Unmet Hours
 ~~~~~~~~~~~~~~~~~~
@@ -350,6 +351,7 @@ Peak building loads are listed below.
    =======================================  ==================================
 
 Note that the "Delivered" peak loads represent the energy delivered by the HVAC system; if a system is significantly undersized, there will be unmet peak load not reflected by these values.
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported peak load will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Component Building Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -386,6 +388,8 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Internal Gains (MBtu)          Heat gain/loss from appliances, plug loads, water heater tank losses, etc. in the conditioned space
    Component Load: \*: Lighting (MBtu)                Heat gain/loss from lighting in the conditioned space
    =================================================  =========================================================================================================
+
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported component loads will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Hot Water Uses
 ~~~~~~~~~~~~~~~~~~~~~
