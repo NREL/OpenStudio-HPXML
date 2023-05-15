@@ -1596,6 +1596,9 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosized-backup.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_backup_heating_capacity": null
@@ -2478,6 +2481,9 @@
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
   },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-heating-capacity-17f.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
+  },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_heating_capacity": 18000,
@@ -2550,6 +2556,9 @@
     "heat_pump_cooling_sensible_heat_fraction": 0.65,
     "heat_pump_heating_capacity_retention_fraction": 0.6,
     "heat_pump_heating_capacity_retention_temp": 17.0
+  },
+  "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
+    "parent_hpxml": "sample_files/base-hvac-pthp.xml"
   },
   "sample_files/base-hvac-room-ac-only.xml": {
     "parent_hpxml": "sample_files/base.xml",

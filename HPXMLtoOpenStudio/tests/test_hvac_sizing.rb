@@ -207,17 +207,20 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
     assert(hpxml.cooling_systems[0].cooling_capacity > clg_cap)
 
     # Test heat pump
-    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml')
     hpxml.header.allow_increased_fixed_capacities = true
     hpxml.heat_pumps[0].heating_capacity /= 10.0
+    hpxml.heat_pumps[0].heating_capacity_17F /= 10.0
     hpxml.heat_pumps[0].backup_heating_capacity /= 10.0
     hpxml.heat_pumps[0].cooling_capacity /= 10.0
     htg_cap = hpxml.heat_pumps[0].heating_capacity
+    htg_17f_cap = hpxml.heat_pumps[0].heating_capacity_17F
     htg_bak_cap = hpxml.heat_pumps[0].backup_heating_capacity
     clg_cap = hpxml.heat_pumps[0].cooling_capacity
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     _model, hpxml = _test_measure(args_hash)
     assert(hpxml.heat_pumps[0].heating_capacity > htg_cap)
+    assert(hpxml.heat_pumps[0].heating_capacity_17F > htg_17f_cap)
     assert(hpxml.heat_pumps[0].backup_heating_capacity > htg_bak_cap)
     assert(hpxml.heat_pumps[0].cooling_capacity > clg_cap)
   end
