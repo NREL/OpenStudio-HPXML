@@ -1255,7 +1255,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_temp', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Retention Temperature')
-    arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default is used.")
+    arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.")
     arg.setUnits('deg-F')
     args << arg
 
