@@ -3216,8 +3216,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:heating_system_type] == 'none') && (args[:heat_pump_type] == 'none') && (args[:heating_system_2_type] != 'none')
     errors << 'A second heating system was specified without a primary heating system.' if error
 
-    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeFixedHeater].include?(args[:heating_system_2_type])
-      if !['none', 'mini-split'].include?(args[:heat_pump_type]) || (args[:heat_pump_type] == 'mini-split' && args[:heat_pump_is_ducted])
+    if (args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate) && [HPXML::HVACTypeFurnace, HPXML::HVACTypeFixedHeater].include?(args[:heating_system_2_type]) # separate ducted backup
+      if !['none', 'mini-split'].include?(args[:heat_pump_type]) || (args[:heat_pump_type] == 'mini-split' && args[:heat_pump_is_ducted]) # ducted heat pump
         errors << 'A ducted heat pump with "separate" ducted backup is not supported.'
       end
     end
