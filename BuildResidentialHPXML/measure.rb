@@ -1339,6 +1339,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     heating_system_2_type_choices = OpenStudio::StringVector.new
     heating_system_2_type_choices << 'none'
+    heating_system_2_type_choices << HPXML::HVACTypeFurnace
     heating_system_2_type_choices << HPXML::HVACTypeWallFurnace
     heating_system_2_type_choices << HPXML::HVACTypeFloorFurnace
     heating_system_2_type_choices << HPXML::HVACTypeBoiler
@@ -1346,6 +1347,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_2_type_choices << HPXML::HVACTypeStove
     heating_system_2_type_choices << HPXML::HVACTypePortableHeater
     heating_system_2_type_choices << HPXML::HVACTypeFireplace
+    heating_system_2_type_choices << HPXML::HVACTypeFixedHeater
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_2_type', heating_system_2_type_choices, true)
     arg.setDisplayName('Heating System 2: Type')
@@ -3213,6 +3215,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = (args[:heating_system_type] == 'none') && (args[:heat_pump_type] == 'none') && (args[:heating_system_2_type] != 'none')
     errors << 'A second heating system was specified without a primary heating system.' if error
+
+    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeFixedHeater].include?(args[:heating_system_2_type])
+      if !['none', 'mini-split'].include?(args[:heat_pump_type]) || (args[:heat_pump_type] == 'mini-split' && args[:heat_pump_is_ducted])
+        errors << 'A ducted heat pump with "separate" ducted backup is not supported.'
+      end
+    end
 
     error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && !args[:geometry_building_num_units].is_initialized
     errors << 'Did not specify the number of units in the building for single-family attached or apartment units.' if error

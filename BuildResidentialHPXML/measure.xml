@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>58c397aa-1969-4e48-a7bc-0d22e27e7733</version_id>
-  <version_modified>20230515T163005Z</version_modified>
+  <version_id>1a26caf0-1652-4c2d-aa55-b275d3a88dda</version_id>
+  <version_modified>20230516T211801Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2760,6 +2760,10 @@
           <display_name>none</display_name>
         </choice>
         <choice>
+          <value>Furnace</value>
+          <display_name>Furnace</display_name>
+        </choice>
+        <choice>
           <value>WallFurnace</value>
           <display_name>WallFurnace</display_name>
         </choice>
@@ -2786,6 +2790,10 @@
         <choice>
           <value>Fireplace</value>
           <display_name>Fireplace</display_name>
+        </choice>
+        <choice>
+          <value>FixedHeater</value>
+          <display_name>FixedHeater</display_name>
         </choice>
       </choices>
     </argument>
@@ -6654,7 +6662,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C26172ED</checksum>
+      <checksum>56ABEAD9</checksum>
     </file>
     <file>
       <version>
@@ -6665,7 +6673,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F7B212C2</checksum>
+      <checksum>E9C9F432</checksum>
     </file>
   </files>
 </measure>
