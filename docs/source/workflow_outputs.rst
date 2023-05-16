@@ -508,6 +508,8 @@ Timestamps in the output use the start-of-period convention unless you have requ
 Additional timestamp columns can be optionally requested that reflect daylight saving time (DST) and/or coordinated universal time (UTC).
 Most outputs will be summed over the hour (e.g., energy) but some will be averaged over the hour (e.g., temperatures, airflows).
 
+Note that if the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported zone temperature for the living space will reflect a fully conditioned home due to the way these systems are modeled in EnergyPlus.
+
 .. _bill_outputs:
 
 Utility Bill Outputs
