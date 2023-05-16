@@ -1145,9 +1145,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_crankcase_watts', false)
-    arg.setDisplayName('Cooling System: Crankcase Power Watts')
-    arg.setDescription("Cooling system crankcase power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_crankcase_heater_watts', false)
+    arg.setDisplayName('Cooling System: Crankcase Heater Power Watts')
+    arg.setDescription("Cooling system crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}. If not provided, the OS-HPXML default is used.")
     arg.setUnits('W')
     args << arg
 
@@ -1343,9 +1343,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_watts', false)
-    arg.setDisplayName('Heat Pump: Crankcase Power Watts')
-    arg.setDescription("Heat Pump crankcase power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_heater_watts', false)
+    arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
+    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default is used.")
     arg.setUnits('W')
     args << arg
 
@@ -4721,9 +4721,9 @@ class HPXMLFile
       end
     end
 
-    if args[:cooling_system_crankcase_watts].is_initialized
+    if args[:cooling_system_crankcase_heater_watts].is_initialized
       if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include?(cooling_system_type)
-        cooling_system_crankcase_watts = args[:cooling_system_crankcase_watts].get
+        cooling_system_crankcase_heater_watts = args[:cooling_system_crankcase_heater_watts].get
       end
     end
 
@@ -4758,7 +4758,7 @@ class HPXMLFile
                               cooling_efficiency_ceer: cooling_efficiency_ceer,
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: charge_defect_ratio,
-                              crankcase_watts: cooling_system_crankcase_watts,
+                              crankcase_heater_watts: cooling_system_crankcase_heater_watts,
                               primary_system: true,
                               integrated_heating_system_fuel: integrated_heating_system_fuel,
                               integrated_heating_system_capacity: integrated_heating_system_capacity,
@@ -4860,9 +4860,9 @@ class HPXMLFile
       charge_defect_ratio = args[:heat_pump_charge_defect_ratio].get
     end
 
-    if args[:heat_pump_crankcase_watts].is_initialized
+    if args[:heat_pump_crankcase_heater_watts].is_initialized
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
-        heat_pump_crankcase_watts = args[:heat_pump_crankcase_watts].get
+        heat_pump_crankcase_heater_watts = args[:heat_pump_crankcase_heater_watts].get
       end
     end
 
@@ -4909,7 +4909,7 @@ class HPXMLFile
                          cooling_efficiency_eer: cooling_efficiency_eer,
                          airflow_defect_ratio: airflow_defect_ratio,
                          charge_defect_ratio: charge_defect_ratio,
-                         crankcase_watts: heat_pump_crankcase_watts,
+                         crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                          primary_heating_system: primary_heating_system,
                          primary_cooling_system: primary_cooling_system)
   end

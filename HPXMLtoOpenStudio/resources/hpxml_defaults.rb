@@ -1368,29 +1368,29 @@ class HPXMLDefaults
       end
     end
 
-    # Crankcase power [Watts]
-    # Fixme: Need to handle the crankcase modeling for cooling only scenario
+    # Crankcase heater power [Watts]
+    # Fixme: Need to handle the crankcase heater modeling for cooling only scenario
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-      next unless cooling_system.crankcase_watts.nil?
+      next unless cooling_system.crankcase_heater_watts.nil?
 
       if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-        cooling_system.crankcase_watts = 0.0
+        cooling_system.crankcase_heater_watts = 0.0
       else
-        cooling_system.crankcase_watts = 50 # From RESNET Publication No. 002-2017
+        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
       end
-      cooling_system.crankcase_watts_isdefaulted = true
+      cooling_system.crankcase_heater_watts_isdefaulted = true
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-      next unless heat_pump.crankcase_watts.nil?
+      next unless heat_pump.crankcase_heater_watts.nil?
 
       if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-        heat_pump.crankcase_watts = 0.0
+        heat_pump.crankcase_heater_watts = 0.0
       else
-        heat_pump.crankcase_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
+        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
       end
-      heat_pump.crankcase_watts_isdefaulted = true
+      heat_pump.crankcase_heater_watts_isdefaulted = true
     end
 
     # Pilot Light

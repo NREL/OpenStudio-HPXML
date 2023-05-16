@@ -349,7 +349,7 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
               <extension>
-                <CrankcasePowerWatts>40.0</CrankcasePowerWatts>
+                <CrankcaseHeaterPowerWatts>40.0</CrankcaseHeaterPowerWatts>
               </extension>
             </CoolingSystem>
           </HVACPlant>
