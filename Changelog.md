@@ -24,6 +24,8 @@ __New Features__
    - If `NumberofResidents` not provided, an *asset* calculation is performed assuming standard occupancy per ANSI/RESNET/ICC 301.
    - If `NumberofResidents` is provided, an *operational* calculation is performed using a relationship between #Bedrooms and #Occupants from RECS 2015.
 - Heat pump enhancements:
+  - Allows `HeatingCapacityRetention[Fraction | Temperature]` inputs to define cold-climate performance; like `HeatingCapacity17F` but can apply to autosized systems and can use a user-specified temperature.
+  - Default mini-split heating capacity retention updated from 0.4 to 0.5 (at 5 deg-F).
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
   - Defaults for `BackupHeatingLockoutTemperature`: 50F for dual-fuel, 40F for all other heat pumps.
@@ -31,6 +33,7 @@ __New Features__
   - `BackupHeatingCapacity` can now be defaulted (autosized) even when the heat pump capacities are provided (hard-sized).
 - Infiltration changes:
   - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
+  - **Breaking change**: Replaces `BuildingConstruction/extension/HasFlueOrChimney` with `AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace`; defaults now incorporate HVAC/water heater location.
   - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
 - Lighting changes:
   - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
@@ -39,6 +42,9 @@ __New Features__
   - Allows optional inputs under `HVACSizingControl/ManualJInputs` to override Manual J defaults for HVAC autosizing calculations.
   - Updates to better align various default values and algorithms with Manual J.
   - Updates design load calculations to handle conditioned basements with insulated slabs.
+- Duct enhancements:
+  - Allows modeling ducts buried in attic loose-fill insulation using `Ducts/DuctBuriedInsulationLevel`.
+  - Allows specifying `Ducts/DuctEffectiveRValue`, the value that will be used in the model, though its use is not recommended.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
@@ -57,6 +63,7 @@ __Bugfixes__
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
 - Various fixes for window/skylight/duct design loads for Manual J HVAC autosizing calculations.
 - Ensure that ductless HVAC systems do not have a non-zero airflow defect ratio specified.
+- Fixes possible "A neighbor building has an azimuth (XX) not equal to the azimuth of any wall" for SFA/MF units with neighboring buildings for shade.
 
 ## OpenStudio-HPXML v1.5.1
 
