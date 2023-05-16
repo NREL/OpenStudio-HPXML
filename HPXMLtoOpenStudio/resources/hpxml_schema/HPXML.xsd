@@ -110,7 +110,7 @@
 			<xs:element name="ReceivingSystemIdentifierType" type="ReceivingSystemIdentifierType" minOccurs="0"/>
 			<xs:element name="ReceivingSystemIdentifierValue" type="ReceivingSystemIdentifierValue" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute name="id" type="xs:IDREF">
+		<xs:attribute name="idref" type="xs:IDREF">
 			<xs:annotation>
 				<xs:documentation>Id reference in the current document. Optional. If the element isn't available in the current document, don't use this.</xs:documentation>
 			</xs:annotation>
@@ -3118,6 +3118,11 @@
 			<xs:element minOccurs="0" name="CombustionAppliances">
 				<xs:complexType>
 					<xs:sequence>
+						<xs:element name="MaxAmbientCOinLivingSpaceDuringAudit" minOccurs="0" type="HPXMLDouble">
+							<xs:annotation>
+								<xs:documentation>Monitored throughout assessment, not just appliance testing</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element minOccurs="0" name="CombustionApplianceZone" maxOccurs="unbounded">
 							<xs:complexType>
 								<xs:sequence>
@@ -3205,11 +3210,6 @@
 														<xs:complexContent>
 															<xs:extension base="CAZApplianceReading">
 																<xs:sequence>
-																	<xs:element name="MaxAmbientCOinLivingSpaceDuringAudit" minOccurs="0" type="HPXMLDouble">
-																		<xs:annotation>
-																			<xs:documentation>Monitored throughout assessment, not just appliance testing</xs:documentation>
-																		</xs:annotation>
-																	</xs:element>
 																	<xs:element minOccurs="0" name="AmbientCOActionDuringCAZTesting" type="HPXMLString">
 																		<xs:annotation>
 																			<xs:documentation>BPI Gold Sheet is one example that shows action levels based upon decision logic</xs:documentation>
@@ -8694,6 +8694,7 @@
 			<xs:enumeration value="crawlspace - unconditioned"/>
 			<xs:enumeration value="crawlspace - unvented"/>
 			<xs:enumeration value="crawlspace - vented"/>
+			<xs:enumeration value="manufactured home belly"/>
 			<xs:enumeration value="garage"/>
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>
