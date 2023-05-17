@@ -118,6 +118,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
+                            'hvac-negative-crankcase-heater-watts' => ['Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.'],
                             'incomplete-integrated-heating' => ['Expected 1 element(s) for xpath: IntegratedHeatingSystemFractionHeatLoadServed'],
                             'invalid-airflow-defect-ratio' => ['Expected extension/AirflowDefectRatio to be 0'],
                             'invalid-assembly-effective-rvalue' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
@@ -376,6 +377,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['hvac-sizing-humidity-setpoint'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.header.manualj_humidity_setpoint = 50
+      elsif ['hvac-negative-crankcase-heater-watts'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.cooling_systems[0].crankcase_heater_watts = -10
       elsif ['incomplete-integrated-heating'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ptac-with-heating-electricity.xml'))
         hpxml.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = nil
