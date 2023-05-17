@@ -310,6 +310,7 @@ Annual building loads are listed below.
    ======================================  ==================================================================
 
 Note that the "Delivered" loads represent the energy delivered by the HVAC/DHW system; if a system is significantly undersized, there will be unmet load not reflected by these values.
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported load will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Unmet Hours
 ~~~~~~~~~~~~~~~~~~
@@ -350,6 +351,7 @@ Peak building loads are listed below.
    =======================================  ==================================
 
 Note that the "Delivered" peak loads represent the energy delivered by the HVAC system; if a system is significantly undersized, there will be unmet peak load not reflected by these values.
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported peak load will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Component Building Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -386,6 +388,8 @@ Component loads disaggregated by Heating/Cooling are listed below.
    Component Load: \*: Internal Gains (MBtu)          Heat gain/loss from appliances, plug loads, water heater tank losses, etc. in the conditioned space
    Component Load: \*: Lighting (MBtu)                Heat gain/loss from lighting in the conditioned space
    =================================================  =========================================================================================================
+
+If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported component loads will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Hot Water Uses
 ~~~~~~~~~~~~~~~~~~~~~
@@ -503,6 +507,8 @@ Timeseries outputs can be one of the following frequencies: hourly, daily, month
 Timestamps in the output use the start-of-period convention unless you have requested the end-of-period timestamp convention.
 Additional timestamp columns can be optionally requested that reflect daylight saving time (DST) and/or coordinated universal time (UTC).
 Most outputs will be summed over the hour (e.g., energy) but some will be averaged over the hour (e.g., temperatures, airflows).
+
+Note that if the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported zone temperature for the living space will reflect a fully conditioned home due to the way these systems are modeled in EnergyPlus.
 
 .. _bill_outputs:
 

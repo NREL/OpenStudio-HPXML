@@ -387,13 +387,13 @@ class HPXMLTest < MiniTest::Test
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
     bill_results = _get_bill_results(bills_csv_path)
-    results = _get_simulation_results(annual_csv_path, xml, hpxml)
+    results = _get_simulation_results(annual_csv_path, xml)
     _verify_outputs(rundir, xml, results, hpxml)
 
     return results, bill_results
   end
 
-  def _get_simulation_results(annual_csv_path, xml, hpxml)
+  def _get_simulation_results(annual_csv_path, xml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
@@ -421,12 +421,8 @@ class HPXMLTest < MiniTest::Test
         abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
       end
       # Check that the difference is less than 1.5 MBtu or less than 10%
-      if hpxml.total_fraction_heat_load_served > 0
-        assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
-      end
-      if hpxml.total_fraction_cool_load_served > 0
-        assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
-      end
+      assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
+      assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
     end
 
     return results
