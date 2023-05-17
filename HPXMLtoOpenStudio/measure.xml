@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d180b629-9ce9-48cc-b6cd-6d121ed81f72</version_id>
-  <version_modified>20230516T215611Z</version_modified>
+  <version_id>863905ea-7881-4ea7-96aa-70a62d273827</version_id>
+  <version_modified>20230517T163023Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -506,12 +506,6 @@
       <checksum>17D30902</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F97C75BD</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -524,6 +518,12 @@
       <checksum>D6D366C0</checksum>
     </file>
     <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E8FDF3E7</checksum>
+    </file>
+    <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -533,7 +533,7 @@
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>916E743B</checksum>
+      <checksum>B1FA13CF</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -562,7 +562,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0FA29C69</checksum>
+      <checksum>3704F900</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
