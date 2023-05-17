@@ -207,13 +207,13 @@ class OSModel
     add_num_occupants(model, runner, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = Schedule.get_unavailable_periods(SchedulesFile::ColumnHVAC, @hpxml.header.unavailable_periods)
+    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnHVAC, @hpxml.header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, spaces, airloop_map)
     add_heating_system(runner, model, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
-    add_dehumidifiers(model, spaces)
+    add_dehumidifiers(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
@@ -1340,7 +1340,7 @@ class OSModel
     end
 
     # Water Heater
-    unavailable_periods = Schedule.get_unavailable_periods(SchedulesFile::ColumnWaterHeater, @hpxml.header.unavailable_periods)
+    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml.header.unavailable_periods)
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
@@ -1600,10 +1600,10 @@ class OSModel
                             @schedules_file, @hpxml.header.unavailable_periods)
   end
 
-  def self.add_dehumidifiers(model, spaces)
+  def self.add_dehumidifiers(runner, model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
-    HVAC.apply_dehumidifiers(model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml.header.unavailable_periods)
+    HVAC.apply_dehumidifiers(runner, model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml.header.unavailable_periods)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
