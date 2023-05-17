@@ -573,7 +573,6 @@ class HPXMLTest < MiniTest::Test
       next if message.include? 'DetailedSkyDiffuseModeling is chosen but not needed as either the shading transmittance for shading devices does not change throughout the year'
       next if message.include? 'View factors not complete'
       next if message.include?('CheckSimpleWAHPRatedCurvesOutputs') && message.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
-      next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues')
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
