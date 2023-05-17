@@ -1145,6 +1145,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_crankcase_heater_watts', false)
+    arg.setDisplayName('Cooling System: Crankcase Heater Power Watts')
+    arg.setDescription("Cooling system crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('W')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_integrated_heating_system_fuel', heating_system_fuel_choices, false)
     arg.setDisplayName('Cooling System: Integrated Heating System Fuel Type')
     arg.setDescription("The fuel type of the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
@@ -1247,10 +1253,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_17_f', false)
-    arg.setDisplayName('Heat Pump: Heating Capacity 17F')
-    arg.setDescription("The output heating capacity of the heat pump at 17F. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default is used.")
-    arg.setUnits('Btu/hr')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
+    arg.setDisplayName('Heat Pump: Heating Capacity Retention Fraction')
+    arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_temp', false)
+    arg.setDisplayName('Heat Pump: Heating Capacity Retention Temperature')
+    arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.")
+    arg.setUnits('deg-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_capacity', false)
@@ -1329,6 +1341,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Charge Defect Ratio')
     arg.setDescription('The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies to all heat pump types. If not provided, assumes no defect.')
     arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_heater_watts', false)
+    arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
+    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('W')
     args << arg
 
     heating_system_2_type_choices = OpenStudio::StringVector.new
@@ -4703,6 +4721,12 @@ class HPXMLFile
       end
     end
 
+    if args[:cooling_system_crankcase_heater_watts].is_initialized
+      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include?(cooling_system_type)
+        cooling_system_crankcase_heater_watts = args[:cooling_system_crankcase_heater_watts].get
+      end
+    end
+
     if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type)
       if args[:cooling_system_integrated_heating_system_fuel].is_initialized
         integrated_heating_system_fuel = args[:cooling_system_integrated_heating_system_fuel].get
@@ -4734,6 +4758,7 @@ class HPXMLFile
                               cooling_efficiency_ceer: cooling_efficiency_ceer,
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: charge_defect_ratio,
+                              crankcase_heater_watts: cooling_system_crankcase_heater_watts,
                               primary_system: true,
                               integrated_heating_system_fuel: integrated_heating_system_fuel,
                               integrated_heating_system_capacity: integrated_heating_system_capacity,
@@ -4750,10 +4775,12 @@ class HPXMLFile
       heating_capacity = args[:heat_pump_heating_capacity].get
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      if args[:heat_pump_heating_capacity_17_f].is_initialized
-        heating_capacity_17F = args[:heat_pump_heating_capacity_17_f].get
-      end
+    if args[:heat_pump_heating_capacity_retention_fraction].is_initialized
+      heating_capacity_retention_fraction = args[:heat_pump_heating_capacity_retention_fraction].get
+    end
+
+    if args[:heat_pump_heating_capacity_retention_temp].is_initialized
+      heating_capacity_retention_temp = args[:heat_pump_heating_capacity_retention_temp].get
     end
 
     if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
@@ -4833,6 +4860,12 @@ class HPXMLFile
       charge_defect_ratio = args[:heat_pump_charge_defect_ratio].get
     end
 
+    if args[:heat_pump_crankcase_heater_watts].is_initialized
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
+        heat_pump_crankcase_heater_watts = args[:heat_pump_crankcase_heater_watts].get
+      end
+    end
+
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 
@@ -4852,7 +4885,8 @@ class HPXMLFile
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: heating_capacity,
-                         heating_capacity_17F: heating_capacity_17F,
+                         heating_capacity_retention_fraction: heating_capacity_retention_fraction,
+                         heating_capacity_retention_temp: heating_capacity_retention_temp,
                          compressor_type: compressor_type,
                          compressor_lockout_temp: compressor_lockout_temp,
                          cooling_shr: cooling_shr,
@@ -4875,6 +4909,7 @@ class HPXMLFile
                          cooling_efficiency_eer: cooling_efficiency_eer,
                          airflow_defect_ratio: airflow_defect_ratio,
                          charge_defect_ratio: charge_defect_ratio,
+                         crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                          primary_heating_system: primary_heating_system,
                          primary_cooling_system: primary_cooling_system)
   end
