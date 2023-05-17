@@ -709,7 +709,7 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
-  def self.apply_dehumidifiers(model, dehumidifiers, living_space, unavailable_periods)
+  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -756,7 +756,7 @@ class HVAC
     control_zone.setZoneControlHumidistat(humidistat)
 
     # Availability Schedule
-    dehum_unavailable_periods = Schedule.get_unavailable_periods(SchedulesFile::ColumnDehumidifier, unavailable_periods)
+    dehum_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnDehumidifier, unavailable_periods)
     avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: dehum_unavailable_periods)
     avail_sch = avail_sch.schedule
 
@@ -795,7 +795,7 @@ class HVAC
       ceiling_fan_sch = schedules_file.create_schedule_file(col_name: ceiling_fan_col_name)
     end
     if ceiling_fan_sch.nil?
-      ceiling_fan_unavailable_periods = Schedule.get_unavailable_periods(ceiling_fan_col_name, unavailable_periods)
+      ceiling_fan_unavailable_periods = Schedule.get_unavailable_periods(runner, ceiling_fan_col_name, unavailable_periods)
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions
@@ -3592,7 +3592,13 @@ class HVAC
       tout_db_sensor.setKeyName('Environment')
 
       # Actuator
-      actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(heating_sch, *EPlus::EMSActuatorScheduleConstantValue)
+      if heating_sch.is_a? OpenStudio::Model::ScheduleConstant
+        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(heating_sch, *EPlus::EMSActuatorScheduleConstantValue)
+      elsif heating_sch.is_a? OpenStudio::Model::ScheduleRuleset
+        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(heating_sch, *EPlus::EMSActuatorScheduleYearValue)
+      else
+        fail "Unexpected heating schedule type: #{heating_sch.class}."
+      end
       actuator.setName("#{heating_sch.name.to_s.gsub(' ', '_')}_act")
 
       # Program

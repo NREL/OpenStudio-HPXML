@@ -513,8 +513,9 @@ class HPXMLTest < MiniTest::Test
       if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if log_line.include? 'DSE is not currently supported when calculating utility bills.'
       end
-      if !hpxml.header.unavailable_periods.empty?
-        next if log_line.include? 'It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.'
+      if !hpxml.header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
+        next if log_line.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
+        next if log_line.include? 'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'
       end
 
       flunk "Unexpected run.log warning found for #{File.basename(hpxml_path)}: #{log_line}"
