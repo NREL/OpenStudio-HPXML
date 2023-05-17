@@ -1369,7 +1369,6 @@ class HPXMLDefaults
     end
 
     # Crankcase heater power [Watts]
-    # Fixme: Need to handle the crankcase heater modeling for cooling only scenario
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
       next unless cooling_system.crankcase_heater_watts.nil?
