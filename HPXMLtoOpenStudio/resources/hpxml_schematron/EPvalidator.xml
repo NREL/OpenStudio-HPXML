@@ -2372,7 +2372,7 @@
   <sch:pattern>
     <sch:title>[LocationCheck=ManufacturedHomeBelly]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Appliances/*[h:Location="manufactured home belly"] | h:Systems/*/*[h:Location="manufactured home belly"] | h:Systems/*/*/*[h:UnitLocation="manufactured home belly"] | h:Systems/*/*/*/*/*[h:DuctLocation="manufactured home belly"]]'>
-      <sch:assert role='ERROR' test='count(h:Enclosure/*/*[h:InteriorAdjacentTo="manufactured home belly" or h:ExteriorAdjacentTo="manufactured home belly"]) &gt;= 1'>A location is specified as "manufactured home belly" but no surfaces were found adjacent to this space type.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Enclosure/*/*[h:InteriorAdjacentTo="manufactured home underbelly" or h:ExteriorAdjacentTo="manufactured home underbelly"]) &gt;= 1'>A location is specified as "manufactured home belly" but no surfaces were found adjacent to the "manufactured home underbelly" space type.</sch:assert>
     </sch:rule>
   </sch:pattern>
   
