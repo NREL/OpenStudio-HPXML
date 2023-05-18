@@ -968,7 +968,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Aggregate up from hourly to the desired timeseries frequency
         next unless ['daily', 'monthly'].include? args[:timeseries_frequency]
 
-        year = 1999 # Try non-leap year for calculations
+        year = @hpxml.header.sim_calendar_year
         sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
         n_hours_per_period = get_n_hours_per_period(args[:timeseries_frequency], sim_start_day_of_year, sim_end_day_of_year, year)
 
