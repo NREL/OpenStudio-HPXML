@@ -1328,7 +1328,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_ducted', false)
     arg.setDisplayName('Heat Pump: Is Ducted')
-    arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted. If not provided, assumes not ducted.")
+    arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} are not ducted. If not provided, assumes not ducted.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_airflow_defect_ratio', false)
@@ -3228,9 +3228,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:heating_system_type] == 'none') && (args[:heat_pump_type] == 'none') && (args[:heating_system_2_type] != 'none')
     errors << 'A second heating system was specified without a primary heating system.' if error
 
-    if (args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate) && [HPXML::HVACTypeFurnace, HPXML::HVACTypeFixedHeater].include?(args[:heating_system_2_type]) # separate ducted backup
-      if !['none', 'mini-split'].include?(args[:heat_pump_type]) || (args[:heat_pump_type] == 'mini-split' && args[:heat_pump_is_ducted]) # ducted heat pump
-        errors << 'A ducted heat pump with "separate" ducted backup is not supported.'
+    if ((args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate) && (args[:heating_system_2_type] == HPXML::HVACTypeFurnace)) # separate ducted backup
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(args[:heat_pump_type]) ||
+         ((args[:heat_pump_type] == HPXML::HVACTypeHeatPumpMiniSplit) && args[:heat_pump_is_ducted]) # ducted heat pump
+        errors << "A ducted heat pump with '#{HPXML::HeatPumpBackupTypeSeparate}' ducted backup is not supported."
       end
     end
 

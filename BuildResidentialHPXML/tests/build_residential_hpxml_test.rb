@@ -211,7 +211,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-ducts-location-and-areas-not-same-type.xml' => 'Duct location and surface area not both defaulted or not both specified.',
       'error-second-heating-system-serves-total-heat-load.xml' => 'The fraction of heat load served by the second heating system is 100%.',
       'error-second-heating-system-but-no-primary-heating.xml' => 'A second heating system was specified without a primary heating system.',
-      'error-second-heating-system-ducted-with-ducted-primary-heating.xml' => 'A ducted heat pump with "separate" ducted backup is not supported.',
+      'error-second-heating-system-ducted-with-ducted-primary-heating.xml' => "A ducted heat pump with 'separate' ducted backup is not supported.",
       'error-sfa-no-building-num-units.xml' => 'Did not specify the number of units in the building for single-family attached or apartment units.',
       'error-sfa-above-apartment.xml' => 'Single-family attached units cannot be above another unit.',
       'error-sfa-below-apartment.xml' => 'Single-family attached units cannot be below another unit.',
