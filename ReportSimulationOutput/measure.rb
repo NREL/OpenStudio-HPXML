@@ -369,7 +369,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Resilience
       if args[:include_annual_resilience] || args[:include_timeseries_resilience]
         resilience_frequency = 'timestep'
-        if ['hourly', 'daily', 'monthly'].include?(args[:timeseries_frequency])
+        if args[:timeseries_frequency] != 'timestep'
           resilience_frequency = 'hourly'
         end
         result << OpenStudio::IdfObject.load("Output:Meter,Electricity:Facility,#{resilience_frequency};").get
@@ -546,7 +546,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if File.exist? msgpack_timeseries_path
       @msgpackDataTimeseries = MessagePack.unpack(File.read(msgpack_timeseries_path, mode: 'rb'))
     end
-    if (not @emissions.empty?) || ((not @resilience[RT::Battery].variables.empty?) && args[:timeseries_frequency] != 'timestep')
+    if (not @emissions.empty?) || ((not @resilience[RT::Battery].variables.empty?) && (args[:timeseries_frequency] != 'timestep'))
       @msgpackDataHourly = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout_hourly.msgpack'), mode: 'rb'))
     end
 
@@ -941,12 +941,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
         end
 
-        if ['hourly', 'daily', 'monthly'].include?(args[:timeseries_frequency])
+        resilience_frequency = 'timestep'
+        ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
+        if args[:timeseries_frequency] != 'timestep'
           resilience_frequency = 'hourly'
           ts_per_hr = 1
-        else
-          resilience_frequency = 'timestep'
-          ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
         end
 
         batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)

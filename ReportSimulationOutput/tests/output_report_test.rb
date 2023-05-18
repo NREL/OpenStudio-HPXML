@@ -586,7 +586,8 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_component_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
-                  'include_timeseries_weather' => false }
+                  'include_timeseries_weather' => false,
+                  'include_timeseries_resilience' => false }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
@@ -614,7 +615,8 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
-                  'include_timeseries_weather' => true }
+                  'include_timeseries_weather' => true,
+                  'include_timeseries_resilience' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
