@@ -359,7 +359,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.exterior_adjacent_to = adjacent_to
     hpxml.floors[0].exterior_adjacent_to = adjacent_to
     hpxml.floors[1].exterior_adjacent_to = adjacent_to
@@ -388,11 +388,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.delete
-    hpxml.walls.select.with_index { |w, i| w.id = "Wall#{i + 1}" }
-    hpxml.windows.select { |w| w.wall_idref = hpxml.walls[-1].id }
-    hpxml.doors.select { |d| d.wall_idref = hpxml.walls[-1].id }
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -456,7 +453,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
-           }           [0]
+           }[0]
     hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 50,
                       azimuth: 270,
@@ -467,7 +464,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHeatedSpace
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -476,7 +473,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -1157,12 +1154,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     grg_wall = hpxml.walls.select { |w|
                  w.interior_adjacent_to == HPXML::LocationGarage &&
                    w.exterior_adjacent_to == HPXML::LocationOutside
-               } [0]
+               }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: grg_wall.id,
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
+  end
+  if ['base-misc-neighbor-shading-bldgtype-multifamily.xml'].include? hpxml_file
+    wall = hpxml.walls.select { |w| w.azimuth == hpxml.neighbor_buildings[0].azimuth }[0]
+    wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
   end
 
   # ---------- #
@@ -1404,6 +1405,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].conditioned_floor_area_served = 4050.0
       hpxml.hvac_distributions[0].number_of_return_registers = 3
     end
+  elsif ['base-hvac-ducts-effective-rvalue.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_insulation_r_value = nil
+    hpxml.hvac_distributions[0].ducts[1].duct_insulation_r_value = nil
+    hpxml.hvac_distributions[0].ducts[0].duct_effective_r_value = 4.5
+    hpxml.hvac_distributions[0].ducts[1].duct_effective_r_value = 1.7
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.reverse_each do |hvac_distribution|
       hvac_distribution.delete
@@ -1665,6 +1671,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.manualj_internal_loads_sensible = 4000
     hpxml.header.manualj_internal_loads_latent = 200
     hpxml.header.manualj_num_occupants = 5
+  end
+  if hpxml_file.include? 'heating-capacity-17f'
+    hpxml.heat_pumps[0].heating_capacity_17F = hpxml.heat_pumps[0].heating_capacity * hpxml.heat_pumps[0].heating_capacity_retention_fraction
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
   end
 
   # ------------------ #
@@ -2315,7 +2326,9 @@ if ARGV[0].to_sym == :update_hpxmls
 
   # Create sample/test HPXMLs
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  t = Time.now
   create_hpxmls()
+  puts "Completed in #{(Time.now - t).round(1)}s"
 end
 
 if ARGV[0].to_sym == :download_utility_rates
