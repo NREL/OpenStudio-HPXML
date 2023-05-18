@@ -367,12 +367,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Resilience
-      result << OpenStudio::IdfObject.load('Output:Meter,Electricity:Facility,hourly;').get
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,hourly;').get
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,hourly;').get
-      @resilience.values.each do |resilience|
-        resilience.variables.each do |_sys_id, varkey, var|
-          result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},hourly;").get
+      if args[:include_annual_resilience] || args[:include_timeseries_resilience]
+        resilience_frequency = 'timestep'
+        if ['hourly', 'daily', 'monthly'].include?(args[:timeseries_frequency])
+          resilience_frequency = 'hourly'
+        end
+        result << OpenStudio::IdfObject.load("Output:Meter,Electricity:Facility,#{resilience_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{resilience_frequency};").get
+        result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{resilience_frequency};").get
+        @resilience.values.each do |resilience|
+          resilience.variables.each do |_sys_id, varkey, var|
+            result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{resilience_frequency};").get
+          end
         end
       end
     end
@@ -540,7 +546,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if File.exist? msgpack_timeseries_path
       @msgpackDataTimeseries = MessagePack.unpack(File.read(msgpack_timeseries_path, mode: 'rb'))
     end
-    if (not @emissions.empty?) || (not @resilience[RT::Battery].variables.empty?)
+    if (not @emissions.empty?) || ((not @resilience[RT::Battery].variables.empty?) && args[:timeseries_frequency] != 'timestep')
       @msgpackDataHourly = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout_hourly.msgpack'), mode: 'rb'))
     end
 
@@ -905,7 +911,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         minimum_storage_state_of_charge_fraction = nil
         batt_kwh = nil
         batt_kw = nil
-        batt_roundtrip_efficiency = nil
         @hpxml.batteries.each do |battery|
           @model.getElectricLoadCenterDistributions.each do |elcd|
             battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
@@ -915,7 +920,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
 
           batt_kw = battery.rated_power_output
-          batt_roundtrip_efficiency = battery.round_trip_efficiency
           @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |liion|
             battery_id = liion.additionalProperties.getFeatureAsString('HPXML_ID')
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
@@ -924,27 +928,54 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
         end
 
-        batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, 'hourly')
-        batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
-        elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
-        elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
-        elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
-        elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, 'hourly')
-        crit_load = elec.zip(elec_prod).map { |x, y| x + y }
-
-        resilience_hours = []
-        n_timesteps = crit_load.size
-        (0...n_timesteps).each do |init_time_step|
-          resilience_hours << get_resilience_hours(init_time_step, batt_kwh, batt_kw, batt_roundtrip_efficiency, batt_soc_kwh[init_time_step], crit_load, n_timesteps)
+        if ['hourly', 'daily', 'monthly'].include?(args[:timeseries_frequency])
+          resilience_frequency = 'hourly'
+          ts_per_hr = 1
+        else
+          resilience_frequency = 'timestep'
+          ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
         end
 
-        puts("Resilience Hours = #{resilience_hours[0..23]}")
-        # puts("critical loads = #{crit_load[0..23]}")
-        # puts("elec_prod = #{elec_prod[0..23]}")
-        # puts("elec_stor = #{elec_stor[0..23]}")
+        batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
+        batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
+        elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
+        elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        crit_load = elec.zip(elec_prod).map { |x, y| x + y }
 
-        resilience.annual_output = resilience_hours.sum(0.0) / resilience_hours.size
-        resilience.timeseries_output = resilience_hours if args[:timeseries_frequency] == 'hourly'
+        resilience_timeseries = []
+        n_timesteps = crit_load.size
+        (0...n_timesteps).each do |init_time_step|
+          resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kw, batt_soc_kwh[init_time_step], crit_load, n_timesteps, ts_per_hr)
+        end
+
+        resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
+        resilience.timeseries_output = resilience_timeseries
+
+        # Aggregate up from hourly to the desired timeseries frequency
+        next unless ['daily', 'monthly'].include? args[:timeseries_frequency]
+
+        year = 1999 # Try non-leap year for calculations
+        sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
+
+        if args[:timeseries_frequency] == 'daily'
+          n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
+        elsif args[:timeseries_frequency] == 'monthly'
+          n_days_per_month = Constants.NumDaysInMonths(year)
+          n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
+          n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
+          n_days_per_period[-1] = @hpxml.header.sim_end_day
+          n_hours_per_period = n_days_per_period.map { |x| x * 24 }
+        end
+
+        resilience_timeseries = []
+        start_hour = 0
+        n_hours_per_period.each do |n_hours|
+          resilience_timeseries << resilience.timeseries_output[start_hour..start_hour + n_hours - 1].sum(0.0) / resilience.timeseries_output[start_hour..start_hour + n_hours - 1].size
+          start_hour += n_hours
+        end
+        resilience.timeseries_output = resilience_timeseries
       end
     end
 
@@ -1804,21 +1835,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
-  def get_resilience_hours(init_time_step, _batt_kwh, batt_kw, _batt_roundtrip_efficiency, batt_soc_kwh, crit_load, n_timesteps)
+  def get_resilience_timeseries(init_time_step, batt_kw, batt_soc_kwh, crit_load, n_timesteps, ts_per_hr)
     (0...n_timesteps).each do |i|
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
-      # Original Code
-      # if load_kw < 0 # load is met
-      #  if batt_soc_kwh < batt_kwh # charge battery if theres room in the battery
-      #    batt_soc_kwh += [
-      #      batt_kwh - batt_soc_kwh, # room available
-      #      batt_kw * batt_roundtrip_efficiency, # inverter capacity
-      #      -load_kw * batt_roundtrip_efficiency, # excess energy
-      #    ].min
-      #  end
-      # else # check if we can meet load with generator then storage
       if load_kw > 0
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
           # prevent battery charge from going negative
@@ -1828,11 +1849,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       if load_kw > 0 # failed to meet load in this time step
-        return i
+        return i / Float(ts_per_hr)
       end
     end
 
-    return n_timesteps
+    return n_timesteps / Float(ts_per_hr)
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
