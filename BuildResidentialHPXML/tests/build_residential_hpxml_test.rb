@@ -1019,7 +1019,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     elsif ['error-second-heating-system-ducted-with-ducted-primary-heating.xml'].include? hpxml_file
       args['heating_system_type'] = 'none'
       args['cooling_system_type'] = 'none'
-      args['heat_pump_type'] = 'mini-split'
+      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
       args['heat_pump_is_ducted'] = true
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
       args['heating_system_2_type'] = HPXML::HVACTypeFurnace
