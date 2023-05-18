@@ -137,7 +137,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-foundation-wall-properties' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall, id: "FoundationWall1"]',
                                                                      'Expected DistanceToBottomOfInsulation to be greater than or equal to DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]',
                                                                      'Expected DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]'],
-                            'invalid-ground-conductivity' => ['Expected extension/GroundConductivity to be greater than 0'],
+                            'invalid-ground-conductivity' => ['Expected Conductivity to be greater than 0'],
                             'invalid-heat-pump-capacity-retention' => ['Expected Fraction to be less than 1',
                                                                        'Expected Temperature to be less than or equal to 17'],
                             'invalid-heat-pump-capacity-retention2' => ['Expected Fraction to be greater than or equal to 0'],
