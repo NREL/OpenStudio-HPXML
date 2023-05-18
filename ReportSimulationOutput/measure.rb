@@ -641,6 +641,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return timestamps, timestamps_dst, timestamps_utc
   end
 
+  def get_n_hours_per_period(timeseries_frequency, sim_start_day_of_year, sim_end_day_of_year, year)
+    if timeseries_frequency == 'daily'
+      n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
+    elsif timeseries_frequency == 'monthly'
+      n_days_per_month = Constants.NumDaysInMonths(year)
+      n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
+      n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
+      n_days_per_period[-1] = @hpxml.header.sim_end_day
+      n_hours_per_period = n_days_per_period.map { |x| x * 24 }
+    end
+    return n_hours_per_period
+  end
+
   def get_outputs(runner, args)
     outputs = {}
 
@@ -958,16 +971,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         year = 1999 # Try non-leap year for calculations
         sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
-
-        if args[:timeseries_frequency] == 'daily'
-          n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
-        elsif args[:timeseries_frequency] == 'monthly'
-          n_days_per_month = Constants.NumDaysInMonths(year)
-          n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
-          n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
-          n_days_per_period[-1] = @hpxml.header.sim_end_day
-          n_hours_per_period = n_days_per_period.map { |x| x * 24 }
-        end
+        n_hours_per_period = get_n_hours_per_period(args[:timeseries_frequency], sim_start_day_of_year, sim_end_day_of_year, year)
 
         resilience_timeseries = []
         start_hour = 0
@@ -1127,15 +1131,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           # Aggregate up from hourly to the desired timeseries frequency
           next unless ['daily', 'monthly'].include? args[:timeseries_frequency]
 
-          if args[:timeseries_frequency] == 'daily'
-            n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
-          elsif args[:timeseries_frequency] == 'monthly'
-            n_days_per_month = Constants.NumDaysInMonths(year)
-            n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
-            n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
-            n_days_per_period[-1] = @hpxml.header.sim_end_day
-            n_hours_per_period = n_days_per_period.map { |x| x * 24 }
-          end
+          n_hours_per_period = get_n_hours_per_period(args[:timeseries_frequency], sim_start_day_of_year, sim_end_day_of_year, year)
           fail 'Unexpected failure for emissions calculations.' if n_hours_per_period.sum != @emissions[key].timeseries_output_by_end_use[eu_key].size
 
           timeseries_output = []
