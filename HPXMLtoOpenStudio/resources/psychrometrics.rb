@@ -366,7 +366,7 @@ class Psychrometrics
     return w
   end
 
-  def self.CoilAoFactor(runner, dBin, wBin, p, qdot, cfm, shr)
+  def self.CoilAoFactor(runner, dBin, p, qdot, cfm, shr, win)
     '''
     Description:
     ------------
@@ -381,25 +381,25 @@ class Psychrometrics
     Inputs:
     -------
         Tdb    float    Entering Dry Bulb (degF)
-        Twb    float    Entering Wet Bulb (degF)
         P      float    Barometric pressure (psi)
         Qdot   float    Total capacity of unit (kBtu/h)
         cfm    float    Volumetric flow rate of unit (CFM)
         shr    float    Sensible heat ratio
+        win    float    Entering humidity ratio
     Outputs:
     --------
         Ao    float    Coil Ao Factor
     '''
 
-    bf = self.CoilBypassFactor(runner, dBin, wBin, p, qdot, cfm, shr)
-    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, wBin, p, cfm), 'lbm/min', 'kg/s')
+    bf = self.CoilBypassFactor(runner, dBin, p, qdot, cfm, shr, win)
+    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
 
     ntu = -1.0 * Math.log(bf)
     ao = ntu * mfr
     return ao
   end
 
-  def self.CoilBypassFactor(runner, dBin, wBin, p, qdot, cfm, shr)
+  def self.CoilBypassFactor(runner, dBin, p, qdot, cfm, shr, win)
     '''
     Description:
     ------------
@@ -414,20 +414,19 @@ class Psychrometrics
     Inputs:
     -------
         Tdb    float    Entering Dry Bulb (degF)
-        Twb    float    Entering Wet Bulb (degF)
         P      float    Barometric pressure (psi)
         Qdot   float    Total capacity of unit (kBtu/h)
         cfm    float    Volumetric flow rate of unit (CFM)
         shr    float    Sensible heat ratio
+        win    float    Entering humidity ratio
     Outputs:
     --------
         CBF    float    Coil Bypass Factor
     '''
 
-    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, wBin, p, cfm), 'lbm/min', 'kg/s')
+    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
 
     tin = UnitConversions.convert(dBin, 'F', 'C')
-    win = w_fT_Twb_P(dBin, wBin, p)
     p = UnitConversions.convert(p, 'psi', 'kPa')
 
     dH = UnitConversions.convert(qdot, 'kBtu/hr', 'W') / mfr
@@ -437,11 +436,7 @@ class Psychrometrics
     dW = win - wout
     hout = hin - dH
     tout = self.T_fw_h_SI(wout, hout)
-    rH_out = self.R_fT_w_P_SI(tout, wout, p)
-
-    if (rH_out > 1) && !runner.nil?
-      runner.registerWarning('Conditions passed to CoilBypassFactor result in outlet RH > 100%')
-    end
+    # rH_out = self.R_fT_w_P_SI(tout, wout, p)
 
     dT = tin - tout
     m_c = dW / dT
@@ -461,7 +456,6 @@ class Psychrometrics
     d_T_ADP = 5.0
 
     while (cnt < 100) && (tol > 0.001)
-      # for i in range(1,itmax+1):
 
       if cnt > 0
         t_ADP += d_T_ADP
@@ -491,7 +485,7 @@ class Psychrometrics
     return [bF, 0.01].max
   end
 
-  def self.CalculateMassflowRate(dBin, wBin, p, cfm)
+  def self.CalculateMassflowRate(dBin, p, cfm, win)
     '''
     Description:
     ------------
@@ -504,14 +498,13 @@ class Psychrometrics
     Inputs:
     -------
         Tdb    float    Entering Dry Bulb (degF)
-        Twb    float    Entering Wet Bulb (degF)
         P      float    Barometric pressure (psi)
         cfm    float    Volumetric flow rate of unit (CFM)
+        win    float    Entering humidity ratio
     Outputs:
     --------
         mfr    float    mass flow rate (lbm/min)
     '''
-    win = w_fT_Twb_P(dBin, wBin, p)
     rho_in = rhoD_fT_w_P(dBin, win, p)
     mfr = cfm * rho_in
     return mfr
@@ -760,7 +753,7 @@ class Psychrometrics
     return tdp
   end
 
-  def self.CalculateSHR(runner, dBin, wBin, p, q, cfm, ao, win)
+  def self.CalculateSHR(runner, dBin, p, q, cfm, ao, win)
     '''
     Description:
     ------------
@@ -774,7 +767,6 @@ class Psychrometrics
     Inputs:
     -------
         Tdb    float    Entering Dry Bulb (degF)
-        Twb    float    Entering Wet Bulb (degF)
         P      float    Barometric pressure (psi)
         Q      float    Total capacity of unit (kBtu/h)
         cfm    float    Volumetric flow rate of unit (CFM)
@@ -784,7 +776,7 @@ class Psychrometrics
         SHR    float    Sensible Heat Ratio
     '''
 
-    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, wBin, p, cfm), 'lbm/min', 'kg/s')
+    mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
     bf = Math.exp(-1.0 * ao / mfr)
 
     p = UnitConversions.convert(p, 'psi', 'kPa')
