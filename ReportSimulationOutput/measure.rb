@@ -371,6 +371,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         resilience_frequency = 'timestep'
         if args[:timeseries_frequency] != 'timestep'
           resilience_frequency = 'hourly'
+
+          # We need the following request in case no other output types are requested
+          # I.e., this will force a eplusout_xxx.msgpack from which we get timestamps
+          if ['daily', 'monthly'].include?(args[:timeseries_frequency])
+            result << OpenStudio::IdfObject.load("Output:Variable,*,Site Outdoor Air Drybulb Temperature,#{args[:timeseries_frequency]};").get
+          end
         end
         result << OpenStudio::IdfObject.load("Output:Meter,Electricity:Facility,#{resilience_frequency};").get
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{resilience_frequency};").get
