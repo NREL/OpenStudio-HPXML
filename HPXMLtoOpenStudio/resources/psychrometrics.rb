@@ -78,7 +78,7 @@ class Psychrometrics
     return psat
   end
 
-  def self.Tsat_fP(p)
+  def self.Tsat_fP(runner, p)
     '''
     Description:
     ------------
@@ -120,14 +120,14 @@ class Psychrometrics
 
     end
 
-    if not cvg
-      puts 'Warning: Tsat_fP failed to converge'
+    if !cvg && !runner.nil?
+      runner.registerWarning('Tsat_fP failed to converge')
     end
 
     return tsat
   end
 
-  def self.Tsat_fh_P(h, p)
+  def self.Tsat_fh_P(runner, h, p)
     '''
     Description:
     ------------
@@ -171,8 +171,8 @@ class Psychrometrics
 
     end
 
-    if not cvg
-      puts 'Warning: Tsat_fh_P failed to converge'
+    if !cvg && !runner.nil?
+      runner.registerWarning('Tsat_fh_P failed to converge')
     end
 
     return tdb
@@ -276,7 +276,7 @@ class Psychrometrics
     return pstd
   end
 
-  def self.Twb_fT_w_P(tdb, w, p)
+  def self.Twb_fT_w_P(runner, tdb, w, p)
     '''
     Description:
     ------------
@@ -300,7 +300,7 @@ class Psychrometrics
         Twb     float      wetbulb temperature (degF)
     '''
     # Initialize
-    tboil = self.Tsat_fP(p) # (degF)
+    tboil = self.Tsat_fP(runner, p) # (degF)
     twb = [[tdb, tboil - 0.1].min, 0.0].max # (degF)
 
     twb1 = twb # (degF)
@@ -332,8 +332,8 @@ class Psychrometrics
       end
     end
 
-    if not cvg
-      puts 'Warning: Twb_fT_w_P failed to converge'
+    if !cvg && !runner.nil?
+      runner.registerWarning('Twb_fT_w_P failed to converge')
     end
 
     if twb > tdb
@@ -366,7 +366,7 @@ class Psychrometrics
     return w
   end
 
-  def self.CoilAoFactor(dBin, wBin, p, qdot, cfm, shr)
+  def self.CoilAoFactor(runner, dBin, wBin, p, qdot, cfm, shr)
     '''
     Description:
     ------------
@@ -391,7 +391,7 @@ class Psychrometrics
         Ao    float    Coil Ao Factor
     '''
 
-    bf = self.CoilBypassFactor(dBin, wBin, p, qdot, cfm, shr)
+    bf = self.CoilBypassFactor(runner, dBin, wBin, p, qdot, cfm, shr)
     mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, wBin, p, cfm), 'lbm/min', 'kg/s')
 
     ntu = -1.0 * Math.log(bf)
@@ -399,7 +399,7 @@ class Psychrometrics
     return ao
   end
 
-  def self.CoilBypassFactor(dBin, wBin, p, qdot, cfm, shr)
+  def self.CoilBypassFactor(runner, dBin, wBin, p, qdot, cfm, shr)
     '''
     Description:
     ------------
@@ -439,14 +439,14 @@ class Psychrometrics
     tout = self.T_fw_h_SI(wout, hout)
     rH_out = self.R_fT_w_P_SI(tout, wout, p)
 
-    if rH_out > 1
-      puts 'Error: Conditions passed to CoilBypassFactor result in outlet RH > 100%'
+    if (rH_out > 1) && !runner.nil?
+      runner.registerWarning('Conditions passed to CoilBypassFactor result in outlet RH > 100%')
     end
 
     dT = tin - tout
     m_c = dW / dT
 
-    t_ADP = self.Tdp_fP_w_SI(p, wout) # Initial guess for iteration
+    t_ADP = self.Tdp_fP_w_SI(runner, p, wout) # Initial guess for iteration
 
     if shr == 1
       w_ADP = w_fT_Twb_P_SI(t_ADP, t_ADP, p)
@@ -566,7 +566,7 @@ class Psychrometrics
     return self.R_fT_w_P(UnitConversions.convert(tdb, 'C', 'F'), w, UnitConversions.convert(p, 'kPa', 'psi'))
   end
 
-  def self.Tdp_fP_w_SI(p, w)
+  def self.Tdp_fP_w_SI(runner, p, w)
     '''
     Description:
     ------------
@@ -592,7 +592,7 @@ class Psychrometrics
     --------
         Tdp     float      dewpoint temperature  (degC)
     '''
-    return UnitConversions.convert(self.Tdp_fP_w(UnitConversions.convert(p, 'kPa', 'psi'), w), 'F', 'C')
+    return UnitConversions.convert(self.Tdp_fP_w(runner, UnitConversions.convert(p, 'kPa', 'psi'), w), 'F', 'C')
   end
 
   def self.w_fT_Twb_P_SI(tdb, twb, p)
@@ -699,7 +699,7 @@ class Psychrometrics
     return pw
   end
 
-  def self.Tdp_fP_w(p, w)
+  def self.Tdp_fP_w(runner, p, w)
     '''
     Description:
     ------------
@@ -753,14 +753,14 @@ class Psychrometrics
         tdp = -999.0
       else
         pw = self.Pw_fP_w(p, w)
-        tdp = self.Tsat_fP(pw)
+        tdp = self.Tsat_fP(runner, pw)
       end
 
     end
     return tdp
   end
 
-  def self.CalculateSHR(dBin, wBin, p, q, cfm, ao, win)
+  def self.CalculateSHR(runner, dBin, wBin, p, q, cfm, ao, win)
     '''
     Description:
     ------------
@@ -797,7 +797,7 @@ class Psychrometrics
     # W_ADP = self.w_fT_h_SI(T_ADP, H_ADP)
 
     # Initialize
-    t_ADP = self.Tdp_fP_w_SI(p, win)
+    t_ADP = self.Tdp_fP_w_SI(runner, p, win)
     t_ADP_1 = t_ADP # (degC)
     t_ADP_2 = t_ADP # (degC)
     w_ADP = w_fT_R_P_SI(t_ADP, 1.0, p)
@@ -820,7 +820,7 @@ class Psychrometrics
     end
 
     if not cvg
-      puts 'Warning: Tsat_fh_P failed to converge'
+      runnger.registerWarning('CalculateSHR failed to converge')
     end
 
     h_Tin_Wadp = h_fT_w_SI(tin, w_ADP)
@@ -888,7 +888,7 @@ class Psychrometrics
     return w
   end
 
-  def self.Twb_fT_R_P(tdb, r, p)
+  def self.Twb_fT_R_P(runner, tdb, r, p)
     '''
     Description:
     ------------
@@ -911,7 +911,7 @@ class Psychrometrics
     '''
 
     w = w_fT_R_P(tdb, r, p)
-    twb = self.Twb_fT_w_P(tdb, w, p)
+    twb = self.Twb_fT_w_P(runner, tdb, w, p)
     return twb
   end
 end
