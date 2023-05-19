@@ -403,6 +403,17 @@ Annual hot water uses are listed below.
    Hot Water: Distribution Waste (gal) 
    ===================================  ====================
 
+Resilience Hours
+~~~~~~~~~~~~~~~~
+
+Resilience hours by system are listed below.
+
+   ===================================  ====================
+   Type                                 Notes
+   ===================================  ====================
+   Resilience: Battery (hr)             Use the battery state of charge and the load profile to figure out how long the battery would have been able to support the electrical loads. Calculation is done for every timestep and then averaged.
+   ===================================  ====================
+
 HVAC Capacities
 ~~~~~~~~~~~~~~~
 
@@ -497,6 +508,7 @@ Depending on the outputs requested, the file may include:
    Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., living space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
+   Resilience                           Average resilience hours for each applicable system.
    EnergyPlus Output Variables          These are optional and can be requested with the ReportSimulationOutput ``user_output_variables`` argument.
    ===================================  ==================================================================================================================================
 
