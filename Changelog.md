@@ -14,6 +14,7 @@ __New Features__
   - **Breaking change**: Adds "net" values for emissions; "total" values now exclude generation (e.g., PV).
   - Adds `Load: Heating: Heat Pump Backup` (heating load delivered by heat pump backup systems).
   - Adds `System Use` outputs (end use outputs for each heating, cooling, and water heating system); allows requesting timeseries output.
+  - Adds `Resilience` outputs (average hours outputs for the battery); allows requesting timeseries output.
   - All annual load outputs are now provided as timeseries outputs; previously only "Delivered" loads were available.
   - Peak summer/winter electricity outputs are now based on Jun/July/Aug and Dec/Jan/Feb months, not HVAC heating/cooling operation.
   - Allows specifying the number of decimal places for timeseries output.
