@@ -168,7 +168,6 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Natural Gas: Clothes Dryer (MBtu)
    End Use: Natural Gas: Range/Oven (MBtu)
    End Use: Natural Gas: Mech Vent Preheating (MBtu)
-   End Use: Natural Gas: Mech Vent Precooling (MBtu)
    End Use: Natural Gas: Pool Heater (MBtu)
    End Use: Natural Gas: Hot Tub Heater (MBtu)
    End Use: Natural Gas: Grill (MBtu)
@@ -181,17 +180,16 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Fuel Oil: Clothes Dryer (MBtu)
    End Use: Fuel Oil: Range/Oven (MBtu)
    End Use: Fuel Oil: Mech Vent Preheating (MBtu)
-   End Use: Fuel Oil: Mech Vent Precooling (MBtu)
    End Use: Fuel Oil: Grill (MBtu)
    End Use: Fuel Oil: Lighting (MBtu)
    End Use: Fuel Oil: Fireplace (MBtu)
+   End Use: Fuel Oil: Generator (MBtu)                               Positive value for any fuel consumed
    End Use: Propane: Heating (MBtu)                                  Excludes heat pump backup
    End Use: Propane: Heating Heat Pump Backup (MBtu)
    End Use: Propane: Hot Water (MBtu)
    End Use: Propane: Clothes Dryer (MBtu)
    End Use: Propane: Range/Oven (MBtu)
    End Use: Propane: Mech Vent Preheating (MBtu)
-   End Use: Propane: Mech Vent Precooling (MBtu)
    End Use: Propane: Grill (MBtu)
    End Use: Propane: Lighting (MBtu)
    End Use: Propane: Fireplace (MBtu)
@@ -202,30 +200,30 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Wood Cord: Clothes Dryer (MBtu)
    End Use: Wood Cord: Range/Oven (MBtu)
    End Use: Wood Cord: Mech Vent Preheating (MBtu)
-   End Use: Wood Cord: Mech Vent Precooling (MBtu)
    End Use: Wood Cord: Grill (MBtu)
    End Use: Wood Cord: Lighting (MBtu)
    End Use: Wood Cord: Fireplace (MBtu)
+   End Use: Wood Cord: Generator (MBtu)                              Positive value for any fuel consumed
    End Use: Wood Pellets: Heating (MBtu)                             Excludes heat pump backup
    End Use: Wood Pellets: Heating Heat Pump Backup (MBtu)
    End Use: Wood Pellets: Hot Water (MBtu)
    End Use: Wood Pellets: Clothes Dryer (MBtu)
    End Use: Wood Pellets: Range/Oven (MBtu)
    End Use: Wood Pellets: Mech Vent Preheating (MBtu)
-   End Use: Wood Pellets: Mech Vent Precooling (MBtu)
    End Use: Wood Pellets: Grill (MBtu)
    End Use: Wood Pellets: Lighting (MBtu)
    End Use: Wood Pellets: Fireplace (MBtu)
+   End Use: Wood Pellets: Generator (MBtu)                           Positive value for any fuel consumed
    End Use: Coal: Heating (MBtu)                                     Excludes heat pump backup
    End Use: Coal: Heating Heat Pump Backup (MBtu)
    End Use: Coal: Hot Water (MBtu)
    End Use: Coal: Clothes Dryer (MBtu)
    End Use: Coal: Range/Oven (MBtu)
    End Use: Coal: Mech Vent Preheating (MBtu)
-   End Use: Coal: Mech Vent Precooling (MBtu)
    End Use: Coal: Grill (MBtu)
    End Use: Coal: Lighting (MBtu)
    End Use: Coal: Fireplace (MBtu)
+   End Use: Coal: Generator (MBtu)                                   Positive value for any fuel consumed
    ================================================================  ====================================================
 
 Annual Energy By System Use
