@@ -3358,7 +3358,7 @@ class HPXMLFile
   def self.create(runner, model, args, epw_path, hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
-      weather = WeatherProcess.new(epw_path: epw_path)
+      weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
     end
 
     success = create_geometry_envelope(runner, model, args)
