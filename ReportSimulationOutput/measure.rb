@@ -1370,14 +1370,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Resilience
-    if args[:include_annual_resilience]
-      @resilience.each do |_type, resilience|
-        results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
-      end
-      results_out << [line_break]
-    end
-
     # End Use Emissions
     if args[:include_annual_emission_end_uses]
       if not @emissions.empty?
@@ -1441,6 +1433,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_annual_hot_water_uses]
       @hot_water_uses.each do |_hot_water_type, hot_water|
         results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(n_digits - 2)]
+      end
+      results_out << [line_break]
+    end
+
+    # Resilience
+    if args[:include_annual_resilience]
+      @resilience.each do |_type, resilience|
+        results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
       end
       results_out << [line_break]
     end
@@ -2370,7 +2370,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless resilience_type == RT::Battery
 
       resilience.name = "Resilience: #{resilience_type}"
-      resilience.annual_units = 'avg-hr'
+      resilience.annual_units = 'hr'
       resilience.timeseries_units = 'hr'
     end
 
