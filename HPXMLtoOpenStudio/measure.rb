@@ -691,96 +691,57 @@ class OSModel
         slab.exposed_perimeter = [slab.exposed_perimeter, 1.0].max # minimum value to prevent error if no exposed slab
       end
 
-      # Calculate combinations of slabs/walls for each Kiva instance
-      kiva_instances = get_kiva_instances(fnd_walls, slabs)
-
-      # Obtain some wall/slab information
-      fnd_wall_lengths = {}
-      fnd_walls.each do |foundation_wall|
-        next unless foundation_wall.is_exterior
-
-        fnd_wall_lengths[foundation_wall] = foundation_wall.area / foundation_wall.height
-      end
-      slab_exp_perims = {}
-      slab_areas = {}
       slabs.each do |slab|
-        slab_exp_perims[slab] = slab.exposed_perimeter
-        slab_areas[slab] = slab.area
-      end
-      total_slab_exp_perim = slab_exp_perims.values.sum(0.0)
-      total_slab_area = slab_areas.values.sum(0.0)
-      total_fnd_wall_length = fnd_wall_lengths.values.sum(0.0)
-
-      no_wall_slab_exp_perim = {}
-
-      kiva_instances.each do |foundation_wall, slab|
-        # Apportion referenced walls/slabs for this Kiva instance
-        slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
-        if total_fnd_wall_length > 0
-          fnd_wall_frac = fnd_wall_lengths[foundation_wall] / total_fnd_wall_length
-        else
-          fnd_wall_frac = 1.0 # Handle slab foundation type
-        end
-
         kiva_foundation = nil
-        if not foundation_wall.nil?
+        slab_frac = slab.exposed_perimeter / slabs.map { |s| s.exposed_perimeter }.sum
+
+        fnd_walls.each do |fnd_wall|
           # Add exterior foundation wall surface
-          kiva_foundation = add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
-                                                total_fnd_wall_length, total_slab_exp_perim)
+          kiva_foundation = add_foundation_wall(runner, model, spaces, slab_frac, fnd_wall)
         end
 
-        # Add single combined foundation slab surface (for similar surfaces)
-        slab_exp_perim = slab_exp_perims[slab] * fnd_wall_frac
-        slab_area = slab_areas[slab] * fnd_wall_frac
-        no_wall_slab_exp_perim[slab] = 0.0 if no_wall_slab_exp_perim[slab].nil?
-        if (not foundation_wall.nil?) && (slab_exp_perim > fnd_wall_lengths[foundation_wall] * slab_frac)
-          # Keep track of no-wall slab exposed perimeter
-          no_wall_slab_exp_perim[slab] += (slab_exp_perim - fnd_wall_lengths[foundation_wall] * slab_frac)
-
-          # Reduce this slab's exposed perimeter so that EnergyPlus does not automatically
-          # create a second no-wall Kiva instance for each of our Kiva instances.
-          # Instead, we will later create our own Kiva instance to account for it.
-          # This reduces the number of Kiva instances we end up with.
-          exp_perim_frac = (fnd_wall_lengths[foundation_wall] * slab_frac) / slab_exp_perim
-          slab_exp_perim *= exp_perim_frac
-          slab_area *= exp_perim_frac
-        end
-        if not foundation_wall.nil?
-          z_origin = -1 * foundation_wall.depth_below_grade # Position based on adjacent foundation walls
-        else
+        if fnd_walls.empty?
+          # Slab on grade
           z_origin = -1 * slab.depth_below_grade
+          exp_perim_frac = 1.0
+          kiva_foundation = add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+        else
+          # Slab below grade
+          fnd_walls.each do |fnd_wall|
+            z_origin = -1 * fnd_wall.depth_below_grade # Position based on adjacent foundation wall
+            exp_perim_frac = (fnd_wall.area / fnd_wall.height) / slab.exposed_perimeter
+            kiva_foundation = add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+          end
         end
-        add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
-                            slab_area, z_origin, kiva_foundation)
       end
 
-      # For each slab, create a no-wall Kiva slab instance if needed.
-      slabs.each do |slab|
-        next unless no_wall_slab_exp_perim[slab] > 1.0
-
-        z_origin = 0
-        slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
-                            slab_area, z_origin, nil)
-      end
+      # FIXME: create a no-wall Kiva slab instance if needed.
+      #      slabs.each do |slab|
+      #        next unless no_wall_slab_exp_perim[slab] > 1.0
+      #
+      #        z_origin = 0
+      #        slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
+      #        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
+      #                            slab_area, z_origin, nil)
+      #       end
 
       # Interzonal foundation wall surfaces
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
-      fnd_walls.each do |foundation_wall|
-        next unless foundation_wall.is_interior
+      fnd_walls.each do |fnd_wall|
+        next unless fnd_wall.is_interior
 
-        ag_height = foundation_wall.height - foundation_wall.depth_below_grade
-        ag_net_area = foundation_wall.net_area * ag_height / foundation_wall.height
+        ag_height = fnd_wall.height - fnd_wall.depth_below_grade
+        ag_net_area = fnd_wall.net_area * ag_height / fnd_wall.height
         next if ag_net_area < 1.0
 
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
-        if foundation_wall.azimuth.nil?
+        if fnd_wall.azimuth.nil?
           azimuth = @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
         else
-          azimuth = foundation_wall.azimuth
+          azimuth = fnd_wall.azimuth
         end
 
         vertices = Geometry.create_wall_vertices(length, ag_height, z_origin, azimuth)
@@ -789,10 +750,10 @@ class OSModel
         surface.additionalProperties.setFeature('Azimuth', azimuth)
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
-        surface.setName(foundation_wall.id)
+        surface.setName(fnd_wall.id)
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, foundation_wall)
-        set_surface_exterior(model, spaces, surface, foundation_wall)
+        set_surface_interior(model, spaces, surface, fnd_wall)
+        set_surface_exterior(model, spaces, surface, fnd_wall)
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
 
@@ -801,27 +762,25 @@ class OSModel
         wall_type = HPXML::WallTypeConcrete
         inside_film = Material.AirFilmVertical
         outside_film = Material.AirFilmVertical
-        assembly_r = foundation_wall.insulation_assembly_r_value
-        mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
+        assembly_r = fnd_wall.insulation_assembly_r_value
+        mat_int_finish = Material.InteriorFinishMaterial(fnd_wall.interior_finish_type, fnd_wall.interior_finish_thickness)
         if assembly_r.nil?
-          concrete_thick_in = foundation_wall.thickness
-          int_r = foundation_wall.insulation_interior_r_value
-          ext_r = foundation_wall.insulation_exterior_r_value
+          concrete_thick_in = fnd_wall.thickness
+          int_r = fnd_wall.insulation_interior_r_value
+          ext_r = fnd_wall.insulation_exterior_r_value
           mat_concrete = Material.Concrete(concrete_thick_in)
           mat_int_finish_rvalue = mat_int_finish.nil? ? 0.0 : mat_int_finish.rvalue
           assembly_r = int_r + ext_r + mat_concrete.rvalue + mat_int_finish_rvalue + inside_film.rvalue + outside_film.rvalue
         end
         mat_ext_finish = nil
 
-        Constructions.apply_wall_construction(runner, model, [surface], foundation_wall.id, wall_type, assembly_r,
+        Constructions.apply_wall_construction(runner, model, [surface], fnd_wall.id, wall_type, assembly_r,
                                               mat_int_finish, inside_film, outside_film, mat_ext_finish, nil, nil)
       end
     end
   end
 
-  def self.add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
-                               total_fnd_wall_length, total_slab_exp_perim)
-
+  def self.add_foundation_wall(runner, model, spaces, slab_frac, foundation_wall)
     net_area = foundation_wall.net_area * slab_frac
     gross_area = foundation_wall.area * slab_frac
     height = foundation_wall.height
@@ -834,10 +793,8 @@ class OSModel
       azimuth = foundation_wall.azimuth
     end
 
-    if total_fnd_wall_length > total_slab_exp_perim
-      # Calculate exposed section of wall based on slab's total exposed perimeter.
-      length *= total_slab_exp_perim / total_fnd_wall_length
-    end
+    # Calculate exposed section of wall
+    length *= foundation_wall.net_exposed_area / foundation_wall.net_area
 
     return if length < 0.1 # Avoid Kiva error if exposed wall length is too small
 
@@ -907,10 +864,9 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(model, weather, spaces, slab, slab_exp_perim,
-                               slab_area, z_origin, kiva_foundation)
-
-    slab_tot_perim = slab_exp_perim
+  def self.add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+    slab_tot_perim = slab.exposed_perimeter * exp_perim_frac
+    slab_area = slab.area * exp_perim_frac
     if slab_tot_perim**2 - 16.0 * slab_area <= 0
       # Cannot construct rectangle with this perimeter/area. Some of the
       # perimeter is presumably not exposed, so bump up perimeter value.
@@ -966,7 +922,7 @@ class OSModel
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab_exp_perim, mat_carpet, soil_k_in, kiva_foundation)
+                                        slab.exposed_perimeter, mat_carpet, soil_k_in, kiva_foundation)
 
     kiva_foundation = surface.adjacentFoundation.get
 
@@ -2627,23 +2583,6 @@ class OSModel
     else
       set_surface_exterior(model, spaces, surface, hpxml_surface)
     end
-  end
-
-  def self.get_kiva_instances(fnd_walls, slabs)
-    # Identify unique Kiva foundations that are required.
-    kiva_fnd_walls = []
-    fnd_walls.each do |foundation_wall|
-      next unless foundation_wall.is_exterior
-
-      kiva_fnd_walls << foundation_wall
-    end
-    if kiva_fnd_walls.empty? # Handle slab foundation type
-      kiva_fnd_walls << nil
-    end
-
-    kiva_slabs = slabs
-
-    return kiva_fnd_walls.product(kiva_slabs)
   end
 
   def self.set_foundation_and_walls_top()
