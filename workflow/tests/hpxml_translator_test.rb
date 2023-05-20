@@ -823,34 +823,9 @@ class HPXMLTest < MiniTest::Test
       end
 
       # Net area
-      hpxml_value = wall.area
-      (hpxml.windows + hpxml.doors).each do |subsurface|
-        next if subsurface.wall_idref.upcase != wall_id
-
-        hpxml_value -= subsurface.area
-      end
+      hpxml_value = wall.net_area
       if wall.exterior_adjacent_to == HPXML::LocationGround
-        # Calculate total length of walls
-        wall_total_length = 0
-        hpxml.foundation_walls.each do |foundation_wall|
-          next unless foundation_wall.exterior_adjacent_to == HPXML::LocationGround
-          next unless wall.interior_adjacent_to == foundation_wall.interior_adjacent_to
-
-          wall_total_length += foundation_wall.area / foundation_wall.height
-        end
-
-        # Calculate total slab exposed perimeter
-        slab_exposed_length = 0
-        hpxml.slabs.each do |slab|
-          next unless wall.interior_adjacent_to == slab.interior_adjacent_to
-
-          slab_exposed_length += slab.exposed_perimeter
-        end
-
-        # Calculate exposed foundation wall area
-        if slab_exposed_length < wall_total_length
-          hpxml_value *= (slab_exposed_length / wall_total_length)
-        end
+        hpxml_value = wall.net_exposed_area
       end
       if (hpxml.foundation_walls.include? wall) && (not wall.is_exterior)
         # interzonal foundation walls: only above-grade portion modeled

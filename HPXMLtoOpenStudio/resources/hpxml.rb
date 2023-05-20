@@ -2727,6 +2727,25 @@ class HPXML < Object
       return val
     end
 
+    def net_exposed_area
+      # Net wall area apportioned to exposed perimeter
+
+      # Calculate total length of walls
+      wall_total_length = @hpxml_object.foundation_walls.select { |fw| fw.is_exterior && interior_adjacent_to == fw.interior_adjacent_to }.map { |fw| fw.area / fw.height }.sum
+
+      # Calculate total slab exposed perimeter
+      slab_exposed_length = @hpxml_object.slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
+
+      # Calculate exposed foundation wall area
+      if slab_exposed_length < wall_total_length
+        exposed_fraction = (slab_exposed_length / wall_total_length)
+      else
+        exposed_fraction = 1.0
+      end
+
+      return net_area * exposed_fraction
+    end
+
     def is_exterior
       if @exterior_adjacent_to == LocationGround
         return true
