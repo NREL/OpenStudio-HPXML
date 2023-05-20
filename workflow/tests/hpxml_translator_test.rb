@@ -736,9 +736,7 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    if hpxml_path.include? 'ASHRAE_Standard_140'
-      # nop
-    elsif hpxml_path.include? 'real_homes'
+    if hpxml_path.include?('ASHRAE_Standard_140') || hpxml_path.include?('real_homes')
       # nop
     elsif hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeApartment
       # no foundation, above dwelling unit
@@ -824,12 +822,13 @@ class HPXMLTest < MiniTest::Test
 
       # Net area
       hpxml_value = wall.net_area
-      if wall.exterior_adjacent_to == HPXML::LocationGround
-        hpxml_value = wall.net_exposed_area
-      end
-      if (hpxml.foundation_walls.include? wall) && (not wall.is_exterior)
-        # interzonal foundation walls: only above-grade portion modeled
-        hpxml_value *= (wall.height - wall.depth_below_grade) / wall.height
+      if wall.is_a? HPXML::FoundationWall
+        if wall.is_exterior
+          hpxml_value = wall.net_exposed_area
+        else
+          # interzonal foundation walls: only above-grade portion modeled
+          hpxml_value *= (wall.height - wall.depth_below_grade) / wall.height
+        end
       end
       if wall.is_exterior
         query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"

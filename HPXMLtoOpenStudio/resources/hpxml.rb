@@ -2419,6 +2419,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def net_area
+      return area
+    end
+
     def delete
       @hpxml_object.rim_joists.delete(self)
       @hpxml_object.foundations.each do |foundation|

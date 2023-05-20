@@ -688,8 +688,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     _check_surface(hpxml.furniture_mass, os_surface, furniture_mass_layer_names)
   end
 
-  def test_kiva_properties
-    ['base.xml',
+  def test_foundation_properties
+    ['../tests/ASHRAE_Standard_140/L322XC.xml',
+     'base.xml',
      'base-foundation-slab.xml',
      'base-foundation-basement-garage.xml',
      'base-foundation-unconditioned-basement-above-grade.xml',

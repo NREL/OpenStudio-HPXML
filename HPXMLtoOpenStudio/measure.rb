@@ -676,13 +676,18 @@ class OSModel
 
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
-      fnd_walls = []
+      int_fnd_walls = []
+      ext_fnd_walls = []
       slabs = []
-      @hpxml.foundation_walls.each do |foundation_wall|
-        next unless foundation_wall.interior_adjacent_to == foundation_type
-        next if foundation_wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+      @hpxml.foundation_walls.each do |fnd_wall|
+        next unless fnd_wall.interior_adjacent_to == foundation_type
+        next if fnd_wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-        fnd_walls << foundation_wall
+        if fnd_wall.is_interior
+          int_fnd_walls << fnd_wall
+        else
+          ext_fnd_walls << fnd_wall
+        end
       end
       @hpxml.slabs.each do |slab|
         next unless slab.interior_adjacent_to == foundation_type
@@ -692,44 +697,47 @@ class OSModel
       end
 
       slabs.each do |slab|
-        kiva_foundation = nil
         slab_frac = slab.exposed_perimeter / slabs.map { |s| s.exposed_perimeter }.sum
 
-        fnd_walls.each do |fnd_wall|
-          # Add exterior foundation wall surface
-          kiva_foundation = add_foundation_wall(runner, model, spaces, slab_frac, fnd_wall)
-        end
-
-        if fnd_walls.empty?
+        if ext_fnd_walls.empty?
           # Slab on grade
           z_origin = -1 * slab.depth_below_grade
           exp_perim_frac = 1.0
-          kiva_foundation = add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+          add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, nil)
         else
           # Slab below grade
-          fnd_walls.each do |fnd_wall|
+          tot_ext_fnd_wall_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum * slab_frac
+          ext_fnd_walls.each do |fnd_wall|
             z_origin = -1 * fnd_wall.depth_below_grade # Position based on adjacent foundation wall
-            exp_perim_frac = (fnd_wall.area / fnd_wall.height) / slab.exposed_perimeter
-            kiva_foundation = add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+            fnd_wall_length = fnd_wall.area / fnd_wall.height * slab_frac
+            if slab.exposed_perimeter > tot_ext_fnd_wall_length
+              # Reduce this slab's exposed perimeter so that EnergyPlus does not automatically
+              # create a second no-wall Kiva instance for each of our Kiva instances.
+              # Instead, we will later create our own Kiva instance to account for it.
+              # This reduces the number of Kiva instances we end up with.
+              exp_perim_frac = fnd_wall_length / slab.exposed_perimeter
+            else
+              exp_perim_frac = fnd_wall_length / tot_ext_fnd_wall_length
+            end
+            kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall, slab_frac)
+            add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
+          end
+
+          # Slab on grade
+          if slab.exposed_perimeter - tot_ext_fnd_wall_length > 1.0
+            # Create the no-wall Kiva slab instance now
+            z_origin = 0
+            exp_perim_frac = (slab.exposed_perimeter - tot_ext_fnd_wall_length) / slab.exposed_perimeter
+            add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, nil)
           end
         end
       end
-
-      # FIXME: create a no-wall Kiva slab instance if needed.
-      #      slabs.each do |slab|
-      #        next unless no_wall_slab_exp_perim[slab] > 1.0
-      #
-      #        z_origin = 0
-      #        slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
-      #        add_foundation_slab(model, weather, spaces, slab, no_wall_slab_exp_perim[slab],
-      #                            slab_area, z_origin, nil)
-      #       end
 
       # Interzonal foundation wall surfaces
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
-      fnd_walls.each do |fnd_wall|
+      int_fnd_walls.each do |fnd_wall|
         next unless fnd_wall.is_interior
 
         ag_height = fnd_wall.height - fnd_wall.depth_below_grade
@@ -780,7 +788,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_wall(runner, model, spaces, slab_frac, foundation_wall)
+  def self.add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac)
     net_area = foundation_wall.net_area * slab_frac
     gross_area = foundation_wall.area * slab_frac
     height = foundation_wall.height
@@ -922,7 +930,7 @@ class OSModel
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        slab.exposed_perimeter, mat_carpet, soil_k_in, kiva_foundation)
+                                        slab.exposed_perimeter * exp_perim_frac, mat_carpet, soil_k_in, kiva_foundation)
 
     kiva_foundation = surface.adjacentFoundation.get
 
