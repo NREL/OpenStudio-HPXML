@@ -3,13 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-<<<<<<< HEAD
-  <version_id>a3a21956-95fd-4e36-8e27-a8004a2d549c</version_id>
-  <version_modified>20230425T172442Z</version_modified>
-=======
-  <version_id>61a17495-a6d8-4328-a2c6-341c8ef4300c</version_id>
-  <version_modified>20230519T183248Z</version_modified>
->>>>>>> master
+  <version_id>d37a1ccb-2c59-4bcb-aa22-528baa5c3caa</version_id>
+  <version_modified>20230522T170353Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6694,7 +6689,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>010244DB</checksum>
+      <checksum>80767566</checksum>
     </file>
     <file>
       <version>
@@ -6705,17 +6700,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-<<<<<<< HEAD
-      <checksum>B902450C</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FE53E8B3</checksum>
-=======
-      <checksum>AE26AEE7</checksum>
->>>>>>> master
+      <checksum>D4FEC418</checksum>
     </file>
   </files>
 </measure>
