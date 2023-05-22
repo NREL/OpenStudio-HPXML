@@ -689,17 +689,21 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_foundation_properties
-    ['../tests/ASHRAE_Standard_140/L322XC.xml',
-     'base.xml',
-     'base-foundation-slab.xml',
-     'base-foundation-basement-garage.xml',
-     'base-foundation-unconditioned-basement-above-grade.xml',
-     'base-foundation-conditioned-crawlspace.xml',
-     'base-foundation-ambient.xml',
-     'base-foundation-walkout-basement.xml',
-     'base-foundation-multiple.xml',
-     'base-foundation-complex.xml',
-     'base-bldgtype-attached-2stories.xml'].each do |hpxml_name|
+    tests = {
+      '../tests/ASHRAE_Standard_140/L322XC.xml' => 1,                 # 1 basement foundation
+      'base.xml' => 1,                                                # 1 basement foundation
+      'base-foundation-slab.xml' => 1,                                # 1 slab-on-grade foundation
+      'base-foundation-basement-garage.xml' => 2,                     # 1 basement foundation + 1 garage foundation
+      'base-foundation-unconditioned-basement-above-grade.xml' => 1,  # 1 basement foundation
+      'base-foundation-conditioned-crawlspace.xml' => 1,              # 1 crawlspace foundation
+      'base-foundation-ambient.xml' => 0,                             # 0 foundations
+      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation at 4 below-grade depths (0, 1, 4, 7 ft)
+      'base-foundation-multiple.xml' => 2,                            # 1 basement foundation + 1 crawlspace foundation
+      'base-foundation-complex.xml' => 10,                            # Lots of foundations for testing
+      'base-bldgtype-attached-2stories.xml' => 1,                     # 1 basement foundation
+    }
+
+    tests.each do |hpxml_name, num_kiva_objects|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_name))
       model, hpxml = _test_measure(args_hash)
@@ -727,6 +731,10 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
           int_fwall_int_adj_tos[int_adj_to] << fwall
         end
       end
+
+      # Check number of Kiva:Foundation objects
+      # We want the lowest possible number that is sufficient, in order to keep runtime performance fast
+      assert_equal(num_kiva_objects, model.getFoundationKivas.size)
 
       # Check slab exposed perimeters
       slab_int_adj_tos.each do |int_adj_to, slabs|
@@ -834,6 +842,8 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_collapse_surfaces
+    # Check that multiple similar surfaces are correctly collapsed
+    # to reduce EnergyPlus runtime.
     def split_surfaces(surfaces, should_collapse_surfaces)
       surf_class = surfaces[0].class
       for n in 1..surfaces.size
@@ -919,6 +929,30 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         end
       end
     end
+
+    # Check that Slab/DepthBelowGrade is ignored for below-grade spaces
+    # when collapsing surfaces, such that we reduce the number of Kiva:Foundation
+    # objects and therefore runtime.
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-foundation-walkout-basement.xml'))
+    model, _hpxml = _test_measure(args_hash)
+    num_kiva_fnd_objets = model.getFoundationKivas.size
+
+    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml.slabs[0].depth_below_grade = hpxml.foundation_walls[0].depth_below_grade
+    hpxml.slabs[0].area /= 3.0
+    hpxml.slabs[0].exposed_perimeter /= 3.0
+    for i in 1..2
+      hpxml.slabs << hpxml.slabs[0].dup
+      hpxml.slabs[i].id = "Slab#{i + 1}"
+      hpxml.slabs[i].perimeter_insulation_id = "Slab#{i + 1}PerimeterInsulation"
+      hpxml.slabs[i].under_slab_insulation_id = "Slab#{i + 1}UnderSlabInsulation"
+      hpxml.slabs[i].depth_below_grade = hpxml.foundation_walls[i].depth_below_grade
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    model, _hpxml = _test_measure(args_hash)
+    assert_equal(num_kiva_fnd_objets, model.getFoundationKivas.size)
   end
 
   def test_aspect_ratios

@@ -936,7 +936,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     exposed_perimeter: 40,
                     perimeter_insulation_depth: 0,
                     under_slab_insulation_width: 0,
-                    depth_below_grade: 0,
                     perimeter_insulation_r_value: 0,
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,

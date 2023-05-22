@@ -1,3 +1,8 @@
+## OpenStudio-HPXML v1.6.1
+
+__New Features__
+- `Slab/DepthBelowGrade` is no longer required for certain foundation types.
+
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__

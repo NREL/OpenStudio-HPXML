@@ -859,6 +859,16 @@ class HPXMLDefaults
         slab.carpet_fraction = conditioned_slab ? 0.8 : 0.0
         slab.carpet_fraction_isdefaulted = true
       end
+      if slab.adjacent_foundation_walls.empty?
+        if slab.depth_below_grade.nil?
+          slab.depth_below_grade = 0.0
+          slab.depth_below_grade_isdefaulted = true
+        end
+      else
+        if !slab.depth_below_grade.nil?
+          slab.depth_below_grade = nil # Ignore Slab/DepthBelowGrade; use values from adjacent foundation walls instead
+        end
+      end
     end
   end
 

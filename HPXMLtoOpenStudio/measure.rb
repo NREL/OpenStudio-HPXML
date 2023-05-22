@@ -675,29 +675,19 @@ class OSModel
     foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
-      # Get attached foundation walls/slabs
-      int_fnd_walls = []
-      ext_fnd_walls = []
+      # Get attached slabs/foundation walls
       slabs = []
-      @hpxml.foundation_walls.each do |fnd_wall|
-        next unless fnd_wall.interior_adjacent_to == foundation_type
-        next if fnd_wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
-
-        if fnd_wall.is_interior
-          int_fnd_walls << fnd_wall
-        else
-          ext_fnd_walls << fnd_wall
-        end
-      end
       @hpxml.slabs.each do |slab|
         next unless slab.interior_adjacent_to == foundation_type
 
         slabs << slab
         slab.exposed_perimeter = [slab.exposed_perimeter, 1.0].max # minimum value to prevent error if no exposed slab
       end
+      int_fnd_walls = slabs[0].adjacent_foundation_walls.select { |fw| fw.net_area >= 1.0 && fw.is_interior }
+      ext_fnd_walls = slabs[0].adjacent_foundation_walls.select { |fw| fw.net_area >= 1.0 && fw.is_exterior }
 
       slabs.each do |slab|
-        slab_frac = slab.exposed_perimeter / slabs.map { |s| s.exposed_perimeter }.sum
+        slab_frac = slab.exposed_perimeter / slabs.map { |s| s.exposed_perimeter }.sum # Used to apportion foundation walls to each slab
 
         if ext_fnd_walls.empty?
           # Slab on grade
@@ -713,19 +703,18 @@ class OSModel
             if slab.exposed_perimeter > tot_ext_fnd_wall_length
               # Reduce this slab's exposed perimeter so that EnergyPlus does not automatically
               # create a second no-wall Kiva instance for each of our Kiva instances.
-              # Instead, we will later create our own Kiva instance to account for it.
-              # This reduces the number of Kiva instances we end up with.
-              exp_perim_frac = fnd_wall_length / slab.exposed_perimeter
+              # Instead, we will later create our own single Kiva instance to account for it.
+              # This reduces the number of Kiva instances we end up with, for faster runtimes.
+              exp_perim_frac = fnd_wall_length / slab.exposed_perimeter # exp_perim_fracs sum to less than 1
             else
-              exp_perim_frac = fnd_wall_length / tot_ext_fnd_wall_length
+              exp_perim_frac = fnd_wall_length / tot_ext_fnd_wall_length # exp_perim_fracs sum to 1
             end
             kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall, slab_frac)
             add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, kiva_foundation)
           end
 
-          # Slab on grade
           if slab.exposed_perimeter - tot_ext_fnd_wall_length > 1.0
-            # Create the no-wall Kiva slab instance now
+            # Create the no-wall Kiva slab instance now to model the remaining exposed perimeter
             z_origin = 0
             exp_perim_frac = (slab.exposed_perimeter - tot_ext_fnd_wall_length) / slab.exposed_perimeter
             add_foundation_slab(model, weather, spaces, slab, z_origin, exp_perim_frac, nil)

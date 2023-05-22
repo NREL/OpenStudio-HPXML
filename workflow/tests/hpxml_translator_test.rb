@@ -736,26 +736,6 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    if hpxml_path.include?('ASHRAE_Standard_140') || hpxml_path.include?('real_homes')
-      # nop
-    elsif hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeApartment
-      # no foundation, above dwelling unit
-      assert_equal(0, num_kiva_instances)
-    elsif hpxml.slabs.empty?
-      assert_equal(0, num_kiva_instances)
-    else
-      num_expected_kiva_instances = { 'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
-                                      'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
-                                      'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
-                                      'base-enclosure-garage.xml' => 2,                  # additional instance for garage
-                                      'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
-                                      'base-foundation-complex.xml' => 10,               # lots of foundations for testing
-                                      'base-pv-battery-garage.xml' => 2 }                # additional instance for garage
-      num_expected = num_expected_kiva_instances[File.basename(hpxml_path)]
-      num_expected = 1 if num_expected.nil?
-      assert_equal(num_expected, num_kiva_instances)
-    end
-
     # Enclosure Foundation Slabs
     num_slabs = hpxml.slabs.size
     if (num_slabs <= 1) && (num_kiva_instances <= 1) # The slab surfaces may be combined in these situations, so skip tests
