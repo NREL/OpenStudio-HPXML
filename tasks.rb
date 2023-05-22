@@ -9,34 +9,55 @@ end
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   workflow_dir = File.join(this_dir, 'workflow')
-  hpxml_inputs_tsv_path = File.join(workflow_dir, 'hpxml_inputs.tsv')
+  hpxml_inputs_tsv_path = File.join(workflow_dir, 'hpxml_inputs.json')
 
-  require 'csv'
-  csv_data = CSV.open(hpxml_inputs_tsv_path, headers: :first_row, col_sep: "\t").map(&:to_h)
+  require 'json'
+  json_inputs = JSON.parse(File.read(hpxml_inputs_tsv_path))
   abs_hpxml_files = []
-  dirs = csv_data.map { |r| r['hpxml_path'] }.uniq
+  dirs = json_inputs.keys.map { |file_path| File.dirname(file_path) }.uniq
 
-  puts "Generating #{csv_data.size} HPXML files..."
+  schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
+  schema_validator = XMLValidator.get_schema_validator(schema_path)
 
-  csv_data.each_with_index do |csv_row, i|
-    puts "[#{i + 1}/#{csv_data.size}] Generating #{csv_row['hpxml_file']}..."
-    hpxml_file = csv_row['hpxml_file']
-    csv_row['hpxml_path'] = File.join(workflow_dir, csv_row['hpxml_path'], hpxml_file)
-    hpxml_path = csv_row['hpxml_path']
+  schedules_regenerated = []
+
+  puts "Generating #{json_inputs.size} HPXML files..."
+
+  json_inputs.keys.each_with_index do |hpxml_filename, i|
+    puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
+    hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
-    csv_row.delete('hpxml_file')
 
-    # Convert from true/false strings to boolean
-    csv_row.each do |k, v|
-      next if v.nil?
+    # Build up json_input from parent_hpxml(s)
+    parent_hpxml_filenames = []
+    parent_hpxml_filename = json_inputs[hpxml_filename]['parent_hpxml']
+    while not parent_hpxml_filename.nil?
+      if not json_inputs.keys.include? parent_hpxml_filename
+        fail "Could not find parent_hpxml: #{parent_hpxml_filename}."
+      end
 
-      csv_row[k] = true if ['true', 'TRUE'].include?(v)
-      csv_row[k] = false if ['false', 'FALSE'].include?(v)
+      parent_hpxml_filenames << parent_hpxml_filename
+      parent_hpxml_filename = json_inputs[parent_hpxml_filename]['parent_hpxml']
     end
+    json_input = { 'hpxml_path' => hpxml_path }
+    for parent_hpxml_filename in parent_hpxml_filenames.reverse
+      json_input.merge!(json_inputs[parent_hpxml_filename])
+    end
+    json_input.merge!(json_inputs[hpxml_filename])
+    json_input.delete('parent_hpxml')
 
     measures = {}
-    measures['BuildResidentialHPXML'] = [csv_row]
-    # measures['BuildResidentialScheduleFile'] = [sch_args] if !sch_args.empty?
+    measures['BuildResidentialHPXML'] = [json_input]
+
+    # Re-generate stochastic schedule CSV?
+    csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
+    if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
+      sch_args = { 'hpxml_path' => hpxml_path,
+                   'output_csv_path' => csv_path,
+                   'hpxml_output_path' => hpxml_path }
+      measures['BuildResidentialScheduleFile'] = [sch_args]
+      schedules_regenerated << csv_path
+    end
 
     measures_dir = File.dirname(__FILE__)
     model = OpenStudio::Model::Model.new
@@ -59,11 +80,11 @@ def create_hpxmls
     if hpxml_path.include? 'ASHRAE_Standard_140'
       apply_hpxml_modification_ashrae_140(hpxml)
     else
-      apply_hpxml_modification(hpxml_file, hpxml)
+      apply_hpxml_modification(File.basename(hpxml_path), hpxml)
     end
     hpxml_doc = hpxml.to_oga()
 
-    if ['base-multiple-buildings.xml'].include? hpxml_file
+    if hpxml_path.include? 'base-multiple-buildings.xml'
       # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
       hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
       building_element = XMLHelper.get_element(hpxml_element, 'Building')
@@ -87,12 +108,11 @@ def create_hpxmls
 
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
-    schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    errors, _ = XMLValidator.validate_against_schema(hpxml_path, schema_path)
+    errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
     next unless errors.size > 0
 
     puts errors.to_s
-    puts "\nError: Did not successfully validate #{hpxml_file}."
+    puts "\nError: Did not successfully validate #{hpxml_filename}."
     exit!
   end
 
@@ -339,7 +359,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.exterior_adjacent_to = adjacent_to
     hpxml.floors[0].exterior_adjacent_to = adjacent_to
     hpxml.floors[1].exterior_adjacent_to = adjacent_to
@@ -368,11 +388,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.delete
-    hpxml.walls.select.with_index { |w, i| w.id = "Wall#{i + 1}" }
-    hpxml.windows.select { |w| w.wall_idref = hpxml.walls[-1].id }
-    hpxml.doors.select { |d| d.wall_idref = hpxml.walls[-1].id }
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -436,7 +453,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
-           }           [0]
+           }[0]
     hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 50,
                       azimuth: 270,
@@ -447,7 +464,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHeatedSpace
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -456,7 +473,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -1137,12 +1154,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     grg_wall = hpxml.walls.select { |w|
                  w.interior_adjacent_to == HPXML::LocationGarage &&
                    w.exterior_adjacent_to == HPXML::LocationOutside
-               } [0]
+               }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: grg_wall.id,
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
+  end
+  if ['base-misc-neighbor-shading-bldgtype-multifamily.xml'].include? hpxml_file
+    wall = hpxml.walls.select { |w| w.azimuth == hpxml.neighbor_buildings[0].azimuth }[0]
+    wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
   end
 
   # ---------- #
@@ -1384,6 +1405,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].conditioned_floor_area_served = 4050.0
       hpxml.hvac_distributions[0].number_of_return_registers = 3
     end
+  elsif ['base-hvac-ducts-effective-rvalue.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_insulation_r_value = nil
+    hpxml.hvac_distributions[0].ducts[1].duct_insulation_r_value = nil
+    hpxml.hvac_distributions[0].ducts[0].duct_effective_r_value = 4.5
+    hpxml.hvac_distributions[0].ducts[1].duct_effective_r_value = 1.7
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.reverse_each do |hvac_distribution|
       hvac_distribution.delete
@@ -1645,6 +1671,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.manualj_internal_loads_sensible = 4000
     hpxml.header.manualj_internal_loads_latent = 200
     hpxml.header.manualj_num_occupants = 5
+  end
+  if hpxml_file.include? 'heating-capacity-17f'
+    hpxml.heat_pumps[0].heating_capacity_17F = hpxml.heat_pumps[0].heating_capacity * hpxml.heat_pumps[0].heating_capacity_retention_fraction
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
   end
 
   # ------------------ #
@@ -1940,17 +1971,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
-                         annual_output_kwh: 500)
+                         annual_output_kwh: 1200)
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeOil,
                          annual_consumption_kbtu: 8500,
-                         annual_output_kwh: 500)
+                         annual_output_kwh: 1200)
   elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          is_shared_system: true,
                          fuel_type: HPXML::FuelTypePropane,
                          annual_consumption_kbtu: 85000,
-                         annual_output_kwh: 5000,
+                         annual_output_kwh: 12000,
                          number_of_bedrooms_served: 18)
   end
 
@@ -2290,7 +2321,9 @@ if ARGV[0].to_sym == :update_hpxmls
 
   # Create sample/test HPXMLs
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  t = Time.now
   create_hpxmls()
+  puts "Completed in #{(Time.now - t).round(1)}s"
 end
 
 if ARGV[0].to_sym == :download_utility_rates
