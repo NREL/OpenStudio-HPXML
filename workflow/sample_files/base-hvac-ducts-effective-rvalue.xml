@@ -318,131 +318,37 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatPump1'/>
-              <PrimaryCoolingSystem idref='HeatPump1'/>
+              <PrimaryHeatingSystem idref='HeatingSystem1'/>
+              <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
-            <HeatPump>
-              <SystemIdentifier id='HeatPump1'/>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
-              <HeatingCapacity17F>21600.0</HeatingCapacity17F>
-              <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
-              <BackupType>integrated</BackupType>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+            </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem1'/>
+              <DistributionSystem idref='HVACDistribution1'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>17.25</Value>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
-              <CoolingDetailedPerformanceData>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.325</CapacityFractionOfNominal>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>4.47</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.71</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.367</CapacityFractionOfNominal>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>6.34</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.111</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>3.53</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-              </CoolingDetailedPerformanceData>
-              <HeatingDetailedPerformanceData>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.278</CapacityFractionOfNominal>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>4.73</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>3.44</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.117</CapacityFractionOfNominal>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>1.84</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.689</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.66</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.053</CapacityFractionOfNominal>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>0.81</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.553</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.28</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-              </HeatingDetailedPerformanceData>
-            </HeatPump>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
@@ -473,14 +379,14 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>4.5</DuctEffectiveRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>1.7</DuctEffectiveRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>

@@ -1376,7 +1376,7 @@
   },
   "sample_files/base-enclosure-infil-flue.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_has_flue_or_chimney": true
+    "air_leakage_has_flue_or_chimney_in_conditioned_space": true
   },
   "sample_files/base-enclosure-infil-natural-ach.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1664,9 +1664,6 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
-  },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml"
   },
   "sample_files/base-hvac-autosize.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2188,6 +2185,15 @@
   "sample_files/base-hvac-ducts-area-multipliers.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-hvac-ducts-buried.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "ducts_supply_buried_insulation_level": "deeply buried",
+    "ducts_return_buried_insulation_level": "deeply buried",
+    "ducts_return_insulation_r": 4
+  },
+  "sample_files/base-hvac-ducts-effective-rvalue.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "ElectricResistance",
@@ -2435,9 +2441,6 @@
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml"
-  },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_heating_capacity": 0,
@@ -2459,9 +2462,6 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
-  },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance2.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
