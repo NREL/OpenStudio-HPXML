@@ -409,9 +409,8 @@ class HVAC
     clg_coil = nil
 
     # Heating Coil (model w/ constant efficiency)
-    constant_biquadratic = create_curve_biquadratic_constant(model)
-    constant_quadratic = create_curve_quadratic_constant(model)
-    htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_biquadratic, constant_quadratic, constant_biquadratic, constant_quadratic, constant_quadratic)
+    constant_table = create_table_lookup_constant(model)
+    htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_table, constant_table, constant_table, constant_table, constant_table)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
     htg_coil.setDefrostTimePeriodFraction(0.00001) # Disable defrost; avoid E+ warning w/ value of zero
@@ -490,6 +489,8 @@ class HVAC
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
+    var_plr = { name: 'part_load_ratio', min: 0.1, max: 1.0, values: [], sample_low: 0.1, sample_high: 1.0, sample_step: 0.1 }
+    var_t_water = { name: 't_water', min: 20.0, max: 85.0, values: [], sample_low: 20.0, sample_high: 85.0, sample_step: 5.0 }
     if is_condensing
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
       boiler_RatedHWRT = UnitConversions.convert(80.0, 'F', 'C')
@@ -502,11 +503,15 @@ class HVAC
       boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
       boiler.setNominalThermalEfficiency(boilerEff_Design)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-      boiler_eff_curve = create_curve_biquadratic(model, [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723], 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+      boiler_curve_coeff = [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723]
+      boiler_independent_vars, boiler_output_values = set_up_table_lookup_variables([var_plr, var_t_water], 'biquadratic', boiler_curve_coeff)
+      boiler_eff_curve = create_table_lookup(model, 'CondensingBoilerEff', boiler_independent_vars, boiler_output_values)
     else
       boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
-      boiler_eff_curve = create_curve_bicubic(model, [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05], 'NonCondensingBoilerEff', 0.1, 1.0, 20.0, 80.0)
+      boiler_curve_coeff = [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05]
+      boiler_independent_vars, boiler_output_values = set_up_table_lookup_variables([var_plr, var_t_water], 'bicubic', boiler_curve_coeff)
+      boiler_eff_curve = create_table_lookup(model, 'NonCondensingBoilerEff', boiler_independent_vars, boiler_output_values)
     end
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
     boiler.setMinimumPartLoadRatio(0.0)
@@ -741,9 +746,15 @@ class HVAC
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
     relative_humidity_setpoint_sch.setValue(rh_setpoint)
 
-    capacity_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-CAP-fT', -100, 100, -100, 100)
-    energy_factor_curve = create_curve_biquadratic(model, ef_coeff, 'DXDH-EF-fT', -100, 100, -100, 100)
-    part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
+    var_db = { name: 'dry_bulb_temp', min: -100.0, max: 100.0, values: [], sample_low: -100.0, sample_high: 100.0, sample_step: 5.0 }
+    var_rh = { name: 'rh', min: -100.0, max: 100.0, values: [], sample_low: 0.0, sample_high: 100.0, sample_step: 5.0 }
+    var_plf = { name: 'plf', min: 0.0, max: 1.0, values: [], sample_low: 0.0, sample_high: 1.0, sample_step: 0.1 }
+    dh_cap_independent_vars, dh_cap_output_values = set_up_table_lookup_variables([var_db, var_rh], 'biquadratic', w_coeff)
+    dh_ef_independent_vars, dh_ef_output_values = set_up_table_lookup_variables([var_db, var_rh], 'biquadratic', ef_coeff)
+    dh_plf_independent_vars, dh_plf_output_values = set_up_table_lookup_variables([var_plf], 'quadratic', pl_coeff)
+    capacity_curve = create_table_lookup(model, 'DXDH-CAP-fT', dh_cap_independent_vars, dh_cap_output_values)
+    energy_factor_curve = create_table_lookup(model, 'DXDH-EF-fT', dh_ef_independent_vars, dh_ef_output_values)
+    part_load_frac_curve = create_table_lookup(model, 'DXDH-PLF-fPLR', dh_plf_independent_vars, dh_plf_output_values, 0.7, 1.0)
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
     air_flow_rate = 2.75 * total_capacity
@@ -2695,47 +2706,6 @@ class HVAC
     end
   end
 
-  def self.create_curve_biquadratic_constant(model)
-    curve = OpenStudio::Model::CurveBiquadratic.new(model)
-    curve.setName('ConstantBiquadratic')
-    curve.setCoefficient1Constant(1)
-    curve.setCoefficient2x(0)
-    curve.setCoefficient3xPOW2(0)
-    curve.setCoefficient4y(0)
-    curve.setCoefficient5yPOW2(0)
-    curve.setCoefficient6xTIMESY(0)
-    curve.setMinimumValueofx(-100)
-    curve.setMaximumValueofx(100)
-    curve.setMinimumValueofy(-100)
-    curve.setMaximumValueofy(100)
-    return curve
-  end
-
-  def self.create_curve_quadratic_constant(model)
-    curve = OpenStudio::Model::CurveQuadratic.new(model)
-    curve.setName('ConstantQuadratic')
-    curve.setCoefficient1Constant(1)
-    curve.setCoefficient2x(0)
-    curve.setCoefficient3xPOW2(0)
-    curve.setMinimumValueofx(-100)
-    curve.setMaximumValueofx(100)
-    curve.setMinimumCurveOutput(-100)
-    curve.setMaximumCurveOutput(100)
-    return curve
-  end
-
-  def self.create_curve_cubic_constant(model)
-    curve = OpenStudio::Model::CurveCubic.new(model)
-    curve.setName('ConstantCubic')
-    curve.setCoefficient1Constant(1)
-    curve.setCoefficient2x(0)
-    curve.setCoefficient3xPOW2(0)
-    curve.setCoefficient4xPOW3(0)
-    curve.setMinimumValueofx(-100)
-    curve.setMaximumValueofx(100)
-    return curve
-  end
-
   def self.convert_curve_biquadratic(coeff, ip_to_si = true)
     if ip_to_si
       # Convert IP curves to SI curves
@@ -2760,31 +2730,53 @@ class HVAC
     end
   end
 
-  def self.create_curve_biquadratic(model, coeff, name, min_x, max_x, min_y, max_y)
-    curve = OpenStudio::Model::CurveBiquadratic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setCoefficient4y(coeff[3])
-    curve.setCoefficient5yPOW2(coeff[4])
-    curve.setCoefficient6xTIMESY(coeff[5])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    curve.setMinimumValueofy(min_y)
-    curve.setMaximumValueofy(max_y)
-    return curve
-  end
-  
   def self.calculate_biquadratic_output(x, y, coeff)
-    return coeff[0] + coeff[1]*x + coeff[2]*x*x + coeff[3]*y + coeff[4]*y*y + coeff[5]*x*y
-  end
-  
-  def self.calculate_quadratic_output(x, coeff)
-    return coeff[0] + coeff[1]*x + coeff[2]*x*x
+    return coeff[0] + coeff[1] * x + coeff[2] * x * x + coeff[3] * y + coeff[4] * y * y + coeff[5] * x * y
   end
 
-  def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil)
+  def self.calculate_bicubic_output(x, y, coeff)
+    return coeff[0] + coeff[1] * x + coeff[2] * x * x + coeff[3] * y + coeff[4] * y * y + coeff[5] * x * y + coeff[6] * x * x * x + coeff[7] * y * y * y + coeff[8] * x * x * y + coeff[9] * x * y * y
+  end
+
+  def self.calculate_quadratic_output(x, coeff)
+    return coeff[0] + coeff[1] * x + coeff[2] * x * x
+  end
+
+  def self.set_up_table_lookup_variables(vars, curve_type, curve_coeff)
+    vars.each do |var|
+      next unless var[:values].empty? # values already set from previous calls
+
+      for var_value in (var[:sample_low]...var[:sample_high]).step(var[:sample_step])
+        var[:values] << var_value
+      end
+    end
+    curve_output_values = []
+    if vars.size == 2
+      vars[0][:values].each do |var1_value|
+        vars[1][:values].each do |var2_value|
+          if curve_type == 'biquadratic'
+            curve_output_values << calculate_biquadratic_output(var1_value, var2_value, curve_coeff)
+          elsif curve_type == 'bicubic'
+            curve_output_values << calculate_bicubic_output(var1_value, var2_value, curve_coeff)
+          end
+        end
+      end
+    elsif vars.size == 1
+      vars[0][:values].each do |var1_value|
+        if curve_type == 'quadratic'
+          curve_output_values << calculate_quadratic_output(var1_value, curve_coeff)
+        end
+      end
+    end
+    return vars, curve_output_values
+  end
+
+  def self.create_table_lookup_constant(model)
+    var_constant = { name: 'constant_var', min: -100, max: 100, values: [0, 1] }
+    return create_table_lookup(model, 'ConstantTable', [var_constant], [1, 1], -100, 100)
+  end
+
+  def self.create_table_lookup(model, name, independent_vars, output_values, output_min, output_max)
     table = OpenStudio::Model::TableLookup.new(model)
     table.setName(name)
     independent_vars.each do |var|
@@ -2800,72 +2792,6 @@ class HVAC
     table.setMaximumOutput(output_max) unless output_max.nil?
     table.setOutputValues(output_values)
     return table
-  end
-
-  def self.create_curve_bicubic(model, coeff, name, min_x, max_x, min_y, max_y)
-    curve = OpenStudio::Model::CurveBicubic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setCoefficient4y(coeff[3])
-    curve.setCoefficient5yPOW2(coeff[4])
-    curve.setCoefficient6xTIMESY(coeff[5])
-    curve.setCoefficient7xPOW3(coeff[6])
-    curve.setCoefficient8yPOW3(coeff[7])
-    curve.setCoefficient9xPOW2TIMESY(coeff[8])
-    curve.setCoefficient10xTIMESYPOW2(coeff[9])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    curve.setMinimumValueofy(min_y)
-    curve.setMaximumValueofy(max_y)
-    return curve
-  end
-
-  def self.create_curve_quadratic(model, coeff, name, min_x, max_x, min_y, max_y, is_dimensionless = false)
-    curve = OpenStudio::Model::CurveQuadratic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    if not min_y.nil?
-      curve.setMinimumCurveOutput(min_y)
-    end
-    if not max_y.nil?
-      curve.setMaximumCurveOutput(max_y)
-    end
-    if is_dimensionless
-      curve.setInputUnitTypeforX('Dimensionless')
-      curve.setOutputUnitType('Dimensionless')
-    end
-    return curve
-  end
-
-  def self.create_curve_cubic(model, coeff, name, min_x, max_x, min_y, max_y)
-    curve = OpenStudio::Model::CurveCubic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setCoefficient4xPOW3(coeff[3])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    curve.setMinimumCurveOutput(min_y)
-    curve.setMaximumCurveOutput(max_y)
-    return curve
-  end
-
-  def self.create_curve_exponent(model, coeff, name, min_x, max_x)
-    curve = OpenStudio::Model::CurveExponent.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2Constant(coeff[1])
-    curve.setCoefficient3Constant(coeff[2])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    return curve
   end
 
   def self.create_curve_quad_linear(model, coeff, name)
@@ -2901,50 +2827,37 @@ class HVAC
     end
 
     if clg_ap.num_speeds > 1
-      constant_biquadratic = create_curve_biquadratic_constant(model)
+      constant_table = create_table_lookup_constant(model)
     end
 
     clg_coil = nil
 
+    # independent variables
+    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
+    var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
+
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-      var_wb = {:name => 'wet_bulb_temp', :min => -100, :max => 100, :values => []}
-      var_db = {:name => 'dry_bulb_temp', :min => -100, :max => 100, :values => []}
-      var_fff = {:name => 'air_flow_rate_ratio', :min => 0.0, :max => 2.0, :values => []}
-      var_fplr = {:name => 'part_load_ratio', :min => 0.0, :max => 1.0, :values => []}
-      cap_ft_output_values = []
-      eir_ft_output_values = []
-      cap_fff_output_values = []
-      eir_fff_output_values = []
-      plf_fplr_output_values = []
+
       # temperature independent variable values
-      for wb_temp in (57...72).step(5)
-        wb_temp_c = UnitConversions.convert(wb_temp, 'F', 'C')
-        var_wb[:values] << wb_temp_c
-        for db_temp in (75...125).step(5)
-          db_temp_c = UnitConversions.convert(db_temp, 'F', 'C')
-          var_db[:values] << db_temp_c unless var_db[:values].include? db_temp_c
-          cap_ft_output_values << calculate_biquadratic_output(wb_temp_c, db_temp_c, cap_ft_spec_si)
-          eir_ft_output_values << calculate_biquadratic_output(wb_temp_c, db_temp_c, eir_ft_spec_si)
-        end
-      end
+      cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', cap_ft_spec_si)
+      eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', eir_ft_spec_si)
+
       # air flow ratio independent variable values
-      for fff in (0...2).step(0.1)
-        var_fff[:values] << fff
-        cap_fff_output_values << calculate_quadratic_output(fff, clg_ap.cool_cap_fflow_spec[i])
-        eir_fff_output_values << calculate_quadratic_output(fff, clg_ap.cool_eir_fflow_spec[i])
-      end
+      cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_cap_fflow_spec[i])
+      eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
+
       # part load ratio independent variable values
-      for plr in (0...1).step(0.1)
-        var_fplr[:values] << plr
-        plf_fplr_output_values << calculate_quadratic_output(plr, clg_ap.cool_plf_fplr_spec[i])
-      end
-      cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", [var_wb, var_db], cap_ft_output_values)
-      eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", [var_wb, var_db], eir_ft_output_values)
-      plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", [var_fplr], plf_fplr_output_values, 0.7, 1)
-      cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", [var_fff], cap_fff_output_values, 0, 2)
-      eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", [var_fff], eir_fff_output_values, 0, 2)
+      plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', clg_ap.cool_plf_fplr_spec[i])
+
+      cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
+      eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
+      plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
+      cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
+      eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
@@ -2976,7 +2889,7 @@ class HVAC
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C')) unless clg_ap.crankcase_temp.nil?
         end
-        stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
+        stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_table)
         stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
         stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
         stage.setNominalTimeforCondensateRemovaltoBegin(1000)
@@ -3002,19 +2915,37 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     if htg_ap.num_speeds > 1
-      constant_biquadratic = create_curve_biquadratic_constant(model)
+      constant_table = create_table_lookup_constant(model)
     end
 
     htg_coil = nil
+    # independent variables
+    var_db_in = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(40, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_db_out = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(-50, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
+    var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
+    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(50, 'F', 'C'), sample_high: UnitConversions.convert(150, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
 
     for i in 0..(htg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
-      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Heat-CAP-fT#{i + 1}", -100, 100, -100, 100)
-      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Heat-EIR-fT#{i + 1}", -100, 100, -100, 100)
-      plf_fplr_curve = create_curve_quadratic(model, htg_ap.heat_plf_fplr_spec[i], "Heat-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
-      cap_fff_curve = create_curve_quadratic(model, htg_ap.heat_cap_fflow_spec[i], "Heat-CAP-fFF#{i + 1}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, htg_ap.heat_eir_fflow_spec[i], "Heat-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+
+      # temperature independent variable values
+      cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_db_in, var_db_out], 'biquadratic', cap_ft_spec_si)
+      eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_db_in, var_db_out], 'biquadratic', eir_ft_spec_si)
+
+      # air flow ratio independent variable values
+      cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_cap_fflow_spec[i])
+      eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_eir_fflow_spec[i])
+
+      # part load ratio independent variable values
+      plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', htg_ap.heat_plf_fplr_spec[i])
+
+      cap_ft_curve = create_table_lookup(model, "Heat-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
+      eir_ft_curve = create_table_lookup(model, "Heat-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
+      plf_fplr_curve = create_table_lookup(model, "Heat-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
+      cap_fff_curve = create_table_lookup(model, "Heat-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
+      eir_fff_curve = create_table_lookup(model, "Heat-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
 
       if htg_ap.num_speeds == 1
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
@@ -3032,7 +2963,7 @@ class HVAC
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
         end
-        stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
+        stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_table)
         stage.setGrossRatedHeatingCOP(1.0 / htg_ap.heat_rated_eirs[i])
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') * htg_ap.heat_capacity_ratios[i])
@@ -3044,7 +2975,8 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
+    defrosteir_independent_vars, defrosteir_output_values = set_up_table_lookup_variables([var_wb, var_db_out], 'biquadratic', [0.1528, 0, 0, 0, 0, 0])
+    defrost_eir_curve = create_table_lookup(model, 'Defrosteir', defrosteir_independent_vars, defrosteir_output_values) # Heating defrost curve for reverse cycle
     htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
     htg_coil.setDefrostStrategy('ReverseCycle')
     htg_coil.setDefrostControl('Timed')
