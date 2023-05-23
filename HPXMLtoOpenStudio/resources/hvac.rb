@@ -2745,7 +2745,7 @@ class HVAC
     return create_table_lookup(model, 'ConstantTable', [var_constant], [1, 1], -100, 100)
   end
 
-  def self.create_table_lookup(model, name, independent_vars, output_values, output_min, output_max)
+  def self.create_table_lookup(model, name, independent_vars, output_values, output_min=nil, output_max=nil)
     table = OpenStudio::Model::TableLookup.new(model)
     table.setName(name)
     independent_vars.each do |var|
