@@ -1077,7 +1077,6 @@ class HPXMLDefaults
       cooling_system.cooling_efficiency_seer_isdefaulted = true
       cooling_system.cooling_efficiency_seer2 = nil
     end
-
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
@@ -1111,6 +1110,22 @@ class HPXMLDefaults
 
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
       heat_pump.compressor_type_isdefaulted = true
+    end
+
+    # Default HP heating capacity retention
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heating_capacity_retention_fraction.nil?
+      next unless heat_pump.heating_capacity_17F.nil?
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
+
+      heat_pump.heating_capacity_retention_temp = 5.0
+      if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.425
+      elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.5
+      end
+      heat_pump.heating_capacity_retention_fraction_isdefaulted = true
+      heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
 
     # Default HP compressor lockout temp
@@ -1353,6 +1368,30 @@ class HPXMLDefaults
       end
     end
 
+    # Crankcase heater power [Watts]
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+      next unless cooling_system.crankcase_heater_watts.nil?
+
+      if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+        cooling_system.crankcase_heater_watts = 0.0
+      else
+        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
+      end
+      cooling_system.crankcase_heater_watts_isdefaulted = true
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+      next unless heat_pump.crankcase_heater_watts.nil?
+
+      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+        heat_pump.crankcase_heater_watts = 0.0
+      else
+        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
+      end
+      heat_pump.crankcase_heater_watts_isdefaulted = true
+    end
+
     # Pilot Light
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace,
@@ -1387,22 +1426,19 @@ class HPXMLDefaults
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
-        HVAC.set_cool_rated_cfm_per_ton(cooling_system)
-        HVAC.set_cool_rated_shrs_gross(cooling_system)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         num_speeds = 10
         HVAC.set_num_speeds(cooling_system)
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_fan_power_rated(cooling_system)
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
         HVAC.set_cool_curves_mshp(cooling_system, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(cooling_system, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
@@ -1420,7 +1456,7 @@ class HPXMLDefaults
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      HVAC.set_heat_rated_cfm_per_ton(heating_system)
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(1, true)
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
@@ -1434,35 +1470,30 @@ class HPXMLDefaults
         end
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_cool_rated_cfm_per_ton(heat_pump)
-        HVAC.set_cool_rated_shrs_gross(heat_pump)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)
         HVAC.set_heat_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_heat_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
         HVAC.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
@@ -2832,11 +2863,6 @@ class HPXMLDefaults
                 htg_sys.heating_capacity_17F = htg_cap_17f.round
                 htg_sys.heating_capacity_17F_isdefaulted = true
               end
-            else
-              # Autosized
-              # FUTURE: Calculate HeatingCapacity17F from heat_cap_ft_spec? Might be confusing
-              # since user would not be able to replicate the results using this value, as the
-              # default curves are non-linear.
             end
           end
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round

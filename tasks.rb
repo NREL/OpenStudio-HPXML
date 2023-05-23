@@ -359,7 +359,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.exterior_adjacent_to = adjacent_to
     hpxml.floors[0].exterior_adjacent_to = adjacent_to
     hpxml.floors[1].exterior_adjacent_to = adjacent_to
@@ -388,11 +388,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     wall.delete
-    hpxml.walls.select.with_index { |w, i| w.id = "Wall#{i + 1}" }
-    hpxml.windows.select { |w| w.wall_idref = hpxml.walls[-1].id }
-    hpxml.doors.select { |d| d.wall_idref = hpxml.walls[-1].id }
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -456,7 +453,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace
-           }           [0]
+           }[0]
     hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 50,
                       azimuth: 270,
@@ -467,7 +464,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHeatedSpace
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -476,7 +473,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     wall = hpxml.walls.select { |w|
              w.interior_adjacent_to == HPXML::LocationLivingSpace &&
                w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-           }           [0]
+           }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: wall.id,
                     area: 20,
@@ -1157,12 +1154,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     grg_wall = hpxml.walls.select { |w|
                  w.interior_adjacent_to == HPXML::LocationGarage &&
                    w.exterior_adjacent_to == HPXML::LocationOutside
-               } [0]
+               }[0]
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: grg_wall.id,
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
+  end
+  if ['base-misc-neighbor-shading-bldgtype-multifamily.xml'].include? hpxml_file
+    wall = hpxml.walls.select { |w| w.azimuth == hpxml.neighbor_buildings[0].azimuth }[0]
+    wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
   end
 
   # ---------- #
@@ -1821,6 +1822,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 1.96)
   end
+  if hpxml_file.include? 'heating-capacity-17f'
+    hpxml.heat_pumps[0].heating_capacity_17F = hpxml.heat_pumps[0].heating_capacity * hpxml.heat_pumps[0].heating_capacity_retention_fraction
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+  end
 
   # ------------------ #
   # HPXML WaterHeating #
@@ -2120,17 +2126,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
-                         annual_output_kwh: 500)
+                         annual_output_kwh: 1200)
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeOil,
                          annual_consumption_kbtu: 8500,
-                         annual_output_kwh: 500)
+                         annual_output_kwh: 1200)
   elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          is_shared_system: true,
                          fuel_type: HPXML::FuelTypePropane,
                          annual_consumption_kbtu: 85000,
-                         annual_output_kwh: 5000,
+                         annual_output_kwh: 12000,
                          number_of_bedrooms_served: 18)
   end
 
@@ -2470,7 +2476,9 @@ if ARGV[0].to_sym == :update_hpxmls
 
   # Create sample/test HPXMLs
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  t = Time.now
   create_hpxmls()
+  puts "Completed in #{(Time.now - t).round(1)}s"
 end
 
 if ARGV[0].to_sym == :download_utility_rates

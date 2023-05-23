@@ -318,37 +318,37 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1'/>
-              <PrimaryCoolingSystem idref='CoolingSystem1'/>
+              <PrimaryHeatingSystem idref='HeatPump1'/>
+              <PrimaryCoolingSystem idref='HeatPump1'/>
             </PrimarySystems>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem1'/>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump1'/>
               <DistributionSystem idref='HVACDistribution1'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
+              <HeatingCapacity17F>21600.0</HeatingCapacity17F>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
+              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
+              <BackupType>integrated</BackupType>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.73</SensibleHeatFraction>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
@@ -428,38 +428,6 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
-        <Batteries>
-          <Battery>
-            <SystemIdentifier id='Battery1'/>
-            <Location>outside</Location>
-            <BatteryType>Li-ion</BatteryType>
-            <NominalCapacity>
-              <Units>kWh</Units>
-              <Value>20.0</Value>
-            </NominalCapacity>
-            <UsableCapacity>
-              <Units>kWh</Units>
-              <Value>18.0</Value>
-            </UsableCapacity>
-            <RatedPowerOutput>6000.0</RatedPowerOutput>
-          </Battery>
-        </Batteries>
-        <extension>
-          <Generators>
-            <Generator>
-              <SystemIdentifier id='Generator1'/>
-              <FuelType>natural gas</FuelType>
-              <AnnualConsumptionkBtu>8500.0</AnnualConsumptionkBtu>
-              <AnnualOutputkWh>1200.0</AnnualOutputkWh>
-            </Generator>
-            <Generator>
-              <SystemIdentifier id='Generator2'/>
-              <FuelType>fuel oil</FuelType>
-              <AnnualConsumptionkBtu>8500.0</AnnualConsumptionkBtu>
-              <AnnualOutputkWh>1200.0</AnnualOutputkWh>
-            </Generator>
-          </Generators>
-        </extension>
       </Systems>
       <Appliances>
         <ClothesWasher>
