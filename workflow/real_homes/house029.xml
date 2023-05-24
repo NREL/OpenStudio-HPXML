@@ -315,7 +315,7 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>1500.0</Area>
-            <ExposedPerimeter>154.92</ExposedPerimeter>
+            <ExposedPerimeter>141.5</ExposedPerimeter>
             <DepthBelowGrade>6.2</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>

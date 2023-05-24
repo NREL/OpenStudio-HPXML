@@ -679,7 +679,6 @@ class OSModel
       next unless fnd_wall.is_exterior
       next unless @hpxml.slabs.select { |s| s.adjacent_foundation_walls.include? fnd_wall }.empty?
 
-      # FIXME: Add test
       runner.registerError("Exterior FoundationWall '#{fnd_wall.id}' has a DepthBelowGrade of #{fnd_wall.depth_below_grade}, but no corresponding Slab found with the same DepthBelowGrade.")
       return
     end
@@ -701,7 +700,7 @@ class OSModel
           add_foundation_slab(model, weather, spaces, slab, slab.exposed_perimeter, nil)
         else
           # Slab below grade
-          tot_fnd_wall_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
+          tot_ext_fnd_wall_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
           remaining_exposed_length = slab.exposed_perimeter
           ext_fnd_walls.each do |fnd_wall|
             # Ensure slab and foundation wall have identical below-grade depth to prevent E+ coplanar error
@@ -711,16 +710,16 @@ class OSModel
             # Both the foundation wall and slab must have same exposed length to prevent Kiva errors.
             # For the foundation wall, we are effectively modeling the net *exposed* area.
             fnd_wall_length = fnd_wall.area / fnd_wall.height
-            apportioned_slab_exposed_perim = slab.exposed_perimeter * fnd_wall_length / tot_fnd_wall_length
+            apportioned_slab_exposed_perim = slab.exposed_perimeter * fnd_wall_length / tot_ext_fnd_wall_length
             exposed_length = [apportioned_slab_exposed_perim, fnd_wall_length].min
             kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall, exposed_length, fnd_wall_length)
             add_foundation_slab(model, weather, spaces, slab, exposed_length, kiva_foundation)
             remaining_exposed_length -= exposed_length
           end
-          if remaining_exposed_length > 1
-            # The slab has exposed perimeter that exceeds the sum of attached exterior foundation wall
-            # lengths. This implies that a portion of the slab exposure has no adjacent wall (e.g., a
-            # walkout basement).
+          if remaining_exposed_length > 1 # Skip if a small length (e.g., due to rounding)
+            # The slab's exposed perimeter exceeds the sum of attached exterior foundation wall lengths.
+            # This may legitimately occur for a walkout basement, where a portion of the slab has no
+            # adjacent foundation wall.
             add_foundation_slab(model, weather, spaces, slab, remaining_exposed_length, nil)
           end
         end

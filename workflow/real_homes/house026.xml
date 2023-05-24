@@ -73,6 +73,7 @@
             <AttachedToFoundationWall idref='FoundationWall3'/>
             <AttachedToFloor idref='Floor2'/>
             <AttachedToSlab idref='Slab1'/>
+            <AttachedToSlab idref='Slab2'/>
           </Foundation>
           <Foundation>
             <SystemIdentifier id='Foundation2'/>
@@ -345,7 +346,7 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>522.5</Area>
-            <ExposedPerimeter>62.8</ExposedPerimeter>
+            <ExposedPerimeter>41.5</ExposedPerimeter>
             <DepthBelowGrade>5.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -366,7 +367,7 @@
             <SystemIdentifier id='Slab2'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>585.5</Area>
-            <ExposedPerimeter>70.36</ExposedPerimeter>
+            <ExposedPerimeter>46.5</ExposedPerimeter>
             <DepthBelowGrade>4.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>

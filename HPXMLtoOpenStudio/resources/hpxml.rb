@@ -3087,7 +3087,7 @@ class HPXML < Object
     end
 
     def adjacent_foundation_walls
-      return @hpxml_object.foundation_walls.select { |fw| fw.interior_adjacent_to == interior_adjacent_to && (fw.depth_below_grade - depth_below_grade).abs < 0.1 }
+      return @hpxml_object.foundation_walls.select { |fw| (interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to) && (fw.depth_below_grade - depth_below_grade).abs < 0.1 }
     end
 
     def delete
