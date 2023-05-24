@@ -2731,23 +2731,24 @@ class HPXML < Object
       return val
     end
 
-    def net_exposed_area
-      # Net wall area apportioned to exposed perimeter
+    def adjacent_slabs
+      return @hpxml_object.slabs.select { |s| s.adjacent_foundation_walls.include? self }
+    end
 
-      # Calculate total length of walls
-      wall_total_length = @hpxml_object.foundation_walls.select { |fw| fw.is_exterior && interior_adjacent_to == fw.interior_adjacent_to }.map { |fw| fw.area / fw.height }.sum
-
+    def exposed_fraction
       # Calculate total slab exposed perimeter
-      slab_exposed_length = @hpxml_object.slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
+      slab_exposed_length = adjacent_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
 
-      # Calculate exposed foundation wall area
+      # Calculate total length of exterior foundation walls
+      ext_adjacent_fnd_walls = adjacent_slabs.map { |s| s.adjacent_foundation_walls.select { |fw| fw.is_exterior } }.flatten
+      wall_total_length = ext_adjacent_fnd_walls.map { |fw| fw.area / fw.height }.sum
+
+      # Calculate exposed fraction
       if slab_exposed_length < wall_total_length
-        exposed_fraction = (slab_exposed_length / wall_total_length)
-      else
-        exposed_fraction = 1.0
+        return slab_exposed_length / wall_total_length
       end
 
-      return net_area * exposed_fraction
+      return 1.0
     end
 
     def is_exterior
@@ -3086,7 +3087,7 @@ class HPXML < Object
     end
 
     def adjacent_foundation_walls
-      return @hpxml_object.foundation_walls.select { |fw| fw.interior_adjacent_to == interior_adjacent_to }
+      return @hpxml_object.foundation_walls.select { |fw| fw.interior_adjacent_to == interior_adjacent_to && (fw.depth_below_grade - depth_below_grade).abs < 0.1 }
     end
 
     def delete

@@ -711,47 +711,41 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       foundation_wall.insulation_exterior_distance_to_bottom = 8
     end
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    hpxml.foundation_walls.reverse_each do |foundation_wall|
-      foundation_wall.delete
+    (hpxml.foundation_walls + hpxml.slabs).reverse_each do |surface|
+      surface.delete
     end
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
-                               exterior_adjacent_to: HPXML::LocationGround,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 8,
-                               area: 480,
-                               thickness: 8,
-                               depth_below_grade: 7,
-                               interior_finish_type: HPXML::InteriorFinishGypsumBoard,
-                               insulation_interior_r_value: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 8,
-                               insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
-                               exterior_adjacent_to: HPXML::LocationGround,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 4,
-                               area: 120,
-                               thickness: 8,
-                               depth_below_grade: 3,
-                               interior_finish_type: HPXML::InteriorFinishGypsumBoard,
-                               insulation_interior_r_value: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 4,
-                               insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
-                               exterior_adjacent_to: HPXML::LocationGround,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 2,
-                               area: 60,
-                               thickness: 8,
-                               depth_below_grade: 1,
-                               interior_finish_type: HPXML::InteriorFinishGypsumBoard,
-                               insulation_interior_r_value: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 2,
-                               insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.each do |foundation_wall|
-      hpxml.foundations[0].attached_to_foundation_wall_idrefs << foundation_wall.id
+    for i in 1..3
+      if i == 1
+        bgdepth, fwall_height, fwall_length, slab_length = 7, 8, 60, 60
+      elsif i == 2
+        bgdepth, fwall_height, fwall_length, slab_length = 3, 4, 30, 30
+      elsif i == 3
+        bgdepth, fwall_height, fwall_length, slab_length = 1, 2, 30, 60
+      end
+      hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
+                                 exterior_adjacent_to: HPXML::LocationGround,
+                                 interior_adjacent_to: HPXML::LocationBasementConditioned,
+                                 height: fwall_height,
+                                 area: fwall_height * fwall_length,
+                                 thickness: 8,
+                                 depth_below_grade: bgdepth,
+                                 interior_finish_type: HPXML::InteriorFinishGypsumBoard,
+                                 insulation_interior_r_value: 0,
+                                 insulation_exterior_distance_to_top: 0,
+                                 insulation_exterior_distance_to_bottom: fwall_height,
+                                 insulation_exterior_r_value: 8.9)
+      hpxml.foundations[0].attached_to_foundation_wall_idrefs << hpxml.foundation_walls[-1].id
+      hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
+                      interior_adjacent_to: HPXML::LocationBasementConditioned,
+                      area: 450.0,
+                      thickness: 4,
+                      exposed_perimeter: slab_length,
+                      depth_below_grade: bgdepth,
+                      perimeter_insulation_depth: 0,
+                      perimeter_insulation_r_value: 0,
+                      under_slab_insulation_r_value: 0,
+                      under_slab_insulation_width: 0)
+      hpxml.foundations[0].attached_to_slab_idrefs << hpxml.slabs[-1].id
     end
     hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 20,
@@ -814,6 +808,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 675,
                     thickness: 0,
                     exposed_perimeter: 75,
+                    depth_below_grade: 3,
                     perimeter_insulation_depth: 0,
                     under_slab_insulation_width: 0,
                     perimeter_insulation_r_value: 0,
@@ -879,6 +874,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 675,
                     thickness: 4,
                     exposed_perimeter: 75,
+                    depth_below_grade: 7,
                     perimeter_insulation_depth: 0,
                     under_slab_insulation_width: 0,
                     perimeter_insulation_r_value: 0,
@@ -890,6 +886,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 675,
                     thickness: 4,
                     exposed_perimeter: 75,
+                    depth_below_grade: 3,
                     perimeter_insulation_depth: 1,
                     under_slab_insulation_width: 0,
                     perimeter_insulation_r_value: 5,
@@ -934,6 +931,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 400,
                     thickness: 4,
                     exposed_perimeter: 40,
+                    depth_below_grade: 0,
                     perimeter_insulation_depth: 0,
                     under_slab_insulation_width: 0,
                     perimeter_insulation_r_value: 0,

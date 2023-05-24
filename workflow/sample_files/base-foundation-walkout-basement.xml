@@ -104,6 +104,8 @@
             <AttachedToFoundationWall idref='FoundationWall2'/>
             <AttachedToFoundationWall idref='FoundationWall3'/>
             <AttachedToSlab idref='Slab1'/>
+            <AttachedToSlab idref='Slab2'/>
+            <AttachedToSlab idref='Slab3'/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -275,9 +277,10 @@
           <Slab>
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>1350.0</Area>
+            <Area>450.0</Area>
             <Thickness>4.0</Thickness>
-            <ExposedPerimeter>150.0</ExposedPerimeter>
+            <ExposedPerimeter>60.0</ExposedPerimeter>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -292,10 +295,50 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
+          </Slab>
+          <Slab>
+            <SystemIdentifier id='Slab2'/>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>450.0</Area>
+            <Thickness>4.0</Thickness>
+            <ExposedPerimeter>30.0</ExposedPerimeter>
+            <DepthBelowGrade>3.0</DepthBelowGrade>
+            <PerimeterInsulation>
+              <SystemIdentifier id='Slab2PerimeterInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
+              </Layer>
+            </PerimeterInsulation>
+            <UnderSlabInsulation>
+              <SystemIdentifier id='Slab2UnderSlabInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+              </Layer>
+            </UnderSlabInsulation>
+          </Slab>
+          <Slab>
+            <SystemIdentifier id='Slab3'/>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>450.0</Area>
+            <Thickness>4.0</Thickness>
+            <ExposedPerimeter>60.0</ExposedPerimeter>
+            <DepthBelowGrade>1.0</DepthBelowGrade>
+            <PerimeterInsulation>
+              <SystemIdentifier id='Slab3PerimeterInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
+              </Layer>
+            </PerimeterInsulation>
+            <UnderSlabInsulation>
+              <SystemIdentifier id='Slab3UnderSlabInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+              </Layer>
+            </UnderSlabInsulation>
           </Slab>
         </Slabs>
         <Windows>

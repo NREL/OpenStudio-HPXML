@@ -693,14 +693,15 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       '../tests/ASHRAE_Standard_140/L322XC.xml' => 1,                 # 1 basement foundation
       'base.xml' => 1,                                                # 1 basement foundation
       'base-foundation-slab.xml' => 1,                                # 1 slab-on-grade foundation
-      'base-foundation-basement-garage.xml' => 2,                     # 1 basement foundation + 1 garage foundation
+      'base-foundation-basement-garage.xml' => 2,                     # 1 basement foundation + 1 garage slab
       'base-foundation-unconditioned-basement-above-grade.xml' => 1,  # 1 basement foundation
       'base-foundation-conditioned-crawlspace.xml' => 1,              # 1 crawlspace foundation
       'base-foundation-ambient.xml' => 0,                             # 0 foundations
-      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation at 4 below-grade depths (0, 1, 4, 7 ft)
+      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation at 3 below-grade depths (1, 4, 7 ft) + additional no-wall exposed perimeter
       'base-foundation-multiple.xml' => 2,                            # 1 basement foundation + 1 crawlspace foundation
-      'base-foundation-complex.xml' => 10,                            # Lots of foundations for testing
+      'base-foundation-complex.xml' => 5,                             # 1 basement foundation at 2 below-grade depths (3, 7 ft), each w/ 2 different wall insulation configurations, + additional no-wall exposed perimeter
       'base-bldgtype-attached-2stories.xml' => 1,                     # 1 basement foundation
+      'base-enclosure-2stories-garage.xml' => 2,                      # 1 basement foundation + 1 garage slab
     }
 
     tests.each do |hpxml_name, num_kiva_objects|
@@ -751,6 +752,24 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         assert_in_epsilon(hpxml_exposed_perimeter, UnitConversions.convert(osm_exposed_perimeter, 'm', 'ft'), 0.01)
       end
 
+      # Check each Kiva:Foundation has identical slab exposed perimeter and total exterior foundation wall length
+      # This is required by Kiva, otherwise you get simulation errors.
+      model.getFoundationKivas.each do |foundation|
+        osm_exposed_perimeter = 0.0
+        model.getSurfacePropertyExposedFoundationPerimeters.each do |osm_prop|
+          surf = model.getSurfaces.find { |s| s.name.to_s == osm_prop.surfaceName }
+          next unless surf.outsideBoundaryCondition == 'Foundation' && surf.adjacentFoundation.get == foundation
+
+          osm_exposed_perimeter += UnitConversions.convert(osm_prop.totalExposedPerimeter.get, 'm', 'ft')
+        end
+
+        osm_fwalls = model.getSurfaces.select { |s| s.outsideBoundaryCondition == 'Foundation' && s.adjacentFoundation.get == foundation && s.surfaceType == 'Wall' }
+        if not osm_fwalls.empty?
+          osm_fwalls_length = osm_fwalls.map { |s| Geometry.get_surface_length(s) }.sum
+          assert_in_epsilon(osm_exposed_perimeter, osm_fwalls_length, 0.01)
+        end
+      end
+
       # Check slab areas
       slab_int_adj_tos.each do |int_adj_to, slabs|
         osm_slabs = model.getSurfaces.select { |s| s.surfaceType == 'Floor' && s.outsideBoundaryCondition == 'Foundation' && s.space.get.name.to_s.start_with?(int_adj_to) }
@@ -764,23 +783,8 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       slab_int_adj_tos.each do |int_adj_to, slabs|
         osm_slabs = model.getSurfaces.select { |s| s.surfaceType == 'Floor' && s.outsideBoundaryCondition == 'Foundation' && s.space.get.name.to_s.start_with?(int_adj_to) }
 
-        osm_bgdepths = osm_slabs.map { |s| -1 * Geometry.getSurfaceZValues([s]).min }.uniq.sort
-        hpxml_bgdepths = []
-        slabs.each do |slab|
-          attached_ext_fwalls = hpxml.foundation_walls.select { |fw| fw.interior_adjacent_to == slab.interior_adjacent_to && fw.is_exterior }
-          if attached_ext_fwalls.empty? # slab on grade
-            hpxml_bgdepths << slab.depth_below_grade
-          else # slab below grade
-            hpxml_bgdepths += attached_ext_fwalls.map { |fw| fw.depth_below_grade }
-          end
-        end
-        slab_exposed_perimeter = slabs.map { |s| s.exposed_perimeter }.sum
-        fwall_exposed_perimeter = hpxml.foundation_walls.select { |fw| fw.interior_adjacent_to == slabs[0].interior_adjacent_to && fw.is_exterior }.map { |fw| fw.area / fw.height }.sum
-        if slab_exposed_perimeter - fwall_exposed_perimeter > 1.0
-          # no-wall slab exposed perimeter
-          hpxml_bgdepths << 0.0
-        end
-        hpxml_bgdepths = hpxml_bgdepths.uniq.sort
+        osm_bgdepths = osm_slabs.map { |s| -1 * Geometry.get_surface_z_values([s]).min }.uniq.sort
+        hpxml_bgdepths = slabs.map { |s| s.depth_below_grade }.uniq.sort
         assert_equal(hpxml_bgdepths, osm_bgdepths)
       end
 
@@ -789,7 +793,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         osm_fwalls = model.getSurfaces.select { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition == 'Foundation' && s.space.get.name.to_s.start_with?(int_adj_to) }
 
         osm_area = osm_fwalls.map { |s| s.grossArea }.sum
-        hpxml_area = fwalls.map { |fw| fw.net_exposed_area }.sum
+        hpxml_area = fwalls.map { |fw| fw.net_area * fw.exposed_fraction }.sum
         assert_in_epsilon(hpxml_area, UnitConversions.convert(osm_area, 'm^2', 'ft^2'), 0.01)
       end
 
@@ -797,24 +801,24 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       ext_fwall_int_adj_tos.each do |int_adj_to, fwalls|
         osm_fwalls = model.getSurfaces.select { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition == 'Foundation' && s.space.get.name.to_s.start_with?(int_adj_to) }
 
-        osm_heights = osm_fwalls.map { |s| Geometry.getSurfaceZValues([s]).max - Geometry.getSurfaceZValues([s]).min }.uniq.sort
+        osm_heights = osm_fwalls.map { |s| Geometry.get_surface_height(s) }.uniq.sort
         hpxml_heights = fwalls.map { |fw| fw.height }.uniq.sort
         assert_equal(hpxml_heights, osm_heights)
 
-        osm_bgdepths = osm_fwalls.map { |s| -1 * Geometry.getSurfaceZValues([s]).min }.uniq.sort
+        osm_bgdepths = osm_fwalls.map { |s| -1 * Geometry.get_surface_z_values([s]).min }.uniq.sort
         hpxml_bgdepths = fwalls.map { |fw| fw.depth_below_grade }.uniq.sort
         assert_equal(hpxml_bgdepths, osm_bgdepths)
       end
 
       # Check interior foundation wall heights & below-grade depths
       int_fwall_int_adj_tos.each do |int_adj_to, fwalls|
-        osm_fwalls = model.getSurfaces.select { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition != 'Foundation' && Geometry.getSurfaceZValues([s]).min < 0 && s.space.get.name.to_s.start_with?(int_adj_to) }
+        osm_fwalls = model.getSurfaces.select { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition != 'Foundation' && Geometry.get_surface_z_values([s]).min < 0 && s.space.get.name.to_s.start_with?(int_adj_to) }
 
-        osm_heights = osm_fwalls.map { |s| Geometry.getSurfaceZValues([s]).max - Geometry.getSurfaceZValues([s]).min }.uniq.sort
+        osm_heights = osm_fwalls.map { |s| Geometry.get_surface_z_values([s]).max - Geometry.get_surface_z_values([s]).min }.uniq.sort
         hpxml_heights = fwalls.map { |fw| fw.height - fw.depth_below_grade }.uniq.sort
         assert_equal(hpxml_heights, osm_heights)
 
-        osm_bgdepths = osm_fwalls.map { |s| -1 * Geometry.getSurfaceZValues([s]).min }.uniq.sort
+        osm_bgdepths = osm_fwalls.map { |s| -1 * Geometry.get_surface_z_values([s]).min }.uniq.sort
         hpxml_bgdepths = fwalls.map { |fw| fw.height - fw.depth_below_grade }.uniq.sort
         assert_equal(hpxml_bgdepths, osm_bgdepths)
       end

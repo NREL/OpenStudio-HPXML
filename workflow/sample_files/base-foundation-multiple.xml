@@ -314,6 +314,7 @@
             <Area>675.0</Area>
             <Thickness>4.0</Thickness>
             <ExposedPerimeter>75.0</ExposedPerimeter>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -339,6 +340,7 @@
             <Area>675.0</Area>
             <Thickness>0.0</Thickness>
             <ExposedPerimeter>75.0</ExposedPerimeter>
+            <DepthBelowGrade>3.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>
               <Layer>

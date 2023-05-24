@@ -4368,7 +4368,9 @@ class HPXMLFile
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
-      if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
+      if has_foundation_walls
+        depth_below_grade = hpxml.foundation_walls[0].depth_below_grade
+      else
         depth_below_grade = 0
       end
 
@@ -4450,7 +4452,7 @@ class HPXMLFile
         end
 
         # Get max z coordinate of this window
-        sub_surface_z = Geometry.getSurfaceZValues([sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
+        sub_surface_z = Geometry.get_surface_z_values([sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
 
         overhangs_depth = args[:geometry_eaves_depth]
         overhangs_distance_to_top_of_window = eaves_z - sub_surface_z # difference between max z coordinates of eaves and this window

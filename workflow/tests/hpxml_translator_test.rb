@@ -804,7 +804,8 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = wall.net_area
       if wall.is_a? HPXML::FoundationWall
         if wall.is_exterior
-          hpxml_value = wall.net_exposed_area
+          # only modeling portion of foundation wall that is exposed perimeter
+          hpxml_value *= wall.exposed_fraction
         else
           # interzonal foundation walls: only above-grade portion modeled
           hpxml_value *= (wall.height - wall.depth_below_grade) / wall.height
