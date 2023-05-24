@@ -101,12 +101,6 @@ class CalculateUtilityBill
       if net_elec < 0 # net producer, give credit at user specified rate
         bill.annual_production_credit += -net_elec * rate.net_metering_user_excess_sellback_rate
       end
-      if bill.annual_production_credit != 0
-        for month in 0..10
-          bill.monthly_production_credit[month] = 0.0
-        end
-        bill.monthly_production_credit[11] = bill.annual_production_credit
-      end
     end
     return net_elec
   end
@@ -362,12 +356,6 @@ class CalculateUtilityBill
 
       for m in 0..11
         bill.monthly_fixed_charge[m] += monthly_min_charges[m]
-
-        if m == 11
-          bill.monthly_production_credit[m] = bill.annual_production_credit
-        else
-          bill.monthly_production_credit[m] = 0.0
-        end
       end
 
     else # Either no PV or PV with FIT

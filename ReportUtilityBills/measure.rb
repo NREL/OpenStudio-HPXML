@@ -325,6 +325,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     monthly_results = {}
     (1..12).to_a.each do |month|
       monthly_results["#{month}"] = {}
+      monthly_results["#{month}"]["#{bill_scenario_name}: Total (USD)"] = 0.0
     end
 
     if args[:include_monthly_bills]
@@ -339,6 +340,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
           monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)"] = monthly_production_credit.round(2) if [FT::Elec].include?(fuel_type)
         end
         bill.monthly_total.each_with_index do |monthly_total, month|
+          monthly_results["#{month + 1}"]["#{bill_scenario_name}: Total (USD)"] += monthly_total.round(2)
           monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Total (USD)"] = monthly_total.round(2)
         end
       end
@@ -530,7 +532,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     utility_bills.values.each do |bill|
       if bill.annual_production_credit != 0
         bill.annual_production_credit *= -1
-        bill.monthly_production_credit = bill.monthly_production_credit.map { |x| x * -1 }
+
+        # Report the PV credit at the end of the year for all scenarios.
+        for month in 0..10
+          bill.monthly_production_credit[month] = 0.0
+        end
+        bill.monthly_production_credit[11] = bill.annual_production_credit
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
