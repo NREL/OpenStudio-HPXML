@@ -933,30 +933,6 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         end
       end
     end
-
-    # Check that Slab/DepthBelowGrade is ignored for below-grade spaces
-    # when collapsing surfaces, such that we reduce the number of Kiva:Foundation
-    # objects and therefore runtime.
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-foundation-walkout-basement.xml'))
-    model, _hpxml = _test_measure(args_hash)
-    num_kiva_fnd_objets = model.getFoundationKivas.size
-
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
-    hpxml.slabs[0].depth_below_grade = hpxml.foundation_walls[0].depth_below_grade
-    hpxml.slabs[0].area /= 3.0
-    hpxml.slabs[0].exposed_perimeter /= 3.0
-    for i in 1..2
-      hpxml.slabs << hpxml.slabs[0].dup
-      hpxml.slabs[i].id = "Slab#{i + 1}"
-      hpxml.slabs[i].perimeter_insulation_id = "Slab#{i + 1}PerimeterInsulation"
-      hpxml.slabs[i].under_slab_insulation_id = "Slab#{i + 1}UnderSlabInsulation"
-      hpxml.slabs[i].depth_below_grade = hpxml.foundation_walls[i].depth_below_grade
-    end
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    model, _hpxml = _test_measure(args_hash)
-    assert_equal(num_kiva_fnd_objets, model.getFoundationKivas.size)
   end
 
   def test_aspect_ratios

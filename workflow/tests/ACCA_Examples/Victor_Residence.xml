@@ -120,6 +120,7 @@
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Area>1800.0</Area>
             <ExposedPerimeter>172.0</ExposedPerimeter>
+            <DepthBelowGrade>2.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>

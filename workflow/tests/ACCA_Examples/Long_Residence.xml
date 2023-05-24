@@ -136,6 +136,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1479.0</Area>
             <ExposedPerimeter>160.0</ExposedPerimeter>
+            <DepthBelowGrade>5.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
