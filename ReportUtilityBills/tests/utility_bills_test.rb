@@ -1144,8 +1144,6 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     # Check sum of monthly equal to annual
     actual_bills.keys.each do |bill|
-      next if bill == 'Test: Total (USD)'
-
       assert(actual_monthly_bills.keys.include?(bill))
       assert_in_delta(actual_bills[bill], actual_monthly_bills[bill].sum, 0.1) # within 10 cents
     end
