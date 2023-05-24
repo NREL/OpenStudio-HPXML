@@ -6,7 +6,7 @@ __New Features__
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
-- Updates to OpenStudio 3.6.0/EnergyPlus 23.1.
+- Updates to OpenStudio 3.6.1/EnergyPlus 23.1.
 - **Breaking change**: Updates to newer proposed HPXML v4.0:
   - Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
   - Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
