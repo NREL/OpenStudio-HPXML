@@ -736,7 +736,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                                insulation_interior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 4,
+                               insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
     hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
@@ -748,7 +748,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                                insulation_interior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 2,
+                               insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
     hpxml.foundation_walls.each do |foundation_wall|
       hpxml.foundations[0].attached_to_foundation_wall_idrefs << foundation_wall.id
@@ -866,7 +866,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                                insulation_interior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 4,
+                               insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
     hpxml.foundation_walls.each do |foundation_wall|
       hpxml.foundations[0].attached_to_foundation_wall_idrefs << foundation_wall.id

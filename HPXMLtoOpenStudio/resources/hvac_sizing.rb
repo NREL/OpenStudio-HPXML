@@ -966,8 +966,8 @@ class HVACSizing
         end
         k_soil = 0.8 # Value from ASHRAE HoF, probably used by Manual J
         r_other = 1.47 # Value from ASHRAE HoF, probably used by Manual J
-        foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
-        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
+        ext_fnd_walls = @hpxml.foundation_walls.select { |fw| fw.is_exterior }
+        z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum # Weighted-average (by length) below-grade depth
         sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
         length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
         width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
