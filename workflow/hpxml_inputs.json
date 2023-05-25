@@ -923,7 +923,18 @@
     "parent_hpxml": "sample_files/base-bldgtype-multifamily.xml"
   },
   "sample_files/base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-multifamily.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-multifamily.xml",
+    "heat_pump_type": "ground-to-air",
+    "heat_pump_heating_efficiency_type": "COP",
+    "heat_pump_cooling_efficiency_type": "EER"
+  },
+  "sample_files/base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump2.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml",
+    "geothermal_loop_loop_flow": 12.3,
+    "geothermal_loop_boreholes_or_trenches_count": 5,
+    "geothermal_loop_boreholes_or_trenches_length": 23.4,
+    "geothermal_loop_boreholes_or_trenches_spacing": 34.5,
+    "geothermal_loop_pipe_conductivity": 0.25
   },
   "sample_files/base-bldgtype-multifamily-shared-laundry-room.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-multifamily.xml"
