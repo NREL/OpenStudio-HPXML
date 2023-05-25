@@ -697,9 +697,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       'base-foundation-unconditioned-basement-above-grade.xml' => 1,  # 1 basement foundation
       'base-foundation-conditioned-crawlspace.xml' => 1,              # 1 crawlspace foundation
       'base-foundation-ambient.xml' => 0,                             # 0 foundations
-      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation with 3 below-grade depths + additional no-wall exposed perimeter
+      'base-foundation-walkout-basement.xml' => 2,                    # 1 basement foundation with 1 effective below-grade depth + additional no-wall exposed perimeter
       'base-foundation-multiple.xml' => 2,                            # 1 basement foundation + 1 crawlspace foundation
-      'base-foundation-complex.xml' => 10,                            # 2 basement foundations, each with 2 below-grade depths + additional no-wall exposed perimeter
+      'base-foundation-complex.xml' => 6,                             # 2 basement foundations, each with 1 effective below-grade depth + additional no-wall exposed perimeter
       'base-bldgtype-attached-2stories.xml' => 1,                     # 1 basement foundation
       'base-enclosure-2stories-garage.xml' => 2,                      # 1 basement foundation + 1 garage slab
     }
@@ -797,7 +797,15 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         assert_equal(hpxml_heights, osm_heights)
 
         osm_bgdepths = osm_fwalls.map { |s| -1 * Geometry.get_surface_z_values([s]).min }.uniq.sort
-        hpxml_bgdepths = fwalls.map { |fw| fw.depth_below_grade }.uniq.sort
+        if hpxml_name == 'base-foundation-walkout-basement.xml'
+          # All foundation walls similar: single foundation wall w/ effective below-grade depth
+          hpxml_bgdepths = [4.5]
+        elsif hpxml_name == 'base-foundation-complex.xml'
+          # Pairs of foundation walls similar: pairs of foundation walls w/ effective below-grade depths
+          hpxml_bgdepths = [4.33333, 4.5]
+        else
+          hpxml_bgdepths = fwalls.map { |fw| fw.depth_below_grade }.uniq.sort
+        end
         assert_equal(hpxml_bgdepths, osm_bgdepths)
       end
 
@@ -925,13 +933,12 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       end
     end
 
-    # Check that Slab/DepthBelowGrade is ignored for below-grade spaces
-    # when collapsing surfaces, such that we reduce the number of Kiva:Foundation
-    # objects and therefore runtime.
+    # Check that Slab/DepthBelowGrade is ignored for below-grade spaces when
+    # collapsing surfaces.
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-foundation-walkout-basement.xml'))
     model, _hpxml = _test_measure(args_hash)
-    num_kiva_fnd_objets = model.getFoundationKivas.size
+    num_kiva_fnd_objects = model.getFoundationKivas.size
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
     hpxml.slabs[0].depth_below_grade = hpxml.foundation_walls[0].depth_below_grade
@@ -947,7 +954,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     model, _hpxml = _test_measure(args_hash)
-    assert_equal(num_kiva_fnd_objets, model.getFoundationKivas.size)
+    assert_equal(num_kiva_fnd_objects, model.getFoundationKivas.size)
   end
 
   def test_aspect_ratios

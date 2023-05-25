@@ -6798,6 +6798,7 @@ class HPXML < Object
                        :exposed_perimeter]
 
     # Look for pairs of surfaces that can be collapsed
+    like_foundation_walls = {}
     surf_types.each do |surf_type, surfaces|
       next unless surf_types_of_interest.nil? || surf_types_of_interest.include?(surf_type)
 
@@ -6814,12 +6815,20 @@ class HPXML < Object
             next if attribute.to_s.end_with? '_isdefaulted'
             next if attrs_to_ignore.include? attribute
             next if (surf_type == :foundation_walls) && ([:azimuth, :orientation].include? attribute) # Azimuth of foundation walls is irrelevant
+            next if (surf_type == :foundation_walls) && (attribute == :depth_below_grade) # Ignore BG depth difference; we will later calculate an effective BG depth for the combined surface
             next if surf.send(attribute) == surf2.send(attribute)
 
             match = false
             break
           end
           next unless match
+
+          if (surf_type == :foundation_walls) && (surf.depth_below_grade != surf2.depth_below_grade)
+            if like_foundation_walls[surf].nil?
+              like_foundation_walls[surf] = [{ bgdepth: surf.depth_below_grade, length: surf.area / surf.height }]
+            end
+            like_foundation_walls[surf] << { bgdepth: surf2.depth_below_grade, length: surf2.area / surf2.height }
+          end
 
           # Update values
           if (not surf.area.nil?) && (not surf2.area.nil?)
@@ -6848,6 +6857,11 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
+    end
+
+    like_foundation_walls.each do |foundation_wall, properties|
+      # Calculate weighted-average (by length) below-grade depth
+      foundation_wall.depth_below_grade = properties.map { |p| p[:bgdepth] * p[:length] }.sum(0.0) / properties.map { |p| p[:length] }.sum
     end
   end
 
