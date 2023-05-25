@@ -3024,17 +3024,17 @@ class HVACSizing
 
     if not foundation_wall.insulation_assembly_r_value.nil?
       wall_constr_rvalue = foundation_wall.insulation_assembly_r_value - Material.AirFilmVertical.rvalue
-      wall_ins_rvalues = []
-      wall_ins_offsets = []
-      wall_ins_heights = []
+      wall_ins_rvalue_int, wall_ins_rvalue_ext = 0, 0
+      wall_ins_dist_to_top_int, wall_ins_dist_to_top_ext = 0, 0
+      wall_ins_dist_to_bottom_int, wall_ins_dist_to_bottom_ext = 0, 0
     else
       wall_constr_rvalue = Material.Concrete(foundation_wall.thickness).rvalue
-      wall_ins_rvalues = [foundation_wall.insulation_interior_r_value,
-                          foundation_wall.insulation_exterior_r_value]
-      wall_ins_offsets = [foundation_wall.insulation_interior_distance_to_top,
-                          foundation_wall.insulation_exterior_distance_to_top]
-      wall_ins_heights = [foundation_wall.insulation_interior_distance_to_bottom - foundation_wall.insulation_interior_distance_to_top,
-                          foundation_wall.insulation_exterior_distance_to_bottom - foundation_wall.insulation_exterior_distance_to_top]
+      wall_ins_rvalue_int = foundation_wall.insulation_interior_r_value
+      wall_ins_rvalue_ext = foundation_wall.insulation_exterior_r_value
+      wall_ins_dist_to_top_int = foundation_wall.insulation_interior_distance_to_top
+      wall_ins_dist_to_top_ext = foundation_wall.insulation_exterior_distance_to_top
+      wall_ins_dist_to_bottom_int = foundation_wall.insulation_interior_distance_to_bottom
+      wall_ins_dist_to_bottom_ext = foundation_wall.insulation_exterior_distance_to_bottom
     end
     k_soil = @hpxml.site.ground_conductivity
 
@@ -3042,18 +3042,24 @@ class HVACSizing
     u_wall_with_soil = 0.0
     u_wall_without_soil = 0.0
     wall_height = foundation_wall.height.ceil
-    for d in 1..wall_height
-      r_soil = (Math::PI * d / 2.0) / k_soil
-
+    wall_depth_above_grade = foundation_wall.height - foundation_wall.depth_below_grade
+    for distance_to_top in 1..wall_height
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
-      if d <= (foundation_wall.height - foundation_wall.depth_below_grade)
-        r_wall += Material.AirFilmOutside.rvalue # Above-grade, add exterior film
+      if distance_to_top <= wall_depth_above_grade
+        # Above-grade: no soil, add exterior film
+        r_soil = 0.0
+        r_wall += Material.AirFilmOutside.rvalue
+      else
+        # Below-grade: add soil, no exterior film
+        distance_to_grade = distance_to_top - wall_depth_above_grade
+        r_soil = (Math::PI * distance_to_grade / 2.0) / k_soil
       end
-      for i in 0..wall_ins_rvalues.size - 1
-        if (d > wall_ins_offsets[i]) && (d <= wall_ins_offsets[i] + wall_ins_heights[i])
-          r_wall += wall_ins_rvalues[i] # Insulation at this depth, add R-value
-        end
+      if (distance_to_top > wall_ins_dist_to_top_int) && (distance_to_top <= wall_ins_dist_to_bottom_int)
+        r_wall += wall_ins_rvalue_int # Interior insulation at this depth, add R-value
+      end
+      if (distance_to_top > wall_ins_dist_to_top_ext) && (distance_to_top <= wall_ins_dist_to_bottom_ext)
+        r_wall += wall_ins_rvalue_ext # Interior insulation at this depth, add R-value
       end
       u_wall_with_soil += 1.0 / (r_soil + r_wall)
       u_wall_without_soil += 1.0 / r_wall
