@@ -1349,6 +1349,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
+    arg.setDisplayName('Geothermal Loop: Loop Flow')
+    arg.setDescription("Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg.setUnits('gpm')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_or_trenches_count', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Count')
+    arg.setDescription("Number of boreholes or trenches. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_length', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Length')
+    arg.setDescription("Length of each borehole (vertical) or trench (horizontal). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg.setUnits('ft')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_spacing', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Spacing')
+    arg.setDescription("Distance between bores/trenches. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('ft')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_pipe_conductivity', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Conductivity')
+    arg.setDescription("Pipe conductivity of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('Btu/hr-ft-F')
+    args << arg
+
     heating_system_2_type_choices = OpenStudio::StringVector.new
     heating_system_2_type_choices << 'none'
     heating_system_2_type_choices << HPXML::HVACTypeFurnace
@@ -3393,6 +3423,7 @@ class HPXMLFile
     set_heating_systems(hpxml, args)
     set_cooling_systems(hpxml, args)
     set_heat_pumps(hpxml, args)
+    set_geothermal_loop(hpxml, args)
     set_secondary_heating_systems(hpxml, args)
     set_hvac_distribution(hpxml, args)
     set_hvac_control(hpxml, args, epw_file, weather)
@@ -4921,6 +4952,40 @@ class HPXMLFile
                          crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                          primary_heating_system: primary_heating_system,
                          primary_cooling_system: primary_cooling_system)
+  end
+
+  def self.set_geothermal_loop(hpxml, args)
+    heat_pump_type = args[:heat_pump_type]
+
+    return if heat_pump_type != HPXML::HVACTypeHeatPumpGroundToAir
+
+    if args[:geothermal_loop_loop_flow].is_initialized
+      loop_flow = args[:geothermal_loop_loop_flow].get
+    end
+
+    if args[:geothermal_loop_boreholes_or_trenches_count].is_initialized
+      num_bore_holes = args[:geothermal_loop_boreholes_or_trenches_count].get
+    end
+
+    if args[:geothermal_loop_boreholes_or_trenches_length].is_initialized
+      bore_length = args[:geothermal_loop_boreholes_or_trenches_length].get
+    end
+
+    if args[:geothermal_loop_boreholes_or_trenches_spacing].is_initialized
+      bore_spacing = args[:geothermal_loop_boreholes_or_trenches_spacing].get
+    end
+
+    if args[:geothermal_loop_pipe_conductivity].is_initialized
+      pipe_cond = args[:geothermal_loop_pipe_conductivity].get
+    end
+
+    hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
+                               loop_flow: loop_flow,
+                               num_bore_holes: num_bore_holes,
+                               bore_length: bore_length,
+                               bore_spacing: bore_spacing,
+                               pipe_cond: pipe_cond)
+    hpxml.heat_pumps[-1].geothermal_loop_idref = hpxml.geothermal_loops[-1].id
   end
 
   def self.set_secondary_heating_systems(hpxml, args)
