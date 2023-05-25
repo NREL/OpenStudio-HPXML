@@ -3992,7 +3992,7 @@ class HPXML < Object
   end
 
   class GeothermalLoop < BaseElement
-    ATTRS = [:id, :pipe_cond]
+    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :pipe_cond]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4011,6 +4011,13 @@ class HPXML < Object
       geothermal_loop = XMLHelper.add_element(hvac_plant, 'GeothermalLoop')
       sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(geothermal_loop, 'LoopFlow', @loop_flow, :float, @loop_flow_isdefaulted) unless @loop_flow.nil?
+      if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?)
+        boreholes_or_trenches = XMLHelper.add_element(geothermal_loop, 'BoreholesOrTrenches')
+        XMLHelper.add_element(boreholes_or_trenches, 'Count', @num_bore_holes, :integer, @num_bore_holes_isdefaulted) unless @num_bore_holes.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Length', @bore_length, :float, @bore_length_isdefaulted) unless @bore_length.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Spacing', @bore_spacing, :float, @bore_spacing_isdefaulted) unless @bore_spacing.nil?
+      end
       if not @pipe_cond.nil?
         pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
         XMLHelper.add_element(pipe, 'Conductivity', @pipe_cond, :float, @pipe_cond_isdefaulted) unless @pipe_cond.nil?
@@ -4021,6 +4028,10 @@ class HPXML < Object
       return if geothermal_loop.nil?
 
       @id = HPXML::get_id(geothermal_loop)
+      @loop_flow = XMLHelper.get_value(geothermal_loop, 'LoopFlow', :float)
+      @num_bore_holes = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Count', :integer)
+      @bore_length = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Length', :float)
+      @bore_spacing = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Spacing', :float)
       @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
     end
   end

@@ -1507,6 +1507,11 @@ class HPXMLDefaults
           heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
         end
 
+        if heat_pump.geothermal_loop.bore_spacing.nil?
+          heat_pump.geothermal_loop.bore_spacing = 20.0 # ft, distance between bores
+          heat_pump.geothermal_loop.bore_spacing_isdefaulted = true
+        end
+
         if heat_pump.geothermal_loop.pipe_cond.nil?
           heat_pump.geothermal_loop.pipe_cond = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
           heat_pump.geothermal_loop.pipe_cond_isdefaulted = true
@@ -2902,6 +2907,16 @@ class HPXMLDefaults
           htg_sys.additional_properties.GSHP_Bore_Depth = hvac_sizing_values.GSHP_Bore_Depth
           htg_sys.additional_properties.GSHP_Bore_Holes = hvac_sizing_values.GSHP_Bore_Holes
           htg_sys.additional_properties.GSHP_G_Functions = hvac_sizing_values.GSHP_G_Functions
+
+          geothermal_loop = htg_sys.geothermal_loop
+          if geothermal_loop.loop_flow.nil?
+            geothermal_loop.loop_flow = hvac_sizing_values.GSHP_Loop_flow
+            geothermal_loop.loop_flow_isdefaulted = true
+          end
+          if geothermal_loop.num_bore_holes.nil?
+            geothermal_loop.num_bore_holes = hvac_sizing_values.GSHP_Bore_Holes
+            geothermal_loop.num_bore_holes_isdefaulted = true
+          end
         end
       end
 

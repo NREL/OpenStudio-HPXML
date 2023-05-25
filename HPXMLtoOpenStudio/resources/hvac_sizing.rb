@@ -1885,17 +1885,29 @@ class HVACSizing
     hvac_cooling_ap = hvac_cooling.additional_properties
 
     # Autosize ground loop heat exchanger length
-    bore_spacing = 20.0 # ft, distance between bores
+    geothermal_loop = hvac_cooling.geothermal_loop
+    bore_spacing = geothermal_loop.bore_spacing
     pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
     nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, pipe_r_value)
 
-    bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    bore_length = [bore_length_heat, bore_length_cool].max
+    bore_length = geothermal_loop.bore_length
+    if bore_length.nil?
+      bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+      bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+      bore_length = [bore_length_heat, bore_length_cool].max
+      geothermal_loop.bore_length_isdefaulted = true
+    end
 
-    loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+    loop_flow = geothermal_loop.loop_flow
+    if loop_flow.nil?
+      loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+    end
 
-    num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
+    num_bore_holes = geothermal_loop.num_bore_holes
+    if num_bore_holes.nil?
+      num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
+      geothermal_loop.num_bore_holes_isdefaulted = true
+    end
     bore_depth = (bore_length / num_bore_holes).floor # ft
     min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
 
