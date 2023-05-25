@@ -690,7 +690,7 @@ class OSModel
 
         if ext_fnd_walls.empty?
           # Slab w/o foundation walls
-          add_foundation_slab(model, weather, spaces, slab, -1 * slab.depth_below_grade, slab.exposed_perimeter, nil)
+          add_foundation_slab(model, weather, spaces, slab, -1 * slab.depth_below_grade.to_f, slab.exposed_perimeter, nil)
         else
           # Slab w/ foundation walls
           ext_fnd_walls_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
