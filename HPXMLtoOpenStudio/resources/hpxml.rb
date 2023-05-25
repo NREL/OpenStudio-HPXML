@@ -2731,16 +2731,16 @@ class HPXML < Object
       return val
     end
 
-    def adjacent_slabs
-      return @hpxml_object.slabs.select { |s| s.adjacent_foundation_walls.include? self }
+    def connected_slabs
+      return @hpxml_object.slabs.select { |s| s.connected_foundation_walls.include? self }
     end
 
     def exposed_fraction
       # Calculate total slab exposed perimeter
-      slab_exposed_length = adjacent_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
+      slab_exposed_length = connected_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
 
       # Calculate total length of exterior foundation walls
-      ext_adjacent_fnd_walls = adjacent_slabs.map { |s| s.adjacent_foundation_walls.select { |fw| fw.is_exterior } }.flatten
+      ext_adjacent_fnd_walls = connected_slabs.map { |s| s.connected_foundation_walls.select { |fw| fw.is_exterior } }.flatten.uniq
       wall_total_length = ext_adjacent_fnd_walls.map { |fw| fw.area / fw.height }.sum
 
       # Calculate exposed fraction
@@ -3086,8 +3086,8 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
-    def adjacent_foundation_walls
-      return @hpxml_object.foundation_walls.select { |fw| (interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to) && (fw.depth_below_grade - depth_below_grade).abs < 0.1 }
+    def connected_foundation_walls
+      return @hpxml_object.foundation_walls.select { |fw| interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to }
     end
 
     def delete

@@ -697,9 +697,9 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       'base-foundation-unconditioned-basement-above-grade.xml' => 1,  # 1 basement foundation
       'base-foundation-conditioned-crawlspace.xml' => 1,              # 1 crawlspace foundation
       'base-foundation-ambient.xml' => 0,                             # 0 foundations
-      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation at 3 below-grade depths (1, 4, 7 ft) + additional no-wall exposed perimeter
+      'base-foundation-walkout-basement.xml' => 4,                    # 1 basement foundation with 3 below-grade depths + additional no-wall exposed perimeter
       'base-foundation-multiple.xml' => 2,                            # 1 basement foundation + 1 crawlspace foundation
-      'base-foundation-complex.xml' => 10,                            # Lots of foundations for testing
+      'base-foundation-complex.xml' => 10,                            # 2 basement foundations, each with 2 below-grade depths + additional no-wall exposed perimeter
       'base-bldgtype-attached-2stories.xml' => 1,                     # 1 basement foundation
       'base-enclosure-2stories-garage.xml' => 2,                      # 1 basement foundation + 1 garage slab
     }
@@ -777,15 +777,6 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         osm_area = osm_slabs.map { |s| s.grossArea }.sum
         hpxml_area = slabs.map { |s| s.area }.sum
         assert_in_epsilon(hpxml_area, UnitConversions.convert(osm_area, 'm^2', 'ft^2'), 0.01)
-      end
-
-      # Check slab below-grade depths
-      slab_int_adj_tos.each do |int_adj_to, slabs|
-        osm_slabs = model.getSurfaces.select { |s| s.surfaceType == 'Floor' && s.outsideBoundaryCondition == 'Foundation' && s.space.get.name.to_s.start_with?(int_adj_to) }
-
-        osm_bgdepths = osm_slabs.map { |s| -1 * Geometry.get_surface_z_values([s]).min }.uniq.sort
-        hpxml_bgdepths = slabs.map { |s| s.depth_below_grade }.uniq.sort
-        assert_equal(hpxml_bgdepths, osm_bgdepths)
       end
 
       # Check exterior foundation wall exposed areas

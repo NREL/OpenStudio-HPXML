@@ -685,22 +685,26 @@ class OSModel
       end
 
       slabs.each do |slab|
-        ext_fnd_walls = slab.adjacent_foundation_walls.select { |fw| fw.net_area >= 1.0 && fw.is_exterior }
+        slab_frac = slab.exposed_perimeter / slabs.map { |s| s.exposed_perimeter }.sum
+        ext_fnd_walls = slab.connected_foundation_walls.select { |fw| fw.net_area >= 1.0 && fw.is_exterior }
 
         if ext_fnd_walls.empty?
           # Slab w/o foundation walls
           add_foundation_slab(model, weather, spaces, slab, -1 * slab.depth_below_grade, slab.exposed_perimeter, nil)
         else
           # Slab w/ foundation walls
-          tot_ext_fnd_wall_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
+          ext_fnd_walls_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
           remaining_exposed_length = slab.exposed_perimeter
+
+          # Since we don't know which FoundationWalls are adjacent to which Slabs, we apportion
+          # each FoundationWall to each slab.
           ext_fnd_walls.each do |fnd_wall|
-            # Create Kiva Foundation w/ foundation wall and slab.
             # Both the foundation wall and slab must have same exposed length to prevent Kiva errors.
             # For the foundation wall, we are effectively modeling the net *exposed* area.
             fnd_wall_length = fnd_wall.area / fnd_wall.height
-            apportioned_slab_exposed_perim = slab.exposed_perimeter * fnd_wall_length / tot_ext_fnd_wall_length
-            exposed_length = [apportioned_slab_exposed_perim, fnd_wall_length].min
+            apportioned_exposed_length = fnd_wall_length / ext_fnd_walls_length * slab.exposed_perimeter # Slab exposed perimeter apportioned to this foundation wall
+            apportioned_total_length = fnd_wall_length * slab_frac # Foundation wall length apportioned to this slab
+            exposed_length = [apportioned_exposed_length, apportioned_total_length].min
             remaining_exposed_length -= exposed_length
 
             kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall, exposed_length, fnd_wall_length)
@@ -774,8 +778,8 @@ class OSModel
 
   def self.add_foundation_wall(runner, model, spaces, foundation_wall, exposed_length, fnd_wall_length)
     exposed_fraction = exposed_length / fnd_wall_length
-    net_area = foundation_wall.net_area * exposed_fraction
-    gross_area = foundation_wall.area * exposed_fraction
+    net_exposed_area = foundation_wall.net_area * exposed_fraction
+    gross_exposed_area = foundation_wall.area * exposed_fraction
     height = foundation_wall.height
     height_ag = height - foundation_wall.depth_below_grade
     z_origin = -1 * foundation_wall.depth_below_grade
@@ -787,10 +791,10 @@ class OSModel
 
     return if exposed_length < 0.1 # Avoid Kiva error if exposed wall length is too small
 
-    if gross_area > net_area
+    if gross_exposed_area > net_exposed_area
       # Create a "notch" in the wall to account for the subsurfaces. This ensures that
       # we preserve the appropriate wall height, length, and area for Kiva.
-      subsurface_area = gross_area - net_area
+      subsurface_area = gross_exposed_area - net_exposed_area
     else
       subsurface_area = 0
     end

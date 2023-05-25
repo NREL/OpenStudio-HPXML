@@ -1051,7 +1051,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
   .. [#] If DepthBelowGrade not provided, defaults to zero for foundation types without walls.
-         For foundation types with walls, the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
+         For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
   .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
