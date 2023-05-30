@@ -2050,15 +2050,17 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``BoreholesOrTrenches/Length``     double    ft                        No        autosized [#]_         
   ``BoreholesOrTrenches/Spacing``    double    ft                        No        20.0
   ``BoreholesOrTrenches/Diameter``   double    in                        No        5.0
-  ``Grout/Conductivity``             double    Btu/hr-ft-F               No        0.4
-  ``Pipe/Conductivity``              double    Btu/hr-ft-F               No        0.23
+  ``Grout/Conductivity``             double    Btu/hr-ft-F  > 0          No        0.4
+  ``Pipe/Conductivity``              double    Btu/hr-ft-F  > 0          No        0.23
   ``Pipe/Diameter``                  double    in           [#]_         No        0.75
+  ``Pipe/ShankSpacing``              double    in                        No        [#]_
   =================================  ========  ===========  ===========  ========  ==============  ===============================================
 
   .. [#] Loop flow autosized per TODO.
   .. [#] Number of boreholes/trenches autosized per TODO.
   .. [#] Borehole/trench length autosized per TODO.
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4".
+  .. [#] Sum of U-tube spacing and pipe outer diameter.
 
 .. _hvac_control:
 
