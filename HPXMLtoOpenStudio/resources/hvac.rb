@@ -281,7 +281,7 @@ class HVAC
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))
-    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(hp_ap.shank_spacing, 'in', 'm'))
+    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(heat_pump.geothermal_loop.shank_spacing, 'in', 'm'))
     ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((hp_ap.pipe_od - hp_ap.pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
     ground_heat_exch_vert.setGFunctionReferenceRatio(0.0005)
@@ -3350,6 +3350,7 @@ class HVAC
 
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties
+    geothermal_loop = heat_pump.geothermal_loop
 
     hp_ap.design_chw = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     hp_ap.design_delta_t = 10.0
@@ -3360,7 +3361,7 @@ class HVAC
     else
       hp_ap.design_hw = [35.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].min # Temperature of fluid entering indoor coil, use 35F as upper bound
     end
-    pipe_size = heat_pump.geothermal_loop.pipe_size
+    pipe_size = geothermal_loop.pipe_size
     # Pipe nominal size conversion to pipe outside diameter and inside diameter,
     # only pipe sizes <= 2" are used here with DR11 (dimension ratio),
     if pipe_size == 0.75 # 3/4" pipe
@@ -3383,9 +3384,8 @@ class HVAC
       hp_ap.u_tube_spacing = 0.9661
     elsif hp_ap.u_tube_spacing_type == 'c'
       # Both tubes placed against outer edge of borehole
-      hp_ap.u_tube_spacing = hp_ap.bore_diameter - 2 * hp_ap.pipe_od
+      hp_ap.u_tube_spacing = geothermal_loop.bore_diameter - 2 * hp_ap.pipe_od
     end
-    hp_ap.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
   end
 
   def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)

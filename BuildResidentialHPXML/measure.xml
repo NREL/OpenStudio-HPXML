@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>421aacf4-f3c3-44d1-bfa0-191d16a6b3ff</version_id>
-  <version_modified>2023-05-30T21:35:37Z</version_modified>
+  <version_id>1f47efbe-ac4a-4b60-a74a-32f38838a872</version_id>
+  <version_modified>2023-05-30T23:54:52Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2794,7 +2794,7 @@
     <argument>
       <name>geothermal_loop_boreholes_or_trenches_length</name>
       <display_name>Geothermal Loop: Boreholes or Trenches Length</display_name>
-      <description>Length of each borehole (vertical) or trench (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
+      <description>Average length of each borehole (vertical) or trench (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
       <type>Double</type>
       <units>ft</units>
       <required>false</required>
@@ -2858,6 +2858,15 @@
           <display_name>1-1/4" pipe</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>geothermal_loop_pipe_shank_spacing</name>
+      <display_name>Geothermal Loop: Pipe Shank Spacing</display_name>
+      <description>Measured as center-to-center (not edge-to-edge) distance between two branches of a vertical U-tube. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>in</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>heating_system_2_type</name>
@@ -6774,7 +6783,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B8515628</checksum>
+      <checksum>FF2EA4BF</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>

@@ -3997,7 +3997,7 @@ class HPXML < Object
   end
 
   class GeothermalLoop < BaseElement
-    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter, :grout_conductivity, :pipe_cond, :pipe_size]
+    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter, :grout_conductivity, :pipe_cond, :pipe_size, :shank_spacing]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4017,7 +4017,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(geothermal_loop, 'LoopFlow', @loop_flow, :float, @loop_flow_isdefaulted) unless @loop_flow.nil?
-      if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?)
+      if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?) || (not @bore_diameter.nil?)
         boreholes_or_trenches = XMLHelper.add_element(geothermal_loop, 'BoreholesOrTrenches')
         XMLHelper.add_element(boreholes_or_trenches, 'Count', @num_bore_holes, :integer, @num_bore_holes_isdefaulted) unless @num_bore_holes.nil?
         XMLHelper.add_element(boreholes_or_trenches, 'Length', @bore_length, :float, @bore_length_isdefaulted) unless @bore_length.nil?
@@ -4028,10 +4028,11 @@ class HPXML < Object
         grout = XMLHelper.add_element(geothermal_loop, 'Grout')
         XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
       end
-      if (not @pipe_cond.nil?) || (not @pipe_size.nil?)
+      if (not @pipe_cond.nil?) || (not @pipe_size.nil?) || (not @shank_spacing.nil?)
         pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
         XMLHelper.add_element(pipe, 'Conductivity', @pipe_cond, :float, @pipe_cond_isdefaulted) unless @pipe_cond.nil?
         XMLHelper.add_element(pipe, 'Diameter', @pipe_size, :float, @pipe_size_isdefaulted) unless @pipe_size.nil?
+        XMLHelper.add_element(pipe, 'ShankSpacing', @shank_spacing, :float, @shank_spacing_isdefaulted) unless @shank_spacing.nil?
       end
     end
 
@@ -4047,6 +4048,7 @@ class HPXML < Object
       @grout_conductivity = XMLHelper.get_value(geothermal_loop, 'Grout/Conductivity', :float)
       @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
       @pipe_size = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
+      @shank_spacing = XMLHelper.get_value(geothermal_loop, 'Pipe/ShankSpacing', :float)
     end
   end
 
