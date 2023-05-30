@@ -550,9 +550,11 @@ Soil information is entered in ``Soil``.
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``Conductivity``                  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
+  ``extension/Diffusivity           double    TODO         > 0          No        0.0208    Diffusivity of the ground soil [#]_
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
+  .. [#] Diffusivity used for ground source heat pumps.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -1923,6 +1925,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                       Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0          See [#]_                  Number of dwelling units served
+  ``AttachedToGeothermalLoop``                     idref                          TODO                      ID of attached geothermal loop
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2030,6 +2033,29 @@ If a backup type of "separate" is provided, additional information is entered in
 
     - The conditioned space cannot be partially heated (i.e., the sum of all ``FractionHeatLoadServed`` must be 1).
     - There cannot be multiple backup heating systems.
+
+.. _geothermal_loops:
+
+HPXML Geothermal Loops
+**********************
+
+Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
+
+  =================================  ========  ===========  ===========  ========  =========  ===============================================
+  Element                            Type      Units        Constraints  Required  Default    Notes
+  =================================  ========  ===========  ===========  ========  =========  ===============================================
+  ``SystemIdentifier``               id                                  Yes                  Unique identifier
+  ``LoopFlow``                       double                              No        autosized
+  ``BoreholesOrTrenches/Count``      integer                             No        autosized          
+  ``BoreholesOrTrenches/Length``     double                              No        autosized          
+  ``BoreholesOrTrenches/Spacing``    double    ft                        No        20.0
+  ``BoreholesOrTrenches/Diameter``   double    in                        No        5.0
+  ``Grout/Conductivity``             double    Btu/hr-ft-F               No        0.4
+  ``Pipe/Conductivity``              double    Btu/hr-ft-F               No        0.23
+  ``Pipe/Diameter``                  double    in           [#]_         No        0.75
+  =================================  ========  ===========  ===========  ========  =========  ===============================================
+
+  .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4".
 
 .. _hvac_control:
 
