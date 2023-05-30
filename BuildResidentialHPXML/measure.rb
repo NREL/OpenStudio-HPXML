@@ -1369,7 +1369,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_length', false)
     arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Length')
-    arg.setDescription("Total length of boreholes (vertical) or trenches (horizontal). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg.setDescription("Length of each borehole (vertical) or trench (horizontal). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
     arg.setUnits('ft')
     args << arg
 

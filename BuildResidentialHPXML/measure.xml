@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b6f74f20-3400-46fd-adb9-a9a7efee46a3</version_id>
-  <version_modified>2023-05-30T19:57:20Z</version_modified>
+  <version_id>421aacf4-f3c3-44d1-bfa0-191d16a6b3ff</version_id>
+  <version_modified>2023-05-30T21:35:37Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2794,7 +2794,7 @@
     <argument>
       <name>geothermal_loop_boreholes_or_trenches_length</name>
       <display_name>Geothermal Loop: Boreholes or Trenches Length</display_name>
-      <description>Total length of boreholes (vertical) or trenches (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
+      <description>Length of each borehole (vertical) or trench (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
       <type>Double</type>
       <units>ft</units>
       <required>false</required>
@@ -6774,7 +6774,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CF9A4983</checksum>
+      <checksum>B8515628</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>

@@ -550,7 +550,7 @@ Soil information is entered in ``Soil``.
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``Conductivity``                  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
-  ``extension/Diffusivity           double    TODO         > 0          No        0.0208    Diffusivity of the ground soil [#]_
+  ``extension/Diffusivity``         double    TODO         > 0          No        0.0208    Diffusivity of the ground soil [#]_
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
@@ -2041,20 +2041,23 @@ HPXML Geothermal Loops
 
 Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
 
-  =================================  ========  ===========  ===========  ========  =========  ===============================================
-  Element                            Type      Units        Constraints  Required  Default    Notes
-  =================================  ========  ===========  ===========  ========  =========  ===============================================
-  ``SystemIdentifier``               id                                  Yes                  Unique identifier
-  ``LoopFlow``                       double                              No        autosized
-  ``BoreholesOrTrenches/Count``      integer                             No        autosized          
-  ``BoreholesOrTrenches/Length``     double                              No        autosized          
+  =================================  ========  ===========  ===========  ========  ==============  ===============================================
+  Element                            Type      Units        Constraints  Required  Default         Notes
+  =================================  ========  ===========  ===========  ========  ==============  ===============================================
+  ``SystemIdentifier``               id                                  Yes                       Unique identifier
+  ``LoopFlow``                       double    gal/min                   No        autosized [#]_
+  ``BoreholesOrTrenches/Count``      integer                             No        autosized [#]_         
+  ``BoreholesOrTrenches/Length``     double    ft                        No        autosized [#]_         
   ``BoreholesOrTrenches/Spacing``    double    ft                        No        20.0
   ``BoreholesOrTrenches/Diameter``   double    in                        No        5.0
   ``Grout/Conductivity``             double    Btu/hr-ft-F               No        0.4
   ``Pipe/Conductivity``              double    Btu/hr-ft-F               No        0.23
   ``Pipe/Diameter``                  double    in           [#]_         No        0.75
-  =================================  ========  ===========  ===========  ========  =========  ===============================================
+  =================================  ========  ===========  ===========  ========  ==============  ===============================================
 
+  .. [#] Loop flow autosized per TODO.
+  .. [#] Number of boreholes/trenches autosized per TODO.
+  .. [#] Borehole/trench length autosized per TODO.
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4".
 
 .. _hvac_control:
