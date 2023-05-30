@@ -930,11 +930,15 @@
   },
   "sample_files/base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump2.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml",
+    "site_ground_diffusivity": 0.03,
     "geothermal_loop_loop_flow": 12.3,
     "geothermal_loop_boreholes_or_trenches_count": 5,
     "geothermal_loop_boreholes_or_trenches_length": 23.4,
     "geothermal_loop_boreholes_or_trenches_spacing": 34.5,
-    "geothermal_loop_pipe_conductivity": 0.25
+    "geothermal_loop_boreholes_or_trenches_diameter": 6.0,
+    "geothermal_loop_grout_conductivity": 0.5,
+    "geothermal_loop_pipe_conductivity": 0.25,
+    "geothermal_loop_pipe_diameter": "1\" pipe"
   },
   "sample_files/base-bldgtype-multifamily-shared-laundry-room.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-multifamily.xml"

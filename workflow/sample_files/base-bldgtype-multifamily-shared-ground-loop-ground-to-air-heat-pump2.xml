@@ -40,6 +40,11 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <Soil>
+            <extension>
+              <Diffusivity>0.03</Diffusivity>
+            </extension>
+          </Soil>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
@@ -267,9 +272,14 @@
                 <Count>5</Count>
                 <Length>23.4</Length>
                 <Spacing>34.5</Spacing>
+                <Diameter>6.0</Diameter>
               </BoreholesOrTrenches>
+              <Grout>
+                <Conductivity>0.5</Conductivity>
+              </Grout>
               <Pipe>
                 <Conductivity>0.25</Conductivity>
+                <Diameter>1.0</Diameter>
               </Pipe>
             </GeothermalLoop>
           </HVACPlant>
