@@ -2909,13 +2909,15 @@ class HPXMLDefaults
           htg_sys.additional_properties.GSHP_G_Functions = hvac_sizing_values.GSHP_G_Functions
 
           geothermal_loop = htg_sys.geothermal_loop
-          if geothermal_loop.loop_flow.nil?
-            geothermal_loop.loop_flow = hvac_sizing_values.GSHP_Loop_flow
-            geothermal_loop.loop_flow_isdefaulted = true
-          end
-          if geothermal_loop.num_bore_holes.nil?
-            geothermal_loop.num_bore_holes = hvac_sizing_values.GSHP_Bore_Holes
-            geothermal_loop.num_bore_holes_isdefaulted = true
+          if not geothermal_loop.nil?
+            if geothermal_loop.loop_flow.nil?
+              geothermal_loop.loop_flow = hvac_sizing_values.GSHP_Loop_flow
+              geothermal_loop.loop_flow_isdefaulted = true
+            end
+            if geothermal_loop.num_bore_holes.nil?
+              geothermal_loop.num_bore_holes = hvac_sizing_values.GSHP_Bore_Holes
+              geothermal_loop.num_bore_holes_isdefaulted = true
+            end
           end
         end
       end
