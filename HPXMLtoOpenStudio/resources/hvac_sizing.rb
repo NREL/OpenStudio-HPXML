@@ -1887,15 +1887,16 @@ class HVACSizing
     # Autosize ground loop heat exchanger length
     geothermal_loop = hvac_cooling.geothermal_loop
     bore_spacing = geothermal_loop.bore_spacing
+    bore_diameter = geothermal_loop.bore_diameter
+    grout_conductivity = geothermal_loop.grout_conductivity
     pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
-    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, pipe_r_value)
+    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
 
     bore_length = geothermal_loop.bore_length
     if bore_length.nil?
       bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length = [bore_length_heat, bore_length_cool].max
-      geothermal_loop.bore_length_isdefaulted = true
     end
 
     loop_flow = geothermal_loop.loop_flow
@@ -1906,7 +1907,6 @@ class HVACSizing
     num_bore_holes = geothermal_loop.num_bore_holes
     if num_bore_holes.nil?
       num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
-      geothermal_loop.num_bore_holes_isdefaulted = true
     end
     bore_depth = (bore_length / num_bore_holes).floor # ft
     min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
@@ -2672,7 +2672,7 @@ class HVACSizing
     return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_cond
   end
 
-  def self.gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, pipe_r_value)
+  def self.gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
     if hvac_cooling_ap.u_tube_spacing_type == 'b'
       beta_0 = 17.4427
       beta_1 = -0.6052
@@ -2684,8 +2684,8 @@ class HVACSizing
       beta_1 = -0.94467
     end
 
-    r_value_ground = Math.log(bore_spacing / hvac_cooling_ap.bore_diameter * 12.0) / 2.0 / Math::PI / @hpxml.site.ground_conductivity
-    r_value_grout = 1.0 / hvac_cooling_ap.grout_conductivity / beta_0 / ((hvac_cooling_ap.bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
+    r_value_ground = Math.log(bore_spacing / bore_diameter * 12.0) / 2.0 / Math::PI / @hpxml.site.ground_conductivity
+    r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 
     rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[0]) / @htd].max

@@ -488,6 +488,11 @@ class HPXMLDefaults
       hpxml.site.ground_conductivity_isdefaulted = true
     end
 
+    if hpxml.site.ground_diffusivity.nil?
+      hpxml.site.ground_diffusivity = 0.0208 # TODO
+      hpxml.site.ground_diffusivity_isdefaulted = true
+    end
+
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
   end
 
@@ -1499,9 +1504,6 @@ class HPXMLDefaults
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
-        HVAC.set_gshp_assumptions(heat_pump, weather)
-        HVAC.set_curves_gshp(heat_pump)
-
         if heat_pump.geothermal_loop.nil?
           hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
           heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
@@ -1512,10 +1514,28 @@ class HPXMLDefaults
           heat_pump.geothermal_loop.bore_spacing_isdefaulted = true
         end
 
+        if heat_pump.geothermal_loop.bore_diameter.nil?
+          heat_pump.geothermal_loop.bore_diameter = 5.0 # in
+          heat_pump.geothermal_loop.bore_diameter_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.grout_conductivity.nil?
+          heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
+          heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
+        end
+
         if heat_pump.geothermal_loop.pipe_cond.nil?
           heat_pump.geothermal_loop.pipe_cond = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
           heat_pump.geothermal_loop.pipe_cond_isdefaulted = true
         end
+
+        if heat_pump.geothermal_loop.pipe_size.nil?
+          heat_pump.geothermal_loop.pipe_size = 0.75 # in
+          heat_pump.geothermal_loop.pipe_size_isdefaulted = true
+        end
+
+        HVAC.set_gshp_assumptions(heat_pump, weather)
+        HVAC.set_curves_gshp(heat_pump)
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
@@ -2917,6 +2937,10 @@ class HPXMLDefaults
             if geothermal_loop.num_bore_holes.nil?
               geothermal_loop.num_bore_holes = hvac_sizing_values.GSHP_Bore_Holes
               geothermal_loop.num_bore_holes_isdefaulted = true
+            end
+            if geothermal_loop.bore_length.nil?
+              geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth # this is the length (i.e., depth) of each borehole?
+              geothermal_loop.bore_length_isdefaulted = true
             end
           end
         end

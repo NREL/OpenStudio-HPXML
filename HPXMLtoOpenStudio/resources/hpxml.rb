@@ -1442,7 +1442,7 @@ class HPXML < Object
 
   class Site < BaseElement
     ATTRS = [:site_type, :surroundings, :vertical_surroundings, :shielding_of_home, :orientation_of_front_of_home, :azimuth_of_front_of_home, :fuels,
-             :ground_conductivity]
+             :ground_conductivity, :ground_diffusivity]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1466,9 +1466,13 @@ class HPXML < Object
           XMLHelper.add_element(fuel_types_available, 'Fuel', fuel, :string)
         end
       end
-      if not @ground_conductivity.nil?
+      if (not @ground_conductivity.nil?) || (not @ground_diffusivity.nil?)
         soil = XMLHelper.add_element(site, 'Soil')
         XMLHelper.add_element(soil, 'Conductivity', @ground_conductivity, :float, @ground_conductivity_isdefaulted) unless @ground_conductivity.nil?
+        if not @ground_diffusivity.nil?
+          extension = XMLHelper.create_elements_as_needed(soil, ['extension'])
+          XMLHelper.add_element(extension, 'Diffusivity', @ground_diffusivity, :float, @ground_diffusivity_isdefaulted) unless @ground_diffusivity.nil?
+        end
       end
 
       if site.children.size == 0
@@ -1491,6 +1495,7 @@ class HPXML < Object
       @azimuth_of_front_of_home = XMLHelper.get_value(site, 'AzimuthOfFrontOfHome', :integer)
       @fuels = XMLHelper.get_values(site, 'FuelTypesAvailable/Fuel', :string)
       @ground_conductivity = XMLHelper.get_value(site, 'Soil/Conductivity', :float)
+      @ground_diffusivity = XMLHelper.get_value(site, 'Soil/extension/Diffusivity', :float)
     end
   end
 
@@ -3992,7 +3997,7 @@ class HPXML < Object
   end
 
   class GeothermalLoop < BaseElement
-    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :pipe_cond]
+    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter, :grout_conductivity, :pipe_cond, :pipe_size]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4017,10 +4022,16 @@ class HPXML < Object
         XMLHelper.add_element(boreholes_or_trenches, 'Count', @num_bore_holes, :integer, @num_bore_holes_isdefaulted) unless @num_bore_holes.nil?
         XMLHelper.add_element(boreholes_or_trenches, 'Length', @bore_length, :float, @bore_length_isdefaulted) unless @bore_length.nil?
         XMLHelper.add_element(boreholes_or_trenches, 'Spacing', @bore_spacing, :float, @bore_spacing_isdefaulted) unless @bore_spacing.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Diameter', @bore_diameter, :float, @bore_diameter_isdefaulted) unless @bore_diameter.nil?
       end
-      if not @pipe_cond.nil?
+      if not @grout_conductivity.nil?
+        grout = XMLHelper.add_element(geothermal_loop, 'Grout')
+        XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
+      end
+      if (not @pipe_cond.nil?) || (not @pipe_size.nil?)
         pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
         XMLHelper.add_element(pipe, 'Conductivity', @pipe_cond, :float, @pipe_cond_isdefaulted) unless @pipe_cond.nil?
+        XMLHelper.add_element(pipe, 'Diameter', @pipe_size, :float, @pipe_size_isdefaulted) unless @pipe_size.nil?
       end
     end
 
@@ -4032,7 +4043,10 @@ class HPXML < Object
       @num_bore_holes = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Count', :integer)
       @bore_length = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Length', :float)
       @bore_spacing = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Spacing', :float)
+      @bore_diameter = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Diameter', :float)
+      @grout_conductivity = XMLHelper.get_value(geothermal_loop, 'Grout/Conductivity', :float)
       @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
+      @pipe_size = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
     end
   end
 

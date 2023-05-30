@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9bebe351-6ab5-4d90-9d13-09c45692b539</version_id>
-  <version_modified>2023-05-25T23:36:43Z</version_modified>
+  <version_id>176e5157-cafc-4351-a63c-22d07916aaa3</version_id>
+  <version_modified>2023-05-30T19:57:22Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2E1DFFAC</checksum>
+      <checksum>1AFF8044</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -238,13 +238,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>11DCF4E9</checksum>
+      <checksum>E5CD6A60</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DC22B597</checksum>
+      <checksum>53F2972F</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -262,7 +262,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>589B89C8</checksum>
+      <checksum>07FC197B</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -274,13 +274,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B4A2F9B1</checksum>
+      <checksum>D3136606</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FF22B64A</checksum>
+      <checksum>E1A0EE29</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
