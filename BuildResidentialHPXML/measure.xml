@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>67fb50c6-1ec6-4422-968a-ab87ac8e29d3</version_id>
-  <version_modified>2023-05-25T23:36:41Z</version_modified>
+  <version_id>b6f74f20-3400-46fd-adb9-a9a7efee46a3</version_id>
+  <version_modified>2023-05-30T19:57:20Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -191,6 +191,15 @@
       <description>Conductivity of the ground soil. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>Btu/hr-ft-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>site_ground_diffusivity</name>
+      <display_name>Site: Ground Diffusivity</display_name>
+      <description>Diffusivity of the ground soil. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>TODO</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -2785,7 +2794,7 @@
     <argument>
       <name>geothermal_loop_boreholes_or_trenches_length</name>
       <display_name>Geothermal Loop: Boreholes or Trenches Length</display_name>
-      <description>Length of each borehole (vertical) or trench (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
+      <description>Total length of boreholes (vertical) or trenches (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
       <type>Double</type>
       <units>ft</units>
       <required>false</required>
@@ -2801,13 +2810,54 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>geothermal_loop_boreholes_or_trenches_diameter</name>
+      <display_name>Geothermal Loop: Boreholes or Trenches Diameter</display_name>
+      <description>Diameter of bores/trenches. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>in</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>geothermal_loop_grout_conductivity</name>
+      <display_name>Geothermal Loop: Grout Conductivity</display_name>
+      <description>Grout conductivity of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <type>Double</type>
+      <units>Btu/hr-ft-F</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>geothermal_loop_pipe_conductivity</name>
-      <display_name>Geothermal Loop: Boreholes or Trenches Conductivity</display_name>
+      <display_name>Geothermal Loop: Pipe Conductivity</display_name>
       <description>Pipe conductivity of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>Btu/hr-ft-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>geothermal_loop_pipe_diameter</name>
+      <display_name>Geothermal Loop: Pipe Diameter</display_name>
+      <description>Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <type>Choice</type>
+      <units>in</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>3/4" pipe</value>
+          <display_name>3/4" pipe</display_name>
+        </choice>
+        <choice>
+          <value>1" pipe</value>
+          <display_name>1" pipe</display_name>
+        </choice>
+        <choice>
+          <value>1-1/4" pipe</value>
+          <display_name>1-1/4" pipe</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>heating_system_2_type</name>
@@ -6724,7 +6774,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CD7250AB</checksum>
+      <checksum>CF9A4983</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
