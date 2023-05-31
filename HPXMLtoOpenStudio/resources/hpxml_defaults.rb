@@ -1504,6 +1504,11 @@ class HPXMLDefaults
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+        if heat_pump.geothermal_loop.nil?
+          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
+          heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
+        end
+
         if heat_pump.geothermal_loop.pipe_size.nil?
           heat_pump.geothermal_loop.pipe_size = 0.75 # in
           heat_pump.geothermal_loop.pipe_size_isdefaulted = true
@@ -1511,11 +1516,6 @@ class HPXMLDefaults
 
         HVAC.set_gshp_assumptions(heat_pump, weather)
         HVAC.set_curves_gshp(heat_pump)
-
-        if heat_pump.geothermal_loop.nil?
-          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
-          heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
-        end
 
         if heat_pump.geothermal_loop.bore_spacing.nil?
           heat_pump.geothermal_loop.bore_spacing = 20.0 # ft, distance between bores
