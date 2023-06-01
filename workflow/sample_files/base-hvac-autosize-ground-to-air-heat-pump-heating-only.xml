@@ -352,6 +352,7 @@
             </HeatPump>
             <GeothermalLoop>
               <SystemIdentifier id='GeothermalLoop1'/>
+              <LoopConfiguration>vertical</LoopConfiguration>
             </GeothermalLoop>
           </HVACPlant>
           <HVACControl>

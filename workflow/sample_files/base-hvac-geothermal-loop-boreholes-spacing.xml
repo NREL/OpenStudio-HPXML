@@ -353,6 +353,7 @@
             </HeatPump>
             <GeothermalLoop>
               <SystemIdentifier id='GeothermalLoop1'/>
+              <LoopConfiguration>vertical</LoopConfiguration>
               <BoreholesOrTrenches>
                 <Spacing>25.0</Spacing>
               </BoreholesOrTrenches>

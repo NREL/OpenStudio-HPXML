@@ -353,6 +353,7 @@
             </HeatPump>
             <GeothermalLoop>
               <SystemIdentifier id='GeothermalLoop1'/>
+              <LoopConfiguration>vertical</LoopConfiguration>
               <Pipe>
                 <Conductivity>0.3</Conductivity>
               </Pipe>

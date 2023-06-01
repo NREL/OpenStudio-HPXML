@@ -5042,6 +5042,7 @@ class HPXMLFile
     end
 
     hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
+                               loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical,
                                loop_flow: loop_flow,
                                num_bore_holes: num_bore_holes,
                                bore_length: bore_length,

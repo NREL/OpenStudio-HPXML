@@ -489,7 +489,7 @@ class HPXMLDefaults
     end
 
     if hpxml.site.ground_diffusivity.nil?
-      hpxml.site.ground_diffusivity = 0.0208 # TODO
+      hpxml.site.ground_diffusivity = 0.0208 # ft^2/hr
       hpxml.site.ground_diffusivity_isdefaulted = true
     end
 
@@ -1505,7 +1505,8 @@ class HPXMLDefaults
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         if heat_pump.geothermal_loop.nil?
-          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}")
+          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
+                                     loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical)
           heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
         end
 
@@ -1527,9 +1528,19 @@ class HPXMLDefaults
           heat_pump.geothermal_loop.bore_diameter_isdefaulted = true
         end
 
+        if heat_pump.geothermal_loop.grout_type.nil? && heat_pump.geothermal_loop.grout_conductivity.nil?
+          heat_pump.geothermal_loop.grout_type = HPXML::GeothermalLoopGroutTypeStandard
+          heat_pump.geothermal_loop.grout_type_isdefaulted = true
+        end
+
         if heat_pump.geothermal_loop.grout_conductivity.nil?
-          heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
-          heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
+          if heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeStandard
+            heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
+            heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
+          elsif heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeThermalEnhanced
+            heat_pump.geothermal_loop.grout_conductivity = 0.8 # Btu/h-ft-R
+            heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
+          end
         end
 
         if heat_pump.geothermal_loop.pipe_cond.nil?

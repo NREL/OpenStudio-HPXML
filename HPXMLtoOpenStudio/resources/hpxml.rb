@@ -156,6 +156,12 @@ class HPXML < Object
   FuelTypeWoodPellets = 'wood pellets'
   FurnitureMassTypeLightWeight = 'light-weight'
   FurnitureMassTypeHeavyWeight = 'heavy-weight'
+  GeothermalLoopLoopConfigurationDiagonal = 'diagonal'
+  GeothermalLoopLoopConfigurationHorizontal = 'horizontal'
+  GeothermalLoopLoopConfigurationOther = 'other'
+  GeothermalLoopLoopConfigurationVertical = 'vertical'
+  GeothermalLoopGroutTypeStandard = 'standard'
+  GeothermalLoopGroutTypeThermallyEnhanced = 'thermally enhanced'
   HeaterTypeElectricResistance = 'electric resistance'
   HeaterTypeGas = 'gas fired'
   HeaterTypeHeatPump = 'heat pump'
@@ -3997,7 +4003,10 @@ class HPXML < Object
   end
 
   class GeothermalLoop < BaseElement
-    ATTRS = [:id, :loop_flow, :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter, :grout_conductivity, :pipe_cond, :pipe_size, :shank_spacing]
+    ATTRS = [:id, :loop_configuration, :loop_flow,
+             :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter,
+             :grout_type, :grout_conductivity,
+             :pipe_cond, :pipe_size, :shank_spacing]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4016,6 +4025,7 @@ class HPXML < Object
       geothermal_loop = XMLHelper.add_element(hvac_plant, 'GeothermalLoop')
       sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(geothermal_loop, 'LoopConfiguration', @loop_configuration, :string, @loop_configuration_isdefaulted) unless @loop_configuration.nil?
       XMLHelper.add_element(geothermal_loop, 'LoopFlow', @loop_flow, :float, @loop_flow_isdefaulted) unless @loop_flow.nil?
       if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?) || (not @bore_diameter.nil?)
         boreholes_or_trenches = XMLHelper.add_element(geothermal_loop, 'BoreholesOrTrenches')
@@ -4024,8 +4034,9 @@ class HPXML < Object
         XMLHelper.add_element(boreholes_or_trenches, 'Spacing', @bore_spacing, :float, @bore_spacing_isdefaulted) unless @bore_spacing.nil?
         XMLHelper.add_element(boreholes_or_trenches, 'Diameter', @bore_diameter, :float, @bore_diameter_isdefaulted) unless @bore_diameter.nil?
       end
-      if not @grout_conductivity.nil?
+      if (not @grout_type.nil?) || (not @grout_conductivity.nil?)
         grout = XMLHelper.add_element(geothermal_loop, 'Grout')
+        XMLHelper.add_element(grout, 'Type', @grout_type, :string, @grout_type_isdefaulted) unless @grout_type.nil?
         XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
       end
       if (not @pipe_cond.nil?) || (not @pipe_size.nil?) || (not @shank_spacing.nil?)
@@ -4040,11 +4051,13 @@ class HPXML < Object
       return if geothermal_loop.nil?
 
       @id = HPXML::get_id(geothermal_loop)
+      @loop_configuration = XMLHelper.get_value(geothermal_loop, 'LoopConfiguration', :string)
       @loop_flow = XMLHelper.get_value(geothermal_loop, 'LoopFlow', :float)
       @num_bore_holes = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Count', :integer)
       @bore_length = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Length', :float)
       @bore_spacing = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Spacing', :float)
       @bore_diameter = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Diameter', :float)
+      @grout_type = XMLHelper.get_value(geothermal_loop, 'Grout/Type', :string)
       @grout_conductivity = XMLHelper.get_value(geothermal_loop, 'Grout/Conductivity', :float)
       @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
       @pipe_size = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)

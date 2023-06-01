@@ -550,7 +550,7 @@ Soil information is entered in ``Soil``.
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``Conductivity``                  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
-  ``extension/Diffusivity``         double    TODO         > 0          No        0.0208    Diffusivity of the ground soil [#]_
+  ``extension/Diffusivity``         double    ft2/hr       > 0          No        0.0208    Diffusivity of the ground soil [#]_
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
@@ -2042,24 +2042,30 @@ HPXML Geothermal Loops
 
 Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
 
-  =================================  ========  ===========  ===========  ========  ==============  ===============================================
-  Element                            Type      Units        Constraints  Required  Default         Notes
-  =================================  ========  ===========  ===========  ========  ==============  ===============================================
-  ``SystemIdentifier``               id                                  Yes                       Unique identifier
-  ``LoopFlow``                       double    gal/min      > 0          No        autosized [#]_
-  ``BoreholesOrTrenches/Count``      integer                > 0          No        autosized [#]_
-  ``BoreholesOrTrenches/Length``     double    ft           > 0          No        autosized [#]_
-  ``BoreholesOrTrenches/Spacing``    double    ft           > 0          No        20.0
-  ``BoreholesOrTrenches/Diameter``   double    in           > 0          No        5.0
-  ``Grout/Conductivity``             double    Btu/hr-ft-F  > 0          No        0.4
-  ``Pipe/Conductivity``              double    Btu/hr-ft-F  > 0          No        0.23
-  ``Pipe/Diameter``                  double    in           See [#]_     No        0.75
-  ``Pipe/ShankSpacing``              double    in           > 0          No        See [#]_
-  =================================  ========  ===========  ===========  ========  ==============  ===============================================
+  ========================================  ================  ===========  ===============  ========  ==============  ===============================================
+  Element                                   Type              Units        Constraints      Required  Default         Notes
+  ========================================  ================  ===========  ===============  ========  ==============  ===============================================
+  ``SystemIdentifier``                      id                                              Yes                       Unique identifier
+  ``LoopConfiguration``                     string                         See [#]_         Yes
+  ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_
+  ``BoreholesOrTrenches/Count``             integer                        > 0              No        autosized [#]_
+  ``BoreholesOrTrenches/Length``            double            ft           > 0              No        autosized [#]_
+  ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        20.0
+  ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
+  ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
+  ``Pipe/Conductivity``                     double            Btu/hr-ft-F  > 0              No        0.23
+  ``Pipe/Diameter``                         double            in           See [#]_         No        0.75
+  ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_
+  ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
-  .. [#] Loop flow autosized per TODO.
-  .. [#] Number of boreholes/trenches autosized per TODO.
-  .. [#] Borehole/trench length autosized per TODO.
+  .. [#] LoopConfiguration must be "vertical".
+  .. [#] Looplow autosized per TODO.
+  .. [#] BoreholesOrTrenches/Count autosized per TODO.
+  .. [#] BoreholesOrTrenches/Length autosized per TODO.
+  .. [#] GroutType choices are "standard" or "thermally enhanced".
+  .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
+         | - **standard**: 0.4 Btu/hr-ft-F
+         | - **thermally enhanced**: 0.8 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] Sum of U-tube spacing and pipe outer diameter.
 
