@@ -138,7 +138,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_diffusivity', false)
     arg.setDisplayName('Site: Ground Diffusivity')
     arg.setDescription('Diffusivity of the ground soil. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('TODO')
+    arg.setUnits('ft^2/hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
