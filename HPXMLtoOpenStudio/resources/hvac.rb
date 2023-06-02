@@ -3373,6 +3373,8 @@ class HVAC
     elsif pipe_size == 1.25 # 1-1/4" pipe
       hp_ap.pipe_od = 1.660 # in
       hp_ap.pipe_id = 1.358 # in
+    else
+      fail "Unexpected pipe size: #{pipe_size}"
     end
     hp_ap.u_tube_spacing_type = 'b'
     # Calculate distance between pipes
