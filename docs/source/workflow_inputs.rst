@@ -2059,7 +2059,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
   .. [#] LoopConfiguration must be "vertical".
-  .. [#] Looplow autosized per TODO.
+  .. [#] LoopFlow autosized per TODO.
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] GroutType choices are "standard" or "thermally enhanced".
