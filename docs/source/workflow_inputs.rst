@@ -2062,7 +2062,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   .. [#] LoopFlow autosized per TODO.
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
-  .. [#] GroutType choices are "standard" or "thermally enhanced".
+  .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
          | - **standard**: 0.4 Btu/hr-ft-F
          | - **thermally enhanced**: 0.8 Btu/hr-ft-F
