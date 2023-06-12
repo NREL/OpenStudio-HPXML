@@ -1925,50 +1925,53 @@ class HVACSizing
       bore_depth = (bore_length / num_bore_holes).floor + 5
     end
 
-    if num_bore_holes == 1
-      bore_config = 'single'
-    elsif num_bore_holes == 2
-      bore_config = 'line'
-    elsif num_bore_holes == 3
-      bore_config = 'line'
-    elsif num_bore_holes == 4
-      bore_config = 'rectangle'
-    elsif num_bore_holes == 5
-      bore_config = 'u-config'
-    elsif num_bore_holes > 5
-      bore_config = 'line'
-    end
+    valid_configs = HVAC.valid_borefield_configs
+    bore_config = geothermal_loop.bore_config
+    if bore_config.nil?
+      if num_bore_holes == 1
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationSingle
+      elsif num_bore_holes == 2
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationLine
+      elsif num_bore_holes == 3
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationLine
+      elsif num_bore_holes == 4
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
+      elsif num_bore_holes == 5
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationUConfig
+      elsif num_bore_holes > 5
+        bore_config = HPXML::GeothermalLoopBorefieldConfigurationLine
+      end
 
-    # Test for valid GSHP bore field configurations
-    valid_configs = { 'single' => [1],
-                      'line' => [2, 3, 4, 5, 6, 7, 8, 9, 10],
-                      'l-config' => [3, 4, 5, 6],
-                      'rectangle' => [2, 4, 6, 8],
-                      'u-config' => [5, 7, 9],
-                      'l2-config' => [8],
-                      'open-rectangle' => [8] }
-    valid_num_bores = valid_configs[bore_config]
-    max_valid_configs = { 'line' => 10, 'l-config' => 6 }
-    unless valid_num_bores.include? num_bore_holes
-      # Any configuration with a max_valid_configs value can accept any number of bores up to the maximum
-      if max_valid_configs.keys.include? bore_config
-        max_num_bore_holes = max_valid_configs[bore_config]
-        num_bore_holes = max_num_bore_holes
-      else
-        # Search for first valid bore field
-        new_bore_config = nil
-        valid_configs.keys.each do |bore_config|
-          next unless valid_configs[bore_config].include? num_bore_holes
-
-          new_bore_config = bore_config
-          break
-        end
-        if not new_bore_config.nil?
-          bore_config = new_bore_config
+      # Test for valid GSHP bore field configurations
+      valid_num_bores = valid_configs[bore_config]
+      max_valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationLine => 10,
+                            HPXML::GeothermalLoopBorefieldConfigurationLConfig => 6 }
+      unless valid_num_bores.include? num_bore_holes
+        # Any configuration with a max_valid_configs value can accept any number of bores up to the maximum
+        if max_valid_configs.keys.include? bore_config
+          max_num_bore_holes = max_valid_configs[bore_config]
+          num_bore_holes = max_num_bore_holes
         else
-          fail 'Could not construct a valid GSHP bore field configuration.'
+          # Search for first valid bore field
+          new_bore_config = nil
+          valid_configs.keys.each do |bore_config|
+            next unless valid_configs[bore_config].include? num_bore_holes
+
+            new_bore_config = bore_config
+            break
+          end
+          if not new_bore_config.nil?
+            bore_config = new_bore_config
+          else
+            fail 'Could not construct a valid GSHP bore field configuration.'
+          end
         end
       end
+    end
+
+    valid_num_bores = valid_configs[bore_config]
+    unless valid_num_bores.include? num_bore_holes
+      fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
     spacing_to_depth_ratio = bore_spacing / bore_depth
@@ -1980,6 +1983,7 @@ class HVACSizing
     hvac_sizing_values.GSHP_Bore_Depth = bore_depth
     hvac_sizing_values.GSHP_Bore_Holes = num_bore_holes
     hvac_sizing_values.GSHP_G_Functions = [lntts, gfnc_coeff]
+    hvac_sizing_values.GSHP_Bore_Config = bore_config
   end
 
   def self.apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
@@ -3197,7 +3201,7 @@ class HVACSizingValues
                 :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp,
                 :Heat_Airflow, :Heat_Airflow_Supp,
-                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
+                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 end
 
 class Numeric

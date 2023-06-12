@@ -156,6 +156,13 @@ class HPXML < Object
   FuelTypeWoodPellets = 'wood pellets'
   FurnitureMassTypeLightWeight = 'light-weight'
   FurnitureMassTypeHeavyWeight = 'heavy-weight'
+  GeothermalLoopBorefieldConfigurationSingle = 'single'
+  GeothermalLoopBorefieldConfigurationLine = 'line'
+  GeothermalLoopBorefieldConfigurationLConfig = 'l-config'
+  GeothermalLoopBorefieldConfigurationRectangle = 'rectangle'
+  GeothermalLoopBorefieldConfigurationUConfig = 'u-config'
+  GeothermalLoopBorefieldConfiguration12Config = '12-config'
+  GeothermalLoopBorefieldConfigurationOpenRectangle = 'open-rectangle'
   GeothermalLoopLoopConfigurationDiagonal = 'diagonal'
   GeothermalLoopLoopConfigurationHorizontal = 'horizontal'
   GeothermalLoopLoopConfigurationOther = 'other'
@@ -4006,7 +4013,8 @@ class HPXML < Object
     ATTRS = [:id, :loop_configuration, :loop_flow,
              :num_bore_holes, :bore_spacing, :bore_length, :bore_diameter,
              :grout_type, :grout_conductivity,
-             :pipe_cond, :pipe_size, :shank_spacing]
+             :pipe_cond, :pipe_size, :shank_spacing,
+             :bore_config]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4045,6 +4053,10 @@ class HPXML < Object
         XMLHelper.add_element(pipe, 'Diameter', @pipe_size, :float, @pipe_size_isdefaulted) unless @pipe_size.nil?
         XMLHelper.add_element(pipe, 'ShankSpacing', @shank_spacing, :float, @shank_spacing_isdefaulted) unless @shank_spacing.nil?
       end
+      if not @bore_config.nil?
+        extension = XMLHelper.create_elements_as_needed(geothermal_loop, ['extension'])
+        XMLHelper.add_element(extension, 'BorefieldConfiguration', @bore_config, :string, @bore_config_isdefaulted) unless @bore_config.nil?
+      end
     end
 
     def from_oga(geothermal_loop)
@@ -4062,6 +4074,7 @@ class HPXML < Object
       @pipe_cond = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
       @pipe_size = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
       @shank_spacing = XMLHelper.get_value(geothermal_loop, 'Pipe/ShankSpacing', :float)
+      @bore_config = XMLHelper.get_value(geothermal_loop, 'extension/BorefieldConfiguration', :string)
     end
   end
 
@@ -4102,17 +4115,6 @@ class HPXML < Object
              :geothermal_loop_idref]
     attr_accessor(*ATTRS)
 
-    def geothermal_loop
-      return if @geothermal_loop_idref.nil?
-
-      @hpxml_object.geothermal_loops.each do |geothermal_loop|
-        next unless geothermal_loop.id == @geothermal_loop_idref
-
-        return geothermal_loop
-      end
-      fail "Attached geothermal loop '#{@geothermal_loop_idref}' not found for heat pump '#{@id}'."
-    end
-
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -4122,6 +4124,17 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
+    def geothermal_loop
+      return if @geothermal_loop_idref.nil?
+
+      @hpxml_object.geothermal_loops.each do |geothermal_loop|
+        next unless geothermal_loop.id == @geothermal_loop_idref
+
+        return geothermal_loop
+      end
+      fail "Attached geothermal loop '#{@geothermal_loop_idref}' not found for heat pump '#{@id}'."
     end
 
     def is_dual_fuel
@@ -4163,6 +4176,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      begin; geothermal_loop; rescue StandardError => e; errors << e.message; end
       return errors
     end
 

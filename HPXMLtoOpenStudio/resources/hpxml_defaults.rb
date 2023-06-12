@@ -2959,6 +2959,10 @@ class HPXMLDefaults
               geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth # this is the length (i.e., depth) of each borehole?
               geothermal_loop.bore_length_isdefaulted = true
             end
+            if geothermal_loop.bore_config.nil?
+              geothermal_loop.bore_config = hvac_sizing_values.GSHP_Bore_Config
+              geothermal_loop.bore_config_isdefaulted = true
+            end
           end
         end
       end

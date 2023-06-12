@@ -3390,6 +3390,17 @@ class HVAC
     end
   end
 
+  def self.valid_borefield_configs
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationSingle => [1],
+                      HPXML::GeothermalLoopBorefieldConfigurationLine => [2, 3, 4, 5, 6, 7, 8, 9, 10],
+                      HPXML::GeothermalLoopBorefieldConfigurationLConfig => [3, 4, 5, 6],
+                      HPXML::GeothermalLoopBorefieldConfigurationRectangle => [2, 4, 6, 8],
+                      HPXML::GeothermalLoopBorefieldConfigurationUConfig => [5, 7, 9],
+                      HPXML::GeothermalLoopBorefieldConfiguration12Config => [8],
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => [8] }
+    return valid_configs
+  end
+
   def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
     n_max = (cop_47.length - 1.0) #-3 # Don't use max speed; FIXME: this is different than calc_mshp_seer?
     n_min = 0
