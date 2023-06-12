@@ -161,7 +161,7 @@ class HPXML < Object
   GeothermalLoopBorefieldConfigurationLConfig = 'l-config'
   GeothermalLoopBorefieldConfigurationRectangle = 'rectangle'
   GeothermalLoopBorefieldConfigurationUConfig = 'u-config'
-  GeothermalLoopBorefieldConfiguration12Config = '12-config'
+  GeothermalLoopBorefieldConfigurationl2Config = 'l2-config'
   GeothermalLoopBorefieldConfigurationOpenRectangle = 'open-rectangle'
   GeothermalLoopLoopConfigurationDiagonal = 'diagonal'
   GeothermalLoopLoopConfigurationHorizontal = 'horizontal'

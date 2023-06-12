@@ -3396,7 +3396,7 @@ class HVAC
                       HPXML::GeothermalLoopBorefieldConfigurationLConfig => [3, 4, 5, 6],
                       HPXML::GeothermalLoopBorefieldConfigurationRectangle => [2, 4, 6, 8],
                       HPXML::GeothermalLoopBorefieldConfigurationUConfig => [5, 7, 9],
-                      HPXML::GeothermalLoopBorefieldConfiguration12Config => [8],
+                      HPXML::GeothermalLoopBorefieldConfigurationl2Config => [8],
                       HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => [8] }
     return valid_configs
   end

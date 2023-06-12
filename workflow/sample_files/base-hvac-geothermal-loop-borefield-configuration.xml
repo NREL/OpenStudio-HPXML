@@ -354,6 +354,9 @@
             <GeothermalLoop>
               <SystemIdentifier id='GeothermalLoop1'/>
               <LoopConfiguration>vertical</LoopConfiguration>
+              <BoreholesOrTrenches>
+                <Count>5</Count>
+              </BoreholesOrTrenches>
               <extension>
                 <BorefieldConfiguration>l-config</BorefieldConfiguration>
               </extension>
