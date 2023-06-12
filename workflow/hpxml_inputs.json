@@ -2387,6 +2387,10 @@
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "geothermal_loop_pipe_shank_spacing": 2.5
   },
+  "sample_files/base-hvac-geothermal-loop-borefield-configuration.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "geothermal_loop_borefield_configuration": "l-config"
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
