@@ -1841,6 +1841,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
+      # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
+      return i / Float(ts_per_hr) if batt_soc_kwh <= 0
+
       if load_kw > 0
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
           # prevent battery charge from going negative
