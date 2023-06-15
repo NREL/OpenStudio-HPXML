@@ -236,55 +236,6 @@ class HVAC
     htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
     clg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
 
-    #Fan/pump adjustment factors JEFFGO
-    max_flow = [htg_cfm_rated, clg_cfm_rated].max
-
-    #puts("htg_cfm_rated = #{htg_cfm_rated}")
-    #puts("clg_cfm_rated = #{clg_cfm_rated}")
-    #puts("max_flow = #{max_flow}")
-    #puts("heat_pump = #{heat_pump}")
-    #p heat_pump
-
-    #CORRECTED fan/pump adjustment 
-    #puts("hp_ap.GSHP_Loop_flow = #{hp_ap.GSHP_Loop_flow}")
-    fan_adjust_kw = UnitConversions.convert(max_flow, 'cfm', 'm^3/s') * 1000.0 * 0.5 * 248.84 / 300000.0  # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
-    pump_adjust_kw = UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s') * 1000.0 * 11.0 * 12.0 * 248.84 / 300000.0 #Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
-    #fan_adjust_kw = (max_flow * 0.471947) * (0.5 * 248.84) / (300.0 * 1000.0) # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
-    #pump_adjust_kw = ((hp_ap.GSHP_Loop_flow * 0.0630902) * (11. * 12. * 248.84)) / (300.0 * 1000.0) #Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
-
-    #OLD ADJUSTMENTS:
-    # FUTURE: Reconcile these fan/pump adjustments with ANSI/RESNET/ICC 301-2019 Section 4.4.5
-    original_fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
-    original_pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
-    
-    iso_power_input_cool = heat_pump.cooling_capacity / UnitConversions.convert(heat_pump.cooling_efficiency_eer, 'Btu/hr', 'W')
-    iso_power_input_heat = heat_pump.heating_capacity / heat_pump.heating_efficiency_cop
-
-    power_input_cool = iso_power_input_cool + fan_adjust_kw + pump_adjust_kw
-    power_input_heat = iso_power_input_heat - fan_adjust_kw - pump_adjust_kw
-    cool_eir = power_input_cool / (heat_pump.cooling_capacity + fan_adjust_kw + pump_adjust_kw)
-    heat_eir = power_input_heat / (heat_pump.heating_capacity - fan_adjust_kw - pump_adjust_kw)
-    hp_ap.cool_rated_eirs = [cool_eir]
-    hp_ap.heat_rated_eirs = [heat_eir]
-
-
-    puts("original_fan_adjust_kw = #{original_fan_adjust_kw}")
-    puts("fan_adjust_kw = #{fan_adjust_kw}")
-    puts("original_pump_adjust_kw = #{original_pump_adjust_kw}")
-    puts("pump_adjust_kw = #{pump_adjust_kw}")
-    puts("hp_ap.cool_rated_eirs=#{hp_ap.cool_rated_eirs}")
-    puts("hp_ap.heat_rated_eirs=#{hp_ap.heat_rated_eirs}")
-
-    #cool_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
-    
-
-
-
-    #heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.heating_efficiency_cop * (1.0 - fan_adjust_kw))
-    
-
-    
-
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = Constants.FluidWater
       runner.registerWarning("Specified #{hp_ap.fluid_type} fluid type and 0 fraction of glycol, so assuming #{Constants.FluidWater} fluid type.")
@@ -1262,6 +1213,9 @@ class HVAC
 
   def self.set_curves_gshp(heat_pump)
     hp_ap = heat_pump.additional_properties
+
+    puts("heat_pump = #{heat_pump}")
+    puts("hp_ap = #{hp_ap}")
     # JEFFGO
     # E+ equation fit coil coefficients generated following approach in Tang's thesis:
     # See Appendix B of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
@@ -1281,8 +1235,31 @@ class HVAC
     hp_ap.heat_cap_curve_spec = [[-5.12650150, -0.93997630, 7.21443206, 0.121065721, 0.051809805]]
     hp_ap.heat_power_curve_spec = [[-7.73235249, 6.43390775, 2.29152262, -0.175598629, 0.005888871]]
     
+    #OLD ADJUSTMENTS:
+
+    original_fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
+    original_pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
+    original_cool_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (original_fan_adjust_kw + original_pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(original_fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
+    original_heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (original_fan_adjust_kw + original_pump_adjust_kw)) / (heat_pump.heating_efficiency_cop * (1.0 - original_fan_adjust_kw))
+
+    #NEW Fan/pump adjustments calculations
+    power_f = heat_pump.fan_watts_per_cfm * 400.0 / UnitConversions.convert(400.0, 'Btu/hr', 'ton') #400 cfm/ton, result is in W/unit cooling/heating in Btu
+    power_p = heat_pump.pump_watts_per_ton / UnitConversions.convert(1.0, 'Btu/hr', 'ton') #result is in W/unit cooling/heating in Btu
+
+    #Cooling
+    cool_eir = ((1.0 - power_f * UnitConversions.convert(1.0, 'Wh', 'Btu') - power_p * UnitConversions.convert(1.0, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer) - power_f - power_p #Same approach as equation 5.5 in Cutler: https://scholar.colorado.edu/concern/graduate_thesis_or_dissertations/r781wg40j
+    puts("cool_eir = #{cool_eir}")
+    #Heating
+    p_net_heat = heat_pump.heating_capacity / 1.0
+    heat_eir = 1.0
+
+    hp_ap.cool_rated_eirs = [cool_eir]
+    hp_ap.heat_rated_eirs = [heat_eir]
+
+
     heat_eir = 1.0 / heat_pump.heating_efficiency_cop #Note this does not include fan/pump adjustments, which are added in later
     hp_ap.heat_rated_eirs = [heat_eir]
+
   end
 
   def self.get_default_compressor_type(hvac_type, seer)
