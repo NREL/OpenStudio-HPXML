@@ -2212,7 +2212,38 @@ def download_utility_rates
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates]
+def download_g_functions
+  require_relative 'HPXMLtoOpenStudio/resources/g_functions/util'
+
+  g_functions_dir = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/g_functions')
+  FileUtils.mkdir(g_functions_dir) if !File.exist?(g_functions_dir)
+  filepath = File.join(g_functions_dir, 'g-function_library_1.0')
+
+  if !File.exist?(filepath)
+    require 'tempfile'
+    tmpfile = Tempfile.new('functions')
+
+    UrlResolver.fetch('https://gdr.openei.org/files/1325/g-function_library_1.0.zip', tmpfile)
+
+    puts 'Extracting g-functions...'
+    require 'zip'
+    Zip::File.open(tmpfile.path.to_s) do |zipfile|
+      zipfile.each do |file|
+        fpath = File.join(g_functions_dir, file.name)
+        FileUtils.mkdir_p(File.dirname(fpath))
+        zipfile.extract(file, fpath) unless File.exist?(fpath)
+      end
+    end
+  end
+
+  num_configs_actual = process_g_functions(filepath)
+
+  puts "#{num_configs_actual} config files are available in #{g_functions_dir}."
+  puts 'Completed.'
+  exit!
+end
+
+command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates, :download_g_functions]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -2331,6 +2362,10 @@ end
 
 if ARGV[0].to_sym == :download_utility_rates
   download_utility_rates
+end
+
+if ARGV[0].to_sym == :download_g_functions
+  download_g_functions
 end
 
 if ARGV[0].to_sym == :create_release_zips
