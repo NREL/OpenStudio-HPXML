@@ -216,7 +216,6 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>2584.0</Area>
             <ExposedPerimeter>205.4</ExposedPerimeter>
-            <DepthBelowGrade>6.75</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -365,7 +364,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
-              <UnitLocation>mechanical closet</UnitLocation>
+              <UnitLocation>living space</UnitLocation>
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Furnace/>

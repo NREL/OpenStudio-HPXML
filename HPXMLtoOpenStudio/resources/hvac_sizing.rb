@@ -116,7 +116,7 @@ class HVACSizing
     rh_indoor_cooling = 0.5 # Manual J is vague on the indoor RH but uses 50% in its examples
     hr_indoor_cooling = (0.62198 * rh_indoor_cooling * pwsat) / (UnitConversions.convert(weather.header.LocalPressure, 'atm', 'kPa') - rh_indoor_cooling * pwsat)
     @cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
-    @wetbulb_indoor_cooling = Psychrometrics.Twb_fT_R_P(@cool_setpoint, rh_indoor_cooling, UnitConversions.convert(weather.header.LocalPressure, 'atm', 'psi'))
+    @wetbulb_indoor_cooling = Psychrometrics.Twb_fT_R_P(nil, @cool_setpoint, rh_indoor_cooling, UnitConversions.convert(weather.header.LocalPressure, 'atm', 'psi'))
 
     db_indoor_degC = UnitConversions.convert(@cool_setpoint, 'F', 'C')
     @enthalpy_indoor_cooling = (1.006 * db_indoor_degC + hr_indoor_cooling * (2501.0 + 1.86 * db_indoor_degC)) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
@@ -2267,8 +2267,7 @@ class HVACSizing
 
           duct_area_fraction = duct_area / total_area
 
-          effective_rvalue = Airflow.get_duct_insulation_rvalue(duct.duct_insulation_r_value, duct_type)
-          dse_Ufactor[duct_type] += 1.0 / effective_rvalue * duct_area_fraction
+          dse_Ufactor[duct_type] += 1.0 / duct.duct_effective_r_value * duct_area_fraction
 
           dse_Tamb[duct_type] += design_temps[duct.duct_location] * duct_area_fraction
 
@@ -2306,12 +2305,12 @@ class HVACSizing
     return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
-  def self.process_curve_fit(airFlowRate, capacity, temp)
+  def self.process_curve_fit(airflow_rate, capacity, temp)
     # TODO: Get rid of this curve by using ADP/BF calculations
     return 0 if capacity == 0
 
     capacity_tons = UnitConversions.convert(capacity, 'Btu/hr', 'ton')
-    return MathTools.biquadratic(airFlowRate / capacity_tons, temp, get_shr_biquadratic)
+    return MathTools.biquadratic(airflow_rate / capacity_tons, temp, get_shr_biquadratic)
   end
 
   def self.get_shr_biquadratic
