@@ -2050,25 +2050,23 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_
   ``BoreholesOrTrenches/Count``             integer                        > 0              No [#]_   autosized [#]_
   ``BoreholesOrTrenches/Length``            double            ft           > 0              No        autosized [#]_
-  ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        20.0
+  ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
   ``Pipe/Conductivity``                     double            Btu/hr-ft-F  > 0              No        0.23
   ``Pipe/Diameter``                         double            in           See [#]_         No        0.75
   ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_
-  ``extension/BorefieldConfiguration``      string                         See [#]_         No        See [#]_
+  ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
   .. [#] LoopConfiguration must be "vertical".
   .. [#] LoopFlow autosized per TODO.
   .. [#] | If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
-         | - **single**: 1
-         | - **line**: 2, 3, 4, 5, 6, 7, 8, 9, or 10
-         | - **l-config**: 3, 4, 5, or 6
-         | - **rectangle**: 2, 4, 6, or 8
-         | - **u-config**: 5, 7, or 9
-         | - **l2-config**: 8
-         | - **open-rectangle**: 8
+         | - **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
+         | - **Open Rectangle**: 8 or 10
+         | - **L**: 4, 5, 6, 7, 8, 9, or 10
+         | - **U**: 7, 9, or 10
+         | - **Lopsided U**: 6, 7, 8, 9, or 10
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
@@ -2077,14 +2075,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **thermally enhanced**: 0.8 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] Sum of U-tube spacing and pipe outer diameter.
-  .. [#] extension/BorefieldConfiguration choices are "single", "line", "l-config", "rectangle", "u-config", "l2-config", or "open-rectangle".
-  .. [#] | If extension/BorefieldConfiguration not provided, defaults based on BoreholesOrTrenches/Count:
-         | - **1**: single
-         | - **2**: line
-         | - **3**: line
-         | - **4**: rectangle
-         | - **5**: u-config
-         | - **6+**: line
+  .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "L", "U", or "Lopsided U".
 
 .. _hvac_control:
 
