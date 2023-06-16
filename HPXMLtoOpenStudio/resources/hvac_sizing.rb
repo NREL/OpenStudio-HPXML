@@ -2670,7 +2670,10 @@ class HVACSizing
     require 'json'
 
     g_functions_filename = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json' }[bore_config]
+                             HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
+                             HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
+                             HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
+                             HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }[bore_config]
     g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
     g_functions = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
 
