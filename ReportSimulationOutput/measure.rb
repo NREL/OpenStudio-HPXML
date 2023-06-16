@@ -930,6 +930,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         minimum_storage_state_of_charge_fraction = nil
         batt_kwh = nil
         batt_kw = nil
+        batt_roundtrip_eff = nil
+
         @hpxml.batteries.each do |battery|
           @model.getElectricLoadCenterDistributions.each do |elcd|
             battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
@@ -939,6 +941,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
 
           batt_kw = battery.rated_power_output
+          batt_roundtrip_eff = battery.round_trip_efficiency
+
           @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |liion|
             battery_id = liion.additionalProperties.getFeatureAsString('HPXML_ID')
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
@@ -965,7 +969,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         resilience_timeseries = []
         n_timesteps = crit_load.size
         (0...n_timesteps).each do |init_time_step|
-          resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kw, batt_soc_kwh[init_time_step], crit_load, n_timesteps, ts_per_hr)
+          resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
         end
 
         resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
@@ -1836,15 +1840,24 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
-  def get_resilience_timeseries(init_time_step, batt_kw, batt_soc_kwh, crit_load, n_timesteps, ts_per_hr)
+  def get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
     (0...n_timesteps).each do |i|
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
-      # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
+	  # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
       return i / Float(ts_per_hr) if batt_soc_kwh <= 0
 
-      if load_kw > 0
+      if load_kw < 0 # load is met
+        if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
+          batt_soc_kwh += [
+            batt_kwh - batt_soc_kwh, # room available
+            batt_kw * batt_roundtrip_eff, # inverter capacity
+            -load_kw * batt_roundtrip_eff, # excess energy
+          ].min
+        end
+
+      else # check if we can meet load with generator then storage
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
           # prevent battery charge from going negative
           batt_soc_kwh = [0, batt_soc_kwh - load_kw].max
