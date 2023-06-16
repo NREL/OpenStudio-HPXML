@@ -3391,13 +3391,13 @@ class HVAC
   end
 
   def self.valid_borefield_configs
-    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationSingle => [1],
-                      HPXML::GeothermalLoopBorefieldConfigurationLine => [2, 3, 4, 5, 6, 7, 8, 9, 10],
-                      HPXML::GeothermalLoopBorefieldConfigurationLConfig => [3, 4, 5, 6],
-                      HPXML::GeothermalLoopBorefieldConfigurationRectangle => [2, 4, 6, 8],
-                      HPXML::GeothermalLoopBorefieldConfigurationUConfig => [5, 7, 9],
-                      HPXML::GeothermalLoopBorefieldConfigurationl2Config => [8],
-                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => [8] }
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                      # HPXML::GeothermalLoopBorefieldConfigurationZonedRectangle => [],
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => [8, 10],
+                      # HPXML::GeothermalLoopBorefieldConfigurationC => [],
+                      HPXML::GeothermalLoopBorefieldConfigurationL => [4, 5, 6, 7, 8, 9, 10],
+                      HPXML::GeothermalLoopBorefieldConfigurationU => [7, 9, 10],
+                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => [6, 7, 8, 9, 10] }
     return valid_configs
   end
 

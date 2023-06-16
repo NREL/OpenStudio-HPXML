@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>222161f0-8825-4c6f-b185-b9afd1693638</version_id>
-  <version_modified>2023-06-15T18:09:12Z</version_modified>
+  <version_id>96f8a5ff-b21c-4b4e-82f9-46ba8b95d436</version_id>
+  <version_modified>2023-06-16T19:42:43Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -247,12 +247,6 @@
       <checksum>45A026F1</checksum>
     </file>
     <file>
-      <filename>g_functions/g-function_library_1.0/zoned_rectangle_5m_v1.0.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6A4C47AD</checksum>
-    </file>
-    <file>
       <filename>g_functions/rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -292,13 +286,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BBE2E750</checksum>
+      <checksum>696216E6</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AA7E448C</checksum>
+      <checksum>7DD8A83B</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,13 +322,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4D5F1922</checksum>
+      <checksum>C338637B</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7613E200</checksum>
+      <checksum>AC78993E</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
