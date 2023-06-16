@@ -1415,13 +1415,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationSingle
-    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationLine
-    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationLConfig
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationRectangle
-    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationUConfig
-    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationl2Config
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle
+    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationL
+    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationU
+    geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationLopsidedU
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Borefield Configuration')

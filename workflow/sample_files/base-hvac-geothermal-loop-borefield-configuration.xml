@@ -358,7 +358,7 @@
                 <Count>5</Count>
               </BoreholesOrTrenches>
               <extension>
-                <BorefieldConfiguration>l-config</BorefieldConfiguration>
+                <BorefieldConfiguration>L</BorefieldConfiguration>
               </extension>
             </GeothermalLoop>
           </HVACPlant>
