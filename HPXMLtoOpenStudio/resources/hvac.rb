@@ -503,7 +503,7 @@ class HVAC
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
       boiler_curve_coeff = [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723]
       var_plr = { name: 'part_load_ratio', min: 0.2, max: 1.0, values: [], sample_low: 0.1, sample_high: 1.0, sample_step: 0.1 }
-      var_t_water = { name: 't_water', min: 30.0, max: 85.0, values: [], sample_low: 20.0, sample_high: 85.0, sample_step: 5.0 }
+      var_t_water = { name: 't_water', min: 30.0, max: 85.0, values: [], sample_low: 30.0, sample_high: 85.0, sample_step: 5.0 }
       boiler_independent_vars, boiler_output_values = set_up_table_lookup_variables([var_plr, var_t_water], 'biquadratic', boiler_curve_coeff)
       boiler_eff_curve = create_table_lookup(model, 'CondensingBoilerEff', boiler_independent_vars, boiler_output_values)
     else
@@ -511,7 +511,7 @@ class HVAC
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
       boiler_curve_coeff = [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05]
       var_plr = { name: 'part_load_ratio', min: 0.1, max: 1.0, values: [], sample_low: 0.1, sample_high: 1.0, sample_step: 0.1 }
-      var_t_water = { name: 't_water', min: 20.0, max: 85.0, values: [], sample_low: 20.0, sample_high: 80.0, sample_step: 5.0 }
+      var_t_water = { name: 't_water', min: 20.0, max: 80.0, values: [], sample_low: 20.0, sample_high: 80.0, sample_step: 5.0 }
       boiler_independent_vars, boiler_output_values = set_up_table_lookup_variables([var_plr, var_t_water], 'bicubic', boiler_curve_coeff)
       boiler_eff_curve = create_table_lookup(model, 'NonCondensingBoilerEff', boiler_independent_vars, boiler_output_values)
     end
