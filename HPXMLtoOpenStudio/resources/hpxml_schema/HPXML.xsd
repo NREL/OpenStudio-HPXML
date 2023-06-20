@@ -8695,7 +8695,6 @@
 			<xs:enumeration value="crawlspace - unvented"/>
 			<xs:enumeration value="crawlspace - vented"/>
 			<xs:enumeration value="manufactured home belly"/>
-			<xs:enumeration value="manufactured home belly"/>
 			<xs:enumeration value="garage"/>
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>

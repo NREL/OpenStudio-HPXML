@@ -187,6 +187,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                                'Expected 0 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting]'],
+                            'manufactured-home-reference-duct' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
+                                                                   'A location is specified as "manufactured home belly" but no surfaces were found adjacent to the "manufactured home underbelly" space type.'],
+                            'manufactured-home-reference-water-heater' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
+                                                                           'A location is specified as "manufactured home belly" but no surfaces were found adjacent to the "manufactured home underbelly" space type.'],
+                            'manufactured-home-reference-floor' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
+                                                                    'There must be at least one ceiling adjacent to "crawlspace - vented".'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
                             'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "Ducts2"]'],
@@ -200,7 +206,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem1"]'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
-                            'water-heater-location-other' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeatingSystem1\"]"],
+                            'water-heater-location-other' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'manufactured home belly' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
@@ -527,6 +533,20 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         int_cfl = hpxml.lighting_groups.find { |lg| lg.location == HPXML::LocationInterior && lg.lighting_type == HPXML::LightingTypeCFL }
         int_cfl.fraction_of_units_in_location = 0.8
+      elsif ['manufactured-home-reference-duct'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationManufacturedHomeBelly
+      elsif ['manufactured-home-reference-water-heater'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.water_heating_systems[0].location = HPXML::LocationManufacturedHomeBelly
+      elsif ['manufactured-home-reference-floor'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-foundation-vented-crawlspace.xml'))
+        hpxml.floors.each do |floor|
+          if floor.exterior_adjacent_to == HPXML::LocationCrawlspaceVented
+            floor.exterior_adjacent_to = HPXML::LocationManufacturedHomeUnderBelly
+            break
+          end
+        end
       elsif ['missing-cfis-supplemental-fan'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-cfis.xml'))
         hpxml.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan

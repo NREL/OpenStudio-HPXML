@@ -2416,4 +2416,11 @@
     </sch:rule>
   </sch:pattern>
 
+  <sch:pattern>
+    <sch:title>[BuildingTypeCheck=ManufacturedHomeBelly]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Systems/*/*[h:Location="manufactured home belly"] | h:Systems/*/*/*/*/*[h:DuctLocation="manufactured home belly"] | h:Enclosure[*/*[h:InteriorAdjacentTo="manufactured home underbelly" or h:ExteriorAdjacentTo="manufactured home underbelly"]]]'>
+      <sch:assert role='ERROR' test='h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType[text()="manufactured home"] or not(h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType)'>There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
 </sch:schema>
