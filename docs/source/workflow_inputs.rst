@@ -2049,7 +2049,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``LoopConfiguration``                     string                         See [#]_         Yes
   ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_
   ``BoreholesOrTrenches/Count``             integer                        > 0              No [#]_   autosized [#]_
-  ``BoreholesOrTrenches/Length``            double            ft           > 0              No        autosized [#]_
+  ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
@@ -2068,6 +2068,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **U**: 7, 9, or 10
          | - **Lopsided U**: 6, 7, 8, 9, or 10
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
+  .. [#] BoreholesOrTrenches/Length must be between 79 ft and 1,259 ft.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
