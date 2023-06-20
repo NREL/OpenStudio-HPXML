@@ -1326,7 +1326,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
          | - **none**: "living space"
          | - **air**: supply duct location with the largest area, otherwise "living space"
