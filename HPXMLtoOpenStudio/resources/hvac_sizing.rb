@@ -1939,8 +1939,7 @@ class HVACSizing
 
     # spacing_to_depth_ratio = bore_spacing / bore_depth
 
-    lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
-    gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
     hvac_sizing_values.GSHP_Loop_flow = loop_flow
     hvac_sizing_values.GSHP_Bore_Depth = bore_depth
@@ -2675,26 +2674,73 @@ class HVACSizing
                              HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
                              HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }[bore_config]
     g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
-    g_functions = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
+    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
 
-    _b = UnitConversions.convert(bore_spacing, 'ft', 'm')
-    _h = UnitConversions.convert(bore_depth, 'ft', 'm')
-    _r_b = UnitConversions.convert(bore_diameter / 2.0, 'in', 'm')
+    actuals = { 'b' => UnitConversions.convert(bore_spacing, 'ft', 'm'),
+                'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
+                'rb' => UnitConversions.convert(bore_diameter / 2.0, 'in', 'm') }
+    actuals['b_over_h'] = actuals['b'] / actuals['h']
 
-    # FIXME: find "closest" or "interpolated" b_h_rb instead of hardcoding below
-    b = 5 # m
-    h = 192 # m
-    rb = 0.08 # m
-    b_h_rb = "#{b}._#{h}._#{rb}"
+    g_library = { 24 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  48 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  96 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  192 => { 'b' => 5, 'd' => 2, 'rb' => 0.08 },
+                  384 => { 'b' => 5, 'd' => 2, 'rb' => 0.0875 } }
+    g_library.each do |h, b_d_rb|
+      g_library[h]['b_over_h'] = Float(b_d_rb['b']) / h
+      g_library[h]['rb_over_h'] = Float(b_d_rb['rb']) / h
+    end
 
-    g_functions.each do |_key_1, values_1|
+    [[24, 48], [48, 96], [96, 192], [192, 384]].each do |h1, h2|
+      next unless actuals['h'] >= h1 && actuals['h'] < h2
+
+      pt1 = g_library[h1]
+      pt2 = g_library[h2]
+
+      # linear interpolation on "g" values
+      logtimes = []
+      gs = []
+      [h1, h2].each do |h|
+        b_d_rb = g_library[h]
+        b = b_d_rb['b']
+        rb = b_d_rb['rb']
+        b_h_rb = "#{b}._#{h}._#{rb}"
+
+        logtime, g = get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+        logtimes << logtime
+        gs << g
+      end
+      g_functions = gs[0].zip(gs[1]).map { |v| linear_interpolate(actuals['b_over_h'], pt1['b_over_h'], v[0], pt2['b_over_h'], v[1]) }
+
+      # linear interpolation on rb/h for correction factor
+      actuals['rb_over_h'] = linear_interpolate(actuals['b_over_h'], pt1['b_over_h'], pt1['rb_over_h'], pt2['b_over_h'], pt2['rb_over_h'])
+      rb = actuals['rb_over_h'] * actuals['h']
+      rb_actual_over_rb = actuals['rb'] / rb
+      correction_factor = Math.log(rb_actual_over_rb)
+      g_functions = g_functions.map { |v| v - correction_factor }
+
+      return logtimes[0], g_functions
+    end
+
+    fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
+  end
+
+  def self.linear_interpolate(x, x1, y1, x2, y2)
+    y = y1 + (x - x1) * ((y2 - y1) / (x2 - x1))
+    return y
+  end
+
+  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+    g_functions_json.each do |_key_1, values_1|
       if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
           HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
         bore_locations = values_1[:bore_locations]
         next if bore_locations.size != num_bore_holes
 
-        gfnc_coeff = values_1[:g][b_h_rb.to_sym].map { |v| Float(v) }
-        return gfnc_coeff
+        logtime = values_1[:logtime].map { |v| Float(v) }
+        g = values_1[:g][b_h_rb.to_sym].map { |v| Float(v) }
+
+        return logtime, g
       elsif [HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle,
              HPXML::GeothermalLoopBorefieldConfigurationLopsidedU,
              HPXML::GeothermalLoopBorefieldConfigurationU].include?(bore_config)
@@ -2702,14 +2748,14 @@ class HVACSizing
           bore_locations = values_2[:bore_locations]
           next if bore_locations.size != num_bore_holes
 
-          gfnc_coeff = values_2[:g][b_h_rb.to_sym].map { |v| Float(v) }
-          puts gfnc_coeff
-          return gfnc_coeff
+          logtime = values_2[:logtime].map { |v| Float(v) }
+          g = values_2[:g][b_h_rb.to_sym].map { |v| Float(v) }
+
+          return logtime, g
         end
       end
     end
-
-    fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
+    fail 'Could not find TODO.'
   end
 
   def self.calculate_average_r_value(surfaces)
