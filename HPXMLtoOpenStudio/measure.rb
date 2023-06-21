@@ -638,6 +638,8 @@ class OSModel
             surface.setWindExposure('NoWind')
           end
         end
+        # This doesn't seem to have any effect on results, even though it is being applied in the model
+        # surface.setWindExposure('NoWind') if @apply_ashrae140_assumptions
       end
 
       # Apply construction
@@ -2655,7 +2657,8 @@ class OSModel
   def self.set_foundation_and_walls_top()
     @foundation_top = 0
     @hpxml.floors.each do |floor|
-      if floor.is_floor && floor.is_exterior
+      # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
+      if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
         @foundation_top = 2.0
       end
     end
