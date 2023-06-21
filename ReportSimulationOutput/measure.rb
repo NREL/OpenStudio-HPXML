@@ -931,6 +931,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_kwh = nil
         batt_kw = nil
         batt_roundtrip_eff = nil
+        batt_loss = nil
 
         @hpxml.batteries.each do |battery|
           @model.getElectricLoadCenterDistributions.each do |elcd|
@@ -943,11 +944,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           batt_kw = battery.rated_power_output
           batt_roundtrip_eff = battery.round_trip_efficiency
 
-          @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |liion|
-            battery_id = liion.additionalProperties.getFeatureAsString('HPXML_ID')
+          @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+            battery_id = elcs.additionalProperties.getFeatureAsString('HPXML_ID')
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
 
-            batt_kwh = liion.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
+            batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
+            batt_loss = "#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar"
           end
         end
 
@@ -962,9 +964,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
         elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        batt_loss = get_report_variable_data_timeseries(['EMS'], [batt_loss], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
         elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        crit_load = elec.zip(elec_prod).map { |x, y| x + y }
+        crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
 
         resilience_timeseries = []
         n_timesteps = crit_load.size
@@ -1845,7 +1848,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
-	  # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
+      # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
       return i / Float(ts_per_hr) if batt_soc_kwh <= 0
 
       if load_kw < 0 # load is met
