@@ -1846,14 +1846,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
     (0...n_timesteps).each do |i|
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
-      load_kw = crit_load[t] #FIXME: This has the battery charging/discharging taken out of it, but does not account for roundtrip efficiency (because it is handled through EMS)
+      load_kw = crit_load[t] # FIXME: This has the battery charging/discharging taken out of it, but does not account for roundtrip efficiency (because it is handled through EMS)
 
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
       return i / Float(ts_per_hr) if batt_soc_kwh <= 0
 
-      #if init_time_step == 1570
+      # if init_time_step == 1570
       #  puts("init__soc_kwh = #{batt_soc_kwh}")
-      #end
+      # end
 
       if load_kw < 0 # load is met with PV
         if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
@@ -1872,11 +1872,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
 
-      #if init_time_step == 1570
+      # if init_time_step == 1570
       #  puts("Timestep = #{t}")
       #  puts("crit_load = #{load_kw}")
       #  puts("batt_soc_kwh = #{batt_soc_kwh}")
-      #end
+      # end
 
       if load_kw > 0 # failed to meet load in this time step
         return i / Float(ts_per_hr)
