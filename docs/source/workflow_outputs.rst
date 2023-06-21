@@ -515,7 +515,7 @@ Utility Bill Outputs
 
 OpenStudio-HPXML can optionally generate utility bill output files (annual, monthly, or both).
 The annual utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
-The monthly utility bills output file is called ``results_bills_monthly.csv`` (or ``results_bills_monthly.json`` or ``results_bills_monthly.msgpack``) and location in the run directory.
+The monthly utility bills output file is called ``results_bills_monthly.csv`` (or ``results_bills_monthly.json`` or ``results_bills_monthly.msgpack``) and located in the run directory.
 
 Annual Bills by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~

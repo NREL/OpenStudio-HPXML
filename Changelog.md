@@ -1,7 +1,9 @@
 ## OpenStudio-HPXML v1.7.0
 __New Features__
+- ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 
 __Bugfixes__
+- Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 
 ## OpenStudio-HPXML v1.6.0
 
@@ -25,7 +27,6 @@ __New Features__
   - Msgpack outputs are no longer rounded (since there is no file size penalty to storing full precision).
   - Annual emissions and utility bills now include all fuel/end uses, even if zero.
   - ReportSimulationOutput measure: Allows disabling individual annual output sections.
-  - ReportUtilityBills measure: New optional arguments for reporting annual and monthly utility bill outputs. Both default to true.
 - **Breaking change**: Deprecates `OccupancyCalculationType` ("asset" or "operational").
    - If `NumberofResidents` not provided, an *asset* calculation is performed assuming standard occupancy per ANSI/RESNET/ICC 301.
    - If `NumberofResidents` is provided, an *operational* calculation is performed using a relationship between #Bedrooms and #Occupants from RECS 2015.
@@ -73,7 +74,6 @@ __Bugfixes__
 - Ensure that ductless HVAC systems do not have a non-zero airflow defect ratio specified.
 - Fixes possible "A neighbor building has an azimuth (XX) not equal to the azimuth of any wall" for SFA/MF units with neighboring buildings for shade.
 - Fixes reported loads when no/partial HVAC system (e.g., room air conditioner that meets 30% of the cooling load).
-- Fixes error for calculating zero utility bill fixed costs for simulations with abbreviated run periods.
 
 ## OpenStudio-HPXML v1.5.1
 
