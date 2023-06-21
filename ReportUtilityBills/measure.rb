@@ -37,6 +37,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     format_chs << 'csv'
     format_chs << 'json'
     format_chs << 'msgpack'
+    # format_chs << 'csv_dview': # TODO: support this
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('output_format', format_chs, false)
     arg.setDisplayName('Output Format')
     arg.setDescription('The file format of the annual (and timeseries, if requested) outputs.')
@@ -53,6 +54,25 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDisplayName('Generate Monthly Utility Bills')
     arg.setDescription('Generates monthly utility bills.')
     arg.setDefaultValue(true)
+    args << arg
+
+    timestamp_chs = OpenStudio::StringVector.new
+    timestamp_chs << 'start'
+    timestamp_chs << 'end'
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('monthly_timestamp_convention', timestamp_chs, false)
+    arg.setDisplayName('Generate Monthly Output: Timestamp Convention')
+    arg.setDescription('Determines whether monthly timestamps use the start-of-period or end-of-period convention.')
+    arg.setDefaultValue('start')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
+    arg.setDisplayName('Annual Output File Name')
+    arg.setDescription("If not provided, defaults to 'results_bills.csv' (or 'results_bills.json' or 'results_bills.msgpack').")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('monthly_output_file_name', false)
+    arg.setDisplayName('Monthly Output File Name')
+    arg.setDescription("If not provided, defaults to 'results_bills_monthly.csv' (or 'results_bills_monthly.json' or 'results_bills_monthly.msgpack').")
     args << arg
 
     return args
@@ -139,6 +159,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return result
     end
 
+    args = get_arguments(runner, arguments(model), user_arguments)
+
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
@@ -178,6 +200,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    if args[:include_monthly_bills]
+      # force a eplusout_monthly.msgpack from which we get timestamps
+      result << OpenStudio::IdfObject.load('Output:Variable,*,Site Outdoor Air Drybulb Temperature,monthly;').get
+    end
+
     return result.uniq
   end
 
@@ -210,12 +237,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
 
-    if not File.exist? File.join(output_dir, 'eplusout.msgpack')
-      runner.registerError('Cannot find eplusout.msgpack.')
-      return false
-    end
-    @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack'), mode: 'rb'))
-
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
@@ -223,18 +244,38 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     return true if @hpxml.header.utility_bill_scenarios.empty?
 
+    if not File.exist? File.join(output_dir, 'eplusout.msgpack')
+      runner.registerError('Cannot find eplusout.msgpack.')
+      return false
+    end
+    @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack'), mode: 'rb'))
+    msgpack_monthly_path = File.join(output_dir, 'eplusout_monthly.msgpack')
+    if File.exist? msgpack_monthly_path
+      @msgpackDataMonthly = MessagePack.unpack(File.read(msgpack_monthly_path, mode: 'rb'))
+    end
+
     warnings = check_for_return_type_warnings()
     if register_warnings(runner, warnings)
       return true
     end
 
     # Set paths
-    output_path = File.join(output_dir, "results_bills.#{args[:output_format]}")
-    FileUtils.rm(output_path) if File.exist?(output_path)
+    if not args[:annual_output_file_name].nil?
+      annual_output_path = File.join(output_dir, args[:annual_output_file_name])
+    else
+      annual_output_path = File.join(output_dir, "results_bills.#{args[:output_format]}")
+    end
+    if not args[:monthly_output_file_name].nil?
+      monthly_output_path = File.join(output_dir, args[:monthly_output_file_name])
+    else
+      monthly_output_path = File.join(output_dir, "results_bills_monthly.#{args[:output_format]}")
+    end
 
-    monthly_output_path = File.join(output_dir, "results_bills_monthly.#{args[:output_format]}")
-    FileUtils.rm(monthly_output_path) if File.exist?(monthly_output_path)
+    if args[:include_monthly_bills]
+      @timestamps = get_timestamps(@msgpackDataMonthly, @hpxml, args)
+    end
 
+    monthly_data = []
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
       warnings = check_for_next_type_warnings(utility_bill_scenario)
       if register_warnings(runner, warnings)
@@ -259,15 +300,46 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       # Calculate utility bills
       get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, @hpxml.header)
 
-      # Write/report results
-      report_runperiod_output_results(runner, args, utility_bills, output_path, utility_bill_scenario.name)
-      report_runperiod_monthly_output_results(runner, args, utility_bills, monthly_output_path, utility_bill_scenario.name)
+      # Write/report runperiod results
+      report_runperiod_output_results(runner, args, utility_bills, annual_output_path, utility_bill_scenario.name)
+
+      # Get monthly results
+      get_monthly_output_results(runner, args, utility_bills, utility_bill_scenario.name, monthly_data)
     end
+
+    # Write/report monthly results
+    report_monthly_output_results(runner, args, monthly_data, monthly_output_path)
 
     return true
   end
 
-  def report_runperiod_output_results(runner, args, utility_bills, output_path, bill_scenario_name)
+  def get_timestamps(msgpackData, hpxml, args)
+    return if msgpackData.nil?
+
+    ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
+
+    timestamps = []
+    year = hpxml.header.sim_calendar_year
+    ep_timestamps.each do |ep_timestamp|
+      month_day, hour_minute = ep_timestamp.split(' ')
+      month, day = month_day.split('/').map(&:to_i)
+      hour, minute, _ = hour_minute.split(':').map(&:to_i)
+
+      # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
+      if args[:monthly_timestamp_convention] == 'start'
+        ts_offset = Constants.NumDaysInMonths(year)[month - 1] * 60 * 60 * 24 # seconds
+      end
+
+      ts = Time.utc(year, month, day, hour, minute)
+      ts -= ts_offset unless ts_offset.nil?
+
+      timestamps << ts.iso8601.delete('Z')
+    end
+
+    return timestamps
+  end
+
+  def report_runperiod_output_results(runner, args, utility_bills, annual_output_path, bill_scenario_name)
     line_break = nil
 
     results_out = []
@@ -285,7 +357,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     if ['csv'].include? args[:output_format]
-      CSV.open(output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
+      CSV.open(annual_output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif ['json', 'msgpack'].include? args[:output_format]
       h = {}
       results_out.each do |out|
@@ -302,12 +374,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       if args[:output_format] == 'json'
         require 'json'
-        File.open(output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
+        File.open(annual_output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
       elsif args[:output_format] == 'msgpack'
-        File.open(output_path, 'a') { |json| h.to_msgpack(json) }
+        File.open(annual_output_path, 'a') { |json| h.to_msgpack(json) }
       end
     end
-    runner.registerInfo("Wrote annual bills output to #{output_path}.")
+    runner.registerInfo("Wrote annual bills output to #{annual_output_path}.")
 
     results_out.each do |name, value|
       next if name.nil? || value.nil?
@@ -319,67 +391,57 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  def report_runperiod_monthly_output_results(runner, args, utility_bills, output_path, bill_scenario_name)
-    line_break = nil
-
-    monthly_results = {}
-    (1..12).to_a.each do |month|
-      monthly_results["#{month}"] = {}
-      monthly_results["#{month}"]["#{bill_scenario_name}: Total (USD)"] = 0.0
-    end
+  def get_monthly_output_results(args, utility_bills, bill_scenario_name, monthly_data)
+    monthly_data << ["#{bill_scenario_name}: Total", 'USD'] + ([0.0] * 12)
+    total_ix = monthly_results.size - 1
 
     if args[:include_monthly_bills]
       utility_bills.each do |fuel_type, bill|
-        bill.monthly_fixed_charge.each_with_index do |monthly_fixed_charge, month|
-          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)"] = monthly_fixed_charge.round(2)
-        end
-        bill.monthly_energy_charge.each_with_index do |monthly_energy_charge, month|
-          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Energy (USD)"] = monthly_energy_charge.round(2)
-        end
-        bill.monthly_production_credit.each_with_index do |monthly_production_credit, month|
-          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)"] = monthly_production_credit.round(2) if [FT::Elec].include?(fuel_type)
-        end
-        bill.monthly_total.each_with_index do |monthly_total, month|
-          monthly_results["#{month + 1}"]["#{bill_scenario_name}: Total (USD)"] += monthly_total.round(2)
-          monthly_results["#{month + 1}"]["#{bill_scenario_name}: #{fuel_type}: Total (USD)"] = monthly_total.round(2)
-        end
+        monthly_data[total_ix][2..-1] = monthly_data[total_ix][2..-1].zip(bill.monthly_total).map { |x, y| x + y }
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Fixed", 'USD'] + bill.monthly_fixed_charge
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Energy", 'USD'] + bill.monthly_energy_charge
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: PV Credit", 'USD'] + bill.monthly_production_credit if [FT::Elec].include?(fuel_type)
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Total", 'USD'] + bill.monthly_total
       end
     end
+  end
 
-    results_out = [['Month']]
-    monthly_results.each do |row_name, results|
-      results_out << [row_name]
-      results.each do |col_name, val|
-        results_out[0] << col_name if !results_out[0].include?(col_name)
-        results_out[-1] << val
-      end
-    end
-    results_out << [line_break]
+  def report_monthly_output_results(runner, args, monthly_data, monthly_output_path)
+    return if @timestamps.nil?
+
+    # Initial output data w/ Time column(s)
+    data = ['Time', nil] + @timestamps
+
+    return if (monthly_data.size) == 0
+
+    fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     if ['csv'].include? args[:output_format]
-      CSV.open(output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
+      # Assemble data
+      data = data.zip(*monthly_data)
+
+      # Write file
+      CSV.open(monthly_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << elem } }
     elsif ['json', 'msgpack'].include? args[:output_format]
       h = {}
-      results_out.each do |out|
-        next if out == [line_break]
+      h['Time'] = data[2..-1]
 
-        if out[0].include? ':'
-          grp, name = out[0].split(':', 2)
+      [monthly_data].each do |d|
+        d.each do |o|
+          grp, name = o[0].split(':', 2)
           h[grp] = {} if h[grp].nil?
-          h[grp][name.strip] = out[1]
-        else
-          h[out[0]] = out[1]
+          h[grp]["#{name.strip} (#{o[1]})"] = o[2..-1]
         end
       end
 
       if args[:output_format] == 'json'
         require 'json'
-        File.open(output_path, 'a') { |json| json.write(JSON.pretty_generate(h)) }
+        File.open(monthly_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
       elsif args[:output_format] == 'msgpack'
-        File.open(output_path, 'a') { |json| h.to_msgpack(json) }
+        File.open(monthly_output_path, 'w') { |json| h.to_msgpack(json) }
       end
     end
-    runner.registerInfo("Wrote monthly bills output to #{output_path}.")
+    runner.registerInfo("Wrote monthly bills output to #{monthly_output_path}.")
   end
 
   def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems)

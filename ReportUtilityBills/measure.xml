@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>1a243b7e-a9cc-44da-a311-12f6623c4e70</version_id>
-  <version_modified>2023-05-24T22:56:20Z</version_modified>
+  <version_id>b0db73ec-1f24-4cb8-9205-99205a54305b</version_id>
+  <version_modified>2023-06-21T18:24:51Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -72,6 +72,41 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>monthly_timestamp_convention</name>
+      <display_name>Generate Monthly Output: Timestamp Convention</display_name>
+      <description>Determines whether monthly timestamps use the start-of-period or end-of-period convention.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>start</default_value>
+      <choices>
+        <choice>
+          <value>start</value>
+          <display_name>start</display_name>
+        </choice>
+        <choice>
+          <value>end</value>
+          <display_name>end</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>annual_output_file_name</name>
+      <display_name>Annual Output File Name</display_name>
+      <description>If not provided, defaults to 'results_bills.csv' (or 'results_bills.json' or 'results_bills.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>monthly_output_file_name</name>
+      <display_name>Monthly Output File Name</display_name>
+      <description>If not provided, defaults to 'results_bills_monthly.csv' (or 'results_bills_monthly.json' or 'results_bills_monthly.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
   </arguments>
   <outputs />
   <provenances />
@@ -95,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D2B3E9AF</checksum>
+      <checksum>B67364BA</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -276,12 +311,6 @@
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
       <checksum>ED0D6618</checksum>
-    </file>
-    <file>
-      <filename>results_bills_monthly.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3388B83D</checksum>
     </file>
     <file>
       <filename>utility_bills_test.rb</filename>
