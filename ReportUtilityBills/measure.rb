@@ -304,7 +304,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       report_runperiod_output_results(runner, args, utility_bills, annual_output_path, utility_bill_scenario.name)
 
       # Get monthly results
-      get_monthly_output_results(runner, args, utility_bills, utility_bill_scenario.name, monthly_data)
+      get_monthly_output_results(args, utility_bills, utility_bill_scenario.name, monthly_data)
     end
 
     # Write/report monthly results
@@ -393,15 +393,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   def get_monthly_output_results(args, utility_bills, bill_scenario_name, monthly_data)
     monthly_data << ["#{bill_scenario_name}: Total", 'USD'] + ([0.0] * 12)
-    total_ix = monthly_results.size - 1
+    total_ix = monthly_data.size - 1
 
     if args[:include_monthly_bills]
       utility_bills.each do |fuel_type, bill|
-        monthly_data[total_ix][2..-1] = monthly_data[total_ix][2..-1].zip(bill.monthly_total).map { |x, y| x + y }
-        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Fixed", 'USD'] + bill.monthly_fixed_charge
-        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Energy", 'USD'] + bill.monthly_energy_charge
-        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: PV Credit", 'USD'] + bill.monthly_production_credit if [FT::Elec].include?(fuel_type)
-        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Total", 'USD'] + bill.monthly_total
+        monthly_data[total_ix][2..-1] = monthly_data[total_ix][2..-1].zip(bill.monthly_total.map { |v| v.round(2) }).map { |x, y| x + y }
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Fixed", 'USD'] + bill.monthly_fixed_charge.map { |v| v.round(2) }
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Energy", 'USD'] + bill.monthly_energy_charge.map { |v| v.round(2) }
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: PV Credit", 'USD'] + bill.monthly_production_credit.map { |v| v.round(2) } if [FT::Elec].include?(fuel_type)
+        monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Total", 'USD'] + bill.monthly_total.map { |v| v.round(2) }
       end
     end
   end
