@@ -2540,8 +2540,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 4,
-    "heat_pump_heating_capacity": 10000,
-    "heat_pump_heating_capacity_17_f": 5900
+    "heat_pump_heating_capacity": 10000
   },
   "sample_files/base-hvac-onoff-thermostat-deadband-room-air-conditioner.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
