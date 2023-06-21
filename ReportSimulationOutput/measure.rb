@@ -1851,10 +1851,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
       return i / Float(ts_per_hr) if batt_soc_kwh <= 0
 
-      # if init_time_step == 1570
-      #  puts("init__soc_kwh = #{batt_soc_kwh}")
-      # end
-
       if load_kw < 0 # load is met with PV
         if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
           batt_soc_kwh += [
@@ -1871,12 +1867,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           load_kw = 0
         end
       end
-
-      # if init_time_step == 1570
-      #  puts("Timestep = #{t}")
-      #  puts("crit_load = #{load_kw}")
-      #  puts("batt_soc_kwh = #{batt_soc_kwh}")
-      # end
 
       if load_kw > 0 # failed to meet load in this time step
         return i / Float(ts_per_hr)
