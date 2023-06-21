@@ -94,6 +94,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @fuels_pv_none_detailed = _load_timeseries(0, true)
     @fuels_pv_1kw_detailed = _load_timeseries(1, true)
     @fuels_pv_10kw_detailed = _load_timeseries(10, true)
+
+    @monthly_data = []
   end
 
   def teardown
@@ -115,7 +117,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_pv_1kW_net_metering_user_excess_rate
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
     @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
-      actual_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+      actual_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario, @monthly_data)
       @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
       expected_bills = _get_expected_bills(@expected_bills)
       _check_bills(expected_bills, actual_bills)
@@ -1113,12 +1115,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     return fuels
   end
 
-  def _bill_calcs(fuels, header, pv_systems, utility_bill_scenario)
+  def _bill_calcs(fuels, header, pv_systems, utility_bill_scenario, monthly_data)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    args = {}
-    args[:output_format] = 'csv'
-    args[:include_annual_bills] = true
-    args[:include_monthly_bills] = true
+    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true }
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
     @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems)
@@ -1135,12 +1134,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_for_runner_registered_values(runner, nil, actual_bills)
 
     # Monthly
-    monthly_output_path = File.join(File.dirname(__FILE__), "results_bills_monthly.#{args[:output_format]}")
-    @measure.report_runperiod_monthly_output_results(runner, args, utility_bills, monthly_output_path, utility_bill_scenario.name)
+    @measure.get_monthly_output_results(args, utility_bills, utility_bill_scenario.name, monthly_data)
 
     # Check written values exist and are registered
-    assert(File.exist?(@bills_monthly_csv))
-    actual_monthly_bills = _get_actual_monthly_bills(@bills_monthly_csv)
+    actual_monthly_bills = _get_actual_monthly_bills(monthly_data)
 
     # Check sum of monthly equal to annual
     actual_bills.keys.each do |bill|
@@ -1226,17 +1223,15 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _get_actual_monthly_bills(bills_monthly_csv)
+  def _get_actual_monthly_bills(monthly_data)
     actual_monthly_bills = {}
-    CSV.foreach(bills_monthly_csv, headers: true) do |row|
-      row.each do |k, v|
-        next if k == 'Month' || v.nil?
 
-        if !actual_monthly_bills.keys.include?(k)
-          actual_monthly_bills[k] = []
-        end
-        actual_monthly_bills[k] << Float(v)
-      end
+    monthly_data.each do |col|
+      k = col[0]
+      units = col[1]
+      next if k == 'Time'
+
+      actual_monthly_bills[k + " (#{units})"] = col[2..-1]
     end
 
     return actual_monthly_bills
