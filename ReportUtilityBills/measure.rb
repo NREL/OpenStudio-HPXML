@@ -159,8 +159,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return result
     end
 
-    args = get_arguments(runner, arguments(model), user_arguments)
-
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
@@ -191,18 +189,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
         next if is_production && @hpxml.pv_systems.empty?
 
-        if fuel_type == FT::Elec
-          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get if @hpxml.header.utility_bill_scenarios.has_simple_electric_rates
-          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get if @hpxml.header.utility_bill_scenarios.has_detailed_electric_rates
+        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
+        if fuel_type == FT::Elec && @hpxml.header.utility_bill_scenarios.has_detailed_electric_rates
+          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get
         else
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         end
       end
-    end
-
-    if args[:include_monthly_bills]
-      # force a eplusout_monthly.msgpack from which we get timestamps
-      result << OpenStudio::IdfObject.load('Output:Variable,*,Site Outdoor Air Drybulb Temperature,monthly;').get
     end
 
     return result.uniq
@@ -249,10 +242,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return false
     end
     @msgpackData = MessagePack.unpack(File.read(File.join(output_dir, 'eplusout.msgpack'), mode: 'rb'))
-    msgpack_monthly_path = File.join(output_dir, 'eplusout_monthly.msgpack')
-    if File.exist? msgpack_monthly_path
-      @msgpackDataMonthly = MessagePack.unpack(File.read(msgpack_monthly_path, mode: 'rb'))
-    end
+    # msgpack_monthly_path = File.join(output_dir, 'eplusout_monthly.msgpack')
+    # if File.exist? msgpack_monthly_path
+    # @msgpackDataMonthly = MessagePack.unpack(File.read(msgpack_monthly_path, mode: 'rb'))
+    # end
 
     warnings = check_for_return_type_warnings()
     if register_warnings(runner, warnings)
@@ -272,7 +265,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     if args[:include_monthly_bills]
-      @timestamps = get_timestamps(@msgpackDataMonthly, @hpxml, args)
+      @timestamps = get_timestamps(args)
     end
 
     monthly_data = []
@@ -313,13 +306,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timestamps(msgpackData, hpxml, args)
-    return if msgpackData.nil?
-
-    ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
+  def get_timestamps(args)
+    ep_timestamps = @msgpackData['MeterData']['Monthly']['Rows'].map { |r| r.keys[0] }
 
     timestamps = []
-    year = hpxml.header.sim_calendar_year
+    year = @hpxml.header.sim_calendar_year
     ep_timestamps.each do |ep_timestamp|
       month_day, hour_minute = ep_timestamp.split(' ')
       month, day = month_day.split('/').map(&:to_i)
@@ -670,9 +661,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_freq)
-    msgpack_timeseries_name = { 'timestep' => 'TimeStep',
-                                'hourly' => 'Hourly',
-                                'daily' => 'Daily',
+    msgpack_timeseries_name = { 'hourly' => 'Hourly',
                                 'monthly' => 'Monthly' }[timeseries_freq]
     begin
       data = @msgpackData['MeterData'][msgpack_timeseries_name]
