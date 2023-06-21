@@ -1685,7 +1685,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.geothermal_loops[0].loop_flow = 1
     hpxml.geothermal_loops[0].num_bore_holes = 2
     hpxml.geothermal_loops[0].bore_spacing = 3
-    hpxml.geothermal_loops[0].bore_length = 4
+    hpxml.geothermal_loops[0].bore_length = 100
     hpxml.geothermal_loops[0].bore_diameter = 5
     hpxml.geothermal_loops[0].grout_type = HPXML::GeothermalLoopGroutTypeThermallyEnhanced
     hpxml.geothermal_loops[0].grout_conductivity = 6
@@ -1695,7 +1695,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.geothermal_loops[0].bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_geothermal_loop_values(hpxml_default.geothermal_loops[0], HPXML::GeothermalLoopLoopConfigurationVertical, 1, 2, 3, 4, 5, HPXML::GeothermalLoopGroutTypeThermallyEnhanced, 6, 7, 1.0, 9, HPXML::GeothermalLoopBorefieldConfigurationRectangle)
+    _test_default_geothermal_loop_values(hpxml_default.geothermal_loops[0], HPXML::GeothermalLoopLoopConfigurationVertical, 1, 2, 3, 100, 5, HPXML::GeothermalLoopGroutTypeThermallyEnhanced, 6, 7, 1.0, 9, HPXML::GeothermalLoopBorefieldConfigurationRectangle)
 
     # Test defaults
     hpxml.geothermal_loops[0].loop_flow = nil

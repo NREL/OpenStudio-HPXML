@@ -1937,8 +1937,6 @@ class HVACSizing
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
-    # spacing_to_depth_ratio = bore_spacing / bore_depth
-
     lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
     hvac_sizing_values.GSHP_Loop_flow = loop_flow
