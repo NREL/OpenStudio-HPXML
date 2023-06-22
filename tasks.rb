@@ -1229,7 +1229,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       end
     end
   end
-  if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil')
+  if hpxml_file.include?('water-loop-heat-pump') || (hpxml_file.include?('fan-coil') && !hpxml_file.include?('fireplace-elec'))
     # Handle WLHP/ducted fan coil
     hpxml.hvac_distributions.reverse_each do |hvac_distribution|
       hvac_distribution.delete
