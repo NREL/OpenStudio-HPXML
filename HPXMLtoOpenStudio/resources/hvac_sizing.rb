@@ -2708,24 +2708,29 @@ class HVACSizing
         logtimes << logtime
         gs << g
       end
-      g_functions = gs[0].zip(gs[1]).map { |v| linear_interpolate(actuals['b_over_h'], pt1['b_over_h'], v[0], pt2['b_over_h'], v[1]) }
+      x = actuals['b_over_h']
+      x0 = pt1['b_over_h']
+      x1 = pt2['b_over_h']
+      g_functions = gs[0].zip(gs[1]).map { |v| MathTools.interp2(x, x0, x1, v[0], v[1]) }
 
       # linear interpolation on rb/h for correction factor
-      actuals['rb_over_h'] = linear_interpolate(actuals['b_over_h'], pt1['b_over_h'], pt1['rb_over_h'], pt2['b_over_h'], pt2['rb_over_h'])
+      x = actuals['b_over_h']
+      x0 = pt1['b_over_h']
+      x1 = pt2['b_over_h']
+      f0 = pt1['rb_over_h']
+      f1 = pt2['rb_over_h']
+      actuals['rb_over_h'] = MathTools.interp2(x, x0, x1, f0, f1)
       rb = actuals['rb_over_h'] * actuals['h']
       rb_actual_over_rb = actuals['rb'] / rb
       correction_factor = Math.log(rb_actual_over_rb)
       g_functions = g_functions.map { |v| v - correction_factor }
 
+      fail "Found different logtimes for '#{bore_config}' with H=#{h1} and H=#{h2}." if logtimes[0] != logtimes[1]
+
       return logtimes[0], g_functions
     end
 
     fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
-  end
-
-  def self.linear_interpolate(x, x1, y1, x2, y2)
-    y = y1 + (x - x1) * ((y2 - y1) / (x2 - x1))
-    return y
   end
 
   def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
@@ -2753,7 +2758,8 @@ class HVACSizing
         end
       end
     end
-    fail 'Could not find TODO.'
+
+    fail "Could not find g-values for '#{bore_config}' with '#{num_bore_holes}' boreholes."
   end
 
   def self.calculate_average_r_value(surfaces)
