@@ -638,8 +638,6 @@ class OSModel
             surface.setWindExposure('NoWind')
           end
         end
-        # This doesn't seem to have any effect on results, even though it is being applied in the model
-        # surface.setWindExposure('NoWind') if @apply_ashrae140_assumptions
       end
 
       # Apply construction
