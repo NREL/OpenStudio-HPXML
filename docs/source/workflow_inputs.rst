@@ -1013,7 +1013,11 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior
+    air films, and insulation installation grade. For a manufactured home belly
+    where the area of the belly wrap is different and usually greater than the
+    floor area, the AssemblyEffectiveRValue should be adjusted to account for
+    the surface area of the belly wrap and insulation.
 
 For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
 
