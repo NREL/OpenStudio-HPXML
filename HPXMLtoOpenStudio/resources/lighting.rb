@@ -38,17 +38,19 @@ class Lighting
     ext_kwh *= lighting.exterior_usage_multiplier
 
     # Calculate garage lighting kWh/yr
-    grg_kwh = kwhs_per_year[HPXML::LocationGarage]
-    if grg_kwh.nil?
-      gfa = 0 # Garage floor area
-      if spaces.keys.include? HPXML::LocationGarage
-        gfa = UnitConversions.convert(spaces[HPXML::LocationGarage].floorArea, 'm^2', 'ft^2')
-      end
+    gfa = 0 # Garage floor area
+    if spaces.keys.include? HPXML::LocationGarage
+      gfa = UnitConversions.convert(spaces[HPXML::LocationGarage].floorArea, 'm^2', 'ft^2')
+    end
+    if gfa > 0
+      grg_kwh = kwhs_per_year[HPXML::LocationGarage]
+      if grg_kwh.nil?
 
-      grg_kwh = calc_garage_energy(eri_version, gfa,
-                                   fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
-                                   fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
-                                   fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]])
+        grg_kwh = calc_garage_energy(eri_version, gfa,
+                                     fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
+                                     fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
+                                     fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]])
+      end
     end
     grg_kwh = 0.0 if grg_kwh.nil?
     grg_kwh *= lighting.garage_usage_multiplier
