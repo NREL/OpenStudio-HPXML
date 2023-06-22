@@ -21,10 +21,10 @@ class Lighting
       int_kwh = calc_interior_energy(eri_version, cfa,
                                      fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
                                      fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
-                                     fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
-                                     lighting.interior_usage_multiplier)
+                                     fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]])
     end
     int_kwh = 0.0 if int_kwh.nil?
+    int_kwh *= lighting.interior_usage_multiplier
 
     # Calculate exterior lighting kWh/yr
     ext_kwh = kwhs_per_year[HPXML::LocationExterior]
@@ -32,10 +32,10 @@ class Lighting
       ext_kwh = calc_exterior_energy(eri_version, cfa,
                                      fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]],
                                      fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
-                                     fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
-                                     lighting.exterior_usage_multiplier)
+                                     fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]])
     end
     ext_kwh = 0.0 if ext_kwh.nil?
+    ext_kwh *= lighting.exterior_usage_multiplier
 
     # Calculate garage lighting kWh/yr
     grg_kwh = kwhs_per_year[HPXML::LocationGarage]
@@ -48,10 +48,10 @@ class Lighting
       grg_kwh = calc_garage_energy(eri_version, gfa,
                                    fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
                                    fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
-                                   fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
-                                   lighting.garage_usage_multiplier)
+                                   fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]])
     end
     grg_kwh = 0.0 if grg_kwh.nil?
+    grg_kwh *= lighting.garage_usage_multiplier
 
     # Add lighting to conditioned space
     if int_kwh > 0
@@ -212,7 +212,7 @@ class Lighting
 
   private
 
-  def self.calc_interior_energy(eri_version, cfa, f_int_cfl, f_int_lfl, f_int_led, interior_usage_multiplier = 1.0)
+  def self.calc_interior_energy(eri_version, cfa, f_int_cfl, f_int_lfl, f_int_led)
     return if f_int_cfl.nil? || f_int_lfl.nil? || f_int_led.nil?
 
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
@@ -245,12 +245,10 @@ class Lighting
       int_kwh = 0.8 * ((4.0 - 3.0 * fF_int) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa)
     end
 
-    int_kwh *= interior_usage_multiplier
-
     return int_kwh
   end
 
-  def self.calc_exterior_energy(eri_version, cfa, f_ext_cfl, f_ext_lfl, f_ext_led, exterior_usage_multiplier = 1.0)
+  def self.calc_exterior_energy(eri_version, cfa, f_ext_cfl, f_ext_lfl, f_ext_led)
     return if f_ext_cfl.nil? || f_ext_lfl.nil? || f_ext_led.nil?
 
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
@@ -283,12 +281,10 @@ class Lighting
       ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fF_ext) + 0.25 * (100.0 + 0.05 * cfa) * fF_ext
     end
 
-    ext_kwh *= exterior_usage_multiplier
-
     return ext_kwh
   end
 
-  def self.calc_garage_energy(eri_version, gfa, f_grg_cfl, f_grg_lfl, f_grg_led, garage_usage_multiplier = 1.0)
+  def self.calc_garage_energy(eri_version, gfa, f_grg_cfl, f_grg_lfl, f_grg_led)
     return if f_grg_cfl.nil? || f_grg_lfl.nil? || f_grg_led.nil?
 
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
@@ -326,8 +322,6 @@ class Lighting
         grg_kwh = 100.0 * (1.0 - fF_grg) + 25.0 * fF_grg
       end
     end
-
-    grg_kwh *= garage_usage_multiplier
 
     return grg_kwh
   end
