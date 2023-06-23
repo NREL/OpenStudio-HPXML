@@ -116,12 +116,12 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_pv_1kW_net_metering_user_excess_rate
     @hpxml.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml.pv_systems.size }
-    @hpxml.header.utility_bill_scenarios.each do |utility_bill_scenario|
-      actual_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario, @monthly_data)
-      @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
-      expected_bills = _get_expected_bills(@expected_bills)
-      _check_bills(expected_bills, actual_bills)
-    end
+    utility_bill_scenario = @hpxml.header.utility_bill_scenarios[0]
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml.header, @hpxml.pv_systems, utility_bill_scenario)
+    @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
+    expected_bills = _get_expected_bills(@expected_bills)
+    _check_bills(expected_bills, actual_bills)
+    _check_monthly_bills(actual_bills, actual_monthly_bills)
   end
 
   def test_simple_pv_10kW_net_metering_user_excess_rate
@@ -227,8 +227,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-simcontrol-runperiod-1-month.xml'))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    actual_bills = _test_measure()
+    actual_bills, actual_monthly_bills = _test_measure()
     assert_operator(actual_bills['Bills: Total (USD)'], :>, 0)
+    _check_monthly_bills(actual_bills, actual_monthly_bills)
   end
 
   def test_workflow_no_bill_scenarios
@@ -1072,6 +1073,14 @@ class ReportUtilityBillsTest < MiniTest::Test
     end
   end
 
+  def _check_monthly_bills(actual_bills, actual_monthly_bills)
+    # Check sum of monthly equal to annual
+    actual_bills.keys.each do |bill|
+      assert(actual_monthly_bills.keys.include?(bill))
+      assert_in_delta(actual_bills[bill], actual_monthly_bills[bill].sum, 0.1) # within 10 cents
+    end
+  end
+
   def _load_timeseries(pv_size_kw, use_hourly_electricity)
     fuels = @measure.setup_fuel_outputs()
     columns = CSV.read(File.join(File.dirname(__FILE__), 'data.csv')).transpose
@@ -1115,7 +1124,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return fuels
   end
 
-  def _bill_calcs(fuels, header, pv_systems, utility_bill_scenario, monthly_data)
+  def _bill_calcs(fuels, header, pv_systems, utility_bill_scenario)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true }
 
@@ -1134,18 +1143,17 @@ class ReportUtilityBillsTest < MiniTest::Test
     _check_for_runner_registered_values(runner, nil, actual_bills)
 
     # Monthly
-    @measure.get_monthly_output_results(args, utility_bills, utility_bill_scenario.name, monthly_data)
+    timestamps = (1..12).to_a
+    monthly_data = []
+    monthly_output_path = File.join(File.dirname(__FILE__), "results_bills_monthly.#{args[:output_format]}")
+    @measure.get_monthly_output_results(args, utility_bills, utility_bill_scenario.name, monthly_data, header)
+    @measure.report_monthly_output_results(runner, args, timestamps, monthly_data, monthly_output_path)
 
-    # Check written values exist and are registered
-    actual_monthly_bills = _get_actual_monthly_bills(monthly_data)
+    # Check written values exist
+    assert(File.exist?(@bills_monthly_csv))
+    actual_monthly_bills = _get_actual_monthly_bills(@bills_monthly_csv)
 
-    # Check sum of monthly equal to annual
-    actual_bills.keys.each do |bill|
-      assert(actual_monthly_bills.keys.include?(bill))
-      assert_in_delta(actual_bills[bill], actual_monthly_bills[bill].sum, 0.1) # within 10 cents
-    end
-
-    return actual_bills
+    return actual_bills, actual_monthly_bills
   end
 
   def _test_measure(hpxml: nil, expected_errors: [], expected_warnings: [])
@@ -1183,6 +1191,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     File.delete(osw_path)
 
     bills_csv = File.join(File.dirname(template_osw), 'run', 'results_bills.csv')
+    bills_monthly_csv = File.join(File.dirname(template_osw), 'run', 'results_bills_monthly.csv')
 
     # Check warnings/errors
     if not expected_errors.empty?
@@ -1208,7 +1217,10 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     _check_for_runner_registered_values(nil, File.join(File.dirname(bills_csv), 'results.json'), actual_bills)
 
-    return actual_bills
+    assert(File.exist?(bills_monthly_csv))
+    actual_monthly_bills = _get_actual_monthly_bills(bills_monthly_csv)
+
+    return actual_bills, actual_monthly_bills
   end
 
   def _get_actual_bills(bills_csv)
@@ -1223,16 +1235,24 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _get_actual_monthly_bills(monthly_data)
+  def _get_actual_monthly_bills(bills_monthly_csv)
+    lines = File.readlines(bills_monthly_csv)
+    cols = lines[0].strip.split(',')
+    units = lines[1].strip.split(',')[1]
+
     actual_monthly_bills = {}
-
-    monthly_data.each do |col|
-      k = col[0]
-      units = col[1]
-      next if k == 'Time'
-
-      actual_monthly_bills[k + " (#{units})"] = col[2..-1]
+    cols.each do |col|
+      col += " (#{units})"
+      actual_monthly_bills[col] = []
     end
+
+    lines[2..-1].each do |row|
+      row.strip.split(',').each_with_index do |v, i|
+        col = cols[i] + " (#{units})"
+        actual_monthly_bills[col] << Float(v) if !col.include?('Time')
+      end
+    end
+    actual_monthly_bills.delete('Time' + " (#{units})")
 
     return actual_monthly_bills
   end
