@@ -2691,7 +2691,8 @@
     "holiday_lighting_period": "Nov 24 - Jan 6"
   },
   "sample_files/base-lighting-kwh-per-year.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "lighting_interior_usage_multiplier": 1.5
   },
   "sample_files/base-lighting-mixed.xml": {
     "parent_hpxml": "sample_files/base.xml"
