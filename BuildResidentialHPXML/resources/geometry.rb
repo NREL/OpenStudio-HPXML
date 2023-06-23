@@ -547,7 +547,7 @@ class Geometry
         HPXML::FoundationTypeCrawlspaceConditioned,
         HPXML::FoundationTypeBasementUnconditioned,
         HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeAmbient].include? foundation_type
+        HPXML::FoundationTypeAmbient].include?(foundation_type) || foundation_type.start_with?(HPXML::FoundationTypeBellyAndWing)
 
       z = -foundation_height
 
@@ -577,6 +577,8 @@ class Geometry
         foundation_space_name = HPXML::LocationBasementConditioned
       elsif foundation_type == HPXML::FoundationTypeAmbient
         foundation_space_name = HPXML::LocationOutside
+      elsif foundation_type.start_with?(HPXML::FoundationTypeBellyAndWing)
+        foundation_space_name = HPXML::LocationManufacturedHomeUnderBelly
       end
       foundation_zone.setName(foundation_space_name)
       foundation_space.setName(foundation_space_name)
@@ -2226,7 +2228,7 @@ class Geometry
 
   # Shift all spaces up by foundation height for ambient foundation
   def self.apply_ambient_foundation_shift(model, foundation_type, foundation_height)
-    if foundation_type == HPXML::FoundationTypeAmbient
+    if [HPXML::FoundationTypeAmbient, HPXML::FoundationTypeBellyAndWing].include?(foundation_type)
       m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
       m[2, 3] = -foundation_height
       model.getSpaces.each do |space|

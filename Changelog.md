@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.7.0
+
+__New Features__
+- Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
+
+__Bugfixes__
+
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__

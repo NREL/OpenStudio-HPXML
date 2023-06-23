@@ -889,6 +889,13 @@
     "parent_hpxml": "sample_files/base-bldgtype-multifamily-shared-boiler-only-baseboard.xml",
     "heating_system_type": "Shared Boiler w/ Ductless Fan Coil"
   },
+  "sample_files/base-bldgtype-multifamily-shared-boiler-only-fan-coil-fireplace-elec.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml",
+    "heating_system_fraction_heat_load_served": 0.75,
+    "heating_system_2_type": "Fireplace",
+    "heating_system_2_heating_efficiency": 1.0,
+    "heating_system_2_fraction_heat_load_served": 0.25
+  },
   "sample_files/base-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml"
   },
@@ -1464,6 +1471,30 @@
     "parent_hpxml": "sample_files/base.xml",
     "misc_plug_loads_other_annual_kwh": 1729
   },
+  "sample_files/base-foundation-belly-wing-skirt.xml": {
+    "parent_hpxml": "sample_files/base-foundation-ambient.xml",
+    "geometry_unit_type": "manufactured home",
+    "geometry_unit_aspect_ratio": 4.0,
+    "geometry_foundation_type": "BellyAndWingWithSkirt",
+    "geometry_foundation_height": 2,
+    "geometry_foundation_height_above_grade": 2,
+    "geometry_roof_pitch": "3:12",
+    "window_area_front": 140,
+    "window_area_back": 140,
+    "window_area_left": 20,
+    "window_area_right": 20,
+    "ducts_supply_location": "manufactured home belly",
+    "ducts_supply_insulation_r": 0,
+    "ducts_return_location": "manufactured home belly"
+  },
+  "sample_files/base-foundation-belly-wing-no-skirt.xml": {
+    "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
+    "geometry_foundation_type": "BellyAndWingNoSkirt"
+  },
+  "sample_files/base-foundation-belly-wing-equip-location.xml": {
+    "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
+    "water_heater_location": "manufactured home belly"
+  },
   "sample_files/base-foundation-complex.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
@@ -1652,8 +1683,7 @@
     "heating_system_2_type": "Boiler",
     "heating_system_2_fuel": "natural gas",
     "heating_system_2_heating_efficiency": 0.8,
-    "heating_system_2_heating_capacity": 60000,
-    "heating_system_2_fraction_heat_load_served": 0.25
+    "heating_system_2_heating_capacity": 60000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
@@ -2509,8 +2539,7 @@
     "heating_system_2_type": "Stove",
     "heating_system_2_fuel": "fuel oil",
     "heating_system_2_heating_efficiency": 0.6,
-    "heating_system_2_heating_capacity": 60000,
-    "heating_system_2_fraction_heat_load_served": 0.25
+    "heating_system_2_heating_capacity": 60000
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",

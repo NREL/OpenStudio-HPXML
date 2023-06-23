@@ -424,6 +424,14 @@ class Geometry
                outdoor_weight: 0.0,
                ground_weight: 1.0,
                f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+    elsif location == HPXML::LocationManufacturedHomeBelly
+      # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+      # 3.5 Manufactured House Belly Pan Temperatures
+      return { temp_min: nil,
+               indoor_weight: 1.0,
+               outdoor_weight: 0.0,
+               ground_weight: 0.0,
+               f_regain: 0.62 }
     end
     fail "Unhandled location: #{location}."
   end

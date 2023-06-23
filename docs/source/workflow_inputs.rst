@@ -796,6 +796,12 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
+If the dwelling has a manufactured home belly-and-wing foundation, whether a
+skirt is present can be optionally entered in
+``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing/SkirtPresent``.
+The default, if that value is missing, is to assume there is a skirt present and
+the floors above that foundation do not have exposure to the wind. 
+
 HPXML Roofs
 ***********
 
@@ -1000,14 +1006,18 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
 
-  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home underbelly".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior
+    air films, and insulation installation grade. For a manufactured home belly
+    where the area of the belly wrap is different and usually greater than the
+    floor area, the AssemblyEffectiveRValue should be adjusted to account for
+    the surface area of the belly wrap and insulation.
 
 For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
 
@@ -1320,7 +1330,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
          | - **none**: "living space"
          | - **air**: supply duct location with the largest area, otherwise "living space"
@@ -2202,7 +2212,7 @@ Additional information is entered in each ``Ducts``.
          Fully buried ducts have insulation that just covers the top of the ducts.
          Deeply buried ducts have insulation that continues above the top of the ducts.
          See the `Building America Solution Center <https://basc.pnnl.gov/resource-guides/ducts-buried-attic-insulation>`_ for more information.
-  .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home belly".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
@@ -3563,9 +3573,9 @@ HPXML Locations
 
 The various locations used in an HPXML file are defined as follows:
 
-  ==============================  =======================================================  =======================================  =============
+  ==============================  =======================================================  =======================================  =================
   Value                           Description                                              Temperature                              Building Type
-  ==============================  =======================================================  =======================================  =============
+  ==============================  =======================================================  =======================================  =================
   outside                         Ambient environment                                      Weather data                             Any
   ground                                                                                   EnergyPlus calculation                   Any
   living space                    Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
@@ -3577,6 +3587,8 @@ The various locations used in an HPXML file are defined as follows:
   crawlspace - unvented                                                                    EnergyPlus calculation                   Any
   crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
+  manufactured home underbelly    Underneath the belly of a manufactured home              Weather, wind exposed no skirt           Manufactured only
+  manufactured home belly         Within the belly of the manufactured home                Same as living space                     Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
   other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only
   other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of living space/outside; min of 50F  SFA/MF only
@@ -3585,7 +3597,7 @@ The various locations used in an HPXML file are defined as follows:
   exterior wall                   Ducts in exterior wall                                   Avg of living space/outside              Any
   under slab                      Ducts under slab (ground)                                EnergyPlus calculation                   Any
   roof deck                       Ducts on roof deck (outside)                             Weather data                             Any
-  ==============================  =======================================================  =======================================  =============
+  ==============================  =======================================================  =======================================  =================
 
 Validating & Debugging Errors
 -----------------------------
