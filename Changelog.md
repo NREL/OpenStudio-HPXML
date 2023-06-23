@@ -3,6 +3,7 @@ __New Features__
 - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 
 __Bugfixes__
+- Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 
 ## OpenStudio-HPXML v1.6.0
