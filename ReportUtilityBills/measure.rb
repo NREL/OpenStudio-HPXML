@@ -327,21 +327,20 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   end
 
   def report_runperiod_output_results(runner, args, utility_bills, annual_output_path, bill_scenario_name)
-    line_break = nil
+    return unless args[:include_annual_bills]
 
     results_out = []
+    results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
 
-    if args[:include_annual_bills]
-      results_out << ["#{bill_scenario_name}: Total (USD)", utility_bills.values.sum { |bill| bill.annual_total.round(2) }.round(2)]
-
-      utility_bills.each do |fuel_type, bill|
-        results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)]
-        results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)]
-        results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
-        results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)]
-      end
-      results_out << [line_break]
+    utility_bills.each do |fuel_type, bill|
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Fixed (USD)", bill.annual_fixed_charge.round(2)]
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Energy (USD)", bill.annual_energy_charge.round(2)]
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: PV Credit (USD)", bill.annual_production_credit.round(2)] if [FT::Elec].include?(fuel_type)
+      results_out << ["#{bill_scenario_name}: #{fuel_type}: Total (USD)", bill.annual_total.round(2)]
     end
+
+    line_break = nil
+    results_out << [line_break]
 
     if ['csv'].include? args[:output_format]
       CSV.open(annual_output_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
