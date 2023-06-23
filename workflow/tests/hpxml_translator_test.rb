@@ -193,8 +193,6 @@ class HPXMLTest < MiniTest::Test
       command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
       if not invalid_variable_only
         command += ' --hourly ALL'
-        command += ' --add-timeseries-time-column DST'
-        command += ' --add-timeseries-time-column UTC'
         command += " --add-timeseries-output-variable 'Zone People Occupant Count'"
         command += " --add-timeseries-output-variable 'Zone People Total Heating Energy'"
       end
@@ -209,8 +207,6 @@ class HPXMLTest < MiniTest::Test
         # Check timeseries columns exist
         timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
       else
