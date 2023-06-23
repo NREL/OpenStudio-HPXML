@@ -1,3 +1,9 @@
+## OpenStudio-HPXML v1.7.0
+__New Features__
+
+__Bugfixes__
+- Fixes lighting multipliers not being applied when kWh/yr inputs are used.
+
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
