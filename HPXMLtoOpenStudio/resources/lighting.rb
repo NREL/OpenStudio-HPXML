@@ -24,7 +24,7 @@ class Lighting
                                      fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]])
     end
     int_kwh = 0.0 if int_kwh.nil?
-    int_kwh *= lighting.interior_usage_multiplier
+    int_kwh *= lighting.interior_usage_multiplier unless lighting.interior_usage_multiplier.nil?
 
     # Calculate exterior lighting kWh/yr
     ext_kwh = kwhs_per_year[HPXML::LocationExterior]
@@ -35,7 +35,7 @@ class Lighting
                                      fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]])
     end
     ext_kwh = 0.0 if ext_kwh.nil?
-    ext_kwh *= lighting.exterior_usage_multiplier
+    ext_kwh *= lighting.exterior_usage_multiplier unless lighting.exterior_usage_multiplier.nil?
 
     # Calculate garage lighting kWh/yr
     gfa = 0 # Garage floor area
@@ -53,7 +53,7 @@ class Lighting
       end
     end
     grg_kwh = 0.0 if grg_kwh.nil?
-    grg_kwh *= lighting.garage_usage_multiplier
+    grg_kwh *= lighting.garage_usage_multiplier unless lighting.garage_usage_multiplier.nil?
 
     # Add lighting to conditioned space
     if int_kwh > 0
