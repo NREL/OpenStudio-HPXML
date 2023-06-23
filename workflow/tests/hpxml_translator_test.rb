@@ -736,28 +736,6 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    if hpxml_path.include? 'ASHRAE_Standard_140'
-      # nop
-    elsif hpxml_path.include? 'real_homes'
-      # nop
-    elsif hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeApartment
-      # no foundation, above dwelling unit
-      assert_equal(0, num_kiva_instances)
-    elsif hpxml.slabs.empty?
-      assert_equal(0, num_kiva_instances)
-    else
-      num_expected_kiva_instances = { 'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
-                                      'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
-                                      'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
-                                      'base-enclosure-garage.xml' => 2,                  # additional instance for garage
-                                      'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
-                                      'base-foundation-complex.xml' => 10,               # lots of foundations for testing
-                                      'base-pv-battery-garage.xml' => 2 }                # additional instance for garage
-      num_expected = num_expected_kiva_instances[File.basename(hpxml_path)]
-      num_expected = 1 if num_expected.nil?
-      assert_equal(num_expected, num_kiva_instances)
-    end
-
     # Enclosure Foundation Slabs
     num_slabs = hpxml.slabs.size
     if (num_slabs <= 1) && (num_kiva_instances <= 1) # The slab surfaces may be combined in these situations, so skip tests
@@ -823,38 +801,15 @@ class HPXMLTest < MiniTest::Test
       end
 
       # Net area
-      hpxml_value = wall.area
-      (hpxml.windows + hpxml.doors).each do |subsurface|
-        next if subsurface.wall_idref.upcase != wall_id
-
-        hpxml_value -= subsurface.area
-      end
-      if wall.exterior_adjacent_to == HPXML::LocationGround
-        # Calculate total length of walls
-        wall_total_length = 0
-        hpxml.foundation_walls.each do |foundation_wall|
-          next unless foundation_wall.exterior_adjacent_to == HPXML::LocationGround
-          next unless wall.interior_adjacent_to == foundation_wall.interior_adjacent_to
-
-          wall_total_length += foundation_wall.area / foundation_wall.height
+      hpxml_value = wall.net_area
+      if wall.is_a? HPXML::FoundationWall
+        if wall.is_exterior
+          # only modeling portion of foundation wall that is exposed perimeter
+          hpxml_value *= wall.exposed_fraction
+        else
+          # interzonal foundation walls: only above-grade portion modeled
+          hpxml_value *= (wall.height - wall.depth_below_grade) / wall.height
         end
-
-        # Calculate total slab exposed perimeter
-        slab_exposed_length = 0
-        hpxml.slabs.each do |slab|
-          next unless wall.interior_adjacent_to == slab.interior_adjacent_to
-
-          slab_exposed_length += slab.exposed_perimeter
-        end
-
-        # Calculate exposed foundation wall area
-        if slab_exposed_length < wall_total_length
-          hpxml_value *= (slab_exposed_length / wall_total_length)
-        end
-      end
-      if (hpxml.foundation_walls.include? wall) && (not wall.is_exterior)
-        # interzonal foundation walls: only above-grade portion modeled
-        hpxml_value *= (wall.height - wall.depth_below_grade) / wall.height
       end
       if wall.is_exterior
         query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"

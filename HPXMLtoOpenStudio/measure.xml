@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>cf104569-6dc4-42d8-9af7-8546e44870c4</version_id>
-  <version_modified>2023-06-21T16:39:22Z</version_modified>
+  <version_id>95206b77-144f-4d10-82a8-9d4fe1e4cd22</version_id>
+  <version_modified>2023-06-23T16:50:01Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>810319CC</checksum>
+      <checksum>7B81BF09</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -226,7 +226,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>09BB1647</checksum>
+      <checksum>66B20F30</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -238,13 +238,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FD9479BF</checksum>
+      <checksum>44BBB9C7</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1A5A2580</checksum>
+      <checksum>C7A530D7</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -262,7 +262,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C5928BEF</checksum>
+      <checksum>38897339</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -280,13 +280,13 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BA88A4C6</checksum>
+      <checksum>C1BA6300</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CA310A8D</checksum>
+      <checksum>08122D51</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -490,13 +490,13 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9F95A6CF</checksum>
+      <checksum>4BEF037E</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>50C2B83E</checksum>
+      <checksum>925E05C1</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -526,7 +526,7 @@
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>16756D02</checksum>
+      <checksum>B7FC720C</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
