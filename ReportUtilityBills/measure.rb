@@ -381,10 +381,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def get_monthly_output_results(args, utility_bills, bill_scenario_name, monthly_data, header)
     run_period = (header.sim_begin_month - 1)..(header.sim_end_month - 1)
     monthly_data << ["#{bill_scenario_name}: Total", 'USD'] + ([0.0] * run_period.size)
+    total_ix = monthly_data.size - 1
 
     if args[:include_monthly_bills]
       utility_bills.each do |fuel_type, bill|
-        monthly_data[0][2..-1] = monthly_data[0][2..-1].zip(bill.monthly_total[run_period].map { |v| v.round(2) }).map { |x, y| x + y }
+        monthly_data[total_ix][2..-1] = monthly_data[total_ix][2..-1].zip(bill.monthly_total[run_period].map { |v| v.round(2) }).map { |x, y| x + y }
         monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Fixed", 'USD'] + bill.monthly_fixed_charge[run_period].map { |v| v.round(2) }
         monthly_data << ["#{bill_scenario_name}: #{fuel_type}: Energy", 'USD'] + bill.monthly_energy_charge[run_period].map { |v| v.round(2) }
         monthly_data << ["#{bill_scenario_name}: #{fuel_type}: PV Credit", 'USD'] + bill.monthly_production_credit[run_period].map { |v| v.round(2) } if [FT::Elec].include?(fuel_type)
