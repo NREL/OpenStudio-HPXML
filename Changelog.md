@@ -1,7 +1,8 @@
-## OpenStudio-HPXML v1.6.1
-
+## OpenStudio-HPXML v1.7.0
 __New Features__
-- `Slab/DepthBelowGrade` is no longer required for certain foundation types.
+
+__Bugfixes__
+- Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 
 ## OpenStudio-HPXML v1.6.0
 
