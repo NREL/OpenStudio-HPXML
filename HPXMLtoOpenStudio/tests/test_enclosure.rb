@@ -949,7 +949,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       hpxml.slabs[i].id = "Slab#{i + 1}"
       hpxml.slabs[i].perimeter_insulation_id = "Slab#{i + 1}PerimeterInsulation"
       hpxml.slabs[i].under_slab_insulation_id = "Slab#{i + 1}UnderSlabInsulation"
-      hpxml.slabs[i].depth_below_grade = hpxml.foundation_walls[i].depth_below_grade
+      hpxml.slabs[i].depth_below_grade = hpxml.foundation_walls[i].depth_below_grade * i / 3.0
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
