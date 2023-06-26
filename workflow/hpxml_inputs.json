@@ -1491,10 +1491,6 @@
     "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
     "geometry_foundation_type": "BellyAndWingNoSkirt"
   },
-  "sample_files/base-foundation-belly-wing-equip-location.xml": {
-    "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
-    "water_heater_location": "manufactured home belly"
-  },
   "sample_files/base-foundation-complex.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
