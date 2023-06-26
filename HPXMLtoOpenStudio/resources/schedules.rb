@@ -1470,6 +1470,16 @@ class SchedulesFile
   def export()
     return false if @output_schedules_path.nil?
 
+    # Expand schedules with fewer elements such that all the schedules have the same number of elements
+    num_hrs_in_year = Constants.NumHoursInYear(@year)
+    n_ts_per_hr = @tmp_schedules.map { |_k, v| v.size / num_hrs_in_year }.uniq.max
+    @tmp_schedules.each do |col, values|
+      if values.size / num_hrs_in_year < n_ts_per_hr
+        @tmp_schedules[col] = values.map { |v| [v] * n_ts_per_hr }.flatten
+      end
+    end
+
+    # Export the schedules
     CSV.open(@output_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
