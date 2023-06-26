@@ -629,6 +629,7 @@ class HPXMLDefaults
         if foundation.belly_wing_skirt_present.nil?
           foundation.belly_wing_skirt_present_isdefaulted = true
           foundation.belly_wing_skirt_present = true
+          break
         end
       end
     end
