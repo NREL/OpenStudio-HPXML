@@ -427,6 +427,7 @@ class Geometry
     elsif location == HPXML::LocationManufacturedHomeBelly
       # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
       # 3.5 Manufactured House Belly Pan Temperatures
+      # FUTURE: Consider modeling the belly as a separate thermal zone so that we dynamically calculate temperatures.
       return { temp_min: nil,
                indoor_weight: 1.0,
                outdoor_weight: 0.0,

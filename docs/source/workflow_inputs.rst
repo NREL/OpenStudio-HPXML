@@ -3587,8 +3587,8 @@ The various locations used in an HPXML file are defined as follows:
   crawlspace - unvented                                                                    EnergyPlus calculation                   Any
   crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
-  manufactured home underbelly    Underneath the belly of a manufactured home              Weather, wind exposed no skirt           Manufactured only
-  manufactured home belly         Within the belly of the manufactured home                Same as living space                     Manufactured only              
+  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                             Manufactured only
+  manufactured home belly         Within the belly                                         Same as living space                     Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
   other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only
   other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of living space/outside; min of 50F  SFA/MF only
