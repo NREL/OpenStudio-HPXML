@@ -1390,6 +1390,7 @@ class SchedulesFile
     import()
     battery_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+    expand_schedules
     set_unavailable_periods(unavailable_periods)
     convert_setpoints
     @output_schedules_path = output_path
@@ -1470,16 +1471,6 @@ class SchedulesFile
   def export()
     return false if @output_schedules_path.nil?
 
-    # Expand schedules with fewer elements such that all the schedules have the same number of elements
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
-    n_ts_per_hr = @tmp_schedules.map { |_k, v| v.size / num_hrs_in_year }.uniq.max
-    @tmp_schedules.each do |col, values|
-      if values.size / num_hrs_in_year < n_ts_per_hr
-        @tmp_schedules[col] = values.map { |v| [v] * n_ts_per_hr }.flatten
-      end
-    end
-
-    # Export the schedules
     CSV.open(@output_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
@@ -1651,6 +1642,17 @@ class SchedulesFile
     end
   end
 
+  def expand_schedules
+    # Expand schedules with fewer elements such that all the schedules have the same number of elements
+    num_hrs_in_year = Constants.NumHoursInYear(@year)
+    n_ts_per_hr = @tmp_schedules.map { |_k, v| v.size / num_hrs_in_year }.uniq.max
+    @tmp_schedules.each do |col, values|
+      if values.size / num_hrs_in_year < n_ts_per_hr
+        @tmp_schedules[col] = values.map { |v| [v] * n_ts_per_hr }.flatten
+      end
+    end
+  end
+
   def set_unavailable_periods(unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -1683,7 +1685,7 @@ class SchedulesFile
           if schedule_name == ColumnWaterHeaterSetpoint
             # Temperature of tank < 2C indicates of possibility of freeze.
             @tmp_schedules[schedule_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[column_name][i] == 1.0
-          else
+          elsif ![SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(schedule_name)
             @tmp_schedules[schedule_name][i] *= (1.0 - @tmp_schedules[column_name][i])
           end
         end
