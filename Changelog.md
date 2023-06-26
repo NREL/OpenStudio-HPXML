@@ -4,6 +4,7 @@ __New Features__
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 
 __Bugfixes__
+- Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 
 ## OpenStudio-HPXML v1.6.0
 

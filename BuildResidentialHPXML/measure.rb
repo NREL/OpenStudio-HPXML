@@ -4375,10 +4375,6 @@ class HPXMLFile
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
-      if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
-        depth_below_grade = 0
-      end
-
       if args[:slab_under_width] == 999
         under_slab_insulation_spans_entire_slab = true
       else
@@ -4407,7 +4403,6 @@ class HPXMLFile
                       perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
                       under_slab_insulation_r_value: args[:slab_under_insulation_r],
                       under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
-                      depth_below_grade: depth_below_grade,
                       carpet_fraction: carpet_fraction,
                       carpet_r_value: carpet_r_value)
       @surface_ids[surface.name.to_s] = hpxml.slabs[-1].id
@@ -4457,7 +4452,7 @@ class HPXMLFile
         end
 
         # Get max z coordinate of this window
-        sub_surface_z = Geometry.getSurfaceZValues([sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
+        sub_surface_z = Geometry.get_surface_z_values([sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
 
         overhangs_depth = args[:geometry_eaves_depth]
         overhangs_distance_to_top_of_window = eaves_z - sub_surface_z # difference between max z coordinates of eaves and this window

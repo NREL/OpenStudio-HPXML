@@ -1042,7 +1042,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``Area``                                                 double    ft2           > 0          Yes                  Gross area
   ``Thickness``                                            double    in            >= 0         No         See [#]_  Thickness [#]_
   ``ExposedPerimeter``                                     double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
-  ``DepthBelowGrade``                                      double    ft            >= 0         See [#]_             Depth from the top of the slab surface to grade
+  ``DepthBelowGrade``                                      double    ft            >= 0         No         See [#]_  Depth from the top of the slab surface to grade
   ``PerimeterInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
   ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
   ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
@@ -1060,8 +1060,8 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
-  .. [#] DepthBelowGrade only required if the attached foundation has no ``FoundationWalls``.
-         For foundation types with walls, the the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value.
+  .. [#] If DepthBelowGrade not provided, defaults to zero for foundation types without walls.
+         For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
   .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
@@ -1515,7 +1515,7 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                 Fraction of cooling load served
   ==========================  ========  ======  ===========  ========  ========  ===============================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
          | - **none**: "living space"
          | - **air**: supply duct location with the largest area, otherwise "living space"
@@ -1736,7 +1736,7 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", or "unconditioned space".
+  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
          | - **none**: "living space"
          | - **air**: supply duct location with the largest area, otherwise "living space"
@@ -3587,8 +3587,8 @@ The various locations used in an HPXML file are defined as follows:
   crawlspace - unvented                                                                    EnergyPlus calculation                   Any
   crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
-  manufactured home underbelly    Underneath the belly of a manufactured home              Weather, wind exposed no skirt           Manufactured only
-  manufactured home belly         Within the belly of the manufactured home                Same as living space                     Manufactured only              
+  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                             Manufactured only
+  manufactured home belly         Within the belly                                         Same as living space                     Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
   other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only
   other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of living space/outside; min of 50F  SFA/MF only

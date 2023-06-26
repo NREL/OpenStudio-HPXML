@@ -629,6 +629,7 @@ class HPXMLDefaults
         if foundation.belly_wing_skirt_present.nil?
           foundation.belly_wing_skirt_present_isdefaulted = true
           foundation.belly_wing_skirt_present = true
+          break
         end
       end
     end
@@ -873,6 +874,16 @@ class HPXMLDefaults
       if slab.carpet_fraction.nil?
         slab.carpet_fraction = conditioned_slab ? 0.8 : 0.0
         slab.carpet_fraction_isdefaulted = true
+      end
+      if slab.connected_foundation_walls.empty?
+        if slab.depth_below_grade.nil?
+          slab.depth_below_grade = 0.0
+          slab.depth_below_grade_isdefaulted = true
+        end
+      else
+        if !slab.depth_below_grade.nil?
+          slab.depth_below_grade = nil # Ignore Slab/DepthBelowGrade; use values from adjacent foundation walls instead
+        end
       end
     end
   end
