@@ -3325,6 +3325,11 @@
   },
   "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
+    "hvac_control_heating_weekday_setpoint": null,
+    "hvac_control_heating_weekend_setpoint": null,
+    "hvac_control_cooling_weekday_setpoint": null,
+    "hvac_control_cooling_weekend_setpoint": null,
+    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
