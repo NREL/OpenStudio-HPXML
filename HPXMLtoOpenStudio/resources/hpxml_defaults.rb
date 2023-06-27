@@ -626,11 +626,11 @@ class HPXMLDefaults
         belly_and_wing_foundations << hpxml.foundations[-1]
       end
       belly_and_wing_foundations.each do |foundation|
-        if foundation.belly_wing_skirt_present.nil?
-          foundation.belly_wing_skirt_present_isdefaulted = true
-          foundation.belly_wing_skirt_present = true
-          break
-        end
+        next unless foundation.belly_wing_skirt_present.nil?
+
+        foundation.belly_wing_skirt_present_isdefaulted = true
+        foundation.belly_wing_skirt_present = true
+        break
       end
     end
   end
