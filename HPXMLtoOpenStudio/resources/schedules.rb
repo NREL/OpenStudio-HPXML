@@ -1644,11 +1644,10 @@ class SchedulesFile
 
   def expand_schedules
     # Expand schedules with fewer elements such that all the schedules have the same number of elements
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
-    n_ts_per_hr = @tmp_schedules.map { |_k, v| v.size / num_hrs_in_year }.uniq.max
+    max_size = @tmp_schedules.map { |_k, v| v.size }.uniq.max
     @tmp_schedules.each do |col, values|
-      if values.size / num_hrs_in_year < n_ts_per_hr
-        @tmp_schedules[col] = values.map { |v| [v] * n_ts_per_hr }.flatten
+      if values.size < max_size
+        @tmp_schedules[col] = values.map { |v| [v] * (max_size / values.size) }.flatten
       end
     end
   end
