@@ -1245,8 +1245,8 @@ class HVAC
     cool_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (power_f + power_p)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(power_f, 'Wh', 'Btu'))), 'Wh', 'Btu')
     heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (power_f + power_p)) / (heat_pump.heating_efficiency_cop * (1.0 - power_f))
 
-    hp_ap.cool_rated_eirs = [original_cool_eir]
-    hp_ap.heat_rated_eirs = [original_heat_eir]
+    hp_ap.cool_rated_eirs = [cool_eir]
+    hp_ap.heat_rated_eirs = [heat_eir]
 
   end
 
