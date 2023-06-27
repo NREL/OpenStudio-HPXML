@@ -708,6 +708,36 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
+  def test_geothermal_loop
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-geothermal-loop.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    geothermal_loop = hpxml.geothermal_loops[0]
+    bore_radius = UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm')
+    grout_conductivity = UnitConversions.convert(geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)')
+    pipe_cond = UnitConversions.convert(geothermal_loop.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)')
+    shank_spacing = UnitConversions.convert(geothermal_loop.shank_spacing, 'in', 'm')
+
+    # Check ghx
+    assert(1, model.getGroundHeatExchangerVerticals.size)
+    ghx = model.getGroundHeatExchangerVerticals[0]
+    assert_in_epsilon(bore_radius, ghx.boreHoleRadius.get, 0.01)
+    assert_in_epsilon(grout_conductivity, ghx.groutThermalConductivity.get, 0.01)
+    assert_in_epsilon(pipe_cond, ghx.pipeThermalConductivity.get, 0.01)
+    assert_in_epsilon(shank_spacing, ghx.uTubeDistance.get, 0.01)
+
+    # Check G-Functions
+    lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003] # Expected values
+    gfnc_coeff = [2.1315561988716345, 2.4738153271940466, 2.7469568946536747, 2.9956725720204123, 3.1467376149806783, 3.3411921769988546, 3.6783626039289095, 4.08829282643351, 4.821537806237455, 5.3367290812854895, 5.7252441389588125, 6.290724504739807, 6.691379764734213, 7.611206803037245, 8.406586040216075, 8.626576106961634, 8.824984464247537, 9.019151156396122, 9.170525404484579, 9.300299594597792, 9.412470386165039, 9.506659481451495, 9.577046200210756, 9.657615475750577, 9.712712538365714, 9.739766928164627, 9.783557959201408] # Expected values
+    gFunctions = lntts.zip(gfnc_coeff)
+    ghx.gFunctions.each_with_index do |gFunction, i|
+      assert_in_epsilon(gFunction.lnValue, gFunctions[i][0], 0.01)
+      assert_in_epsilon(gFunction.gValue, gFunctions[i][1], 0.01)
+    end
+  end
+
   def test_shared_chiller_baseboard
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml'))
