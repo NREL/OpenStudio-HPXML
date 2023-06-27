@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>703be74f-301c-4202-b500-a55e42f4107a</version_id>
-  <version_modified>2023-06-26T23:26:27Z</version_modified>
+  <version_id>0cc1ec60-998f-40cf-99cd-b1a3f80ccde0</version_id>
+  <version_modified>2023-06-27T22:39:45Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -355,6 +355,12 @@
       <checksum>D4373DC9</checksum>
     </file>
     <file>
+      <filename>schedule_files/occupancy-stochastic-30-mins.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D4373DC9</checksum>
+    </file>
+    <file>
       <filename>schedule_files/occupancy-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -418,7 +424,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4B208625</checksum>
+      <checksum>85C70F45</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

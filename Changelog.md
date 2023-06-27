@@ -5,6 +5,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
+- Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
 
