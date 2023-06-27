@@ -1389,8 +1389,8 @@ class SchedulesFile
 
     import()
     battery_schedules
-    @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     expand_schedules
+    @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(unavailable_periods)
     convert_setpoints
     @output_schedules_path = output_path
@@ -1644,10 +1644,10 @@ class SchedulesFile
 
   def expand_schedules
     # Expand schedules with fewer elements such that all the schedules have the same number of elements
-    max_size = @tmp_schedules.map { |_k, v| v.size }.uniq.max
-    @tmp_schedules.each do |col, values|
+    max_size = @schedules.map { |_k, v| v.size }.uniq.max
+    @schedules.each do |col, values|
       if values.size < max_size
-        @tmp_schedules[col] = values.map { |v| [v] * (max_size / values.size) }.flatten
+        @schedules[col] = values.map { |v| [v] * (max_size / values.size) }.flatten
       end
     end
   end
