@@ -2775,10 +2775,34 @@ class HVAC
     curve.setCoefficient6z(coeff[5])
     return curve
   end
+  
+  def self.convert_rated_to_gross_capacity_cop_clg(clg_ap)
+    clg_ap.detailed_performance_net_cap_clg.keys().sort.each do |out_db|
+      clg_ap.detailed_performance_net_cap_clg[out_db].each_with_index do |cap, i|
+        net_power = cap / clg_ap.detailed_performance_net_cop_clg[out_db][i]
+        #gross_cap = cap + clg_ap.fan_powers_rated
+      end
+    end
+  end
+
+  def self.append_gross_capacities(cooling_detailed_performance_data)
+    # FIXME: Need to implement
+  end
 
   def self.create_dx_cooling_coil(model, obj_name, cooling_system)
     clg_ap = cooling_system.additional_properties
-
+    if not cooling_system.cooling_detailed_performance_data.empty?
+      gross_total_capacities = convert_rated_to_gross_capacity_cop_clg(clg_ap)
+      gross_total_capacities = append_gross_capacities(cooling_system.cooling_detailed_performance_data)
+      # FIXME: Replace with NEEP data points
+      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    else
+      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    end
+    var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
+    var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
     if cooling_system.is_a? HPXML::CoolingSystem
       clg_type = cooling_system.cooling_system_type
     elsif cooling_system.is_a? HPXML::HeatPump
@@ -2801,18 +2825,15 @@ class HVAC
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-
       # temperature independent variable values
       cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', cap_ft_spec_si)
       eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', eir_ft_spec_si)
-
       # air flow ratio independent variable values
       cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_cap_fflow_spec[i])
       eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
-
       # part load ratio independent variable values
       plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', clg_ap.cool_plf_fplr_spec[i])
-
+      
       cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
       eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
       plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
@@ -3044,6 +3065,33 @@ class HVAC
     end
 
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
+  end
+
+  def self.set_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
+    return if detailed_performance_data.empty?
+    if mode == :clg
+      hvac_ap.detailed_performance_net_cap_clg = {}
+      hvac_ap.detailed_performance_net_cop_clg = {}
+      cap_hash = hvac_ap.detailed_performance_net_cap_clg
+      cop_hash = hvac_ap.detailed_performance_net_cop_clg
+    elsif mode == :htg
+      hvac_ap.detailed_performance_net_cap_htg = {}
+      hvac_ap.detailed_performance_net_cop_htg = {}
+      cap_hash = hvac_ap.detailed_performance_net_cap_htg
+      cop_hash = hvac_ap.detailed_performance_net_cop_htg
+    end
+    detailed_performance_data.each do |data_point|
+      next unless ['minimum', 'maximum'].include? data_point.capacity_description
+      cap_hash[data_point.outdoor_temperature] = [] unless cap_hash.keys().include? data_point.outdoor_temperature
+      cop_hash[data_point.outdoor_temperature] = [] unless cop_hash.keys().include? data_point.outdoor_temperature
+      cap_hash[data_point.outdoor_temperature] << data_point.capacity
+      cop_hash[data_point.outdoor_temperature] << data_point.efficiency_cop
+    end
+    cap_hash.keys().each do |out_db|
+      cap_hash[out_db].sort!
+      cop_hash[out_db].sort!
+    end
+    puts hvac_ap
   end
 
   def self.calc_ceer_from_eer(cooling_system)
