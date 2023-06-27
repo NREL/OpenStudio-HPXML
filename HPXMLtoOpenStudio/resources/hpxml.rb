@@ -2442,6 +2442,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def net_area
+      return area
+    end
+
     def delete
       @hpxml_object.rim_joists.delete(self)
       @hpxml_object.foundations.each do |foundation|
@@ -2748,6 +2752,26 @@ class HPXML < Object
       fail "Calculated a negative net surface area for surface '#{@id}'." if val < 0
 
       return val
+    end
+
+    def connected_slabs
+      return @hpxml_object.slabs.select { |s| s.connected_foundation_walls.include? self }
+    end
+
+    def exposed_fraction
+      # Calculate total slab exposed perimeter
+      slab_exposed_length = connected_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
+
+      # Calculate total length of exterior foundation walls
+      ext_adjacent_fnd_walls = connected_slabs.map { |s| s.connected_foundation_walls.select { |fw| fw.is_exterior } }.flatten.uniq
+      wall_total_length = ext_adjacent_fnd_walls.map { |fw| fw.area / fw.height }.sum
+
+      # Calculate exposed fraction
+      if slab_exposed_length < wall_total_length
+        return slab_exposed_length / wall_total_length
+      end
+
+      return 1.0
     end
 
     def is_exterior
@@ -3085,6 +3109,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def connected_foundation_walls
+      return @hpxml_object.foundation_walls.select { |fw| interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to }
+    end
+
     def delete
       @hpxml_object.slabs.delete(self)
       @hpxml_object.foundations.each do |foundation|
@@ -3108,7 +3136,7 @@ class HPXML < Object
       XMLHelper.add_element(slab, 'Area', @area, :float) unless @area.nil?
       XMLHelper.add_element(slab, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
       XMLHelper.add_element(slab, 'ExposedPerimeter', @exposed_perimeter, :float) unless @exposed_perimeter.nil?
-      XMLHelper.add_element(slab, 'DepthBelowGrade', @depth_below_grade, :float) unless @depth_below_grade.nil?
+      XMLHelper.add_element(slab, 'DepthBelowGrade', @depth_below_grade, :float, @depth_below_grade_isdefaulted) unless @depth_below_grade.nil?
       insulation = XMLHelper.add_element(slab, 'PerimeterInsulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @perimeter_insulation_id.nil?
@@ -6894,6 +6922,7 @@ class HPXML < Object
                        :exposed_perimeter]
 
     # Look for pairs of surfaces that can be collapsed
+    like_foundation_walls = {}
     surf_types.each do |surf_type, surfaces|
       next unless surf_types_of_interest.nil? || surf_types_of_interest.include?(surf_type)
 
@@ -6910,12 +6939,20 @@ class HPXML < Object
             next if attribute.to_s.end_with? '_isdefaulted'
             next if attrs_to_ignore.include? attribute
             next if (surf_type == :foundation_walls) && ([:azimuth, :orientation].include? attribute) # Azimuth of foundation walls is irrelevant
+            next if (surf_type == :foundation_walls) && (attribute == :depth_below_grade) # Ignore BG depth difference; we will later calculate an effective BG depth for the combined surface
             next if surf.send(attribute) == surf2.send(attribute)
 
             match = false
             break
           end
           next unless match
+
+          if (surf_type == :foundation_walls) && (surf.depth_below_grade != surf2.depth_below_grade)
+            if like_foundation_walls[surf].nil?
+              like_foundation_walls[surf] = [{ bgdepth: surf.depth_below_grade, length: surf.area / surf.height }]
+            end
+            like_foundation_walls[surf] << { bgdepth: surf2.depth_below_grade, length: surf2.area / surf2.height }
+          end
 
           # Update values
           if (not surf.area.nil?) && (not surf2.area.nil?)
@@ -6944,6 +6981,11 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
+    end
+
+    like_foundation_walls.each do |foundation_wall, properties|
+      # Calculate weighted-average (by length) below-grade depth
+      foundation_wall.depth_below_grade = properties.map { |p| p[:bgdepth] * p[:length] }.sum(0.0) / properties.map { |p| p[:length] }.sum
     end
   end
 
