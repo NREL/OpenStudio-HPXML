@@ -809,26 +809,39 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.slabs[0].thickness = 7.0
     hpxml.slabs[0].carpet_r_value = 1.1
     hpxml.slabs[0].carpet_fraction = 0.5
+    hpxml.slabs[0].depth_below_grade = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 7.0, 1.1, 0.5)
+    _test_default_slab_values(hpxml_default.slabs[0], 7.0, 1.1, 0.5, nil)
 
     # Test defaults w/ conditioned basement
     hpxml.slabs[0].thickness = nil
     hpxml.slabs[0].carpet_r_value = nil
     hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8)
+    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8, nil)
 
     # Test defaults w/ crawlspace
     hpxml = _create_hpxml('base-foundation-unvented-crawlspace.xml')
     hpxml.slabs[0].thickness = nil
     hpxml.slabs[0].carpet_r_value = nil
     hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 0.0, 0.0, 0.0)
+    _test_default_slab_values(hpxml_default.slabs[0], 0.0, 0.0, 0.0, nil)
+
+    # Test defaults w/ slab-on-grade
+    hpxml = _create_hpxml('base-foundation-slab.xml')
+    hpxml.slabs[0].thickness = nil
+    hpxml.slabs[0].carpet_r_value = nil
+    hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8, 0.0)
   end
 
   def test_windows
@@ -3835,10 +3848,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_slab_values(slab, thickness, carpet_r_value, carpet_fraction)
+  def _test_default_slab_values(slab, thickness, carpet_r_value, carpet_fraction, depth_below_grade)
     assert_equal(thickness, slab.thickness)
     assert_equal(carpet_r_value, slab.carpet_r_value)
     assert_equal(carpet_fraction, slab.carpet_fraction)
+    if depth_below_grade.nil?
+      assert_nil(slab.depth_below_grade)
+    else
+      assert_equal(depth_below_grade, slab.depth_below_grade)
+    end
   end
 
   def _test_default_window_values(hpxml, ext_summer_sfs, ext_winter_sfs, int_summer_sfs, int_winter_sfs, fraction_operable, azimuths)
