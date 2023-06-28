@@ -313,7 +313,7 @@ class Geometry
     hpxml.neighbor_buildings.each do |neighbor_building|
       height = neighbor_building.height.nil? ? walls_top : neighbor_building.height
 
-      vertices = Geometry.create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
+      vertices = create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
       shading_surface = OpenStudio::Model::ShadingSurface.new(vertices, model)
       shading_surface.additionalProperties.setFeature('Azimuth', neighbor_building.azimuth)
       shading_surface.additionalProperties.setFeature('Distance', neighbor_building.distance)
@@ -433,14 +433,14 @@ class Geometry
     minzs = []
     maxzs = []
     spaces.each do |space|
-      zvalues = getSurfaceZValues(space.surfaces)
+      zvalues = get_surface_z_values(space.surfaces)
       minzs << zvalues.min + UnitConversions.convert(space.zOrigin, 'm', 'ft')
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
     return maxzs.max - minzs.min
   end
 
-  def self.getSurfaceZValues(surfaceArray)
+  def self.get_surface_z_values(surfaceArray)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
     surfaceArray.each do |surface|
@@ -449,6 +449,46 @@ class Geometry
       end
     end
     return zValueArray
+  end
+
+  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_x_values(surfaceArray)
+    xValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft').round(5)
+      end
+    end
+    return xValueArray
+  end
+
+  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_y_values(surfaceArray)
+    yValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft').round(5)
+      end
+    end
+    return yValueArray
+  end
+
+  def self.get_surface_length(surface)
+    xvalues = get_surface_x_values([surface])
+    yvalues = get_surface_y_values([surface])
+    xrange = xvalues.max - xvalues.min
+    yrange = yvalues.max - yvalues.min
+    if xrange > yrange
+      return xrange
+    end
+
+    return yrange
+  end
+
+  def self.get_surface_height(surface)
+    zvalues = get_surface_z_values([surface])
+    zrange = zvalues.max - zvalues.min
+    return zrange
   end
 
   def self.get_z_origin_for_zone(zone)
@@ -471,7 +511,7 @@ class Geometry
   end
 
   def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file, unavailable_periods)
-    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Geometry.get_occupancy_default_values()
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
