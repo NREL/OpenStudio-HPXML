@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f1c97e5f-fcd7-4540-9dd1-37e298970fe9</version_id>
-  <version_modified>2023-06-27T16:12:08Z</version_modified>
+  <version_id>3a0ca2d0-23bf-4aa7-a5e0-91abc981e7ed</version_id>
+  <version_modified>2023-06-29T16:59:12Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -220,49 +220,49 @@
       <filename>g_functions/C_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5410CFA9</checksum>
+      <checksum>86C81BDB</checksum>
     </file>
     <file>
       <filename>g_functions/L_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B81A3E85</checksum>
+      <checksum>EA9BD20B</checksum>
     </file>
     <file>
       <filename>g_functions/LopU_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>17FFFDCA</checksum>
+      <checksum>4DE9AEAC</checksum>
     </file>
     <file>
       <filename>g_functions/Open_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>226B7EE7</checksum>
+      <checksum>2D76CB76</checksum>
     </file>
     <file>
       <filename>g_functions/U_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>45A026F1</checksum>
+      <checksum>66F24419</checksum>
     </file>
     <file>
       <filename>g_functions/rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DAF42C80</checksum>
+      <checksum>A455FF70</checksum>
     </file>
     <file>
       <filename>g_functions/util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D76C546D</checksum>
+      <checksum>D062B0CF</checksum>
     </file>
     <file>
       <filename>g_functions/zoned_rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>86CE839A</checksum>
+      <checksum>D5EDBB54</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
@@ -562,7 +562,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3A1C860E</checksum>
+      <checksum>4C361C9C</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>

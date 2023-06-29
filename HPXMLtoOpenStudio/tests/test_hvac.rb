@@ -729,12 +729,33 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(shank_spacing, ghx.uTubeDistance.get, 0.01)
 
     # Check G-Functions
-    lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003] # Expected values
-    gfnc_coeff = [2.1315561988716345, 2.4738153271940466, 2.7469568946536747, 2.9956725720204123, 3.1467376149806783, 3.3411921769988546, 3.6783626039289095, 4.08829282643351, 4.821537806237455, 5.3367290812854895, 5.7252441389588125, 6.290724504739807, 6.691379764734213, 7.611206803037245, 8.406586040216075, 8.626576106961634, 8.824984464247537, 9.019151156396122, 9.170525404484579, 9.300299594597792, 9.412470386165039, 9.506659481451495, 9.577046200210756, 9.657615475750577, 9.712712538365714, 9.739766928164627, 9.783557959201408] # Expected values
+    # Expected values
+    # 3_5: 2: g: 5._384._0.0875 from "LopU_configurations_5m_v1.0.json"
+    lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
+    gfnc_coeff = [3.490358350826967, 4.020991337431924, 4.662672415770914, 5.744820338581088, 7.036835424820224, 8.970879981106723, 11.262539992919834, 13.161918009757274, 15.65519170743656, 17.09242028149083, 18.082377421761176, 19.42410197524493, 20.327301536975842, 22.296280621945826, 23.92882543342862, 24.37208776527693, 24.76938241540891, 25.155531910712668, 25.45459596488941, 25.710007203575426, 25.929812946366734, 26.113696919837288, 26.25080162287551, 26.40743659061555, 26.514329358432732, 26.566734621647846, 26.6515015938595]
     gFunctions = lntts.zip(gfnc_coeff)
     ghx.gFunctions.each_with_index do |gFunction, i|
       assert_in_epsilon(gFunction.lnValue, gFunctions[i][0], 0.01)
       assert_in_epsilon(gFunction.gValue, gFunctions[i][1], 0.01)
+    end
+  end
+
+  def test_g_function_library_linear_interpolation_example
+    bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
+    num_bore_holes = 40
+    bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
+    bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
+    bore_diameter = UnitConversions.convert(UnitConversions.convert(80.0, 'mm', 'm'), 'm', 'in') * 2
+    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+
+    expected_lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
+    expected_gfnc_coeff = [2.619, 2.967, 3.279, 3.700, 4.190, 5.107, 6.680, 8.537, 11.991, 14.633, 16.767, 20.083, 22.593, 28.734, 34.345, 35.927, 37.342, 38.715, 39.768, 40.664, 41.426, 42.056, 42.524, 43.054, 43.416, 43.594, 43.885]
+
+    expected_lntts.zip(actual_lntts).each do |v1, v2|
+      assert_in_epsilon(v1, v2, 0.01)
+    end
+    expected_gfnc_coeff.zip(actual_gfnc_coeff).each do |v1, v2|
+      assert_in_epsilon(v1, v2, 0.01)
     end
   end
 
