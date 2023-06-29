@@ -6,7 +6,7 @@ def process_g_functions(filepath)
   require 'zip'
 
   # downselect criteria
-  n_x_m = 20 # for example, upper bound on number of boreholes
+  n_x_m = 40 # for example, upper bound on number of boreholes
 
   g_functions_path = File.dirname(filepath)
   Dir[File.join(filepath, '*.json')].each do |config_json|
