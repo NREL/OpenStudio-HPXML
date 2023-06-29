@@ -1797,7 +1797,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_location_choices << HPXML::LocationCrawlspaceVented
     water_heater_location_choices << HPXML::LocationCrawlspaceUnvented
     water_heater_location_choices << HPXML::LocationCrawlspaceConditioned
-    water_heater_location_choices << HPXML::LocationManufacturedHomeBelly
     water_heater_location_choices << HPXML::LocationOtherExterior
     water_heater_location_choices << HPXML::LocationOtherHousingUnit
     water_heater_location_choices << HPXML::LocationOtherHeatedSpace

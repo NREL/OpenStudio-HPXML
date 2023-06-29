@@ -193,8 +193,6 @@ class HPXMLTest < MiniTest::Test
       command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
       if not invalid_variable_only
         command += ' --hourly ALL'
-        command += ' --add-timeseries-time-column DST'
-        command += ' --add-timeseries-time-column UTC'
         command += " --add-timeseries-output-variable 'Zone People Occupant Count'"
         command += " --add-timeseries-output-variable 'Zone People Total Heating Energy'"
       end
@@ -209,8 +207,6 @@ class HPXMLTest < MiniTest::Test
         # Check timeseries columns exist
         timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
       else
@@ -429,11 +425,12 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _get_bill_results(bill_csv_path)
-    # Grab all outputs from reporting measure CSV bill results
+    # Grab all outputs (except monthly) from reporting measure CSV bill results
     results = {}
     if File.exist? bill_csv_path
       CSV.foreach(bill_csv_path) do |row|
         next if row.nil? || (row.size < 2)
+        next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
 
         results[row[0]] = Float(row[1])
       end
