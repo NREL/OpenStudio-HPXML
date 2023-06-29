@@ -3346,6 +3346,19 @@
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
+  "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
+    "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
+    "hvac_control_heating_weekday_setpoint": null,
+    "hvac_control_heating_weekend_setpoint": null,
+    "hvac_control_cooling_weekday_setpoint": null,
+    "hvac_control_cooling_weekend_setpoint": null,
+    "water_heater_setpoint_temperature": null,
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
+  },
+  "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
+    "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
+    "schedules_power_outage_period": "Dec 1 5 - Jan 31 14"
+  },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
