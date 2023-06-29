@@ -1222,8 +1222,6 @@ class HVAC
     hp_ap.cool_power_curve_spec = [[-4.42471086639888, 0.658017281046304, 4.37331801294626, 0.174096187531254, -0.0526514790164159]]
     hp_ap.cool_sh_curve_spec = [[4.54172823345154, 14.7653304889134, -18.3541272090485, -0.74401391092935, 0.545560799548833, 0.0182620032235494]]
     hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr]
-    cool_eir = heat_pump.cooling_efficiency_eer / 3.412 #Note this does not include fan/pump adjustments, which are added in later
-    hp_ap.cool_rated_eirs = [cool_eir]
  
     # E+ equation fit coil coefficients from Tang's thesis:
     # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
@@ -1242,8 +1240,8 @@ class HVAC
     power_f = heat_pump.fan_watts_per_cfm * 400.0 / UnitConversions.convert(1.0, 'ton', 'Btu/hr') * UnitConversions.convert(1.0, 'W', 'kW') #400 cfm/ton, result is in kW per Btu/hr of capacity
     power_p = heat_pump.pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') * UnitConversions.convert(1.0, 'W', 'kW') #result is in kW per Btu/hr of capacity
 
-    cool_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (power_f + power_p)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(power_f, 'Wh', 'Btu'))), 'Wh', 'Btu')
-    heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (power_f + power_p)) / (heat_pump.heating_efficiency_cop * (1.0 - power_f))
+    cool_eir = (1 - UnitConversions.convert(power_f, 'Wh', 'Btu')) / UnitConversions.convert(heat_pump.cooling_efficiency_eer,'Btu','Wh') - power_f - power_p
+    heat_eir = (1 + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - power_f - power_p
 
     hp_ap.cool_rated_eirs = [cool_eir]
     hp_ap.heat_rated_eirs = [heat_eir]
