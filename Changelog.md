@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
+- Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 
 __Bugfixes__

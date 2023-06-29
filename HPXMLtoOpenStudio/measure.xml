@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0cc1ec60-998f-40cf-99cd-b1a3f80ccde0</version_id>
-  <version_modified>2023-06-27T22:39:45Z</version_modified>
+  <version_id>0fdf71f5-810f-4d3a-b944-a792c4d8303e</version_id>
+  <version_modified>2023-06-29T00:52:56Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>718E02EC</checksum>
+      <checksum>7B81BF09</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -226,7 +226,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A2D4F7BA</checksum>
+      <checksum>DAEE7CE9</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -238,19 +238,19 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07893D69</checksum>
+      <checksum>44BBB9C7</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E33010DD</checksum>
+      <checksum>15870B20</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E0A455E1</checksum>
+      <checksum>5300D228</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -262,7 +262,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>25D4F595</checksum>
+      <checksum>68C1CC65</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -280,7 +280,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C47248F9</checksum>
+      <checksum>C1BA6300</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -502,7 +502,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D48D2FA1</checksum>
+      <checksum>925E05C1</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -568,7 +568,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6B117F77</checksum>
+      <checksum>0B975B0D</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
