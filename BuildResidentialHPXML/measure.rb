@@ -187,6 +187,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeSFD
     unit_type_choices << HPXML::ResidentialTypeSFA
     unit_type_choices << HPXML::ResidentialTypeApartment
+    unit_type_choices << HPXML::ResidentialTypeManufactured
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
     arg.setDisplayName('Geometry: Unit Type')
@@ -323,6 +324,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_type_choices << HPXML::FoundationTypeBasementConditioned
     foundation_type_choices << HPXML::FoundationTypeAmbient
     foundation_type_choices << HPXML::FoundationTypeAboveApartment # I.e., adiabatic
+    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}WithSkirt"
+    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}NoSkirt"
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', foundation_type_choices, true)
     arg.setDisplayName('Geometry: Foundation Type')
@@ -1527,6 +1530,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherHeatedSpace
     duct_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
+    duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Leakage Units')
@@ -3577,7 +3581,7 @@ class HPXMLFile
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
       args[:geometry_rim_joist_height] = 0.0
-    elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
+    elsif (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       args[:geometry_rim_joist_height] = 0.0
     end
 
@@ -3592,6 +3596,8 @@ class HPXMLFile
       success = Geometry.create_single_family_attached(model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       success = Geometry.create_apartment(model: model, **args)
+    elsif args[:geometry_unit_type] == HPXML::ResidentialTypeManufactured
+      success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     end
     return false if not success
 
@@ -3977,7 +3983,7 @@ class HPXMLFile
           hpxml.site.vertical_surroundings = HPXML::VerticalSurroundingsNoAboveOrBelow
         end
       end
-    elsif [HPXML::ResidentialTypeSFD].include? args[:geometry_unit_type]
+    elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? args[:geometry_unit_type]
       hpxml.site.surroundings = HPXML::SurroundingsStandAlone
       hpxml.site.vertical_surroundings = HPXML::VerticalSurroundingsNoAboveOrBelow
     end
@@ -4680,19 +4686,33 @@ class HPXMLFile
         next unless (foundation_locations.include? surface.interior_adjacent_to) ||
                     (foundation_locations.include? surface.exterior_adjacent_to) ||
                     (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationLivingSpace) ||
-                    (surf_type == 'floors' && surface.exterior_adjacent_to == HPXML::LocationOutside)
+                    (surf_type == 'floors' && [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include?(surface.exterior_adjacent_to))
 
         surf_hash['ids'] << surface.id
       end
     end
 
+    if args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+      foundation_type = HPXML::FoundationTypeBellyAndWing
+      if args[:geometry_foundation_type].end_with?('WithSkirt')
+        belly_wing_skirt_present = true
+      elsif args[:geometry_foundation_type].end_with?('NoSkirt')
+        belly_wing_skirt_present = false
+      else
+        fail 'Unepected belly and wing foundation type.'
+      end
+    else
+      foundation_type = args[:geometry_foundation_type]
+    end
+
     hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
-                          foundation_type: args[:geometry_foundation_type],
+                          foundation_type: foundation_type,
                           attached_to_slab_idrefs: surf_ids['slabs']['ids'],
                           attached_to_floor_idrefs: surf_ids['floors']['ids'],
                           attached_to_foundation_wall_idrefs: surf_ids['foundation_walls']['ids'],
                           attached_to_wall_idrefs: surf_ids['walls']['ids'],
-                          attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'])
+                          attached_to_rim_joist_idrefs: surf_ids['rim_joists']['ids'],
+                          belly_wing_skirt_present: belly_wing_skirt_present)
   end
 
   def self.set_heating_systems(hpxml, args)

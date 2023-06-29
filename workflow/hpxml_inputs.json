@@ -1474,6 +1474,26 @@
     "parent_hpxml": "sample_files/base.xml",
     "misc_plug_loads_other_annual_kwh": 1729
   },
+  "sample_files/base-foundation-belly-wing-skirt.xml": {
+    "parent_hpxml": "sample_files/base-foundation-ambient.xml",
+    "geometry_unit_type": "manufactured home",
+    "geometry_unit_aspect_ratio": 4.0,
+    "geometry_foundation_type": "BellyAndWingWithSkirt",
+    "geometry_foundation_height": 2,
+    "geometry_foundation_height_above_grade": 2,
+    "geometry_roof_pitch": "3:12",
+    "window_area_front": 140,
+    "window_area_back": 140,
+    "window_area_left": 20,
+    "window_area_right": 20,
+    "ducts_supply_location": "manufactured home belly",
+    "ducts_supply_insulation_r": 0,
+    "ducts_return_location": "manufactured home belly"
+  },
+  "sample_files/base-foundation-belly-wing-no-skirt.xml": {
+    "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
+    "geometry_foundation_type": "BellyAndWingNoSkirt"
+  },
   "sample_files/base-foundation-complex.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
@@ -3386,6 +3406,19 @@
     "hvac_control_cooling_weekend_setpoint": null,
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
+  },
+  "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
+    "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
+    "hvac_control_heating_weekday_setpoint": null,
+    "hvac_control_heating_weekend_setpoint": null,
+    "hvac_control_cooling_weekday_setpoint": null,
+    "hvac_control_cooling_weekend_setpoint": null,
+    "water_heater_setpoint_temperature": null,
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
+  },
+  "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
+    "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
+    "schedules_power_outage_period": "Dec 1 5 - Jan 31 14"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
