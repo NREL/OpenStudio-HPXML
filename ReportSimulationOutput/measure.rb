@@ -1846,7 +1846,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
     (0...n_timesteps).each do |i|
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
-      load_kw = crit_load[t] # FIXME: This has the battery charging/discharging taken out of it, but does not account for roundtrip efficiency (because it is handled through EMS)
+      load_kw = crit_load[t]
 
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
       return i / Float(ts_per_hr) if batt_soc_kwh <= 0
