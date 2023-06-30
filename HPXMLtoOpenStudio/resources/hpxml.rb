@@ -122,6 +122,7 @@ class HPXML < Object
   FoundationTypeCrawlspaceConditioned = 'ConditionedCrawlspace'
   FoundationTypeCrawlspaceUnvented = 'UnventedCrawlspace'
   FoundationTypeCrawlspaceVented = 'VentedCrawlspace'
+  FoundationTypeBellyAndWing = 'BellyAndWing'
   FoundationTypeSlab = 'SlabOnGrade'
   FoundationWallTypeConcreteBlock = 'concrete block'
   FoundationWallTypeConcreteBlockFoamCore = 'concrete block foam core'
@@ -229,6 +230,8 @@ class HPXML < Object
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
+  LocationManufacturedHomeBelly = 'manufactured home belly'
+  LocationManufacturedHomeUnderBelly = 'manufactured home underbelly'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
@@ -1980,8 +1983,9 @@ class HPXML < Object
 
   class Foundation < BaseElement
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
-             :attached_to_slab_idrefs, :attached_to_floor_idrefs, :attached_to_foundation_wall_idrefs,
-             :attached_to_wall_idrefs, :attached_to_rim_joist_idrefs]
+             :belly_wing_skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
+             :attached_to_foundation_wall_idrefs, :attached_to_wall_idrefs,
+             :attached_to_rim_joist_idrefs]
     attr_accessor(*ATTRS)
 
     def attached_slabs
@@ -2058,6 +2062,8 @@ class HPXML < Object
         return LocationCrawlspaceConditioned
       elsif @foundation_type == FoundationTypeSlab
         return LocationLivingSpace
+      elsif @foundation_type == FoundationTypeBellyAndWing
+        return LocationManufacturedHomeUnderBelly
       else
         fail "Unexpected foundation type: '#{@foundation_type}'."
       end
@@ -2124,6 +2130,9 @@ class HPXML < Object
         elsif @foundation_type == FoundationTypeCrawlspaceConditioned
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
+        elsif @foundation_type == FoundationTypeBellyAndWing
+          belly_and_wing = XMLHelper.add_element(foundation_type_el, 'BellyAndWing')
+          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean, @belly_wing_skirt_present_isdefaulted) unless @belly_wing_skirt_present.nil?
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
@@ -2181,6 +2190,9 @@ class HPXML < Object
         @foundation_type = FoundationTypeAmbient
       elsif XMLHelper.has_element(foundation, 'FoundationType/AboveApartment')
         @foundation_type = FoundationTypeAboveApartment
+      elsif XMLHelper.has_element(foundation, 'FoundationType/BellyAndWing')
+        @foundation_type = FoundationTypeBellyAndWing
+        @belly_wing_skirt_present = XMLHelper.get_value(foundation, 'FoundationType/BellyAndWing/SkirtPresent', :boolean)
       end
       if @foundation_type == FoundationTypeCrawlspaceVented
         @vented_crawlspace_sla = XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='#{UnitsSLA}']/Value", :float)
@@ -2922,11 +2934,7 @@ class HPXML < Object
     end
 
     def is_exterior
-      if @exterior_adjacent_to == LocationOutside
-        return true
-      end
-
-      return false
+      return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
     end
 
     def is_interior

@@ -602,20 +602,36 @@ class HPXMLDefaults
   end
 
   def self.apply_foundations(hpxml)
-    return unless hpxml.has_location(HPXML::LocationCrawlspaceVented)
+    if hpxml.has_location(HPXML::LocationCrawlspaceVented)
+      vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+      if vented_crawls.empty?
+        hpxml.foundations.add(id: 'VentedCrawlspace',
+                              foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawls << hpxml.foundations[-1]
+      end
+      vented_crawls.each do |vented_crawl|
+        next unless vented_crawl.vented_crawlspace_sla.nil?
 
-    vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
-    if vented_crawls.empty?
-      hpxml.foundations.add(id: 'VentedCrawlspace',
-                            foundation_type: HPXML::FoundationTypeCrawlspaceVented)
-      vented_crawls << hpxml.foundations[-1]
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl.vented_crawlspace_sla_isdefaulted = true
+        break # EPvalidator.xml only allows a single ventilation rate
+      end
     end
-    vented_crawls.each do |vented_crawl|
-      next unless vented_crawl.vented_crawlspace_sla.nil?
 
-      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
-      vented_crawl.vented_crawlspace_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+    if hpxml.has_location(HPXML::LocationManufacturedHomeUnderBelly)
+      belly_and_wing_foundations = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+      if belly_and_wing_foundations.empty?
+        hpxml.foundations.add(id: 'BellyAndWing',
+                              foundation_type: HPXML::FoundationTypeBellyAndWing)
+        belly_and_wing_foundations << hpxml.foundations[-1]
+      end
+      belly_and_wing_foundations.each do |foundation|
+        next unless foundation.belly_wing_skirt_present.nil?
+
+        foundation.belly_wing_skirt_present_isdefaulted = true
+        foundation.belly_wing_skirt_present = true
+        break
+      end
     end
   end
 
