@@ -406,7 +406,7 @@ Annual hot water uses are listed below.
 Resilience Hours
 ~~~~~~~~~~~~~~~~
 
-Resilience hours by system are listed below.
+Resilience outputs are listed below.
 
    ===================================  ====================
    Type                                 Notes
