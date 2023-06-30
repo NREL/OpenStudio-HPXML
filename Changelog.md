@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
+- Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 
 __Bugfixes__
@@ -8,6 +9,7 @@ __Bugfixes__
 - Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
+- Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
 
 ## OpenStudio-HPXML v1.6.0
 
