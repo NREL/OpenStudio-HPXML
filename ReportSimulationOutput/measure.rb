@@ -231,7 +231,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_resilience', false)
     arg.setDisplayName('Generate Timeseries Output: Resilience')
-    arg.setDescription('Generates timeseries resilience.')
+    arg.setDescription('Generates timeseries resilience outputs.')
     arg.setDefaultValue(false)
     args << arg
 
