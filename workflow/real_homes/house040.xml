@@ -52,7 +52,6 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>CFM</UnitofMeasure>
@@ -220,7 +219,6 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>609.2</Area>
             <ExposedPerimeter>85.9</ExposedPerimeter>
-            <DepthBelowGrade>6.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -241,7 +239,6 @@
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Area>152.3</Area>
             <ExposedPerimeter>49.36</ExposedPerimeter>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>
               <Layer>
@@ -396,7 +393,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
-              <UnitLocation>mechanical closet</UnitLocation>
+              <UnitLocation>living space</UnitLocation>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -505,11 +502,11 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
           <FuelType>electricity</FuelType>
         </ClothesDryer>
         <Dishwasher>

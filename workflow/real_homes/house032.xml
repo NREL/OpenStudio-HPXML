@@ -165,7 +165,6 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>848.0</Area>
             <ExposedPerimeter>116.48</ExposedPerimeter>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -320,7 +319,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
-              <UnitLocation>mechanical closet</UnitLocation>
+              <UnitLocation>living space</UnitLocation>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -429,11 +428,11 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <NumberofUnits>1</NumberofUnits>
+          <Count>1</Count>
           <FuelType>natural gas</FuelType>
         </ClothesDryer>
         <Dishwasher>
