@@ -1261,6 +1261,22 @@ class ReportSimulationOutputTest < MiniTest::Test
     _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
   end
 
+  def test_timeseries_monthly_resilience
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-pv-battery-scheduled.xml'),
+                  'skip_validation' => true,
+                  'timeseries_frequency' => 'monthly',
+                  'include_timeseries_resilience' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] +
+                               BaseHPXMLTimeseriesColsResilience
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(12, timeseries_rows.size - 2)
+  end
+
   def test_timeseries_timestep
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'timeseries_frequency' => 'timestep',
