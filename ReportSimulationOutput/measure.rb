@@ -933,6 +933,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Resilience
     @resilience.each do |key, resilience|
       next unless key == RT::Battery
+      next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
 
       resilience.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
@@ -987,6 +988,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
+
+        next unless args[:include_timeseries_resilience]
+
         resilience.timeseries_output = resilience_timeseries
 
         # Aggregate up from hourly to the desired timeseries frequency
