@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>3cb2370d-8d10-41f8-a531-116abd7abc30</version_id>
-  <version_modified>2023-06-21T20:47:53Z</version_modified>
+  <version_id>f463b552-cd3a-4e43-a549-b19ea04922cf</version_id>
+  <version_modified>2023-07-10T15:54:15Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -307,7 +307,7 @@
     <argument>
       <name>include_annual_resilience</name>
       <display_name>Generate Annual Output: Resilience</display_name>
-      <description>Generates annual resilience.</description>
+      <description>Generates annual resilience outputs.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -623,7 +623,7 @@
     <argument>
       <name>include_timeseries_resilience</name>
       <display_name>Generate Timeseries Output: Resilience</display_name>
-      <description>Generates timeseries resilience.</description>
+      <description>Generates timeseries resilience outputs.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -761,13 +761,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BAA39D53</checksum>
+      <checksum>2254E881</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>815DEC3D</checksum>
+      <checksum>EBAC778A</checksum>
     </file>
   </files>
 </measure>

@@ -648,7 +648,6 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
-    puts actual_annual_rows.keys
     assert(actual_annual_rows.keys.empty?)
   end
 

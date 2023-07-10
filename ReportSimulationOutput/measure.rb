@@ -129,7 +129,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_resilience', false)
     arg.setDisplayName('Generate Annual Output: Resilience')
-    arg.setDescription('Generates annual resilience.')
+    arg.setDescription('Generates annual resilience outputs.')
     arg.setDefaultValue(true)
     args << arg
 
@@ -1844,7 +1844,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
-    (0...n_timesteps).each do |i|
+    for i in 0...n_timesteps
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
 
