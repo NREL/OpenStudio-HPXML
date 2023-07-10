@@ -654,6 +654,23 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return n_hours_per_period
   end
 
+  def rollup_timeseries_output_to_daily_or_monthly(timeseries_output, timeseries_frequency, average = false)
+    year = @hpxml.header.sim_calendar_year
+    sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
+    n_hours_per_period = get_n_hours_per_period(timeseries_frequency, sim_start_day_of_year, sim_end_day_of_year, year)
+    fail 'Unexpected failure for n_hours_per_period calculations.' if n_hours_per_period.sum != timeseries_output.size
+
+    ts_output = []
+    start_hour = 0
+    n_hours_per_period.each do |n_hours|
+      timeseries = timeseries_output[start_hour..start_hour + n_hours - 1].sum()
+      timeseries /= timeseries_output[start_hour..start_hour + n_hours - 1].size if average
+      ts_output << timeseries
+      start_hour += n_hours
+    end
+    return ts_output
+  end
+
   def get_outputs(runner, args)
     outputs = {}
 
@@ -973,19 +990,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         resilience.timeseries_output = resilience_timeseries
 
         # Aggregate up from hourly to the desired timeseries frequency
-        next unless ['daily', 'monthly'].include? args[:timeseries_frequency]
-
-        year = @hpxml.header.sim_calendar_year
-        sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
-        n_hours_per_period = get_n_hours_per_period(args[:timeseries_frequency], sim_start_day_of_year, sim_end_day_of_year, year)
-
-        resilience_timeseries = []
-        start_hour = 0
-        n_hours_per_period.each do |n_hours|
-          resilience_timeseries << resilience.timeseries_output[start_hour..start_hour + n_hours - 1].sum(0.0) / resilience.timeseries_output[start_hour..start_hour + n_hours - 1].size
-          start_hour += n_hours
+        if ['daily', 'monthly'].include? args[:timeseries_frequency]
+          resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
         end
-        resilience.timeseries_output = resilience_timeseries
       end
     end
 
@@ -1135,18 +1142,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           @emissions[key].timeseries_output_by_end_use[eu_key] = timeseries_elec.zip(timeseries_elec_factors).map { |n, f| n * f * elec_units_mult }
 
           # Aggregate up from hourly to the desired timeseries frequency
-          next unless ['daily', 'monthly'].include? args[:timeseries_frequency]
-
-          n_hours_per_period = get_n_hours_per_period(args[:timeseries_frequency], sim_start_day_of_year, sim_end_day_of_year, year)
-          fail 'Unexpected failure for emissions calculations.' if n_hours_per_period.sum != @emissions[key].timeseries_output_by_end_use[eu_key].size
-
-          timeseries_output = []
-          start_hour = 0
-          n_hours_per_period.each do |n_hours|
-            timeseries_output << @emissions[key].timeseries_output_by_end_use[eu_key][start_hour..start_hour + n_hours - 1].sum()
-            start_hour += n_hours
+          if ['daily', 'monthly'].include? args[:timeseries_frequency]
+            @emissions[key].timeseries_output_by_end_use[eu_key] = rollup_timeseries_output_to_daily_or_monthly(@emissions[key].timeseries_output_by_end_use[eu_key], args[:timeseries_frequency])
           end
-          @emissions[key].timeseries_output_by_end_use[eu_key] = timeseries_output
         end
 
         # Calculate emissions for fossil fuels
