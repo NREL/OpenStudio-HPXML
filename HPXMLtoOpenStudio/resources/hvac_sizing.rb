@@ -1894,13 +1894,6 @@ class HVACSizing
     pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
     nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
 
-    bore_depth = geothermal_loop.bore_length
-    if bore_depth.nil?
-      bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-      bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-      bore_length = [bore_length_heat, bore_length_cool].max
-    end
-
     loop_flow = geothermal_loop.loop_flow
     if loop_flow.nil?
       loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
@@ -1911,26 +1904,36 @@ class HVACSizing
       num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
     end
 
+    min_bore_depth = UnitConversions.convert(24, 'm', 'ft')
+    max_bore_depth = UnitConversions.convert(384, 'm', 'ft')
+
+    bore_depth = geothermal_loop.bore_length
     if bore_depth.nil?
+      bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+      bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+      bore_length = [bore_length_heat, bore_length_cool].max
       bore_depth = (bore_length / num_bore_holes).floor # ft
-      min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
 
       for _i in 0..4
         if (bore_depth < min_bore_depth) && (num_bore_holes > 1)
           num_bore_holes -= 1
           bore_depth = (bore_length / num_bore_holes).floor
-        elsif bore_depth > 345
+        elsif bore_depth > max_bore_depth
           num_bore_holes += 1
           bore_depth = (bore_length / num_bore_holes).floor
         end
       end
-      bore_depth = (bore_length / num_bore_holes).floor + 5
+
+      bore_depth = (bore_length / num_bore_holes).floor + 5 # FIXME: why add the 5?
+    end
+
+    if (bore_depth < min_bore_depth) || (bore_depth > max_bore_depth)
+      fail "Bore depth (#{bore_depth}) not between #{min_bore_depth.round(3)} and #{max_bore_depth.round(3)} ft."
     end
 
     bore_config = geothermal_loop.bore_config
     if bore_config.nil?
       bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
-      num_bore_holes = [num_bore_holes, 10].min
     end
 
     valid_configs = HVAC.valid_borefield_configs
