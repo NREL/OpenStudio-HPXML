@@ -2784,24 +2784,53 @@ class HVAC
     return curve
   end
   
-  def self.convert_rated_to_gross_capacity_cop_clg(clg_ap)
-    clg_ap.detailed_performance_net_cap_clg.keys().sort.each do |out_db|
-      clg_ap.detailed_performance_net_cap_clg[out_db].each_with_index do |cap, i|
-        net_power = cap / clg_ap.detailed_performance_net_cop_clg[out_db][i]
-        #gross_cap = cap + clg_ap.fan_powers_rated
-      end
+  def self.convert_net_to_gross_capacity_cop(net_cap, net_cop, watts_per_cfm, cfm, fan_ratio, mode)
+    fan_power = watts_per_cfm * cfm * (fan_ratio**3)
+    net_power = net_cap / net_cop
+    if mode == :clg
+      gross_cap = net_cap + fan_power
+    else
+      gross_cap = net_cap - fan_power
+    end
+    gross_power = net_power - fan_power
+    gross_cop = gross_cap / gross_power
+    return gross_cap, gross_cop
+  end
+
+  def self.process_neep_detailed_performance(hvac_ap, mode)
+    # convert net to gross, adds more data points for table lookup, etc.
+    if mode == :clg
+      hvac_ap.detailed_performance_gross_data_clg = {}
+      net_data = hvac_ap.detailed_performance_net_data_clg
+      gross_data = hvac_ap.detailed_performance_gross_data_clg
+      cfm_per_ton_min = hvac_ap.cool_rated_cfm_per_ton[0]
+      cfm_per_ton_max = hvac_ap.cool_rated_cfm_per_ton[-1]
+    elsif mode == :htg
+      hvac_ap.detailed_performance_gross_data_htg = {}
+      net_data = hvac_ap.detailed_performance_net_data_htg
+      gross_data = hvac_ap.detailed_performance_gross_data_htg
+      cfm_per_ton_min = hvac_ap.heat_rated_cfm_per_ton[0]
+      cfm_per_ton_max = hvac_ap.heat_rated_cfm_per_ton[-1]
+    end
+    net_data.keys.sort.each do |out_db|
+      gross_data[out_db] = {:min => [], :max => []}
+      # fan ratio = (cfm per ton min/max) * (cap min/max)
+      fan_ratio_min = net_data[out_db][:min][0] / net_data[out_db][:max][0] * cfm_per_ton_min / cfm_per_ton_max
+      fan_ratio_max = 1
+      gross_data[out_db][:min] = convert_net_to_gross_capacity_cop(net_data[out_db][:min][0], net_data[:min][1], hvac_ap.fan_power_rated, cfm_per_ton_min, fan_ratio_min, mode)
+      gross_data[out_db][:max] = convert_net_to_gross_capacity_cop(net_data[out_db][:max][0], net_data[:max][1], hvac_ap.fan_power_rated, cfm_per_ton_max, fan_ratio_max, mode)
     end
   end
 
-  def self.append_gross_capacities(cooling_detailed_performance_data)
-    # FIXME: Need to implement
+  def self.append_clg_gross_capacities_eirs(cooling_detailed_performance_data)
+    cooling_outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
+    cooling_indoor_wet_bulbs = [50.0, 67.0, 80.0]
+    
   end
 
   def self.create_dx_cooling_coil(model, obj_name, cooling_system)
     clg_ap = cooling_system.additional_properties
     if not cooling_system.cooling_detailed_performance_data.empty?
-      gross_total_capacities = convert_rated_to_gross_capacity_cop_clg(clg_ap)
-      gross_total_capacities = append_gross_capacities(cooling_system.cooling_detailed_performance_data)
       # FIXME: Replace with NEEP data points
       var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
       var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
@@ -3076,30 +3105,27 @@ class HVAC
   end
 
   def self.set_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
-    return if detailed_performance_data.empty?
     if mode == :clg
-      hvac_ap.detailed_performance_net_cap_clg = {}
-      hvac_ap.detailed_performance_net_cop_clg = {}
-      cap_hash = hvac_ap.detailed_performance_net_cap_clg
-      cop_hash = hvac_ap.detailed_performance_net_cop_clg
+      hvac_ap.detailed_performance_net_data_clg = {}
+      performance_data_hash = hvac_ap.detailed_performance_net_data_clg
     elsif mode == :htg
-      hvac_ap.detailed_performance_net_cap_htg = {}
-      hvac_ap.detailed_performance_net_cop_htg = {}
-      cap_hash = hvac_ap.detailed_performance_net_cap_htg
-      cop_hash = hvac_ap.detailed_performance_net_cop_htg
+      hvac_ap.detailed_performance_net_data_htg = {}
+      performance_data_hash = hvac_ap.detailed_performance_net_data_htg
     end
     detailed_performance_data.each do |data_point|
+      # Only process min and max capacities at each outdoor drybulb
       next unless ['minimum', 'maximum'].include? data_point.capacity_description
-      cap_hash[data_point.outdoor_temperature] = [] unless cap_hash.keys().include? data_point.outdoor_temperature
-      cop_hash[data_point.outdoor_temperature] = [] unless cop_hash.keys().include? data_point.outdoor_temperature
-      cap_hash[data_point.outdoor_temperature] << data_point.capacity
-      cop_hash[data_point.outdoor_temperature] << data_point.efficiency_cop
+      if not performance_data_hash.keys.include? data_point.outdoor_temperature
+        performance_data_hash[data_point.outdoor_temperature] = {:min => [], :max => []}
+      end
+      if data_point.capacity_description == 'minimum'
+        performance_data_hash[data_point.outdoor_temperature][:min] << data_point.capacity
+        performance_data_hash[data_point.outdoor_temperature][:min] << data_point.efficiency_cop
+      else
+        performance_data_hash[data_point.outdoor_temperature][:max] << data_point.capacity
+        performance_data_hash[data_point.outdoor_temperature][:max] << data_point.efficiency_cop
+      end
     end
-    cap_hash.keys().each do |out_db|
-      cap_hash[out_db].sort!
-      cop_hash[out_db].sort!
-    end
-    puts hvac_ap
   end
 
   def self.calc_ceer_from_eer(cooling_system)

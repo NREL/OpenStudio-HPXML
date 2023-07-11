@@ -1457,6 +1457,7 @@ class HPXMLDefaults
         HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
         HVAC.set_neep_detailed_performance_data(cooling_system.cooling_detailed_performance_data, cooling_system.additional_properties, :clg)
+        HVAC.process_neep_detailed_performance(cooling_system.additional_properties, :clg)
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         num_speeds = 10
@@ -1468,6 +1469,7 @@ class HPXMLDefaults
         HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
         HVAC.set_neep_detailed_performance_data(cooling_system.cooling_detailed_performance_data, cooling_system.additional_properties, :clg)
+        HVAC.process_neep_detailed_performance(cooling_system.additional_properties, :clg)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
 
@@ -1505,11 +1507,13 @@ class HPXMLDefaults
         HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
         HVAC.set_neep_detailed_performance_data(heat_pump.cooling_detailed_performance_data, heat_pump.additional_properties, :clg)
+        HVAC.process_neep_detailed_performance(heat_pump.additional_properties, :clg)
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
         HVAC.set_neep_detailed_performance_data(heat_pump.cooling_detailed_performance_data, heat_pump.additional_properties, :htg)
+        HVAC.process_neep_detailed_performance(heat_pump.additional_properties, :htg)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
@@ -1522,11 +1526,13 @@ class HPXMLDefaults
         HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
         HVAC.set_neep_detailed_performance_data(heat_pump.cooling_detailed_performance_data, heat_pump.additional_properties, :clg)
+        HVAC.process_neep_detailed_performance(heat_pump.additional_properties, :clg)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)
         HVAC.set_heat_curves_mshp(heat_pump, num_speeds)
         HVAC.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
         HVAC.set_neep_detailed_performance_data(heat_pump.cooling_detailed_performance_data, heat_pump.additional_properties, :htg)
+        HVAC.process_neep_detailed_performance(heat_pump.additional_properties, :htg)
 
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
 
