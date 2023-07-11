@@ -10,6 +10,7 @@ __Bugfixes__
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
 - Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
+- Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 
 ## OpenStudio-HPXML v1.6.0
 
