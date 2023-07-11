@@ -746,7 +746,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
     bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
     bore_diameter = UnitConversions.convert(UnitConversions.convert(80.0, 'mm', 'm'), 'm', 'in') * 2
-    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    n_x_m = '5_8'
+    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter, n_x_m)
 
     expected_lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
     expected_gfnc_coeff = [2.619, 2.967, 3.279, 3.700, 4.190, 5.107, 6.680, 8.537, 11.991, 14.633, 16.767, 20.083, 22.593, 28.734, 34.345, 35.927, 37.342, 38.715, 39.768, 40.664, 41.426, 42.056, 42.524, 43.054, 43.416, 43.594, 43.885]
