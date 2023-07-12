@@ -2,7 +2,9 @@
 
 __New Features__
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
-- ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+- Output updates:
+  - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+  - Adds battery resilience hours output; allows requesting timeseries output.
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
