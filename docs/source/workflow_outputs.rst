@@ -411,10 +411,12 @@ Resilience outputs are listed below.
    ===================================  ====================
    Type                                 Notes
    ===================================  ====================
-   Resilience: Battery (hr)             How long the battery would have been able to support all of the electrical loads [#]_
+   Resilience: Battery (hr)             Average length of time the battery state of charge can meet the electric load [#]_
    ===================================  ====================
 
-  .. [#] Use the battery state of charge and the load profile. This treats all of the loads as "critical loads" that would be supported during an outage. Calculation is done for every timestep and then averaged, which assumes an outage is equally likely to occur every hour of the year. Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
+  .. [#] Calculation is performed every timestep and then averaged, which assumes a power outage is equally likely to occur every hour of the year.
+         The entire electric load is treated as a "critical load" that would be supported during an outage.
+         Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
 
 HVAC Capacities
 ~~~~~~~~~~~~~~~
