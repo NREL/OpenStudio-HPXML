@@ -2223,7 +2223,7 @@ def download_g_functions
   FileUtils.mkdir(g_functions_dir) if !File.exist?(g_functions_dir)
   filepath = File.join(g_functions_dir, 'g-function_library_1.0')
 
-  if !File.exist?(filepath)
+  if !File.exist?(filepath)  # To check: Is it OK to remove this 'if' statement (to auto-overwrite the 'g-function_library_1.0' folder with each download)?
     require 'tempfile'
     tmpfile = Tempfile.new('functions')
 
@@ -2239,6 +2239,7 @@ def download_g_functions
       end
     end
   end
+
 
   num_configs_actual = process_g_functions(filepath)
 
