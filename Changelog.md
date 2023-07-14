@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
+- **Breaking change**: Updates to newer proposed HPXML v4.0:
+  - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.

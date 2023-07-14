@@ -1420,8 +1420,7 @@ class OSModel
                                       sequential_heat_load_fracs, living_zone, @hvac_unavailable_periods)
 
       elsif [HPXML::HVACTypeStove,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeSpaceHeater,
              HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type

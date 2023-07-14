@@ -323,7 +323,7 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
               <HeatingSystemType>
-                <FixedHeater/>
+                <SpaceHeater/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
