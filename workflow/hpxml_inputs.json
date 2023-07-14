@@ -2295,14 +2295,6 @@
     "heating_system_type": "Fireplace",
     "heating_system_fuel": "wood"
   },
-  "sample_files/base-hvac-fixed-heater-gas-only.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "heating_system_type": "FixedHeater",
-    "heating_system_heating_efficiency": 1,
-    "cooling_system_type": "none",
-    "cooling_system_cooling_efficiency": 0,
-    "cooling_system_fraction_cool_load_served": 0
-  },
   "sample_files/base-hvac-floor-furnace-propane-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
     "heating_system_type": "FloorFurnace",
@@ -2569,14 +2561,6 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
-  "sample_files/base-hvac-portable-heater-gas-only.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "heating_system_type": "PortableHeater",
-    "heating_system_heating_efficiency": 1,
-    "cooling_system_type": "none",
-    "cooling_system_cooling_efficiency": 0,
-    "cooling_system_fraction_cool_load_served": 0
-  },
   "sample_files/base-hvac-ptac.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
@@ -2672,6 +2656,14 @@
   },
   "sample_files/base-hvac-setpoints-daily-setbacks.xml": {
     "parent_hpxml": "sample_files/base.xml"
+  },
+  "sample_files/base-hvac-space-heater-gas-only.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "heating_system_type": "SpaceHeater",
+    "heating_system_heating_efficiency": 1,
+    "cooling_system_type": "none",
+    "cooling_system_cooling_efficiency": 0,
+    "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-stove-oil-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
