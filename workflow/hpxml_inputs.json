@@ -1502,6 +1502,11 @@
     "slab_under_insulation_r": 10,
     "slab_under_width": 4
   },
+  "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "slab_under_insulation_r": 10,
+    "slab_under_width": 999
+  },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "foundation_wall_type": "concrete block foam core",
