@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9b91c99f-3cb0-47f7-9970-64bbb8c87dee</version_id>
-  <version_modified>2023-07-11T20:16:33Z</version_modified>
+  <version_id>1a1afbb9-8982-432e-9dc2-b958c438c982</version_id>
+  <version_modified>2023-07-14T15:06:14Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EFBD06BD</checksum>
+      <checksum>14852A93</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -220,49 +220,49 @@
       <filename>g_functions/C_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>86C81BDB</checksum>
+      <checksum>42B2BD99</checksum>
     </file>
     <file>
       <filename>g_functions/L_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EA9BD20B</checksum>
+      <checksum>297BFB4B</checksum>
     </file>
     <file>
       <filename>g_functions/LopU_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4DE9AEAC</checksum>
+      <checksum>D29D2D19</checksum>
     </file>
     <file>
       <filename>g_functions/Open_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2D76CB76</checksum>
+      <checksum>786F23B6</checksum>
     </file>
     <file>
       <filename>g_functions/U_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>66F24419</checksum>
+      <checksum>C81C9908</checksum>
     </file>
     <file>
       <filename>g_functions/rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A455FF70</checksum>
+      <checksum>CC1D265E</checksum>
     </file>
     <file>
       <filename>g_functions/util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D062B0CF</checksum>
+      <checksum>AC0422D0</checksum>
     </file>
     <file>
       <filename>g_functions/zoned_rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D5EDBB54</checksum>
+      <checksum>09B53D87</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
@@ -322,13 +322,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C338637B</checksum>
+      <checksum>64EB8CAB</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3F393562</checksum>
+      <checksum>31474141</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -370,7 +370,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9E02B1C4</checksum>
+      <checksum>0A96C4D7</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>

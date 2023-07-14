@@ -403,6 +403,21 @@ Annual hot water uses are listed below.
    Hot Water: Distribution Waste (gal) 
    ===================================  ====================
 
+Resilience
+~~~~~~~~~~
+
+Resilience outputs are listed below.
+
+   ===================================  ====================
+   Type                                 Notes
+   ===================================  ====================
+   Resilience: Battery (hr)             Average length of time the battery state of charge can meet the electric load [#]_
+   ===================================  ====================
+
+  .. [#] Calculation is performed every timestep and then averaged, which assumes a power outage is equally likely to occur every hour of the year.
+         The entire electric load is treated as a "critical load" that would be supported during an outage.
+         Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
+
 HVAC Capacities
 ~~~~~~~~~~~~~~~
 
@@ -497,6 +512,7 @@ Depending on the outputs requested, the file may include:
    Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., living space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
+   Resilience                           Resilience outputs (currently only average resilience hours for battery storage).
    EnergyPlus Output Variables          These are optional and can be requested with the ReportSimulationOutput ``user_output_variables`` argument.
    ===================================  ==================================================================================================================================
 
