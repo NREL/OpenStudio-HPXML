@@ -701,6 +701,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         months = ['June', 'July', 'August']
       elsif (season == PFT::Winter && is_northern_hemisphere) || (season == PFT::Summer && is_southern_hemisphere)
         months = ['December', 'January', 'February']
+      elsif season == PFT::Annual
+        months = ['Maximum of Months']
       end
       for month in months
         val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], 'ELECTRICITY:FACILITY {Maximum}', peak_fuel.annual_units)
@@ -2397,8 +2399,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuels
     @peak_fuels = {}
-    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Winter Total')
-    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Summer Total')
+    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total')
+    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total')
+    @peak_fuels[[FT::Elec, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total')
 
     @peak_fuels.each do |key, peak_fuel|
       fuel_type, peak_fuel_type = key
