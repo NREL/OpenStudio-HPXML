@@ -334,6 +334,7 @@ Peak building electricity outputs are listed below.
    ==================================  =============================================================
    Peak Electricity: Winter Total (W)  Maximum value in Dec/Jan/Feb (or Jun/Jul/Aug in the southern hemisphere)
    Peak Electricity: Summer Total (W)  Maximum value in Jun/Jul/Aug (or Dec/Jan/Feb in the southern hemisphere)
+   Peak Electricity: Annual Total (W)  Maximum value in any month
    ==================================  =============================================================
 
 Peak Building Loads

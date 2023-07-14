@@ -144,6 +144,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     "Unmet Hours: #{UHT::Cooling} (hr)",
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
+    "Peak Electricity: #{PFT::Annual} #{TE::Total} (W)",
     "Peak Load: #{PLT::Heating} (kBtu/hr)",
     "Peak Load: #{PLT::Cooling} (kBtu/hr)",
     "Component Load: Heating: #{CLT::Roofs} (MBtu)",
