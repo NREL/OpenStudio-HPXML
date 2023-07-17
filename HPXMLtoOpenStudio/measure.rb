@@ -1676,15 +1676,16 @@ class OSModel
       end
     end
 
-    # Duct leakage warnings?
+    # Duct leakage to outside warnings?
     # Need to check here instead of in schematron in case duct locations are defaulted
     @hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next if hvac_distribution.duct_leakage_measurements.empty?
 
       # Skip if there's a duct outside conditioned space
       next if hvac_distribution.ducts.select { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) }.size > 0
 
-      # Issue warning if duct leakage to outside above a certain threshold
+      # Issue warning if duct leakage to outside above a certain threshold and ducts completely in conditioned space
       issue_warning = false
       units = hvac_distribution.duct_leakage_measurements[0].duct_leakage_units
       lto_measurements = hvac_distribution.duct_leakage_measurements.select { |dlm| dlm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside }
