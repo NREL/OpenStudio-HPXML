@@ -56,6 +56,9 @@ class HVAC
 
     fan_cfms = []
     if not cooling_system.nil?
+      if not cooling_system.cooling_detailed_performance_data.empty?
+        process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg)
+      end
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
 
@@ -87,6 +90,9 @@ class HVAC
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
+        if not heating_system.heating_detailed_performance_data.empty?
+          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg)
+        end
 
         # Heating Coil
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
@@ -1036,6 +1042,88 @@ class HVAC
     end
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
+  
+  def self.get_cool_cap_eir_ft_spec(num_speeds)
+    if num_speeds == 1
+      cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
+      eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+    elsif num_speeds == 2
+      cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
+                   [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
+      eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
+                   [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
+    elsif num_speeds == 4
+      # pick 4 or 3 later
+      cap_ft_spec = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
+                     [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
+                     [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
+                     [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
+                     [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
+      eir_ft_spec = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
+                     [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
+                     [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
+                     [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
+                     [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
+    end
+    return cap_ft_spec, eir_ft_spec
+  end
+
+  def self.get_cool_cap_eir_fflow_spec(num_speeds)
+    if num_speeds == 1
+      # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
+      cap_fflow_spec = [get_airflow_fault_cooling_coeff()[0]]
+      eir_fflow_spec = [get_airflow_fault_cooling_coeff()[1]]
+    elsif num_speeds == 2
+      # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
+      cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
+                        [0.618281092, 0.569060264, -0.187341356]]
+      eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
+                        [1.570774717, -0.914152018, 0.343377302]]
+    elsif num_speeds == 4
+      # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
+      # So we assume that there is only one corresponding airflow rate for each compressor speed.
+      eir_fflow_spec = [[1, 0, 0]] * 4
+      cap_fflow_spec = [[1, 0, 0]] * 4
+    end
+    return cap_fflow_spec, eir_fflow_spec
+  end
+  
+  def self.get_heat_cap_eir_ft_spec(heat_pump, num_speeds)
+    cap_ft_spec = calc_heat_cap_ft_spec(heat_pump, num_speeds)
+    if num_speeds == 1
+      # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
+      # https://www.nrel.gov/docs/fy13osti/56354.pdf
+      eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
+    elsif num_speeds == 2
+      # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
+      # https://www.nrel.gov/docs/fy13osti/56354.pdf
+      eir_ft_spec = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
+                     [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
+    elsif num_speeds == 4
+      # From manufacturers data
+      eir_ft_spec = [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
+                     [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
+                     [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
+                     [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
+    end
+    return cap_ft_spec, eir_ft_spec
+  end
+
+  def self.get_heat_cap_eir_fflow_spec(num_speeds)
+    if num_speeds == 1
+      cap_fflow_spec = [get_airflow_fault_heating_coeff()[0]]
+      eir_fflow_spec = [get_airflow_fault_heating_coeff()[1]]
+    elsif num_speeds == 2
+      cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
+                        [0.76634609, 0.32840943, -0.094701495]]
+      eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
+                        [2.001041353, -1.58869128, 0.587593517]]
+    elsif num_speeds == 4
+      cap_fflow_spec = [[1, 0, 0]] * 4
+      eir_fflow_spec = [[1, 0, 0]] * 4
+    end
+    return cap_fflow_spec, eir_fflow_spec
+  end
 
   def self.set_cool_curves_central_air_source(heat_pump, use_eer = false)
     hp_ap = heat_pump.additional_properties
@@ -1043,16 +1131,12 @@ class HVAC
     if hp_ap.num_speeds == 1
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
-      hp_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
-      hp_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+      hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(hp_ap.num_speeds)
       hp_ap.cool_capacity_ratios = [1.0]
       if not use_eer
         hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[0]
         hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-        # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-        cap_fflow_spec, eir_fflow_spec = get_airflow_fault_cooling_coeff()
-        hp_ap.cool_cap_fflow_spec = [cap_fflow_spec]
-        hp_ap.cool_eir_fflow_spec = [eir_fflow_spec]
+        hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(hp_ap.num_speeds)
         hp_ap.cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec)]
       else
         hp_ap.cool_fan_speed_ratios = [1.0]
@@ -1065,39 +1149,20 @@ class HVAC
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_capacity_ratios = [0.72, 1.0]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-      hp_ap.cool_cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
-                                [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
-      hp_ap.cool_eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
-                                [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
-      # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      hp_ap.cool_cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
-                                   [0.618281092, 0.569060264, -0.187341356]]
-      hp_ap.cool_eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
-                                   [1.570774717, -0.914152018, 0.343377302]]
+      hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(hp_ap.num_speeds)
+      hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(hp_ap.num_speeds)
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
       # From Carrier heat pump lab testing
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-      hp_ap.cool_cap_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
-                                       [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
-                                       [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
-                                       [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
-                                       [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
+      hp_ap.cool_cap_coeff_perf_map, hp_ap.cool_eir_coeff_perf_map = get_cool_cap_eir_ft_spec(hp_ap.num_speeds)
       hp_ap.cool_cap_ft_spec = hp_ap.cool_cap_coeff_perf_map.select { |i| [0, 1, 2, 4].include? hp_ap.cool_cap_coeff_perf_map.index(i) }
       hp_ap.cool_cap_ft_spec_3 = hp_ap.cool_cap_coeff_perf_map.select { |i| [0, 1, 4].include? hp_ap.cool_cap_coeff_perf_map.index(i) }
-      hp_ap.cool_eir_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
-                                       [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
-                                       [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
-                                       [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
-                                       [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
       hp_ap.cool_eir_ft_spec = hp_ap.cool_eir_coeff_perf_map.select { |i| [0, 1, 2, 4].include? hp_ap.cool_eir_coeff_perf_map.index(i) }
       hp_ap.cool_eir_ft_spec_3 = hp_ap.cool_eir_coeff_perf_map.select { |i| [0, 1, 4].include? hp_ap.cool_eir_coeff_perf_map.index(i) }
-      # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
-      # So we assume that there is only one corresponding airflow rate for each compressor speed.
-      hp_ap.cool_eir_fflow_spec = [[1, 0, 0]] * 4
-      hp_ap.cool_cap_fflow_spec = [[1, 0, 0]] * 4
+      hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(hp_ap.num_speeds)
       hp_ap.cap_ratio_seer_3 = hp_ap.cool_capacity_ratios.select { |i| [0, 1, 3].include? hp_ap.cool_capacity_ratios.index(i) }
       hp_ap.fan_speed_seer_3 = hp_ap.cool_fan_speed_ratios.select { |i| [0, 1, 3].include? hp_ap.cool_fan_speed_ratios.index(i) }
       hp_ap.cool_eers = calc_eers_cooling_4speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cap_ratio_seer_3, hp_ap.fan_speed_seer_3, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec_3, hp_ap.cool_cap_ft_spec_3)
@@ -1107,15 +1172,10 @@ class HVAC
   def self.set_heat_curves_central_air_source(heat_pump, use_cop = false)
     hp_ap = heat_pump.additional_properties
     hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(hp_ap.num_speeds, use_cop)
+    hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump, hp_ap.num_speeds)
+    hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(hp_ap.num_speeds)
     if hp_ap.num_speeds == 1
-      # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
-      # https://www.nrel.gov/docs/fy13osti/56354.pdf
       hp_ap.heat_capacity_ratios = [1.0]
-      hp_ap.heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
-      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
-      hp_ap.heat_cap_fflow_spec = [cap_fflow_spec]
-      hp_ap.heat_eir_fflow_spec = [eir_fflow_spec]
-      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heat_pump, heat_pump.additional_properties.num_speeds)
       if not use_cop
         hp_ap.heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)]
         hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[0]
@@ -1129,26 +1189,11 @@ class HVAC
       hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
       hp_ap.heat_capacity_ratios = [0.72, 1.0]
       hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
-      hp_ap.heat_eir_ft_spec = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
-                                [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
-      hp_ap.heat_cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
-                                   [0.76634609, 0.32840943, -0.094701495]]
-      hp_ap.heat_eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
-                                   [2.001041353, -1.58869128, 0.587593517]]
-      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heat_pump, heat_pump.additional_properties.num_speeds)
       hp_ap.heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     elsif hp_ap.num_speeds == 4
-      # From manufacturers data
       hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-2]
       hp_ap.heat_capacity_ratios = [0.33, 0.56, 1.0, 1.17]
       hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
-      hp_ap.heat_eir_ft_spec = [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
-                                [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
-                                [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
-                                [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
-      hp_ap.heat_cap_fflow_spec = [[1, 0, 0]] * 4
-      hp_ap.heat_eir_fflow_spec = [[1, 0, 0]] * 4
-      hp_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heat_pump, heat_pump.additional_properties.num_speeds)
       hp_ap.heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     end
   end
@@ -2784,56 +2829,150 @@ class HVAC
     return curve
   end
   
-  def self.convert_net_to_gross_capacity_cop(net_cap, net_cop, watts_per_cfm, cfm, fan_ratio, mode)
+  def self.convert_net_to_gross_capacity_cop(net_cap_watts, net_cop, watts_per_cfm, cfm_per_ton, fan_ratio, mode)
+    net_cap_ton = UnitConversions.convert(net_cap_watts, 'w', 'ton')
+    cfm = net_cap_ton * cfm_per_ton
     fan_power = watts_per_cfm * cfm * (fan_ratio**3)
-    net_power = net_cap / net_cop
+    net_power = net_cap_watts / net_cop
     if mode == :clg
-      gross_cap = net_cap + fan_power
+      gross_cap_watts = net_cap_watts + fan_power
     else
-      gross_cap = net_cap - fan_power
+      gross_cap_watts = net_cap_watts - fan_power
     end
     gross_power = net_power - fan_power
-    gross_cop = gross_cap / gross_power
-    return gross_cap, gross_cop
+    gross_cop = gross_cap_watts / gross_power
+    return gross_cap_watts, gross_cop
   end
 
-  def self.process_neep_detailed_performance(hvac_ap, mode)
+  def self.setup_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
+    if mode == :clg
+      hvac_ap.detailed_performance_net_data_clg = {}
+      performance_data_hash = hvac_ap.detailed_performance_net_data_clg
+    elsif mode == :htg
+      hvac_ap.detailed_performance_net_data_htg = {}
+      performance_data_hash = hvac_ap.detailed_performance_net_data_htg
+    end
+    detailed_performance_data.each do |data_point|
+      # Only process min and max capacities at each outdoor drybulb
+      next unless ['minimum', 'maximum'].include? data_point.capacity_description
+      performance_data_hash[data_point.capacity_description] = {} unless performance_data_hash.keys.include? data_point.capacity_description
+      # first element capacity, second element cop
+      performance_data_hash[data_point.capacity_description][data_point.outdoor_temperature] = [] unless performance_data_hash[data_point.capacity_description].keys.include? data_point.outdoor_temperature
+      performance_data_hash[data_point.capacity_description][data_point.outdoor_temperature] << UnitConversions.convert(data_point.capacity, 'Btu/hr', 'w')
+      performance_data_hash[data_point.capacity_description][data_point.outdoor_temperature] << data_point.efficiency_cop
+    end
+  end
+
+  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode)
+    setup_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
+    
     # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
-      hvac_ap.detailed_performance_gross_data_clg = {}
       net_data = hvac_ap.detailed_performance_net_data_clg
+      cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
+      # create gross data hash
+      hvac_ap.detailed_performance_gross_data_clg = {}
       gross_data = hvac_ap.detailed_performance_gross_data_clg
-      cfm_per_ton_min = hvac_ap.cool_rated_cfm_per_ton[0]
-      cfm_per_ton_max = hvac_ap.cool_rated_cfm_per_ton[-1]
     elsif mode == :htg
-      hvac_ap.detailed_performance_gross_data_htg = {}
       net_data = hvac_ap.detailed_performance_net_data_htg
+      cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
+      # create gross data hash
+      hvac_ap.detailed_performance_gross_data_htg = {}
       gross_data = hvac_ap.detailed_performance_gross_data_htg
-      cfm_per_ton_min = hvac_ap.heat_rated_cfm_per_ton[0]
-      cfm_per_ton_max = hvac_ap.heat_rated_cfm_per_ton[-1]
     end
-    net_data.keys.sort.each do |out_db|
-      gross_data[out_db] = {:min => [], :max => []}
-      # fan ratio = (cfm per ton min/max) * (cap min/max)
-      fan_ratio_min = net_data[out_db][:min][0] / net_data[out_db][:max][0] * cfm_per_ton_min / cfm_per_ton_max
-      fan_ratio_max = 1
-      gross_data[out_db][:min] = convert_net_to_gross_capacity_cop(net_data[out_db][:min][0], net_data[:min][1], hvac_ap.fan_power_rated, cfm_per_ton_min, fan_ratio_min, mode)
-      gross_data[out_db][:max] = convert_net_to_gross_capacity_cop(net_data[out_db][:max][0], net_data[:max][1], hvac_ap.fan_power_rated, cfm_per_ton_max, fan_ratio_max, mode)
+    # convert net to gross
+    net_data.keys.sort.each do |speed|
+      gross_data[speed] = {}
+      net_data[speed].keys.sort.each do |out_db|
+        gross_data[speed][out_db] = []
+        cfm_per_ton_speed = (speed == 'minimum') ? cfm_per_ton[0] : cfm_per_ton[-1]
+        # fan ratio = (cfm per ton min/max) * (cap min/max)
+        fan_ratio = net_data[speed][out_db][0] / net_data['maximum'][out_db][0] * cfm_per_ton_speed / cfm_per_ton[-1]
+        gross_data[speed][out_db] = convert_net_to_gross_capacity_cop(net_data[speed][out_db][0], net_data[speed][out_db][1], hvac_ap.fan_power_rated, cfm_per_ton_speed, fan_ratio, mode)
+      end
     end
+    # convert to table lookup data
+    gross_data = interpolate_to_table_points(gross_data)
+  end
+  
+  def self.interpolate_to_table_points(data_clg)
+    # Set of data used for table lookup
+    cooling_outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
+    new_data = {}
+    data_clg.keys.each do |speed|
+      user_out_db = data_clg[speed].keys.sort
+      new_data[speed] = {}
+      cooling_outdoor_dry_bulbs.each do |new_pt|
+        new_data[speed][new_pt] = []
+        right_point = user_out_db.find { |e| e > new_pt}
+        left_point = user_out_db.reverse.find { |e| e < new_pt}
+        if right_point.nil?
+          # expolation
+          right_point = user_out_db[-1]
+          left_point = user_out_db[-2]
+        elsif left_point.nil?
+          # expolation
+          right_point = user_out_db[1]
+          left_point = user_out_db[0]
+        end
+        cap_slope = (data_clg[speed][right_point][0] - data_clg[speed][left_point][0]) / (right_point - left_point)
+        cop_slope = (data_clg[speed][right_point][1] - data_clg[speed][left_point][1]) / (right_point - left_point)
+        new_data[speed][new_pt] << (new_pt - left_point) * cap_slope + data_clg[speed][left_point][0]
+        new_data[speed][new_pt] << (new_pt - left_point) * cop_slope + data_clg[speed][left_point][1]
+      end
+    end
+    return new_data
   end
 
-  def self.append_clg_gross_capacities_eirs(cooling_detailed_performance_data)
-    cooling_outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
+  def self.correct_cool_ft_capacity_power(gross_data)
+    # Add sensitivity to indoor wet bulb temperature
     cooling_indoor_wet_bulbs = [50.0, 67.0, 80.0]
-    
+    rated_t_iwb = 67
+    # single speed cutler curve coefficients
+    cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(1)
+    # table lookup output values
+    gross_data_odb_iwb_cap = {}
+    gross_data_odb_iwb_eir = {}
+    gross_data.keys.each do |speed|
+      gross_data_odb_iwb_cap[speed] = {}
+      gross_data_odb_iwb_eir[speed] = {}
+      gross_data[speed].keys.sort.each do |t_odb|
+        cooling_indoor_wet_bulbs.each do |t_iwb|
+          gross_data_odb_iwb_cap[speed][t_iwb] = {}
+          gross_data_odb_iwb_eir[speed][t_iwb] = {}
+          # capacity FT curve output
+          cap_ft_curve_output = MathTools.biquadratic(t_iwb, t_odb, cap_ft_spec_ss)
+          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_iwb, t_odb, cap_ft_spec_ss)
+          cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
+          # corrected capacity hash, with two temperature independent variables
+          corrected_capacity = gross_data[speed][t_odb][0] * cap_correction_factor
+          gross_data_odb_iwb_cap[speed][t_iwb][t_odb] = corrected_capacity
+
+          # eir FT curve output
+          eir_ft_curve_output = MathTools.biquadratic(t_iwb, t_odb, eir_ft_spec_ss)
+          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_iwb, t_odb, eir_ft_spec_ss)
+          eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
+          gross_data_odb_iwb_eir[speed][t_iwb][t_odb] = eir_correction_factor / gross_data[speed][t_odb][1]
+        end
+      end
+    end
+    return gross_data_odb_iwb_cap, gross_data_odb_iwb_eir
   end
 
   def self.create_dx_cooling_coil(model, obj_name, cooling_system)
     clg_ap = cooling_system.additional_properties
+    
+    # independent variables
     if not cooling_system.cooling_detailed_performance_data.empty?
-      # FIXME: Replace with NEEP data points
-      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+      cooling_outdoor_dry_bulbs = [UnitConversions.convert(55, 'F', 'C'),
+                                     UnitConversions.convert(82, 'F', 'C'),
+                                     UnitConversions.convert(95, 'F', 'C'),
+                                     UnitConversions.convert(125, 'F', 'C')]
+      cooling_indoor_wet_bulbs = [UnitConversions.convert(50, 'F', 'C'),
+                                     UnitConversions.convert(67, 'F', 'C'),
+                                     UnitConversions.convert(80, 'F', 'C')]
+      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: cooling_indoor_wet_bulbs, sample_low: nil, sample_high: nil, sample_step: nil }
+      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: cooling_outdoor_dry_bulbs, sample_low: nil, sample_high: nil, sample_step: nil }
     else
       var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
       var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
@@ -2852,12 +2991,6 @@ class HVAC
 
     clg_coil = nil
     crankcase_heater_temp = 50 # F
-
-    # independent variables
-    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-    var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-    var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
-    var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
 
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
@@ -3102,30 +3235,6 @@ class HVAC
     end
 
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
-  end
-
-  def self.set_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
-    if mode == :clg
-      hvac_ap.detailed_performance_net_data_clg = {}
-      performance_data_hash = hvac_ap.detailed_performance_net_data_clg
-    elsif mode == :htg
-      hvac_ap.detailed_performance_net_data_htg = {}
-      performance_data_hash = hvac_ap.detailed_performance_net_data_htg
-    end
-    detailed_performance_data.each do |data_point|
-      # Only process min and max capacities at each outdoor drybulb
-      next unless ['minimum', 'maximum'].include? data_point.capacity_description
-      if not performance_data_hash.keys.include? data_point.outdoor_temperature
-        performance_data_hash[data_point.outdoor_temperature] = {:min => [], :max => []}
-      end
-      if data_point.capacity_description == 'minimum'
-        performance_data_hash[data_point.outdoor_temperature][:min] << data_point.capacity
-        performance_data_hash[data_point.outdoor_temperature][:min] << data_point.efficiency_cop
-      else
-        performance_data_hash[data_point.outdoor_temperature][:max] << data_point.capacity
-        performance_data_hash[data_point.outdoor_temperature][:max] << data_point.efficiency_cop
-      end
-    end
   end
 
   def self.calc_ceer_from_eer(cooling_system)
