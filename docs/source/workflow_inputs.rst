@@ -2216,7 +2216,7 @@ Additional information is entered in each ``Ducts``.
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
-  .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
+  .. [#] The sum of all ``FractionDuctArea`` must each equal to 1, both for the supply side and return side.
   .. [#] FractionDuctArea and/or DuctSurfaceArea are required if DuctLocation is provided.
   .. [#] | If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
          | - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
