@@ -2744,7 +2744,7 @@ class HVACSizing
 
       if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
           HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
-        bore_locations = values_1[:bore_locations]
+        bore_locations = values_1[:bore_locations]  # select the most appropriate config here
         next if bore_locations.size != num_bore_holes
 
         logtime = values_1[:logtime].map { |v| Float(v) }
