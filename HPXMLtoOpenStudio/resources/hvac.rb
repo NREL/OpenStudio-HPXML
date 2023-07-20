@@ -2690,7 +2690,7 @@ class HVAC
     return create_table_lookup(model, 'ConstantTable', [var_constant], [1, 1], -100, 100)
   end
 
-  def self.create_table_lookup(model, name, independent_vars, output_values, output_min=nil, output_max=nil)
+  def self.create_table_lookup(model, name, independent_vars, output_values, output_min=nil, output_max=nil, rated_value=nil)
     table = OpenStudio::Model::TableLookup.new(model)
     table.setName(name)
     independent_vars.each do |var|
@@ -2731,8 +2731,9 @@ class HVAC
     return curve
   end
   
-  def self.convert_net_to_gross_capacity_cop(net_cap_watts, net_cop, watts_per_cfm, cfm_per_ton, fan_ratio, mode)
-    net_cap_ton = UnitConversions.convert(net_cap_watts, 'w', 'ton')
+  def self.convert_net_to_gross_capacity_cop(net_cap, net_cop, watts_per_cfm, cfm_per_ton, fan_ratio, mode)
+    net_cap_ton = UnitConversions.convert(net_cap, 'Btu/hr', 'ton')
+    net_cap_watts = UnitConversions.convert(net_cap, 'Btu/hr', 'w')
     cfm = net_cap_ton * cfm_per_ton
     fan_power = watts_per_cfm * cfm * (fan_ratio**3)
     net_power = net_cap_watts / net_cop
@@ -2743,65 +2744,60 @@ class HVAC
     end
     gross_power = net_power - fan_power
     gross_cop = gross_cap_watts / gross_power
-    return gross_cap_watts, gross_cop
+    gross_cap_btu_hr = UnitConversions.convert(net_cap, 'w', 'Btu/hr')
+    return gross_cap_btu_hr, gross_cop
   end
 
-  def self.setup_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
-    if mode == :clg
-      hvac_ap.detailed_performance_net_data_clg = {}
-      performance_data_hash = hvac_ap.detailed_performance_net_data_clg
-    elsif mode == :htg
-      hvac_ap.detailed_performance_net_data_htg = {}
-      performance_data_hash = hvac_ap.detailed_performance_net_data_htg
-    end
+  def self.setup_neep_detailed_performance_data(detailed_performance_data)
+    net_data = {}
     detailed_performance_data.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
       next unless ['minimum', 'maximum'].include? data_point.capacity_description
       speed_num = {'minimum' => 0, 'maximum' => 1}[data_point.capacity_description]
-      performance_data_hash[speed_num] = {} unless performance_data_hash.keys.include? speed_num
+      net_data[speed_num] = {} unless net_data.keys.include? speed_num
       # first element capacity, second element cop
-      performance_data_hash[speed_num][data_point.outdoor_temperature] = [] unless performance_data_hash[speed_num].keys.include? data_point.outdoor_temperature
-      performance_data_hash[speed_num][data_point.outdoor_temperature] << UnitConversions.convert(data_point.capacity, 'Btu/hr', 'w')
-      performance_data_hash[speed_num][data_point.outdoor_temperature] << data_point.efficiency_cop
+      net_data[speed_num][data_point.outdoor_temperature] = [] unless net_data[speed_num].keys.include? data_point.outdoor_temperature
+      net_data[speed_num][data_point.outdoor_temperature] << data_point.capacity
+      net_data[speed_num][data_point.outdoor_temperature] << data_point.efficiency_cop
     end
+    return net_data
   end
 
   def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode)
-    setup_neep_detailed_performance_data(detailed_performance_data, hvac_ap, mode)
+    net_data = setup_neep_detailed_performance_data(detailed_performance_data)
+    gross_data = {}
     
     # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
-      net_data = hvac_ap.detailed_performance_net_data_clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
-      # create gross data hash
-      hvac_ap.detailed_performance_gross_data_clg = {}
-      gross_data = hvac_ap.detailed_performance_gross_data_clg
     elsif mode == :htg
-      net_data = hvac_ap.detailed_performance_net_data_htg
       cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
-      # create gross data hash
-      hvac_ap.detailed_performance_gross_data_htg = {}
-      gross_data = hvac_ap.detailed_performance_gross_data_htg
     end
     # convert net to gross
     net_data.keys.sort.each do |speed|
       gross_data[speed] = {}
       net_data[speed].keys.sort.each do |out_db|
         gross_data[speed][out_db] = []
-        cfm_per_ton_speed = (speed == 0) ? cfm_per_ton[0] : cfm_per_ton[-1]
         # fan ratio = (cfm per ton min/max) * (cap min/max)
-        fan_ratio = net_data[speed][out_db][0] / net_data[1][out_db][0] * cfm_per_ton_speed / cfm_per_ton[-1]
-        gross_data[speed][out_db] = convert_net_to_gross_capacity_cop(net_data[speed][out_db][0], net_data[speed][out_db][1], hvac_ap.fan_power_rated, cfm_per_ton_speed, fan_ratio, mode)
+        fan_ratio = net_data[speed][out_db][0] / net_data[1][out_db][0] * cfm_per_ton[speed] / cfm_per_ton[-1]
+        gross_data[speed][out_db] = convert_net_to_gross_capacity_cop(net_data[speed][out_db][0], net_data[speed][out_db][1], hvac_ap.fan_power_rated, cfm_per_ton[speed], fan_ratio, mode)
       end
     end
     # convert to table lookup data
     puts net_data
     puts gross_data
-    gross_data = interpolate_to_ft_table_points(gross_data, mode)
-    puts gross_data
+    gross_data_interpolated = interpolate_to_odb_table_points(gross_data, mode)
+    puts gross_data_interpolated
+    if mode == :clg
+      hvac_ap.gross_cap_ft_values_clg, hvac_ap.gross_eir_ft_values_clg = correct_ft_cap_eir(gross_data_interpolated, mode)
+    puts hvac_ap.gross_cap_ft_values_clg, hvac_ap.gross_eir_ft_values_clg
+    else
+      hvac_ap.gross_cap_ft_values_htg, hvac_ap.gross_eir_ft_values_htg = correct_ft_cap_eir(gross_data_interpolated, mode)
+    puts hvac_ap.gross_cap_ft_values_htg, hvac_ap.gross_eir_ft_values_htg
+    end
   end
   
-  def self.interpolate_to_ft_table_points(data_orig, mode)
+  def self.interpolate_to_odb_table_points(data_orig, mode)
     # Set of data used for table lookup
     if mode == :clg
       outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
@@ -2834,67 +2830,53 @@ class HVAC
     return new_data
   end
   
-  def self.correct_cool_ft_capacity_power(heat_pump, gross_data)
+  def self.correct_ft_cap_eir(gross_data, mode)
     # Add sensitivity to indoor wet bulb temperature
     # single speed cutler curve coefficients
     if mode == :clg
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
-      indoor_wet_bulbs = [50.0, 67.0, 80.0]
-      rated_t_iwb = 67
+      indoor_t = [50.0, 67.0, 80.0]
+      rated_t_i = 67
     else
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
-      indoor_dry_bulbs = [60.0, 70.0, 80.0]
-      rated_t_iwb = 60
+      indoor_t = [60.0, 70.0, 80.0]
+      rated_t_i = 60
     end
     # table lookup output values
-    gross_data_odb_iwb_cap = {}
-    gross_data_odb_iwb_eir = {}
+    gross_data_out_in_cap = {}
+    gross_data_out_in_eir = {}
     gross_data.keys.sort.each do |speed|
-      gross_data_odb_iwb_cap[speed] = {}
-      gross_data_odb_iwb_eir[speed] = {}
-      gross_data[speed].keys.sort.each do |t_odb|
-        indoor_wet_bulbs.each do |t_iwb|
-          gross_data_odb_iwb_cap[speed][t_iwb] = {}
-          gross_data_odb_iwb_eir[speed][t_iwb] = {}
+      gross_data_out_in_cap[speed] = {}
+      gross_data_out_in_eir[speed] = {}
+      indoor_t.each do |t_i|
+        gross_data_out_in_cap[speed][t_i] = {}
+        gross_data_out_in_eir[speed][t_i] = {}
+        gross_data[speed].keys.sort.each do |t_odb|
           # capacity FT curve output
-          cap_ft_curve_output = MathTools.biquadratic(t_iwb, t_odb, cap_ft_spec_ss)
-          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_iwb, t_odb, cap_ft_spec_ss)
+          cap_ft_curve_output = MathTools.biquadratic(t_i, t_odb, cap_ft_spec_ss[0])
+          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, t_odb, cap_ft_spec_ss[0])
           cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
           # corrected capacity hash, with two temperature independent variables
           corrected_capacity = gross_data[speed][t_odb][0] * cap_correction_factor
-          gross_data_odb_iwb_cap[speed][t_iwb][t_odb] = corrected_capacity
+          gross_data_out_in_cap[speed][t_i][t_odb] = corrected_capacity
 
           # eir FT curve output
-          eir_ft_curve_output = MathTools.biquadratic(t_iwb, t_odb, eir_ft_spec_ss)
-          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_iwb, t_odb, eir_ft_spec_ss)
+          eir_ft_curve_output = MathTools.biquadratic(t_i, t_odb, eir_ft_spec_ss[0])
+          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, t_odb, eir_ft_spec_ss[0])
           eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
-          gross_data_odb_iwb_eir[speed][t_iwb][t_odb] = eir_correction_factor / gross_data[speed][t_odb][1]
+          gross_data_out_in_eir[speed][t_i][t_odb] = eir_correction_factor / gross_data[speed][t_odb][1]
         end
       end
     end
-    return gross_data_odb_iwb_cap, gross_data_odb_iwb_eir
+    return gross_data_out_in_cap, gross_data_out_in_eir
   end
 
   def self.create_dx_cooling_coil(model, obj_name, cooling_system)
     clg_ap = cooling_system.additional_properties
     
     # independent variables
-    if not cooling_system.cooling_detailed_performance_data.empty?
-      cooling_outdoor_dry_bulbs_f = clg_ap.
-      cooling_indoor_wet_bulbs_f = [50.0, 67.0, 80.0]
-      cooling_outdoor_dry_bulbs = [UnitConversions.convert(55, 'F', 'C'),
-                                     UnitConversions.convert(82, 'F', 'C'),
-                                     UnitConversions.convert(95, 'F', 'C'),
-                                     UnitConversions.convert(125, 'F', 'C')]
-      cooling_indoor_wet_bulbs = [UnitConversions.convert(50, 'F', 'C'),
-                                     UnitConversions.convert(67, 'F', 'C'),
-                                     UnitConversions.convert(80, 'F', 'C')]
-      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: cooling_indoor_wet_bulbs, sample_low: nil, sample_high: nil, sample_step: nil }
-      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: cooling_outdoor_dry_bulbs, sample_low: nil, sample_high: nil, sample_step: nil }
-    else
-      var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-      var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-    end
+    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
     if cooling_system.is_a? HPXML::CoolingSystem
@@ -2911,11 +2893,32 @@ class HVAC
     crankcase_heater_temp = 50 # F
 
     for i in 0..(clg_ap.num_speeds - 1)
-      cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
-      eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-      # temperature independent variable values
-      cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', cap_ft_spec_si)
-      eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', eir_ft_spec_si)
+      cap_ft_output_values = []
+      eir_ft_output_values = []
+      if not cooling_system.cooling_detailed_performance_data.empty?
+        puts clg_ap.gross_cap_ft_values_clg[i]
+        rated_cap = clg_ap.gross_cap_ft_values_clg[i][67.0][95.0]
+        rated_eir = clg_ap.gross_eir_ft_values_clg[i][67.0][95.0]
+        # [speed][iwb][odb][capacity]
+        sorted_iwb = clg_ap.gross_cap_ft_values_clg[i].keys.sort
+        sorted_odb = clg_ap.gross_cap_ft_values_clg[i][sorted_iwb[0]].keys.sort
+        var_wb[:values] = sorted_iwb.map {|iwb| UnitConversions.convert(iwb, 'F', 'C')}
+        var_db[:values] = sorted_odb.map {|odb| UnitConversions.convert(odb, 'F', 'C')}
+        sorted_iwb.each do |iwb|
+          sorted_odb.each do |odb|
+            cap_ft_output_values << clg_ap.gross_cap_ft_values_clg[i][iwb][odb] / rated_cap
+            eir_ft_output_values << clg_ap.gross_eir_ft_values_clg[i][iwb][odb] / rated_eir
+          end
+        end
+        cap_ft_independent_vars = [var_wb, var_db]
+        eir_ft_independent_vars = [var_wb, var_db]
+      else
+        cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
+        eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
+        # temperature independent variable values
+        cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', cap_ft_spec_si)
+        eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', eir_ft_spec_si)
+      end
       # air flow ratio independent variable values
       cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_cap_fflow_spec[i])
       eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
@@ -2924,6 +2927,7 @@ class HVAC
       
       cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
       eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
+      puts cap_ft_curve
       plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
       cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
       eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
