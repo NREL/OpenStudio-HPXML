@@ -711,8 +711,8 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 3600,
     "geometry_attic_type": "ConditionedAttic",
-    "ducts_supply_leakage_to_outside_value": 50,
-    "ducts_return_leakage_to_outside_value": 100,
+    "ducts_supply_leakage_to_outside_value": 5,
+    "ducts_return_leakage_to_outside_value": 10,
     "ducts_supply_location": "living space",
     "ducts_return_location": "living space",
     "water_heater_location": "basement - conditioned",
@@ -2264,6 +2264,17 @@
     "ducts_supply_buried_insulation_level": "deeply buried",
     "ducts_return_buried_insulation_level": "deeply buried",
     "ducts_return_insulation_r": 4
+  },
+  "sample_files/base-hvac-ducts-defaults.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
+    "heating_system_fraction_heat_load_served": 0.75,
+    "heating_system_2_type": "Fireplace",
+    "heating_system_2_heating_efficiency": 1.0,
+    "heating_system_2_fraction_heat_load_served": 0.25,
+    "ducts_supply_location": null,
+    "ducts_supply_surface_area": null,
+    "ducts_return_location": null,
+    "ducts_return_surface_area": null
   },
   "sample_files/base-hvac-ducts-effective-rvalue.xml": {
     "parent_hpxml": "sample_files/base.xml"
