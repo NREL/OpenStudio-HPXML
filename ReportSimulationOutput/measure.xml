@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>c836b43c-6875-4308-9001-8489265923af</version_id>
-  <version_modified>2023-07-19T23:17:44Z</version_modified>
+  <version_id>96cc272b-f80b-4ba5-ae10-938296253360</version_id>
+  <version_modified>2023-07-20T21:55:05Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -1879,76 +1879,6 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>airflow_infiltration</name>
-      <display_name>airflow_infiltration</display_name>
-      <short_name>airflow_infiltration</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>airflow_mechanical_ventilation</name>
-      <display_name>airflow_mechanical_ventilation</display_name>
-      <short_name>airflow_mechanical_ventilation</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>airflow_natural_ventilation</name>
-      <display_name>airflow_natural_ventilation</display_name>
-      <short_name>airflow_natural_ventilation</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>airflow_whole_house_fan</name>
-      <display_name>airflow_whole_house_fan</display_name>
-      <short_name>airflow_whole_house_fan</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_drybulb_temperature</name>
-      <display_name>weather_drybulb_temperature</display_name>
-      <short_name>weather_drybulb_temperature</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_wetbulb_temperature</name>
-      <display_name>weather_wetbulb_temperature</display_name>
-      <short_name>weather_wetbulb_temperature</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_relative_humidity</name>
-      <display_name>weather_relative_humidity</display_name>
-      <short_name>weather_relative_humidity</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_wind_speed</name>
-      <display_name>weather_wind_speed</display_name>
-      <short_name>weather_wind_speed</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_diffuse_solar_radiation</name>
-      <display_name>weather_diffuse_solar_radiation</display_name>
-      <short_name>weather_diffuse_solar_radiation</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
-      <name>weather_direct_solar_radiation</name>
-      <display_name>weather_direct_solar_radiation</display_name>
-      <short_name>weather_direct_solar_radiation</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
       <name>resilience_battery_hr</name>
       <display_name>resilience_battery_hr</display_name>
       <short_name>resilience_battery_hr</short_name>
@@ -1987,13 +1917,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5141AACF</checksum>
+      <checksum>AA9428A1</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1A9EB26C</checksum>
+      <checksum>5C7D552C</checksum>
     </file>
   </files>
 </measure>

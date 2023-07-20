@@ -294,8 +294,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
      @peak_loads,
      @component_loads,
      @hot_water_uses,
-     @airflows,
-     @weather,
      @resilience].each do |outputs|
       outputs.values.each do |obj|
         output_name = OpenStudio::toUnderscoreCase("#{obj.name} #{obj.annual_units}")
