@@ -16,6 +16,7 @@ __Bugfixes__
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
 - Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
+- Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 
 ## OpenStudio-HPXML v1.6.0
 
