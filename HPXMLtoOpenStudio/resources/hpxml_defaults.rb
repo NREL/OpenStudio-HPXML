@@ -1469,7 +1469,7 @@ class HPXMLDefaults
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(1, true)
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(HPXML::HVACCompressorTypeSingleStage, true)
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties

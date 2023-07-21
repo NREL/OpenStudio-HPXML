@@ -1166,13 +1166,14 @@ class HVAC
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      system_type = heat_pump.is_a?(HPXML::HeatPump) ? heat_pump.heat_pump_type : heat_pump.cooling_system_type
       # From Carrier heat pump lab testing
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       # FIXME: Use NEEP data analysis to assume capacity ratios
       hp_ap.cool_capacity_ratios = [0.36, 1.0]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
       # Performance coefficients now needed for hvac sizing adjustment
-      hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type)
+      hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(heat_pump.compressor_type, system_type)
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
       hp_ap.cool_eers = calc_eers_cooling_4speed(hp_ap.fan_power_rated)
     end
