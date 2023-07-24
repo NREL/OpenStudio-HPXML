@@ -20,8 +20,9 @@ end
 class EUT
   # End Use Types
   Heating = 'Heating'
-  HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
   HeatingFanPump = 'Heating Fans/Pumps'
+  HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
+  HeatingHeatPumpBackupFanPump = 'Heating Heat Pump Backup Fans/Pumps'
   Cooling = 'Cooling'
   CoolingFanPump = 'Cooling Fans/Pumps'
   HotWater = 'Hot Water'
@@ -69,6 +70,7 @@ end
 class LT
   # Load Types
   Heating = 'Heating: Delivered'
+  HeatingHeatPumpBackup = 'Heating: Heat Pump Backup' # Needed for ERI calculation for dual-fuel heat pumps
   Cooling = 'Cooling: Delivered'
   HotWaterDelivered = 'Hot Water: Delivered'
   HotWaterTankLosses = 'Hot Water: Tank Losses'
@@ -106,10 +108,9 @@ class UHT
   Cooling = 'Cooling'
 end
 
-class ILT
-  # Ideal Load Types
-  Heating = 'Heating'
-  Cooling = 'Cooling'
+class RT
+  # Resilience Types
+  Battery = 'Battery'
 end
 
 class PLT
@@ -122,6 +123,7 @@ class PFT
   # Peak Fuel Types
   Summer = 'Summer'
   Winter = 'Winter'
+  Annual = 'Annual'
 end
 
 class AFT

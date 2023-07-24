@@ -41,7 +41,6 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>CFM</UnitofMeasure>
@@ -297,7 +296,6 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1057.0</Area>
             <ExposedPerimeter>148.0</ExposedPerimeter>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -318,7 +316,6 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>86.0</Area>
             <ExposedPerimeter>12.0</ExposedPerimeter>
-            <DepthBelowGrade>3.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>
               <Layer>
@@ -339,7 +336,6 @@
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>240.0</Area>
             <ExposedPerimeter>61.97</ExposedPerimeter>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab3PerimeterInsulation'/>
               <Layer>

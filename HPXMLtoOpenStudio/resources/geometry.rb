@@ -169,7 +169,7 @@ class Geometry
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
       next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation', 'adiabatic'].include? surface.outsideBoundaryCondition.downcase
+      next unless ['outdoors', 'foundation', 'adiabatic', 'othersidecoefficients'].include? surface.outsideBoundaryCondition.downcase
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -313,7 +313,7 @@ class Geometry
     hpxml.neighbor_buildings.each do |neighbor_building|
       height = neighbor_building.height.nil? ? walls_top : neighbor_building.height
 
-      vertices = Geometry.create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
+      vertices = create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
       shading_surface = OpenStudio::Model::ShadingSurface.new(vertices, model)
       shading_surface.additionalProperties.setFeature('Azimuth', neighbor_building.azimuth)
       shading_surface.additionalProperties.setFeature('Distance', neighbor_building.distance)
@@ -424,6 +424,15 @@ class Geometry
                outdoor_weight: 0.0,
                ground_weight: 1.0,
                f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+    elsif location == HPXML::LocationManufacturedHomeBelly
+      # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+      # 3.5 Manufactured House Belly Pan Temperatures
+      # FUTURE: Consider modeling the belly as a separate thermal zone so that we dynamically calculate temperatures.
+      return { temp_min: nil,
+               indoor_weight: 1.0,
+               outdoor_weight: 0.0,
+               ground_weight: 0.0,
+               f_regain: 0.62 }
     end
     fail "Unhandled location: #{location}."
   end
@@ -433,14 +442,14 @@ class Geometry
     minzs = []
     maxzs = []
     spaces.each do |space|
-      zvalues = getSurfaceZValues(space.surfaces)
+      zvalues = get_surface_z_values(space.surfaces)
       minzs << zvalues.min + UnitConversions.convert(space.zOrigin, 'm', 'ft')
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
     return maxzs.max - minzs.min
   end
 
-  def self.getSurfaceZValues(surfaceArray)
+  def self.get_surface_z_values(surfaceArray)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
     surfaceArray.each do |surface|
@@ -449,6 +458,46 @@ class Geometry
       end
     end
     return zValueArray
+  end
+
+  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_x_values(surfaceArray)
+    xValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft').round(5)
+      end
+    end
+    return xValueArray
+  end
+
+  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_y_values(surfaceArray)
+    yValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft').round(5)
+      end
+    end
+    return yValueArray
+  end
+
+  def self.get_surface_length(surface)
+    xvalues = get_surface_x_values([surface])
+    yvalues = get_surface_y_values([surface])
+    xrange = xvalues.max - xvalues.min
+    yrange = yvalues.max - yvalues.min
+    if xrange > yrange
+      return xrange
+    end
+
+    return yrange
+  end
+
+  def self.get_surface_height(surface)
+    zvalues = get_surface_z_values([surface])
+    zrange = zvalues.max - zvalues.min
+    return zrange
   end
 
   def self.get_z_origin_for_zone(zone)
@@ -470,8 +519,8 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
-  def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file, vacancy_periods)
-    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Geometry.get_occupancy_default_values()
+  def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file, unavailable_periods)
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
@@ -485,13 +534,13 @@ class Geometry
       people_sch = schedules_file.create_schedule_file(col_name: people_col_name)
     end
     if people_sch.nil?
-      people_vacancy_periods = vacancy_periods if SchedulesFile.affected_by_vacancy[people_col_name]
+      people_unavailable_periods = Schedule.get_unavailable_periods(runner, people_col_name, unavailable_periods)
       weekday_sch = hpxml.building_occupancy.weekday_fractions.split(',').map(&:to_f)
       weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
       weekend_sch = hpxml.building_occupancy.weekend_fractions.split(',').map(&:to_f)
       weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
       monthly_sch = hpxml.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, vacancy_periods: people_vacancy_periods)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
       people_sch = people_sch.schedule
     else
       runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.building_occupancy.weekday_fractions.nil?
