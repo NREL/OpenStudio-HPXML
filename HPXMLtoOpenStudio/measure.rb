@@ -125,6 +125,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         schematron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
         schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
       end
+
+      epw_path, weather = nil
+
       hpxml_building_ids.each_with_index do |hpxml_building_id, unit_number|
         hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: hpxml_building_id)
         hpxml.errors.each do |error|
@@ -135,8 +138,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
         return false unless hpxml.errors.empty?
 
-        epw_path = Location.get_epw_path(hpxml, hpxml_path)
-        weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
+        if epw_path.nil?
+          epw_path = Location.get_epw_path(hpxml, hpxml_path)
+          weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
+        end
 
         if hpxml_building_ids.size > 1
           child_model = OpenStudio::Model::Model.new
