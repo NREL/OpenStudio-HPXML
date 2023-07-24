@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>279e9ac9-8a85-4425-9d87-6683d723e839</version_id>
-  <version_modified>2023-06-23T23:58:03Z</version_modified>
+  <version_id>c186ac8f-944d-4cd4-b016-3240c6ee9da3</version_id>
+  <version_modified>2023-07-24T14:21:57Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -277,6 +277,12 @@
       <checksum>31A7BE3B</checksum>
     </file>
     <file>
+      <filename>Detailed Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>953EE2AC</checksum>
+    </file>
+    <file>
       <filename>Invalid Fixed Charge Units.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
@@ -287,12 +293,6 @@
       <filetype>json</filetype>
       <usage_type>test</usage_type>
       <checksum>32FB5BA8</checksum>
-    </file>
-    <file>
-      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>953EE2AC</checksum>
     </file>
     <file>
       <filename>Missing Required Fields.json</filename>
@@ -310,7 +310,7 @@
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8AAE9CCC</checksum>
+      <checksum>47D42579</checksum>
     </file>
   </files>
 </measure>

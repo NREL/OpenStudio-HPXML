@@ -247,7 +247,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_workflow_detailed_calculations
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Detailed Rate.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills, actual_monthly_bills = _test_measure()
     assert_operator(actual_bills['Test 1: Total (USD)'], :>, 0)
@@ -257,7 +257,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_workflow_detailed_calculations_all_electric
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
-    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json')
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Detailed Rate.json')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     actual_bills, actual_monthly_bills = _test_measure()
     assert_operator(actual_bills['Test 1: Total (USD)'], :>, 0)
