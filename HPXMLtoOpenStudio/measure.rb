@@ -101,10 +101,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       output_dir = File.expand_path(output_dir)
     end
 
+    hpxml_building_ids = []
     if building_id.is_initialized
       building_id = building_id.get
+      if building_id == 'ALL'
+        XMLHelper.get_elements(XMLHelper.parse_file(hpxml_path), '/HPXML/Building').each do |hpxml_bldg|
+          hpxml_building_ids << XMLHelper.get_attribute_value(XMLHelper.get_element(hpxml_bldg, 'BuildingID'), 'id')
+        end
+      else
+        hpxml_building_ids = [building_id]
+      end
     else
-      building_id = nil
+      hpxml_building_ids = [nil]
     end
 
     begin
@@ -117,31 +125,151 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         schematron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
         schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
       end
-      hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: building_id)
-      hpxml.errors.each do |error|
-        runner.registerError(error)
-      end
-      hpxml.warnings.each do |warning|
-        runner.registerWarning(warning)
-      end
-      return false unless hpxml.errors.empty?
+      hpxml_building_ids.each_with_index do |hpxml_building_id, unit_number|
+        hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: hpxml_building_id)
+        hpxml.errors.each do |error|
+          runner.registerError(error)
+        end
+        hpxml.warnings.each do |warning|
+          runner.registerWarning(warning)
+        end
+        return false unless hpxml.errors.empty?
 
-      epw_path = Location.get_epw_path(hpxml, hpxml_path)
-      weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
+        epw_path = Location.get_epw_path(hpxml, hpxml_path)
+        weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
 
+        if hpxml_building_ids.size > 1
+          child_model = OpenStudio::Model::Model.new
+          OSModel.create(hpxml, runner, child_model, hpxml_path, epw_path, weather, output_dir,
+                         add_component_loads, building_id, debug)
+          add_child_model_to_parent(model, child_model, unit_number)
+        else
+          OSModel.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
+                         add_component_loads, building_id, debug)
+        end
+      end
       if debug
         epw_output_path = File.join(output_dir, 'in.epw')
         FileUtils.cp(epw_path, epw_output_path)
       end
-
-      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
-                     add_component_loads, building_id, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
     end
 
     return true
+  end
+
+  def add_child_model_to_parent(model, child_model, unit_number)
+    # FIXME: Offset position of units
+
+    # prefix all objects with name using unit number
+    # FUTURE: Create objects with unique names up front so we don't have to do this
+    prefix_all_child_model_objects(child_model, unit_number)
+
+    if unit_number > 0
+      # Skip these unique objects for subsequent units
+      # FIXME: Need to throw a warning/error if different values
+      # between the model object and child object.
+      child_model.getConvergenceLimits.remove
+      child_model.getOutputDiagnostics.remove
+      child_model.getRunPeriodControlDaylightSavingTime.remove
+      child_model.getShadowCalculation.remove
+      child_model.getSimulationControl.remove
+      child_model.getSiteGroundTemperatureDeep.remove
+      child_model.getSiteGroundTemperatureShallow.remove
+      child_model.getSite.remove
+      child_model.getSiteWaterMainsTemperature.remove
+      child_model.getInsideSurfaceConvectionAlgorithm.remove
+      child_model.getOutsideSurfaceConvectionAlgorithm.remove
+      child_model.getTimestep.remove
+      child_model.getFoundationKivaSettings.remove
+      child_model.getOutputJSON.remove
+      child_model.getOutputControlFiles.remove
+      child_model.getPerformancePrecisionTradeoffs.remove
+      child_model.getSiteWaterMainsTemperature.remove
+    end
+
+    child_model_objects = []
+    child_model.objects.each do |obj|
+      next if unit_number > 0 && obj.to_Building.is_initialized
+
+      child_model_objects << obj
+    end
+    model.addObjects(child_model_objects, true)
+  end
+
+  def prefix_all_child_model_objects(child_model, unit_number)
+    unit = "unit#{unit_number}"
+
+    # EMS objects
+    ems_map = {}
+
+    child_model.getEnergyManagementSystemSensors.each do |sensor|
+      ems_map[sensor.name.to_s] = make_variable_name("#{unit}_#{sensor.name}")
+      sensor.setKeyName(make_variable_name("#{unit}_#{sensor.keyName}")) unless sensor.keyName.empty?
+    end
+
+    child_model.getEnergyManagementSystemActuators.each do |actuator|
+      ems_map[actuator.name.to_s] = make_variable_name("#{unit}_#{actuator.name}")
+    end
+
+    child_model.getEnergyManagementSystemInternalVariables.each do |internal_variable|
+      ems_map[internal_variable.name.to_s] = make_variable_name("#{unit}_#{internal_variable.name}")
+      internal_variable.setInternalDataIndexKeyName(make_variable_name("#{unit}_#{internal_variable.internalDataIndexKeyName}")) unless internal_variable.internalDataIndexKeyName.empty?
+    end
+
+    child_model.getEnergyManagementSystemGlobalVariables.each do |global_variable|
+      ems_map[global_variable.name.to_s] = make_variable_name("#{unit}_#{global_variable.name}")
+    end
+
+    child_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
+      next if output_variable.emsVariableObject.is_initialized
+
+      new_ems_variable_name = make_variable_name("#{unit}_#{output_variable.emsVariableName}")
+      ems_map[output_variable.emsVariableName.to_s] = new_ems_variable_name
+      output_variable.setEMSVariableName(new_ems_variable_name)
+    end
+
+    child_model.getEnergyManagementSystemSubroutines.each do |subroutine|
+      ems_map[subroutine.name.to_s] = make_variable_name("#{unit}_#{subroutine.name}")
+    end
+
+    # variables in program lines don't get updated automatically
+    characters = ['', ' ', ',', '(', ')', '+', '-', '*', '/', ';']
+    (child_model.getEnergyManagementSystemPrograms + child_model.getEnergyManagementSystemSubroutines).each do |program|
+      new_lines = []
+      program.lines.each do |line|
+        ems_map.each do |old_name, new_name|
+          next unless line.include?(old_name)
+
+          # old_name between at least 1 character, with the exception of '' on left and ' ' on right
+          characters.each do |lhs|
+            next unless line.include?("#{lhs}#{old_name}")
+
+            characters.each do |rhs|
+              next unless line.include?("#{lhs}#{old_name}#{rhs}")
+              next if lhs == '' && ['', ' '].include?(rhs)
+
+              line.gsub!("#{lhs}#{old_name}#{rhs}", "#{lhs}#{new_name}#{rhs}")
+            end
+          end
+        end
+        new_lines << line
+      end
+      program.setLines(new_lines)
+    end
+
+    # All model objects
+    child_model.objects.each do |model_object|
+      next if model_object.name.nil?
+
+      model_object.setName(make_variable_name("#{unit}_#{model_object.name}"))
+    end
+  end
+
+  def make_variable_name(str)
+    return str.gsub(' ', '_').gsub('-', '_')
   end
 end
 
@@ -1899,6 +2027,8 @@ class OSModel
   end
 
   def self.add_loads_output(model, spaces, add_component_loads)
+    return # FIXME: Temporary
+
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     if @apply_ashrae140_assumptions
