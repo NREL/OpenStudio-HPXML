@@ -2738,7 +2738,7 @@ class HVACSizing
     fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
   end
 
-  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb, n_x_m)
+  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb, n_x_m)  # FIXME: Change all 'n_x_m' to 'm_x_n'
     g_functions_json.each do |key_1, values_1|
       next if !n_x_m.nil? && n_x_m != "#{key_1}"
 

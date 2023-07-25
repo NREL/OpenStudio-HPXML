@@ -19,9 +19,16 @@ def process_g_functions(filepath)
           end
         elsif (bore_locations.length > 10)
           json.delete(key_1)
+        elsif config_json.include?('LopU')
+          value_1.each do |key_2, value_2|
+            bore_locations = value_1[key_2]['bore_locations']
+            if (bore_locations.length > 10)
+              json.delete(key_1)
+            end
+          end
         end
       else
-        value_1.each_key do |key_2, value_2|
+        value_1.each do |key_2, value_2|
           bore_locations = value_1[key_2]['bore_locations']
           if (bore_locations.length>10)
             json.delete(key_1)
