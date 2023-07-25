@@ -8,6 +8,7 @@ __New Features__
   - Adds "Peak Electricity: Annual Total (W)" output.
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+- Improves component heating and cooling load assignment by comparing average temperature setpoint and the living zone temperature during a given timestep.
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
