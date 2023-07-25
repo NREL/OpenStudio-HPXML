@@ -1355,6 +1355,7 @@ class HVACSizing
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
       coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
 
+      # FIXME: Replace performance coefficients with new defaulting correlations
       total_cap_curve_value = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients)
       cool_cap_rated = hvac_sizing_values.Cool_Load_Tot / total_cap_curve_value
 
@@ -2022,6 +2023,7 @@ class HVACSizing
       heating_db = @hpxml.header.manualj_heating_design_temp
     end
 
+    # FIXME: Replace performance coefficients with new defaulting correlations
     heat_cap_rated = (heating_load / MathTools.biquadratic(@heat_setpoint, heating_db, coefficients)) / capacity_ratio
 
     if total_cap_curve_value.nil? # Heat pump has no cooling
