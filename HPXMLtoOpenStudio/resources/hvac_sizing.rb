@@ -2667,7 +2667,7 @@ class HVACSizing
     return nom_length_heat, nom_length_cool
   end
 
-  def self.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter, n_x_m = nil)
+  def self.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
     require 'json'
 
     g_functions_filename = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
@@ -2708,7 +2708,7 @@ class HVACSizing
         rb = b_d_rb['rb']
         b_h_rb = "#{b}._#{h}._#{rb}"
 
-        logtime, g = get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb, n_x_m)
+        logtime, g = get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
         logtimes << logtime
         gs << g
       end
@@ -2737,13 +2737,11 @@ class HVACSizing
     fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
   end
 
-  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb, n_x_m)  # FIXME: Change all 'n_x_m' to 'm_x_n'
-    g_functions_json.each do |key_1, values_1|
-      next if !n_x_m.nil? && n_x_m != "#{key_1}"
-
+  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+    g_functions_json.each do |_key_1, values_1|
       if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
           HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
-        bore_locations = values_1[:bore_locations] # select the most appropriate config here
+        bore_locations = values_1[:bore_locations]
         next if bore_locations.size != num_bore_holes
 
         logtime = values_1[:logtime].map { |v| Float(v) }
