@@ -1339,8 +1339,7 @@ class HPXMLDefaults
         end
       elsif [HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeSpaceHeater,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
           heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
@@ -1481,8 +1480,7 @@ class HPXMLDefaults
     end
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeStove,
-                   HPXML::HVACTypePortableHeater,
-                   HPXML::HVACTypeFixedHeater,
+                   HPXML::HVACTypeSpaceHeater,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
@@ -3086,7 +3084,7 @@ class HPXMLDefaults
           HPXML::HVACTypeWallFurnace,
           HPXML::HVACTypeFloorFurnace,
           HPXML::HVACTypeStove,
-          HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
+          HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
         if not heating_system.heating_efficiency_afue.nil?
           next if heating_system.heating_efficiency_afue >= 0.89
         elsif not heating_system.heating_efficiency_percent.nil?

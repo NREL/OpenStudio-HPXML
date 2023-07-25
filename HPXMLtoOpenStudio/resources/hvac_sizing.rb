@@ -1620,8 +1620,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow_Supp = 0.0
 
     elsif [HPXML::HVACTypeStove,
-           HPXML::HVACTypePortableHeater,
-           HPXML::HVACTypeFixedHeater,
+           HPXML::HVACTypeSpaceHeater,
            HPXML::HVACTypeWallFurnace,
            HPXML::HVACTypeFloorFurnace,
            HPXML::HVACTypeFireplace].include? @heating_type

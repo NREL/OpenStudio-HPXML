@@ -1394,9 +1394,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, false, nil)
   end
 
-  def test_portable_heaters
+  def test_space_heaters
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-portable-heater-gas-only.xml')
+    hpxml = _create_hpxml('base-hvac-space-heater-gas-only.xml')
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1409,23 +1409,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_portable_heater_values(hpxml_default.heating_systems[0], 0, nil)
-  end
-
-  def test_fixed_heaters
-    # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-fixed-heater-gas-only.xml')
-    hpxml.heating_systems[0].fan_watts = 22
-    hpxml.heating_systems[0].heating_capacity = 12345
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 22, 12345)
-
-    # Test defaults
-    hpxml.heating_systems[0].fan_watts = nil
-    hpxml.heating_systems[0].heating_capacity = nil
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 0, nil)
   end
 
   def test_fireplaces

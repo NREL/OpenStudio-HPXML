@@ -72,7 +72,7 @@ def create_hpxmls
     end
 
     if not success
-      puts "\nError: Did not successfully generate #{hpxml_file}."
+      puts "\nError: Did not successfully generate #{hpxml_filename}."
       exit!
     end
 
@@ -1178,8 +1178,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif [HPXML::HVACTypeFloorFurnace,
            HPXML::HVACTypeWallFurnace,
            HPXML::HVACTypeFireplace,
-           HPXML::HVACTypeFixedHeater,
-           HPXML::HVACTypePortableHeater].include? heating_system.heating_system_type
+           HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
       heating_system.fan_watts = 0
     elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
       heating_system.fan_watts = 40

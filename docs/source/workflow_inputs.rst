@@ -334,7 +334,7 @@ If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor i
   wood pellets  --              --             --
   ============  ==============  =============  =============
 
-Default values in lb/MBtu (million Btu) are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICCC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
+Default values in lb/MBtu (million Btu) are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 
 If no default value is available, a warning will be issued.
 
@@ -773,7 +773,7 @@ The presence of a flue or chimney with combustion air from conditioned space can
   ================================================  =======  =====  ===========  =========  ========  ===============================================
 
   .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
          | - heating system is non-electric Fireplace located in conditioned space, or
          | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
@@ -1347,7 +1347,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
          | - **air**: supply duct location with the largest area, otherwise "living space"
          | - **hydronic**: same default logic as :ref:`waterheatingsystems`
          | - **dse**: "living space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
-  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
+  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``SpaceHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
@@ -1483,10 +1483,10 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ``extension/FanPowerWatts``                           double   W       >= 0         No        40         Fan power
   ====================================================  =======  ======  ===========  ========  =========  ===================
 
-Portable/Fixed Heater
-~~~~~~~~~~~~~~~~~~~~~
+Space Heater
+~~~~~~~~~~~~
 
-If a portable heater or fixed heater is specified, additional information is entered in ``HeatingSystem``.
+If a space heater (portable or fixed) is specified, additional information is entered in ``HeatingSystem``.
 
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
@@ -2280,7 +2280,7 @@ Additional information is entered in each ``Ducts``.
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
-  .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
+  .. [#] The sum of all ``FractionDuctArea`` must each equal to 1, both for the supply side and return side.
   .. [#] FractionDuctArea and/or DuctSurfaceArea are required if DuctLocation is provided.
   .. [#] | If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
          | - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
