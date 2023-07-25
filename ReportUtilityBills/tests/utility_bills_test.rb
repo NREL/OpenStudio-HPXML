@@ -68,6 +68,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     @hpxml.header.utility_bill_scenarios.clear
     @hpxml.header.utility_bill_scenarios.add(name: 'Test',
                                              elec_fixed_charge: 8.0,
+                                             elec_marginal_rate: 0.1195179675994109,
                                              natural_gas_fixed_charge: 8.0,
                                              propane_marginal_rate: 2.4532692307692305,
                                              fuel_oil_marginal_rate: 3.495346153846154)
