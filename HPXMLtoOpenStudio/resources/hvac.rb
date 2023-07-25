@@ -2876,8 +2876,8 @@ class HVAC
     clg_ap = cooling_system.additional_properties
     
     # independent variables
-    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-    var_db = { name: 'dry_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_wb = { name: 'wet_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_db = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
     if cooling_system.is_a? HPXML::CoolingSystem
@@ -2892,14 +2892,15 @@ class HVAC
 
     clg_coil = nil
     crankcase_heater_temp = 50 # F
+    rated_iwb = 67.0
+    rated_odb = 95.0
 
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_output_values = []
       eir_ft_output_values = []
       if not cooling_system.cooling_detailed_performance_data.empty?
-        puts clg_ap.gross_cap_ft_values_clg[i]
-        rated_cap = clg_ap.gross_cap_ft_values_clg[i][67.0][95.0]
-        rated_eir = clg_ap.gross_eir_ft_values_clg[i][67.0][95.0]
+        rated_cap = clg_ap.gross_cap_ft_values_clg[i][rated_iwb][rated_odb]
+        rated_eir = clg_ap.gross_eir_ft_values_clg[i][rated_iwb][rated_odb]
         # [speed][iwb][odb][capacity]
         sorted_iwb = clg_ap.gross_cap_ft_values_clg[i].keys.sort
         sorted_odb = clg_ap.gross_cap_ft_values_clg[i][sorted_iwb[0]].keys.sort
@@ -2995,19 +2996,41 @@ class HVAC
     htg_coil = nil
     crankcase_heater_temp = 50 # F
     # independent variables
-    var_db_in = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(40, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
-    var_db_out = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(-50, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_idb = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(40, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
+    var_odb = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(-50, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
     var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(50, 'F', 'C'), sample_high: UnitConversions.convert(150, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
 
+    rated_idb = 60.0
+    rated_odb = 47.0
     for i in 0..(htg_ap.num_speeds - 1)
-      cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
-      eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
+      cap_ft_output_values = []
+      eir_ft_output_values = []
+      if not heating_system.heating_detailed_performance_data.empty?
+        rated_cap = htg_ap.gross_cap_ft_values_htg[i][rated_idb][rated_odb]
+        rated_eir = htg_ap.gross_eir_ft_values_htg[i][rated_idb][rated_odb]
+        # [speed][idb][odb][capacity]
+        sorted_idb = htg_ap.gross_cap_ft_values_htg[i].keys.sort
+        sorted_odb = htg_ap.gross_cap_ft_values_htg[i][sorted_idb[0]].keys.sort
+        var_idb[:values] = sorted_idb.map {|idb| UnitConversions.convert(idb, 'F', 'C')}
+        var_odb[:values] = sorted_odb.map {|odb| UnitConversions.convert(odb, 'F', 'C')}
+        sorted_idb.each do |idb|
+          sorted_odb.each do |odb|
+            cap_ft_output_values << htg_ap.gross_cap_ft_values_htg[i][idb][odb] / rated_cap
+            eir_ft_output_values << htg_ap.gross_eir_ft_values_htg[i][idb][odb] / rated_eir
+          end
+        end
+        cap_ft_independent_vars = [var_idb, var_odb]
+        eir_ft_independent_vars = [var_idb, var_odb]
+      else
+        cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
+        eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
 
-      # temperature independent variable values
-      cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_db_in, var_db_out], 'biquadratic', cap_ft_spec_si)
-      eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_db_in, var_db_out], 'biquadratic', eir_ft_spec_si)
+        # temperature independent variable values
+        cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_idb, var_odb], 'biquadratic', cap_ft_spec_si)
+        eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_idb, var_odb], 'biquadratic', eir_ft_spec_si)
+      end
 
       # air flow ratio independent variable values
       cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_cap_fflow_spec[i])
@@ -3050,7 +3073,7 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    defrosteir_independent_vars, defrosteir_output_values = set_up_table_lookup_variables([var_wb, var_db_out], 'biquadratic', [0.1528, 0, 0, 0, 0, 0])
+    defrosteir_independent_vars, defrosteir_output_values = set_up_table_lookup_variables([var_wb, var_odb], 'biquadratic', [0.1528, 0, 0, 0, 0, 0])
     defrost_eir_curve = create_table_lookup(model, 'Defrosteir', defrosteir_independent_vars, defrosteir_output_values) # Heating defrost curve for reverse cycle
     htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
     htg_coil.setDefrostStrategy('ReverseCycle')
