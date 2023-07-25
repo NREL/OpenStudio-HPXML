@@ -498,8 +498,10 @@ class HPXML < Object
      'HeatPumpFuel',
      'BackupSystemFuel',
      'FuelType',
-     'IntegratedHeatingSystemFuel'].each do |fuel_name|
-      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
+     'IntegratedHeatingSystemFuel',
+     'Heater/Type'].each do |fuel_name|
+      if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']") ||
+         (XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{HPXML::HeaterTypeGas}']") && (fuel == HPXML::FuelTypeNaturalGas))
         return true
       end
     end
