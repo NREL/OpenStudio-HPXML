@@ -1016,9 +1016,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypeBoiler
     heating_system_type_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_choices << HPXML::HVACTypeStove
-    heating_system_type_choices << HPXML::HVACTypePortableHeater
+    heating_system_type_choices << HPXML::HVACTypeSpaceHeater
     heating_system_type_choices << HPXML::HVACTypeFireplace
-    heating_system_type_choices << HPXML::HVACTypeFixedHeater
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
 
@@ -1437,9 +1436,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_2_type_choices << HPXML::HVACTypeBoiler
     heating_system_2_type_choices << HPXML::HVACTypeElectricResistance
     heating_system_2_type_choices << HPXML::HVACTypeStove
-    heating_system_2_type_choices << HPXML::HVACTypePortableHeater
+    heating_system_2_type_choices << HPXML::HVACTypeSpaceHeater
     heating_system_2_type_choices << HPXML::HVACTypeFireplace
-    heating_system_2_type_choices << HPXML::HVACTypeFixedHeater
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_2_type', heating_system_2_type_choices, true)
     arg.setDisplayName('Heating System 2: Type')
@@ -4736,9 +4734,8 @@ class HPXMLFile
       heating_efficiency_afue = args[:heating_system_heating_efficiency]
     elsif [HPXML::HVACTypeElectricResistance,
            HPXML::HVACTypeStove,
-           HPXML::HVACTypePortableHeater,
-           HPXML::HVACTypeFireplace,
-           HPXML::HVACTypeFixedHeater].include?(heating_system_type)
+           HPXML::HVACTypeSpaceHeater,
+           HPXML::HVACTypeFireplace].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 
@@ -5105,7 +5102,7 @@ class HPXMLFile
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include?(heating_system_type) || heating_system_type.include?(HPXML::HVACTypeBoiler)
       heating_efficiency_afue = args[:heating_system_2_heating_efficiency]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include?(heating_system_type)
+    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypeSpaceHeater, HPXML::HVACTypeFireplace].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_2_heating_efficiency]
     end
 
@@ -5262,7 +5259,22 @@ class HPXMLFile
 
     # If duct surface areas are defaulted, set CFA served
     if hvac_distribution.ducts.select { |d| d.duct_surface_area.nil? }.size > 0
-      hvac_distribution.conditioned_floor_area_served = args[:geometry_unit_cfa]
+      max_fraction_load_served = 0.0
+      hvac_distribution.hvac_systems.each do |hvac_system|
+        if hvac_system.respond_to?(:fraction_heat_load_served)
+          if hvac_system.is_a?(HPXML::HeatingSystem) && hvac_system.is_heat_pump_backup_system
+            # HP backup system, use HP fraction heat load served
+            fraction_heat_load_served = hvac_system.primary_heat_pump.fraction_heat_load_served
+          else
+            fraction_heat_load_served = hvac_system.fraction_heat_load_served
+          end
+          max_fraction_load_served = [max_fraction_load_served, fraction_heat_load_served].max
+        end
+        if hvac_system.respond_to?(:fraction_cool_load_served)
+          max_fraction_load_served = [max_fraction_load_served, hvac_system.fraction_cool_load_served].max
+        end
+      end
+      hvac_distribution.conditioned_floor_area_served = args[:geometry_unit_cfa] * max_fraction_load_served
     end
   end
 
