@@ -5,13 +5,16 @@ Electricity
 
 Natural Gas
 * https://www.eia.gov/dnav/ng/ng_pri_sum_a_EPG0_PRS_DMcf_a.htm
-* Download Series History link > Convert second tab (Data 1) to CSV
+* Download Series History link
+* Convert second tab (Data 1) to CSV
 * NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv
 
 Fuel Oil
 * https://www.eia.gov/dnav/pet/xls/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.xls
+* Convert second tab (Data 1) to CSV
 * PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv
 
 Propane
 * https://www.eia.gov/dnav/pet/xls/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.xls
+* Convert second tab (Data 1) to CSV
 * PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv
