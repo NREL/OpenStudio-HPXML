@@ -1,5 +1,5 @@
 Electricity
-* https://www.eia.gov/electricity/data/browser/#/topic/7?agg=1,0&geo=g0fvvvvvvvvvo&endsec=8&linechart=ELEC.PRICE.US-RES.A&columnchart=ELEC.PRICE.US-RES.A&map=ELEC.PRICE.US-RES.A&freq=A&start=2020&end=2021&ctype=linechart&ltype=pin&rtype=s&pin=&rse=0&maptype=0
+* https://www.eia.gov/electricity/data/browser/#/topic/7?agg=1,0&geo=g0fvvvvvvvvvo&endsec=8&linechart=ELEC.PRICE.US-RES.A&columnchart=ELEC.PRICE.US-RES.A&map=ELEC.PRICE.US-RES.A&freq=A&start=2001&end=2022&ctype=linechart&ltype=pin&rtype=s&maptype=0&rse=0&pin=
 * Download > Table (CSV) link
 * Average_retail_price_of_electricity.csv
 
