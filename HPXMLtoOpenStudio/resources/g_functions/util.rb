@@ -11,7 +11,7 @@ def process_g_functions(filepath)
     json = JSON.load(file)
 
     json.each do |key_1, value_1|
-      if value_1.key?("bore_locations")
+      if value_1.key?('bore_locations')
         bore_locations = json[key_1]['bore_locations']
         if config_json.include?('rectangle')
           if key_1 != '5_8' && (bore_locations.length > 10)
@@ -21,9 +21,9 @@ def process_g_functions(filepath)
           json.delete(key_1)
         end
       else
-        value_1.each_key do |key_2, value_2|
+        value_1.each_key do |key_2, _value_2|
           bore_locations = value_1[key_2]['bore_locations']
-          if (bore_locations.length>10)
+          if (bore_locations.length > 10)
             json.delete(key_1)
           end
         end

@@ -123,6 +123,7 @@ class PFT
   # Peak Fuel Types
   Summer = 'Summer'
   Winter = 'Winter'
+  Annual = 'Annual'
 end
 
 class AFT
