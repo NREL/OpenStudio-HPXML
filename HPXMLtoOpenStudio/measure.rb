@@ -166,7 +166,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_child_model_to_parent(model, child_model, unit_number)
-    # FIXME: Offset position of units
+    shift_geometry(child_model, unit_number)
 
     # prefix all objects with name using unit number
     # FUTURE: Create objects with unique names up front so we don't have to do this
@@ -193,6 +193,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       child_model.getOutputControlFiles.remove
       child_model.getPerformancePrecisionTradeoffs.remove
       child_model.getSiteWaterMainsTemperature.remove
+      # FIXME: Remove unused/duplicate schedules; maybe unused schedules will
+      # be correctly removed when the meta_measure.rb code is uncommented?
     end
 
     child_model_objects = []
@@ -202,6 +204,34 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       child_model_objects << obj
     end
     model.addObjects(child_model_objects, true)
+  end
+
+  def shift_geometry(child_model, unit_number)
+    # Shift units so they aren't right on top and shade each other
+    # FIXME: Need to determine the value below based on the model
+    y_shift = 100.0 * unit_number # meters
+
+    # shift the unit so it's not right on top of the previous one
+    child_model.getSpaces.sort.each do |space|
+      space.setYOrigin(y_shift)
+    end
+
+    # shift shading surfaces
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = 1
+    m[1, 1] = 1
+    m[2, 2] = 1
+    m[3, 3] = 1
+    m[1, 3] = y_shift
+    t = OpenStudio::Transformation.new(m)
+
+    child_model.getShadingSurfaceGroups.each do |shading_surface_group|
+      next if shading_surface_group.space.is_initialized # already got shifted
+
+      shading_surface_group.shadingSurfaces.each do |shading_surface|
+        shading_surface.setVertices(t * shading_surface.vertices)
+      end
+    end
   end
 
   def prefix_all_child_model_objects(child_model, unit_number)

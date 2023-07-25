@@ -640,7 +640,7 @@ class HPXMLTest < MiniTest::Test
     end
     assert_equal(0, num_unused_objects)
     # FIXME: Revert once the meta_measure.rb code is reverted
-    #assert_equal(0, num_unused_schedules)
+    # assert_equal(0, num_unused_schedules)
     assert_equal(0, num_unused_constructions)
 
     # Check for Output:Meter and Output:Variable warnings
