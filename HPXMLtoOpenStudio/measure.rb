@@ -126,7 +126,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
       end
 
-      epw_path, weather = nil
+      epw_path, weather = nil, nil
+      hpxml_osm_map = {}
 
       hpxml_building_ids.each_with_index do |hpxml_building_id, unit_number|
         hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: hpxml_building_id)
@@ -144,15 +145,32 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
 
         if hpxml_building_ids.size > 1
-          child_model = OpenStudio::Model::Model.new
-          OSModel.create(hpxml, runner, child_model, hpxml_path, epw_path, weather, output_dir,
-                         add_component_loads, building_id, debug)
-          add_child_model_to_parent(model, child_model, unit_number)
+          # Create the model for this single unit
+          unit_model = OpenStudio::Model::Model.new
+          create_model(hpxml, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+
+          # Add unit model to the whole-building model
+          add_unit_model_to_model(model, unit_model, unit_number)
+          hpxml_osm_map[hpxml] = unit_model
         else
-          OSModel.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
-                         add_component_loads, building_id, debug)
+          create_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          hpxml_osm_map[hpxml] = model
         end
       end
+
+      # Output
+      add_unmet_hours_output(model, hpxml_osm_map)
+      add_loads_output(model, add_component_loads, hpxml_osm_map)
+      set_output_files(model)
+      # Uncomment to debug EMS
+      # add_ems_debug_output(model)
+
+      if debug
+        osm_output_path = File.join(output_dir, 'in.osm')
+        File.write(osm_output_path, model.to_s)
+        runner.registerInfo("Wrote file: #{osm_output_path}")
+      end
+
       if debug
         epw_output_path = File.join(output_dir, 'in.epw')
         FileUtils.cp(epw_path, epw_output_path)
@@ -165,54 +183,54 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def add_child_model_to_parent(model, child_model, unit_number)
-    shift_geometry(child_model, unit_number)
+  def add_unit_model_to_model(model, unit_model, unit_number)
+    shift_geometry(unit_model, unit_number)
 
     # prefix all objects with name using unit number
     # FUTURE: Create objects with unique names up front so we don't have to do this
-    prefix_all_child_model_objects(child_model, unit_number)
+    prefix_all_unit_model_objects(unit_model, unit_number)
 
     if unit_number > 0
       # Skip these unique objects for subsequent units
       # FIXME: Need to throw a warning/error if different values
-      # between the model object and child object.
-      child_model.getConvergenceLimits.remove
-      child_model.getOutputDiagnostics.remove
-      child_model.getRunPeriodControlDaylightSavingTime.remove
-      child_model.getShadowCalculation.remove
-      child_model.getSimulationControl.remove
-      child_model.getSiteGroundTemperatureDeep.remove
-      child_model.getSiteGroundTemperatureShallow.remove
-      child_model.getSite.remove
-      child_model.getSiteWaterMainsTemperature.remove
-      child_model.getInsideSurfaceConvectionAlgorithm.remove
-      child_model.getOutsideSurfaceConvectionAlgorithm.remove
-      child_model.getTimestep.remove
-      child_model.getFoundationKivaSettings.remove
-      child_model.getOutputJSON.remove
-      child_model.getOutputControlFiles.remove
-      child_model.getPerformancePrecisionTradeoffs.remove
-      child_model.getSiteWaterMainsTemperature.remove
+      # between the model object and unit_model object.
+      unit_model.getConvergenceLimits.remove
+      unit_model.getOutputDiagnostics.remove
+      unit_model.getRunPeriodControlDaylightSavingTime.remove
+      unit_model.getShadowCalculation.remove
+      unit_model.getSimulationControl.remove
+      unit_model.getSiteGroundTemperatureDeep.remove
+      unit_model.getSiteGroundTemperatureShallow.remove
+      unit_model.getSite.remove
+      unit_model.getSiteWaterMainsTemperature.remove
+      unit_model.getInsideSurfaceConvectionAlgorithm.remove
+      unit_model.getOutsideSurfaceConvectionAlgorithm.remove
+      unit_model.getTimestep.remove
+      unit_model.getFoundationKivaSettings.remove
+      unit_model.getOutputJSON.remove
+      unit_model.getOutputControlFiles.remove
+      unit_model.getPerformancePrecisionTradeoffs.remove
+      unit_model.getSiteWaterMainsTemperature.remove
       # FIXME: Remove unused/duplicate schedules; maybe unused schedules will
       # be correctly removed when the meta_measure.rb code is uncommented?
     end
 
-    child_model_objects = []
-    child_model.objects.each do |obj|
+    unit_model_objects = []
+    unit_model.objects.each do |obj|
       next if unit_number > 0 && obj.to_Building.is_initialized
 
-      child_model_objects << obj
+      unit_model_objects << obj
     end
-    model.addObjects(child_model_objects, true)
+    model.addObjects(unit_model_objects, true)
   end
 
-  def shift_geometry(child_model, unit_number)
+  def shift_geometry(unit_model, unit_number)
     # Shift units so they aren't right on top and shade each other
     # FIXME: Need to determine the value below based on the model
     y_shift = 100.0 * unit_number # meters
 
     # shift the unit so it's not right on top of the previous one
-    child_model.getSpaces.sort.each do |space|
+    unit_model.getSpaces.sort.each do |space|
       space.setYOrigin(y_shift)
     end
 
@@ -225,7 +243,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     m[1, 3] = y_shift
     t = OpenStudio::Transformation.new(m)
 
-    child_model.getShadingSurfaceGroups.each do |shading_surface_group|
+    unit_model.getShadingSurfaceGroups.each do |shading_surface_group|
       next if shading_surface_group.space.is_initialized # already got shifted
 
       shading_surface_group.shadingSurfaces.each do |shading_surface|
@@ -234,45 +252,43 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def prefix_all_child_model_objects(child_model, unit_number)
-    unit = "unit#{unit_number}"
-
+  def prefix_all_unit_model_objects(unit_model, unit_number)
     # EMS objects
     ems_map = {}
 
-    child_model.getEnergyManagementSystemSensors.each do |sensor|
-      ems_map[sensor.name.to_s] = make_variable_name("#{unit}_#{sensor.name}")
-      sensor.setKeyName(make_variable_name("#{unit}_#{sensor.keyName}")) unless sensor.keyName.empty?
+    unit_model.getEnergyManagementSystemSensors.each do |sensor|
+      ems_map[sensor.name.to_s] = make_variable_name(sensor.name, unit_number)
+      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty?
     end
 
-    child_model.getEnergyManagementSystemActuators.each do |actuator|
-      ems_map[actuator.name.to_s] = make_variable_name("#{unit}_#{actuator.name}")
+    unit_model.getEnergyManagementSystemActuators.each do |actuator|
+      ems_map[actuator.name.to_s] = make_variable_name(actuator.name, unit_number)
     end
 
-    child_model.getEnergyManagementSystemInternalVariables.each do |internal_variable|
-      ems_map[internal_variable.name.to_s] = make_variable_name("#{unit}_#{internal_variable.name}")
-      internal_variable.setInternalDataIndexKeyName(make_variable_name("#{unit}_#{internal_variable.internalDataIndexKeyName}")) unless internal_variable.internalDataIndexKeyName.empty?
+    unit_model.getEnergyManagementSystemInternalVariables.each do |internal_variable|
+      ems_map[internal_variable.name.to_s] = make_variable_name(internal_variable.name, unit_number)
+      internal_variable.setInternalDataIndexKeyName(make_variable_name(internal_variable.internalDataIndexKeyName, unit_number)) unless internal_variable.internalDataIndexKeyName.empty?
     end
 
-    child_model.getEnergyManagementSystemGlobalVariables.each do |global_variable|
-      ems_map[global_variable.name.to_s] = make_variable_name("#{unit}_#{global_variable.name}")
+    unit_model.getEnergyManagementSystemGlobalVariables.each do |global_variable|
+      ems_map[global_variable.name.to_s] = make_variable_name(global_variable.name, unit_number)
     end
 
-    child_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
+    unit_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
       next if output_variable.emsVariableObject.is_initialized
 
-      new_ems_variable_name = make_variable_name("#{unit}_#{output_variable.emsVariableName}")
+      new_ems_variable_name = make_variable_name(output_variable.emsVariableName, unit_number)
       ems_map[output_variable.emsVariableName.to_s] = new_ems_variable_name
       output_variable.setEMSVariableName(new_ems_variable_name)
     end
 
-    child_model.getEnergyManagementSystemSubroutines.each do |subroutine|
-      ems_map[subroutine.name.to_s] = make_variable_name("#{unit}_#{subroutine.name}")
+    unit_model.getEnergyManagementSystemSubroutines.each do |subroutine|
+      ems_map[subroutine.name.to_s] = make_variable_name(subroutine.name, unit_number)
     end
 
     # variables in program lines don't get updated automatically
     characters = ['', ' ', ',', '(', ')', '+', '-', '*', '/', ';']
-    (child_model.getEnergyManagementSystemPrograms + child_model.getEnergyManagementSystemSubroutines).each do |program|
+    (unit_model.getEnergyManagementSystemPrograms + unit_model.getEnergyManagementSystemSubroutines).each do |program|
       new_lines = []
       program.lines.each do |line|
         ems_map.each do |old_name, new_name|
@@ -296,21 +312,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # All model objects
-    child_model.objects.each do |model_object|
+    unit_model.objects.each do |model_object|
       next if model_object.name.nil?
 
-      model_object.setName(make_variable_name("#{unit}_#{model_object.name}"))
+      model_object.setName(make_variable_name(model_object.name, unit_number))
     end
   end
 
-  def make_variable_name(str)
-    return str.gsub(' ', '_').gsub('-', '_')
+  def make_variable_name(obj_name, unit_number)
+    return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
-end
 
-class OSModel
-  def self.create(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir,
-                  add_component_loads, building_id, debug)
+  def create_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
     @hpxml = hpxml
     @debug = debug
 
@@ -392,24 +405,9 @@ class OSModel
     add_generators(model)
     add_batteries(runner, model, spaces)
     add_additional_properties(model, hpxml_path, building_id, epw_file)
-
-    # Output
-    add_unmet_hours_output(model, spaces)
-    add_loads_output(model, spaces, add_component_loads)
-    set_output_files(model)
-    # Uncomment to debug EMS
-    # add_ems_debug_output(model)
-
-    if debug
-      osm_output_path = File.join(output_dir, 'in.osm')
-      File.write(osm_output_path, model.to_s)
-      runner.registerInfo("Wrote file: #{osm_output_path}")
-    end
   end
 
-  private
-
-  def self.check_file_references(hpxml_path)
+  def check_file_references(hpxml_path)
     # Check/update file references
     @hpxml.header.schedules_filepaths = @hpxml.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
@@ -429,7 +427,7 @@ class OSModel
     end
   end
 
-  def self.validate_emissions_files()
+  def validate_emissions_files()
     @hpxml.header.emissions_scenarios.each do |scenario|
       next if scenario.elec_schedule_filepath.nil?
 
@@ -446,7 +444,7 @@ class OSModel
     end
   end
 
-  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
+  def set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -494,11 +492,11 @@ class OSModel
     end
   end
 
-  def self.add_simulation_params(model)
+  def add_simulation_params(model)
     SimControls.apply(model, @hpxml)
   end
 
-  def self.add_num_occupants(model, runner, spaces)
+  def add_num_occupants(model, runner, spaces)
     # Occupants
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
@@ -507,14 +505,14 @@ class OSModel
                              @schedules_file, @hpxml.header.unavailable_periods)
   end
 
-  def self.create_or_get_space(model, spaces, location)
+  def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
       Geometry.create_space_and_zone(model, spaces, location)
     end
     return spaces[location]
   end
 
-  def self.add_roofs(runner, model, spaces)
+  def add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
       next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
@@ -626,7 +624,7 @@ class OSModel
     end
   end
 
-  def self.add_walls(runner, model, spaces)
+  def add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
@@ -694,7 +692,7 @@ class OSModel
     end
   end
 
-  def self.add_rim_joists(runner, model, spaces)
+  def add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
@@ -766,7 +764,7 @@ class OSModel
     end
   end
 
-  def self.add_floors(runner, model, spaces)
+  def add_floors(runner, model, spaces)
     @hpxml.floors.each do |floor|
       area = floor.area
       width = Math::sqrt(area)
@@ -840,7 +838,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_walls_slabs(runner, model, weather, spaces)
+  def add_foundation_walls_slabs(runner, model, weather, spaces)
     foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
@@ -945,7 +943,7 @@ class OSModel
     end
   end
 
-  def self.add_foundation_wall(runner, model, spaces, foundation_wall, exposed_length, fnd_wall_length)
+  def add_foundation_wall(runner, model, spaces, foundation_wall, exposed_length, fnd_wall_length)
     exposed_fraction = exposed_length / fnd_wall_length
     net_exposed_area = foundation_wall.net_area * exposed_fraction
     gross_exposed_area = foundation_wall.area * exposed_fraction
@@ -1026,7 +1024,7 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(model, weather, spaces, slab, z_origin, exposed_length, kiva_foundation)
+  def add_foundation_slab(model, weather, spaces, slab, z_origin, exposed_length, kiva_foundation)
     exposed_fraction = exposed_length / slab.exposed_perimeter
     slab_tot_perim = exposed_length
     slab_area = slab.area * exposed_fraction
@@ -1119,7 +1117,7 @@ class OSModel
     return kiva_foundation
   end
 
-  def self.add_conditioned_floor_area(model, spaces)
+  def add_conditioned_floor_area(model, spaces)
     # Check if we need to add floors between conditioned spaces (e.g., between first
     # and second story or conditioned basement ceiling).
     # This ensures that the E+ reported Conditioned Floor Area is correct.
@@ -1178,7 +1176,7 @@ class OSModel
     apply_adiabatic_construction(model, [floor_surface, ceiling_surface], 'floor')
   end
 
-  def self.add_thermal_mass(model, spaces)
+  def add_thermal_mass(model, spaces)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
@@ -1193,7 +1191,7 @@ class OSModel
     end
   end
 
-  def self.add_cooling_season(model, weather)
+  def add_cooling_season(model, weather)
     # Create cooling season schedule
     # Applies to natural ventilation and calculation of component loads, not HVAC equipment
     # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round)
@@ -1205,7 +1203,7 @@ class OSModel
     @clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
   end
 
-  def self.add_windows(model, spaces)
+  def add_windows(model, spaces)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
     # so as to prevent potentially modeling multiple identical windows in E+,
@@ -1307,7 +1305,7 @@ class OSModel
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def self.add_skylights(model, spaces)
+  def add_skylights(model, spaces)
     surfaces = []
 
     shading_group = nil
@@ -1354,7 +1352,7 @@ class OSModel
     apply_adiabatic_construction(model, surfaces, 'roof')
   end
 
-  def self.add_doors(model, spaces)
+  def add_doors(model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
       door_height = 6.67 # ft
@@ -1396,7 +1394,7 @@ class OSModel
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def self.apply_adiabatic_construction(model, surfaces, type)
+  def apply_adiabatic_construction(model, surfaces, type)
     # Arbitrary construction for heat capacitance.
     # Only applies to surfaces where outside boundary conditioned is
     # adiabatic or surface net area is near zero.
@@ -1421,7 +1419,7 @@ class OSModel
     end
   end
 
-  def self.add_hot_water_and_appliances(runner, model, weather, spaces)
+  def add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
       clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
@@ -1491,7 +1489,7 @@ class OSModel
     Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
   end
 
-  def self.add_cooling_system(model, spaces, airloop_map)
+  def add_cooling_system(model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1536,7 +1534,7 @@ class OSModel
     end
   end
 
-  def self.add_heating_system(runner, model, spaces, airloop_map)
+  def add_heating_system(runner, model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1600,7 +1598,7 @@ class OSModel
     end
   end
 
-  def self.add_heat_pump(runner, model, weather, spaces, airloop_map)
+  def add_heat_pump(runner, model, weather, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1651,7 +1649,7 @@ class OSModel
     end
   end
 
-  def self.add_ideal_system(model, spaces, epw_path)
+  def add_ideal_system(model, spaces, epw_path)
     # Adds an ideal air system as needed to meet the load under certain circumstances:
     # 1. the sum of fractions load served is less than 1, or
     # 2. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
@@ -1695,7 +1693,7 @@ class OSModel
     end
   end
 
-  def self.add_setpoints(runner, model, weather, spaces)
+  def add_setpoints(runner, model, weather, spaces)
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]
@@ -1705,7 +1703,7 @@ class OSModel
     HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml.header.sim_calendar_year, @schedules_file)
   end
 
-  def self.add_ceiling_fans(runner, model, weather, spaces)
+  def add_ceiling_fans(runner, model, weather, spaces)
     return if @hpxml.ceiling_fans.size == 0
 
     ceiling_fan = @hpxml.ceiling_fans[0]
@@ -1713,13 +1711,13 @@ class OSModel
                             @schedules_file, @hpxml.header.unavailable_periods)
   end
 
-  def self.add_dehumidifiers(runner, model, spaces)
+  def add_dehumidifiers(runner, model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
     HVAC.apply_dehumidifiers(runner, model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml.header.unavailable_periods)
   end
 
-  def self.check_distribution_system(hvac_distribution, system_type)
+  def check_distribution_system(hvac_distribution, system_type)
     return if hvac_distribution.nil?
 
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
@@ -1737,7 +1735,7 @@ class OSModel
     end
   end
 
-  def self.add_mels(runner, model, spaces)
+  def add_mels(runner, model, spaces)
     # Misc
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
@@ -1759,7 +1757,7 @@ class OSModel
     end
   end
 
-  def self.add_mfls(runner, model, spaces)
+  def add_mfls(runner, model, spaces)
     # Misc
     @hpxml.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
@@ -1779,12 +1777,12 @@ class OSModel
     end
   end
 
-  def self.add_lighting(runner, model, epw_file, spaces)
+  def add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups, @hpxml.lighting, @eri_version,
                    @schedules_file, @cfa, @hpxml.header.unavailable_periods)
   end
 
-  def self.add_pools_and_hot_tubs(runner, model, spaces)
+  def add_pools_and_hot_tubs(runner, model, spaces)
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
@@ -1808,7 +1806,7 @@ class OSModel
     end
   end
 
-  def self.add_airflow(runner, model, weather, spaces, airloop_map)
+  def add_airflow(runner, model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -1866,23 +1864,22 @@ class OSModel
     end
 
     # Create HVAC availability sensor
-    @hvac_availability_sensor = nil
+    hvac_availability_sensor = nil
     if not @hvac_unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, SchedulesFile::ColumnHVAC, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
-      avail_sch = avail_sch.schedule
 
-      @hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      @hvac_availability_sensor.setName('availability s')
-      @hvac_availability_sensor.setKeyName(avail_sch.name.to_s)
+      hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      hvac_availability_sensor.setName(Constants.ObjectNameHVACAvailabilitySensor)
+      hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
     end
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file,
-                  @hpxml.header.unavailable_periods, @hvac_availability_sensor)
+                  @hpxml.header.unavailable_periods, hvac_availability_sensor)
   end
 
-  def self.create_ducts(model, hvac_distribution, spaces)
+  def create_ducts(model, hvac_distribution, spaces)
     air_ducts = []
 
     # Duct leakage (supply/return => [value, units])
@@ -1961,7 +1958,7 @@ class OSModel
     return air_ducts
   end
 
-  def self.add_photovoltaics(model)
+  def add_photovoltaics(model)
     @hpxml.pv_systems.each do |pv_system|
       next if pv_system.inverter.inverter_efficiency == @hpxml.pv_systems[0].inverter.inverter_efficiency
 
@@ -1972,13 +1969,13 @@ class OSModel
     end
   end
 
-  def self.add_generators(model)
+  def add_generators(model)
     @hpxml.generators.each do |generator|
       Generator.apply(model, @nbeds, generator)
     end
   end
 
-  def self.add_batteries(runner, model, spaces)
+  def add_batteries(runner, model, spaces)
     @hpxml.batteries.each do |battery|
       # Assign space
       battery.additional_properties.space = get_space_from_location(battery.location, spaces)
@@ -1986,7 +1983,7 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(model, hpxml_path, building_id, epw_file)
+  def add_additional_properties(model, hpxml_path, building_id, epw_file)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
@@ -2001,28 +1998,41 @@ class OSModel
     additionalProperties.setFeature('is_southern_hemisphere', epw_file.latitude < 0)
   end
 
-  def self.add_unmet_hours_output(model, spaces)
+  def add_unmet_hours_output(model, hpxml_osm_map)
     # We do our own unmet hours calculation via EMS so that we can incorporate,
-    # e.g., heating/cooling seasons into the logic.
-    hvac_control = @hpxml.hvac_controls[0]
-    if not hvac_control.nil?
-      sim_year = @hpxml.header.sim_calendar_year
-      htg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
-      htg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
-      clg_start_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
-      clg_end_day = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+    # e.g., heating/cooling seasons into the logic. The calculation layers on top
+    # of the built-in EnergyPlus unmet hours output.
+
+    # Create sensors and gather data
+    htg_sensors, clg_sensors = {}, {}
+    total_heat_load_serveds, total_cool_load_serveds = {}, {}
+    htg_start_days, htg_end_days, clg_start_days, clg_end_days = {}, {}, {}, {}
+    hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
+      living_zone_name = unit_model.getThermalZones.find { |z| z.thermostat.is_initialized }.name.to_s
+
+      # EMS sensors
+      htg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Heating Setpoint Not Met Time')
+      htg_sensors[unit].setName('zone htg unmet s')
+      htg_sensors[unit].setKeyName(living_zone_name)
+
+      clg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Cooling Setpoint Not Met Time')
+      clg_sensors[unit].setName('zone clg unmet s')
+      clg_sensors[unit].setKeyName(living_zone_name)
+
+      total_heat_load_serveds[unit] = hpxml.total_fraction_heat_load_served
+      total_cool_load_serveds[unit] = hpxml.total_fraction_cool_load_served
+
+      hvac_control = hpxml.hvac_controls[0]
+      next unless not hvac_control.nil?
+
+      sim_year = hpxml.header.sim_calendar_year
+      htg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
+      htg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
+      clg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
+      clg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
     end
 
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
-    # EMS sensors
-    htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Heating Setpoint Not Met Time')
-    htg_sensor.setName('zone htg unmet s')
-    htg_sensor.setKeyName(living_zone.name.to_s)
-
-    clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Cooling Setpoint Not Met Time')
-    clg_sensor.setName('zone clg unmet s')
-    clg_sensor.setKeyName(living_zone.name.to_s)
+    hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.name.to_s.include? Constants.ObjectNameHVACAvailabilitySensor }
 
     # EMS program
     clg_hrs = 'clg_unmet_hours'
@@ -2031,26 +2041,32 @@ class OSModel
     program.setName(Constants.ObjectNameUnmetHoursProgram)
     program.addLine("Set #{htg_hrs} = 0")
     program.addLine("Set #{clg_hrs} = 0")
-    if @hpxml.total_fraction_heat_load_served > 0
-      if htg_end_day >= htg_start_day
-        line = "If ((DayOfYear >= #{htg_start_day}) && (DayOfYear <= #{htg_end_day}))"
-      else
-        line = "If ((DayOfYear >= #{htg_start_day}) || (DayOfYear <= #{htg_end_day}))"
+    for unit in 0..hpxml_osm_map.size - 1
+      if total_heat_load_serveds[unit] > 0
+        if htg_end_days[unit] >= htg_start_days[unit]
+          line = "If ((DayOfYear >= #{htg_start_days[unit]}) && (DayOfYear <= #{htg_end_days[unit]}))"
+        else
+          line = "If ((DayOfYear >= #{htg_start_days[unit]}) || (DayOfYear <= #{htg_end_days[unit]}))"
+        end
+        line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
+        program.addLine(line)
+        program.addLine("  If #{htg_sensors[unit].name} > #{htg_hrs}") # Use max hourly value across all units
+        program.addLine("    Set #{htg_hrs} = #{htg_sensors[unit].name}")
+        program.addLine('  EndIf')
+        program.addLine('EndIf')
       end
-      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
-      program.addLine(line)
-      program.addLine("  Set #{htg_hrs} = #{htg_hrs} + #{htg_sensor.name}")
-      program.addLine('EndIf')
-    end
-    if @hpxml.total_fraction_cool_load_served > 0
-      if clg_end_day >= clg_start_day
-        line = "If ((DayOfYear >= #{clg_start_day}) && (DayOfYear <= #{clg_end_day}))"
+      next unless total_cool_load_serveds[unit] > 0
+
+      if clg_end_days[unit] >= clg_start_days[unit]
+        line = "If ((DayOfYear >= #{clg_start_days[unit]}) && (DayOfYear <= #{clg_end_days[unit]}))"
       else
-        line = "If ((DayOfYear >= #{clg_start_day}) || (DayOfYear <= #{clg_end_day}))"
+        line = "If ((DayOfYear >= #{clg_start_days[unit]}) || (DayOfYear <= #{clg_end_days[unit]}))"
       end
-      line += " && (#{@hvac_availability_sensor.name} == 1)" if not @hvac_availability_sensor.nil?
+      line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
       program.addLine(line)
-      program.addLine("  Set #{clg_hrs} = #{clg_hrs} + #{clg_sensor.name}")
+      program.addLine("  If #{clg_sensors[unit].name} > #{clg_hrs}") # Use max hourly value across all units
+      program.addLine("    Set #{clg_hrs} = #{clg_sensors[unit].name}")
+      program.addLine('  EndIf')
       program.addLine('EndIf')
     end
 
@@ -2061,50 +2077,57 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  def self.add_loads_output(model, spaces, add_component_loads)
-    return # FIXME: Temporary
-
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
-    if @apply_ashrae140_assumptions
-      total_heat_load_served = 1.0
-      total_cool_load_served = 1.0
-    else
-      total_heat_load_served = @hpxml.total_fraction_heat_load_served
-      total_cool_load_served = @hpxml.total_fraction_cool_load_served
-    end
-
-    liv_load_sensors, intgain_dehumidifier = add_total_loads_output(model, living_zone, total_heat_load_served, total_cool_load_served)
+  def add_loads_output(model, add_component_loads, hpxml_osm_map)
+    loads_data = add_total_loads_output(model, hpxml_osm_map)
     return unless add_component_loads
 
-    add_component_loads_output(model, living_zone, liv_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
+    add_component_loads_output(model, hpxml_osm_map, loads_data)
   end
 
-  def self.add_total_loads_output(model, living_zone, total_heat_load_served, total_cool_load_served)
-    # Energy transferred in the conditioned space, used for determining heating (winter) vs cooling (summer)
-    liv_load_sensors = {}
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
-    liv_load_sensors[:htg].setName('htg_load_liv')
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
-    liv_load_sensors[:clg].setName('clg_load_liv')
+  def add_total_loads_output(model, hpxml_osm_map)
+    # Create sensors and gather data
+    htg_liv_load_sensors, clg_liv_load_sensors = {}, {}
+    htg_duct_load_sensors, clg_duct_load_sensors = {}, {}
+    total_heat_load_serveds, total_cool_load_serveds = {}, {}
+    dehumidifier_sensors = {}
 
-    # Total energy transferred (above plus ducts)
-    tot_load_sensors = {}
-    tot_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating:EnergyTransfer')
-    tot_load_sensors[:htg].setName('htg_load_tot')
-    tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling:EnergyTransfer')
-    tot_load_sensors[:clg].setName('clg_load_tot')
+    hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
+      # Retrieve objects
+      living_zone_name = unit_model.getThermalZones.find { |z| z.thermostat.is_initialized }.name.to_s
+      duct_zone = unit_model.getThermalZones.find { |z| z.isPlenum }
+      duct_zone_name = duct_zone.name.to_s unless duct_zone.nil?
+      dehumidifier = unit_model.getZoneHVACDehumidifierDXs
+      dehumidifier_name = dehumidifier[0].name.to_s unless dehumidifier.empty?
 
-    # Need to adjusted E+ EnergyTransfer meters for dehumidifiers
-    intgain_dehumidifier = nil
-    model.getZoneHVACDehumidifierDXs.each do |e|
-      next unless e.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
-        intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        intgain_dehumidifier.setName(name)
-        intgain_dehumidifier.setKeyName(e.name.to_s)
+      # Fraction heat/cool load served
+      if hpxml.header.apply_ashrae140_assumptions
+        total_heat_load_serveds[unit] = 1.0
+        total_cool_load_serveds[unit] = 1.0
+      else
+        total_heat_load_serveds[unit] = hpxml.total_fraction_heat_load_served
+        total_cool_load_serveds[unit] = hpxml.total_fraction_cool_load_served
       end
+
+      # Energy transferred in conditioned zone, used for determining heating (winter) vs cooling (summer)
+      htg_liv_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{living_zone_name.upcase}")
+      htg_liv_load_sensors[unit].setName('htg_load_liv')
+      clg_liv_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone_name.upcase}")
+      clg_liv_load_sensors[unit].setName('clg_load_liv')
+
+      if not duct_zone_name.nil?
+        # Energy transferred in duct zone
+        htg_duct_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+        htg_duct_load_sensors[unit].setName('htg_load_duct')
+        clg_duct_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+        clg_duct_load_sensors[unit].setName('clg_load_duct')
+      end
+
+      # Need to adjusted E+ EnergyTransfer meters for dehumidifier internal gains
+      next if dehumidifier_name.nil?
+
+      dehumidifier_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Sensible Heating Energy')
+      dehumidifier_sensors[unit].setName('ig_dehumidifier')
+      dehumidifier_sensors[unit].setKeyName(dehumidifier_name)
     end
 
     # EMS program
@@ -2112,19 +2135,30 @@ class OSModel
     program.setName(Constants.ObjectNameTotalLoadsProgram)
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
-    program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    s = "  Set loads_htg_tot = (#{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}) * #{total_heat_load_served}"
-    if not intgain_dehumidifier.nil?
-      s += " - #{intgain_dehumidifier.name}"
+    for unit in 0..hpxml_osm_map.size - 1
+      program.addLine("If #{htg_liv_load_sensors[unit].name} > 0")
+      program.addLine("  Set loads_htg_tot = loads_htg_tot + (#{htg_liv_load_sensors[unit].name} - #{clg_liv_load_sensors[unit].name}) * #{total_heat_load_serveds[unit]}")
+      if not htg_duct_load_sensors[unit].nil?
+        program.addLine("  Set loads_htg_tot = loads_htg_tot + (#{htg_duct_load_sensors[unit].name} - #{clg_duct_load_sensors[unit].name}) * #{total_heat_load_serveds[unit]}")
+      end
+      if not dehumidifier_sensors[unit].nil?
+        program.addLine("  Set loads_htg_tot = loads_htg_tot - #{dehumidifier_sensors[unit].name}")
+      end
+      program.addLine('EndIf')
     end
-    program.addLine(s)
-    program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    s = "  Set loads_clg_tot = (#{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}) * #{total_cool_load_served}"
-    if not intgain_dehumidifier.nil?
-      s += " + #{intgain_dehumidifier.name}"
+    for unit in 0..hpxml_osm_map.size - 1
+      program.addLine("If #{clg_liv_load_sensors[unit].name} > 0")
+      program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_liv_load_sensors[unit].name} - #{htg_liv_load_sensors[unit].name}) * #{total_cool_load_serveds[unit]}")
+      if not clg_duct_load_sensors[unit].nil?
+        # FIXME: Seems like the duct load shouldn't be multiplied by total_cool_load_serveds? Need to check.
+        # Code below mirrors what we do on the master branch.
+        program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_duct_load_sensors[unit].name} - #{htg_duct_load_sensors[unit].name}) * #{total_cool_load_serveds[unit]}")
+      end
+      if not dehumidifier_sensors[unit].nil?
+        program.addLine("  Set loads_clg_tot = loads_clg_tot + #{dehumidifier_sensors[unit].name}")
+      end
+      program.addLine('EndIf')
     end
-    program.addLine(s)
-    program.addLine('EndIf')
 
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -2132,27 +2166,11 @@ class OSModel
     program_calling_manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
     program_calling_manager.addProgram(program)
 
-    return liv_load_sensors, intgain_dehumidifier
+    return htg_liv_load_sensors, clg_liv_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors
   end
 
-  def self.add_component_loads_output(model, living_zone, liv_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
-    # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
-    objects_already_processed = []
-
-    # EMS Sensors: Surfaces, SubSurfaces, InternalMass
-    surfaces_sensors = { walls: [],
-                         rim_joists: [],
-                         foundation_walls: [],
-                         floors: [],
-                         slabs: [],
-                         ceilings: [],
-                         roofs: [],
-                         windows_conduction: [],
-                         windows_solar: [],
-                         doors: [],
-                         skylights_conduction: [],
-                         skylights_solar: [],
-                         internal_mass: [] }
+  def add_component_loads_output(model, hpxml_osm_map, loads_data)
+    htg_liv_load_sensors, clg_liv_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors = loads_data
 
     # Output diagnostics needed for some output variables used below
     output_diagnostics = model.getOutputDiagnostics
@@ -2160,397 +2178,416 @@ class OSModel
 
     area_tolerance = UnitConversions.convert(1.0, 'ft^2', 'm^2')
 
-    model.getSurfaces.sort.each do |s|
-      next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      surface_type = s.additionalProperties.getFeatureAsString('SurfaceType')
-      if not surface_type.is_initialized
-        fail "Could not identify surface type for surface: '#{s.name}'."
-      end
-
-      surface_type = surface_type.get
-
-      s.subSurfaces.each do |ss|
-        # Conduction (windows, skylights, doors)
-        key = { 'Window' => :windows_conduction,
-                'Door' => :doors,
-                'Skylight' => :skylights_conduction }[surface_type]
-        fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
-
-        if (surface_type == 'Window') || (surface_type == 'Skylight')
-          vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
-                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
-        else
-          vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
-                   'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
-                   'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
-                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
-        end
-
-        vars.each do |var, name|
-          surfaces_sensors[key] << []
-          sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-          sensor.setName(name)
-          sensor.setKeyName(ss.name.to_s)
-          surfaces_sensors[key][-1] << sensor
-        end
-
-        # Solar (windows, skylights)
-        next unless (surface_type == 'Window') || (surface_type == 'Skylight')
-
-        key = { 'Window' => :windows_solar,
-                'Skylight' => :skylights_solar }[surface_type]
-        vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
-                 'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
-                 'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
-                 'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
-                 'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
-
-        surfaces_sensors[key] << []
-        vars.each do |var, name|
-          sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-          sensor.setName(name)
-          sensor.setKeyName(ss.name.to_s)
-          surfaces_sensors[key][-1] << sensor
-        end
-      end
-
-      next if s.netArea < area_tolerance # Skip parent surfaces (of subsurfaces) that have near zero net area
-
-      key = { 'FoundationWall' => :foundation_walls,
-              'RimJoist' => :rim_joists,
-              'Wall' => :walls,
-              'Slab' => :slabs,
-              'Floor' => :floors,
-              'Ceiling' => :ceilings,
-              'Roof' => :roofs,
-              'InferredCeiling' => :internal_mass,
-              'InferredFloor' => :internal_mass }[surface_type]
-      fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
-
-      surfaces_sensors[key] << []
-      { 'Surface Inside Face Convection Heat Gain Energy' => 's_conv',
-        'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 's_ig',
-        'Surface Inside Face Solar Radiation Heat Gain Energy' => 's_sol',
-        'Surface Inside Face Lights Radiation Heat Gain Energy' => 's_lgt',
-        'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 's_surf' }.each do |var, name|
-        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        sensor.setName(name)
-        sensor.setKeyName(s.name.to_s)
-        surfaces_sensors[key][-1] << sensor
-      end
-    end
-
-    model.getInternalMasss.sort.each do |m|
-      next unless m.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      surfaces_sensors[:internal_mass] << []
-      { 'Surface Inside Face Convection Heat Gain Energy' => 'im_conv',
-        'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'im_ig',
-        'Surface Inside Face Solar Radiation Heat Gain Energy' => 'im_sol',
-        'Surface Inside Face Lights Radiation Heat Gain Energy' => 'im_lgt',
-        'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'im_surf' }.each do |var, name|
-        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        sensor.setName(name)
-        sensor.setKeyName(m.name.to_s)
-        surfaces_sensors[:internal_mass][-1] << sensor
-      end
-    end
-
-    # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
-    infil_sensors = []
-    natvent_sensors = []
-    whf_sensors = []
-    { Constants.ObjectNameInfiltration => infil_sensors,
-      Constants.ObjectNameNaturalVentilation => natvent_sensors,
-      Constants.ObjectNameWholeHouseFan => whf_sensors }.each do |prefix, array|
-      model.getSpaceInfiltrationDesignFlowRates.sort.each do |i|
-        next unless i.name.to_s.start_with? prefix
-        next unless i.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-        { 'Infiltration Sensible Heat Gain Energy' => prefix.gsub(' ', '_') + '_' + 'gain',
-          'Infiltration Sensible Heat Loss Energy' => prefix.gsub(' ', '_') + '_' + 'loss' }.each do |var, name|
-          airflow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-          airflow_sensor.setName(name)
-          airflow_sensor.setKeyName(i.name.to_s)
-          array << airflow_sensor
-        end
-      end
-    end
-
-    mechvents_sensors = []
-    model.getElectricEquipments.sort.each do |o|
-      next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
-
-      mechvents_sensors << []
-      { 'Electric Equipment Convective Heating Energy' => 'mv_conv',
-        'Electric Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
-        mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        mechvent_sensor.setName(name)
-        mechvent_sensor.setKeyName(o.name.to_s)
-        mechvents_sensors[-1] << mechvent_sensor
-        objects_already_processed << o
-      end
-    end
-    model.getOtherEquipments.sort.each do |o|
-      next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilationHouseFan
-
-      mechvents_sensors << []
-      { 'Other Equipment Convective Heating Energy' => 'mv_conv',
-        'Other Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
-        mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        mechvent_sensor.setName(name)
-        mechvent_sensor.setKeyName(o.name.to_s)
-        mechvents_sensors[-1] << mechvent_sensor
-        objects_already_processed << o
-      end
-    end
-
-    # EMS Sensors: Ducts
-    ducts_sensors = []
-    ducts_mix_gain_sensor = nil
-    ducts_mix_loss_sensor = nil
-
-    has_duct_zone_mixing = false
-    living_zone.airLoopHVACs.sort.each do |airloop|
-      living_zone.zoneMixing.each do |zone_mix|
-        next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
-
-        has_duct_zone_mixing = true
-      end
-    end
-
-    if has_duct_zone_mixing
-      ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
-      ducts_mix_gain_sensor.setName('duct_mix_gain')
-      ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
-
-      ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
-      ducts_mix_loss_sensor.setName('duct_mix_loss')
-      ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
-    end
-
-    # Duct losses
-    model.getOtherEquipments.sort.each do |o|
-      next if objects_already_processed.include? o
-
-      is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
-      next unless is_duct_load.is_initialized
-
-      objects_already_processed << o
-      next unless is_duct_load.get
-
-      ducts_sensors << []
-      { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
-        'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-        ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        ducts_sensor.setName(name)
-        ducts_sensor.setKeyName(o.name.to_s)
-        ducts_sensors[-1] << ducts_sensor
-      end
-    end
-
-    # EMS Sensors: Lighting
-    lightings_sensors = []
-    lightings_sensors << []
-    model.getLightss.sort.each do |e|
-      next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      lightings_sensors << []
-      { 'Lights Convective Heating Energy' => 'ig_lgt_conv',
-        'Lights Radiant Heating Energy' => 'ig_lgt_rad',
-        'Lights Visible Radiation Heating Energy' => 'ig_lgt_vis' }.each do |var, name|
-        intgains_lights_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        intgains_lights_sensor.setName(name)
-        intgains_lights_sensor.setKeyName(e.name.to_s)
-        lightings_sensors[-1] << intgains_lights_sensor
-      end
-    end
-
-    # EMS Sensors: Internal Gains
-    intgains_sensors = []
-
-    model.getElectricEquipments.sort.each do |o|
-      next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-      next if objects_already_processed.include? o
-
-      intgains_sensors << []
-      { 'Electric Equipment Convective Heating Energy' => 'ig_ee_conv',
-        'Electric Equipment Radiant Heating Energy' => 'ig_ee_rad' }.each do |var, name|
-        intgains_elec_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        intgains_elec_equip_sensor.setName(name)
-        intgains_elec_equip_sensor.setKeyName(o.name.to_s)
-        intgains_sensors[-1] << intgains_elec_equip_sensor
-      end
-    end
-
-    model.getOtherEquipments.sort.each do |o|
-      next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-      next if objects_already_processed.include? o
-
-      intgains_sensors << []
-      { 'Other Equipment Convective Heating Energy' => 'ig_oe_conv',
-        'Other Equipment Radiant Heating Energy' => 'ig_oe_rad' }.each do |var, name|
-        intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        intgains_other_equip_sensor.setName(name)
-        intgains_other_equip_sensor.setKeyName(o.name.to_s)
-        intgains_sensors[-1] << intgains_other_equip_sensor
-      end
-    end
-
-    model.getPeoples.sort.each do |e|
-      next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-
-      intgains_sensors << []
-      { 'People Convective Heating Energy' => 'ig_ppl_conv',
-        'People Radiant Heating Energy' => 'ig_ppl_rad' }.each do |var, name|
-        intgains_people = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-        intgains_people.setName(name)
-        intgains_people.setKeyName(e.name.to_s)
-        intgains_sensors[-1] << intgains_people
-      end
-    end
-
-    if not intgain_dehumidifier.nil?
-      intgains_sensors[-1] << intgain_dehumidifier
-    end
-
-    intgains_dhw_sensors = {}
-
-    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
-      next unless wh.ambientTemperatureThermalZone.is_initialized
-      next unless wh.ambientTemperatureThermalZone.get.name.to_s == living_zone.name.to_s
-
-      dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
-      dhw_sensor.setName('dhw_loss')
-      dhw_sensor.setKeyName(wh.name.to_s)
-
-      if wh.is_a? OpenStudio::Model::WaterHeaterMixed
-        oncycle_loss = wh.onCycleLossFractiontoThermalZone
-        offcycle_loss = wh.offCycleLossFractiontoThermalZone
-      else
-        oncycle_loss = wh.skinLossFractiontoZone
-        offcycle_loss = wh.offCycleFlueLossFractiontoZone
-      end
-
-      dhw_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Runtime Fraction')
-      dhw_rtf_sensor.setName('dhw_rtf')
-      dhw_rtf_sensor.setKeyName(wh.name.to_s)
-
-      intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
-    end
-
     nonsurf_names = ['intgains', 'lighting', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
+    surf_names = ['walls', 'rim_joists', 'foundation_walls', 'floors', 'slabs', 'ceilings',
+                  'roofs', 'windows_conduction', 'windows_solar', 'doors', 'skylights_conduction',
+                  'skylights_solar', 'internal_mass']
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName(Constants.ObjectNameComponentLoadsProgram)
 
-    # EMS program: Surfaces
-    surfaces_sensors.each do |k, surface_sensors|
-      program.addLine("Set hr_#{k} = 0")
-      surface_sensors.each do |sensors|
-        s = "Set hr_#{k} = hr_#{k}"
-        sensors.each do |sensor|
-          # remove ss_net if switch
-          if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
-            s += " - #{sensor.name}"
-          elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
-            s += " + #{sensor.name} * ZoneTimestep * 3600"
+    # Initialize
+    [:htg, :clg].each do |mode|
+      surf_names.each do |surf_name|
+        program.addLine("Set loads_#{mode}_#{surf_name} = 0")
+      end
+      nonsurf_names.each do |nonsurf_name|
+        program.addLine("Set loads_#{mode}_#{nonsurf_name} = 0")
+      end
+    end
+
+    hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit|
+      living_zone = unit_model.getThermalZones.select { |z| z.thermostat.is_initialized }[0]
+
+      # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
+      objects_already_processed = []
+
+      # EMS Sensors: Surfaces, SubSurfaces, InternalMass
+      surfaces_sensors = {}
+      surf_names.each do |surf_name|
+        surfaces_sensors[surf_name.to_sym] = []
+      end
+
+      unit_model.getSurfaces.sort.each do |s|
+        next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+
+        surface_type = s.additionalProperties.getFeatureAsString('SurfaceType')
+        if not surface_type.is_initialized
+          fail "Could not identify surface type for surface: '#{s.name}'."
+        end
+
+        surface_type = surface_type.get
+
+        s.subSurfaces.each do |ss|
+          # Conduction (windows, skylights, doors)
+          key = { 'Window' => :windows_conduction,
+                  'Door' => :doors,
+                  'Skylight' => :skylights_conduction }[surface_type]
+          fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
+
+          if (surface_type == 'Window') || (surface_type == 'Skylight')
+            vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
           else
+            vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
+                     'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
+                     'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
+          end
+
+          vars.each do |var, name|
+            surfaces_sensors[key] << []
+            sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+            sensor.setName(name)
+            sensor.setKeyName(ss.name.to_s)
+            surfaces_sensors[key][-1] << sensor
+          end
+
+          # Solar (windows, skylights)
+          next unless (surface_type == 'Window') || (surface_type == 'Skylight')
+
+          key = { 'Window' => :windows_solar,
+                  'Skylight' => :skylights_solar }[surface_type]
+          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+                   'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
+                   'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
+                   'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
+                   'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
+
+          surfaces_sensors[key] << []
+          vars.each do |var, name|
+            sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+            sensor.setName(name)
+            sensor.setKeyName(ss.name.to_s)
+            surfaces_sensors[key][-1] << sensor
+          end
+        end
+
+        next if s.netArea < area_tolerance # Skip parent surfaces (of subsurfaces) that have near zero net area
+
+        key = { 'FoundationWall' => :foundation_walls,
+                'RimJoist' => :rim_joists,
+                'Wall' => :walls,
+                'Slab' => :slabs,
+                'Floor' => :floors,
+                'Ceiling' => :ceilings,
+                'Roof' => :roofs,
+                'InferredCeiling' => :internal_mass,
+                'InferredFloor' => :internal_mass }[surface_type]
+        fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
+
+        surfaces_sensors[key] << []
+        { 'Surface Inside Face Convection Heat Gain Energy' => 's_conv',
+          'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 's_ig',
+          'Surface Inside Face Solar Radiation Heat Gain Energy' => 's_sol',
+          'Surface Inside Face Lights Radiation Heat Gain Energy' => 's_lgt',
+          'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 's_surf' }.each do |var, name|
+          sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          sensor.setName(name)
+          sensor.setKeyName(s.name.to_s)
+          surfaces_sensors[key][-1] << sensor
+        end
+      end
+
+      unit_model.getInternalMasss.sort.each do |m|
+        next unless m.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+
+        surfaces_sensors[:internal_mass] << []
+        { 'Surface Inside Face Convection Heat Gain Energy' => 'im_conv',
+          'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'im_ig',
+          'Surface Inside Face Solar Radiation Heat Gain Energy' => 'im_sol',
+          'Surface Inside Face Lights Radiation Heat Gain Energy' => 'im_lgt',
+          'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'im_surf' }.each do |var, name|
+          sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          sensor.setName(name)
+          sensor.setKeyName(m.name.to_s)
+          surfaces_sensors[:internal_mass][-1] << sensor
+        end
+      end
+
+      # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
+      infil_sensors = []
+      natvent_sensors = []
+      whf_sensors = []
+      { Constants.ObjectNameInfiltration => infil_sensors,
+        Constants.ObjectNameNaturalVentilation => natvent_sensors,
+        Constants.ObjectNameWholeHouseFan => whf_sensors }.each do |prefix, array|
+        unit_model.getSpaceInfiltrationDesignFlowRates.sort.each do |i|
+          next unless i.name.to_s.include? prefix
+          next unless i.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+
+          { 'Infiltration Sensible Heat Gain Energy' => prefix.gsub(' ', '_') + '_' + 'gain',
+            'Infiltration Sensible Heat Loss Energy' => prefix.gsub(' ', '_') + '_' + 'loss' }.each do |var, name|
+            airflow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+            airflow_sensor.setName(name)
+            airflow_sensor.setKeyName(i.name.to_s)
+            array << airflow_sensor
+          end
+        end
+      end
+
+      mechvents_sensors = []
+      unit_model.getElectricEquipments.sort.each do |o|
+        # FIXME: Should switch to using AdditionalProperties rather than object names
+        next unless o.name.to_s.include? Constants.ObjectNameMechanicalVentilation
+
+        { 'Electric Equipment Convective Heating Energy' => 'mv_conv',
+          'Electric Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
+          mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          mechvent_sensor.setName(name)
+          mechvent_sensor.setKeyName(o.name.to_s)
+          mechvents_sensors << mechvent_sensor
+          objects_already_processed << o
+        end
+      end
+      unit_model.getOtherEquipments.sort.each do |o|
+        next unless o.name.to_s.include? Constants.ObjectNameMechanicalVentilationHouseFan
+
+        { 'Other Equipment Convective Heating Energy' => 'mv_conv',
+          'Other Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
+          mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          mechvent_sensor.setName(name)
+          mechvent_sensor.setKeyName(o.name.to_s)
+          mechvents_sensors << mechvent_sensor
+          objects_already_processed << o
+        end
+      end
+
+      # EMS Sensors: Ducts
+      ducts_sensors = []
+      ducts_mix_gain_sensor = nil
+      ducts_mix_loss_sensor = nil
+
+      has_duct_zone_mixing = false
+      living_zone.airLoopHVACs.sort.each do |airloop|
+        living_zone.zoneMixing.each do |zone_mix|
+          next unless zone_mix.name.to_s.include? airloop.name.to_s.gsub(' ', '_')
+
+          has_duct_zone_mixing = true
+        end
+      end
+
+      if has_duct_zone_mixing
+        ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
+        ducts_mix_gain_sensor.setName('duct_mix_gain')
+        ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
+
+        ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
+        ducts_mix_loss_sensor.setName('duct_mix_loss')
+        ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
+      end
+
+      # Duct losses
+      unit_model.getOtherEquipments.sort.each do |o|
+        next if objects_already_processed.include? o
+
+        is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
+        next unless is_duct_load.is_initialized
+
+        objects_already_processed << o
+        next unless is_duct_load.get
+
+        { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
+          'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
+          ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          ducts_sensor.setName(name)
+          ducts_sensor.setKeyName(o.name.to_s)
+          ducts_sensors << ducts_sensor
+        end
+      end
+
+      # EMS Sensors: Lighting
+      lightings_sensors = []
+      lightings_sensors << []
+      unit_model.getLightss.sort.each do |e|
+        next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+
+        lightings_sensors << []
+        { 'Lights Convective Heating Energy' => 'ig_lgt_conv',
+          'Lights Radiant Heating Energy' => 'ig_lgt_rad',
+          'Lights Visible Radiation Heating Energy' => 'ig_lgt_vis' }.each do |var, name|
+          intgains_lights_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          intgains_lights_sensor.setName(name)
+          intgains_lights_sensor.setKeyName(e.name.to_s)
+          lightings_sensors[-1] << intgains_lights_sensor
+        end
+      end
+
+      # EMS Sensors: Internal Gains
+      intgains_sensors = []
+
+      unit_model.getElectricEquipments.sort.each do |o|
+        next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+        next if objects_already_processed.include? o
+
+        intgains_sensors << []
+        { 'Electric Equipment Convective Heating Energy' => 'ig_ee_conv',
+          'Electric Equipment Radiant Heating Energy' => 'ig_ee_rad' }.each do |var, name|
+          intgains_elec_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          intgains_elec_equip_sensor.setName(name)
+          intgains_elec_equip_sensor.setKeyName(o.name.to_s)
+          intgains_sensors[-1] << intgains_elec_equip_sensor
+        end
+      end
+
+      unit_model.getOtherEquipments.sort.each do |o|
+        next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+        next if objects_already_processed.include? o
+
+        intgains_sensors << []
+        { 'Other Equipment Convective Heating Energy' => 'ig_oe_conv',
+          'Other Equipment Radiant Heating Energy' => 'ig_oe_rad' }.each do |var, name|
+          intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          intgains_other_equip_sensor.setName(name)
+          intgains_other_equip_sensor.setKeyName(o.name.to_s)
+          intgains_sensors[-1] << intgains_other_equip_sensor
+        end
+      end
+
+      unit_model.getPeoples.sort.each do |e|
+        next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
+
+        intgains_sensors << []
+        { 'People Convective Heating Energy' => 'ig_ppl_conv',
+          'People Radiant Heating Energy' => 'ig_ppl_rad' }.each do |var, name|
+          intgains_people = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+          intgains_people.setName(name)
+          intgains_people.setKeyName(e.name.to_s)
+          intgains_sensors[-1] << intgains_people
+        end
+      end
+
+      if not dehumidifier_sensors[unit].nil?
+        intgains_sensors[-1] << dehumidifier_sensors[unit]
+      end
+
+      intgains_dhw_sensors = {}
+
+      (unit_model.getWaterHeaterMixeds + unit_model.getWaterHeaterStratifieds).sort.each do |wh|
+        next unless wh.ambientTemperatureThermalZone.is_initialized
+        next unless wh.ambientTemperatureThermalZone.get.name.to_s == living_zone.name.to_s
+
+        dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
+        dhw_sensor.setName('dhw_loss')
+        dhw_sensor.setKeyName(wh.name.to_s)
+
+        if wh.is_a? OpenStudio::Model::WaterHeaterMixed
+          oncycle_loss = wh.onCycleLossFractiontoThermalZone
+          offcycle_loss = wh.offCycleLossFractiontoThermalZone
+        else
+          oncycle_loss = wh.skinLossFractiontoZone
+          offcycle_loss = wh.offCycleFlueLossFractiontoZone
+        end
+
+        dhw_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Runtime Fraction')
+        dhw_rtf_sensor.setName('dhw_rtf')
+        dhw_rtf_sensor.setKeyName(wh.name.to_s)
+
+        intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
+      end
+
+      # EMS program: Surfaces
+      surfaces_sensors.each do |k, surface_sensors|
+        program.addLine("Set hr_#{k} = 0")
+        surface_sensors.each do |sensors|
+          s = "Set hr_#{k} = hr_#{k}"
+          sensors.each do |sensor|
+            # remove ss_net if switch
+            if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
+              s += " - #{sensor.name}"
+            elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
+              s += " + #{sensor.name} * ZoneTimestep * 3600"
+            else
+              s += " + #{sensor.name}"
+            end
+          end
+          program.addLine(s) if sensors.size > 0
+        end
+      end
+
+      # EMS program: Lighting
+      program.addLine('Set hr_lighting = 0')
+      lightings_sensors.each do |lighting_sensors|
+        s = 'Set hr_lighting = hr_lighting'
+        lighting_sensors.each do |sensor|
+          s += " - #{sensor.name}"
+        end
+        program.addLine(s) if lighting_sensors.size > 0
+      end
+
+      # EMS program: Internal gains
+      program.addLine('Set hr_intgains = 0')
+      intgains_sensors.each do |intgain_sensors|
+        s = 'Set hr_intgains = hr_intgains'
+        intgain_sensors.each do |sensor|
+          s += " - #{sensor.name}"
+        end
+        program.addLine(s) if intgain_sensors.size > 0
+      end
+      intgains_dhw_sensors.each do |sensor, vals|
+        off_loss, on_loss, rtf_sensor = vals
+        program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
+      end
+
+      # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
+      { 'infil' => infil_sensors,
+        'natvent' => natvent_sensors,
+        'whf' => whf_sensors,
+        'mechvent' => mechvents_sensors,
+        'ducts' => ducts_sensors }.each do |loadtype, sensors|
+        program.addLine("Set hr_#{loadtype} = 0")
+        next if sensors.empty?
+
+        s = "Set hr_#{loadtype} = hr_#{loadtype}"
+        sensors.each do |sensor|
+          if ['mechvent', 'ducts'].include? loadtype
+            s += " - #{sensor.name}"
+          elsif sensor.name.to_s.include? 'gain'
+            # FIXME: Workaround for https://github.com/NREL/EnergyPlus/issues/9934
+            # Remove when the issue is resolved
+            if loadtype == 'infil'
+              s += " - (#{sensor.name} * 3600)"
+            else
+              s += " - #{sensor.name}"
+            end
+          elsif sensor.name.to_s.include? 'loss'
             s += " + #{sensor.name}"
           end
         end
-        program.addLine(s) if sensors.size > 0
+        program.addLine(s)
       end
-    end
-
-    # EMS program: Lighting
-    program.addLine('Set hr_lighting = 0')
-    lightings_sensors.each do |lighting_sensors|
-      s = 'Set hr_lighting = hr_lighting'
-      lighting_sensors.each do |sensor|
-        s += " - #{sensor.name}"
+      if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
+        program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
       end
-      program.addLine(s) if lighting_sensors.size > 0
-    end
 
-    # EMS program: Internal gains
-    program.addLine('Set hr_intgains = 0')
-    intgains_sensors.each do |intgain_sensors|
-      s = 'Set hr_intgains = hr_intgains'
-      intgain_sensors.each do |sensor|
-        s += " - #{sensor.name}"
-      end
-      program.addLine(s) if intgain_sensors.size > 0
-    end
-    intgains_dhw_sensors.each do |sensor, vals|
-      off_loss, on_loss, rtf_sensor = vals
-      program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
-    end
+      # EMS program: Heating vs Cooling logic
+      program.addLine('Set htg_mode = 0')
+      program.addLine('Set clg_mode = 0')
+      program.addLine("If (#{htg_liv_load_sensors[unit].name} > 0)") # Assign hour to heating if heating load
+      program.addLine("  Set htg_mode = #{total_heat_load_serveds[unit]}")
+      program.addLine("ElseIf (#{clg_liv_load_sensors[unit].name} > 0)") # Assign hour to cooling if cooling load
+      program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
+      program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
+      program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
+      program.addLine('Else') # No load, assign hour to heating if not in cooling season definition
+      program.addLine("  Set htg_mode = #{total_heat_load_serveds[unit]}")
+      program.addLine('EndIf')
 
-    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    { infil_sensors => 'infil',
-      natvent_sensors => 'natvent',
-      whf_sensors => 'whf' }.each do |sensors, loadtype|
-      program.addLine("Set hr_#{loadtype} = 0")
-      s = "Set hr_#{loadtype} = hr_#{loadtype}"
-      sensors.each do |sensor|
-        if sensor.name.to_s.include? 'gain'
-          # FIXME: Workaround for https://github.com/NREL/EnergyPlus/issues/9934
-          # Remove when the issue is resolved
-          if loadtype == 'infil'
-            s += " - (#{sensor.name} * 3600)"
-          else
-            s += " - #{sensor.name}"
-          end
-        elsif sensor.name.to_s.include? 'loss'
-          s += " + #{sensor.name}"
+      [:htg, :clg].each do |mode|
+        if mode == :htg
+          sign = ''
+        else
+          sign = '-'
         end
-      end
-      program.addLine(s) if sensors.size > 0
-    end
-    { mechvents_sensors => 'mechvent',
-      ducts_sensors => 'ducts' }.each do |all_sensors, loadtype|
-      program.addLine("Set hr_#{loadtype} = 0")
-      all_sensors.each do |sensors|
-        s = "Set hr_#{loadtype} = hr_#{loadtype}"
-        sensors.each do |sensor|
-          s += " - #{sensor.name}"
+        surf_names.each do |surf_name|
+          program.addLine("Set loads_#{mode}_#{surf_name} = loads_#{mode}_#{surf_name} + (#{sign}hr_#{surf_name} * #{mode}_mode)")
         end
-        program.addLine(s) if sensors.size > 0
-      end
-    end
-    if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
-      program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
-    end
-
-    # EMS program: Heating vs Cooling logic
-    program.addLine('Set htg_mode = 0')
-    program.addLine('Set clg_mode = 0')
-    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
-    program.addLine("  Set htg_mode = #{total_heat_load_served}")
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
-    program.addLine("  Set clg_mode = #{total_cool_load_served}")
-    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
-    program.addLine("  Set clg_mode = #{total_cool_load_served}")
-    program.addLine('Else') # No load, assign hour to heating if not in cooling season definition
-    program.addLine("  Set htg_mode = #{total_heat_load_served}")
-    program.addLine('EndIf')
-
-    [:htg, :clg].each do |mode|
-      if mode == :htg
-        sign = ''
-      else
-        sign = '-'
-      end
-      surfaces_sensors.keys.each do |k|
-        program.addLine("Set loads_#{mode}_#{k} = #{sign}hr_#{k} * #{mode}_mode")
-      end
-      nonsurf_names.each do |nonsurf_name|
-        program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
+        nonsurf_names.each do |nonsurf_name|
+          program.addLine("Set loads_#{mode}_#{nonsurf_name} = loads_#{mode}_#{nonsurf_name} + (#{sign}hr_#{nonsurf_name} * #{mode}_mode)")
+        end
       end
     end
 
@@ -2561,7 +2598,7 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  def self.set_output_files(model)
+  def set_output_files(model)
     oj = model.getOutputJSON
     oj.setOptionType('TimeSeriesAndTabular')
     oj.setOutputJSON(false)
@@ -2581,14 +2618,14 @@ class OSModel
     ocf.setOutputPerfLog(@debug)
   end
 
-  def self.add_ems_debug_output(model)
+  def add_ems_debug_output(model)
     oems = model.getOutputEnergyManagementSystem
     oems.setActuatorAvailabilityDictionaryReporting('Verbose')
     oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
     oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  def self.set_surface_interior(model, spaces, surface, hpxml_surface)
+  def set_surface_interior(model, spaces, surface, hpxml_surface)
     interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if HPXML::conditioned_below_grade_locations.include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
@@ -2597,7 +2634,7 @@ class OSModel
     end
   end
 
-  def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
+  def set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
     if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
@@ -2618,7 +2655,7 @@ class OSModel
     end
   end
 
-  def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
+  def set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     otherside_coeffs = nil
     model.getSurfacePropertyOtherSideCoefficientss.each do |c|
       next unless c.name.to_s == exterior_adjacent_to
@@ -2639,7 +2676,7 @@ class OSModel
     surface.setWindExposure('NoWind')
   end
 
-  def self.get_space_temperature_schedule(model, location, spaces)
+  def get_space_temperature_schedule(model, location, spaces)
     # Create outside boundary schedules to be actuated by EMS,
     # can be shared by any surface, duct adjacent to / located in those spaces
 
@@ -2724,7 +2761,7 @@ class OSModel
   # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters and ducts).
-  def self.get_space_or_schedule_from_location(location, model, spaces)
+  def get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
                HPXML::LocationOutside,
                HPXML::LocationRoofDeck].include? location
@@ -2749,7 +2786,7 @@ class OSModel
   # Returns an OS:Space, or nil if a MF space or outside
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
-  def self.get_space_from_location(location, spaces)
+  def get_space_from_location(location, spaces)
     return if [HPXML::LocationOutside,
                HPXML::LocationOtherHeatedSpace,
                HPXML::LocationOtherHousingUnit,
@@ -2763,7 +2800,7 @@ class OSModel
     return spaces[location]
   end
 
-  def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)
+  def set_subsurface_exterior(surface, spaces, model, hpxml_surface)
     # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
     # The parent surface is entirely comprised of the subsurface.
 
@@ -2775,7 +2812,7 @@ class OSModel
     end
   end
 
-  def self.set_foundation_and_walls_top()
+  def set_foundation_and_walls_top()
     @foundation_top = 0
     @hpxml.floors.each do |floor|
       # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
@@ -2790,7 +2827,7 @@ class OSModel
     @walls_top = @foundation_top + @hpxml.building_construction.average_ceiling_height * @ncfl_ag
   end
 
-  def self.set_heating_and_cooling_seasons()
+  def set_heating_and_cooling_seasons()
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]

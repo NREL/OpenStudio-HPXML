@@ -250,6 +250,10 @@ class Constants
     return 'dhw recirc pump'
   end
 
+  def self.ObjectNameHVACAvailabilitySensor
+    return 'hvac availability sensor'
+  end
+
   def self.ObjectNameIdealAirSystem
     return 'ideal air system'
   end
