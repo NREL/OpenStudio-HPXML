@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>231dcac6-9638-4768-948e-ed6a091d947b</version_id>
-  <version_modified>2023-07-25T23:09:40Z</version_modified>
+  <version_id>ec3f0f8f-2618-4b4e-8bb8-1bccfb249aa2</version_id>
+  <version_modified>2023-07-27T15:51:57Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -220,43 +220,103 @@
       <filename>g_functions/C_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73BEBBA8</checksum>
+      <checksum>E97DCCDD</checksum>
     </file>
     <file>
       <filename>g_functions/L_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73BEBBA8</checksum>
+      <checksum>6B2B3787</checksum>
     </file>
     <file>
       <filename>g_functions/LopU_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>80874D4F</checksum>
+      <checksum>F639FAC3</checksum>
     </file>
     <file>
       <filename>g_functions/Open_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73BEBBA8</checksum>
+      <checksum>FF25A024</checksum>
     </file>
     <file>
       <filename>g_functions/U_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73BEBBA8</checksum>
+      <checksum>B5BEF270</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/C_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E9E73997</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/L_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1265E552</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/LibraryAccessExample.py</filename>
+      <filetype>py</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C9FE5CC2</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/LopU_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>72B76187</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/Open_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BCB44A41</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/U_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1620B431</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/ZRectsContained.xlsx</filename>
+      <filetype>xlsx</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BA2559DF</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/g-function_library_overview.pdf</filename>
+      <filetype>pdf</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>638C9245</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/rectangle_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E90F30A5</checksum>
+    </file>
+    <file>
+      <filename>g_functions/g-function_library_1.0/zoned_rectangle_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6A4C47AD</checksum>
     </file>
     <file>
       <filename>g_functions/rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E2CF1DF7</checksum>
+      <checksum>25FFB6A8</checksum>
     </file>
     <file>
       <filename>g_functions/util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9ECA4592</checksum>
+      <checksum>3FCF56D1</checksum>
     </file>
     <file>
       <filename>g_functions/zoned_rectangle_5m_v1.0.json</filename>
