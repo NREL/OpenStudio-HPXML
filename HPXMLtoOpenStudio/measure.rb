@@ -129,7 +129,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       epw_path, weather = nil, nil
       hpxml_osm_map = {}
 
-      hpxml_building_ids.each_with_index do |hpxml_building_id, unit_number|
+      hpxml_building_ids.each_with_index do |hpxml_building_id, i|
+        if i > 0
+          # Only need to check the HPXML schema once.
+          # FUTURE: When running entire MF building, only call Schematron validation once
+          # for runtime performance; currently we perform Schematron validation for each
+          # HPXML Building one at a time.
+          schema_validator = nil
+        end
         hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: hpxml_building_id)
         hpxml.errors.each do |error|
           runner.registerError(error)
@@ -148,14 +155,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
           create_unit_model(hpxml, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
-
-          # Add unit model to the whole-building model
-          add_unit_model_to_model(model, unit_model, unit_number)
           hpxml_osm_map[hpxml] = unit_model
         else
           create_unit_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
           hpxml_osm_map[hpxml] = model
         end
+      end
+
+      if hpxml_building_ids.size > 1
+        # Merge unit models into
+        add_unit_model_to_model(model, hpxml_osm_map)
       end
 
       # Output
@@ -183,43 +192,45 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def add_unit_model_to_model(model, unit_model, unit_number)
-    shift_geometry(unit_model, unit_number)
-
-    # prefix all objects with name using unit number
-    # FUTURE: Create objects with unique names up front so we don't have to do this
-    prefix_all_unit_model_objects(unit_model, unit_number)
-
-    if unit_number > 0
-      # Skip these unique objects for subsequent units
-      # FIXME: Need to throw a warning/error if different values
-      # between the model object and unit_model object.
-      unit_model.getConvergenceLimits.remove
-      unit_model.getOutputDiagnostics.remove
-      unit_model.getRunPeriodControlDaylightSavingTime.remove
-      unit_model.getShadowCalculation.remove
-      unit_model.getSimulationControl.remove
-      unit_model.getSiteGroundTemperatureDeep.remove
-      unit_model.getSiteGroundTemperatureShallow.remove
-      unit_model.getSite.remove
-      unit_model.getSiteWaterMainsTemperature.remove
-      unit_model.getInsideSurfaceConvectionAlgorithm.remove
-      unit_model.getOutsideSurfaceConvectionAlgorithm.remove
-      unit_model.getTimestep.remove
-      unit_model.getFoundationKivaSettings.remove
-      unit_model.getOutputJSON.remove
-      unit_model.getOutputControlFiles.remove
-      unit_model.getPerformancePrecisionTradeoffs.remove
-      unit_model.getSiteWaterMainsTemperature.remove
-      # FIXME: Remove unused/duplicate schedules; maybe unused schedules will
-      # be correctly removed when the meta_measure.rb code is uncommented?
-    end
-
+  def add_unit_model_to_model(model, hpxml_osm_map)
     unit_model_objects = []
-    unit_model.objects.each do |obj|
-      next if unit_number > 0 && obj.to_Building.is_initialized
+    hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit_number|
+      shift_geometry(unit_model, unit_number)
 
-      unit_model_objects << obj
+      # prefix all objects with name using unit number
+      # FUTURE: Create objects with unique names up front so we don't have to do this
+      prefix_all_unit_model_objects(unit_model, unit_number)
+
+      if unit_number > 0
+        # Skip these unique objects for subsequent units
+        # FIXME: Need to throw a warning/error if different values
+        # between the model object and unit_model object.
+        unit_model.getConvergenceLimits.remove
+        unit_model.getOutputDiagnostics.remove
+        unit_model.getRunPeriodControlDaylightSavingTime.remove
+        unit_model.getShadowCalculation.remove
+        unit_model.getSimulationControl.remove
+        unit_model.getSiteGroundTemperatureDeep.remove
+        unit_model.getSiteGroundTemperatureShallow.remove
+        unit_model.getSite.remove
+        unit_model.getSiteWaterMainsTemperature.remove
+        unit_model.getInsideSurfaceConvectionAlgorithm.remove
+        unit_model.getOutsideSurfaceConvectionAlgorithm.remove
+        unit_model.getTimestep.remove
+        unit_model.getFoundationKivaSettings.remove
+        unit_model.getOutputJSON.remove
+        unit_model.getOutputControlFiles.remove
+        unit_model.getPerformancePrecisionTradeoffs.remove
+        unit_model.getSiteWaterMainsTemperature.remove
+        # FIXME: Remove unused/duplicate schedules; maybe unused schedules will
+        # be correctly removed when the meta_measure.rb code is uncommented?
+      end
+
+      unit_model.objects.each do |obj|
+        next if unit_number > 0 && obj.to_Building.is_initialized
+
+        unit_model_objects << obj
+      end
     end
     model.addObjects(unit_model_objects, true)
   end
