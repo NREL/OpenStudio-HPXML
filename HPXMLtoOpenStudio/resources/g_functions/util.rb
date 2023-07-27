@@ -1,19 +1,5 @@
 # frozen_string_literal: true
 
-def add_m_n(json, json2, expected_num_boreholes, m_n, key2 = nil)
-  if key2.nil?
-    actual_num_boreholes = json[m_n]['bore_locations'].size
-    fail "#{expected_num_boreholes} vs #{actual_num_boreholes}" if expected_num_boreholes != actual_num_boreholes
-
-    json2.update({ m_n => json[m_n] })
-  else
-    actual_num_boreholes = json[m_n][key2]['bore_locations'].size
-    fail "#{expected_num_boreholes} vs #{actual_num_boreholes}" if expected_num_boreholes != actual_num_boreholes
-
-    json2.update({ m_n => { key2 => json[m_n][key2] } })
-  end
-end
-
 def process_g_functions(filepath)
   # Downselect jsons found at https://gdr.openei.org/files/1325/g-function_library_1.0.zip
   require 'json'
@@ -64,11 +50,12 @@ def process_g_functions(filepath)
       add_m_n(json, json2, 7, '3_3', '1')
       add_m_n(json, json2, 9, '3_4', '1')
       add_m_n(json, json2, 10, '4_4', '1')
-    when 'zoned_rectangle_5m_v1.0.json'
-      add_m_n(json, json2, 17, '5_5', '1_1')
+    when 'zoned_rectangle_5m_v1.0.json' # FIXME: are there any m_n for which num_boreholes<=10?
+      # add_m_n(json, json2, 17, '5_5', '1_1')
     else
       fail "Unrecognized config_json: #{config_json}"
     end
+    next if json2.empty?
 
     configpath = File.join(g_functions_path, File.basename(config_json))
     File.open(configpath, 'w') do |f|
@@ -77,9 +64,23 @@ def process_g_functions(filepath)
     end
   end
 
-  # FileUtils.rm_rf(filepath)
+  FileUtils.rm_rf(filepath)
 
   num_configs_actual = Dir[File.join(g_functions_path, '*.json')].count
 
   return num_configs_actual
+end
+
+def add_m_n(json, json2, expected_num_boreholes, m_n, key2 = nil)
+  if key2.nil?
+    actual_num_boreholes = json[m_n]['bore_locations'].size
+    fail "#{expected_num_boreholes} vs #{actual_num_boreholes}" if expected_num_boreholes != actual_num_boreholes
+
+    json2.update({ m_n => json[m_n] })
+  else
+    actual_num_boreholes = json[m_n][key2]['bore_locations'].size
+    fail "#{expected_num_boreholes} vs #{actual_num_boreholes}" if expected_num_boreholes != actual_num_boreholes
+
+    json2.update({ m_n => { key2 => json[m_n][key2] } })
+  end
 end
