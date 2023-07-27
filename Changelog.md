@@ -8,6 +8,7 @@ __New Features__
   - Adds "Peak Electricity: Annual Total (W)" output.
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+- Update to 2022 EIA energy costs.
 - Connect to the [G-Function Library](https://gdr.openei.org/submissions/1325) (in the Geothermal Data Repository) for using precalculated g-function values with GSHP modeling.
 
 __Bugfixes__
