@@ -1936,12 +1936,13 @@ class HVACSizing
     end
 
     valid_configs = HVAC.valid_borefield_configs
-    valid_num_bores = valid_configs[bore_config]
+    valid_num_bores = valid_configs[bore_config]['num_boreholes']
     unless valid_num_bores.include? num_bore_holes
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
-    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    g_functions_filename = valid_configs[bore_config]['filename']
+    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
     hvac_sizing_values.GSHP_Loop_flow = loop_flow
     hvac_sizing_values.GSHP_Bore_Depth = bore_depth
@@ -2667,15 +2668,9 @@ class HVACSizing
     return nom_length_heat, nom_length_cool
   end
 
-  def self.gshp_gfnc_coeff(bore_config, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+  def self.gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
     require 'json'
 
-    g_functions_filename = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
-                             HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }[bore_config]
     g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
     g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
 
@@ -2750,6 +2745,7 @@ class HVACSizing
 
         return logtime, g
       elsif [HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle,
+             HPXML::GeothermalLoopBorefieldConfigurationC,
              HPXML::GeothermalLoopBorefieldConfigurationLopsidedU,
              HPXML::GeothermalLoopBorefieldConfigurationU].include?(bore_config)
         values_1.each do |_key_2, values_2|
