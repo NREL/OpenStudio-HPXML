@@ -147,13 +147,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml_building_ids.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_model(hpxml, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
 
           # Add unit model to the whole-building model
           add_unit_model_to_model(model, unit_model, unit_number)
           hpxml_osm_map[hpxml] = unit_model
         else
-          create_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
           hpxml_osm_map[hpxml] = model
         end
       end
@@ -323,7 +323,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  def create_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+  def create_unit_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
     @hpxml = hpxml
     @debug = debug
 
@@ -2008,7 +2008,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     htg_start_days, htg_end_days, clg_start_days, clg_end_days = {}, {}, {}, {}
     hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
-      living_zone_name = unit_model.getThermalZones.find { |z| z.thermostat.is_initialized }.name.to_s
+      living_zone_name = unit_model.getThermalZones.find { |z| z.name.to_s == HPXML::LocationLivingSpace }.name.to_s
 
       # EMS sensors
       htg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Heating Setpoint Not Met Time')
@@ -2093,7 +2093,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
       # Retrieve objects
-      living_zone_name = unit_model.getThermalZones.find { |z| z.thermostat.is_initialized }.name.to_s
+      living_zone_name = unit_model.getThermalZones.find { |z| z.name.to_s == HPXML::LocationLivingSpace }.name.to_s
       duct_zone = unit_model.getThermalZones.find { |z| z.isPlenum }
       duct_zone_name = duct_zone.name.to_s unless duct_zone.nil?
       dehumidifier = unit_model.getZoneHVACDehumidifierDXs
@@ -2198,7 +2198,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit|
-      living_zone = unit_model.getThermalZones.select { |z| z.thermostat.is_initialized }[0]
+      living_zone = unit_model.getThermalZones.find { |z| z.name.to_s == HPXML::LocationLivingSpace }
 
       # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
       objects_already_processed = []
