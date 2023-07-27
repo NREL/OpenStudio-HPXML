@@ -2222,7 +2222,7 @@ def download_g_functions
   FileUtils.mkdir(g_functions_dir) if !File.exist?(g_functions_dir)
   filepath = File.join(g_functions_dir, 'g-function_library_1.0')
 
-  if !File.exist?(filepath) # To check: Is it OK to remove this 'if' statement (to auto-overwrite the 'g-function_library_1.0' folder with each download)?
+  if !File.exist?(filepath) # presence of 'g-function_library_1.0' folder will skip re-downloading
     require 'tempfile'
     tmpfile = Tempfile.new('functions')
 
