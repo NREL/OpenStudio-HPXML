@@ -2442,14 +2442,6 @@
     "geothermal_loop_boreholes_or_trenches_count": 5,
     "geothermal_loop_borefield_configuration": "L"
   },
-  "sample_files/base-hvac-library-test-case.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_borefield_configuration": "Rectangle",
-    "geothermal_loop_boreholes_or_trenches_count": 40,
-    "geothermal_loop_boreholes_or_trenches_length": 492.125,
-    "geothermal_loop_boreholes_or_trenches_spacing": 22.96588,
-    "geothermal_loop_boreholes_or_trenches_diameter": 6.2992126
-  },
   "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",

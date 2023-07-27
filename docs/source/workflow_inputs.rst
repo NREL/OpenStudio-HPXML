@@ -2074,6 +2074,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   .. [#] | If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
          | - **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
          | - **Open Rectangle**: 8 or 10
+         | - **C**: 7 or 9
          | - **L**: 4, 5, 6, 7, 8, 9, or 10
          | - **U**: 7, 9, or 10
          | - **Lopsided U**: 6, 7, 8, 9, or 10
@@ -2086,7 +2087,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **thermally enhanced**: 0.8 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] Sum of U-tube spacing and pipe outer diameter.
-  .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "L", "U", or "Lopsided U".
+  .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
 
 .. _hvac_control:
 
