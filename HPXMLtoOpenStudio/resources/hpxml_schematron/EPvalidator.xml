@@ -1297,7 +1297,6 @@
       <sch:assert role='ERROR' test='count(h:BoreholesOrTrenches/h:Count) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BoreholesOrTrenches/Count</sch:assert>
       <sch:assert role='ERROR' test='number(h:BoreholesOrTrenches/h:Count) &gt; 0 or not(h:BoreholesOrTrenches/h:Count)'>Expected BoreholesOrTrenches/Count to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:BoreholesOrTrenches/h:Length) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BoreholesOrTrenches/Length</sch:assert>
-      <sch:assert role='ERROR' test='number(h:BoreholesOrTrenches/h:Length) &gt; 0 or not(h:BoreholesOrTrenches/h:Length)'>Expected BoreholesOrTrenches/Length to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:BoreholesOrTrenches/h:Spacing) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BoreholesOrTrenches/Spacing</sch:assert>
       <sch:assert role='ERROR' test='number(h:BoreholesOrTrenches/h:Spacing) &gt; 0 or not(h:BoreholesOrTrenches/h:Spacing)'>Expected BoreholesOrTrenches/Spacing to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:BoreholesOrTrenches/h:Diameter) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BoreholesOrTrenches/Diameter</sch:assert>
@@ -1310,7 +1309,7 @@
       <sch:assert role='ERROR' test='count(h:Pipe/h:ShankSpacing) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pipe/ShankSpacing</sch:assert>
       <sch:assert role='ERROR' test='number(h:Pipe/h:ShankSpacing) &gt; 0 or not(h:Pipe/h:ShankSpacing)'>Expected Pipe/ShankSpacing to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:BoreholesOrTrenches/h:Count) + count(h:extension/h:BorefieldConfiguration) = 2 or not(h:extension/h:BorefieldConfiguration)'>Expected 0 or 2 element(s) for xpath: BoreholesOrTrenches/Count | extension/BorefieldConfiguration</sch:assert>
-      <sch:assert role='ERROR' test='h:extension/h:BorefieldConfiguration[text()="single" or text()="line" or text()="l-config" or text()="rectangle" or text()="u-config" or text()="l2-config" or text()="open-rectangle"] or not(h:extension/h:BorefieldConfiguration)'>Expected BorefieldConfiguration to be 'single' or 'line' or 'l-config' or 'rectangle' or 'u-config' or '12-config' or 'open-rectangle'</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:BorefieldConfiguration[text()="Rectangle" or text()="Open Rectangle" or text()="C" or text()="L" or text()="U" or text()="Lopsided U"] or not(h:extension/h:BorefieldConfiguration)'>Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U'</sch:assert>
     </sch:rule>
   </sch:pattern>
 

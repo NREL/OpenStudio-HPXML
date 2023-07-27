@@ -2384,6 +2384,19 @@
   "sample_files/base-hvac-furnace-x3-dse.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-hvac-geothermal-loop.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "geothermal_loop_loop_flow": 10.0,
+    "geothermal_loop_boreholes_or_trenches_count": 9,
+    "geothermal_loop_boreholes_or_trenches_length": 1259.84,
+    "geothermal_loop_boreholes_or_trenches_spacing": 16.4042,
+    "geothermal_loop_boreholes_or_trenches_diameter": 6.8897638,
+    "geothermal_loop_grout_conductivity": 0.5,
+    "geothermal_loop_pipe_conductivity": 0.3,
+    "geothermal_loop_pipe_diameter": "1\" pipe",
+    "geothermal_loop_pipe_shank_spacing": 2.5,
+    "geothermal_loop_borefield_configuration": "Lopsided U"
+  },
   "sample_files/base-hvac-geothermal-loop-ground-diffusivity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "site_ground_diffusivity": 0.03
@@ -2427,7 +2440,7 @@
   "sample_files/base-hvac-geothermal-loop-borefield-configuration.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "geothermal_loop_boreholes_or_trenches_count": 5,
-    "geothermal_loop_borefield_configuration": "l-config"
+    "geothermal_loop_borefield_configuration": "L"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",

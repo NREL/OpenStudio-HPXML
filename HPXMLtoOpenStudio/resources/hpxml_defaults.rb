@@ -1543,7 +1543,7 @@ class HPXMLDefaults
         HVAC.set_curves_gshp(heat_pump)
 
         if heat_pump.geothermal_loop.bore_spacing.nil?
-          heat_pump.geothermal_loop.bore_spacing = 20.0 # ft, distance between bores
+          heat_pump.geothermal_loop.bore_spacing = 16.4 # ft, distance between bores
           heat_pump.geothermal_loop.bore_spacing_isdefaulted = true
         end
 

@@ -3399,13 +3399,12 @@ class HVAC
   end
 
   def self.valid_borefield_configs
-    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationSingle => [1],
-                      HPXML::GeothermalLoopBorefieldConfigurationLine => [2, 3, 4, 5, 6, 7, 8, 9, 10],
-                      HPXML::GeothermalLoopBorefieldConfigurationLConfig => [3, 4, 5, 6],
-                      HPXML::GeothermalLoopBorefieldConfigurationRectangle => [2, 4, 6, 8],
-                      HPXML::GeothermalLoopBorefieldConfigurationUConfig => [5, 7, 9],
-                      HPXML::GeothermalLoopBorefieldConfigurationl2Config => [8],
-                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => [8] }
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => { 'num_boreholes' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'filename' => 'rectangle_5m_v1.0.json' },
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => { 'num_boreholes' => [8, 10], 'filename' => 'Open_configurations_5m_v1.0.json' },
+                      HPXML::GeothermalLoopBorefieldConfigurationC => { 'num_boreholes' => [7, 9], 'filename' => 'C_configurations_5m_v1.0.json' },
+                      HPXML::GeothermalLoopBorefieldConfigurationL => { 'num_boreholes' => [4, 5, 6, 7, 8, 9, 10], 'filename' => 'L_configurations_5m_v1.0.json' },
+                      HPXML::GeothermalLoopBorefieldConfigurationU => { 'num_boreholes' => [7, 9, 10], 'filename' => 'U_configurations_5m_v1.0.json' },
+                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => { 'num_boreholes' => [6, 7, 8, 9, 10], 'filename' => 'LopU_configurations_5m_v1.0.json' } }
     return valid_configs
   end
 
