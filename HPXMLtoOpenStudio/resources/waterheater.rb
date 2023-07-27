@@ -1066,13 +1066,13 @@ class Waterheater
 
     desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, model)
     reclaimed_efficiency = 0.25 # default
-    desuperheater_name = "#{tank.name} desuperheater'
+    desuperheater_name = "#{tank.name} desuperheater"
 
     # create a storage tank
     vol = 50.0
     storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
     assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
-    storage_tank_name = " # {tank.name} storage tank"
+    storage_tank_name = "#{tank.name} storage tank"
     # reduce tank setpoint to enable desuperheater setpoint at t_set
     if water_heating_system.temperature.nil?
       fail "Detailed setpoints for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
