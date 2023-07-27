@@ -1869,8 +1869,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       avail_sch = ScheduleConstant.new(model, SchedulesFile::ColumnHVAC, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
 
       hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      hvac_availability_sensor.setName(Constants.ObjectNameHVACAvailabilitySensor)
+      hvac_availability_sensor.setName('hvac availability s')
       hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
+      hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants.ObjectNameHVACAvailabilitySensor)
     end
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
@@ -2008,7 +2009,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     htg_start_days, htg_end_days, clg_start_days, clg_end_days = {}, {}, {}, {}
     hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
-      living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('HPXML_Location').to_s == HPXML::LocationLivingSpace }.name.to_s
+      living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
 
       # EMS sensors
       htg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Heating Setpoint Not Met Time')
@@ -2032,7 +2033,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       clg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
     end
 
-    hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.name.to_s.include? Constants.ObjectNameHVACAvailabilitySensor }
+    hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameHVACAvailabilitySensor }
 
     # EMS program
     clg_hrs = 'clg_unmet_hours'
@@ -2093,7 +2094,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
       # Retrieve objects
-      living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('HPXML_Location').to_s == HPXML::LocationLivingSpace }.name.to_s
+      living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
       duct_zone = unit_model.getThermalZones.find { |z| z.isPlenum }
       duct_zone_name = duct_zone.name.to_s unless duct_zone.nil?
       dehumidifier = unit_model.getZoneHVACDehumidifierDXs
@@ -2198,7 +2199,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit|
-      living_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('HPXML_Location').to_s == HPXML::LocationLivingSpace }
+      living_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }
 
       # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
       objects_already_processed = []

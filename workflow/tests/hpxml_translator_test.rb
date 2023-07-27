@@ -1195,14 +1195,12 @@ class HPXMLTest < Minitest::Test
       if hpxml.total_fraction_heat_load_served == 0
         assert_equal(0, unmet_hours_htg)
       else
-        # FIXME: Revert
-        # assert_operator(unmet_hours_htg, :<, 350)
+        assert_operator(unmet_hours_htg, :<, 350)
       end
       if hpxml.total_fraction_cool_load_served == 0
         assert_equal(0, unmet_hours_clg)
       else
-        # FIXME: Revert
-        # assert_operator(unmet_hours_clg, :<, 350)
+        assert_operator(unmet_hours_clg, :<, 350)
       end
     end
 
