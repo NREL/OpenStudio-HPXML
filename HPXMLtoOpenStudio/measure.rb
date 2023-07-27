@@ -2095,8 +2095,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
       # Retrieve objects
       living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
-      duct_zone = unit_model.getThermalZones.find { |z| z.isPlenum }
-      duct_zone_name = duct_zone.name.to_s unless duct_zone.nil?
+      duct_zone_names = unit_model.getThermalZones.select { |z| z.isPlenum }.map { |z| z.name.to_s }
       dehumidifier = unit_model.getZoneHVACDehumidifierDXs
       dehumidifier_name = dehumidifier[0].name.to_s unless dehumidifier.empty?
 
@@ -2115,12 +2114,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       clg_liv_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone_name.upcase}")
       clg_liv_load_sensors[unit].setName('clg_load_liv')
 
-      if not duct_zone_name.nil?
-        # Energy transferred in duct zone
-        htg_duct_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
-        htg_duct_load_sensors[unit].setName('htg_load_duct')
-        clg_duct_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
-        clg_duct_load_sensors[unit].setName('clg_load_duct')
+      if not duct_zone_names.empty?
+        # Energy transferred in duct zone(s)
+        htg_duct_load_sensors[unit] = []
+        clg_duct_load_sensors[unit] = []
+        duct_zone_names.each do |duct_zone_name|
+          htg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+          htg_duct_load_sensors[unit][-1].setName('htg_load_duct')
+          clg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+          clg_duct_load_sensors[unit][-1].setName('clg_load_duct')
+        end
       end
 
       # Need to adjusted E+ EnergyTransfer meters for dehumidifier internal gains
@@ -2139,8 +2142,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     for unit in 0..hpxml_osm_map.size - 1
       program.addLine("If #{htg_liv_load_sensors[unit].name} > 0")
       program.addLine("  Set loads_htg_tot = loads_htg_tot + (#{htg_liv_load_sensors[unit].name} - #{clg_liv_load_sensors[unit].name}) * #{total_heat_load_serveds[unit]}")
-      if not htg_duct_load_sensors[unit].nil?
-        program.addLine("  Set loads_htg_tot = loads_htg_tot + (#{htg_duct_load_sensors[unit].name} - #{clg_duct_load_sensors[unit].name}) * #{total_heat_load_serveds[unit]}")
+      for i in 0..htg_duct_load_sensors[unit].size - 1
+        program.addLine("  Set loads_htg_tot = loads_htg_tot + (#{htg_duct_load_sensors[unit][i].name} - #{clg_duct_load_sensors[unit][i].name}) * #{total_heat_load_serveds[unit]}")
       end
       if not dehumidifier_sensors[unit].nil?
         program.addLine("  Set loads_htg_tot = loads_htg_tot - #{dehumidifier_sensors[unit].name}")
@@ -2150,10 +2153,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     for unit in 0..hpxml_osm_map.size - 1
       program.addLine("If #{clg_liv_load_sensors[unit].name} > 0")
       program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_liv_load_sensors[unit].name} - #{htg_liv_load_sensors[unit].name}) * #{total_cool_load_serveds[unit]}")
-      if not clg_duct_load_sensors[unit].nil?
+      for i in 0..clg_duct_load_sensors[unit].size - 1
         # FIXME: Seems like the duct load shouldn't be multiplied by total_cool_load_serveds? Need to check.
         # Code below mirrors what we do on the master branch.
-        program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_duct_load_sensors[unit].name} - #{htg_duct_load_sensors[unit].name}) * #{total_cool_load_serveds[unit]}")
+        program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_duct_load_sensors[unit][i].name} - #{htg_duct_load_sensors[unit][i].name}) * #{total_cool_load_serveds[unit]}")
       end
       if not dehumidifier_sensors[unit].nil?
         program.addLine("  Set loads_clg_tot = loads_clg_tot + #{dehumidifier_sensors[unit].name}")
