@@ -2114,16 +2114,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       clg_liv_load_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone_name.upcase}")
       clg_liv_load_sensors[unit].setName('clg_load_liv')
 
-      if not duct_zone_names.empty?
-        # Energy transferred in duct zone(s)
-        htg_duct_load_sensors[unit] = []
-        clg_duct_load_sensors[unit] = []
-        duct_zone_names.each do |duct_zone_name|
-          htg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
-          htg_duct_load_sensors[unit][-1].setName('htg_load_duct')
-          clg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
-          clg_duct_load_sensors[unit][-1].setName('clg_load_duct')
-        end
+      # Energy transferred in duct zone(s)
+      htg_duct_load_sensors[unit] = []
+      clg_duct_load_sensors[unit] = []
+      duct_zone_names.each do |duct_zone_name|
+        htg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+        htg_duct_load_sensors[unit][-1].setName('htg_load_duct')
+        clg_duct_load_sensors[unit] << OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}")
+        clg_duct_load_sensors[unit][-1].setName('clg_load_duct')
       end
 
       # Need to adjusted E+ EnergyTransfer meters for dehumidifier internal gains
