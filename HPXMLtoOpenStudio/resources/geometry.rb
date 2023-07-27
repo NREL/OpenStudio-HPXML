@@ -5,6 +5,7 @@ class Geometry
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
+      thermal_zone.additionalProperties.setFeature('HPXML_Location', location)
 
       space = OpenStudio::Model::Space.new(model)
       space.setName(location)
