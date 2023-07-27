@@ -292,7 +292,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       new_lines = []
       program.lines.each do |line|
         ems_map.each do |old_name, new_name|
-          next unless line.include?(old_name)
+          next unless line.include?(old_name) && !line.include?(old_name + '_')
 
           # old_name between at least 1 character, with the exception of '' on left and ' ' on right
           characters.each do |lhs|
