@@ -97,7 +97,7 @@ class MathTools
       puts 'Error: There must be 10 coefficients in a bicubic polynomial'
     end
     z = c[0] + c[1] * x + c[2] * x**2 + c[3] * y + c[4] * y**2 + c[5] * x * y + \
-        c[6] * x**3 + c[7] * y **3 + c[8] * x**2 * y + c[9] * x * y**2
+        c[6] * x**3 + c[7] * y**3 + c[8] * x**2 * y + c[9] * x * y**2
 
     return z
   end

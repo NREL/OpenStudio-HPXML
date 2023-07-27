@@ -1472,7 +1472,6 @@ class HPXMLDefaults
       heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(HPXML::HVACCompressorTypeSingleStage, true)
     end
     hpxml.heat_pumps.each do |heat_pump|
-      hp_ap = heat_pump.additional_properties
       if [HPXML::HVACTypeHeatPumpAirToAir,
           HPXML::HVACTypeHeatPumpMiniSplit,
           HPXML::HVACTypeHeatPumpPTHP,

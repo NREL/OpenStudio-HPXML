@@ -1042,16 +1042,16 @@ class HVAC
     end
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
-  
-  def self.get_cool_cap_eir_ft_spec(compressor_type, system_type=nil)
+
+  def self.get_cool_cap_eir_ft_spec(compressor_type, system_type = nil)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
-                   [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
+                     [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
       eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
-                   [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
+                     [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeCentralAirConditioner].include? system_type
         # From Carrier heat pump lab testing
@@ -1088,10 +1088,10 @@ class HVAC
     end
     return cap_fflow_spec, eir_fflow_spec
   end
-  
-  def self.get_heat_cap_eir_ft_spec(compressor_type, system_type=nil)
+
+  def self.get_heat_cap_eir_ft_spec(compressor_type, system_type = nil)
     # FIXME: Need to handle capacity retention inputs later, especially for single speed and two speed systems, don't overwrite current approach
-    #cap_ft_spec = calc_heat_cap_ft_spec(heat_pump)
+    # cap_ft_spec = calc_heat_cap_ft_spec(heat_pump)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
@@ -2691,7 +2691,7 @@ class HVAC
     return create_table_lookup(model, 'ConstantTable', [var_constant], [1, 1], -100, 100)
   end
 
-  def self.create_table_lookup(model, name, independent_vars, output_values, output_min=nil, output_max=nil, rated_value=nil)
+  def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil, _rated_value = nil)
     table = OpenStudio::Model::TableLookup.new(model)
     table.setName(name)
     independent_vars.each do |var|
@@ -2731,7 +2731,7 @@ class HVAC
     curve.setCoefficient6z(coeff[5])
     return curve
   end
-  
+
   def self.convert_net_to_gross_capacity_cop(net_cap, net_cop, watts_per_cfm, cfm_per_ton, fan_ratio, mode)
     net_cap_ton = UnitConversions.convert(net_cap, 'Btu/hr', 'ton')
     net_cap_watts = UnitConversions.convert(net_cap, 'Btu/hr', 'w')
@@ -2745,74 +2745,66 @@ class HVAC
     end
     gross_power = net_power - fan_power
     gross_cop = gross_cap_watts / gross_power
-    gross_cap_btu_hr = UnitConversions.convert(net_cap, 'w', 'Btu/hr')
+    gross_cap_btu_hr = UnitConversions.convert(gross_cap_watts, 'w', 'Btu/hr')
     return gross_cap_btu_hr, gross_cop
   end
 
   def self.setup_neep_detailed_performance_data(detailed_performance_data)
-    net_data = {}
+    data_array = Array.new(2) { Array.new }
     detailed_performance_data.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
       next unless ['minimum', 'maximum'].include? data_point.capacity_description
-      speed_num = {'minimum' => 0, 'maximum' => 1}[data_point.capacity_description]
-      net_data[speed_num] = {} unless net_data.keys.include? speed_num
-      # first element capacity, second element cop
-      net_data[speed_num][data_point.outdoor_temperature] = [] unless net_data[speed_num].keys.include? data_point.outdoor_temperature
-      net_data[speed_num][data_point.outdoor_temperature] << data_point.capacity
-      net_data[speed_num][data_point.outdoor_temperature] << data_point.efficiency_cop
+
+      if data_point.capacity_description == 'minimum'
+        data_array[0] << data_point
+      else
+        data_array[1] << data_point
+      end
     end
-    return net_data
+    return data_array
   end
 
   def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode)
-    net_data = setup_neep_detailed_performance_data(detailed_performance_data)
-    gross_data = {}
-    
+    data_array = setup_neep_detailed_performance_data(detailed_performance_data)
+
     # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
+      hvac_ap.cooling_performance_data_array = data_array
     elsif mode == :htg
       cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
+      hvac_ap.heating_performance_data_array = data_array
     end
     # convert net to gross
-    net_data.keys.sort.each do |speed|
-      gross_data[speed] = {}
-      net_data[speed].keys.sort.each do |out_db|
-        gross_data[speed][out_db] = []
+    data_array.each_with_index do |data, speed|
+      data.each do |dp|
+        # FIXME: What if user only provides one speed data for a specific outdoor temperature, add logic to ignore those.
+        max_speed_capacity = data_array[-1].find { |dp_max| dp_max.outdoor_temperature == dp.outdoor_temperature }.capacity
+        cap_ratio = dp.capacity / max_speed_capacity
         # fan ratio = (cfm per ton min/max) * (cap min/max)
-        fan_ratio = net_data[speed][out_db][0] / net_data[1][out_db][0] * cfm_per_ton[speed] / cfm_per_ton[-1]
-        gross_data[speed][out_db] = convert_net_to_gross_capacity_cop(net_data[speed][out_db][0], net_data[speed][out_db][1], hvac_ap.fan_power_rated, cfm_per_ton[speed], fan_ratio, mode)
+        fan_ratio = cap_ratio * cfm_per_ton[speed] / cfm_per_ton[-1]
+        dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, dp.efficiency_cop, hvac_ap.fan_power_rated, cfm_per_ton[speed], fan_ratio, mode)
       end
     end
     # convert to table lookup data
-    puts net_data
-    puts gross_data
-    gross_data_interpolated = interpolate_to_odb_table_points(gross_data, mode)
-    puts gross_data_interpolated
-    if mode == :clg
-      hvac_ap.gross_cap_ft_values_clg, hvac_ap.gross_eir_ft_values_clg = correct_ft_cap_eir(gross_data_interpolated, mode)
-    puts hvac_ap.gross_cap_ft_values_clg, hvac_ap.gross_eir_ft_values_clg
-    else
-      hvac_ap.gross_cap_ft_values_htg, hvac_ap.gross_eir_ft_values_htg = correct_ft_cap_eir(gross_data_interpolated, mode)
-    puts hvac_ap.gross_cap_ft_values_htg, hvac_ap.gross_eir_ft_values_htg
-    end
+    interpolate_to_odb_table_points(data_array, mode)
+    correct_ft_cap_eir(data_array, mode)
   end
-  
-  def self.interpolate_to_odb_table_points(data_orig, mode)
+
+  def self.interpolate_to_odb_table_points(data_array, mode)
     # Set of data used for table lookup
     if mode == :clg
       outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
     else
       outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
     end
-    new_data = {}
-    data_orig.keys.sort.each do |speed|
-      user_out_db = data_orig[speed].keys.sort
-      new_data[speed] = {}
+    data_array.each_with_index do |data, speed|
+      user_out_db = data_array[speed].map { |dp| dp.outdoor_temperature }
       outdoor_dry_bulbs.each do |new_pt|
-        new_data[speed][new_pt] = []
-        right_point = user_out_db.find { |e| e > new_pt}
-        left_point = user_out_db.reverse.find { |e| e < new_pt}
+        next if user_out_db.include? new_pt
+
+        right_point = user_out_db.find { |e| e > new_pt }
+        left_point = user_out_db.reverse.find { |e| e < new_pt }
         if right_point.nil?
           # expolation
           right_point = user_out_db[-1]
@@ -2822,59 +2814,83 @@ class HVAC
           right_point = user_out_db[1]
           left_point = user_out_db[0]
         end
-        cap_slope = (data_orig[speed][right_point][0] - data_orig[speed][left_point][0]) / (right_point - left_point)
-        cop_slope = (data_orig[speed][right_point][1] - data_orig[speed][left_point][1]) / (right_point - left_point)
-        new_data[speed][new_pt] << (new_pt - left_point) * cap_slope + data_orig[speed][left_point][0]
-        new_data[speed][new_pt] << (new_pt - left_point) * cop_slope + data_orig[speed][left_point][1]
+        right_dp = data.find { |dp| dp.outdoor_temperature == right_point }
+        left_dp = data.find { |dp| dp.outdoor_temperature == left_point }
+        cap_slope = (right_dp.gross_capacity - left_dp.gross_capacity) / (right_point - left_point)
+        cop_slope = (right_dp.gross_efficiency_cop - left_dp.gross_efficiency_cop) / (right_point - left_point)
+        new_dp = left_dp.dup
+        new_dp.outdoor_temperature = new_pt
+        new_dp.capacity = nil
+        new_dp.capacity_description = nil
+        new_dp.efficiency_cop = nil
+        new_dp.gross_capacity = (new_pt - left_point) * cap_slope + left_dp.gross_capacity
+        new_dp.gross_efficiency_cop = (new_pt - left_point) * cop_slope + left_dp.gross_efficiency_cop
+        data << new_dp
       end
+      data = data.sort_by { |dp| dp.outdoor_temperature }
     end
-    return new_data
   end
-  
-  def self.correct_ft_cap_eir(gross_data, mode)
-    # Add sensitivity to indoor wet bulb temperature
+
+  def self.correct_ft_cap_eir(data_array, mode)
+    # Add sensitivity to indoor conditions
     # single speed cutler curve coefficients
     if mode == :clg
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       indoor_t = [50.0, 67.0, 80.0]
-      rated_t_i = 67
+      rated_t_i = 67.0
     else
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       indoor_t = [60.0, 70.0, 80.0]
-      rated_t_i = 60
+      rated_t_i = 60.0
     end
-    # table lookup output values
-    gross_data_out_in_cap = {}
-    gross_data_out_in_eir = {}
-    gross_data.keys.sort.each do |speed|
-      gross_data_out_in_cap[speed] = {}
-      gross_data_out_in_eir[speed] = {}
-      indoor_t.each do |t_i|
-        gross_data_out_in_cap[speed][t_i] = {}
-        gross_data_out_in_eir[speed][t_i] = {}
-        gross_data[speed].keys.sort.each do |t_odb|
-          # capacity FT curve output
-          cap_ft_curve_output = MathTools.biquadratic(t_i, t_odb, cap_ft_spec_ss[0])
-          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, t_odb, cap_ft_spec_ss[0])
-          cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
-          # corrected capacity hash, with two temperature independent variables
-          corrected_capacity = gross_data[speed][t_odb][0] * cap_correction_factor
-          gross_data_out_in_cap[speed][t_i][t_odb] = corrected_capacity
-
-          # eir FT curve output
-          eir_ft_curve_output = MathTools.biquadratic(t_i, t_odb, eir_ft_spec_ss[0])
-          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, t_odb, eir_ft_spec_ss[0])
-          eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
-          gross_data_out_in_eir[speed][t_i][t_odb] = eir_correction_factor / gross_data[speed][t_odb][1]
+    data_array.each do |data|
+      data.each do |dp|
+        if mode == :clg
+          dp.indoor_wetbulb = rated_t_i
+        else
+          dp.indoor_temperature = rated_t_i
         end
       end
     end
-    return gross_data_out_in_cap, gross_data_out_in_eir
+    # table lookup output values
+    data_array.each do |data|
+      array_tmp = Array.new
+      indoor_t.each do |t_i|
+        next if t_i == rated_t_i
+
+        data_tmp = Array.new
+        data.each do |dp|
+          dp_new = dp.dup
+          data_tmp << dp_new
+          if mode == :clg
+            dp_new.indoor_wetbulb = t_i
+          else
+            dp_new.indoor_temperature = t_i
+          end
+          # capacity FT curve output
+          cap_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, cap_ft_spec_ss[0])
+          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, cap_ft_spec_ss[0])
+          cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
+          # corrected capacity hash, with two temperature independent variables
+          dp_new.gross_capacity *= cap_correction_factor
+
+          # eir FT curve output
+          eir_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, eir_ft_spec_ss[0])
+          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, eir_ft_spec_ss[0])
+          eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
+          dp_new.gross_efficiency_cop /= eir_correction_factor
+        end
+        array_tmp << data_tmp
+      end
+      array_tmp.each do |new_data|
+        data.concat(new_data)
+      end
+    end
   end
 
   def self.create_dx_cooling_coil(model, obj_name, cooling_system)
     clg_ap = cooling_system.additional_properties
-    
+
     # independent variables
     var_wb = { name: 'wet_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(57, 'F', 'C'), sample_high: UnitConversions.convert(72, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_db = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(75, 'F', 'C'), sample_high: UnitConversions.convert(125, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
@@ -2896,24 +2912,20 @@ class HVAC
     rated_odb = 95.0
 
     for i in 0..(clg_ap.num_speeds - 1)
-      cap_ft_output_values = []
-      eir_ft_output_values = []
       if not cooling_system.cooling_detailed_performance_data.empty?
-        rated_cap = clg_ap.gross_cap_ft_values_clg[i][rated_iwb][rated_odb]
-        rated_eir = clg_ap.gross_eir_ft_values_clg[i][rated_iwb][rated_odb]
-        # [speed][iwb][odb][capacity]
-        sorted_iwb = clg_ap.gross_cap_ft_values_clg[i].keys.sort
-        sorted_odb = clg_ap.gross_cap_ft_values_clg[i][sorted_iwb[0]].keys.sort
-        var_wb[:values] = sorted_iwb.map {|iwb| UnitConversions.convert(iwb, 'F', 'C')}
-        var_db[:values] = sorted_odb.map {|odb| UnitConversions.convert(odb, 'F', 'C')}
-        sorted_iwb.each do |iwb|
-          sorted_odb.each do |odb|
-            cap_ft_output_values << clg_ap.gross_cap_ft_values_clg[i][iwb][odb] / rated_cap
-            eir_ft_output_values << clg_ap.gross_eir_ft_values_clg[i][iwb][odb] / rated_eir
-          end
-        end
+        data_speed = clg_ap.cooling_performance_data_array[i]
+        # sort by the order of independent vars
+        data_speed = data_speed.sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
+        var_wb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
+        var_db[:values] = data_speed.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_wb, var_db]
         eir_ft_independent_vars = [var_wb, var_db]
+
+        rate_dp = data_speed.find { |dp| (dp.indoor_wetbulb == rated_iwb) && (dp.outdoor_temperature == rated_odb) }
+        rated_cap = rate_dp.gross_capacity
+        rated_eir = 1.0 / rate_dp.gross_efficiency_cop
+        cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
+        eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
       else
         cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
         eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
@@ -2926,10 +2938,9 @@ class HVAC
       eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
       # part load ratio independent variable values
       plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', clg_ap.cool_plf_fplr_spec[i])
-      
+
       cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
       eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
-      puts cap_ft_curve
       plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
       cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
       eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
@@ -3005,24 +3016,20 @@ class HVAC
     rated_idb = 60.0
     rated_odb = 47.0
     for i in 0..(htg_ap.num_speeds - 1)
-      cap_ft_output_values = []
-      eir_ft_output_values = []
       if not heating_system.heating_detailed_performance_data.empty?
-        rated_cap = htg_ap.gross_cap_ft_values_htg[i][rated_idb][rated_odb]
-        rated_eir = htg_ap.gross_eir_ft_values_htg[i][rated_idb][rated_odb]
-        # [speed][idb][odb][capacity]
-        sorted_idb = htg_ap.gross_cap_ft_values_htg[i].keys.sort
-        sorted_odb = htg_ap.gross_cap_ft_values_htg[i][sorted_idb[0]].keys.sort
-        var_idb[:values] = sorted_idb.map {|idb| UnitConversions.convert(idb, 'F', 'C')}
-        var_odb[:values] = sorted_odb.map {|odb| UnitConversions.convert(odb, 'F', 'C')}
-        sorted_idb.each do |idb|
-          sorted_odb.each do |odb|
-            cap_ft_output_values << htg_ap.gross_cap_ft_values_htg[i][idb][odb] / rated_cap
-            eir_ft_output_values << htg_ap.gross_eir_ft_values_htg[i][idb][odb] / rated_eir
-          end
-        end
+        data_speed = htg_ap.heating_performance_data_array[i]
+        # sort by the order of independent vars
+        data_speed = data_speed.sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
+        var_idb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
+        var_odb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_idb, var_odb]
         eir_ft_independent_vars = [var_idb, var_odb]
+
+        rate_dp = data_speed.find { |dp| (dp.indoor_temperature == rated_idb) && (dp.outdoor_temperature == rated_odb) }
+        rated_cap = rate_dp.gross_capacity
+        rated_eir = 1.0 / rate_dp.gross_efficiency_cop
+        cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
+        eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
       else
         cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
         eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
@@ -3802,8 +3809,8 @@ class HVAC
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        cap_fff_specs_coeff = (mode == :clg)? clg_htg_ap.cool_cap_fflow_spec[speed] : clg_htg_ap.heat_cap_fflow_spec[speed]
-        eir_fff_specs_coeff = (mode == :clg)? clg_htg_ap.cool_eir_fflow_spec[speed] : clg_htg_ap.heat_eir_fflow_spec[speed]
+        cap_fff_specs_coeff = (mode == :clg) ? clg_htg_ap.cool_cap_fflow_spec[speed] : clg_htg_ap.heat_cap_fflow_spec[speed]
+        eir_fff_specs_coeff = (mode == :clg) ? clg_htg_ap.cool_eir_fflow_spec[speed] : clg_htg_ap.heat_eir_fflow_spec[speed]
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_specs_coeff[0]}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_specs_coeff[1]}")
         fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_specs_coeff[2]}")
@@ -4098,7 +4105,7 @@ class HVAC
     if hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
       hvac_ap.num_speeds = 1
     else
-      hvac_ap.num_speeds =  2
+      hvac_ap.num_speeds = 2
     end
   end
 

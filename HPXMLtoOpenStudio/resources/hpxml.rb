@@ -6818,7 +6818,7 @@ class HPXML < Object
 
   class CoolingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :indoor_wetbulb, :capacity, :capacity_fraction_of_nominal,
-             :capacity_description, :efficiency_cop]
+             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6877,7 +6877,7 @@ class HPXML < Object
 
   class HeatingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :capacity, :capacity_fraction_of_nominal,
-             :capacity_description, :efficiency_cop]
+             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop]
     attr_accessor(*ATTRS)
 
     def delete
