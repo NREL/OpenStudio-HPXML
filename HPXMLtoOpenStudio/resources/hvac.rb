@@ -379,7 +379,7 @@ class HVAC
       equip_def.setFractionLatent(0)
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      equip.setEndUseSubcategory(equip_def.name.to_s)
+      equip.setEndUseSubcategory(Constants.ObjectNameGSHPSharedPump)
       equip.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
 
@@ -680,8 +680,10 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
   end
 
-  def self.apply_ideal_air_loads(model, obj_name, sequential_cool_load_fracs,
+  def self.apply_ideal_air_loads(model, sequential_cool_load_fracs,
                                  sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+
+    obj_name = Constants.ObjectNameIdealAirSystem
 
     # Ideal Air System
     ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -738,7 +740,7 @@ class HVAC
 
     rh_setpoint = dehumidifiers[0].rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
+    relative_humidity_setpoint_sch.setName("#{obj_name} rh setpoint")
     relative_humidity_setpoint_sch.setValue(rh_setpoint)
 
     capacity_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-CAP-fT', -100, 100, -100, 100)
@@ -851,12 +853,12 @@ class HVAC
     end
 
     if heating_sch.nil?
-      heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
+      heating_setpoint = HourlyByDaySchedule.new(model, 'heating setpoint', htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
       heating_sch = heating_setpoint.schedule
     end
 
     if cooling_sch.nil?
-      cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
+      cooling_setpoint = HourlyByDaySchedule.new(model, 'cooling setpoint', clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
       cooling_sch = cooling_setpoint.schedule
     end
 
@@ -1432,7 +1434,7 @@ class HVAC
     # Create Equipment object for fuel consumption
     loc_space = model.getSpaces[0] # Arbitrary; not used
     fuel_type = heating_system.heating_system_fuel
-    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameBoilerPilotLight(boiler.name), loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, "#{boiler.name} #{Constants.ObjectNameBoilerPilotLight}", loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # Sensor
     boiler_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
@@ -1457,13 +1459,14 @@ class HVAC
 
     # EMS Output Variable for reporting
     pilot_light_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_pilot_energy')
-    pilot_light_output_var.setName("#{Constants.ObjectNameBoilerPilotLight(boiler.name)} outvar")
+    pilot_light_output_var.setName("#{pilot_light_object.name} outvar")
     pilot_light_output_var.setTypeOfDataInVariable('Summed')
     pilot_light_output_var.setUpdateFrequency('SystemTimestep')
     pilot_light_output_var.setEMSProgramOrSubroutineName(pilot_light_program)
     pilot_light_output_var.setUnits('J')
     pilot_light_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
     pilot_light_output_var.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+    pilot_light_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBoilerPilotLight) # Used by reporting measure
   end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
@@ -1579,15 +1582,16 @@ class HVAC
       next if sensor.nil?
 
       fan_or_pump_ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_#{mode}")
-      name = { 'clg' => Constants.ObjectNameFanPumpDisaggregateCool(fan_or_pump.name.to_s),
-               'primary_htg' => Constants.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump.name.to_s),
-               'backup_htg' => Constants.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump.name.to_s) }[mode]
-      fan_or_pump_ems_output_var.setName(name)
+      object_type = { 'clg' => Constants.ObjectNameFanPumpDisaggregateCool,
+                      'primary_htg' => Constants.ObjectNameFanPumpDisaggregatePrimaryHeat,
+                      'backup_htg' => Constants.ObjectNameFanPumpDisaggregateBackupHeat }[mode]
+      fan_or_pump_ems_output_var.setName("#{fan_or_pump.name} #{object_type}")
       fan_or_pump_ems_output_var.setTypeOfDataInVariable('Summed')
       fan_or_pump_ems_output_var.setUpdateFrequency('SystemTimestep')
       fan_or_pump_ems_output_var.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var.setUnits('J')
       fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id) # Used by reporting measure
+      fan_or_pump_ems_output_var.additionalProperties.setFeature('ObjectType', object_type) # Used by reporting measure
     end
   end
 
@@ -1653,7 +1657,7 @@ class HVAC
       htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
-    htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
+    htg_supp_coil.setName(obj_name + ' backup htg coil')
     htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     htg_supp_coil.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 

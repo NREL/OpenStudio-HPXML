@@ -1132,9 +1132,9 @@ class Constructions
       next if furnAreaFraction.nil?
       next if furnAreaFraction <= 0
 
-      mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name}"
-      constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name}"
-      mass_obj_name_space = "#{Constants.ObjectNameFurniture} mass #{space.name}"
+      mat_obj_name_space = "furniture material #{space.name}"
+      constr_obj_name_space = "furniture construction #{space.name}"
+      mass_obj_name_space = "furniture mass #{space.name}"
 
       furnThickness = UnitConversions.convert(furnMass / (furnDensity * furnAreaFraction), 'ft', 'in')
 

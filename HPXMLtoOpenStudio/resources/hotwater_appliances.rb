@@ -47,6 +47,7 @@ class HotWaterAndAppliances
       # Create schedule
       cw_power_schedule = nil
       cw_col_name = SchedulesFile::ColumnClothesWasher
+      cw_object_name = Constants.ObjectNameClothesWasher
       if not schedules_file.nil?
         cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: cw_col_name, daily_kwh: cw_annual_kwh / 365.0)
         cw_power_schedule = schedules_file.create_schedule_file(col_name: cw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
@@ -56,7 +57,7 @@ class HotWaterAndAppliances
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
-        cw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesWasher, cw_weekday_sch, cw_weekend_sch, cw_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cw_unavailable_periods)
+        cw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, cw_object_name + ' schedule', cw_weekday_sch, cw_weekend_sch, cw_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cw_unavailable_periods)
         cw_design_level_w = cw_schedule_obj.calc_design_level_from_daily_kwh(cw_annual_kwh / 365.0)
         cw_power_schedule = cw_schedule_obj.schedule
       else
@@ -67,7 +68,7 @@ class HotWaterAndAppliances
 
       cw_space = clothes_washer.additional_properties.space
       cw_space = living_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameClothesWasher, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_power_schedule)
+      add_electric_equipment(model, cw_object_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_power_schedule)
     end
 
     # Clothes dryer energy
@@ -77,6 +78,7 @@ class HotWaterAndAppliances
       # Create schedule
       cd_schedule = nil
       cd_col_name = SchedulesFile::ColumnClothesDryer
+      cd_obj_name = Constants.ObjectNameClothesDryer
       if not schedules_file.nil?
         cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: cd_col_name, annual_kwh: cd_annual_kwh)
         cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: cd_col_name, annual_therm: cd_annual_therm)
@@ -87,7 +89,7 @@ class HotWaterAndAppliances
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
-        cd_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cd_unavailable_periods)
+        cd_schedule_obj = MonthWeekdayWeekendSchedule.new(model, cd_obj_name + ' schedule', cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cd_unavailable_periods)
         cd_design_level_e = cd_schedule_obj.calc_design_level_from_daily_kwh(cd_annual_kwh / 365.0)
         cd_design_level_f = cd_schedule_obj.calc_design_level_from_daily_therm(cd_annual_therm / 365.0)
         cd_schedule = cd_schedule_obj.schedule
@@ -99,8 +101,8 @@ class HotWaterAndAppliances
 
       cd_space = clothes_dryer.additional_properties.space
       cd_space = living_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule)
-      add_other_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
+      add_electric_equipment(model, cd_obj_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule)
+      add_other_equipment(model, cd_obj_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
     end
 
     # Dishwasher energy
@@ -110,6 +112,7 @@ class HotWaterAndAppliances
       # Create schedule
       dw_power_schedule = nil
       dw_col_name = SchedulesFile::ColumnDishwasher
+      dw_obj_name = Constants.ObjectNameDishwasher
       if not schedules_file.nil?
         dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: dw_col_name, daily_kwh: dw_annual_kwh / 365.0)
         dw_power_schedule = schedules_file.create_schedule_file(col_name: dw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
@@ -119,7 +122,7 @@ class HotWaterAndAppliances
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
-        dw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameDishwasher, dw_weekday_sch, dw_weekend_sch, dw_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: dw_unavailable_periods)
+        dw_schedule_obj = MonthWeekdayWeekendSchedule.new(model, dw_obj_name + ' schedule', dw_weekday_sch, dw_weekend_sch, dw_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: dw_unavailable_periods)
         dw_design_level_w = dw_schedule_obj.calc_design_level_from_daily_kwh(dw_annual_kwh / 365.0)
         dw_power_schedule = dw_schedule_obj.schedule
       else
@@ -130,7 +133,7 @@ class HotWaterAndAppliances
 
       dw_space = dishwasher.additional_properties.space
       dw_space = living_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameDishwasher, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_power_schedule)
+      add_electric_equipment(model, dw_obj_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_power_schedule)
     end
 
     # Refrigerator(s) energy
@@ -140,6 +143,7 @@ class HotWaterAndAppliances
       # Create schedule
       fridge_schedule = nil
       fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::ColumnRefrigerator : SchedulesFile::ColumnExtraRefrigerator
+      fridge_obj_name = Constants.ObjectNameRefrigerator
       if not schedules_file.nil?
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
@@ -149,7 +153,7 @@ class HotWaterAndAppliances
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
-        fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
+        fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
         fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
         fridge_schedule = fridge_schedule_obj.schedule
       else
@@ -160,7 +164,7 @@ class HotWaterAndAppliances
 
       rf_space = refrigerator.additional_properties.space
       rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameRefrigerator, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
+      add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
     end
 
     # Freezer(s) energy
@@ -170,6 +174,7 @@ class HotWaterAndAppliances
       # Create schedule
       freezer_schedule = nil
       freezer_col_name = SchedulesFile::ColumnFreezer
+      freezer_obj_name = Constants.ObjectNameFreezer
       if not schedules_file.nil?
         freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: freezer_col_name, annual_kwh: fz_annual_kwh)
         freezer_schedule = schedules_file.create_schedule_file(col_name: freezer_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
@@ -179,7 +184,7 @@ class HotWaterAndAppliances
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
-        freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: freezer_unavailable_periods)
+        freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, freezer_obj_name + ' schedule', freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: freezer_unavailable_periods)
         freezer_design_level = freezer_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
         freezer_schedule = freezer_schedule_obj.schedule
       else
@@ -190,7 +195,7 @@ class HotWaterAndAppliances
 
       fz_space = freezer.additional_properties.space
       fz_space = living_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameFreezer, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
+      add_electric_equipment(model, freezer_obj_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
     end
 
     # Cooking Range energy
@@ -200,6 +205,7 @@ class HotWaterAndAppliances
       # Create schedule
       cook_schedule = nil
       cook_col_name = SchedulesFile::ColumnCookingRange
+      cook_obj_name = Constants.ObjectNameCookingRange
       if not schedules_file.nil?
         cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: cook_col_name, annual_kwh: cook_annual_kwh)
         cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: cook_col_name, annual_therm: cook_annual_therm)
@@ -210,7 +216,7 @@ class HotWaterAndAppliances
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
-        cook_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cook_unavailable_periods)
+        cook_schedule_obj = MonthWeekdayWeekendSchedule.new(model, cook_obj_name + ' schedule', cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: cook_unavailable_periods)
         cook_design_level_e = cook_schedule_obj.calc_design_level_from_daily_kwh(cook_annual_kwh / 365.0)
         cook_design_level_f = cook_schedule_obj.calc_design_level_from_daily_therm(cook_annual_therm / 365.0)
         cook_schedule = cook_schedule_obj.schedule
@@ -222,8 +228,8 @@ class HotWaterAndAppliances
 
       cook_space = cooking_range.additional_properties.space
       cook_space = living_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
-      add_other_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
+      add_electric_equipment(model, cook_obj_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
+      add_other_equipment(model, cook_obj_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
     end
 
     if not hot_water_distribution.nil?
@@ -264,6 +270,7 @@ class HotWaterAndAppliances
       # Create schedule
       fixtures_schedule = nil
       fixtures_col_name = SchedulesFile::ColumnHotWaterFixtures
+      fixtures_obj_name = Constants.ObjectNameFixtures
       if not schedules_file.nil?
         fixtures_schedule = schedules_file.create_schedule_file(col_name: fixtures_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
@@ -272,7 +279,7 @@ class HotWaterAndAppliances
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers
-        fixtures_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFixtures, fixtures_weekday_sch, fixtures_weekend_sch, fixtures_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fixtures_unavailable_periods)
+        fixtures_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fixtures_obj_name + ' schedule', fixtures_weekday_sch, fixtures_weekend_sch, fixtures_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fixtures_unavailable_periods)
         fixtures_schedule = fixtures_schedule_obj.schedule
       else
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekday_fractions.nil?
@@ -301,10 +308,11 @@ class HotWaterAndAppliances
         end
 
         # Fixtures (showers, sinks, baths)
-        add_water_use_equipment(model, Constants.ObjectNameFixtures, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], mw_temp_schedule)
+        add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], mw_temp_schedule)
 
         # Distribution waste (primary driven by fixture draws)
-        add_water_use_equipment(model, Constants.ObjectNameDistributionWaste, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], mw_temp_schedule)
+        waste_obj_name = Constants.ObjectNameDistributionWaste
+        add_water_use_equipment(model, waste_obj_name, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], mw_temp_schedule)
 
         # Recirculation pump
         dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier)
@@ -343,7 +351,7 @@ class HotWaterAndAppliances
             cw_peak_flow = cw_schedule_obj.calc_design_level_from_daily_gpm(cw_gpd)
             water_cw_schedule = cw_schedule_obj.schedule
           end
-          add_water_use_equipment(model, Constants.ObjectNameClothesWasher, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id])
+          add_water_use_equipment(model, cw_object_name, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id])
         end
       end
 
@@ -370,7 +378,7 @@ class HotWaterAndAppliances
         dw_peak_flow = dw_schedule_obj.calc_design_level_from_daily_gpm(dw_gpd)
         water_dw_schedule = dw_schedule_obj.schedule
       end
-      add_water_use_equipment(model, Constants.ObjectNameDishwasher, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id])
+      add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id])
     end
 
     if not hot_water_distribution.nil?

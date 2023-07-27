@@ -347,10 +347,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return result
     end
 
-    unmet_hours_program = @model.getModelObjectByName(Constants.ObjectNameUnmetHoursProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
-    total_loads_program = @model.getModelObjectByName(Constants.ObjectNameTotalLoadsProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
-    comp_loads_program = @model.getModelObjectByName(Constants.ObjectNameComponentLoadsProgram.gsub(' ', '_'))
-    comp_loads_program = comp_loads_program.is_initialized ? comp_loads_program.get.to_EnergyManagementSystemProgram.get : nil
+    unmet_hours_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetHoursProgram }
+    total_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameTotalLoadsProgram }
+    comp_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameComponentLoadsProgram }
     has_heating = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_heating').get
     has_cooling = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_cooling').get
 
@@ -984,7 +983,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
 
             batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
-            batt_loss = "#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar"
+            batt_loss = elcs.additionalProperties.getFeatureAsString('BatteryLosses').get
           end
         end
 
@@ -1294,9 +1293,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       next unless (sum_categories - meter_fuel_total).abs > tol
-      # FIXME: Need to re-enable
-      # runner.registerError("#{fuel_type} category end uses (#{sum_categories.round(3)}) do not sum to total (#{meter_fuel_total.round(3)}).")
-      # return false
+
+      runner.registerError("#{fuel_type} category end uses (#{sum_categories.round(3)}) do not sum to total (#{meter_fuel_total.round(3)}).")
+      return false
     end
 
     # Check sum of timeseries outputs match annual outputs
@@ -2619,6 +2618,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # For a given object, returns the output variables to be requested and associates
     # them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
 
+    object_type = object.additionalProperties.getFeatureAsString('ObjectType')
+    object_type = object_type.get if object_type.is_initialized
+
     to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
               EPlus::FuelTypeNaturalGas => FT::Gas,
               EPlus::FuelTypeOil => FT::Oil,
@@ -2708,12 +2710,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::HotWater] => ["Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_FanSystemModel.is_initialized
-        if object.name.to_s.start_with? Constants.ObjectNameWaterHeater
+        if object_type == Constants.ObjectNameWaterHeater
           return { [FT::Elec, EUT::HotWater] => ["Fan #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_PumpConstantSpeed.is_initialized
-        if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
+        if object_type == Constants.ObjectNameSolarHotWater
           return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
@@ -2729,8 +2731,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::LightsExterior] => ["Exterior Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_Lights.is_initialized
-        end_use = { Constants.ObjectNameInteriorLighting => EUT::LightsInterior,
-                    Constants.ObjectNameGarageLighting => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
+        end_use = { Constants.ObjectNameLightingInterior => EUT::LightsInterior,
+                    Constants.ObjectNameLightingGarage => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
         return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
@@ -2791,18 +2793,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Dehumidifier] => ["Zone Dehumidifier #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
-        if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat
+        if object_type == Constants.ObjectNameFanPumpDisaggregatePrimaryHeat
           return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
-        elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
+        elsif object_type == Constants.ObjectNameFanPumpDisaggregateBackupHeat
           return { [FT::Elec, EUT::HeatingHeatPumpBackupFanPump] => [object.name.to_s] }
-        elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateCool
+        elsif object_type == Constants.ObjectNameFanPumpDisaggregateCool
           return { [FT::Elec, EUT::CoolingFanPump] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
+        elsif object_type == Constants.ObjectNameWaterHeaterAdjustment
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
+        elsif object_type == Constants.ObjectNameBatteryLossesAdjustment
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
+        elsif object_type == Constants.ObjectNameBoilerPilotLight
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
@@ -2838,7 +2840,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
           is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
         end
-        if capacity == 0 && object.name.to_s.include?(Constants.ObjectNameSolarHotWater)
+        if capacity == 0 && object_type == Constants.ObjectNameSolarHotWater
           return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
         elsif capacity > 0 || is_combi_boiler # Active water heater only (e.g., exclude desuperheater and solar thermal storage tanks)
           return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
@@ -2865,7 +2867,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
-        if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
+        if object_type == Constants.ObjectNameFanPumpDisaggregateBackupHeat
           # Fan/pump energy is contributing to the load
           return { LT::HeatingHeatPumpBackup => [object.name.to_s] }
         end

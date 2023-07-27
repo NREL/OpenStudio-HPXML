@@ -36,10 +36,10 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
     model, _hpxml = _test_measure(args_hash)
 
     # Check interior lighting
-    assert_in_delta(1322, get_kwh_per_year(model, Constants.ObjectNameInteriorLighting), 1.0)
+    assert_in_delta(1322, get_kwh_per_year(model, Constants.ObjectNameLightingInterior), 1.0)
 
     # Check exterior lighting
-    assert_in_delta(98, get_kwh_per_year(model, Constants.ObjectNameExteriorLighting), 1.0)
+    assert_in_delta(98, get_kwh_per_year(model, Constants.ObjectNameLightingExterior), 1.0)
   end
 
   def test_lighting_garage
@@ -48,13 +48,13 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
     model, _hpxml = _test_measure(args_hash)
 
     # Check interior lighting
-    assert_in_delta(1544, get_kwh_per_year(model, Constants.ObjectNameInteriorLighting), 1.0)
+    assert_in_delta(1544, get_kwh_per_year(model, Constants.ObjectNameLightingInterior), 1.0)
 
     # Check garage lighting
-    assert_in_delta(42, get_kwh_per_year(model, Constants.ObjectNameGarageLighting), 1.0)
+    assert_in_delta(42, get_kwh_per_year(model, Constants.ObjectNameLightingGarage), 1.0)
 
     # Check exterior lighting
-    assert_in_delta(109, get_kwh_per_year(model, Constants.ObjectNameExteriorLighting), 1.0)
+    assert_in_delta(109, get_kwh_per_year(model, Constants.ObjectNameLightingExterior), 1.0)
   end
 
   def test_exterior_holiday_lighting
@@ -82,12 +82,12 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
     # Check interior lighting
     int_kwh_yr = hpxml.lighting_groups.find { |lg| lg.location == HPXML::LocationInterior }.kwh_per_year
     int_kwh_yr *= hpxml.lighting.interior_usage_multiplier unless hpxml.lighting.interior_usage_multiplier.nil?
-    assert_in_delta(int_kwh_yr, get_kwh_per_year(model, Constants.ObjectNameInteriorLighting), 1.0)
+    assert_in_delta(int_kwh_yr, get_kwh_per_year(model, Constants.ObjectNameLightingInterior), 1.0)
 
     # Check exterior lighting
     ext_kwh_yr = hpxml.lighting_groups.find { |lg| lg.location == HPXML::LocationExterior }.kwh_per_year
     ext_kwh_yr *= hpxml.lighting.exterior_usage_multiplier unless hpxml.lighting.exterior_usage_multiplier.nil?
-    assert_in_delta(ext_kwh_yr, get_kwh_per_year(model, Constants.ObjectNameExteriorLighting), 1.0)
+    assert_in_delta(ext_kwh_yr, get_kwh_per_year(model, Constants.ObjectNameLightingExterior), 1.0)
   end
 
   def test_lighting_none
@@ -96,13 +96,13 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
     model, _hpxml = _test_measure(args_hash)
 
     # Check interior lighting
-    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameInteriorLighting))
+    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameLightingInterior))
 
     # Check garage lighting
-    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameGarageLighting))
+    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameLightingGarage))
 
     # Check exterior lighting
-    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameExteriorLighting))
+    assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameLightingExterior))
   end
 
   def _test_measure(args_hash)

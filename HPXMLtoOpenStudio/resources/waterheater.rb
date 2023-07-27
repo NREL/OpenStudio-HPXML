@@ -4,7 +4,7 @@ class Waterheater
   def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set_c, eri_version)
+    loop = create_new_loop(model, t_set_c, eri_version)
 
     act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type)
     u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
@@ -33,7 +33,7 @@ class Waterheater
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set_c, eri_version)
+    loop = create_new_loop(model, t_set_c, eri_version)
 
     act_vol = 1.0
     _u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
@@ -62,7 +62,7 @@ class Waterheater
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set_c, eri_version)
+    loop = create_new_loop(model, t_set_c, eri_version)
 
     h_tank = 0.0188 * water_heating_system.tank_volume + 0.0935 # Linear relationship that gets GE height at 50 gal and AO Smith height at 80 gal
 
@@ -166,7 +166,7 @@ class Waterheater
     end
 
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set_c, eri_version)
+    loop = create_new_loop(model, t_set_c, eri_version)
 
     # Create water heater
     new_heater = create_new_heater(name: obj_name_combi,
@@ -416,7 +416,7 @@ class Waterheater
     end
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(Constants.ObjectNamePlantLoopSHW)
+    plant_loop.setName('solar hot water loop')
     if fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
@@ -448,6 +448,7 @@ class Waterheater
     pump.setRatedFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
     pump.addToNode(plant_loop.supplyInletNode)
     pump.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
+    pump.additionalProperties.setFeature('ObjectType', Constants.ObjectNameSolarHotWater) # Used by reporting measure
 
     panel_length = UnitConversions.convert(solar_thermal_system.collector_area, 'ft^2', 'm^2')**0.5
     run = Math::cos(solar_thermal_system.collector_tilt * Math::PI / 180) * panel_length
@@ -589,6 +590,7 @@ class Waterheater
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
     storage_tank.setUseSideDesignFlowRate(UnitConversions.convert(solar_thermal_system.storage_volume, 'gal', 'm^3') / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
     storage_tank.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
+    storage_tank.additionalProperties.setFeature('ObjectType', Constants.ObjectNameSolarHotWater) # Used by reporting measure
 
     plant_loop.addDemandBranchForComponent(storage_tank)
     dhw_loop.addSupplyBranchForComponent(storage_tank)
@@ -821,6 +823,7 @@ class Waterheater
     fan.setMotorInAirStreamFraction(1.0)
     fan.setDesignMaximumAirFlowRate(UnitConversions.convert(airflow_rate, 'ft^3/min', 'm^3/s'))
     fan.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+    fan.additionalProperties.setFeature('ObjectType', Constants.ObjectNameWaterHeater) # Used by reporting measure
 
     return fan
   end
@@ -1063,13 +1066,13 @@ class Waterheater
 
     desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, model)
     reclaimed_efficiency = 0.25 # default
-    desuperheater_name = Constants.ObjectNameDesuperheater(tank.name)
+    desuperheater_name = "#{tank.name} desuperheater'
 
     # create a storage tank
     vol = 50.0
     storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
     assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
-    storage_tank_name = "#{tank.name} storage tank"
+    storage_tank_name = " # {tank.name} storage tank"
     # reduce tank setpoint to enable desuperheater setpoint at t_set
     if water_heating_system.temperature.nil?
       fail "Detailed setpoints for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
@@ -1319,7 +1322,7 @@ class Waterheater
     end
 
     # Add an other equipment object for water heating that will get actuated, has a small initial load but gets overwritten by EMS
-    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameWaterHeaterAdjustment(heater.name), loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, "#{heater.name} energy adjustment", loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # EMS for calculating the EC_adj
 
@@ -1377,13 +1380,14 @@ class Waterheater
 
     # EMS Output Variable for EC_adj reporting
     ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ec_adj_energy')
-    ec_adj_output_var.setName("#{Constants.ObjectNameWaterHeaterAdjustment(heater.name)} outvar")
+    ec_adj_output_var.setName("#{heater.name} #{Constants.ObjectNameWaterHeaterAdjustment} outvar")
     ec_adj_output_var.setTypeOfDataInVariable('Summed')
     ec_adj_output_var.setUpdateFrequency('SystemTimestep')
     ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
     ec_adj_output_var.setUnits('J')
     ec_adj_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
     ec_adj_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+    ec_adj_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameWaterHeaterAdjustment) # Used by reporting measure
   end
 
   def self.get_default_hot_water_temperature(eri_version)
@@ -1761,8 +1765,9 @@ class Waterheater
     return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 # Half the deadband to account for E+ deadband
   end
 
-  def self.create_new_loop(model, name, t_set_c, eri_version)
+  def self.create_new_loop(model, t_set_c, eri_version)
     # Create a new plant loop for the water heater
+    name = 'dhw loop'
 
     if t_set_c.nil?
       t_set_c = UnitConversions.convert(get_default_hot_water_temperature(eri_version), 'F', 'C')

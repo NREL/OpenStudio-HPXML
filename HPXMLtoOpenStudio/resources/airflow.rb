@@ -34,18 +34,18 @@ class Airflow
     @wout_sensor.setName('out wt s')
 
     @win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')
-    @win_sensor.setName("#{Constants.ObjectNameAirflow} win s")
+    @win_sensor.setName('win s')
     @win_sensor.setKeyName(@living_zone.name.to_s)
 
     @vwind_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
     @vwind_sensor.setName('site vw s')
 
     @tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    @tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
+    @tin_sensor.setName('tin s')
     @tin_sensor.setKeyName(@living_zone.name.to_s)
 
     @tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
-    @tout_sensor.setName("#{Constants.ObjectNameAirflow} tt s")
+    @tout_sensor.setName('tout s')
     @tout_sensor.setKeyName(@living_zone.name.to_s)
 
     @adiabatic_const = nil
@@ -360,6 +360,7 @@ class Airflow
     nv_flow.setSpace(@living_space)
     nv_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(nv_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     nv_flow_actuator.setName("#{nv_flow.name} act")
+    nv_flow.additionalProperties.setFeature('ObjectType', Constants.ObjectNameNaturalVentilation)
 
     whf_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     whf_flow.setName(Constants.ObjectNameWholeHouseFan + ' flow')
@@ -367,6 +368,7 @@ class Airflow
     whf_flow.setSpace(@living_space)
     whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     whf_flow_actuator.setName("#{whf_flow.name} act")
+    whf_flow.additionalProperties.setFeature('ObjectType', Constants.ObjectNameWholeHouseFan)
 
     # Electric Equipment (for whole house fan electricity consumption)
     whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -559,8 +561,8 @@ class Airflow
     other_equip_def.setFractionRadiant(0.0)
     actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
     actuator.setName("#{other_equip.name} act")
-    if not is_duct_load_for_report.nil?
-      other_equip.additionalProperties.setFeature(Constants.IsDuctLoadForReport, is_duct_load_for_report)
+    if is_duct_load_for_report
+      other_equip.additionalProperties.setFeature('ObjectType', Constants.ObjectNameDuctLoad)
     end
     return actuator
   end
@@ -922,6 +924,7 @@ class Airflow
           zone_mixing.setSourceZone(source_zone)
           duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
           duct_actuators[var_name].setName("#{zone_mixing.name} act")
+          zone_mixing.additionalProperties.setFeature('ObjectType', Constants.ObjectNameDuctLoad)
         end
       end
 
@@ -1284,7 +1287,7 @@ class Airflow
   end
 
   def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index, unavailable_periods)
-    obj_name = "#{Constants.ObjectNameClothesDryerExhaust} #{index}"
+    obj_name = "dryer exhaust #{index}"
 
     # Create schedule
     obj_sch = nil
@@ -1297,7 +1300,7 @@ class Airflow
       cd_weekday_sch = vented_dryer.weekday_fractions
       cd_weekend_sch = vented_dryer.weekend_fractions
       cd_monthly_sch = vented_dryer.monthly_multipliers
-      obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
+      obj_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
       obj_sch = obj_sch.schedule
       obj_sch_name = obj_sch.name.to_s
       full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
@@ -1680,13 +1683,13 @@ class Airflow
     # Assume introducing no sensible loads to zone if preconditioned
     if not vent_mech_preheat.empty?
       htg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
-      htg_stp_sensor.setName("#{Constants.ObjectNameAirflow} htg stp s")
+      htg_stp_sensor.setName('htg stp s')
       htg_stp_sensor.setKeyName(@living_zone.name.to_s)
       infil_program.addLine("Set HtgStp = #{htg_stp_sensor.name}") # heating thermostat setpoint
     end
     if not vent_mech_precool.empty?
       clg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Cooling Setpoint Temperature')
-      clg_stp_sensor.setName("#{Constants.ObjectNameAirflow} clg stp s")
+      clg_stp_sensor.setName('clg stp s')
       clg_stp_sensor.setKeyName(@living_zone.name.to_s)
       infil_program.addLine("Set ClgStp = #{clg_stp_sensor.name}") # cooling thermostat setpoint
     end
@@ -1782,6 +1785,7 @@ class Airflow
     infil_flow.setSpace(@living_space)
     infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     infil_flow_actuator.setName("#{infil_flow.name} act")
+    infil_flow.additionalProperties.setFeature('ObjectType', Constants.ObjectNameInfiltration)
 
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
