@@ -76,37 +76,39 @@ def create_hpxmls
       exit!
     end
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
-    if hpxml_path.include? 'ASHRAE_Standard_140'
-      apply_hpxml_modification_ashrae_140(hpxml)
-    else
-      apply_hpxml_modification(File.basename(hpxml_path), hpxml)
-    end
-    hpxml_doc = hpxml.to_oga()
-
-    if hpxml_path.include? 'base-multiple-buildings.xml'
-      # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
-      hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
-      building_element = XMLHelper.get_element(hpxml_element, 'Building')
-      for i in 2..3
-        new_building_element = Marshal.load(Marshal.dump(building_element)) # Deep copy
-
-        # Make all IDs unique so the HPXML is valid
-        new_building_element.each_node do |node|
-          next unless node.is_a?(Oga::XML::Element)
-
-          if not XMLHelper.get_attribute_value(node, 'id').nil?
-            XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}_#{i}")
-          elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
-            XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}_#{i}")
-          end
-        end
-
-        hpxml_element.children << new_building_element
+    if not hpxml_path.include? 'base-multiple-buildings.xml'
+      hpxml = HPXML.new(hpxml_path: hpxml_path)
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        apply_hpxml_modification_ashrae_140(hpxml)
+      else
+        apply_hpxml_modification(File.basename(hpxml_path), hpxml)
       end
-    end
+      hpxml_doc = hpxml.to_oga()
 
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
+      if hpxml_path.include? 'base-multiple-buildings.xml'
+        # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
+        hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
+        building_element = XMLHelper.get_element(hpxml_element, 'Building')
+        for i in 2..3
+          new_building_element = Marshal.load(Marshal.dump(building_element)) # Deep copy
+
+          # Make all IDs unique so the HPXML is valid
+          new_building_element.each_node do |node|
+            next unless node.is_a?(Oga::XML::Element)
+
+            if not XMLHelper.get_attribute_value(node, 'id').nil?
+              XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}_#{i}")
+            elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
+              XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}_#{i}")
+            end
+          end
+
+          hpxml_element.children << new_building_element
+        end
+      end
+
+      XMLHelper.write_file(hpxml_doc, hpxml_path)
+    end
 
     errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
     next unless errors.size > 0

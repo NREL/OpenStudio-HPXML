@@ -3189,7 +3189,7 @@
   },
   "sample_files/base-multiple-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "clothes_dryer_present": false
+    "hpxml_path_in": "workflow/sample_files/base.xml"
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",
