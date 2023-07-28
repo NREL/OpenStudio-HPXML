@@ -303,7 +303,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       new_lines = []
       program.lines.each do |line|
         ems_map.each do |old_name, new_name|
-          next unless line.include?(old_name) && !line.include?(old_name + '_')
+          next unless line.include?(old_name)
 
           # old_name between at least 1 character, with the exception of '' on left and ' ' on right
           characters.each do |lhs|
@@ -316,6 +316,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
               line.gsub!("#{lhs}#{old_name}#{rhs}", "#{lhs}#{new_name}#{rhs}")
             end
           end
+        end
+        while line.include? "unit#{unit_number + 1}_unit#{unit_number + 1}_"
+          line.gsub!("unit#{unit_number + 1}_unit#{unit_number + 1}_", "unit#{unit_number + 1}_")
         end
         new_lines << line
       end
