@@ -42,6 +42,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path_in', false)
+    arg.setDisplayName('HPXML File Path In')
+    arg.setDescription('Absolute/relative path of the existing HPXML file.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -3151,7 +3156,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(hpxml_path)
     end
 
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path)
+    # Existing HPXML File
+    if args[:hpxml_path_in].is_initialized
+      hpxml_path_in = args[:hpxml_path_in].get
+      unless (Pathname.new hpxml_path_in).absolute?
+        hpxml_path_in = File.expand_path(hpxml_path_in)
+      end
+    end
+
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -3357,7 +3370,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_path, hpxml_path)
+  def self.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
     epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
       weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
@@ -3428,6 +3441,7 @@ class HPXMLFile
     renumber_hpxml_ids(hpxml)
 
     hpxml_doc = hpxml.to_oga()
+    hpxml_doc = add_building(hpxml_path_in, hpxml_doc)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_validation]
@@ -3441,9 +3455,37 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       HPXMLDefaults.apply(runner, hpxml, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_oga()
+      hpxml_doc = add_building(hpxml_path_in, hpxml_doc)
     end
 
     return hpxml_doc
+  end
+
+  def self.add_building(hpxml_path_in, hpxml_doc)
+    return hpxml_doc if hpxml_path_in.nil?
+
+    hpxml_doc_in = XMLHelper.parse_file(hpxml_path_in)
+    hpxml_in = XMLHelper.get_element(hpxml_doc_in, '/HPXML')
+    building_id = "#{XMLHelper.get_elements(hpxml_in, 'Building').size + 1}"
+
+    hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
+    building_element = XMLHelper.get_element(hpxml_element, 'Building')
+    new_building_element = Marshal.load(Marshal.dump(building_element)) # Deep copy
+
+    # Make all IDs unique so the HPXML is valid
+    new_building_element.each_node do |node|
+      next unless node.is_a?(Oga::XML::Element)
+
+      if not XMLHelper.get_attribute_value(node, 'id').nil?
+        XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}_#{building_id}")
+      elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
+        XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}_#{building_id}")
+      end
+    end
+
+    hpxml_in.children << new_building_element
+
+    return hpxml_doc_in
   end
 
   def self.validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
