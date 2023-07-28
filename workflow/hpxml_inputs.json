@@ -3144,6 +3144,10 @@
     "parent_hpxml": "sample_files/base.xml",
     "site_shielding_of_home": "well-shielded"
   },
+  "sample_files/base-misc-unit-multiplier.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "unit_multiplier": "10"
+  },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_fixtures_usage_multiplier": 0.9,

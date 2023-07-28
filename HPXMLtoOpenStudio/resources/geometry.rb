@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class Geometry
-  def self.create_space_and_zone(model, spaces, location)
+  def self.create_space_and_zone(model, spaces, location, zone_multiplier = nil)
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
+      if not zone_multiplier.nil?
+        thermal_zone.setMultiplier(zone_multiplier)
+      end
 
       space = OpenStudio::Model::Space.new(model)
       space.setName(location)

@@ -4183,30 +4183,35 @@ class HVAC
     return hvac_systems
   end
 
-  def self.ensure_nonzero_sizing_values(hpxml)
+  def self.ensure_nonzero_sizing_values_and_apply_unit_multiplier(hpxml)
+    # 1. Ensure non-zero capacity/airflow sizing values to prevent E+ errors.
+    # 2. Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
+    #    multiplied thermal zone load to the HVAC system, so the HVAC system
+    #    needs to be sized to meet the entire multiplied zone load.
     min_capacity = 1.0 # Btuh
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
+    mult = hpxml.building_construction.number_of_units
     hpxml.heating_systems.each do |htg_sys|
-      htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
+      htg_sys.heating_capacity = [htg_sys.heating_capacity * mult, min_capacity].max
       if not htg_sys.heating_airflow_cfm.nil?
-        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
+        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm * mult, min_airflow].max
       end
     end
     hpxml.cooling_systems.each do |clg_sys|
-      clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
-      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
+      clg_sys.cooling_capacity = [clg_sys.cooling_capacity * mult, min_capacity].max
+      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm * mult, min_airflow].max
     end
     hpxml.heat_pumps.each do |hp_sys|
-      hp_sys.cooling_capacity = [hp_sys.cooling_capacity, min_capacity].max
-      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, min_airflow].max
-      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, min_capacity].max
-      hp_sys.heating_capacity = [hp_sys.heating_capacity, min_capacity].max
-      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, min_airflow].max
+      hp_sys.cooling_capacity = [hp_sys.cooling_capacity * mult, min_capacity].max
+      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm * mult, min_airflow].max
+      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible * mult, min_capacity].max
+      hp_sys.heating_capacity = [hp_sys.heating_capacity * mult, min_capacity].max
+      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm * mult, min_airflow].max
       if not hp_sys.heating_capacity_17F.nil?
-        hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, min_capacity].max
+        hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F * mult, min_capacity].max
       end
       if not hp_sys.backup_heating_capacity.nil?
-        hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max
+        hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity * mult, min_capacity].max
       end
     end
   end

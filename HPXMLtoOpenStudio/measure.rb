@@ -181,7 +181,7 @@ class OSModel
 
     # Conditioned space/zone
     spaces = {}
-    create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
+    create_or_get_space(model, spaces, HPXML::LocationLivingSpace, @hpxml.building_construction.number_of_units)
     set_foundation_and_walls_top()
     set_heating_and_cooling_seasons()
     add_setpoints(runner, model, weather, spaces)
@@ -302,9 +302,9 @@ class OSModel
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
 
-    # Now that we've written in.xml, ensure that no capacities/airflows
-    # are zero in order to prevent potential E+ errors.
-    HVAC.ensure_nonzero_sizing_values(@hpxml)
+    # Now that we've written in.xml, make changes to the capacities
+    # for the EnergyPlus simulation.
+    HVAC.ensure_nonzero_sizing_values_and_apply_unit_multiplier(@hpxml)
 
     # Now that we've written in.xml, make adjustments for modeling purposes.
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
@@ -344,9 +344,9 @@ class OSModel
                              @schedules_file, @hpxml.header.unavailable_periods)
   end
 
-  def self.create_or_get_space(model, spaces, location)
+  def self.create_or_get_space(model, spaces, location, zone_multiplier = nil)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location)
+      Geometry.create_space_and_zone(model, spaces, location, zone_multiplier)
     end
     return spaces[location]
   end
