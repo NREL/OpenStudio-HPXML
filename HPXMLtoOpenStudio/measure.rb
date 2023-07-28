@@ -181,7 +181,7 @@ class OSModel
 
     # Conditioned space/zone
     spaces = {}
-    create_or_get_space(model, spaces, HPXML::LocationLivingSpace, @hpxml.building_construction.number_of_units)
+    create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
     set_heating_and_cooling_seasons()
     add_setpoints(runner, model, weather, spaces)
@@ -344,9 +344,9 @@ class OSModel
                              @schedules_file, @hpxml.header.unavailable_periods)
   end
 
-  def self.create_or_get_space(model, spaces, location, zone_multiplier = nil)
+  def self.create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, zone_multiplier)
+      Geometry.create_space_and_zone(model, spaces, location, @hpxml.building_construction.number_of_units)
     end
     return spaces[location]
   end

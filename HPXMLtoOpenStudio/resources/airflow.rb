@@ -91,7 +91,7 @@ class Airflow
     # Apply ducts
 
     duct_systems.each do |ducts, object|
-      apply_ducts(model, ducts, object, vent_fans_mech)
+      apply_ducts(model, ducts, object, vent_fans_mech, hpxml.building_construction.number_of_units)
     end
 
     # Apply infiltration/ventilation
@@ -499,9 +499,10 @@ class Airflow
     return avail_sch
   end
 
-  def self.create_return_air_duct_zone(model, loop_name)
+  def self.create_return_air_duct_zone(model, loop_name, unit_multiplier)
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
+    ra_duct_zone.setMultiplier(unit_multiplier)
     ra_duct_zone.setName(loop_name + ' ret air zone')
     ra_duct_zone.setVolume(1.0)
 
@@ -654,7 +655,7 @@ class Airflow
     end
   end
 
-  def self.apply_ducts(model, ducts, object, vent_fans_mech)
+  def self.apply_ducts(model, ducts, object, vent_fans_mech, unit_multiplier)
     ducts.each do |duct|
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
@@ -674,7 +675,7 @@ class Airflow
       # Most system types
 
       # Set the return plenum
-      ra_duct_zone = create_return_air_duct_zone(model, object.name.to_s)
+      ra_duct_zone = create_return_air_duct_zone(model, object.name.to_s, unit_multiplier)
       ra_duct_space = ra_duct_zone.spaces[0]
       @living_zone.setReturnPlenum(ra_duct_zone, object)
 
