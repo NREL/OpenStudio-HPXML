@@ -2323,7 +2323,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
+      # EMS Sensors: Infiltration, Natural Ventilation, Whole House Fan
       infil_sensors, natvent_sensors, whf_sensors = [], [], []
       unit_model.getSpaceInfiltrationDesignFlowRates.sort.each do |i|
         next unless i.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
@@ -2345,6 +2345,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
+      # EMS Sensors: Mechanical Ventilation
       mechvents_sensors = []
       unit_model.getElectricEquipments.sort.each do |o|
         next unless o.endUseSubcategory == Constants.ObjectNameMechanicalVentilation
@@ -2389,9 +2390,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       unit_model.getOtherEquipments.sort.each do |o|
         next if objects_already_processed.include? o
-
-        object_type = o.additionalProperties.getFeatureAsString('ObjectType').to_s
-        next unless object_type == Constants.ObjectNameDuctLoad
+        next unless o.endUseSubcategory == Constants.ObjectNameDuctLoad
 
         objects_already_processed << o
         { 'Other Equipment Convective Heating Energy' => 'ducts_conv',

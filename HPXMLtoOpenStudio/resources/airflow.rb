@@ -541,7 +541,7 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_other_equipment_object_and_actuator(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil, is_duct_load_for_report: nil)
+  def self.create_other_equipment_object_and_actuator(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil)
     other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     other_equip_def.setName("#{name} equip")
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
@@ -561,9 +561,6 @@ class Airflow
     other_equip_def.setFractionRadiant(0.0)
     actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
     actuator.setName("#{other_equip.name} act")
-    if is_duct_load_for_report
-      other_equip.additionalProperties.setFeature('ObjectType', Constants.ObjectNameDuctLoad)
-    end
     return actuator
   end
 
@@ -816,47 +813,47 @@ class Airflow
       end
 
       # Other equipment objects to cancel out the supply air leakage directly into the return plenum
-      equip_act_infos << ['supply_sens_lk_to_liv', 'SupSensLkToLv', true, @living_space, 0.0, f_regain]
-      equip_act_infos << ['supply_lat_lk_to_liv', 'SupLatLkToLv', true, @living_space, 1.0 - f_regain, f_regain]
+      equip_act_infos << ['supply_sens_lk_to_liv', 'SupSensLkToLv', Constants.ObjectNameDuctLoad, @living_space, 0.0, f_regain]
+      equip_act_infos << ['supply_lat_lk_to_liv', 'SupLatLkToLv', Constants.ObjectNameDuctLoad, @living_space, 1.0 - f_regain, f_regain]
 
       # Supply duct conduction load added to the living space
-      equip_act_infos << ['supply_cond_to_liv', 'SupCondToLv', true, @living_space, 0.0, f_regain]
+      equip_act_infos << ['supply_cond_to_liv', 'SupCondToLv', Constants.ObjectNameDuctLoad, @living_space, 0.0, f_regain]
 
       # Return duct conduction load added to the return plenum zone
-      equip_act_infos << ['return_cond_to_rp', 'RetCondToRP', true, ra_duct_space, 0.0, f_regain]
+      equip_act_infos << ['return_cond_to_rp', 'RetCondToRP', Constants.ObjectNameDuctLoad, ra_duct_space, 0.0, f_regain]
 
       # Return duct sensible leakage impact on the return plenum
-      equip_act_infos << ['return_sens_lk_to_rp', 'RetSensLkToRP', true, ra_duct_space, 0.0, f_regain]
+      equip_act_infos << ['return_sens_lk_to_rp', 'RetSensLkToRP', Constants.ObjectNameDuctLoad, ra_duct_space, 0.0, f_regain]
 
       # Return duct latent leakage impact on the return plenum
-      equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', true, ra_duct_space, 1.0 - f_regain, f_regain]
+      equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', Constants.ObjectNameDuctLoad, ra_duct_space, 1.0 - f_regain, f_regain]
 
       # Supply duct conduction impact on the duct zone
       if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
-        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
+        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', nil, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', nil, duct_location.spaces[0], 0.0, 0.0]
       end
 
       # Return duct conduction impact on the duct zone
       if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
-        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
+        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', nil, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', nil, duct_location.spaces[0], 0.0, 0.0]
       end
 
       # Supply duct sensible leakage impact on the duct zone
       if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
-        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
+        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', nil, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', false, duct_location.spaces[0], 0.0, 0.0]
+        equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', nil, duct_location.spaces[0], 0.0, 0.0]
       end
 
       # Supply duct latent leakage impact on the duct zone
       if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
-        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', false, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
+        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', nil, @living_space, 0.0, 1.0] # Arbitrary space, all heat lost
       else
-        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', false, duct_location.spaces[0], 1.0, 0.0]
+        equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', nil, duct_location.spaces[0], 1.0, 0.0]
       end
 
       duct_vars = {}
@@ -872,7 +869,7 @@ class Airflow
         equip_act_infos.each do |act_info|
           var_name = "#{prefix}#{act_info[0]}"
           object_name = "#{object_name_idx} #{prefix}#{act_info[1]}".gsub(' ', '_')
-          is_load_for_report = act_info[2]
+          end_use = act_info[2]
           space = act_info[3]
           if is_cfis && (space == ra_duct_space)
             # Move all CFIS return duct losses to the conditioned space so as to avoid extreme plenum temperatures
@@ -885,7 +882,7 @@ class Airflow
           if not is_cfis
             duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
           end
-          duct_actuators[var_name] = create_other_equipment_object_and_actuator(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, is_duct_load_for_report: is_load_for_report)
+          duct_actuators[var_name] = create_other_equipment_object_and_actuator(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, end_use: end_use)
         end
       end
 
@@ -1287,7 +1284,7 @@ class Airflow
   end
 
   def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index, unavailable_periods)
-    obj_name = "dryer exhaust #{index}"
+    obj_name = "#{Constants.ObjectNameClothesDryer} exhaust #{index}"
 
     # Create schedule
     obj_sch = nil
@@ -1544,9 +1541,9 @@ class Airflow
   def self.setup_mech_vent_vars_actuators(model:, program:)
     # Actuators for mech vent fan
     sens_name = "#{Constants.ObjectNameMechanicalVentilationHouseFan} sensible load"
-    fan_sens_load_actuator = create_other_equipment_object_and_actuator(model: model, name: sens_name, space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
+    fan_sens_load_actuator = create_other_equipment_object_and_actuator(model: model, name: sens_name, space: @living_space, frac_lat: 0.0, frac_lost: 0.0, end_use: Constants.ObjectNameMechanicalVentilationHouseFan)
     lat_name = "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load"
-    fan_lat_load_actuator = create_other_equipment_object_and_actuator(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
+    fan_lat_load_actuator = create_other_equipment_object_and_actuator(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0, end_use: Constants.ObjectNameMechanicalVentilationHouseFan)
     program.addLine("Set #{fan_sens_load_actuator.name} = 0.0")
     program.addLine("Set #{fan_lat_load_actuator.name} = 0.0")
     # Air property at inlet nodes on both sides
