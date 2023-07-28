@@ -4183,36 +4183,63 @@ class HVAC
     return hvac_systems
   end
 
-  def self.ensure_nonzero_sizing_values_and_apply_unit_multiplier(hpxml)
-    # 1. Ensure non-zero capacity/airflow sizing values to prevent E+ errors.
-    # 2. Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
-    #    multiplied thermal zone load to the HVAC system, so the HVAC system
-    #    needs to be sized to meet the entire multiplied zone load.
+  def self.ensure_nonzero_sizing_values(hpxml)
     min_capacity = 1.0 # Btuh
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
-    mult = hpxml.building_construction.number_of_units
     hpxml.heating_systems.each do |htg_sys|
-      htg_sys.heating_capacity = [htg_sys.heating_capacity * mult, min_capacity].max
-      if not htg_sys.heating_airflow_cfm.nil?
-        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm * mult, min_airflow].max
-      end
+      htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
+      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max unless htg_sys.heating_airflow_cfm.nil?
     end
     hpxml.cooling_systems.each do |clg_sys|
-      clg_sys.cooling_capacity = [clg_sys.cooling_capacity * mult, min_capacity].max
-      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm * mult, min_airflow].max
+      clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
+      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
     end
     hpxml.heat_pumps.each do |hp_sys|
-      hp_sys.cooling_capacity = [hp_sys.cooling_capacity * mult, min_capacity].max
-      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm * mult, min_airflow].max
+      hp_sys.cooling_capacity = [hp_sys.cooling_capacity, min_capacity].max
+      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, min_airflow].max
       hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible * mult, min_capacity].max
-      hp_sys.heating_capacity = [hp_sys.heating_capacity * mult, min_capacity].max
-      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm * mult, min_airflow].max
-      if not hp_sys.heating_capacity_17F.nil?
-        hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F * mult, min_capacity].max
-      end
-      if not hp_sys.backup_heating_capacity.nil?
-        hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity * mult, min_capacity].max
-      end
+      hp_sys.heating_capacity = [hp_sys.heating_capacity, min_capacity].max
+      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, min_airflow].max
+      hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, min_capacity].max unless hp_sys.heating_capacity_17F.nil?
+      hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max unless hp_sys.backup_heating_capacity.nil?
+    end
+  end
+
+  def self.apply_unit_multiplier(hpxml)
+    # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
+    # multiplied thermal zone load to the HVAC system, so the HVAC system
+    # needs to be sized to meet the entire multiplied zone load.
+    unit_multiplier = hpxml.building_construction.number_of_units
+    hpxml.heating_systems.each do |htg_sys|
+      htg_sys.heating_capacity *= unit_multiplier
+      htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
+      htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
+      # FIXME: electric_auxiliary_energy?
+      # FIXME: fan_coil_watts?
+      # FIXME: shared_loop_watts?
+      # FIXME: fan_watts?
+    end
+    hpxml.cooling_systems.each do |clg_sys|
+      clg_sys.cooling_capacity *= unit_multiplier
+      clg_sys.cooling_airflow_cfm *= unit_multiplier
+      clg_sys.crankcase_heater_watts *= unit_multiplier
+      # FIXME: integrated_heating_system_capacity?
+      # FIXME: integrated_heating_system_airflow_cfm?
+      # FIXME: shared_loop_watts?
+      # FIXME: fan_coil_watts?
+    end
+    hpxml.heat_pumps.each do |hp_sys|
+      hp_sys.cooling_capacity *= unit_multiplier
+      hp_sys.cooling_airflow_cfm *= unit_multiplier
+      hp_sys.additional_properties.cooling_capacity_sensible *= unit_multiplier
+      hp_sys.heating_capacity *= unit_multiplier
+      hp_sys.heating_airflow_cfm *= unit_multiplier
+      hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
+      hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
+      hp_sys.crankcase_heater_watts *= unit_multiplier
+      # FIXME: shared_loop_watts?
+      # FIXME: heating_airflow_cfm?
+      # FIXME: cooling_airflow_cfm?
     end
   end
 

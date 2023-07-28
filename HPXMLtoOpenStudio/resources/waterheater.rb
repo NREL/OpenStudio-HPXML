@@ -1808,4 +1808,15 @@ class Waterheater
       return HPXML::WaterHeaterUsageBinHigh
     end
   end
+
+  def self.apply_unit_multiplier(hpxml)
+    # We are multiplying the hot water usage by the unit multiplier,
+    # so we also need the water heater to be sized to meet the entire
+    # hot water demand.
+    unit_multiplier = hpxml.building_construction.number_of_units
+    hpxml.water_heating_systems.each do |water_heater|
+      water_heater.tank_volume *= unit_multiplier
+      water_heater.heating_capacity *= unit_multiplier
+    end
+  end
 end

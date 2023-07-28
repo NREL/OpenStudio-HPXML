@@ -302,11 +302,13 @@ class OSModel
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
 
-    # Now that we've written in.xml, make changes to the capacities
-    # for the EnergyPlus simulation.
-    HVAC.ensure_nonzero_sizing_values_and_apply_unit_multiplier(@hpxml)
-
-    # Now that we've written in.xml, make adjustments for modeling purposes.
+    # Now that we've written in.xml...
+    # 1. ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
+    HVAC.ensure_nonzero_sizing_values(@hpxml)
+    # 2. apply unit multipliers to HVAC systems and water heaters
+    HVAC.apply_unit_multiplier(@hpxml)
+    Waterheater.apply_unit_multiplier(@hpxml)
+    # 3. make adjustments for modeling purposes
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
     @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
@@ -1317,7 +1319,7 @@ class OSModel
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml.header.unavailable_periods)
+                                @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1618,7 +1620,7 @@ class OSModel
 
   def self.add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups, @hpxml.lighting, @eri_version,
-                   @schedules_file, @cfa, @hpxml.header.unavailable_periods)
+                   @schedules_file, @cfa, @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
@@ -2375,6 +2377,7 @@ class OSModel
     program.addLine("  Set htg_mode = #{total_heat_load_served}")
     program.addLine('EndIf')
 
+    unit_multiplier = @hpxml.building_construction.number_of_units
     [:htg, :clg].each do |mode|
       if mode == :htg
         sign = ''
@@ -2382,10 +2385,10 @@ class OSModel
         sign = '-'
       end
       surfaces_sensors.keys.each do |k|
-        program.addLine("Set loads_#{mode}_#{k} = #{sign}hr_#{k} * #{mode}_mode")
+        program.addLine("Set loads_#{mode}_#{k} = #{sign}hr_#{k} * #{mode}_mode * #{unit_multiplier}")
       end
       nonsurf_names.each do |nonsurf_name|
-        program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
+        program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode * #{unit_multiplier}")
       end
     end
 
