@@ -2396,7 +2396,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fuel.name = "Fuel Use: #{fuel_type}: Total"
       fuel.annual_units = 'MBtu'
       fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
-      if @end_uses.select { |key, end_use| key[0] == fuel_type && end_use.variables.size > 0 }.size == 0
+      if @end_uses.select { |key, end_use| key[0] == fuel_type && end_use.variables.size + end_use.meters.size > 0 }.size == 0
         fuel.meters = []
       end
     end
