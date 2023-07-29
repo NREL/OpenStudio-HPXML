@@ -160,13 +160,6 @@ class Battery
     battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     battery_losses_pcm.addProgram(battery_losses_program)
 
-    battery_losses_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'losses')
-    battery_losses_output_var.setName("#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar")
-    battery_losses_output_var.setTypeOfDataInVariable('Summed')
-    battery_losses_output_var.setUpdateFrequency('SystemTimestep')
-    battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
-    battery_losses_output_var.setUnits('J')
-
     elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
