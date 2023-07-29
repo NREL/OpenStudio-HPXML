@@ -1806,8 +1806,8 @@ class Waterheater
     # hot water demand.
     unit_multiplier = hpxml.building_construction.number_of_units
     hpxml.water_heating_systems.each do |water_heater|
-      water_heater.tank_volume *= unit_multiplier
-      water_heater.heating_capacity *= unit_multiplier
+      water_heater.tank_volume *= unit_multiplier unless water_heater.tank_volume.nil?
+      water_heater.heating_capacity *= unit_multiplier unless water_heater.heating_capacity.nil?
     end
   end
 end
