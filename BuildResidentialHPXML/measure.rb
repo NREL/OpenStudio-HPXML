@@ -5109,7 +5109,7 @@ class HPXMLFile
     end
 
     if (not ducts_return_location.nil?) && ducts_return_surface_area.nil? && ducts_return_area_fraction.nil?
-      # Supply duct location without any area inputs provided; set area fraction
+      # Return duct location without any area inputs provided; set area fraction
       if ducts_return_location == HPXML::LocationLivingSpace
         ducts_return_area_fraction = 1.0
       else
@@ -5144,6 +5144,7 @@ class HPXMLFile
     end
 
     if (not ducts_supply_area_fraction.nil?) && (ducts_supply_area_fraction < 1)
+      # OS-HPXML needs duct fractions to sum to 1; add remaining ducts in living space.
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeSupply,
                                   duct_insulation_r_value: 0.0,
@@ -5153,6 +5154,7 @@ class HPXMLFile
 
     if not hvac_distribution.ducts.find { |d| d.duct_type == HPXML::DuctTypeReturn }.nil?
       if (not ducts_return_area_fraction.nil?) && (ducts_return_area_fraction < 1)
+        # OS-HPXML needs duct fractions to sum to 1; add remaining ducts in living space.
         hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                     duct_type: HPXML::DuctTypeReturn,
                                     duct_insulation_r_value: 0.0,
