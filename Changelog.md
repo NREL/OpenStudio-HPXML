@@ -9,6 +9,7 @@ __New Features__
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 - Update to 2022 EIA energy costs.
+- BuildResidentialHPXML measure: Allow duct area fractions (as an alternative to duct areas in ft^2).
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
