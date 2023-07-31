@@ -30,6 +30,9 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
+        # FIXME: Delete this line when E+ fix is available; currently hitting limitation noted
+        # in https://github.com/NREL/EnergyPlus/issues/9049
+        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple.xml'
 
         xmls << File.absolute_path(xml)
       end
@@ -665,6 +668,8 @@ class HPXMLTest < Minitest::Test
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_equal(60 / timestep, sql_value)
 
+    unit_multiplier = hpxml.building_construction.number_of_units
+
     # Conditioned Floor Area
     if (hpxml.total_fraction_cool_load_served > 0) || (hpxml.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
       hpxml_value = hpxml.building_construction.conditioned_floor_area
@@ -673,7 +678,7 @@ class HPXMLTest < Minitest::Test
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+      assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
     end
 
     # Enclosure Roofs
@@ -704,7 +709,7 @@ class HPXMLTest < Minitest::Test
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+      assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
 
       # Solar absorptance
       hpxml_value = roof.solar_absorptance
@@ -750,7 +755,7 @@ class HPXMLTest < Minitest::Test
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_operator(sql_value, :>, 0.01)
-        assert_in_epsilon(hpxml_value, sql_value, 0.1)
+        assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
 
         # Tilt
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
@@ -821,7 +826,7 @@ class HPXMLTest < Minitest::Test
       end
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+      assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
 
       # Solar absorptance
       if wall.respond_to?(:solar_absorptance) && (not wall.solar_absorptance.nil?)
@@ -898,7 +903,7 @@ class HPXMLTest < Minitest::Test
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{floor_id}' AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+      assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
 
       # Tilt
       if floor.is_ceiling
@@ -931,7 +936,7 @@ class HPXMLTest < Minitest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+      assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
 
       # U-Factor
       if subsurface.is_exterior
@@ -1001,7 +1006,7 @@ class HPXMLTest < Minitest::Test
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_operator(sql_value, :>, 0.01)
-        assert_in_epsilon(hpxml_value, sql_value, 0.1)
+        assert_in_epsilon(hpxml_value * unit_multiplier, sql_value, 0.1)
       end
 
       # R-Value

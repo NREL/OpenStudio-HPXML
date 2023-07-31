@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Lighting
-  def self.apply(runner, model, epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa, unavailable_periods)
+  def self.apply(runner, model, epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa,
+                 unavailable_periods, unit_multiplier)
     ltg_locns = [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage]
     ltg_types = [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED]
 
@@ -36,6 +37,7 @@ class Lighting
     end
     ext_kwh = 0.0 if ext_kwh.nil?
     ext_kwh *= lighting.exterior_usage_multiplier unless lighting.exterior_usage_multiplier.nil?
+    ext_kwh *= unit_multiplier # Not in a thermal zone, so needs to be explicitly multiplied
 
     # Calculate garage lighting kWh/yr
     gfa = 0 # Garage floor area

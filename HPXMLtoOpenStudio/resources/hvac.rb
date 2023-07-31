@@ -437,8 +437,7 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_boiler(model, runner, heating_system,
-                        sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods, unit_multiplier)
     obj_name = Constants.ObjectNameBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
@@ -522,7 +521,7 @@ class HVAC
 
     # FIXME: EMS program to model pilot light
     # Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
-    set_boiler_pilot_light_ems_program(model, boiler, heating_system)
+    set_boiler_pilot_light_ems_program(model, boiler, heating_system, control_zone, unit_multiplier)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -1430,11 +1429,11 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.set_boiler_pilot_light_ems_program(model, boiler, heating_system)
+  def self.set_boiler_pilot_light_ems_program(model, boiler, heating_system, control_zone, unit_multiplier)
     # Create Equipment object for fuel consumption
-    loc_space = model.getSpaces[0] # Arbitrary; not used
+    space = control_zone.spaces[0] # Arbitrary
     fuel_type = heating_system.heating_system_fuel
-    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, "#{boiler.name} #{Constants.ObjectNameBoilerPilotLight}", loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, "#{boiler.name} #{Constants.ObjectNameBoilerPilotLight}", space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # Sensor
     boiler_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
@@ -1448,25 +1447,15 @@ class HVAC
     # Program
     pilot_light_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     pilot_light_program.setName("#{boiler.name} pilot light program")
-    pilot_light_program.addLine("Set #{pilot_light_act.name} = (1.0 - #{boiler_plr_sensor.name}) * #{UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W')}")
-    pilot_light_program.addLine("Set boiler_pilot_energy = #{pilot_light_act.name} * 3600 * SystemTimeStep")
+    # Since the pilot light has been multiplied by the unit_multiplier, and this OtherEquipment object will be adding
+    # load to a thermal zone with an E+ multiplier, we would double-count the multiplier if we didn't divide by it here.
+    pilot_light_program.addLine("Set #{pilot_light_act.name} = (1.0 - #{boiler_plr_sensor.name}) * #{UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W')} / #{unit_multiplier}")
 
     # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{boiler.name} pilot light program manager")
     program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     program_calling_manager.addProgram(pilot_light_program)
-
-    # EMS Output Variable for reporting
-    pilot_light_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_pilot_energy')
-    pilot_light_output_var.setName("#{pilot_light_object.name} outvar")
-    pilot_light_output_var.setTypeOfDataInVariable('Summed')
-    pilot_light_output_var.setUpdateFrequency('SystemTimestep')
-    pilot_light_output_var.setEMSProgramOrSubroutineName(pilot_light_program)
-    pilot_light_output_var.setUnits('J')
-    pilot_light_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
-    pilot_light_output_var.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
-    pilot_light_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBoilerPilotLight) # Used by reporting measure
   end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
@@ -4192,9 +4181,7 @@ class HVAC
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
     hpxml.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
-      if not htg_sys.heating_airflow_cfm.nil?
-        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
-      end
+      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max unless htg_sys.heating_airflow_cfm.nil?
     end
     hpxml.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
@@ -4206,12 +4193,46 @@ class HVAC
       hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, min_capacity].max
       hp_sys.heating_capacity = [hp_sys.heating_capacity, min_capacity].max
       hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, min_airflow].max
-      if not hp_sys.heating_capacity_17F.nil?
-        hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, min_capacity].max
-      end
-      if not hp_sys.backup_heating_capacity.nil?
-        hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max
-      end
+      hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, min_capacity].max unless hp_sys.heating_capacity_17F.nil?
+      hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max unless hp_sys.backup_heating_capacity.nil?
+    end
+  end
+
+  def self.apply_unit_multiplier(hpxml)
+    # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
+    # multiplied thermal zone load to the HVAC system, so the HVAC system
+    # needs to be sized to meet the entire multiplied zone load.
+    unit_multiplier = hpxml.building_construction.number_of_units
+    hpxml.heating_systems.each do |htg_sys|
+      htg_sys.heating_capacity *= unit_multiplier
+      htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
+      htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
+      # FIXME: electric_auxiliary_energy?
+      # FIXME: fan_coil_watts?
+      # FIXME: shared_loop_watts?
+      # FIXME: fan_watts?
+    end
+    hpxml.cooling_systems.each do |clg_sys|
+      clg_sys.cooling_capacity *= unit_multiplier
+      clg_sys.cooling_airflow_cfm *= unit_multiplier
+      clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
+      # FIXME: integrated_heating_system_capacity?
+      # FIXME: integrated_heating_system_airflow_cfm?
+      # FIXME: shared_loop_watts?
+      # FIXME: fan_coil_watts?
+    end
+    hpxml.heat_pumps.each do |hp_sys|
+      hp_sys.cooling_capacity *= unit_multiplier
+      hp_sys.cooling_airflow_cfm *= unit_multiplier
+      hp_sys.additional_properties.cooling_capacity_sensible *= unit_multiplier
+      hp_sys.heating_capacity *= unit_multiplier
+      hp_sys.heating_airflow_cfm *= unit_multiplier
+      hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
+      hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
+      hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
+      # FIXME: shared_loop_watts?
+      # FIXME: heating_airflow_cfm?
+      # FIXME: cooling_airflow_cfm?
     end
   end
 

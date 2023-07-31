@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Waterheater
-  def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods)
+  def self.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, t_set_c, eri_version)
@@ -23,13 +23,13 @@ class Waterheater
                                    unavailable_periods: unavailable_periods)
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
+    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, unit_multiplier)
     add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
 
     return loop
   end
 
-  def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods)
+  def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier)
     water_heating_system.heating_capacity = 100000000000.0
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -52,13 +52,13 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system)
+    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, unit_multiplier)
     add_desuperheater(model, runner, water_heating_system, new_heater, loc_space, loc_schedule, loop)
 
     return loop
   end
 
-  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, eri_version, schedules_file, unavailable_periods)
+  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, eri_version, schedules_file, unavailable_periods, unit_multiplier)
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -137,12 +137,12 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_inlet_air_program)
 
-    add_ec_adj(model, hpwh, ec_adj, loc_space, water_heating_system)
+    add_ec_adj(model, hpwh, ec_adj, loc_space, water_heating_system, unit_multiplier)
 
     return loop
   end
 
-  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods)
+  def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(model, water_heating_system.related_hvac_idref)
@@ -213,7 +213,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, boiler)
+    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, unit_multiplier, boiler)
 
     return loop
   end
@@ -1303,7 +1303,7 @@ class Waterheater
     return num_baths
   end
 
-  def self.add_ec_adj(model, heater, ec_adj, loc_space, water_heating_system, combi_boiler = nil)
+  def self.add_ec_adj(model, heater, ec_adj, loc_space, water_heating_system, unit_multiplier, combi_boiler = nil)
     adjustment = ec_adj - 1.0
 
     if loc_space.nil? # WH is not in a zone, set the other equipment to be in a random space
@@ -1369,25 +1369,15 @@ class Waterheater
     else
       ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
     end
-    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjustment} * dhw_e_cons")
-    ec_adj_program.addLine("Set ec_adj_energy = #{ec_adj_actuator.name} * 3600 * SystemTimeStep")
+    # Since the water heater has been multiplied by the unit_multiplier, and this OtherEquipment object will be adding
+    # load to a thermal zone with an E+ multiplier, we would double-count the multiplier if we didn't divide by it here.
+    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjustment} * dhw_e_cons / #{unit_multiplier}")
 
     # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
     program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     program_calling_manager.addProgram(ec_adj_program)
-
-    # EMS Output Variable for EC_adj reporting
-    ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ec_adj_energy')
-    ec_adj_output_var.setName("#{heater.name} #{Constants.ObjectNameWaterHeaterAdjustment} outvar")
-    ec_adj_output_var.setTypeOfDataInVariable('Summed')
-    ec_adj_output_var.setUpdateFrequency('SystemTimestep')
-    ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
-    ec_adj_output_var.setUnits('J')
-    ec_adj_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
-    ec_adj_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
-    ec_adj_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameWaterHeaterAdjustment) # Used by reporting measure
   end
 
   def self.get_default_hot_water_temperature(eri_version)
@@ -1811,6 +1801,17 @@ class Waterheater
       return HPXML::WaterHeaterUsageBinMedium
     else
       return HPXML::WaterHeaterUsageBinHigh
+    end
+  end
+
+  def self.apply_unit_multiplier(hpxml)
+    # We are multiplying the hot water usage by the unit multiplier,
+    # so we also need the water heater to be sized to meet the entire
+    # hot water demand.
+    unit_multiplier = hpxml.building_construction.number_of_units
+    hpxml.water_heating_systems.each do |water_heater|
+      water_heater.tank_volume *= unit_multiplier unless water_heater.tank_volume.nil?
+      water_heater.heating_capacity *= unit_multiplier unless water_heater.heating_capacity.nil?
     end
   end
 end

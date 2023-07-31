@@ -183,6 +183,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeApartment
     unit_type_choices << HPXML::ResidentialTypeManufactured
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('unit_multiplier', false)
+    arg.setDisplayName('Building Construction: Unit Multiplier')
+    arg.setDescription('The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value. If not provided, defaults to 1.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
     arg.setDisplayName('Geometry: Unit Type')
     arg.setDescription("The type of dwelling unit. Use #{HPXML::ResidentialTypeSFA} for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use #{HPXML::ResidentialTypeApartment} for a dwelling unit with 1 story, attached units to one, two, or three sides, and units above and/or below.")
@@ -3962,6 +3967,10 @@ class HPXMLFile
 
     if args[:year_built].is_initialized
       hpxml.building_construction.year_built = args[:year_built].get
+    end
+
+    if args[:unit_multiplier].is_initialized
+      hpxml.building_construction.number_of_units = args[:unit_multiplier].get
     end
   end
 

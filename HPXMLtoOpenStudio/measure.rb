@@ -477,11 +477,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
 
-    # Now that we've written in.xml, ensure that no capacities/airflows
-    # are zero in order to prevent potential E+ errors.
+    # Now that we've written in.xml...
+    # 1. ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
-
-    # Now that we've written in.xml, make adjustments for modeling purposes.
+    # 2. apply unit multipliers to HVAC systems and water heaters
+    HVAC.apply_unit_multiplier(@hpxml)
+    Waterheater.apply_unit_multiplier(@hpxml)
+    # 3. make adjustments for modeling purposes
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
     @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
@@ -521,7 +523,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location)
+      Geometry.create_space_and_zone(model, spaces, location, @hpxml.building_construction.number_of_units)
     end
     return spaces[location]
   end
@@ -1475,15 +1477,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       sys_id = water_heating_system.id
+      unit_multiplier = @hpxml.building_construction.number_of_units
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods)
+        plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods, unit_multiplier)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-        plantloop_map[sys_id] = Waterheater.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods)
+        plantloop_map[sys_id] = Waterheater.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods, unit_multiplier)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @eri_version, @schedules_file, unavailable_periods)
+        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @eri_version, @schedules_file, unavailable_periods, unit_multiplier)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods)
+        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods, unit_multiplier)
       else
         fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
       end
@@ -1492,7 +1495,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml.header.unavailable_periods)
+                                @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1586,8 +1589,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
-        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system,
-                                                sequential_heat_load_fracs, living_zone, @hvac_unavailable_periods)
+        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, living_zone,
+                                                @hvac_unavailable_periods, @hpxml.building_construction.number_of_units)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
@@ -1792,7 +1795,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_lighting(runner, model, epw_file, spaces)
     Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups, @hpxml.lighting, @eri_version,
-                   @schedules_file, @cfa, @hpxml.header.unavailable_periods)
+                   @schedules_file, @cfa, @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
   end
 
   def add_pools_and_hot_tubs(runner, model, spaces)
@@ -2558,6 +2561,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("  Set htg_mode = #{total_heat_load_serveds[unit]}")
       program.addLine('EndIf')
 
+      unit_multiplier = @hpxml.building_construction.number_of_units
       [:htg, :clg].each do |mode|
         if mode == :htg
           sign = ''
@@ -2565,10 +2569,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           sign = '-'
         end
         surf_names.each do |surf_name|
-          program.addLine("Set loads_#{mode}_#{surf_name} = loads_#{mode}_#{surf_name} + (#{sign}hr_#{surf_name} * #{mode}_mode)")
+          program.addLine("Set loads_#{mode}_#{surf_name} = loads_#{mode}_#{surf_name} + (#{sign}hr_#{surf_name} * #{mode}_mode * #{unit_multiplier})")
         end
         nonsurf_names.each do |nonsurf_name|
-          program.addLine("Set loads_#{mode}_#{nonsurf_name} = loads_#{mode}_#{nonsurf_name} + (#{sign}hr_#{nonsurf_name} * #{mode}_mode)")
+          program.addLine("Set loads_#{mode}_#{nonsurf_name} = loads_#{mode}_#{nonsurf_name} + (#{sign}hr_#{nonsurf_name} * #{mode}_mode * #{unit_multiplier})")
         end
       end
     end

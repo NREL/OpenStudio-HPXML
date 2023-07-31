@@ -33,7 +33,6 @@ class Battery
 
       nominal_capacity_kwh = get_kWh_from_Ah(battery.nominal_capacity_ah, nominal_voltage) # kWh
       usable_capacity_ah = battery.usable_capacity_ah
-      usable_capacity_kwh = get_kWh_from_Ah(usable_capacity_ah, nominal_voltage) # kWh
       usable_fraction = usable_capacity_ah / battery.nominal_capacity_ah
     end
 
@@ -167,11 +166,6 @@ class Battery
     battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
     battery_losses_output_var.setUnits('J')
     battery_losses_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBatteryLossesAdjustment)
-
-    elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
-    elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
-    elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
-    elcs.additionalProperties.setFeature('BatteryLosses', battery_losses_output_var.name.to_s)
   end
 
   def self.get_battery_default_values(has_garage = false)
