@@ -8,6 +8,7 @@ __New Features__
   - Adds "Peak Electricity: Annual Total (W)" output.
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+- Update to 2022 EIA energy costs.
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
