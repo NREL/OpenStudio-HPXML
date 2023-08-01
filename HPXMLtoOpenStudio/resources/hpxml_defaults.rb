@@ -1148,7 +1148,8 @@ class HPXMLDefaults
       if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
         heat_pump.heating_capacity_retention_fraction = 0.425
       elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
-        heat_pump.heating_capacity_retention_fraction = 0.5
+        ## Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+        heat_pump.heating_capacity_retention_fraction = 0.0461 * heat_pump.heating_efficiency_hspf + 0.1594
       end
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
@@ -1491,8 +1492,12 @@ class HPXMLDefaults
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump)
-        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
+        if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed && heat_pump.heating_detailed_performance_data.empty?
+          HVAC.set_heat_detailed_performance_data(heat_pump)
+        else
+          HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
+          HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
+        end
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         HVAC.set_gshp_assumptions(heat_pump, weather)
