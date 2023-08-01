@@ -2061,10 +2061,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if object.to_AdditionalProperties.is_initialized
 
       [EUT, HWT, LT, RT].each do |class_name|
+        vars_by_key = get_object_outputs_by_key(@model, object, class_name)
+        next if vars_by_key.size == 0
+
         sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
         sys_id = sys_id.is_initialized ? sys_id.get : nil
-        vars_by_key = get_object_outputs_by_key(@model, object, sys_id, class_name)
-        next if vars_by_key.size == 0
 
         vars_by_key.each do |key, output_vars|
           output_vars.each do |output_var|
@@ -2610,27 +2611,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  def is_heat_pump_backup(sys_id)
-    return false if @hpxml.nil?
-
-    # Integrated backup?
-    @hpxml.heat_pumps.each do |heat_pump|
-      next if sys_id != heat_pump.id
-
-      return true
-    end
-
-    # Separate backup system?
-    @hpxml.heating_systems.each do |heating_system|
-      next if sys_id != heating_system.id
-      next unless heating_system.is_heat_pump_backup_system
-
-      return true
-    end
-
-    return false
-  end
-
   def get_hpxml_system_ids
     # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
     return [] if @hpxml.nil?
@@ -2642,7 +2622,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return system_ids
   end
 
-  def get_object_outputs_by_key(model, object, sys_id, class_name)
+  def get_object_outputs_by_key(model, object, class_name)
     # For a given object, returns the Output:Variables or Output:Meters to be requested,
     # and associates them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
 
@@ -2665,28 +2645,28 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_CoilHeatingElectric.is_initialized
-        if not is_heat_pump_backup(sys_id)
-          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
-        else
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        else
+          return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
-        if not is_heat_pump_backup(sys_id)
-          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
-        else
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
           return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
+        else
+          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-        if not is_heat_pump_backup(sys_id)
-          return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
-        else
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
+        else
+          return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
       elsif object.to_BoilerHotWater.is_initialized
@@ -2696,10 +2676,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
-          if not is_heat_pump_backup(sys_id)
-            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
-          else
+          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
             return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
+          else
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
           end
         else
           fuel = object.to_BoilerHotWater.get.fuelType
@@ -2887,17 +2867,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
 
       elsif object.to_CoilHeatingGas.is_initialized || object.to_CoilHeatingElectric.is_initialized
-        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized
-          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
-            return { LT::HeatingHeatPumpBackup => ['Heating Coil Heating Energy'] }
-          end
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { LT::HeatingHeatPumpBackup => ['Heating Coil Heating Energy'] }
         end
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized || object.to_ZoneHVACBaseboardConvectiveWater.is_initialized
-        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized
-          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
-            return { LT::HeatingHeatPumpBackup => ['Baseboard Total Heating Energy'] }
-          end
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { LT::HeatingHeatPumpBackup => ['Baseboard Total Heating Energy'] }
         end
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
