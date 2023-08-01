@@ -482,7 +482,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     HVAC.ensure_nonzero_sizing_values(@hpxml)
     # 2. apply unit multipliers to HVAC systems and water heaters
     HVAC.apply_unit_multiplier(@hpxml)
-    Waterheater.apply_unit_multiplier(@hpxml)
     # 3. make adjustments for modeling purposes
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
     @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
@@ -1469,6 +1468,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Water Heater
     unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml.header.unavailable_periods)
+    unit_multiplier = @hpxml.building_construction.number_of_units
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
@@ -1477,7 +1477,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       sys_id = water_heating_system.id
-      unit_multiplier = @hpxml.building_construction.number_of_units
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
         plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @eri_version, @schedules_file, unavailable_periods, unit_multiplier)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
@@ -1499,7 +1498,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
-      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map)
+      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map, unit_multiplier)
     end
 
     # Add combi-system EMS program with water use equipment information

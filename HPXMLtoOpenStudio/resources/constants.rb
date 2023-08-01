@@ -91,7 +91,7 @@ class Constants
   end
 
   def self.ObjectNameBatteryLossesAdjustment
-    return 'losses adjustment'
+    return 'battery losses adjustment'
   end
 
   def self.ObjectNameBoiler
@@ -99,7 +99,7 @@ class Constants
   end
 
   def self.ObjectNameBoilerPilotLight
-    return 'pilot light'
+    return 'boiler pilot light'
   end
 
   def self.ObjectNameCeilingFan
@@ -371,7 +371,7 @@ class Constants
   end
 
   def self.ObjectNameWaterHeaterAdjustment
-    return 'energy adjustment'
+    return 'water heater energy adjustment'
   end
 
   def self.ObjectNameWaterLoopHeatPump
