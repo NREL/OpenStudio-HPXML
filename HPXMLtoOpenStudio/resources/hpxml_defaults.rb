@@ -1520,7 +1520,9 @@ class HPXMLDefaults
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-
+      # Assign minimum capacity here to avoid E+ simulation error
+      min_capacity = 1.0
+      heat_pump.heating_capacity = [heat_pump.heating_capacity, min_capacity].max
       if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed && heat_pump.heating_detailed_performance_data.empty?
         HVAC.set_heat_detailed_performance_data(heat_pump)
       end
