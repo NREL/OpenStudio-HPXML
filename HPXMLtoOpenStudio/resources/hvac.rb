@@ -2290,7 +2290,16 @@ class HVAC
   end
 
   def self.get_heat_max_capacity_maintainence_5(heat_pump)
-    return 1.0 - (1.0 - heat_pump.heating_capacity_retention_fraction) * (47.0 - 5.0) / (47.0 - heat_pump.heating_capacity_retention_temp)
+    if not heat_pump.heating_capacity_17F.nil?
+      heating_capacity_retention_temp = 17.0
+      heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+    elsif not heat_pump.heating_capacity_retention_fraction.nil?
+      heating_capacity_retention_temp = heat_pump.heating_capacity_retention_temp
+      heating_capacity_retention_fraction = heat_pump.heating_capacity_retention_fraction
+    else
+      fail 'Missing heating capacity retention or 17F heating capacity.'
+    end
+    return 1.0 - (1.0 - heating_capacity_retention_fraction) * (47.0 - 5.0) / (47.0 - heating_capacity_retention_temp)
   end
 
   def self.get_heat_min_capacity_maintainence_5(is_ducted)

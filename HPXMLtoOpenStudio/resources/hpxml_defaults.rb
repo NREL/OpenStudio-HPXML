@@ -1142,9 +1142,17 @@ class HPXMLDefaults
 
     # Default HP heating capacity retention
     hpxml.heat_pumps.each do |heat_pump|
+      # Ignore heating capacity retention if there's detailed performance data provided
+      if ((not heat_pump.heating_detailed_performance_data.empty?) && (not heat_pump.heating_capacity_retention_fraction.nil?)) ||
+         ((not heat_pump.heating_detailed_performance_data.empty?) && (not heat_pump.heating_capacity_17F.nil?))
+        heat_pump.heating_capacity_retention_temp = nil
+        heat_pump.heating_capacity_retention_fraction = nil
+        heat_pump.heating_capacity_17F = nil
+      end
       next unless heat_pump.heating_capacity_retention_fraction.nil?
       next unless heat_pump.heating_capacity_17F.nil?
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
+      next unless heat_pump.heating_detailed_performance_data.empty?
 
       heat_pump.heating_capacity_retention_temp = 5.0
       if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type

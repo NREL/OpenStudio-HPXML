@@ -1486,6 +1486,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 14.0, 8.0, 0.425, 5.0, 50.0)
+
+    # Test override capacity retention and capacity 17F w/ detailed performance data
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+    hpxml.heat_pumps[0].cooling_shr = 0.88
+    hpxml.heat_pumps[0].fan_watts_per_cfm = 0.66
+    hpxml.heat_pumps[0].charge_defect_ratio = -0.11
+    hpxml.heat_pumps[0].airflow_defect_ratio = -0.22
+    hpxml.heat_pumps[0].cooling_efficiency_seer = 14.0
+    hpxml.heat_pumps[0].heating_efficiency_hspf = 8.0
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = 0.1
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = 2.0
+    hpxml.heat_pumps[0].crankcase_heater_watts = 40.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, nil, nil, 40.0)
+
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+    hpxml.heat_pumps[0].heating_capacity_17F = 9876
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, nil, nil, 40.0)
   end
 
   def test_pthp
