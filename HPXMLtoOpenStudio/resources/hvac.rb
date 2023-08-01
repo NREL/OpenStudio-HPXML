@@ -1198,6 +1198,7 @@ class HVAC
   def self.set_heat_curves_central_air_source(heat_pump, use_cop = false)
     hp_ap = heat_pump.additional_properties
     hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type, use_cop)
+    hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type)
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
     hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump)
     hp_ap.heat_rated_capacities = hp_ap.heat_capacity_ratios.map { |capacity_ratio| capacity_ratio * heat_pump.heating_capacity }
@@ -1222,6 +1223,7 @@ class HVAC
     hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
     hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type)
+    # TODO: Remove the cap/eir ft coefficients later
     hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type)
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
     hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
@@ -1276,7 +1278,7 @@ class HVAC
                                   outdoor_temperature: 17)
   end
 
-  def self.get_heat_capacity_ratios(heat_pump, is_ducted)
+  def self.get_heat_capacity_ratios(heat_pump, is_ducted = nil)
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
