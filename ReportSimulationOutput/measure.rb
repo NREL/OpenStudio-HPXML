@@ -2797,13 +2797,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
                     Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool }[subcategory]
-        if end_use.nil? && (object_type == Constants.ObjectNameWaterHeaterAdjustment)
+        if end_use.nil? && (subcategory == Constants.ObjectNameWaterHeaterAdjustment)
           end_use = EUT::HotWater
         end
-        if end_use.nil? && (object_type == Constants.ObjectNameBoilerPilotLight)
+        if end_use.nil? && (subcategory == Constants.ObjectNameBoilerPilotLight)
           end_use = EUT::Heating
         end
-        if end_use.nil? && (object_type == Constants.ObjectNameBatteryLossesAdjustment)
+        if end_use.nil? && (subcategory == Constants.ObjectNameBatteryLossesAdjustment)
           end_use = EUT::Battery
         end
         if not end_use.nil?

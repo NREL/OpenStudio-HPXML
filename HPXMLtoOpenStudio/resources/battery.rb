@@ -33,6 +33,7 @@ class Battery
 
       nominal_capacity_kwh = get_kWh_from_Ah(battery.nominal_capacity_ah, nominal_voltage) # kWh
       usable_capacity_ah = battery.usable_capacity_ah
+      usable_capacity_kwh = get_kWh_from_Ah(usable_capacity_ah, nominal_voltage) # kWh
       usable_fraction = usable_capacity_ah / battery.nominal_capacity_ah
     end
 
@@ -134,7 +135,7 @@ class Battery
 
     loss_adj_object_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     loss_adj_object = OpenStudio::Model::OtherEquipment.new(loss_adj_object_def)
-    obj_name = "#{elcs.name} #{Constants.ObjectNameBatteryLossesAdjustment}"
+    obj_name = Constants.ObjectNameBatteryLossesAdjustment
     loss_adj_object.setName(obj_name)
     loss_adj_object.setEndUseSubcategory(obj_name)
     loss_adj_object.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
@@ -159,13 +160,18 @@ class Battery
     battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     battery_losses_pcm.addProgram(battery_losses_program)
 
+    # FIXME: Shouldn't need this; can use OtherEquipment output var instead
     battery_losses_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'losses')
     battery_losses_output_var.setName("#{obj_name} outvar")
     battery_losses_output_var.setTypeOfDataInVariable('Summed')
     battery_losses_output_var.setUpdateFrequency('SystemTimestep')
     battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
     battery_losses_output_var.setUnits('J')
-    battery_losses_output_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBatteryLossesAdjustment)
+
+    elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
+    elcs.additionalProperties.setFeature('BatteryLosses', battery_losses_output_var.name.to_s)
   end
 
   def self.get_battery_default_values(has_garage = false)

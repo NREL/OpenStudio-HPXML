@@ -1433,7 +1433,7 @@ class HVAC
     # Create Equipment object for fuel consumption
     space = control_zone.spaces[0] # Arbitrary
     fuel_type = heating_system.heating_system_fuel
-    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, "#{boiler.name} #{Constants.ObjectNameBoilerPilotLight}", space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameBoilerPilotLight, space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # Sensor
     boiler_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
