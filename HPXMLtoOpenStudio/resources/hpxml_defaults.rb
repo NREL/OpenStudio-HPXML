@@ -66,6 +66,8 @@ class HPXMLDefaults
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa)
+
+    apply_detailed_performance_data_for_var_speed_systems(hpxml)
   end
 
   def self.get_default_azimuths(hpxml)
@@ -1492,12 +1494,8 @@ class HPXMLDefaults
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump)
-        if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed && heat_pump.heating_detailed_performance_data.empty?
-          HVAC.set_heat_detailed_performance_data(heat_pump)
-        else
-          HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
-          HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
-        end
+        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
+        HVAC.set_heat_rated_eirs(heat_pump) if (!use_eer_cop && heat_pump.compressor_type != HPXML::HVACCompressorTypeVariableSpeed)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         HVAC.set_gshp_assumptions(heat_pump, weather)
@@ -1506,6 +1504,17 @@ class HPXMLDefaults
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
+      end
+    end
+  end
+
+  def self.apply_detailed_performance_data_for_var_speed_systems(hpxml)
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+
+      if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed && heat_pump.heating_detailed_performance_data.empty?
+        HVAC.set_heat_detailed_performance_data(heat_pump)
       end
     end
   end
