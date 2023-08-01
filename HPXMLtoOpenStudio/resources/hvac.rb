@@ -1142,7 +1142,6 @@ class HVAC
     hp_ap = heat_pump.additional_properties
     hp_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(heat_pump.compressor_type, use_eer)
     hp_ap.cool_capacity_ratios = get_cool_capacity_ratios(heat_pump)
-    hp_ap.cool_rated_capacities = hp_ap.cool_capacity_ratios.map { |capacity_ratio| capacity_ratio * heat_pump.cooling_capacity }
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
@@ -1201,7 +1200,6 @@ class HVAC
     hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type)
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
     hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump)
-    hp_ap.heat_rated_capacities = hp_ap.heat_capacity_ratios.map { |capacity_ratio| capacity_ratio * heat_pump.heating_capacity }
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       if not use_cop
         hp_ap.heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)]
@@ -2921,6 +2919,9 @@ class HVAC
     crankcase_heater_temp = 50 # F
     rated_iwb = 67.0
     rated_odb = 95.0
+    if cooling_system.cooling_detailed_performance_data.empty?
+      clg_ap.cool_rated_capacities = clg_ap.cool_capacity_ratios.map { |capacity_ratio| capacity_ratio * cooling_system.cooling_capacity }
+    end
 
     for i in 0..(clg_ap.num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
@@ -3028,6 +3029,10 @@ class HVAC
 
     rated_idb = 60.0
     rated_odb = 47.0
+    if heating_system.heating_detailed_performance_data.empty?
+      htg_ap.heat_rated_capacities = htg_ap.heat_capacity_ratios.map { |capacity_ratio| capacity_ratio * heating_system.heating_capacity }
+    end
+
     for i in 0..(htg_ap.num_speeds - 1)
       if not heating_system.heating_detailed_performance_data.empty?
         data_speed = htg_ap.heating_performance_data_array[i]
