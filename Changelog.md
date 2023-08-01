@@ -9,7 +9,11 @@ __New Features__
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
 - Update to 2022 EIA energy costs.
-- Connect to the [G-Function Library](https://gdr.openei.org/submissions/1325) (in the Geothermal Data Repository) for using precalculated g-function values with GSHP modeling.
+- Ground source heat pump enhancements:
+  - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements
+  - Allow optional inputs related to geothermal loop: loop flow, borehole count/length/spacing/diameter/configuration, grout conductivity, pipe conductivity/diameter/shank spacing.
+  - Allow optional ground diffusivity input for site soil.
+  - Connect to the [G-Function Library](https://gdr.openei.org/submissions/1325) (in the Geothermal Data Repository) for using precalculated g-function values with GSHP modeling.
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
