@@ -1234,7 +1234,7 @@ class HVAC
     min_capacity_maintenance_5 = get_heat_min_capacity_maintainence_5(is_ducted)
     # performance data at 47F, maximum speed
     max_cop_47 = calc_heat_max_cop_47_from_hspf(heat_pump.heating_efficiency_hspf, max_capacity_maintenance_5, is_ducted)
-    max_capacity_47 = heat_pump.heating_capacity
+    max_capacity_47 = calc_heat_max_capacity_47_from_rated(heat_pump.heating_capacity, is_ducted)
     detailed_performance_data.add(capacity: max_capacity_47,
                                   efficiency_cop: max_cop_47,
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
@@ -2296,6 +2296,14 @@ class HVAC
       return 1.106
     else
       return 0.611
+    end
+  end
+  
+  def self.calc_heat_max_capacity_47_from_rated(rated_capacity, is_ducted)
+    if is_ducted
+      return rated_capacity / 0.972
+    else
+      return rated_capacity / 0.812
     end
   end
 
