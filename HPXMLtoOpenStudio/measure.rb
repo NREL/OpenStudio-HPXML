@@ -163,7 +163,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       if hpxml_building_ids.size > 1
-        # Merge unit models into
+        # Merge unit models into final model
         add_unit_model_to_model(model, hpxml_osm_map)
       end
 
@@ -194,45 +194,74 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_unit_model_to_model(model, hpxml_osm_map)
     unit_model_objects = []
-    hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit_number|
+
+    unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
+                       'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
+                       'OS:OutputControl:Files' => 'OutputControlFiles',
+                       'OS:Output:Diagnostics' => 'OutputDiagnostics',
+                       'OS:Output:JSON' => 'OutputJSON',
+                       'OS:PerformancePrecisionTradeoffs' => 'PerformancePrecisionTradeoffs',
+                       'OS:RunPeriod' => 'RunPeriod',
+                       'OS:RunPeriodControl:DaylightSavingTime' => 'RunPeriodControlDaylightSavingTime',
+                       'OS:ShadowCalculation' => 'ShadowCalculation',
+                       'OS:SimulationControl' => 'SimulationControl',
+                       'OS:Site' => 'Site',
+                       'OS:Site:GroundTemperature:Deep' => 'SiteGroundTemperatureDeep',
+                       'OS:Site:GroundTemperature:Shallow' => 'SiteGroundTemperatureShallow',
+                       'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
+                       'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
+                       'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
+                       'OS:Timestep' => 'Timestep' }
+
+    # Handle unique objects first: Grab one from the first model we find the
+    # object on (may not be the first unit).
+    # FIXME: Need to throw a warning/error if different values between the model
+    # object and unit_model object.
+    unique_objects.each do |idd_obj, osm_class|
+      hpxml_osm_map.values.each do |unit_model|
+        next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
+
+        unit_model_objects << unit_model.send("get#{osm_class}")
+        break
+      end
+    end
+
+    hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
       shift_geometry(unit_model, unit_number)
 
-      # prefix all objects with name using unit number
+      # Prefix all objects with name using unit number
       # FUTURE: Create objects with unique names up front so we don't have to do this
       prefix_all_unit_model_objects(unit_model, unit_number)
-
-      if unit_number > 0
-        # Skip these unique objects for subsequent units
-        # FIXME: Need to throw a warning/error if different values
-        # between the model object and unit_model object.
-        unit_model.getConvergenceLimits.remove
-        unit_model.getOutputDiagnostics.remove
-        unit_model.getRunPeriodControlDaylightSavingTime.remove
-        unit_model.getShadowCalculation.remove
-        unit_model.getSimulationControl.remove
-        unit_model.getSiteGroundTemperatureDeep.remove
-        unit_model.getSiteGroundTemperatureShallow.remove
-        unit_model.getSite.remove
-        unit_model.getSiteWaterMainsTemperature.remove
-        unit_model.getInsideSurfaceConvectionAlgorithm.remove
-        unit_model.getOutsideSurfaceConvectionAlgorithm.remove
-        unit_model.getTimestep.remove
-        unit_model.getFoundationKivaSettings.remove
-        unit_model.getOutputJSON.remove
-        unit_model.getOutputControlFiles.remove
-        unit_model.getPerformancePrecisionTradeoffs.remove
-        unit_model.getSiteWaterMainsTemperature.remove
-        # FIXME: Remove unused/duplicate schedules; maybe unused schedules will
-        # be correctly removed when the meta_measure.rb code is uncommented?
-      end
 
       unit_model.objects.each do |obj|
         next if unit_number > 0 && obj.to_Building.is_initialized
 
+        # Skip unique objects
+        is_unique = false
+        unique_objects.values.each do |osm_class|
+          next unless obj.send("to_#{osm_class}").is_initialized
+
+          is_unique = true
+          break
+        end
+        next if is_unique
+
         unit_model_objects << obj
       end
     end
+
     model.addObjects(unit_model_objects, true)
+
+    # Remove duplicate lengthy tmains schedules
+    # FIXME: Develop a generic way to remove unused/duplicate schedules; maybe unused
+    # schedules will be correctly removed when the meta_measure.rb code is uncommented?
+    preserve_sched_name = model.getSiteWaterMainsTemperature.temperatureSchedule.get.name.to_s
+    model.getScheduleIntervals.each do |sched|
+      next unless sched.name.to_s.include? 'mains_temperature_schedule'
+      next if sched.name.to_s == preserve_sched_name
+
+      sched.remove
+    end
   end
 
   def shift_geometry(unit_model, unit_number)

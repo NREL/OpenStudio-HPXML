@@ -4207,7 +4207,7 @@ class HVAC
       htg_sys.heating_capacity *= unit_multiplier
       htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
-      # FIXME: electric_auxiliary_energy?
+      htg_sys.electric_auxiliary_energy *= unit_multiplier unless htg_sys.electric_auxiliary_energy.nil?
       # FIXME: fan_coil_watts?
       # FIXME: shared_loop_watts?
       # FIXME: fan_watts?
