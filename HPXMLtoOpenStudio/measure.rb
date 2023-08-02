@@ -101,20 +101,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       output_dir = File.expand_path(output_dir)
     end
 
-    hpxml_building_ids = []
-    if building_id.is_initialized
-      building_id = building_id.get
-      if building_id == 'ALL'
-        XMLHelper.get_elements(XMLHelper.parse_file(hpxml_path), '/HPXML/Building').each do |hpxml_bldg|
-          hpxml_building_ids << XMLHelper.get_attribute_value(XMLHelper.get_element(hpxml_bldg, 'BuildingID'), 'id')
-        end
-      else
-        hpxml_building_ids = [building_id]
-      end
-    else
-      hpxml_building_ids = [nil]
-    end
-
     begin
       if skip_validation
         schema_validator = nil
@@ -126,43 +112,36 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
       end
 
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: building_id)
+      hpxml.errors.each do |error|
+        runner.registerError(error)
+      end
+      hpxml.warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+      return false unless hpxml.errors.empty?
+
       epw_path, weather = nil, nil
       hpxml_osm_map = {}
 
-      hpxml_building_ids.each_with_index do |hpxml_building_id, i|
-        if i > 0
-          # Only need to check the HPXML schema once.
-          # FUTURE: When running entire MF building, only call Schematron validation once
-          # for runtime performance; currently we perform Schematron validation for each
-          # HPXML Building one at a time.
-          schema_validator = nil
-        end
-        hpxml = HPXML.new(hpxml_path: hpxml_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: hpxml_building_id)
-        hpxml.errors.each do |error|
-          runner.registerError(error)
-        end
-        hpxml.warnings.each do |warning|
-          runner.registerWarning(warning)
-        end
-        return false unless hpxml.errors.empty?
-
+      hpxml.buildings.each_with_index do |hpxml_bldg, _i|
         if epw_path.nil?
-          epw_path = Location.get_epw_path(hpxml, hpxml_path)
+          epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
           weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
         end
 
-        if hpxml_building_ids.size > 1
+        if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
-          hpxml_osm_map[hpxml] = unit_model
+          create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
-          hpxml_osm_map[hpxml] = model
+          create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          hpxml_osm_map[hpxml_bldg] = model
         end
       end
 
-      if hpxml_building_ids.size > 1
+      if hpxml.buildings.size > 1
         # Merge unit models into final model
         add_unit_model_to_model(model, hpxml_osm_map)
       end
@@ -366,15 +345,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  def create_unit_model(hpxml, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
-    @hpxml = hpxml
+  def create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+    @hpxml_header = hpxml.header
+    @hpxml_bldg = hpxml_bldg
     @debug = debug
 
-    @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
+    @eri_version = @hpxml_header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
-    @apply_ashrae140_assumptions = @hpxml.header.apply_ashrae140_assumptions # Hidden feature
+    @apply_ashrae140_assumptions = @hpxml_header.apply_ashrae140_assumptions # Hidden feature
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Here we turn off OS error-checking so that any invalid values provided
@@ -389,13 +369,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     check_file_references(hpxml_path)
     epw_file = Location.apply_weather_file(model, epw_path)
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml.header.schedules_filepaths,
-                                        year: Location.get_sim_calendar_year(@hpxml.header.sim_calendar_year, epw_file),
-                                        unavailable_periods: @hpxml.header.unavailable_periods,
+                                        schedules_paths: @hpxml_header.schedules_filepaths,
+                                        year: Location.get_sim_calendar_year(@hpxml_header.sim_calendar_year, epw_file),
+                                        unavailable_periods: @hpxml_header.unavailable_periods,
                                         output_path: File.join(output_dir, 'in.schedules.csv'))
-    set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
+    set_defaults_and_globals(runner, hpxml, output_dir, epw_file, weather, @schedules_file)
     validate_emissions_files()
-    Location.apply(model, weather, epw_file, @hpxml)
+    # FIXME: Need to address this
+    Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
 
     # Conditioned space/zone
@@ -416,12 +397,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_skylights(model, spaces)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
-    Geometry.set_zone_volumes(spaces, @hpxml, @apply_ashrae140_assumptions)
-    Geometry.explode_surfaces(model, @hpxml, @walls_top)
+    Geometry.set_zone_volumes(spaces, @hpxml_bldg, @apply_ashrae140_assumptions)
+    Geometry.explode_surfaces(model, @hpxml_bldg, @walls_top)
     add_num_occupants(model, runner, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnHVAC, @hpxml.header.unavailable_periods)
+    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnHVAC, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, spaces, airloop_map)
@@ -447,19 +428,20 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(runner, model, spaces)
+    # FIXME: Need to address add_additional_properties
     add_additional_properties(model, hpxml_path, building_id, epw_file)
   end
 
   def check_file_references(hpxml_path)
     # Check/update file references
-    @hpxml.header.schedules_filepaths = @hpxml.header.schedules_filepaths.collect { |sfp|
+    @hpxml_header.schedules_filepaths = @hpxml_header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(hpxml_path),
                           'Schedules')
     }
 
-    @hpxml.header.emissions_scenarios.each do |scenario|
-      if @hpxml.header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
+    @hpxml_header.emissions_scenarios.each do |scenario|
+      if @hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
         fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
       end
       next if scenario.elec_schedule_filepath.nil?
@@ -471,7 +453,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_emissions_files()
-    @hpxml.header.emissions_scenarios.each do |scenario|
+    @hpxml_header.emissions_scenarios.each do |scenario|
       next if scenario.elec_schedule_filepath.nil?
 
       data = File.readlines(scenario.elec_schedule_filepath)
@@ -487,77 +469,79 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
+  def set_defaults_and_globals(runner, hpxml, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
 
     # Set globals
-    @cfa = @hpxml.building_construction.conditioned_floor_area
-    @ncfl = @hpxml.building_construction.number_of_conditioned_floors
-    @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
-    @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
+    @cfa = @hpxml_bldg.building_construction.conditioned_floor_area
+    @ncfl = @hpxml_bldg.building_construction.number_of_conditioned_floors
+    @ncfl_ag = @hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+    @nbeds = @hpxml_bldg.building_construction.number_of_bedrooms
+    @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml_bldg)
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(runner, @hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
+    HPXMLDefaults.apply(runner, hpxml, @hpxml_bldg, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
     # Write updated HPXML object (w/ defaults) to file for inspection
+    # FIXME: Need to address this
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
-    XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
+    XMLHelper.write_file(hpxml.to_hpxml, @hpxml_defaults_path)
 
     # Now that we've written in.xml...
     # 1. ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
-    HVAC.ensure_nonzero_sizing_values(@hpxml)
+    HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # 2. apply unit multipliers to HVAC systems and water heaters
-    HVAC.apply_unit_multiplier(@hpxml)
+    HVAC.apply_unit_multiplier(@hpxml_bldg)
     # 3. make adjustments for modeling purposes
-    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
-    @hpxml.collapse_enclosure_surfaces() # Speeds up simulation
-    @hpxml.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
+    @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
+    @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
+    @hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
     # We don't want this to be written to in.xml, because then if you ran the in.xml
     # file, you would get different results (operational calculation) relative to the
     # original file (asset calculation).
-    if @hpxml.building_occupancy.number_of_residents.nil?
-      @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
+    if @hpxml_bldg.building_occupancy.number_of_residents.nil?
+      @hpxml_bldg.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
     end
 
     # If zero occupants, ensure end uses of interest are zeroed out
-    if (@hpxml.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
-      @hpxml.header.unavailable_periods.add(column_name: 'Vacancy',
-                                            begin_month: @hpxml.header.sim_begin_month,
-                                            begin_day: @hpxml.header.sim_begin_day,
+    if (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
+      @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
+                                            begin_month: @hpxml_header.sim_begin_month,
+                                            begin_day: @hpxml_header.sim_begin_day,
                                             begin_hour: 0,
-                                            end_month: @hpxml.header.sim_end_month,
-                                            end_day: @hpxml.header.sim_end_day,
+                                            end_month: @hpxml_header.sim_end_month,
+                                            end_day: @hpxml_header.sim_end_day,
                                             end_hour: 24,
                                             natvent_availability: HPXML::ScheduleUnavailable)
     end
   end
 
   def add_simulation_params(model)
-    SimControls.apply(model, @hpxml)
+    # FIXME: Address this
+    SimControls.apply(model, @hpxml_header, @hpxml_bldg)
   end
 
   def add_num_occupants(model, runner, spaces)
     # Occupants
-    num_occ = @hpxml.building_occupancy.number_of_residents
+    num_occ = @hpxml_bldg.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, runner, @hpxml, num_occ, spaces[HPXML::LocationLivingSpace],
-                             @schedules_file, @hpxml.header.unavailable_periods)
+    Geometry.apply_occupants(model, runner, @hpxml_bldg, num_occ, spaces[HPXML::LocationLivingSpace],
+                             @schedules_file, @hpxml_header.unavailable_periods)
   end
 
   def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, @hpxml.building_construction.number_of_units)
+      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units)
     end
     return spaces[location]
   end
 
   def add_roofs(runner, model, spaces)
-    @hpxml.roofs.each do |roof|
+    @hpxml_bldg.roofs.each do |roof|
       next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if roof.azimuth.nil?
@@ -669,7 +653,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_walls(runner, model, spaces)
-    @hpxml.walls.each do |wall|
+    @hpxml_bldg.walls.each do |wall|
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
@@ -737,7 +721,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_rim_joists(runner, model, spaces)
-    @hpxml.rim_joists.each do |rim_joist|
+    @hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -809,7 +793,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_floors(runner, model, spaces)
-    @hpxml.floors.each do |floor|
+    @hpxml_bldg.floors.each do |floor|
       area = floor.area
       width = Math::sqrt(area)
       length = area / width
@@ -838,7 +822,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       elsif floor.is_floor
         surface.setSunExposure('NoSun')
         if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
-          foundation = @hpxml.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
+          foundation = @hpxml_bldg.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
           if foundation.belly_wing_skirt_present
             surface.setWindExposure('NoWind')
           end
@@ -883,12 +867,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_foundation_walls_slabs(runner, model, weather, spaces)
-    foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
+    foundation_types = @hpxml_bldg.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
       # Get attached slabs/foundation walls
       slabs = []
-      @hpxml.slabs.each do |slab|
+      @hpxml_bldg.slabs.each do |slab|
         next unless slab.interior_adjacent_to == foundation_type
 
         slabs << slab
@@ -935,7 +919,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
-      int_fnd_walls = @hpxml.foundation_walls.select { |fw| fw.is_interior && fw.interior_adjacent_to == foundation_type }
+      int_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.is_interior && fw.interior_adjacent_to == foundation_type }
       int_fnd_walls.each do |fnd_wall|
         next unless fnd_wall.is_interior
 
@@ -1054,7 +1038,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
-    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+    soil_k_in = UnitConversions.convert(@hpxml_bldg.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
@@ -1122,7 +1106,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       mat_carpet = Material.CoveringBare(slab.carpet_fraction,
                                          slab.carpet_r_value)
     end
-    soil_k_in = UnitConversions.convert(@hpxml.site.ground_conductivity, 'ft', 'in')
+    soil_k_in = UnitConversions.convert(@hpxml_bldg.site.ground_conductivity, 'ft', 'in')
 
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
@@ -1133,7 +1117,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     foundation_walls_insulated = false
     foundation_ceiling_insulated = false
-    @hpxml.foundation_walls.each do |fnd_wall|
+    @hpxml_bldg.foundation_walls.each do |fnd_wall|
       next unless fnd_wall.interior_adjacent_to == slab.interior_adjacent_to
       next unless fnd_wall.exterior_adjacent_to == HPXML::LocationGround
 
@@ -1143,7 +1127,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         foundation_walls_insulated = true
       end
     end
-    @hpxml.floors.each do |floor|
+    @hpxml_bldg.floors.each do |floor|
       next unless floor.interior_adjacent_to == HPXML::LocationLivingSpace
       next unless floor.exterior_adjacent_to == slab.interior_adjacent_to
 
@@ -1154,8 +1138,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     Constructions.apply_kiva_initial_temp(kiva_foundation, slab, weather,
                                           spaces[HPXML::LocationLivingSpace].thermalZone.get,
-                                          @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day,
-                                          @hpxml.header.sim_calendar_year, @schedules_file,
+                                          @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day,
+                                          @hpxml_header.sim_calendar_year, @schedules_file,
                                           foundation_walls_insulated, foundation_ceiling_insulated)
 
     return kiva_foundation
@@ -1167,14 +1151,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # This ensures that the E+ reported Conditioned Floor Area is correct.
 
     sum_cfa = 0.0
-    @hpxml.floors.each do |floor|
+    @hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
       next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(floor.interior_adjacent_to) ||
                   [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(floor.exterior_adjacent_to)
 
       sum_cfa += floor.area
     end
-    @hpxml.slabs.each do |slab|
+    @hpxml_bldg.slabs.each do |slab|
       next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? slab.interior_adjacent_to
 
       sum_cfa += slab.area
@@ -1227,11 +1211,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
     else
-      mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
-      partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
+      mat_int_finish = Material.InteriorFinishMaterial(@hpxml_bldg.partition_wall_mass.interior_finish_type, @hpxml_bldg.partition_wall_mass.interior_finish_thickness)
+      partition_wall_area = @hpxml_bldg.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area, spaces)
 
-      Constructions.apply_furniture(model, @hpxml.furniture_mass, spaces)
+      Constructions.apply_furniture(model, @hpxml_bldg.furniture_mass, spaces)
     end
   end
 
@@ -1252,17 +1236,17 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # fraction_operable properties from windows and re-collapse the enclosure
     # so as to prevent potentially modeling multiple identical windows in E+,
     # which can increase simulation runtime.
-    @hpxml.windows.each do |window|
+    @hpxml_bldg.windows.each do |window|
       window.fraction_operable = nil
     end
-    @hpxml.collapse_enclosure_surfaces()
+    @hpxml_bldg.collapse_enclosure_surfaces()
 
     shading_group = nil
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }
 
     surfaces = []
-    @hpxml.windows.each_with_index do |window, i|
+    @hpxml_bldg.windows.each_with_index do |window, i|
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1312,7 +1296,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
         shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @hpxml)
+                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @hpxml_header)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1356,7 +1340,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }
 
-    @hpxml.skylights.each_with_index do |skylight, i|
+    @hpxml_bldg.skylights.each_with_index do |skylight, i|
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
@@ -1390,7 +1374,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
       shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @hpxml)
+                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @hpxml_header)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')
@@ -1398,7 +1382,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_doors(model, spaces)
     surfaces = []
-    @hpxml.doors.each do |door|
+    @hpxml_bldg.doors.each do |door|
       door_height = 6.67 # ft
       door_length = door.area / door_height
       z_origin = @foundation_top
@@ -1465,42 +1449,42 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
-    @hpxml.clothes_washers.each do |clothes_washer|
+    @hpxml_bldg.clothes_washers.each do |clothes_washer|
       clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
     end
-    @hpxml.clothes_dryers.each do |clothes_dryer|
+    @hpxml_bldg.clothes_dryers.each do |clothes_dryer|
       clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, spaces)
     end
-    @hpxml.dishwashers.each do |dishwasher|
+    @hpxml_bldg.dishwashers.each do |dishwasher|
       dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
     end
-    @hpxml.refrigerators.each do |refrigerator|
+    @hpxml_bldg.refrigerators.each do |refrigerator|
       refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, spaces)
     end
-    @hpxml.freezers.each do |freezer|
+    @hpxml_bldg.freezers.each do |freezer|
       freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
     end
-    @hpxml.cooking_ranges.each do |cooking_range|
+    @hpxml_bldg.cooking_ranges.each do |cooking_range|
       cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
     end
 
     # Distribution
-    if @hpxml.water_heating_systems.size > 0
-      hot_water_distribution = @hpxml.hot_water_distributions[0]
+    if @hpxml_bldg.water_heating_systems.size > 0
+      hot_water_distribution = @hpxml_bldg.hot_water_distributions[0]
     end
 
     # Solar thermal system
     solar_thermal_system = nil
-    if @hpxml.solar_thermal_systems.size > 0
-      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+    if @hpxml_bldg.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml_bldg.solar_thermal_systems[0]
     end
 
     # Water Heater
-    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml.header.unavailable_periods)
-    unit_multiplier = @hpxml.building_construction.number_of_units
-    has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
+    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml_header.unavailable_periods)
+    unit_multiplier = @hpxml_bldg.building_construction.number_of_units
+    has_uncond_bsmnt = @hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
-    @hpxml.water_heating_systems.each do |water_heating_system|
+    @hpxml_bldg.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
 
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
@@ -1521,9 +1505,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Hot water fixtures and appliances
-    HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
+    HotWaterAndAppliances.apply(model, runner, @hpxml_header, @hpxml_bldg, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
+                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1531,13 +1515,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Add combi-system EMS program with water use equipment information
-    Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
+    Waterheater.apply_combi_system_EMS(model, @hpxml_bldg.water_heating_systems, plantloop_map)
   end
 
   def add_cooling_system(model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+    HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
       next if hvac_system[:cooling].nil?
       next unless hvac_system[:cooling].is_a? HPXML::CoolingSystem
 
@@ -1582,7 +1566,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_heating_system(runner, model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+    HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
       next if hvac_system[:heating].nil?
       next unless hvac_system[:heating].is_a? HPXML::HeatingSystem
 
@@ -1618,7 +1602,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, living_zone,
-                                                @hvac_unavailable_periods, @hpxml.building_construction.number_of_units)
+                                                @hvac_unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
@@ -1646,7 +1630,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_heat_pump(runner, model, weather, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+    HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
       next if hvac_system[:cooling].nil?
       next unless hvac_system[:cooling].is_a? HPXML::HeatPump
 
@@ -1680,7 +1664,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 living_zone, @hpxml.site.ground_conductivity, @hvac_unavailable_periods)
+                                                                 living_zone, @hpxml_bldg.site.ground_conductivity, @hvac_unavailable_periods)
 
       end
 
@@ -1700,7 +1684,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # 2. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    if @apply_ashrae140_assumptions && (@hpxml.total_fraction_heat_load_served + @hpxml.total_fraction_heat_load_served == 0.0)
+    if @apply_ashrae140_assumptions && (@hpxml_bldg.total_fraction_heat_load_served + @hpxml_bldg.total_fraction_heat_load_served == 0.0)
       cooling_load_frac = 1.0
       heating_load_frac = 1.0
       if @apply_ashrae140_assumptions
@@ -1717,16 +1701,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return
     end
 
-    if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
-      @remaining_heat_load_frac -= (1.0 - @hpxml.total_fraction_heat_load_served)
+    if (@hpxml_bldg.total_fraction_heat_load_served < 1.0) && (@hpxml_bldg.total_fraction_heat_load_served > 0.0)
+      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_heat_load_frac - @hpxml_bldg.total_fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+      @remaining_heat_load_frac -= (1.0 - @hpxml_bldg.total_fraction_heat_load_served)
     else
       sequential_heat_load_fracs = [0.0]
     end
 
-    if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-      sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served, @remaining_cool_load_frac, @cooling_days)
-      @remaining_cool_load_frac -= (1.0 - @hpxml.total_fraction_cool_load_served)
+    if (@hpxml_bldg.total_fraction_cool_load_served < 1.0) && (@hpxml_bldg.total_fraction_cool_load_served > 0.0)
+      sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(@remaining_cool_load_frac - @hpxml_bldg.total_fraction_cool_load_served, @remaining_cool_load_frac, @cooling_days)
+      @remaining_cool_load_frac -= (1.0 - @hpxml_bldg.total_fraction_cool_load_served)
     else
       sequential_cool_load_fracs = [0.0]
     end
@@ -1738,27 +1722,27 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_setpoints(runner, model, weather, spaces)
-    return if @hpxml.hvac_controls.size == 0
+    return if @hpxml_bldg.hvac_controls.size == 0
 
-    hvac_control = @hpxml.hvac_controls[0]
+    hvac_control = @hpxml_bldg.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-    has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
+    has_ceiling_fan = (@hpxml_bldg.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml.header.sim_calendar_year, @schedules_file)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml_header.sim_calendar_year, @schedules_file)
   end
 
   def add_ceiling_fans(runner, model, weather, spaces)
-    return if @hpxml.ceiling_fans.size == 0
+    return if @hpxml_bldg.ceiling_fans.size == 0
 
-    ceiling_fan = @hpxml.ceiling_fans[0]
+    ceiling_fan = @hpxml_bldg.ceiling_fans[0]
     HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace],
-                            @schedules_file, @hpxml.header.unavailable_periods)
+                            @schedules_file, @hpxml_header.unavailable_periods)
   end
 
   def add_dehumidifiers(runner, model, spaces)
-    return if @hpxml.dehumidifiers.size == 0
+    return if @hpxml_bldg.dehumidifiers.size == 0
 
-    HVAC.apply_dehumidifiers(runner, model, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml.header.unavailable_periods)
+    HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml_header.unavailable_periods)
   end
 
   def check_distribution_system(hvac_distribution, system_type)
@@ -1781,7 +1765,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_mels(runner, model, spaces)
     # Misc
-    @hpxml.plug_loads.each do |plug_load|
+    @hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         obj_name = Constants.ObjectNameMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
@@ -1797,13 +1781,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions,
-                           @schedules_file, @hpxml.header.unavailable_periods)
+                           @schedules_file, @hpxml_header.unavailable_periods)
     end
   end
 
   def add_mfls(runner, model, spaces)
     # Misc
-    @hpxml.fuel_loads.each do |fuel_load|
+    @hpxml_bldg.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
         obj_name = Constants.ObjectNameMiscGrill
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
@@ -1817,43 +1801,43 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       MiscLoads.apply_fuel(model, runner, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace],
-                           @schedules_file, @hpxml.header.unavailable_periods)
+                           @schedules_file, @hpxml_header.unavailable_periods)
     end
   end
 
   def add_lighting(runner, model, epw_file, spaces)
-    Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups, @hpxml.lighting, @eri_version,
-                   @schedules_file, @cfa, @hpxml.header.unavailable_periods, @hpxml.building_construction.number_of_units)
+    Lighting.apply(runner, model, epw_file, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
+                   @schedules_file, @cfa, @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
   end
 
   def add_pools_and_hot_tubs(runner, model, spaces)
-    @hpxml.pools.each do |pool|
+    @hpxml_bldg.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(runner, model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace],
-                                             @schedules_file, @hpxml.header.unavailable_periods)
+                                             @schedules_file, @hpxml_header.unavailable_periods)
       next if pool.pump_type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_pump(runner, model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace],
-                                           @schedules_file, @hpxml.header.unavailable_periods)
+                                           @schedules_file, @hpxml_header.unavailable_periods)
     end
 
-    @hpxml.hot_tubs.each do |hot_tub|
+    @hpxml_bldg.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(runner, model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace],
-                                             @schedules_file, @hpxml.header.unavailable_periods)
+                                             @schedules_file, @hpxml_header.unavailable_periods)
       next if hot_tub.pump_type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_pump(runner, model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace],
-                                           @schedules_file, @hpxml.header.unavailable_periods)
+                                           @schedules_file, @hpxml_header.unavailable_periods)
     end
   end
 
   def add_airflow(runner, model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
-    @hpxml.hvac_distributions.each do |hvac_distribution|
+    @hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       air_ducts = create_ducts(model, hvac_distribution, spaces)
@@ -1883,7 +1867,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Duct leakage to outside warnings?
     # Need to check here instead of in schematron in case duct locations are defaulted
-    @hpxml.hvac_distributions.each do |hvac_distribution|
+    @hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.duct_leakage_measurements.empty?
 
@@ -1918,10 +1902,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants.ObjectNameHVACAvailabilitySensor)
     end
 
-    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
+    Airflow.apply(model, runner, weather, spaces, @hpxml_header, @hpxml_bldg, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file,
-                  @hpxml.header.unavailable_periods, hvac_availability_sensor)
+                  @hpxml_header.unavailable_periods, hvac_availability_sensor)
   end
 
   def create_ducts(model, hvac_distribution, spaces)
@@ -2004,27 +1988,27 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_photovoltaics(model)
-    @hpxml.pv_systems.each do |pv_system|
-      next if pv_system.inverter.inverter_efficiency == @hpxml.pv_systems[0].inverter.inverter_efficiency
+    @hpxml_bldg.pv_systems.each do |pv_system|
+      next if pv_system.inverter.inverter_efficiency == @hpxml_bldg.pv_systems[0].inverter.inverter_efficiency
 
       fail 'Expected all InverterEfficiency values to be equal.'
     end
-    @hpxml.pv_systems.each do |pv_system|
+    @hpxml_bldg.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
     end
   end
 
   def add_generators(model)
-    @hpxml.generators.each do |generator|
+    @hpxml_bldg.generators.each do |generator|
       Generator.apply(model, @nbeds, generator)
     end
   end
 
   def add_batteries(runner, model, spaces)
-    @hpxml.batteries.each do |battery|
+    @hpxml_bldg.batteries.each do |battery|
       # Assign space
       battery.additional_properties.space = get_space_from_location(battery.location, spaces)
-      Battery.apply(runner, model, @hpxml.pv_systems, battery, @schedules_file)
+      Battery.apply(runner, model, @hpxml_bldg.pv_systems, battery, @schedules_file)
     end
   end
 
@@ -2034,12 +2018,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
-    emissions_scenario_names = @hpxml.header.emissions_scenarios.map { |s| s.name }.to_s
+    emissions_scenario_names = @hpxml_header.emissions_scenarios.map { |s| s.name }.to_s
     additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
-    emissions_scenario_types = @hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s
+    emissions_scenario_types = @hpxml_header.emissions_scenarios.map { |s| s.emissions_type }.to_s
     additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
-    additionalProperties.setFeature('has_heating', @hpxml.total_fraction_heat_load_served > 0)
-    additionalProperties.setFeature('has_cooling', @hpxml.total_fraction_cool_load_served > 0)
+    additionalProperties.setFeature('has_heating', @hpxml_bldg.total_fraction_heat_load_served > 0)
+    additionalProperties.setFeature('has_cooling', @hpxml_bldg.total_fraction_cool_load_served > 0)
     additionalProperties.setFeature('is_southern_hemisphere', epw_file.latitude < 0)
   end
 
@@ -2052,7 +2036,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     htg_sensors, clg_sensors = {}, {}
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     htg_start_days, htg_end_days, clg_start_days, clg_end_days = {}, {}, {}, {}
-    hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
+    hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
 
       # EMS sensors
@@ -2064,13 +2048,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       clg_sensors[unit].setName('zone clg unmet s')
       clg_sensors[unit].setKeyName(living_zone_name)
 
-      total_heat_load_serveds[unit] = hpxml.total_fraction_heat_load_served
-      total_cool_load_serveds[unit] = hpxml.total_fraction_cool_load_served
+      total_heat_load_serveds[unit] = hpxml_bldg.total_fraction_heat_load_served
+      total_cool_load_serveds[unit] = hpxml_bldg.total_fraction_cool_load_served
 
-      hvac_control = hpxml.hvac_controls[0]
+      hvac_control = hpxml_bldg.hvac_controls[0]
       next unless not hvac_control.nil?
 
-      sim_year = hpxml.header.sim_calendar_year
+      sim_year = @hpxml_header.sim_calendar_year
       htg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
       htg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
       clg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
@@ -2137,7 +2121,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     dehumidifier_sensors = {}
 
-    hpxml_osm_map.each_with_index do |(hpxml, unit_model), unit|
+    hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       # Retrieve objects
       living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
       duct_zone_names = unit_model.getThermalZones.select { |z| z.isPlenum }.map { |z| z.name.to_s }
@@ -2145,12 +2129,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       dehumidifier_name = dehumidifier[0].name.to_s unless dehumidifier.empty?
 
       # Fraction heat/cool load served
-      if hpxml.header.apply_ashrae140_assumptions
+      if @hpxml_header.apply_ashrae140_assumptions
         total_heat_load_serveds[unit] = 1.0
         total_cool_load_serveds[unit] = 1.0
       else
-        total_heat_load_serveds[unit] = hpxml.total_fraction_heat_load_served
-        total_cool_load_serveds[unit] = hpxml.total_fraction_cool_load_served
+        total_heat_load_serveds[unit] = hpxml_bldg.total_fraction_heat_load_served
+        total_cool_load_serveds[unit] = hpxml_bldg.total_fraction_cool_load_served
       end
 
       # Energy transferred in conditioned zone, used for determining heating (winter) vs cooling (summer)
@@ -2246,7 +2230,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    hpxml_osm_map.each_with_index do |(_hpxml, unit_model), unit|
+    hpxml_osm_map.values.each_with_index do |unit_model, unit|
       living_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }
 
       # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
@@ -2589,7 +2573,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("  Set htg_mode = #{total_heat_load_serveds[unit]}")
       program.addLine('EndIf')
 
-      unit_multiplier = @hpxml.building_construction.number_of_units
+      unit_multiplier = @hpxml_bldg.building_construction.number_of_units
       [:htg, :clg].each do |mode|
         if mode == :htg
           sign = ''
@@ -2828,23 +2812,23 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def set_foundation_and_walls_top()
     @foundation_top = 0
-    @hpxml.floors.each do |floor|
+    @hpxml_bldg.floors.each do |floor|
       # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
       if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
         @foundation_top = 2.0
       end
     end
-    @hpxml.foundation_walls.each do |foundation_wall|
+    @hpxml_bldg.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       @foundation_top = top if top > @foundation_top
     end
-    @walls_top = @foundation_top + @hpxml.building_construction.average_ceiling_height * @ncfl_ag
+    @walls_top = @foundation_top + @hpxml_bldg.building_construction.average_ceiling_height * @ncfl_ag
   end
 
   def set_heating_and_cooling_seasons()
-    return if @hpxml.hvac_controls.size == 0
+    return if @hpxml_bldg.hvac_controls.size == 0
 
-    hvac_control = @hpxml.hvac_controls[0]
+    hvac_control = @hpxml_bldg.hvac_controls[0]
 
     htg_start_month = hvac_control.seasons_heating_begin_month
     htg_start_day = hvac_control.seasons_heating_begin_day
@@ -2855,8 +2839,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    @heating_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    @heating_days = Schedule.get_daily_season(@hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = Schedule.get_daily_season(@hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
   end
 end
 

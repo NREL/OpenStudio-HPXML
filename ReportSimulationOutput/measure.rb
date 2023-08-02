@@ -564,7 +564,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
+
+    # FIXME: Relax this constraint (using a new building_id measure argument?)
+    if hpxml.buildings.size > 1
+      runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
+      return false
+    end
+    @hpxml_header = hpxml.header
+    @hpxml_bldg = hpxml.buildings[0]
 
     setup_outputs(false, args[:user_output_variables])
 
@@ -595,7 +603,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if args[:timeseries_frequency] != 'none'
-      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml, args)
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml_header, args)
     end
 
     # Retrieve outputs
@@ -612,24 +620,24 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timestamps(msgpackData, hpxml, args)
+  def get_timestamps(msgpackData, hpxml_header, args)
     return if msgpackData.nil?
 
     ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
 
     if args[:add_timeseries_dst_column] || args[:use_dview_format]
-      dst_start_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_begin_month, hpxml.header.dst_begin_day, 2)
-      dst_end_ts = Time.utc(hpxml.header.sim_calendar_year, hpxml.header.dst_end_month, hpxml.header.dst_end_day, 1)
+      dst_start_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_header.dst_begin_month, hpxml_header.dst_begin_day, 2)
+      dst_end_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_header.dst_end_month, hpxml_header.dst_end_day, 1)
     end
     if args[:add_timeseries_utc_column]
-      utc_offset = hpxml.header.time_zone_utc_offset
+      utc_offset = hpxml_header.time_zone_utc_offset
       utc_offset *= 3600 # seconds
     end
 
     timestamps = []
     timestamps_dst = [] if args[:add_timeseries_dst_column] || args[:use_dview_format]
     timestamps_utc = [] if args[:add_timeseries_utc_column]
-    year = hpxml.header.sim_calendar_year
+    year = hpxml_header.sim_calendar_year
     ep_timestamps.each do |ep_timestamp|
       month_day, hour_minute = ep_timestamp.split(' ')
       month, day = month_day.split('/').map(&:to_i)
@@ -638,7 +646,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
       if args[:timeseries_timestamp_convention] == 'start'
         if args[:timeseries_frequency] == 'timestep'
-          ts_offset = hpxml.header.timestep * 60 # seconds
+          ts_offset = hpxml_header.timestep * 60 # seconds
         elsif args[:timeseries_frequency] == 'hourly'
           ts_offset = 60 * 60 # seconds
         elsif args[:timeseries_frequency] == 'daily'
@@ -678,16 +686,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
     elsif timeseries_frequency == 'monthly'
       n_days_per_month = Constants.NumDaysInMonths(year)
-      n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
-      n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
-      n_days_per_period[-1] = @hpxml.header.sim_end_day
+      n_days_per_period = n_days_per_month[@hpxml_header.sim_begin_month - 1..@hpxml_header.sim_end_month - 1]
+      n_days_per_period[0] -= @hpxml_header.sim_begin_day - 1
+      n_days_per_period[-1] = @hpxml_header.sim_end_day
       n_hours_per_period = n_days_per_period.map { |x| x * 24 }
     end
     return n_hours_per_period
   end
 
   def rollup_timeseries_output_to_daily_or_monthly(timeseries_output, timeseries_frequency, average = false)
-    year = @hpxml.header.sim_calendar_year
+    year = @hpxml_header.sim_calendar_year
     sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
     n_hours_per_period = get_n_hours_per_period(timeseries_frequency, sim_start_day_of_year, sim_end_day_of_year, year)
     fail 'Unexpected failure for n_hours_per_period calculations.' if n_hours_per_period.sum != timeseries_output.size
@@ -862,7 +870,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Apply Heating/Cooling DSEs
-    (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
+    (@hpxml_bldg.heating_systems + @hpxml_bldg.heat_pumps).each do |htg_system|
       next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
       next if htg_system.distribution_system_idref.nil?
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
@@ -880,7 +888,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
-    (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
+    (@hpxml_bldg.cooling_systems + @hpxml_bldg.heat_pumps).each do |clg_system|
       next unless clg_system.fraction_cool_load_served > 0
       next if clg_system.distribution_system_idref.nil?
       next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
@@ -899,7 +907,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Apply solar fraction to load for simple solar water heating systems
-    @hpxml.solar_thermal_systems.each do |solar_system|
+    @hpxml_bldg.solar_thermal_systems.each do |solar_system|
       next if solar_system.solar_fraction.nil?
 
       @loads[LT::HotWaterSolarThermal].annual_output = 0.0 if @loads[LT::HotWaterSolarThermal].annual_output.nil?
@@ -908,7 +916,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if not solar_system.water_heating_system.nil?
         dhw_ids = [solar_system.water_heating_system.id]
       else # Apply to all water heating systems
-        dhw_ids = @hpxml.water_heating_systems.map { |dhw| dhw.id }
+        dhw_ids = @hpxml_bldg.water_heating_systems.map { |dhw| dhw.id }
       end
       dhw_ids.each do |dhw_id|
         apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
@@ -1002,7 +1010,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_roundtrip_eff = nil
         batt_loss = nil
 
-        @hpxml.batteries.each do |battery|
+        @hpxml_bldg.batteries.each do |battery|
           @model.getElectricLoadCenterDistributions.each do |elcd|
             battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
@@ -1131,7 +1139,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       kwh_to_mwh = UnitConversions.convert(1.0, 'kWh', 'MWh')
 
       # Calculate for each scenario
-      @hpxml.header.emissions_scenarios.each do |scenario|
+      @hpxml_header.emissions_scenarios.each do |scenario|
         key = [scenario.emissions_type, scenario.name]
 
         # Get hourly electricity factors
@@ -1185,7 +1193,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
           # Calculate timeseries emissions for end use
 
-          if args[:timeseries_frequency] == 'timestep' && @hpxml.header.timestep != 60
+          if args[:timeseries_frequency] == 'timestep' && @hpxml_header.timestep != 60
             timeseries_elec = end_use.timeseries_output_by_system.values.transpose.map(&:sum).map { |x| x * kwh_to_mwh }
           else
             # Need to perform calculations hourly at a minimum
@@ -1193,7 +1201,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end
 
           if args[:timeseries_frequency] == 'timestep'
-            n_timesteps_per_hour = Integer(60.0 / @hpxml.header.timestep)
+            n_timesteps_per_hour = Integer(60.0 / @hpxml_header.timestep)
             timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
           else
             timeseries_elec_factors = hourly_elec_factors.dup
@@ -1280,8 +1288,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_sim_times_of_year(year)
-    sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
-    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day)
+    sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
+    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_end_month, @hpxml_header.sim_end_day)
     sim_start_hour = (sim_start_day_of_year - 1) * 24
     sim_end_hour = sim_end_day_of_year * 24 - 1
     return sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour
@@ -1305,7 +1313,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
-    if (all_total == 0) && (@hpxml.total_fraction_cool_load_served + @hpxml.total_fraction_heat_load_served > 0)
+    if (all_total == 0) && (@hpxml_bldg.total_fraction_cool_load_served + @hpxml_bldg.total_fraction_heat_load_served > 0)
       runner.registerError('Simulation unsuccessful.')
       return false
     elsif all_total.infinite?
@@ -1364,8 +1372,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
       n_digits = 3 # Default for annual (or near-annual) data
-      sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
-                    Schedule.get_day_num_from_month_day(2000, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
+      sim_n_days = (Schedule.get_day_num_from_month_day(2000, @hpxml_header.sim_end_month, @hpxml_header.sim_end_day) -
+                    Schedule.get_day_num_from_month_day(2000, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day))
       if sim_n_days <= 10 # 10 days or less; add two decimal places
         n_digits += 2
       elsif sim_n_days <= 100 # 100 days or less; add one decimal place
@@ -1550,7 +1558,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def append_sizing_results(results_out, line_break)
     # Summary HVAC capacities
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
-    @hpxml.hvac_systems.each do |hvac_system|
+    @hpxml_bldg.hvac_systems.each do |hvac_system|
       if hvac_system.is_a? HPXML::HeatingSystem
         next if hvac_system.is_heat_pump_backup_system
 
@@ -1576,38 +1584,38 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # HVAC design temperatures
     results_out << [line_break]
-    results_out << ['HVAC Design Temperature: Heating (F)', @hpxml.header.manualj_heating_design_temp.round(2)]
-    results_out << ['HVAC Design Temperature: Cooling (F)', @hpxml.header.manualj_cooling_design_temp.round(2)]
+    results_out << ['HVAC Design Temperature: Heating (F)', @hpxml_header.manualj_heating_design_temp.round(2)]
+    results_out << ['HVAC Design Temperature: Cooling (F)', @hpxml_header.manualj_cooling_design_temp.round(2)]
 
     # HVAC design loads
     results_out << [line_break]
-    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml.hvac_plant.hdl_total.round(1)]
-    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml.hvac_plant.hdl_ducts.round(1)]
-    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml.hvac_plant.hdl_windows.round(1)]
-    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml.hvac_plant.hdl_skylights.round(1)]
-    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml.hvac_plant.hdl_doors.round(1)]
-    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml.hvac_plant.hdl_walls.round(1)]
-    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml.hvac_plant.hdl_roofs.round(1)]
-    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml.hvac_plant.hdl_floors.round(1)]
-    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml.hvac_plant.hdl_slabs.round(1)]
-    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml.hvac_plant.hdl_ceilings.round(1)]
-    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.hdl_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml.hvac_plant.cdl_sens_total.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml.hvac_plant.cdl_sens_ducts.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml.hvac_plant.cdl_sens_windows.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml.hvac_plant.cdl_sens_skylights.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml.hvac_plant.cdl_sens_doors.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml.hvac_plant.cdl_sens_walls.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml.hvac_plant.cdl_sens_roofs.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml.hvac_plant.cdl_sens_floors.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml.hvac_plant.cdl_sens_slabs.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml.hvac_plant.cdl_sens_ceilings.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.cdl_sens_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml.hvac_plant.cdl_sens_intgains.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml.hvac_plant.cdl_lat_total.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml.hvac_plant.cdl_lat_ducts.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml.hvac_plant.cdl_lat_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml.hvac_plant.cdl_lat_intgains.round(1)]
+    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml_bldg.hvac_plant.hdl_total.round(1)]
+    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.hdl_ducts.round(1)]
+    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml_bldg.hvac_plant.hdl_windows.round(1)]
+    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml_bldg.hvac_plant.hdl_skylights.round(1)]
+    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml_bldg.hvac_plant.hdl_doors.round(1)]
+    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml_bldg.hvac_plant.hdl_walls.round(1)]
+    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml_bldg.hvac_plant.hdl_roofs.round(1)]
+    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml_bldg.hvac_plant.hdl_floors.round(1)]
+    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml_bldg.hvac_plant.hdl_slabs.round(1)]
+    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml_bldg.hvac_plant.hdl_ceilings.round(1)]
+    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.hdl_infilvent.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_total.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_ducts.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_windows.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_skylights.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_doors.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_walls.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_roofs.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_floors.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_slabs.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_ceilings.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_infilvent.round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_intgains.round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_total.round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_ducts.round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_infilvent.round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_intgains.round(1)]
 
     return results_out
   end
@@ -1629,9 +1637,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
       n_digits = 3 # Default for hourly (or longer) data
       if args[:timeseries_frequency] == 'timestep'
-        if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
+        if @hpxml_header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
           n_digits += 2
-        elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
+        elsif @hpxml_header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
           n_digits += 1
         end
       end
@@ -1794,11 +1802,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
         # Add header per DataFileTemplate.pdf; see https://github.com/NREL/wex/wiki/DView
-        year = @hpxml.header.sim_calendar_year
-        start_day = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
+        year = @hpxml_header.sim_calendar_year
+        start_day = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
         start_hr = (start_day - 1) * 24
         if args[:timeseries_frequency] == 'timestep'
-          interval_hrs = @hpxml.header.timestep / 60.0
+          interval_hrs = @hpxml_header.timestep / 60.0
         elsif args[:timeseries_frequency] == 'hourly'
           interval_hrs = 1.0
         elsif args[:timeseries_frequency] == 'daily'
@@ -1816,7 +1824,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         # Apply daylight savings
         if args[:timeseries_frequency] == 'timestep' || args[:timeseries_frequency] == 'hourly'
-          if @hpxml.header.dst_enabled
+          if @hpxml_header.dst_enabled
             dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
             dst_end_ix.downto(dst_start_ix + 1) do |i|
               data[i + 1] = data[i]
@@ -2620,10 +2628,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def get_hpxml_system_ids
     # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
-    return [] if @hpxml.nil?
+    return [] if @hpxml_bldg.nil?
 
     system_ids = []
-    (@hpxml.hvac_systems + @hpxml.water_heating_systems + @hpxml.ventilation_fans).each do |system|
+    (@hpxml_bldg.hvac_systems + @hpxml_bldg.water_heating_systems + @hpxml_bldg.ventilation_fans).each do |system|
       system_ids << system.id
     end
     return system_ids

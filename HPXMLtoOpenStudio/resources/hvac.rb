@@ -3638,7 +3638,7 @@ class HVAC
     return primary_duct_area, secondary_duct_area
   end
 
-  def self.get_default_duct_locations(hpxml)
+  def self.get_default_duct_locations(hpxml_bldg)
     primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
                                        HPXML::LocationBasementUnconditioned,
                                        HPXML::LocationCrawlspaceConditioned,
@@ -3650,7 +3650,7 @@ class HVAC
 
     primary_duct_location = nil
     primary_duct_location_hierarchy.each do |location|
-      if hpxml.has_location(location)
+      if hpxml_bldg.has_location(location)
         primary_duct_location = location
         break
       end
@@ -3925,13 +3925,13 @@ class HVAC
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
-  def self.apply_shared_systems(hpxml)
-    applied_clg = apply_shared_cooling_systems(hpxml)
-    applied_htg = apply_shared_heating_systems(hpxml)
+  def self.apply_shared_systems(hpxml_bldg)
+    applied_clg = apply_shared_cooling_systems(hpxml_bldg)
+    applied_htg = apply_shared_heating_systems(hpxml_bldg)
     return unless (applied_clg || applied_htg)
 
     # Remove WLHP if not serving heating nor cooling
-    hpxml.heat_pumps.each do |hp|
+    hpxml_bldg.heat_pumps.each do |hp|
       next unless hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
       next if hp.fraction_heat_load_served > 0
       next if hp.fraction_cool_load_served > 0
@@ -3940,9 +3940,9 @@ class HVAC
     end
 
     # Remove any orphaned HVAC distributions
-    hpxml.hvac_distributions.each do |hvac_distribution|
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       hvac_systems = []
-      hpxml.hvac_systems.each do |hvac_system|
+      hpxml_bldg.hvac_systems.each do |hvac_system|
         next if hvac_system.distribution_system_idref.nil?
         next unless hvac_system.distribution_system_idref == hvac_distribution.id
 
@@ -3954,9 +3954,9 @@ class HVAC
     end
   end
 
-  def self.apply_shared_cooling_systems(hpxml)
+  def self.apply_shared_cooling_systems(hpxml_bldg)
     applied = false
-    hpxml.cooling_systems.each do |cooling_system|
+    hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
 
       applied = true
@@ -3975,7 +3975,7 @@ class HVAC
         chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
         if distribution_type == HPXML::HVACDistributionTypeHydronic
           if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
+            wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
             aux_dweq = wlhp.cooling_capacity / wlhp.cooling_efficiency_eer
           else
             aux_dweq = 0.0
@@ -3993,7 +3993,7 @@ class HVAC
         # Cooling tower w/ water loop heat pump
         if distribution_type == HPXML::HVACDistributionTypeHydronic
           if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
+            wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
             wlhp_cap = wlhp.cooling_capacity
             wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
           end
@@ -4028,45 +4028,45 @@ class HVAC
           wlhp.fraction_heat_load_served = 0.0
         else
           # Assign DSE=1
-          hpxml.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
-                                       distribution_system_type: HPXML::HVACDistributionTypeDSE,
-                                       annual_cooling_dse: 1.0,
-                                       annual_heating_dse: 1.0)
-          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+          hpxml_bldg.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
+                                            distribution_system_type: HPXML::HVACDistributionTypeDSE,
+                                            annual_cooling_dse: 1.0,
+                                            annual_heating_dse: 1.0)
+          cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
       elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
         # Convert "fan coil" air distribution system to "regular velocity"
         if distribution_system.hvac_systems.size > 1
           # Has attached heating system, so create a copy specifically for the cooling system
-          hpxml.hvac_distributions.add(id: "#{distribution_system.id}_#{cooling_system.id}",
-                                       distribution_system_type: distribution_system.distribution_system_type,
-                                       air_type: distribution_system.air_type,
-                                       number_of_return_registers: distribution_system.number_of_return_registers,
-                                       conditioned_floor_area_served: distribution_system.conditioned_floor_area_served)
+          hpxml_bldg.hvac_distributions.add(id: "#{distribution_system.id}_#{cooling_system.id}",
+                                            distribution_system_type: distribution_system.distribution_system_type,
+                                            air_type: distribution_system.air_type,
+                                            number_of_return_registers: distribution_system.number_of_return_registers,
+                                            conditioned_floor_area_served: distribution_system.conditioned_floor_area_served)
           distribution_system.duct_leakage_measurements.each do |lm|
-            hpxml.hvac_distributions[-1].duct_leakage_measurements << lm.dup
+            hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << lm.dup
           end
           distribution_system.ducts.each do |d|
-            hpxml.hvac_distributions[-1].ducts << d.dup
+            hpxml_bldg.hvac_distributions[-1].ducts << d.dup
           end
-          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+          cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
-        hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
-        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+        hpxml_bldg.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
+        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
           # Assign zero supply leakage
-          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                     duct_leakage_units: HPXML::UnitsCFM25,
-                                                                     duct_leakage_value: 0,
-                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                          duct_leakage_units: HPXML::UnitsCFM25,
+                                                                          duct_leakage_value: 0,
+                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
-        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
           # Assign zero return leakage
-          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                     duct_leakage_units: HPXML::UnitsCFM25,
-                                                                     duct_leakage_value: 0,
-                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                          duct_leakage_units: HPXML::UnitsCFM25,
+                                                                          duct_leakage_value: 0,
+                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
-        hpxml.hvac_distributions[-1].ducts.each do |d|
+        hpxml_bldg.hvac_distributions[-1].ducts.each do |d|
           d.id = "#{d.id}_#{cooling_system.id}"
         end
       end
@@ -4075,9 +4075,9 @@ class HVAC
     return applied
   end
 
-  def self.apply_shared_heating_systems(hpxml)
+  def self.apply_shared_heating_systems(hpxml_bldg)
     applied = false
-    hpxml.heating_systems.each do |heating_system|
+    hpxml_bldg.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
 
       applied = true
@@ -4094,7 +4094,7 @@ class HVAC
 
         # Heat pump
         # If this approach is ever removed, also remove code in HVACSizing.apply_hvac_loads()
-        wlhp = hpxml.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
+        wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
         wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
         wlhp.fraction_cool_load_served = 0.0
 
@@ -4130,9 +4130,9 @@ class HVAC
     return UnitConversions.convert(capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', 'm^3/s') * capacity_ratio
   end
 
-  def self.is_attached_heating_and_cooling_systems(hpxml, heating_system, cooling_system)
+  def self.is_attached_heating_and_cooling_systems(hpxml_bldg, heating_system, cooling_system)
     # Now only allows furnace+AC
-    if not ((hpxml.heating_systems.include? heating_system) && (hpxml.cooling_systems.include? cooling_system))
+    if not ((hpxml_bldg.heating_systems.include? heating_system) && (hpxml_bldg.cooling_systems.include? cooling_system))
       return false
     end
     if not (heating_system.heating_system_type == HPXML::HVACTypeFurnace && cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner)
@@ -4142,23 +4142,23 @@ class HVAC
     return true
   end
 
-  def self.get_hpxml_hvac_systems(hpxml)
+  def self.get_hpxml_hvac_systems(hpxml_bldg)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
     # (e.g., a furnace + central air conditioner w/ the same ducts).
     hvac_systems = []
 
-    hpxml.cooling_systems.each do |cooling_system|
+    hpxml_bldg.cooling_systems.each do |cooling_system|
       heating_system = nil
-      if is_attached_heating_and_cooling_systems(hpxml, cooling_system.attached_heating_system, cooling_system)
+      if is_attached_heating_and_cooling_systems(hpxml_bldg, cooling_system.attached_heating_system, cooling_system)
         heating_system = cooling_system.attached_heating_system
       end
       hvac_systems << { cooling: cooling_system,
                         heating: heating_system }
     end
 
-    hpxml.heating_systems.each do |heating_system|
-      if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
+    hpxml_bldg.heating_systems.each do |heating_system|
+      if is_attached_heating_and_cooling_systems(hpxml_bldg, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
       end
 
@@ -4169,7 +4169,7 @@ class HVAC
     # Heat pump with backup system must be sorted last so that the last two
     # HVAC systems in the EnergyPlus EquipmentList are 1) the heat pump and
     # 2) the heat pump backup system.
-    hpxml.heat_pumps.sort_by { |hp| hp.backup_system_idref.to_s }.each do |heat_pump|
+    hpxml_bldg.heat_pumps.sort_by { |hp| hp.backup_system_idref.to_s }.each do |heat_pump|
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
     end
@@ -4177,18 +4177,18 @@ class HVAC
     return hvac_systems
   end
 
-  def self.ensure_nonzero_sizing_values(hpxml)
+  def self.ensure_nonzero_sizing_values(hpxml_bldg)
     min_capacity = 1.0 # Btuh
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
-    hpxml.heating_systems.each do |htg_sys|
+    hpxml_bldg.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
       htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max unless htg_sys.heating_airflow_cfm.nil?
     end
-    hpxml.cooling_systems.each do |clg_sys|
+    hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
       clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
     end
-    hpxml.heat_pumps.each do |hp_sys|
+    hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity = [hp_sys.cooling_capacity, min_capacity].max
       hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, min_airflow].max
       hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, min_capacity].max
@@ -4199,12 +4199,12 @@ class HVAC
     end
   end
 
-  def self.apply_unit_multiplier(hpxml)
+  def self.apply_unit_multiplier(hpxml_bldg)
     # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
     # multiplied thermal zone load to the HVAC system, so the HVAC system
     # needs to be sized to meet the entire multiplied zone load.
-    unit_multiplier = hpxml.building_construction.number_of_units
-    hpxml.heating_systems.each do |htg_sys|
+    unit_multiplier = hpxml_bldg.building_construction.number_of_units
+    hpxml_bldg.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity *= unit_multiplier
       htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
@@ -4213,7 +4213,7 @@ class HVAC
       # FIXME: shared_loop_watts?
       # FIXME: fan_watts?
     end
-    hpxml.cooling_systems.each do |clg_sys|
+    hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity *= unit_multiplier
       clg_sys.cooling_airflow_cfm *= unit_multiplier
       clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
@@ -4222,7 +4222,7 @@ class HVAC
       # FIXME: shared_loop_watts?
       # FIXME: fan_coil_watts?
     end
-    hpxml.heat_pumps.each do |hp_sys|
+    hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity *= unit_multiplier
       hp_sys.cooling_airflow_cfm *= unit_multiplier
       hp_sys.additional_properties.cooling_capacity_sensible *= unit_multiplier

@@ -310,7 +310,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
         hpxml.header.xml_generated_by = 'build_residential_hpxml_test.rb'
         hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-        hpxml_doc = hpxml.to_oga()
+        hpxml_doc = hpxml.to_hpxml()
         XMLHelper.write_file(hpxml_doc, hpxml_path)
       rescue Exception => e
         flunk "Error: Did not successfully generate #{hpxml_file}.\n#{e}\n#{e.backtrace.join('\n')}"
@@ -319,7 +319,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
     # Check generated HPXML files
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(@output_path, 'extra-seasons-building-america.xml')))
-    hvac_control = hpxml.hvac_controls[0]
+    hvac_control = hpxml.buildings[0].hvac_controls[0]
     assert_equal(10, hvac_control.seasons_heating_begin_month)
     assert_equal(1, hvac_control.seasons_heating_begin_day)
     assert_equal(6, hvac_control.seasons_heating_end_month)

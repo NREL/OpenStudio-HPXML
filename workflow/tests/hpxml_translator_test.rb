@@ -161,7 +161,7 @@ class HPXMLTest < Minitest::Test
       sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
       tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
       hpxml = HPXML.new(hpxml_path: File.join(sample_files_path, 'base.xml'))
-      XMLHelper.write_file(hpxml.to_oga, tmp_hpxml_path)
+      XMLHelper.write_file(hpxml.to_hpxml, tmp_hpxml_path)
 
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.absolute_path(tmp_hpxml_path)

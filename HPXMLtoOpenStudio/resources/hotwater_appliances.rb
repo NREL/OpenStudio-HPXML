@@ -1,38 +1,38 @@
 # frozen_string_literal: true
 
 class HotWaterAndAppliances
-  def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
+  def self.apply(model, runner, hpxml_header, hpxml_bldg, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map,
                  unavailable_periods, unit_multiplier)
 
     @runner = runner
-    cfa = hpxml.building_construction.conditioned_floor_area
-    ncfl = hpxml.building_construction.number_of_conditioned_floors
-    has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
-    fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
+    cfa = hpxml_bldg.building_construction.conditioned_floor_area
+    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
+    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+    fixtures_usage_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier
     living_space = spaces[HPXML::LocationLivingSpace]
-    nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
+    nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
 
     # Get appliances, etc.
-    if not hpxml.clothes_washers.empty?
-      clothes_washer = hpxml.clothes_washers[0]
+    if not hpxml_bldg.clothes_washers.empty?
+      clothes_washer = hpxml_bldg.clothes_washers[0]
     end
-    if not hpxml.clothes_dryers.empty?
-      clothes_dryer = hpxml.clothes_dryers[0]
+    if not hpxml_bldg.clothes_dryers.empty?
+      clothes_dryer = hpxml_bldg.clothes_dryers[0]
     end
-    if not hpxml.dishwashers.empty?
-      dishwasher = hpxml.dishwashers[0]
+    if not hpxml_bldg.dishwashers.empty?
+      dishwasher = hpxml_bldg.dishwashers[0]
     end
-    if not hpxml.cooking_ranges.empty?
-      cooking_range = hpxml.cooking_ranges[0]
+    if not hpxml_bldg.cooking_ranges.empty?
+      cooking_range = hpxml_bldg.cooking_ranges[0]
     end
-    if not hpxml.ovens.empty?
-      oven = hpxml.ovens[0]
+    if not hpxml_bldg.ovens.empty?
+      oven = hpxml_bldg.ovens[0]
     end
 
     # Create WaterUseConnections object for each water heater (plant loop)
     water_use_connections = {}
-    hpxml.water_heating_systems.each do |water_heating_system|
+    hpxml_bldg.water_heating_systems.each do |water_heating_system|
       plant_loop = plantloop_map[water_heating_system.id]
       wuc = OpenStudio::Model::WaterUseConnections.new(model)
       wuc.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
@@ -137,7 +137,7 @@ class HotWaterAndAppliances
     end
 
     # Refrigerator(s) energy
-    hpxml.refrigerators.each do |refrigerator|
+    hpxml_bldg.refrigerators.each do |refrigerator|
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
 
       # Create schedule
@@ -168,7 +168,7 @@ class HotWaterAndAppliances
     end
 
     # Freezer(s) energy
-    hpxml.freezers.each do |freezer|
+    hpxml_bldg.freezers.each do |freezer|
       fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
 
       # Create schedule
@@ -234,7 +234,7 @@ class HotWaterAndAppliances
 
     if not hot_water_distribution.nil?
       fixtures_all_low_flow = true
-      hpxml.water_fixtures.each do |water_fixture|
+      hpxml_bldg.water_fixtures.each do |water_fixture|
         next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
 
         fixtures_all_low_flow = false if not water_fixture.low_flow
@@ -243,20 +243,20 @@ class HotWaterAndAppliances
       # Calculate mixed water fractions
       t_mix = 105.0 # F, Temperature of mixed water at fixtures
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
-      hpxml.water_heating_systems.each do |water_heating_system|
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
         wh_setpoint = water_heating_system.temperature
         wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow,
-                                                                               hpxml.header.sim_calendar_year)
+                                                                               hpxml_header.sim_calendar_year)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
       daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, avg_setpoint_temp, t_mix)
 
       # Schedules
       # Replace mains water temperature schedule with water heater inlet temperature schedule.
       # These are identical unless there is a DWHR.
-      start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, hpxml.header.sim_calendar_year)
+      start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, hpxml_header.sim_calendar_year)
       timestep_day = OpenStudio::Time.new(1, 0)
       time_series_tmains = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), 'C')
       schedule_tmains = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_tmains, model).get
@@ -276,19 +276,19 @@ class HotWaterAndAppliances
       end
       if fixtures_schedule.nil?
         fixtures_unavailable_periods = Schedule.get_unavailable_periods(runner, fixtures_col_name, unavailable_periods)
-        fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
-        fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
-        fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers
+        fixtures_weekday_sch = hpxml_bldg.water_heating.water_fixtures_weekday_fractions
+        fixtures_weekend_sch = hpxml_bldg.water_heating.water_fixtures_weekend_fractions
+        fixtures_monthly_sch = hpxml_bldg.water_heating.water_fixtures_monthly_multipliers
         fixtures_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fixtures_obj_name + ' schedule', fixtures_weekday_sch, fixtures_weekend_sch, fixtures_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fixtures_unavailable_periods)
         fixtures_schedule = fixtures_schedule_obj.schedule
       else
-        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekday_fractions.nil?
-        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekend_fractions.nil?
-        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_monthly_multipliers.nil?
+        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_weekday_fractions.nil?
+        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_weekend_fractions.nil?
+        runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil?
       end
     end
 
-    hpxml.water_heating_systems.each do |water_heating_system|
+    hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
@@ -334,7 +334,7 @@ class HotWaterAndAppliances
       if not clothes_washer.nil?
         gpd_frac = nil
         if clothes_washer.is_shared_appliance && (not clothes_washer.hot_water_distribution.nil?)
-          gpd_frac = 1.0 / hpxml.water_heating_systems.size # Apportion load to each water heater on distribution system
+          gpd_frac = 1.0 / hpxml_bldg.water_heating_systems.size # Apportion load to each water heater on distribution system
         elsif clothes_washer.is_shared_appliance && clothes_washer.water_heating_system.id == water_heating_system.id
           gpd_frac = 1.0 # Shared water heater sees full appliance load
         elsif not clothes_washer.is_shared_appliance
@@ -360,7 +360,7 @@ class HotWaterAndAppliances
 
       gpd_frac = nil
       if dishwasher.is_shared_appliance && (not dishwasher.hot_water_distribution.nil?)
-        gpd_frac = 1.0 / hpxml.water_heating_systems.size # Apportion load to each water heater on distribution system
+        gpd_frac = 1.0 / hpxml_bldg.water_heating_systems.size # Apportion load to each water heater on distribution system
       elsif dishwasher.is_shared_appliance && dishwasher.water_heating_system.id == water_heating_system.id
         gpd_frac = 1.0 # Shared water heater sees full appliance load
       elsif not dishwasher.is_shared_appliance
@@ -1071,7 +1071,7 @@ class HotWaterAndAppliances
     fail 'Unexpected hot water distribution system.'
   end
 
-  def self.get_default_extra_refrigerator_and_freezer_locations(hpxml)
+  def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
                                              HPXML::LocationBasementUnconditioned,
                                              HPXML::LocationBasementConditioned,
@@ -1079,7 +1079,7 @@ class HotWaterAndAppliances
 
     extra_refrigerator_location = nil
     extra_refrigerator_location_hierarchy.each do |location|
-      if hpxml.has_location(location)
+      if hpxml_bldg.has_location(location)
         extra_refrigerator_location = location
         break
       end

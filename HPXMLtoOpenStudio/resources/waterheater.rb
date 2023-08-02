@@ -1415,7 +1415,7 @@ class Waterheater
     end
   end
 
-  def self.get_default_location(hpxml, climate_zone_iecc)
+  def self.get_default_location(hpxml_bldg, climate_zone_iecc)
     iecc_zone = (climate_zone_iecc.nil? ? nil : climate_zone_iecc.zone)
     if ['1A', '1B', '1C', '2A', '2B', '2C', '3B', '3C'].include? iecc_zone
       location_hierarchy = [HPXML::LocationGarage,
@@ -1430,7 +1430,7 @@ class Waterheater
                             HPXML::LocationLivingSpace]
     end
     location_hierarchy.each do |location|
-      if hpxml.has_location(location)
+      if hpxml_bldg.has_location(location)
         return location
       end
     end

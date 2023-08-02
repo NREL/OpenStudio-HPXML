@@ -4,7 +4,7 @@ class Airflow
   # Constants
   InfilPressureExponent = 0.65
 
-  def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
+  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa, nbeds,
                  ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file,
                  unavailable_periods, hvac_availability_sensor)
@@ -13,7 +13,7 @@ class Airflow
 
     @runner = runner
     @spaces = spaces
-    @year = hpxml.header.sim_calendar_year
+    @year = hpxml_header.sim_calendar_year
     @living_space = spaces[HPXML::LocationLivingSpace]
     @living_zone = @living_space.thermalZone.get
     @nbeds = nbeds
@@ -21,8 +21,8 @@ class Airflow
     @eri_version = eri_version
     @apply_ashrae140_assumptions = apply_ashrae140_assumptions
     @cfa = cfa
-    @cooking_range_in_cond_space = hpxml.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.cooking_ranges[0].location)
-    @clothes_dryer_in_cond_space = hpxml.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml.clothes_dryers[0].location)
+    @cooking_range_in_cond_space = hpxml_bldg.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.cooking_ranges[0].location)
+    @clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
     @hvac_availability_sensor = hvac_availability_sensor
 
     # Global sensors
@@ -56,7 +56,7 @@ class Airflow
     vent_fans_bath = []
     vent_fans_whf = []
     vent_fans_cfis_suppl = []
-    hpxml.ventilation_fans.each do |vent_fan|
+    hpxml_bldg.ventilation_fans.each do |vent_fan|
       next unless vent_fan.hours_in_operation.nil? || vent_fan.hours_in_operation > 0
 
       if vent_fan.used_for_whole_building_ventilation
@@ -77,7 +77,7 @@ class Airflow
     end
 
     # Vented clothes dryers
-    vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
+    vented_dryers = hpxml_bldg.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
 
     # Initialization
     initialize_cfis(model, vent_fans_mech, airloop_map, unavailable_periods)
@@ -91,30 +91,30 @@ class Airflow
     # Apply ducts
 
     duct_systems.each do |ducts, object|
-      apply_ducts(model, ducts, object, vent_fans_mech, hpxml.building_construction.number_of_units)
+      apply_ducts(model, ducts, object, vent_fans_mech, hpxml_bldg.building_construction.number_of_units)
     end
 
     # Apply infiltration/ventilation
 
-    set_wind_speed_correction(model, hpxml.site)
-    window_area = hpxml.windows.map { |w| w.area }.sum(0.0)
+    set_wind_speed_correction(model, hpxml_bldg.site)
+    window_area = hpxml_bldg.windows.map { |w| w.area }.sum(0.0)
     open_window_area = window_area * frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
 
-    vented_attic = hpxml.attics.find { |attic| attic.attic_type == HPXML::AtticTypeVented }
-    vented_crawl = hpxml.foundations.find { |foundation| foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+    vented_attic = hpxml_bldg.attics.find { |attic| attic.attic_type == HPXML::AtticTypeVented }
+    vented_crawl = hpxml_bldg.foundations.find { |foundation| foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
 
-    _sla, living_ach50, nach, infil_volume, infil_height, a_ext = get_values_from_air_infiltration_measurements(hpxml, cfa, weather)
+    _sla, living_ach50, nach, infil_volume, infil_height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     if @apply_ashrae140_assumptions
       living_const_ach = nach
       living_ach50 = nil
     end
     living_const_ach *= a_ext unless living_const_ach.nil?
     living_ach50 *= a_ext unless living_ach50.nil?
-    has_flue_chimney_in_cond_space = hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space
+    has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
 
-    apply_natural_ventilation_and_whole_house_fan(model, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml.header.natvent_days_per_week,
+    apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_header.natvent_days_per_week,
                                                   infil_volume, infil_height, unavailable_periods)
-    apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+    apply_infiltration_and_ventilation_fans(model, weather, hpxml_bldg.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             has_flue_chimney_in_cond_space, living_ach50, living_const_ach, infil_volume, infil_height,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
   end
@@ -171,13 +171,13 @@ class Airflow
     fail 'Unexpected error.'
   end
 
-  def self.get_values_from_air_infiltration_measurements(hpxml, cfa, weather)
-    measurement = get_infiltration_measurement_of_interest(hpxml.air_infiltration_measurements)
+  def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+    measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
 
     volume = measurement.infiltration_volume
     height = measurement.infiltration_height
     if height.nil?
-      height = hpxml.inferred_infiltration_height(volume)
+      height = hpxml_bldg.inferred_infiltration_height(volume)
     end
 
     sla, ach50, nach = nil
@@ -214,9 +214,9 @@ class Airflow
     return sla, ach50, nach, volume, height, a_ext
   end
 
-  def self.get_default_mech_vent_flow_rate(hpxml, vent_fan, weather, cfa, nbeds)
+  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds)
     # Calculates Qfan cfm requirement per ASHRAE 62.2-2019
-    sla, _ach50, _nach, _volume, height, a_ext = get_values_from_air_infiltration_measurements(hpxml, cfa, weather)
+    sla, _ach50, _nach, _volume, height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
 
     nl = get_infiltration_NL_from_SLA(sla, height)
     q_inf = nl * weather.data.WSF * cfa / 7.3 # Effective annual average infiltration rate, cfm, eq. 4.5a
