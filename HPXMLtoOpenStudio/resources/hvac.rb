@@ -517,6 +517,7 @@ class HVAC
     boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+    boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
     # FIXME: EMS program to model pilot light

@@ -809,14 +809,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end_use.annual_output_by_system[sys_id] += get_report_meter_data_annual(vars, UnitConversions.convert(1.0, 'J', end_use.annual_units))
 
         if args[:include_timeseries_end_use_consumptions]
-          end_use.timeseries_output_by_system[sys_id] = [0.0] * @timestamps.size if end_use.timeseries_output_by_system[sys_id].nil?
-          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, args[:timeseries_frequency])).map { |x, y| x + y }
+          values = get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, args[:timeseries_frequency])
+          if end_use.timeseries_output_by_system[sys_id].nil?
+            end_use.timeseries_output_by_system[sys_id] = values
+          else
+            end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(values).map { |x, y| x + y }
+          end
         end
         next unless args[:include_hourly_electric_end_use_consumptions] && fuel_type == FT::Elec
 
-        ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
-        end_use.hourly_output_by_system[sys_id] = [0.0] * (@timestamps.size / ts_per_hr) if end_use.hourly_output_by_system[sys_id].nil?
-        end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly')).map { |x, y| x + y }
+        values = get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly')
+        if end_use.hourly_output_by_system[sys_id].nil?
+          end_use.hourly_output_by_system[sys_id] = values
+        else
+          end_use.hourly_output_by_system[sys_id] = end_use.hourly_output_by_system[sys_id].zip(values).map { |x, y| x + y }
+        end
       end
     end
 
