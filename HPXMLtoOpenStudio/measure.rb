@@ -170,8 +170,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       add_unmet_hours_output(model, hpxml_osm_map)
       add_loads_output(model, add_component_loads, hpxml_osm_map)
       set_output_files(model)
-      hpxml_bldg = hpxml.buildings[0] # FIXME: Need to address this
-      add_additional_properties(model, hpxml.header, hpxml_bldg, hpxml_path, building_id, epw_file, hpxml_defaults_path)
+      add_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, epw_file, hpxml_defaults_path)
       # Uncomment to debug EMS
       # add_ems_debug_output(model)
 
@@ -2014,18 +2013,23 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_additional_properties(model, hpxml_header, hpxml_bldg, hpxml_path, building_id, epw_file, hpxml_defaults_path)
+  def add_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, epw_file, hpxml_defaults_path)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
-    emissions_scenario_names = hpxml_header.emissions_scenarios.map { |s| s.name }.to_s
-    additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
-    emissions_scenario_types = hpxml_header.emissions_scenarios.map { |s| s.emissions_type }.to_s
-    additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
-    additionalProperties.setFeature('has_heating', hpxml_bldg.total_fraction_heat_load_served > 0)
-    additionalProperties.setFeature('has_cooling', hpxml_bldg.total_fraction_cool_load_served > 0)
+    additionalProperties.setFeature('emissions_scenario_names', hpxml.header.emissions_scenarios.map { |s| s.name }.to_s)
+    additionalProperties.setFeature('emissions_scenario_types', hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s)
+    heated_zones, cooled_zones = [], []
+    hpxml_osm_map.each do |hpxml_bldg, unit_model|
+      living_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationLivingSpace }.name.to_s
+
+      heated_zones << living_zone_name if hpxml_bldg.total_fraction_heat_load_served > 0
+      cooled_zones << living_zone_name if hpxml_bldg.total_fraction_cool_load_served > 0
+    end
+    additionalProperties.setFeature('heated_zones', heated_zones.to_s)
+    additionalProperties.setFeature('cooled_zones', cooled_zones.to_s)
     additionalProperties.setFeature('is_southern_hemisphere', epw_file.latitude < 0)
   end
 

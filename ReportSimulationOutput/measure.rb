@@ -350,8 +350,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     unmet_hours_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetHoursProgram }
     total_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameTotalLoadsProgram }
     comp_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameComponentLoadsProgram }
-    has_heating = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_heating').get
-    has_cooling = @model.getBuilding.additionalProperties.getFeatureAsBoolean('has_cooling').get
+    heated_zones = emissions_scenario_names = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
+    cooled_zones = emissions_scenario_names = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
 
     args = get_arguments(runner, arguments(model), user_arguments)
 
@@ -501,22 +501,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{args[:timeseries_frequency]};").get
       end
       # Also report thermostat setpoints
-      if has_heating
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
+      heated_zones.each do |heated_zone|
+        result << OpenStudio::IdfObject.load("Output:Variable,#{heated_zone.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
-      if has_cooling
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
+      cooled_zones.each do |cooled_zone|
+        result << OpenStudio::IdfObject.load("Output:Variable,#{cooled_zone.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
     end
 
     # Airflow outputs (timeseries only)
     if args[:include_timeseries_airflows]
       @airflows.values.each do |airflow|
-        ems_program = @model.getModelObjectByName(airflow.ems_program.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
-        airflow.ems_variables.each do |ems_variable|
-          result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{ems_variable}_timeseries_outvar,#{ems_variable},Averaged,ZoneTimestep,#{ems_program.name},m^3/s;").get
-          result << OpenStudio::IdfObject.load("Output:Variable,*,#{ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
-        end
+        # FIXME: Need to address this
+        ems_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == airflow.ems_program }
+        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{airflow.ems_variable}_timeseries_outvar,#{airflow.ems_variable},Averaged,ZoneTimestep,#{ems_program.name},m^3/s;").get
+        result << OpenStudio::IdfObject.load("Output:Variable,*,#{airflow.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
       end
     end
 
@@ -566,12 +565,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
-    # FIXME: Relax this constraint (using a new building_id measure argument?)
-    if hpxml.buildings.size > 1
-      runner.registerWarning('Cannot currently handle an HPXML with multiple Building elements.')
-    end
     @hpxml_header = hpxml.header
-    @hpxml_bldg = hpxml.buildings[0]
+    @hpxml_bldgs = hpxml.buildings
 
     setup_outputs(false, args[:user_output_variables])
 
@@ -602,7 +597,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if args[:timeseries_frequency] != 'none'
-      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml_header, @hpxml_bldg, args)
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml_header, @hpxml_bldgs, args)
     end
 
     # Retrieve outputs
@@ -619,17 +614,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timestamps(msgpackData, hpxml_header, hpxml_bldg, args)
+  def get_timestamps(msgpackData, hpxml_header, hpxml_bldgs, args)
     return if msgpackData.nil?
 
     ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
 
     if args[:add_timeseries_dst_column] || args[:use_dview_format]
-      dst_start_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldg.dst_begin_month, hpxml_bldg.dst_begin_day, 2)
-      dst_end_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldg.dst_end_month, hpxml_bldg.dst_end_day, 1)
+      dst_start_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldgs[0].dst_begin_month, hpxml_bldgs[0].dst_begin_day, 2)
+      dst_end_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldgs[0].dst_end_month, hpxml_bldgs[0].dst_end_day, 1)
     end
     if args[:add_timeseries_utc_column]
-      utc_offset = hpxml_bldg.time_zone_utc_offset
+      utc_offset = hpxml_bldgs[0].time_zone_utc_offset
       utc_offset *= 3600 # seconds
     end
 
@@ -868,57 +863,61 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Apply Heating/Cooling DSEs
-    (@hpxml_bldg.heating_systems + @hpxml_bldg.heat_pumps).each do |htg_system|
-      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
-      next if htg_system.distribution_system_idref.nil?
-      next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if htg_system.distribution_system.annual_heating_dse.nil?
+    @hpxml_bldgs.each do |hpxml_bldg|
+      # Apply Heating/Cooling DSEs
+      # FIXME: Check whether this handles units with different DSEs
+      (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |htg_system|
+        next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
+        next if htg_system.distribution_system_idref.nil?
+        next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+        next if htg_system.distribution_system.annual_heating_dse.nil?
 
-      dse = htg_system.distribution_system.annual_heating_dse
-      @fuels.each do |fuel_type, fuel|
-        [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump, EUT::HeatingHeatPumpBackupFanPump].each do |end_use_type|
-          end_use = @end_uses[[fuel_type, end_use_type]]
-          next if end_use.nil?
+        dse = htg_system.distribution_system.annual_heating_dse
+        @fuels.each do |fuel_type, fuel|
+          [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump, EUT::HeatingHeatPumpBackupFanPump].each do |end_use_type|
+            end_use = @end_uses[[fuel_type, end_use_type]]
+            next if end_use.nil?
 
-          if not end_use.annual_output_by_system[htg_system.id].nil?
-            apply_multiplier_to_output(end_use, fuel, htg_system.id, 1.0 / dse)
+            if not end_use.annual_output_by_system[htg_system.id].nil?
+              apply_multiplier_to_output(end_use, fuel, htg_system.id, 1.0 / dse)
+            end
           end
         end
       end
-    end
-    (@hpxml_bldg.cooling_systems + @hpxml_bldg.heat_pumps).each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
-      next if clg_system.distribution_system_idref.nil?
-      next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if clg_system.distribution_system.annual_cooling_dse.nil?
+      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |clg_system|
+        next unless clg_system.fraction_cool_load_served > 0
+        next if clg_system.distribution_system_idref.nil?
+        next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+        next if clg_system.distribution_system.annual_cooling_dse.nil?
 
-      dse = clg_system.distribution_system.annual_cooling_dse
-      @fuels.each do |fuel_type, fuel|
-        [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
-          end_use = @end_uses[[fuel_type, end_use_type]]
-          next if end_use.nil?
-          next if end_use.annual_output_by_system[clg_system.id].nil?
+        dse = clg_system.distribution_system.annual_cooling_dse
+        @fuels.each do |fuel_type, fuel|
+          [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
+            end_use = @end_uses[[fuel_type, end_use_type]]
+            next if end_use.nil?
+            next if end_use.annual_output_by_system[clg_system.id].nil?
 
-          apply_multiplier_to_output(end_use, fuel, clg_system.id, 1.0 / dse)
+            apply_multiplier_to_output(end_use, fuel, clg_system.id, 1.0 / dse)
+          end
         end
       end
-    end
 
-    # Apply solar fraction to load for simple solar water heating systems
-    @hpxml_bldg.solar_thermal_systems.each do |solar_system|
-      next if solar_system.solar_fraction.nil?
+      # Apply solar fraction to load for simple solar water heating systems
+      # FIXME: Check whether this handles units with different solar fractions
+      hpxml_bldg.solar_thermal_systems.each do |solar_system|
+        next if solar_system.solar_fraction.nil?
 
-      @loads[LT::HotWaterSolarThermal].annual_output = 0.0 if @loads[LT::HotWaterSolarThermal].annual_output.nil?
-      @loads[LT::HotWaterSolarThermal].timeseries_output = [0.0] * @timestamps.size if @loads[LT::HotWaterSolarThermal].timeseries_output.nil?
+        @loads[LT::HotWaterSolarThermal].annual_output = 0.0 if @loads[LT::HotWaterSolarThermal].annual_output.nil?
+        @loads[LT::HotWaterSolarThermal].timeseries_output = [0.0] * @timestamps.size if @loads[LT::HotWaterSolarThermal].timeseries_output.nil?
 
-      if not solar_system.water_heating_system.nil?
-        dhw_ids = [solar_system.water_heating_system.id]
-      else # Apply to all water heating systems
-        dhw_ids = @hpxml_bldg.water_heating_systems.map { |dhw| dhw.id }
-      end
-      dhw_ids.each do |dhw_id|
-        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
+        if not solar_system.water_heating_system.nil?
+          dhw_ids = [solar_system.water_heating_system.id]
+        else # Apply to all water heating systems
+          dhw_ids = hpxml_bldg.water_heating_systems.map { |dhw| dhw.id }
+        end
+        dhw_ids.each do |dhw_id|
+          apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
+        end
       end
     end
 
@@ -1009,7 +1008,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_roundtrip_eff = nil
         batt_loss = nil
 
-        @hpxml_bldg.batteries.each do |battery|
+        # FIXME: Need to address this
+        @hpxml_bldgs[0].batteries.each do |battery|
           @model.getElectricLoadCenterDistributions.each do |elcd|
             battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
             next unless (battery_id.is_initialized && battery_id.get == battery.id)
@@ -1103,7 +1103,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Airflows
     if args[:include_timeseries_airflows]
       @airflows.each do |_airflow_type, airflow|
-        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, args[:timeseries_frequency])
+        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{airflow.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, args[:timeseries_frequency])
       end
     end
 
@@ -1312,7 +1312,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check if simulation successful
     all_total = @fuels.values.map { |x| x.annual_output.to_f }.sum(0.0)
-    if (all_total == 0) && (@hpxml_bldg.total_fraction_cool_load_served + @hpxml_bldg.total_fraction_heat_load_served > 0)
+    total_fraction_cool_load_served = @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.total_fraction_cool_load_served }.sum(0.0)
+    total_fraction_heat_load_served = @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.total_fraction_heat_load_served }.sum(0.0)
+    if (all_total == 0) && (total_fraction_cool_load_served + total_fraction_heat_load_served > 0)
       runner.registerError('Simulation unsuccessful.')
       return false
     elsif all_total.infinite?
@@ -1557,23 +1559,25 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   def append_sizing_results(results_out, line_break)
     # Summary HVAC capacities
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
-    @hpxml_bldg.hvac_systems.each do |hvac_system|
-      if hvac_system.is_a? HPXML::HeatingSystem
-        next if hvac_system.is_heat_pump_backup_system
+    @hpxml_bldgs.each do |hpxml_bldg|
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        if hvac_system.is_a? HPXML::HeatingSystem
+          next if hvac_system.is_heat_pump_backup_system
 
-        htg_cap += hvac_system.heating_capacity.to_f
-      elsif hvac_system.is_a? HPXML::CoolingSystem
-        clg_cap += hvac_system.cooling_capacity.to_f
-        if hvac_system.has_integrated_heating
-          htg_cap += hvac_system.integrated_heating_system_capacity.to_f
-        end
-      elsif hvac_system.is_a? HPXML::HeatPump
-        htg_cap += hvac_system.heating_capacity.to_f
-        clg_cap += hvac_system.cooling_capacity.to_f
-        if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-          hp_backup_cap += hvac_system.backup_heating_capacity.to_f
-        elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
-          hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f
+          htg_cap += hvac_system.heating_capacity.to_f
+        elsif hvac_system.is_a? HPXML::CoolingSystem
+          clg_cap += hvac_system.cooling_capacity.to_f
+          if hvac_system.has_integrated_heating
+            htg_cap += hvac_system.integrated_heating_system_capacity.to_f
+          end
+        elsif hvac_system.is_a? HPXML::HeatPump
+          htg_cap += hvac_system.heating_capacity.to_f
+          clg_cap += hvac_system.cooling_capacity.to_f
+          if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+            hp_backup_cap += hvac_system.backup_heating_capacity.to_f
+          elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
+            hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f
+          end
         end
       end
     end
@@ -1588,33 +1592,33 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # HVAC design loads
     results_out << [line_break]
-    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml_bldg.hvac_plant.hdl_total.round(1)]
-    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.hdl_ducts.round(1)]
-    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml_bldg.hvac_plant.hdl_windows.round(1)]
-    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml_bldg.hvac_plant.hdl_skylights.round(1)]
-    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml_bldg.hvac_plant.hdl_doors.round(1)]
-    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml_bldg.hvac_plant.hdl_walls.round(1)]
-    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml_bldg.hvac_plant.hdl_roofs.round(1)]
-    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml_bldg.hvac_plant.hdl_floors.round(1)]
-    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml_bldg.hvac_plant.hdl_slabs.round(1)]
-    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml_bldg.hvac_plant.hdl_ceilings.round(1)]
-    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.hdl_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_total.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_ducts.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_windows.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_skylights.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_doors.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_walls.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_roofs.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_floors.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_slabs.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_ceilings.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml_bldg.hvac_plant.cdl_sens_intgains.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_total.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_ducts.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_infilvent.round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml_bldg.hvac_plant.cdl_lat_intgains.round(1)]
+    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_total }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ducts }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_windows }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_skylights }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_doors }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_walls }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_roofs }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_floors }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_slabs }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ceilings }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_infilvent }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_total }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ducts }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_windows }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_skylights }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_doors }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_walls }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_roofs }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_floors }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_slabs }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ceilings }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_infilvent }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_intgains }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_total }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_ducts }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_infilvent }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_intgains }.sum(0.0).round(1)]
 
     return results_out
   end
@@ -1823,7 +1827,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         # Apply daylight savings
         if args[:timeseries_frequency] == 'timestep' || args[:timeseries_frequency] == 'hourly'
-          if @hpxml_bldg.dst_enabled
+          if @hpxml_bldgs[0].dst_enabled
             dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
             dst_end_ix.downto(dst_start_ix + 1) do |i|
               data[i + 1] = data[i]
@@ -2240,12 +2244,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   class Airflow < BaseOutput
-    def initialize(ems_program:, ems_variables:)
+    def initialize(ems_program:, ems_variable:)
       super()
       @ems_program = ems_program
-      @ems_variables = ems_variables
+      @ems_variable = ems_variable
     end
-    attr_accessor(:ems_program, :ems_variables)
+    attr_accessor(:ems_program, :ems_variable)
   end
 
   class Weather < BaseOutput
@@ -2568,10 +2572,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Airflows
     @airflows = {}
-    @airflows[AFT::Infiltration] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_')])
-    @airflows[AFT::MechanicalVentilation] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: ['Qfan'])
-    @airflows[AFT::NaturalVentilation] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')])
-    @airflows[AFT::WholeHouseFan] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')])
+    @airflows[AFT::Infiltration] = Airflow.new(ems_program: Constants.ObjectNameInfiltration, ems_variable: (Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_'))
+    @airflows[AFT::MechanicalVentilation] = Airflow.new(ems_program: Constants.ObjectNameInfiltration, ems_variable: 'Qfan')
+    @airflows[AFT::NaturalVentilation] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation, ems_variable: (Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_'))
+    @airflows[AFT::WholeHouseFan] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation, ems_variable: (Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_'))
 
     @airflows.each do |airflow_type, airflow|
       airflow.name = "Airflow: #{airflow_type}"
@@ -2627,11 +2631,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def get_hpxml_system_ids
     # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
-    return [] if @hpxml_bldg.nil?
+    return [] if @hpxml_bldgs.empty?
 
     system_ids = []
-    (@hpxml_bldg.hvac_systems + @hpxml_bldg.water_heating_systems + @hpxml_bldg.ventilation_fans).each do |system|
-      system_ids << system.id
+    @hpxml_bldgs.each do |hpxml_bldg|
+      (hpxml_bldg.hvac_systems + hpxml_bldg.water_heating_systems + hpxml_bldg.ventilation_fans).each do |system|
+        system_ids << system.id
+      end
     end
     return system_ids
   end

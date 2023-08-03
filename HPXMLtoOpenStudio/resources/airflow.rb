@@ -411,6 +411,7 @@ class Airflow
 
     # Program
     vent_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    vent_program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameNaturalVentilation)
     vent_program.setName(Constants.ObjectNameNaturalVentilation + ' program')
     vent_program.addLine("Set Tin = #{@tin_sensor.name}")
     vent_program.addLine("Set Tout = #{@tout_sensor.name}")
@@ -1787,6 +1788,7 @@ class Airflow
 
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    infil_program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameInfiltration)
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
