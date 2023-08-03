@@ -131,19 +131,17 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
       epw_file = OpenStudio::EpwFile.new(epw_path)
 
-      # Process schedules & emissions once upfront
+      # Apply HPXML defaults upfront; process schedules & emissions
       check_file_references(hpxml.header, hpxml_path)
       schedules_file = SchedulesFile.new(runner: runner, model: model,
                                          schedules_paths: hpxml.header.schedules_filepaths,
                                          year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                          unavailable_periods: hpxml.header.unavailable_periods,
                                          output_path: File.join(output_dir, 'in.schedules.csv'))
-      validate_emissions_files(hpxml.header)
-
-      # Apply HPXML defaults upfront
       hpxml.buildings.each do |hpxml_bldg|
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
       end
+      validate_emissions_files(hpxml.header)
 
       # Write updated HPXML object (w/ defaults) to file for inspection
       hpxml_defaults_path = File.join(output_dir, 'in.xml')
