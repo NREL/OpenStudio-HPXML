@@ -63,7 +63,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
     arg.setDisplayName('BuildingID')
-    arg.setDescription('The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.')
+    arg.setDescription("The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to run all the HPXML Buildings (dwelling units) of a multifamily building in a single model.")
     args << arg
 
     return args
@@ -89,6 +89,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
     building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
+    building_id = building_id.is_initialized ? building_id.get : nil
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(hpxml_path)

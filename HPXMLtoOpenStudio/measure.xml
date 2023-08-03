@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>199148ff-2eab-4ef1-8701-7726b6dce78e</version_id>
-  <version_modified>2023-08-03T16:39:32Z</version_modified>
+  <version_id>3724f4a1-7af3-445c-86e9-73fcc3598550</version_id>
+  <version_modified>2023-08-03T19:23:08Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -87,7 +87,7 @@
     <argument>
       <name>building_id</name>
       <display_name>BuildingID</display_name>
-      <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.</description>
+      <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to run all the HPXML Buildings (dwelling units) of a multifamily building in a single model.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5F856E77</checksum>
+      <checksum>9AF2C9A5</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -238,13 +238,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A4C0F16C</checksum>
+      <checksum>881B0576</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9DE8304E</checksum>
+      <checksum>042A5F6E</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>

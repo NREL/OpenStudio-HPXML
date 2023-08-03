@@ -397,7 +397,6 @@ class HPXML < Object
     @hpxml_path = hpxml_path
     @errors = []
     @warnings = []
-    @building_id = nil
 
     hpxml_doc = nil
     if not hpxml_path.nil?
@@ -419,7 +418,7 @@ class HPXML < Object
       # Do this before schematron validation so that:
       # 1. We don't give schematron warnings for Building elements that are not of interest.
       # 2. The schematron validation occurs faster (as we're only validating one Building).
-      if XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
+      if (XMLHelper.get_elements(hpxml_doc, 'Building').size > 1) && (building_id.to_s.downcase != 'all')
         if building_id.nil?
           @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.'
           return unless @errors.empty?
@@ -1049,8 +1048,6 @@ class HPXML < Object
       return if hpxml.nil?
 
       XMLHelper.get_elements(hpxml, 'Building').each do |building|
-        next if (not @building_id.nil?) && (HPXML::get_id(building, 'BuildingID') != @building_id)
-
         self << Building.new(@parent_object, building)
       end
     end

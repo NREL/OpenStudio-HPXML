@@ -302,7 +302,7 @@ class HPXMLTest < Minitest::Test
     run_log = File.join(File.dirname(xml), 'run', 'run.log')
 
     # Check successful simulation when providing correct building ID
-    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyBuilding"
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyBuilding_2"
     system(command, err: File::NULL)
     assert_equal(true, File.exist?(csv_output_path))
 

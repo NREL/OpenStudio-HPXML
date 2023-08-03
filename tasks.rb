@@ -85,7 +85,9 @@ def create_hpxmls
     hpxml_doc = hpxml.to_doc()
 
     if hpxml_path.include? 'base-multiple-buildings.xml'
-      # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
+      # Create duplicates of the Building
+      # FUTURE: Instead of this, call the BuildResHPXML measure multiple times
+      # using the new capability in https://github.com/NREL/OpenStudio-HPXML/pull/1452
       hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
       building_element = XMLHelper.get_element(hpxml_element, 'Building')
       for i in 2..3

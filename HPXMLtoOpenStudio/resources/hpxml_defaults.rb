@@ -23,9 +23,9 @@ class HPXMLDefaults
 
     apply_header(hpxml.header, epw_file, weather)
     apply_header_sizing(hpxml.header, hpxml_bldg, weather, nbeds)
+    apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
-    apply_building(hpxml_bldg, epw_file)
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
