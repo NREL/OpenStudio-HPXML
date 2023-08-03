@@ -186,7 +186,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Check for presence of fuels once
     has_fuel = { HPXML::FuelTypeElectricity => true }
-    hpxml_doc = hpxml.to_hpxml
+    hpxml_doc = hpxml.to_doc
     Constants.FossilFuels.each do |fuel|
       has_fuel[fuel] = @hpxml_bldg.has_fuel(fuel, hpxml_doc)
     end

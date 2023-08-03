@@ -29,7 +29,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_stochastic
     hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     model, hpxml, result = _test_measure()
@@ -65,7 +65,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_stochastic_subset_of_columns
     hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     columns = [SchedulesFile::ColumnCookingRange,
                SchedulesFile::ColumnDishwasher,
@@ -98,7 +98,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_stochastic_subset_of_columns_invalid_name
     hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['schedules_type'] = 'stochastic'
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
@@ -112,7 +112,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_stochastic_debug
     hpxml = _create_hpxml('base.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     @args_hash['debug'] = true
@@ -149,7 +149,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_random_seed
     hpxml = _create_hpxml('base-location-baltimore-md.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['schedules_random_seed'] = 1
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
@@ -217,7 +217,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
   def test_10_min_timestep
     hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     model, hpxml, result = _test_measure()
@@ -256,7 +256,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     hpxml = _create_hpxml('base.xml')
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     _model, _hpxml, result = _test_measure()
@@ -270,7 +270,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     hpxml = _create_hpxml('base.xml')
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     _model, _hpxml, result = _test_measure()

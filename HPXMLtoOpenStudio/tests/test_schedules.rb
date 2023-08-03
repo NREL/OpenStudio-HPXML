@@ -36,7 +36,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_default_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 11
     schedule_rulesets = 17
@@ -65,7 +65,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_simple_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 11
     schedule_rulesets = 17
@@ -94,7 +94,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_simple_vacancy_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple-vacancy.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
     occupied_ratio = (1.0 - vacancy_hrs / 8760.0)
@@ -115,7 +115,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_simple_vacancy_year_round_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple-vacancy-year-round.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     vacancy_hrs = 8760.0
     occupied_ratio = (1.0 - vacancy_hrs / 8760.0)
@@ -136,7 +136,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_simple_power_outage_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-simple-power-outage.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     outage_hrs = 31.0 * 1.0 * 24.0 - 15.0
     powered_ratio = (1.0 - outage_hrs / 8760.0)
@@ -158,7 +158,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     assert_equal(11, model.getScheduleFiles.size)
 
@@ -189,7 +189,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_vacancy_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedules_paths = hpxml.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
@@ -230,7 +230,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_vacancy_schedules2
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     column_name = hpxml.header.unavailable_periods[0].column_name
 
@@ -279,7 +279,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_vacancy_year_round_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedules_paths = hpxml.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
@@ -320,7 +320,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_power_outage_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-power-outage.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedules_paths = hpxml.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
@@ -362,7 +362,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def test_stochastic_power_outage_schedules2
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-power-outage.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     column_name = hpxml.header.unavailable_periods[0].column_name
 
@@ -424,7 +424,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     sch_name = Constants.ObjectNameRefrigerator + ' schedule'
 
     # hours not specified
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -445,7 +445,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 1
     end_hour = 5
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -465,7 +465,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 2
     end_hour = 24
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -486,7 +486,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 2
     end_hour = 11
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -510,7 +510,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 31
     end_hour = 12
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -542,7 +542,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     sch_name = "#{Constants.ObjectNameNaturalVentilation} schedule"
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -560,7 +560,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     # not available
     natvent_availability = HPXML::ScheduleUnavailable
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -578,7 +578,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     # available
     natvent_availability = HPXML::ScheduleAvailable
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
 
     schedule = model.getScheduleRulesets.find { |schedule| schedule.name.to_s == sch_name }
@@ -607,7 +607,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     sch_name = Constants.ObjectNameRefrigerator + ' schedule'
 
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
     assert_equal(2012, year)
 

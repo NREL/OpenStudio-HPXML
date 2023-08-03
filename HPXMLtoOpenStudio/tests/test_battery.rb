@@ -28,7 +28,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_battery_default
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-defaults.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -61,7 +61,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_battery
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -76,7 +76,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_battery_scheduled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-scheduled.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -117,7 +117,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_pv_battery
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -153,7 +153,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_pv_battery_scheduled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-scheduled.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -194,7 +194,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_pv_battery_round_trip_efficiency
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-round-trip-efficiency.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -231,7 +231,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     skip # Temporarily disabled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-lifetime-model.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -264,7 +264,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_pv_battery_garage
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-garage.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
@@ -298,7 +298,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def test_pv_battery_ah
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-ah.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)

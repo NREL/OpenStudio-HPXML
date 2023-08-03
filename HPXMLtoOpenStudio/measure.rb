@@ -133,10 +133,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
@@ -345,7 +345,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  def create_hpxml_bldg_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+  def create_unit_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
     @debug = debug
@@ -487,7 +487,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Write updated HPXML object (w/ defaults) to file for inspection
     # FIXME: Need to address this
     @hpxml_defaults_path = File.join(output_dir, 'in.xml')
-    XMLHelper.write_file(hpxml.to_hpxml, @hpxml_defaults_path)
+    XMLHelper.write_file(hpxml.to_doc, @hpxml_defaults_path)
 
     # Now that we've written in.xml...
     # 1. ensure that no capacities/airflows are zero in order to prevent potential E+ errors.

@@ -161,7 +161,7 @@ class HPXMLTest < Minitest::Test
       sample_files_path = File.join(File.dirname(__FILE__), '..', 'sample_files')
       tmp_hpxml_path = File.join(sample_files_path, 'tmp.xml')
       hpxml = HPXML.new(hpxml_path: File.join(sample_files_path, 'base.xml'))
-      XMLHelper.write_file(hpxml.to_hpxml, tmp_hpxml_path)
+      XMLHelper.write_file(hpxml.to_doc, tmp_hpxml_path)
 
       rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
       xml = File.absolute_path(tmp_hpxml_path)
@@ -395,7 +395,7 @@ class HPXMLTest < Minitest::Test
     end
     bill_results = _get_bill_results(bills_csv_path)
     results = _get_simulation_results(annual_csv_path, xml)
-    _verify_outputs(rundir, xml, results, hpxml)
+    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0])
 
     return results, bill_results
   end
@@ -450,17 +450,17 @@ class HPXMLTest < Minitest::Test
     return results
   end
 
-  def _verify_outputs(rundir, hpxml_path, results, hpxml)
+  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg)
     assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
     # Collapse windows further using same logic as measure.rb
-    hpxml.windows.each do |window|
+    hpxml_bldg.windows.each do |window|
       window.fraction_operable = nil
     end
-    hpxml.collapse_enclosure_surfaces()
-    hpxml.delete_adiabatic_subsurfaces()
+    hpxml_bldg.collapse_enclosure_surfaces()
+    hpxml_bldg.delete_adiabatic_subsurfaces()
 
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |message|
@@ -469,45 +469,45 @@ class HPXMLTest < Minitest::Test
       next if message.start_with? 'Executing command'
       next if message.include? 'Could not find state average'
 
-      if hpxml.clothes_washers.empty?
+      if hpxml_bldg.clothes_washers.empty?
         next if message.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
       end
-      if hpxml.clothes_dryers.empty?
+      if hpxml_bldg.clothes_dryers.empty?
         next if message.include? 'No clothes dryer specified, the model will not include clothes dryer energy use.'
       end
-      if hpxml.dishwashers.empty?
+      if hpxml_bldg.dishwashers.empty?
         next if message.include? 'No dishwasher specified, the model will not include dishwasher energy use.'
       end
-      if hpxml.refrigerators.empty?
+      if hpxml_bldg.refrigerators.empty?
         next if message.include? 'No refrigerator specified, the model will not include refrigerator energy use.'
       end
-      if hpxml.cooking_ranges.empty?
+      if hpxml_bldg.cooking_ranges.empty?
         next if message.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
       end
-      if hpxml.water_heating_systems.empty?
+      if hpxml_bldg.water_heating_systems.empty?
         next if message.include? 'No water heating specified, the model will not include water heating energy use.'
       end
-      if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+      if (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
         next if message.include? 'No space heating specified, the model will not include space heating energy use.'
       end
-      if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+      if (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
         next if message.include? 'No space cooling specified, the model will not include space cooling energy use.'
       end
-      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
+      if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
         next if message.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
       end
-      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
+      if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
         next if message.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
       end
-      if hpxml.lighting_groups.empty?
+      if hpxml_bldg.lighting_groups.empty?
         next if message.include? 'No interior lighting specified, the model will not include interior lighting energy use.'
         next if message.include? 'No exterior lighting specified, the model will not include exterior lighting energy use.'
         next if message.include? 'No garage lighting specified, the model will not include garage lighting energy use.'
       end
-      if hpxml.windows.empty?
+      if hpxml_bldg.windows.empty?
         next if message.include? 'No windows specified, the model will not include window heat transfer.'
       end
-      if hpxml.pv_systems.empty? && !hpxml.batteries.empty? && hpxml.header.schedules_filepaths.empty?
+      if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_header.schedules_filepaths.empty?
         next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
@@ -515,10 +515,10 @@ class HPXMLTest < Minitest::Test
         next if message.include? 'Could not find a marginal Electricity rate.'
         next if message.include? 'Could not find a marginal Natural Gas rate.'
       end
-      if !hpxml.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
+      if !hpxml_bldg.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
         next if message.include? 'DSE is not currently supported when calculating utility bills.'
       end
-      if !hpxml.header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
+      if !hpxml_header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
         next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
         next if message.include? 'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'
       end
@@ -580,7 +580,7 @@ class HPXMLTest < Minitest::Test
       next if message.include?('CheckSimpleWAHPRatedCurvesOutputs') && message.include?('WaterToAirHeatPump:EquationFit') # FIXME: Check these
 
       # HPWHs
-      if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
+      if hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if message.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
         next if message.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
         next if message.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
@@ -588,18 +588,18 @@ class HPXMLTest < Minitest::Test
         next if message.include? 'Enthalpy out of range (PsyTsatFnHPb)'
         next if message.include?('CheckWarmupConvergence: Loads Initialization') && message.include?('did not converge after 25 warmup days')
       end
-      if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior }.size > 0
+      if hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior }.size > 0
         next if message.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
       end
       # Stratified tank WHs
-      if hpxml.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
+      if hpxml_bldg.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
         next if message.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       end
       # HP defrost curves
-      if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type }.size > 0
+      if hpxml_bldg.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type }.size > 0
         next if message.include?('GetDXCoils: Coil:Heating:DX') && message.include?('curve values')
       end
-      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
+      if hpxml_bldg.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
         # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
         # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
         # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
@@ -611,16 +611,16 @@ class HPXMLTest < Minitest::Test
         # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
         next if message.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
       end
-      if hpxml.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
+      if hpxml_bldg.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
         next if message.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
       if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
         next if message.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
-      if hpxml.solar_thermal_systems.size > 0
+      if hpxml_bldg.solar_thermal_systems.size > 0
         next if message.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if !hpxml.header.unavailable_periods.empty?
+      if !hpxml_header.unavailable_periods.empty?
         next if message.include? 'Target water temperature is greater than the hot water temperature'
         next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
       end
@@ -660,7 +660,7 @@ class HPXMLTest < Minitest::Test
     assert_equal(0, num_invalid_output_variables)
 
     # Timestep
-    timestep = hpxml.header.timestep
+    timestep = hpxml_header.timestep
     if timestep.nil?
       timestep = 60
     end
@@ -668,13 +668,13 @@ class HPXMLTest < Minitest::Test
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_equal(60 / timestep, sql_value)
 
-    unit_multiplier = hpxml.building_construction.number_of_units
+    unit_multiplier = hpxml_bldg.building_construction.number_of_units
 
     # Conditioned Floor Area
-    if (hpxml.total_fraction_cool_load_served > 0) || (hpxml.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
-      hpxml_value = hpxml.building_construction.conditioned_floor_area
-      if hpxml.has_location(HPXML::LocationCrawlspaceConditioned)
-        hpxml_value += hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
+    if (hpxml_bldg.total_fraction_cool_load_served > 0) || (hpxml_bldg.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
+      hpxml_value = hpxml_bldg.building_construction.conditioned_floor_area
+      if hpxml_bldg.has_location(HPXML::LocationCrawlspaceConditioned)
+        hpxml_value += hpxml_bldg.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
@@ -682,7 +682,7 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Roofs
-    hpxml.roofs.each do |roof|
+    hpxml_bldg.roofs.each do |roof|
       roof_id = roof.id.upcase
 
       # R-value
@@ -701,7 +701,7 @@ class HPXMLTest < Minitest::Test
 
       # Net area
       hpxml_value = roof.area
-      hpxml.skylights.each do |subsurface|
+      hpxml_bldg.skylights.each do |subsurface|
         next if subsurface.roof_idref.upcase != roof_id
 
         hpxml_value -= subsurface.area
@@ -745,9 +745,9 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Foundation Slabs
-    num_slabs = hpxml.slabs.size
+    num_slabs = hpxml_bldg.slabs.size
     if (num_slabs <= 1) && (num_kiva_instances <= 1) # The slab surfaces may be combined in these situations, so skip tests
-      hpxml.slabs.each do |slab|
+      hpxml_bldg.slabs.each do |slab|
         slab_id = slab.id.upcase
 
         # Exposed Area
@@ -765,7 +765,7 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Walls/RimJoists/FoundationWalls
-    (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
+    (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       wall_id = wall.id.upcase
 
       if wall.is_adiabatic
@@ -851,7 +851,7 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Floors
-    hpxml.floors.each do |floor|
+    hpxml_bldg.floors.each do |floor|
       floor_id = floor.id.upcase
 
       if floor.is_adiabatic
@@ -917,7 +917,7 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Windows/Skylights
-    (hpxml.windows + hpxml.skylights).each do |subsurface|
+    (hpxml_bldg.windows + hpxml_bldg.skylights).each do |subsurface|
       subsurface_id = subsurface.id.upcase
 
       if subsurface.is_exterior
@@ -977,7 +977,7 @@ class HPXMLTest < Minitest::Test
         assert_in_epsilon(90.0, sql_value, 0.01)
       elsif subsurface.is_a? HPXML::Skylight
         hpxml_value = nil
-        hpxml.roofs.each do |roof|
+        hpxml_bldg.roofs.each do |roof|
           next if roof.id != subsurface.roof_idref
 
           hpxml_value = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
@@ -991,7 +991,7 @@ class HPXMLTest < Minitest::Test
     end
 
     # Enclosure Doors
-    hpxml.doors.each do |door|
+    hpxml_bldg.doors.each do |door|
       door_id = door.id.upcase
 
       if door.wall.is_exterior
@@ -1030,14 +1030,14 @@ class HPXMLTest < Minitest::Test
     # HVAC Load Fractions
     if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
       htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-      assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
+      assert_equal(hpxml_bldg.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
     clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-    assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
+    assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Mechanical Ventilation
-    whole_vent_fans = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && !vent_mech.is_cfis_supplemental_fan? }
-    local_vent_fans = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation }
+    whole_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && !vent_mech.is_cfis_supplemental_fan? }
+    local_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation }
     fan_cfis = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
     fan_sup = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
     fan_exh = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
@@ -1084,8 +1084,8 @@ class HPXMLTest < Minitest::Test
                     HPXML::Dishwasher => Constants.ObjectNameDishwasher,
                     HPXML::CookingRange => Constants.ObjectNameCookingRange }
 
-    (hpxml.clothes_washers + hpxml.clothes_dryers + hpxml.refrigerators + hpxml.dishwashers + hpxml.cooking_ranges).each do |appliance|
-      next unless hpxml.water_heating_systems.size > 0
+    (hpxml_bldg.clothes_washers + hpxml_bldg.clothes_dryers + hpxml_bldg.refrigerators + hpxml_bldg.dishwashers + hpxml_bldg.cooking_ranges).each do |appliance|
+      next unless hpxml_bldg.water_heating_systems.size > 0
 
       # Location
       hpxml_value = appliance.location
@@ -1101,9 +1101,9 @@ class HPXMLTest < Minitest::Test
     # Lighting
     ltg_energy = results.select { |k, _v| k.include? 'End Use: Electricity: Lighting' }.values.sum(0.0)
     if not (hpxml_path.include?('vacancy-year-round') || hpxml_path.include?('residents-0'))
-      assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+      assert_equal(hpxml_bldg.lighting_groups.size > 0, ltg_energy > 0)
     else
-      assert_operator(hpxml.lighting_groups.size, :>, 0)
+      assert_operator(hpxml_bldg.lighting_groups.size, :>, 0)
       assert_equal(0, ltg_energy)
     end
 
@@ -1111,24 +1111,24 @@ class HPXMLTest < Minitest::Test
     htg_fuels = []
     htg_backup_fuels = []
     wh_fuels = []
-    hpxml.heating_systems.each do |heating_system|
+    hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.is_heat_pump_backup_system
         htg_backup_fuels << heating_system.heating_system_fuel
       else
         htg_fuels << heating_system.heating_system_fuel
       end
     end
-    hpxml.cooling_systems.each do |cooling_system|
+    hpxml_bldg.cooling_systems.each do |cooling_system|
       if cooling_system.has_integrated_heating
         htg_fuels << cooling_system.integrated_heating_system_fuel
       end
     end
-    hpxml.heat_pumps.each do |heat_pump|
+    hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
         htg_backup_fuels << heat_pump.backup_heating_fuel
       end
     end
-    hpxml.water_heating_systems.each do |water_heating_system|
+    hpxml_bldg.water_heating_systems.each do |water_heating_system|
       related_hvac = water_heating_system.related_hvac_system
       if related_hvac.nil?
         wh_fuels << water_heating_system.fuel_type
@@ -1140,7 +1140,7 @@ class HPXMLTest < Minitest::Test
     is_warm_climate = false
     if ['USA_FL_Miami.Intl.AP.722020_TMY3.epw',
         'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw',
-        'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'].include? hpxml.climate_and_risk_zones.weather_station_epw_filepath
+        'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'].include? hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
       is_warm_climate = true
     end
 
@@ -1178,12 +1178,12 @@ class HPXMLTest < Minitest::Test
       else
         assert_equal(0, energy_dhw)
       end
-      if (hpxml.clothes_dryers.size > 0) && (hpxml.clothes_dryers[0].fuel_type == fuel)
+      if (hpxml_bldg.clothes_dryers.size > 0) && (hpxml_bldg.clothes_dryers[0].fuel_type == fuel)
         assert_operator(energy_cd, :>, 0)
       else
         assert_equal(0, energy_cd)
       end
-      if (hpxml.cooking_ranges.size > 0) && (hpxml.cooking_ranges[0].fuel_type == fuel)
+      if (hpxml_bldg.cooking_ranges.size > 0) && (hpxml_bldg.cooking_ranges[0].fuel_type == fuel)
         assert_operator(energy_cr, :>, 0)
       else
         assert_equal(0, energy_cr)
@@ -1197,12 +1197,12 @@ class HPXMLTest < Minitest::Test
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
     else
-      if hpxml.total_fraction_heat_load_served == 0
+      if hpxml_bldg.total_fraction_heat_load_served == 0
         assert_equal(0, unmet_hours_htg)
       else
         assert_operator(unmet_hours_htg, :<, 350)
       end
-      if hpxml.total_fraction_cool_load_served == 0
+      if hpxml_bldg.total_fraction_cool_load_served == 0
         assert_equal(0, unmet_hours_clg)
       else
         assert_operator(unmet_hours_clg, :<, 350)

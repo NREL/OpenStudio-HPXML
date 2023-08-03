@@ -603,7 +603,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if args[:timeseries_frequency] != 'none'
-      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml_header, args)
+      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @hpxml_header, @hpxml_bldg, args)
     end
 
     # Retrieve outputs
@@ -620,17 +620,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timestamps(msgpackData, hpxml_header, args)
+  def get_timestamps(msgpackData, hpxml_header, hpxml_bldg, args)
     return if msgpackData.nil?
 
     ep_timestamps = msgpackData['Rows'].map { |r| r.keys[0] }
 
     if args[:add_timeseries_dst_column] || args[:use_dview_format]
-      dst_start_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_header.dst_begin_month, hpxml_header.dst_begin_day, 2)
-      dst_end_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_header.dst_end_month, hpxml_header.dst_end_day, 1)
+      dst_start_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldg.dst_begin_month, hpxml_bldg.dst_begin_day, 2)
+      dst_end_ts = Time.utc(hpxml_header.sim_calendar_year, hpxml_bldg.dst_end_month, hpxml_bldg.dst_end_day, 1)
     end
     if args[:add_timeseries_utc_column]
-      utc_offset = hpxml_header.time_zone_utc_offset
+      utc_offset = hpxml_bldg.time_zone_utc_offset
       utc_offset *= 3600 # seconds
     end
 
@@ -1824,7 +1824,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         # Apply daylight savings
         if args[:timeseries_frequency] == 'timestep' || args[:timeseries_frequency] == 'hourly'
-          if @hpxml_header.dst_enabled
+          if @hpxml_bldg.dst_enabled
             dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
             dst_end_ix.downto(dst_start_ix + 1) do |i|
               data[i + 1] = data[i]

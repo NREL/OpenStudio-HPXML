@@ -33,7 +33,7 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
   def test_lighting
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check interior lighting
     assert_in_delta(1322, get_kwh_per_year(model, Constants.ObjectNameLightingInterior), 1.0)
@@ -45,7 +45,7 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
   def test_lighting_garage
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-2stories-garage.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check interior lighting
     assert_in_delta(1544, get_kwh_per_year(model, Constants.ObjectNameLightingInterior), 1.0)
@@ -63,7 +63,7 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
      'base-lighting-holiday.xml'].each do |hpxml_name|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
-      model, hpxml, hpxml_bldg = _test_measure(args_hash)
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       if hpxml_name == 'base-lighting-holiday.xml'
         # Check exterior holiday lighting
@@ -77,7 +77,7 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
   def test_lighting_kwh_per_year
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-lighting-kwh-per-year.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check interior lighting
     int_kwh_yr = hpxml_bldg.lighting_groups.find { |lg| lg.location == HPXML::LocationInterior }.kwh_per_year
@@ -93,7 +93,7 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
   def test_lighting_none
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-lighting-none.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check interior lighting
     assert_equal(0.0, get_kwh_per_year(model, Constants.ObjectNameLightingInterior))

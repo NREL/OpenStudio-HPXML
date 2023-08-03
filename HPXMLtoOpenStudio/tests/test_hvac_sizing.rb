@@ -26,7 +26,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Expected values from Figure 7-4
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Vatilo_Residence.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(9147, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
     assert_in_delta(4234, hpxml_bldg.hvac_plant.hdl_windows, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, default_tol_btuh)
@@ -56,7 +56,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Expected values from Figure 8-3
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Victor_Residence.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(29137, hpxml_bldg.hvac_plant.hdl_ducts, 12000)
     assert_in_delta(9978, hpxml_bldg.hvac_plant.hdl_windows, default_tol_btuh)
     assert_in_delta(471, hpxml_bldg.hvac_plant.hdl_skylights, default_tol_btuh)
@@ -87,7 +87,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Expected values from Figure 9-3
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Long_Residence.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, default_tol_btuh)
     assert_in_delta(8315, hpxml_bldg.hvac_plant.hdl_windows, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, default_tol_btuh)
@@ -126,17 +126,17 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       # Run w/ ACCA sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-acca.xml"))
-      _model_acca, acca_hpxml, acca_hpxml_bldg = _test_measure(args_hash)
+      _model_acca, _acca_hpxml, acca_hpxml_bldg = _test_measure(args_hash)
 
       # Run w/ HERS sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-hers.xml"))
-      _model_hers, hers_hpxml, hers_hpxml_bldg = _test_measure(args_hash)
+      _model_hers, _hers_hpxml, hers_hpxml_bldg = _test_measure(args_hash)
 
       # Run w/ MaxLoad sizing
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-maxload.xml"))
-      _model_maxload, maxload_hpxml, maxload_hpxml_bldg = _test_measure(args_hash)
+      _model_maxload, _maxload_hpxml, maxload_hpxml_bldg = _test_measure(args_hash)
 
       # Check that MaxLoad >= HERS > ACCA for heat pump heating capacity
       hp_capacity_acca = acca_hpxml_bldg.heat_pumps[0].heating_capacity
@@ -151,7 +151,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Run w/ ducted heat pump and ductless backup
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that boiler capacity equals building heating design load w/o duct load.
     htg_design_load_without_ducts = hpxml_bldg.hvac_plant.hdl_total - hpxml_bldg.hvac_plant.hdl_ducts
@@ -161,7 +161,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Run w/ ducted heat pump and ducted backup
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that furnace capacity is between the building heating design load w/o duct load
     # and the building heating design load w/ duct load. This is because the building duct
@@ -175,7 +175,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Run w/ ductless heat pump and ductless backup
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that stove capacity equals building heating design load
     htg_design_load = hpxml_bldg.hvac_plant.hdl_total
@@ -187,7 +187,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Check that HP backup heating capacity matches heating design load even when using MaxLoad in a hot climate (GitHub issue #1140)
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload-miami-fl.xml'))
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, hpxml_bldg.hvac_plant.hdl_total)
   end
@@ -201,8 +201,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-undersized-allow-increased-fixed-capacities.xml')
     htg_cap = hpxml_bldg.heating_systems[0].heating_capacity
     clg_cap = hpxml_bldg.cooling_systems[0].cooling_capacity
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert(hpxml_bldg.heating_systems[0].heating_capacity > htg_cap)
     assert(hpxml_bldg.cooling_systems[0].cooling_capacity > clg_cap)
 
@@ -217,8 +217,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     htg_17f_cap = hpxml_bldg.heat_pumps[0].heating_capacity_17F
     htg_bak_cap = hpxml_bldg.heat_pumps[0].backup_heating_capacity
     clg_cap = hpxml_bldg.heat_pumps[0].cooling_capacity
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert(hpxml_bldg.heat_pumps[0].heating_capacity > htg_cap)
     assert(hpxml_bldg.heat_pumps[0].heating_capacity_17F > htg_17f_cap)
     assert(hpxml_bldg.heat_pumps[0].backup_heating_capacity > htg_bak_cap)
@@ -229,45 +229,45 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Run base
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base.xml'))
-    _model, base_hpxml, base_hpxml_bldg = _test_measure(args_hash)
+    _model, _base_hpxml, base_hpxml_bldg = _test_measure(args_hash)
 
     # Test heating/cooling design temps
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base.xml')
     hpxml.header.manualj_heating_design_temp = 0.0
     hpxml.header.manualj_cooling_design_temp = 100.0
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_operator(test_hpxml_bldg.hvac_plant.hdl_total, :>, base_hpxml_bldg.hvac_plant.hdl_total)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_total, :>, base_hpxml_bldg.hvac_plant.cdl_sens_total)
 
     # Test heating/cooling setpoints
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base.xml')
     hpxml.header.manualj_heating_setpoint = 72.5
     hpxml.header.manualj_cooling_setpoint = 72.5
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_operator(test_hpxml_bldg.hvac_plant.hdl_total, :>, base_hpxml_bldg.hvac_plant.hdl_total)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_total, :>, base_hpxml_bldg.hvac_plant.cdl_sens_total)
 
     # Test internal loads
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base.xml')
     hpxml.header.manualj_internal_loads_sensible = 1000.0
     hpxml.header.manualj_internal_loads_latent = 500.0
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(test_hpxml_bldg.hvac_plant.hdl_total, base_hpxml_bldg.hvac_plant.hdl_total)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_intgains, :<, base_hpxml_bldg.hvac_plant.cdl_sens_intgains)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_lat_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_lat_intgains)
 
     # Test number of occupants
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base.xml')
     hpxml.header.manualj_num_occupants = 10
-    XMLHelper.write_file(hpxml.to_hpxml, @tmp_hpxml_path)
-    _model, test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(test_hpxml_bldg.hvac_plant.hdl_total, base_hpxml_bldg.hvac_plant.hdl_total)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_sens_intgains)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_lat_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_lat_intgains)

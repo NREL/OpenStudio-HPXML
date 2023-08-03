@@ -29,7 +29,7 @@ class HPXMLtoOpenStudioPVTest < Minitest::Test
   def test_pv
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.pv_systems.each do |pv_system|
       generator, inverter = get_generator_inverter(model, pv_system.id)
@@ -50,7 +50,7 @@ class HPXMLtoOpenStudioPVTest < Minitest::Test
   def test_pv_shared
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-pv.xml'))
-    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.pv_systems.each do |pv_system|
       generator, inverter = get_generator_inverter(model, pv_system.id)

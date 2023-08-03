@@ -3433,7 +3433,7 @@ class HPXMLFile
     collapse_surfaces(hpxml_bldg, args)
     renumber_hpxml_ids(hpxml_bldg)
 
-    hpxml_doc = hpxml.to_hpxml()
+    hpxml_doc = hpxml.to_doc()
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_validation]
@@ -3447,7 +3447,7 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       # FIXME: Address this when multiple buildings
       HPXMLDefaults.apply(runner, hpxml, hpxml.buildings[0], eri_version, weather, epw_file: epw_file)
-      hpxml_doc = hpxml.to_hpxml()
+      hpxml_doc = hpxml.to_doc()
     end
 
     return hpxml_doc

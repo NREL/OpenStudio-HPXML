@@ -82,7 +82,7 @@ def create_hpxmls
     else
       apply_hpxml_modification(File.basename(hpxml_path), hpxml)
     end
-    hpxml_doc = hpxml.to_hpxml()
+    hpxml_doc = hpxml.to_doc()
 
     if hpxml_path.include? 'base-multiple-buildings.xml'
       # HPXML class doesn't support multiple buildings, so we'll stitch together manually.

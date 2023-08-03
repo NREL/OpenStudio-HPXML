@@ -601,7 +601,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         fail "Unhandled case: #{error_case}."
       end
 
-      hpxml_doc = hpxml.to_hpxml()
+      hpxml_doc = hpxml.to_doc()
 
       # Perform additional raw XML manipulation
       if ['invalid-id2'].include? error_case
@@ -808,7 +808,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         fail "Unhandled case: #{warning_case}."
       end
 
-      hpxml_doc = hpxml.to_hpxml()
+      hpxml_doc = hpxml.to_doc()
 
       # Test against schematron
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
@@ -899,13 +899,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
       if ['battery-bad-values-max-not-one'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][0] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['battery-bad-values-min-not-neg-one'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][0] = -1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
@@ -946,20 +946,20 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.plug_loads[-1].id = hpxml_bldg.plug_loads[0].id
       elsif ['emissions-duplicate-names'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
         hpxml.header.emissions_scenarios << hpxml.header.emissions_scenarios[0].dup
       elsif ['emissions-wrong-columns'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
         scenario = hpxml.header.emissions_scenarios[1]
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), scenario.elec_schedule_filepath))
         csv_data[10] = [431.0] * (scenario.elec_schedule_column_number - 1)
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.emissions_scenarios[1].elec_schedule_filepath = @tmp_csv_path
       elsif ['emissions-wrong-filename'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
         hpxml.header.emissions_scenarios[1].elec_schedule_filepath = 'invalid-wrong-filename.csv'
       elsif ['emissions-wrong-rows'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
         scenario = hpxml.header.emissions_scenarios[1]
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), scenario.elec_schedule_filepath))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
@@ -1031,11 +1031,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.batteries[0].usable_capacity_kwh = 10.0
         hpxml_bldg.batteries[0].usable_capacity_ah = nil
       elsif ['invalid-datatype-boolean'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
       elsif ['invalid-datatype-integer'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
       elsif ['invalid-datatype-float'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
       elsif ['invalid-daylight-saving'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-simcontrol-daylight-saving-custom.xml')
         hpxml_bldg.dst_begin_month = 3
@@ -1062,26 +1062,26 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.water_heating_systems[0].uses_desuperheater = true
         hpxml_bldg.water_heating_systems[0].related_hvac_idref = 'CoolingSystem_bad'
       elsif ['invalid-runperiod'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.sim_begin_month = 3
         hpxml.header.sim_begin_day = 10
         hpxml.header.sim_end_month = 4
         hpxml.header.sim_end_day = 31
       elsif ['invalid-shading-season'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.shading_summer_begin_month = 3
         hpxml.header.shading_summer_begin_day = 10
         hpxml.header.shading_summer_end_month = 4
         hpxml.header.shading_summer_end_day = 31
       elsif ['invalid-unavailable-period'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.unavailable_periods.add(column_name: 'Power Outage',
                                              begin_month: 3,
                                              begin_day: 10,
                                              end_month: 4,
                                              end_day: 31)
       elsif ['invalid-schema-version'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
       elsif ['invalid-skylights-physical-properties'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights-physical-properties.xml')
         hpxml_bldg.skylights[1].thermal_break = false
@@ -1094,7 +1094,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                  inverter_efficiency: 0.5)
         hpxml_bldg.pv_systems[1].inverter_idref = hpxml_bldg.inverters[-1].id
       elsif ['leap-year-TMY'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
         hpxml.header.sim_calendar_year = 2008
       elsif ['net-area-negative-roof'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
@@ -1125,41 +1125,41 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.water_heating_systems << hpxml_bldg.water_heating_systems[0].dup
         hpxml_bldg.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size}"
       elsif ['schedule-detailed-bad-values-max-not-one'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-bad-values-negative'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = -0.5
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-bad-values-non-numeric'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         csv_data[1][1] = 'NA'
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-bad-values-mode-negative'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-detailed-schedules.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-detailed-schedules.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[1]))
         csv_data[1][0] = -0.5
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
-        hpxmlheader.schedules_filepaths = [@tmp_csv_path]
+        hpxml.header.schedules_filepaths = [@tmp_csv_path]
       elsif ['schedule-detailed-duplicate-columns'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml.header.schedules_filepaths = []
         hpxml.header.schedules_filepaths << @tmp_csv_path
         hpxml.header.schedules_filepaths << @tmp_csv_path
       elsif ['schedule-detailed-wrong-filename'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.schedules_filepaths << 'invalid-wrong-filename.csv'
       elsif ['schedule-detailed-wrong-rows'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
         hpxml.header.schedules_filepaths = [@tmp_csv_path]
@@ -1242,13 +1242,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.windows[0].wall_idref = 'foobar'
       elsif ['unavailable-period-missing-column'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-simple-vacancy.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-vacancy.xml')
         hpxml.header.unavailable_periods[0].column_name = 'foobar'
       else
         fail "Unhandled case: #{error_case}."
       end
 
-      hpxml_doc = hpxml.to_hpxml()
+      hpxml_doc = hpxml.to_doc()
 
       # Perform additional raw XML manipulation
       if ['invalid-datatype-boolean'].include? error_case
@@ -1401,24 +1401,24 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
       elsif ['power-outage'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-non-stochastic.csv')
       elsif ['schedule-file-and-setpoints'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/setpoints.csv')
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-setpoints.csv')
       elsif ['schedule-file-and-operating-mode'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml')
         hpxml.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
       else
         fail "Unhandled case: #{warning_case}."
       end
 
-      hpxml_doc = hpxml.to_hpxml()
+      hpxml_doc = hpxml.to_doc()
 
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
       _test_measure('warning', expected_warnings)

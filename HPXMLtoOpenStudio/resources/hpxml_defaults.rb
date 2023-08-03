@@ -16,12 +16,13 @@ class HPXMLDefaults
 
     # Check for presence of fuels once
     has_fuel = {}
-    hpxml_doc = hpxml.to_hpxml
+    hpxml_doc = hpxml.to_doc
     Constants.FossilFuels.each do |fuel|
       has_fuel[fuel] = hpxml_bldg.has_fuel(fuel, hpxml_doc)
     end
 
-    apply_header(hpxml.header, hpxml_bldg, epw_file, weather, nbeds)
+    apply_header(hpxml.header, epw_file, weather)
+    apply_header_sizing(hpxml.header, hpxml_bldg, weather, nbeds)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
     apply_building(hpxml_bldg, epw_file)
@@ -106,7 +107,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml_header, hpxml_bldg, epw_file, weather, nbeds)
+  def self.apply_header(hpxml_header, epw_file, weather)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -182,7 +183,9 @@ class HPXMLDefaults
         end
       end
     end
+  end
 
+  def self.apply_header_sizing(hpxml_header, hpxml_bldg, weather, nbeds)
     if hpxml_header.allow_increased_fixed_capacities.nil?
       hpxml_header.allow_increased_fixed_capacities = false
       hpxml_header.allow_increased_fixed_capacities_isdefaulted = true

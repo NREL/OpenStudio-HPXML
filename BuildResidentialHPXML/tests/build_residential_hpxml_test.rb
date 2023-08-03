@@ -310,7 +310,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
         hpxml.header.xml_generated_by = 'build_residential_hpxml_test.rb'
         hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-        hpxml_doc = hpxml.to_hpxml()
+        hpxml_doc = hpxml.to_doc()
         XMLHelper.write_file(hpxml_doc, hpxml_path)
       rescue Exception => e
         flunk "Error: Did not successfully generate #{hpxml_file}.\n#{e}\n#{e.backtrace.join('\n')}"
