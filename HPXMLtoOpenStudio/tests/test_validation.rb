@@ -839,7 +839,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported"],
-                            'hvac-gshp-invalid-bore-depth' => ['Bore depth (1260.0) not between 78.74 and 1259.843 ft'],
+                            'hvac-gshp-invalid-bore-depth' => ['Bore depth (1260.0) not between 78.74 and 498.688 ft'],
                             'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' and cooling system 'CoolingSystem1' are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],

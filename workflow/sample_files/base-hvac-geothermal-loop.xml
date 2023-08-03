@@ -357,9 +357,9 @@
               <LoopFlow>10.0</LoopFlow>
               <BoreholesOrTrenches>
                 <Count>9</Count>
-                <Length>1259.84</Length>
+                <Length>314.961</Length>
                 <Spacing>16.4042</Spacing>
-                <Diameter>6.8897638</Diameter>
+                <Diameter>5.905512</Diameter>
               </BoreholesOrTrenches>
               <Grout>
                 <Conductivity>0.5</Conductivity>
