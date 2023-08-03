@@ -12,7 +12,8 @@ def process_g_functions(filepath)
     puts "Processing #{config_json}..."
     json = JSON.load(file)
 
-    # the idea here is load json2 up with the "most square" m_n for each config/boreholes combo
+    # It's possible that multiple m_n keys exist for a given config/borehole combo.
+    # So, we are choosing the "most square" m_n for each config/boreholes combo.
     json2 = {}
     case config_json
     when 'rectangle_5m_v1.0.json'
