@@ -1363,27 +1363,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('gpm')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_or_trenches_count', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Count')
-    arg.setDescription("Number of boreholes or trenches. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_count', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Count')
+    arg.setDescription("Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_length', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Length')
-    arg.setDescription("Average length of each borehole (vertical) or trench (horizontal). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_length', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Length')
+    arg.setDescription("Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default is used.")
     arg.setUnits('ft')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_spacing', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Spacing')
-    arg.setDescription("Distance between bores/trenches. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_spacing', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Spacing')
+    arg.setDescription("Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
     arg.setUnits('ft')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_or_trenches_diameter', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes or Trenches Diameter')
-    arg.setDescription("Diameter of bores/trenches. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_diameter', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Diameter')
+    arg.setDescription("Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
     arg.setUnits('in')
     args << arg
 
@@ -5028,20 +5028,20 @@ class HPXMLFile
       loop_flow = args[:geothermal_loop_loop_flow].get
     end
 
-    if args[:geothermal_loop_boreholes_or_trenches_count].is_initialized
-      num_bore_holes = args[:geothermal_loop_boreholes_or_trenches_count].get
+    if args[:geothermal_loop_boreholes_count].is_initialized
+      num_bore_holes = args[:geothermal_loop_boreholes_count].get
     end
 
-    if args[:geothermal_loop_boreholes_or_trenches_length].is_initialized
-      bore_length = args[:geothermal_loop_boreholes_or_trenches_length].get
+    if args[:geothermal_loop_boreholes_length].is_initialized
+      bore_length = args[:geothermal_loop_boreholes_length].get
     end
 
-    if args[:geothermal_loop_boreholes_or_trenches_spacing].is_initialized
-      bore_spacing = args[:geothermal_loop_boreholes_or_trenches_spacing].get
+    if args[:geothermal_loop_boreholes_spacing].is_initialized
+      bore_spacing = args[:geothermal_loop_boreholes_spacing].get
     end
 
-    if args[:geothermal_loop_boreholes_or_trenches_diameter].is_initialized
-      bore_diameter = args[:geothermal_loop_boreholes_or_trenches_diameter].get
+    if args[:geothermal_loop_boreholes_diameter].is_initialized
+      bore_diameter = args[:geothermal_loop_boreholes_diameter].get
     end
 
     if args[:geothermal_loop_grout_conductivity].is_initialized

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f843e147-2f50-4b17-88d5-143a30c51bac</version_id>
-  <version_modified>2023-07-27T18:48:20Z</version_modified>
+  <version_id>e3226445-93ae-4198-a8d0-e1470528815d</version_id>
+  <version_modified>2023-08-03T22:19:07Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2791,36 +2791,36 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>geothermal_loop_boreholes_or_trenches_count</name>
-      <display_name>Geothermal Loop: Boreholes or Trenches Count</display_name>
-      <description>Number of boreholes or trenches. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
+      <name>geothermal_loop_boreholes_count</name>
+      <display_name>Geothermal Loop: Boreholes Count</display_name>
+      <description>Number of boreholes. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>geothermal_loop_boreholes_or_trenches_length</name>
-      <display_name>Geothermal Loop: Boreholes or Trenches Length</display_name>
-      <description>Average length of each borehole (vertical) or trench (horizontal). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
+      <name>geothermal_loop_boreholes_length</name>
+      <display_name>Geothermal Loop: Boreholes Length</display_name>
+      <description>Average length of each borehole (vertical). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default is used.</description>
       <type>Double</type>
       <units>ft</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>geothermal_loop_boreholes_or_trenches_spacing</name>
-      <display_name>Geothermal Loop: Boreholes or Trenches Spacing</display_name>
-      <description>Distance between bores/trenches. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <name>geothermal_loop_boreholes_spacing</name>
+      <display_name>Geothermal Loop: Boreholes Spacing</display_name>
+      <description>Distance between bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>ft</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>geothermal_loop_boreholes_or_trenches_diameter</name>
-      <display_name>Geothermal Loop: Boreholes or Trenches Diameter</display_name>
-      <description>Diameter of bores/trenches. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
+      <name>geothermal_loop_boreholes_diameter</name>
+      <display_name>Geothermal Loop: Boreholes Diameter</display_name>
+      <description>Diameter of bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>in</units>
       <required>false</required>
@@ -6829,7 +6829,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5AD047C0</checksum>
+      <checksum>EEB9E29D</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
