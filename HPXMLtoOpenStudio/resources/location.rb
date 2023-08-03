@@ -8,12 +8,6 @@ class Location
     apply_ground_temps(model, weather)
   end
 
-  def self.apply_weather_file(model, epw_path)
-    epw_file = OpenStudio::EpwFile.new(epw_path)
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-    return epw_file
-  end
-
   private
 
   def self.apply_site(model, epw_file)

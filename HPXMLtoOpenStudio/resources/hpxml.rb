@@ -1078,7 +1078,8 @@ class HPXML < Object
     def to_doc(doc)
       return if nil?
 
-      building = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building'])
+      hpxml = XMLHelper.create_elements_as_needed(doc, ['HPXML'])
+      building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
       if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
@@ -1112,57 +1113,57 @@ class HPXML < Object
       project_status = XMLHelper.add_element(building, 'ProjectStatus')
       XMLHelper.add_element(project_status, 'EventType', @event_type, :string)
 
-      @site.to_doc(doc)
-      @neighbor_buildings.to_doc(doc)
-      @building_occupancy.to_doc(doc)
-      @building_construction.to_doc(doc)
-      @climate_and_risk_zones.to_doc(doc)
-      @air_infiltration_measurements.to_doc(doc)
-      @air_infiltration.to_doc(doc)
-      @attics.to_doc(doc)
-      @foundations.to_doc(doc)
-      @roofs.to_doc(doc)
-      @rim_joists.to_doc(doc)
-      @walls.to_doc(doc)
-      @foundation_walls.to_doc(doc)
-      @floors.to_doc(doc)
-      @slabs.to_doc(doc)
-      @windows.to_doc(doc)
-      @skylights.to_doc(doc)
-      @doors.to_doc(doc)
-      @partition_wall_mass.to_doc(doc)
-      @furniture_mass.to_doc(doc)
-      @heating_systems.to_doc(doc)
-      @cooling_systems.to_doc(doc)
-      @heat_pumps.to_doc(doc)
-      @hvac_plant.to_doc(doc)
-      @hvac_controls.to_doc(doc)
-      @hvac_distributions.to_doc(doc)
-      @ventilation_fans.to_doc(doc)
-      @water_heating_systems.to_doc(doc)
-      @hot_water_distributions.to_doc(doc)
-      @water_fixtures.to_doc(doc)
-      @water_heating.to_doc(doc)
-      @solar_thermal_systems.to_doc(doc)
-      @pv_systems.to_doc(doc)
-      @inverters.to_doc(doc)
-      @batteries.to_doc(doc)
-      @generators.to_doc(doc)
-      @clothes_washers.to_doc(doc)
-      @clothes_dryers.to_doc(doc)
-      @dishwashers.to_doc(doc)
-      @refrigerators.to_doc(doc)
-      @freezers.to_doc(doc)
-      @dehumidifiers.to_doc(doc)
-      @cooking_ranges.to_doc(doc)
-      @ovens.to_doc(doc)
-      @lighting_groups.to_doc(doc)
-      @ceiling_fans.to_doc(doc)
-      @lighting.to_doc(doc)
-      @pools.to_doc(doc)
-      @hot_tubs.to_doc(doc)
-      @plug_loads.to_doc(doc)
-      @fuel_loads.to_doc(doc)
+      @site.to_doc(building)
+      @neighbor_buildings.to_doc(building)
+      @building_occupancy.to_doc(building)
+      @building_construction.to_doc(building)
+      @climate_and_risk_zones.to_doc(building)
+      @air_infiltration_measurements.to_doc(building)
+      @air_infiltration.to_doc(building)
+      @attics.to_doc(building)
+      @foundations.to_doc(building)
+      @roofs.to_doc(building)
+      @rim_joists.to_doc(building)
+      @walls.to_doc(building)
+      @foundation_walls.to_doc(building)
+      @floors.to_doc(building)
+      @slabs.to_doc(building)
+      @windows.to_doc(building)
+      @skylights.to_doc(building)
+      @doors.to_doc(building)
+      @partition_wall_mass.to_doc(building)
+      @furniture_mass.to_doc(building)
+      @heating_systems.to_doc(building)
+      @cooling_systems.to_doc(building)
+      @heat_pumps.to_doc(building)
+      @hvac_plant.to_doc(building)
+      @hvac_controls.to_doc(building)
+      @hvac_distributions.to_doc(building)
+      @ventilation_fans.to_doc(building)
+      @water_heating_systems.to_doc(building)
+      @hot_water_distributions.to_doc(building)
+      @water_fixtures.to_doc(building)
+      @water_heating.to_doc(building)
+      @solar_thermal_systems.to_doc(building)
+      @pv_systems.to_doc(building)
+      @inverters.to_doc(building)
+      @batteries.to_doc(building)
+      @generators.to_doc(building)
+      @clothes_washers.to_doc(building)
+      @clothes_dryers.to_doc(building)
+      @dishwashers.to_doc(building)
+      @refrigerators.to_doc(building)
+      @freezers.to_doc(building)
+      @dehumidifiers.to_doc(building)
+      @cooking_ranges.to_doc(building)
+      @ovens.to_doc(building)
+      @lighting_groups.to_doc(building)
+      @ceiling_fans.to_doc(building)
+      @lighting.to_doc(building)
+      @pools.to_doc(building)
+      @hot_tubs.to_doc(building)
+      @plug_loads.to_doc(building)
+      @fuel_loads.to_doc(building)
     end
 
     def from_doc(building)
@@ -1710,10 +1711,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      site = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site'])
+      site = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'Site'])
       XMLHelper.add_element(site, 'SiteType', @site_type, :string, @site_type_isdefaulted) unless @site_type.nil?
       XMLHelper.add_element(site, 'Surroundings', @surroundings, :string) unless @surroundings.nil?
       XMLHelper.add_element(site, 'VerticalSurroundings', @vertical_surroundings, :string) unless @vertical_surroundings.nil?
@@ -1774,10 +1775,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      neighbors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site', 'extension', 'Neighbors'])
+      neighbors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'Site', 'extension', 'Neighbors'])
       neighbor_building = XMLHelper.add_element(neighbors, 'NeighborBuilding')
       XMLHelper.add_element(neighbor_building, 'Orientation', @orientation, :string, @orientation_isdefaulted) unless @orientation.nil?
       XMLHelper.add_element(neighbor_building, 'Azimuth', @azimuth, :integer, @azimuth_isdefaulted) unless @azimuth.nil?
@@ -1804,10 +1805,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      building_occupancy = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingOccupancy'])
+      building_occupancy = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'BuildingOccupancy'])
       XMLHelper.add_element(building_occupancy, 'NumberofResidents', @number_of_residents, :float, @number_of_residents_isdefaulted) unless @number_of_residents.nil?
       XMLHelper.add_extension(building_occupancy, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(building_occupancy, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
@@ -1839,10 +1840,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      building_construction = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
+      building_construction = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
       XMLHelper.add_element(building_construction, 'YearBuilt', @year_built, :integer) unless @year_built.nil?
       XMLHelper.add_element(building_construction, 'ResidentialFacilityType', @residential_facility_type, :string) unless @residential_facility_type.nil?
       XMLHelper.add_element(building_construction, 'NumberofUnits', @number_of_units, :integer, @number_of_units_isdefaulted) unless @number_of_units.nil?
@@ -1891,10 +1892,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'ClimateandRiskZones'])
+      climate_and_risk_zones = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'ClimateandRiskZones'])
 
       @climate_zone_ieccs.to_doc(climate_and_risk_zones)
 
@@ -1976,10 +1977,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      air_infiltration = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'AirInfiltration'])
+      air_infiltration = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'AirInfiltration'])
       XMLHelper.add_extension(air_infiltration, 'HasFlueOrChimneyInConditionedSpace', @has_flue_or_chimney_in_conditioned_space, :boolean, @has_flue_or_chimney_in_conditioned_space_isdefaulted) unless @has_flue_or_chimney_in_conditioned_space.nil?
     end
 
@@ -2017,10 +2018,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      air_infiltration = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'AirInfiltration'])
+      air_infiltration = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'AirInfiltration'])
       air_infiltration_measurement = XMLHelper.add_element(air_infiltration, 'AirInfiltrationMeasurement')
       sys_id = XMLHelper.add_element(air_infiltration_measurement, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2135,10 +2136,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      attics = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Attics'])
+      attics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Attics'])
       attic = XMLHelper.add_element(attics, 'Attic')
       sys_id = XMLHelper.add_element(attic, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2358,10 +2359,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      foundations = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Foundations'])
+      foundations = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Foundations'])
       foundation = XMLHelper.add_element(foundations, 'Foundation')
       sys_id = XMLHelper.add_element(foundation, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2560,10 +2561,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      roofs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Roofs'])
+      roofs = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Roofs'])
       roof = XMLHelper.add_element(roofs, 'Roof')
       sys_id = XMLHelper.add_element(roof, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2708,10 +2709,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      rim_joists = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'RimJoists'])
+      rim_joists = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'RimJoists'])
       rim_joist = XMLHelper.add_element(rim_joists, 'RimJoist')
       sys_id = XMLHelper.add_element(rim_joist, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2865,10 +2866,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      walls = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Walls'])
+      walls = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Walls'])
       wall = XMLHelper.add_element(walls, 'Wall')
       sys_id = XMLHelper.add_element(wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3071,10 +3072,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      foundation_walls = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'FoundationWalls'])
+      foundation_walls = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'FoundationWalls'])
       foundation_wall = XMLHelper.add_element(foundation_walls, 'FoundationWall')
       sys_id = XMLHelper.add_element(foundation_wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3234,10 +3235,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      floors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Floors'])
+      floors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Floors'])
       floor = XMLHelper.add_element(floors, 'Floor')
       sys_id = XMLHelper.add_element(floor, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3371,10 +3372,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      slabs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Slabs'])
+      slabs = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Slabs'])
       slab = XMLHelper.add_element(slabs, 'Slab')
       sys_id = XMLHelper.add_element(slab, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3499,10 +3500,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      windows = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Windows'])
+      windows = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Windows'])
       window = XMLHelper.add_element(windows, 'Window')
       sys_id = XMLHelper.add_element(window, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3653,10 +3654,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      skylights = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Skylights'])
+      skylights = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Skylights'])
       skylight = XMLHelper.add_element(skylights, 'Skylight')
       sys_id = XMLHelper.add_element(skylight, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3791,10 +3792,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      doors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Doors'])
+      doors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Doors'])
       door = XMLHelper.add_element(doors, 'Door')
       sys_id = XMLHelper.add_element(door, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3829,10 +3830,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      partition_wall_mass = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'extension', 'PartitionWallMass'])
+      partition_wall_mass = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'extension', 'PartitionWallMass'])
       XMLHelper.add_element(partition_wall_mass, 'AreaFraction', @area_fraction, :float, @area_fraction_isdefaulted) unless @area_fraction.nil?
       if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
         interior_finish = XMLHelper.add_element(partition_wall_mass, 'InteriorFinish')
@@ -3865,10 +3866,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      furniture_mass = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'extension', 'FurnitureMass'])
+      furniture_mass = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'extension', 'FurnitureMass'])
       XMLHelper.add_element(furniture_mass, 'AreaFraction', @area_fraction, :float, @area_fraction_isdefaulted) unless @area_fraction.nil?
       XMLHelper.add_element(furniture_mass, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
     end
@@ -3975,11 +3976,11 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -4151,11 +4152,11 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -4358,11 +4359,11 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -4564,10 +4565,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       if not @hdl_total.nil?
         dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignLoads'])
         XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
@@ -4642,10 +4643,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC'])
+      hvac = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC'])
       hvac_control = XMLHelper.add_element(hvac, 'HVACControl')
       sys_id = XMLHelper.add_element(hvac_control, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -4790,10 +4791,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hvac = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC'])
+      hvac = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC'])
       hvac_distribution = XMLHelper.add_element(hvac, 'HVACDistribution')
       sys_id = XMLHelper.add_element(hvac_distribution, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5165,10 +5166,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      ventilation_fans = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'MechanicalVentilation', 'VentilationFans'])
+      ventilation_fans = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'MechanicalVentilation', 'VentilationFans'])
       ventilation_fan = XMLHelper.add_element(ventilation_fans, 'VentilationFan')
       sys_id = XMLHelper.add_element(ventilation_fan, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5314,10 +5315,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
+      water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
       water_heating_system = XMLHelper.add_element(water_heating, 'WaterHeatingSystem')
       sys_id = XMLHelper.add_element(water_heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5423,10 +5424,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
+      water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
       hot_water_distribution = XMLHelper.add_element(water_heating, 'HotWaterDistribution')
       sys_id = XMLHelper.add_element(hot_water_distribution, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5519,10 +5520,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
+      water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
       water_fixture = XMLHelper.add_element(water_heating, 'WaterFixture')
       sys_id = XMLHelper.add_element(water_fixture, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5549,10 +5550,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
+      water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
       XMLHelper.add_extension(water_heating, 'WaterFixturesUsageMultiplier', @water_fixtures_usage_multiplier, :float, @water_fixtures_usage_multiplier_isdefaulted) unless @water_fixtures_usage_multiplier.nil?
       XMLHelper.add_extension(water_heating, 'WaterFixturesWeekdayScheduleFractions', @water_fixtures_weekday_fractions, :string, @water_fixtures_weekday_fractions_isdefaulted) unless @water_fixtures_weekday_fractions.nil?
       XMLHelper.add_extension(water_heating, 'WaterFixturesWeekendScheduleFractions', @water_fixtures_weekend_fractions, :string, @water_fixtures_weekend_fractions_isdefaulted) unless @water_fixtures_weekend_fractions.nil?
@@ -5613,10 +5614,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      solar_thermal = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'SolarThermal'])
+      solar_thermal = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'SolarThermal'])
       solar_thermal_system = XMLHelper.add_element(solar_thermal, 'SolarThermalSystem')
       sys_id = XMLHelper.add_element(solar_thermal_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5697,10 +5698,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      photovoltaics = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Photovoltaics'])
+      photovoltaics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Photovoltaics'])
       pv_system = XMLHelper.add_element(photovoltaics, 'PVSystem')
       sys_id = XMLHelper.add_element(pv_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5780,10 +5781,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      photovoltaics = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Photovoltaics'])
+      photovoltaics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Photovoltaics'])
       inverter = XMLHelper.add_element(photovoltaics, 'Inverter')
       sys_id = XMLHelper.add_element(inverter, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5825,10 +5826,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      generators = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'extension', 'Generators'])
+      generators = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'extension', 'Generators'])
       generator = XMLHelper.add_element(generators, 'Generator')
       sys_id = XMLHelper.add_element(generator, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5880,10 +5881,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      batteries = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Batteries'])
+      batteries = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Batteries'])
       battery = XMLHelper.add_element(batteries, 'Battery')
       sys_id = XMLHelper.add_element(battery, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5988,10 +5989,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       clothes_washer = XMLHelper.add_element(appliances, 'ClothesWasher')
       sys_id = XMLHelper.add_element(clothes_washer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6075,10 +6076,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       clothes_dryer = XMLHelper.add_element(appliances, 'ClothesDryer')
       sys_id = XMLHelper.add_element(clothes_dryer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6173,10 +6174,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       dishwasher = XMLHelper.add_element(appliances, 'Dishwasher')
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6252,10 +6253,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       refrigerator = XMLHelper.add_element(appliances, 'Refrigerator')
       sys_id = XMLHelper.add_element(refrigerator, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6310,10 +6311,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       freezer = XMLHelper.add_element(appliances, 'Freezer')
       sys_id = XMLHelper.add_element(freezer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6366,10 +6367,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       dehumidifier = XMLHelper.add_element(appliances, 'Dehumidifier')
       sys_id = XMLHelper.add_element(dehumidifier, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6424,10 +6425,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       cooking_range = XMLHelper.add_element(appliances, 'CookingRange')
       sys_id = XMLHelper.add_element(cooking_range, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6481,10 +6482,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
       oven = XMLHelper.add_element(appliances, 'Oven')
       sys_id = XMLHelper.add_element(oven, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6526,10 +6527,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
+      lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
       lighting_group = XMLHelper.add_element(lighting, 'LightingGroup')
       sys_id = XMLHelper.add_element(lighting_group, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6571,10 +6572,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
+      lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
       XMLHelper.add_extension(lighting, 'InteriorUsageMultiplier', @interior_usage_multiplier, :float, @interior_usage_multiplier_isdefaulted) unless @interior_usage_multiplier.nil?
       XMLHelper.add_extension(lighting, 'GarageUsageMultiplier', @garage_usage_multiplier, :float, @garage_usage_multiplier_isdefaulted) unless @garage_usage_multiplier.nil?
       XMLHelper.add_extension(lighting, 'ExteriorUsageMultiplier', @exterior_usage_multiplier, :float, @exterior_usage_multiplier_isdefaulted) unless @exterior_usage_multiplier.nil?
@@ -6588,7 +6589,7 @@ class HPXML < Object
       XMLHelper.add_extension(lighting, 'ExteriorWeekendScheduleFractions', @exterior_weekend_fractions, :string, @exterior_weekend_fractions_isdefaulted) unless @exterior_weekend_fractions.nil?
       XMLHelper.add_extension(lighting, 'ExteriorMonthlyScheduleMultipliers', @exterior_monthly_multipliers, :string, @exterior_monthly_multipliers_isdefaulted) unless @exterior_monthly_multipliers.nil?
       if @holiday_exists
-        exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
+        exterior_holiday_lighting = XMLHelper.create_elements_as_needed(lighting, ['extension', 'ExteriorHolidayLighting'])
         if not @holiday_kwh_per_day.nil?
           holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
           XMLHelper.add_element(holiday_lighting_load, 'Units', UnitsKwhPerDay, :string)
@@ -6663,10 +6664,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
+      lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
       ceiling_fan = XMLHelper.add_element(lighting, 'CeilingFan')
       sys_id = XMLHelper.add_element(ceiling_fan, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6721,10 +6722,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      pools = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Pools'])
+      pools = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Pools'])
       pool = XMLHelper.add_element(pools, 'Pool')
       sys_id = XMLHelper.add_element(pool, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6829,10 +6830,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      hot_tubs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'HotTubs'])
+      hot_tubs = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'HotTubs'])
       hot_tub = XMLHelper.add_element(hot_tubs, 'HotTub')
       sys_id = XMLHelper.add_element(hot_tub, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6935,10 +6936,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
+      misc_loads = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'MiscLoads'])
       plug_load = XMLHelper.add_element(misc_loads, 'PlugLoad')
       sys_id = XMLHelper.add_element(plug_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6997,10 +6998,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(building)
       return if nil?
 
-      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
+      misc_loads = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'MiscLoads'])
       fuel_load = XMLHelper.add_element(misc_loads, 'FuelLoad')
       sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)

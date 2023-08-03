@@ -568,8 +568,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # FIXME: Relax this constraint (using a new building_id measure argument?)
     if hpxml.buildings.size > 1
-      runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
-      return false
+      runner.registerWarning('Cannot currently handle an HPXML with multiple Building elements.')
     end
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml.buildings[0]

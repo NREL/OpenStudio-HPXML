@@ -122,28 +122,49 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       return false unless hpxml.errors.empty?
 
-      epw_path, weather = nil, nil
+      eri_version = hpxml.header.eri_calculation_version # Hidden feature
+      eri_version = 'latest' if eri_version.nil?
+      eri_version = Constants.ERIVersions[-1] if eri_version == 'latest'
+
+      # Process weather once upfront
+      epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
+      weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
+      epw_file = OpenStudio::EpwFile.new(epw_path)
+
+      # Process schedules & emissions once upfront
+      check_file_references(hpxml.header, hpxml_path)
+      schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                         schedules_paths: hpxml.header.schedules_filepaths,
+                                         year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
+                                         unavailable_periods: hpxml.header.unavailable_periods,
+                                         output_path: File.join(output_dir, 'in.schedules.csv'))
+      validate_emissions_files(hpxml.header)
+
+      # Apply HPXML defaults upfront
+      hpxml.buildings.each do |hpxml_bldg|
+        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
+      end
+
+      # Write updated HPXML object (w/ defaults) to file for inspection
+      hpxml_defaults_path = File.join(output_dir, 'in.xml')
+      XMLHelper.write_file(hpxml.to_doc, hpxml_defaults_path)
+
+      # Create OpenStudio model
       hpxml_osm_map = {}
-
-      hpxml.buildings.each_with_index do |hpxml_bldg, _i|
-        if epw_path.nil?
-          epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
-          weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
-        end
-
+      hpxml.buildings.each do |hpxml_bldg|
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
 
+      # Merge unit models into final model
       if hpxml.buildings.size > 1
-        # Merge unit models into final model
         add_unit_model_to_model(model, hpxml_osm_map)
       end
 
@@ -151,16 +172,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       add_unmet_hours_output(model, hpxml_osm_map)
       add_loads_output(model, add_component_loads, hpxml_osm_map)
       set_output_files(model)
+      hpxml_bldg = hpxml.buildings[0] # FIXME: Need to address this
+      add_additional_properties(model, hpxml.header, hpxml_bldg, hpxml_path, building_id, epw_file, hpxml_defaults_path)
       # Uncomment to debug EMS
       # add_ems_debug_output(model)
 
       if debug
+        # Write OSM file to run dir
         osm_output_path = File.join(output_dir, 'in.osm')
         File.write(osm_output_path, model.to_s)
         runner.registerInfo("Wrote file: #{osm_output_path}")
-      end
 
-      if debug
+        # Copy EPW file to run dir
         epw_output_path = File.join(output_dir, 'in.epw')
         FileUtils.cp(epw_path, epw_output_path)
       end
@@ -346,14 +369,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  def create_unit_model(hpxml, hpxml_bldg, runner, model, hpxml_path, epw_path, weather, output_dir, building_id, debug)
+  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
     @debug = debug
-
-    @eri_version = @hpxml_header.eri_calculation_version # Hidden feature
-    @eri_version = 'latest' if @eri_version.nil?
-    @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
+    @schedules_file = schedules_file
+    @eri_version = eri_version
 
     @apply_ashrae140_assumptions = @hpxml_header.apply_ashrae140_assumptions # Hidden feature
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
@@ -367,15 +388,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     model.setStrictnessLevel('None'.to_StrictnessLevel)
 
     # Init
-    check_file_references(hpxml_path)
-    epw_file = Location.apply_weather_file(model, epw_path)
-    @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml_header.schedules_filepaths,
-                                        year: Location.get_sim_calendar_year(@hpxml_header.sim_calendar_year, epw_file),
-                                        unavailable_periods: @hpxml_header.unavailable_periods,
-                                        output_path: File.join(output_dir, 'in.schedules.csv'))
-    set_defaults_and_globals(runner, hpxml, output_dir, epw_file, weather, @schedules_file)
-    validate_emissions_files()
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+    set_defaults_and_globals()
     # FIXME: Need to address this
     Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
@@ -429,20 +443,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_photovoltaics(model)
     add_generators(model)
     add_batteries(runner, model, spaces)
-    # FIXME: Need to address add_additional_properties
-    add_additional_properties(model, hpxml_path, building_id, epw_file)
   end
 
-  def check_file_references(hpxml_path)
+  def check_file_references(hpxml_header, hpxml_path)
     # Check/update file references
-    @hpxml_header.schedules_filepaths = @hpxml_header.schedules_filepaths.collect { |sfp|
+    hpxml_header.schedules_filepaths = hpxml_header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(hpxml_path),
                           'Schedules')
     }
 
-    @hpxml_header.emissions_scenarios.each do |scenario|
-      if @hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
+    hpxml_header.emissions_scenarios.each do |scenario|
+      if hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
         fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
       end
       next if scenario.elec_schedule_filepath.nil?
@@ -453,8 +465,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def validate_emissions_files()
-    @hpxml_header.emissions_scenarios.each do |scenario|
+  def validate_emissions_files(hpxml_header)
+    hpxml_header.emissions_scenarios.each do |scenario|
       next if scenario.elec_schedule_filepath.nil?
 
       data = File.readlines(scenario.elec_schedule_filepath)
@@ -470,7 +482,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def set_defaults_and_globals(runner, hpxml, output_dir, epw_file, weather, schedules_file)
+  def set_defaults_and_globals()
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -482,20 +494,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @nbeds = @hpxml_bldg.building_construction.number_of_bedrooms
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml_bldg)
 
-    # Apply defaults to HPXML object
-    HPXMLDefaults.apply(runner, hpxml, @hpxml_bldg, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
-
-    # Write updated HPXML object (w/ defaults) to file for inspection
-    # FIXME: Need to address this
-    @hpxml_defaults_path = File.join(output_dir, 'in.xml')
-    XMLHelper.write_file(hpxml.to_doc, @hpxml_defaults_path)
-
-    # Now that we've written in.xml...
-    # 1. ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
+    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
-    # 2. apply unit multipliers to HVAC systems and water heaters
+    # Apply unit multipliers to HVAC systems and water heaters
     HVAC.apply_unit_multiplier(@hpxml_bldg)
-    # 3. make adjustments for modeling purposes
+    # Make adjustments for modeling purposes
     @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
     @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
@@ -2013,18 +2016,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_additional_properties(model, hpxml_path, building_id, epw_file)
+  def add_additional_properties(model, hpxml_header, hpxml_bldg, hpxml_path, building_id, epw_file, hpxml_defaults_path)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
-    additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
+    additionalProperties.setFeature('hpxml_defaults_path', hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
-    emissions_scenario_names = @hpxml_header.emissions_scenarios.map { |s| s.name }.to_s
+    emissions_scenario_names = hpxml_header.emissions_scenarios.map { |s| s.name }.to_s
     additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
-    emissions_scenario_types = @hpxml_header.emissions_scenarios.map { |s| s.emissions_type }.to_s
+    emissions_scenario_types = hpxml_header.emissions_scenarios.map { |s| s.emissions_type }.to_s
     additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
-    additionalProperties.setFeature('has_heating', @hpxml_bldg.total_fraction_heat_load_served > 0)
-    additionalProperties.setFeature('has_cooling', @hpxml_bldg.total_fraction_cool_load_served > 0)
+    additionalProperties.setFeature('has_heating', hpxml_bldg.total_fraction_heat_load_served > 0)
+    additionalProperties.setFeature('has_cooling', hpxml_bldg.total_fraction_cool_load_served > 0)
     additionalProperties.setFeature('is_southern_hemisphere', epw_file.latitude < 0)
   end
 

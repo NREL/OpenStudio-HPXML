@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3724f4a1-7af3-445c-86e9-73fcc3598550</version_id>
-  <version_modified>2023-08-03T19:23:08Z</version_modified>
+  <version_id>b4a0d9ad-d9d5-49c7-aef7-9fd3ac723558</version_id>
+  <version_modified>2023-08-03T21:12:30Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9AF2C9A5</checksum>
+      <checksum>3F0C784F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -238,7 +238,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>881B0576</checksum>
+      <checksum>48F3DEE3</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -292,7 +292,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>50558171</checksum>
+      <checksum>D6CB36BA</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
