@@ -2057,15 +2057,15 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
   ``SystemIdentifier``                      id                                              Yes                       Unique identifier
   ``LoopConfiguration``                     string                         See [#]_         Yes
-  ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_
+  ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_  Water flow rate through the geothermal loop
   ``BoreholesOrTrenches/Count``             integer                        > 0              No [#]_   autosized [#]_
-  ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_
-  ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4
+  ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_  Length (i.e., average depth) of each borehole
+  ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
   ``Pipe/Conductivity``                     double            Btu/hr-ft-F  > 0              No        0.23
   ``Pipe/Diameter``                         double            in           See [#]_         No        0.75
-  ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_
+  ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_        Center-to-center distance between two branches of a vertical U-tube
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
@@ -2079,7 +2079,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **U**: 7, 9, or 10
          | - **Lopsided U**: 6, 7, 8, 9, or 10
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
-  .. [#] BoreholesOrTrenches/Length must be between 79 ft and 1,259 ft.
+  .. [#] BoreholesOrTrenches/Length must be between 79 ft and 500 ft.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
@@ -2088,6 +2088,13 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] Sum of U-tube spacing and pipe outer diameter.
   .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
+
+.. note::
+
+  For a given combination of ``extension/BorefieldConfiguration``, ``BoreholesOrTrenches/Count``, ``BoreholesOrTrenches/Spacing``, ``BoreholesOrTrenches/Length``, and ``BoreholesOrTrenches/Diameter``, g-function values are determined using the `G-Function Library <https://gdr.openei.org/submissions/1325>`_ (from the Geothermal Data Repository).
+  To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
+  ``BoreholesOrTrenches/Length`` therefore has a minimum of 24 m (or 79 ft).
+  ``BoreholesOrTrenches/Length``, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
 
 .. _hvac_control:
 
