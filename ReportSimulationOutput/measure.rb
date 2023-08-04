@@ -350,8 +350,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     unmet_hours_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetHoursProgram }
     total_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameTotalLoadsProgram }
     comp_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameComponentLoadsProgram }
-    heated_zones = emissions_scenario_names = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
-    cooled_zones = emissions_scenario_names = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
+    heated_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
+    cooled_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
 
     args = get_arguments(runner, arguments(model), user_arguments)
 
