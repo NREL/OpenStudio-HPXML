@@ -3889,7 +3889,6 @@ class HPXMLFile
 
     hpxml.buildings.add(building_id: 'MyBuilding',
                         event_type: 'proposed workscope',
-                        site_id: 'SiteID',
                         zip_code: zip_code,
                         state_code: state_code,
                         time_zone_utc_offset: time_zone_utc_offset,
