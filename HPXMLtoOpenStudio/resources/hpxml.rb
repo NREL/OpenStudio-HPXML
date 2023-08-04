@@ -1064,7 +1064,7 @@ class HPXML < Object
                    :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                    :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                    :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
-    ATTRS = [:building_id, :state_code, :zip_code, :time_zone_utc_offset, :egrid_region,
+    ATTRS = [:building_id, :site_id, :state_code, :zip_code, :time_zone_utc_offset, :egrid_region,
              :egrid_subregion, :cambium_region_gea, :dst_enabled, :dst_begin_month,
              :dst_begin_day, :dst_end_month, :dst_end_day, :event_type]
     attr_accessor(*CLASS_ATTRS)
@@ -1085,7 +1085,7 @@ class HPXML < Object
       if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
         building_site = XMLHelper.add_element(building, 'Site')
         site_id = XMLHelper.add_element(building_site, 'SiteID')
-        XMLHelper.add_attribute(site_id, 'id', 'SiteID')
+        XMLHelper.add_attribute(site_id, 'id', @site_id)
         if (not @state_code.nil?) || (not @zip_code.nil?)
           address = XMLHelper.add_element(building_site, 'Address')
           XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
@@ -1170,6 +1170,7 @@ class HPXML < Object
       if not building.nil?
         @building_id = HPXML::get_id(building, 'BuildingID')
         @event_type = XMLHelper.get_value(building, 'ProjectStatus/EventType', :string)
+        @site_id = HPXML::get_id(building, 'Site/SiteID')
         @state_code = XMLHelper.get_value(building, 'Site/Address/StateCode', :string)
         @zip_code = XMLHelper.get_value(building, 'Site/Address/ZipCode', :string)
         @egrid_region = XMLHelper.get_value(building, 'Site/eGridRegion', :string)

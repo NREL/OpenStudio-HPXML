@@ -15,6 +15,12 @@
         <UtilityBillScenario>
           <Name>Bills</Name>
         </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>Bills</Name>
+        </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>Bills</Name>
+        </UtilityBillScenario>
       </UtilityBillScenarios>
     </extension>
   </SoftwareInfo>
@@ -441,6 +447,14 @@
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
         </ClothesWasher>
+        <ClothesDryer>
+          <SystemIdentifier id='ClothesDryer1'/>
+          <Location>living space</Location>
+          <FuelType>electricity</FuelType>
+          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <Vented>true</Vented>
+          <VentedFlowRate>150.0</VentedFlowRate>
+        </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
           <Location>living space</Location>
@@ -778,7 +792,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window1InteriorShading_2'/>
+              <SystemIdentifier id='Window1_2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -792,7 +806,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window2InteriorShading_2'/>
+              <SystemIdentifier id='Window2_2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -806,7 +820,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window3InteriorShading_2'/>
+              <SystemIdentifier id='Window3_2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -820,7 +834,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window4InteriorShading_2'/>
+              <SystemIdentifier id='Window4_2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -965,6 +979,14 @@
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
         </ClothesWasher>
+        <ClothesDryer>
+          <SystemIdentifier id='ClothesDryer1_2'/>
+          <Location>living space</Location>
+          <FuelType>electricity</FuelType>
+          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <Vented>true</Vented>
+          <VentedFlowRate>150.0</VentedFlowRate>
+        </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_2'/>
           <Location>living space</Location>
@@ -1302,7 +1324,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window1InteriorShading_3'/>
+              <SystemIdentifier id='Window1_3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -1316,7 +1338,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window2InteriorShading_3'/>
+              <SystemIdentifier id='Window2_3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -1330,7 +1352,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window3InteriorShading_3'/>
+              <SystemIdentifier id='Window3_3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -1344,7 +1366,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window4InteriorShading_3'/>
+              <SystemIdentifier id='Window4_3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>

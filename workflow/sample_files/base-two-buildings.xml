@@ -556,7 +556,7 @@
   <Building>
     <BuildingID id='MyBuilding_2'/>
     <Site>
-      <SiteID id='SiteID'/>
+      <SiteID id='SiteID_2'/>
       <Address>
         <StateCode>CO</StateCode>
       </Address>

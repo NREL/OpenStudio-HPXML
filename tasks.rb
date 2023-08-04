@@ -24,7 +24,7 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    next if !hpxml_filename.include? 'two-buildings'
+    # next if !hpxml_filename.include? 'base.xml'
 
     puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -78,12 +78,7 @@ def create_hpxmls
       exit!
     end
 
-    building_id = nil
-    if hpxml_path.include? 'buildings'
-      building_id = 'ALL'
-    end
-
-    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
+    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
     if hpxml_path.include? 'ASHRAE_Standard_140'
       apply_hpxml_modification_ashrae_140(hpxml)
     else

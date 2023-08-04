@@ -3390,7 +3390,7 @@ class HPXMLFile
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path_in)
+    hpxml = HPXML.new(hpxml_path: hpxml_path_in, building_id: 'ALL')
 
     set_header(hpxml, args)
     hpxml_bldg = add_building(hpxml, args)
@@ -3462,7 +3462,6 @@ class HPXMLFile
       # FIXME: Address this when multiple buildings
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
-      # unique_hpxml_ids(hpxml_doc)
     end
 
     return hpxml_doc
@@ -3890,6 +3889,7 @@ class HPXMLFile
 
     hpxml.buildings.add(building_id: 'MyBuilding',
                         event_type: 'proposed workscope',
+                        site_id: 'SiteID',
                         zip_code: zip_code,
                         state_code: state_code,
                         time_zone_utc_offset: time_zone_utc_offset,
