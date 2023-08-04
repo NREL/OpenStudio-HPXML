@@ -42,6 +42,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path_in', false)
+    arg.setDisplayName('HPXML File Path In')
+    arg.setDescription('Absolute/relative path of the existing HPXML file.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -3156,7 +3161,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(hpxml_path)
     end
 
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path)
+    # Existing HPXML File
+    if args[:hpxml_path_in].is_initialized
+      hpxml_path_in = args[:hpxml_path_in].get
+      unless (Pathname.new hpxml_path_in).absolute?
+        hpxml_path_in = File.expand_path(hpxml_path_in)
+      end
+    end
+
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -3362,7 +3375,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_path, hpxml_path)
+  def self.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
     epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
       weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
@@ -3377,7 +3390,7 @@ class HPXMLFile
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
 
-    hpxml = HPXML.new
+    hpxml = HPXML.new(hpxml_path: hpxml_path_in)
 
     set_header(hpxml, args)
     hpxml_bldg = add_building(hpxml, args)
@@ -3434,6 +3447,7 @@ class HPXMLFile
     renumber_hpxml_ids(hpxml_bldg)
 
     hpxml_doc = hpxml.to_doc()
+    unique_hpxml_ids(hpxml_doc)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_validation]
@@ -3446,8 +3460,9 @@ class HPXMLFile
     if args[:apply_defaults]
       eri_version = Constants.ERIVersions[-1]
       # FIXME: Address this when multiple buildings
-      HPXMLDefaults.apply(runner, hpxml, hpxml.buildings[0], eri_version, weather, epw_file: epw_file)
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
+      # unique_hpxml_ids(hpxml_doc)
     end
 
     return hpxml_doc
@@ -6424,6 +6439,25 @@ class HPXMLFile
         if surf.respond_to? :under_slab_insulation_id
           surf.under_slab_insulation_id = "#{surf_name}#{i + 1}UnderSlabInsulation"
         end
+      end
+    end
+  end
+
+  def self.unique_hpxml_ids(hpxml_doc)
+    hpxml = XMLHelper.get_element(hpxml_doc, '/HPXML')
+    buildings = XMLHelper.get_elements(hpxml, 'Building')
+    n = buildings.size
+    bldg_no = ''
+    bldg_no = "_#{n}" if n > 1
+
+    # Make all IDs unique so the HPXML is valid
+    buildings[-1].each_node do |node|
+      next unless node.is_a?(Oga::XML::Element)
+
+      if not XMLHelper.get_attribute_value(node, 'id').nil?
+        XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}#{bldg_no}")
+      elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
+        XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}#{bldg_no}")
       end
     end
   end
