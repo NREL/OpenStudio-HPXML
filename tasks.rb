@@ -24,7 +24,7 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    # next if !hpxml_filename.include? 'multiple-buildings'
+    # next if !hpxml_filename.include? 'two-buildings-detailed'
 
     puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)

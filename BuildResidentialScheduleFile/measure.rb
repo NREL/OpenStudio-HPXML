@@ -97,13 +97,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:hpxml_output_path] = hpxml_output_path
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
 
     # FIXME: Relax this constraint (using a new building_id measure argument?)
-    if hpxml.buildings.size > 1
-      runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
-      return false
-    end
+    # if hpxml.buildings.size > 1
+    # runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
+    # return false
+    # end
     hpxml_bldg = hpxml.buildings[0]
 
     # exit if number of occupants is zero
