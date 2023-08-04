@@ -1462,7 +1462,7 @@ class HPXMLDefaults
         end
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
-        HVAC.set_fan_power_rated(cooling_system) unless use_eer
+        HVAC.set_fan_power_rated(cooling_system, use_eer)
         HVAC.set_cool_c_d(cooling_system)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
         HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
@@ -1493,7 +1493,7 @@ class HPXMLDefaults
           use_eer_cop = false
         end
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
+        HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump)
@@ -1520,6 +1520,7 @@ class HPXMLDefaults
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+
       # Assign minimum capacity here to avoid E+ simulation error
       min_capacity = 1.0
       heat_pump.heating_capacity = [heat_pump.heating_capacity, min_capacity].max
