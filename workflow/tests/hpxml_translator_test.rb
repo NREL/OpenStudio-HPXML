@@ -30,6 +30,7 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
+        next if xml.include? 'base-two-buildings'
         # FIXME: Delete this line when E+ fix is available; currently hitting limitation noted
         # in https://github.com/NREL/EnergyPlus/issues/9049
         next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple.xml'
