@@ -4286,7 +4286,7 @@ class HVAC
     # and space-constrained) that we don't handle here.
     if is_ducted # Ducted split system
       return hspf2 / 0.85
-    else # Ducted split system
+    else # Ductless system
       return hspf2 / 0.90
     end
   end
