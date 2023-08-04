@@ -24,7 +24,7 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    # next if !hpxml_filename.include? 'two-buildings-detailed'
+    next if !hpxml_filename.include? 'multiple-buildings'
 
     puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -110,7 +110,6 @@ end
 
 def apply_hpxml_modification_ashrae_140(hpxml)
   # Set detailed HPXML values for ASHRAE 140 test files
-  hpxml_bldg = hpxml.buildings[0]
 
   # ------------ #
   # HPXML Header #
@@ -120,86 +119,88 @@ def apply_hpxml_modification_ashrae_140(hpxml)
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
   hpxml.header.apply_ashrae140_assumptions = true
 
-  # --------------------- #
-  # HPXML BuildingSummary #
-  # --------------------- #
+  hpxml.buildings.each do |hpxml_bldg|
+    # --------------------- #
+    # HPXML BuildingSummary #
+    # --------------------- #
 
-  hpxml_bldg.site.azimuth_of_front_of_home = nil
-  hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.site.azimuth_of_front_of_home = nil
+    hpxml_bldg.building_construction.average_ceiling_height = nil
 
-  # --------------- #
-  # HPXML Enclosure #
-  # --------------- #
+    # --------------- #
+    # HPXML Enclosure #
+    # --------------- #
 
-  hpxml_bldg.attics[0].vented_attic_ach = 2.4
-  hpxml_bldg.foundations.reverse_each do |foundation|
-    foundation.delete
-  end
-  hpxml_bldg.roofs.each do |roof|
-    if roof.roof_color == HPXML::ColorReflective
-      roof.solar_absorptance = 0.2
-    else
-      roof.solar_absorptance = 0.6
+    hpxml_bldg.attics[0].vented_attic_ach = 2.4
+    hpxml_bldg.foundations.reverse_each do |foundation|
+      foundation.delete
     end
-    roof.emittance = 0.9
-    roof.roof_color = nil
-  end
-  (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
-    if wall.color == HPXML::ColorReflective
-      wall.solar_absorptance = 0.2
-    else
-      wall.solar_absorptance = 0.6
-    end
-    wall.emittance = 0.9
-    wall.color = nil
-    if wall.is_a?(HPXML::Wall)
-      if wall.attic_wall_type == HPXML::AtticWallTypeGable
-        wall.insulation_assembly_r_value = 2.15
+    hpxml_bldg.roofs.each do |roof|
+      if roof.roof_color == HPXML::ColorReflective
+        roof.solar_absorptance = 0.2
       else
-        wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
-        wall.interior_finish_thickness = 0.5
+        roof.solar_absorptance = 0.6
+      end
+      roof.emittance = 0.9
+      roof.roof_color = nil
+    end
+    (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
+      if wall.color == HPXML::ColorReflective
+        wall.solar_absorptance = 0.2
+      else
+        wall.solar_absorptance = 0.6
+      end
+      wall.emittance = 0.9
+      wall.color = nil
+      if wall.is_a?(HPXML::Wall)
+        if wall.attic_wall_type == HPXML::AtticWallTypeGable
+          wall.insulation_assembly_r_value = 2.15
+        else
+          wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+          wall.interior_finish_thickness = 0.5
+        end
       end
     end
-  end
-  hpxml_bldg.floors.each do |floor|
-    next unless floor.is_ceiling
+    hpxml_bldg.floors.each do |floor|
+      next unless floor.is_ceiling
 
-    floor.interior_finish_type = HPXML::InteriorFinishGypsumBoard
-    floor.interior_finish_thickness = 0.5
-  end
-  hpxml_bldg.foundation_walls.each do |fwall|
-    if fwall.insulation_interior_r_value == 0
-      fwall.interior_finish_type = HPXML::InteriorFinishNone
-    else
-      fwall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
-      fwall.interior_finish_thickness = 0.5
+      floor.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+      floor.interior_finish_thickness = 0.5
     end
-  end
-  if hpxml_bldg.doors.size == 1
-    hpxml_bldg.doors[0].area /= 2.0
-    hpxml_bldg.doors << hpxml_bldg.doors[0].dup
-    hpxml_bldg.doors[1].azimuth = 0
-    hpxml_bldg.doors[1].id = 'Door2'
-  end
-  hpxml_bldg.windows.each do |window|
-    next if window.overhangs_depth.nil?
+    hpxml_bldg.foundation_walls.each do |fwall|
+      if fwall.insulation_interior_r_value == 0
+        fwall.interior_finish_type = HPXML::InteriorFinishNone
+      else
+        fwall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+        fwall.interior_finish_thickness = 0.5
+      end
+    end
+    if hpxml_bldg.doors.size == 1
+      hpxml_bldg.doors[0].area /= 2.0
+      hpxml_bldg.doors << hpxml_bldg.doors[0].dup
+      hpxml_bldg.doors[1].azimuth = 0
+      hpxml_bldg.doors[1].id = 'Door2'
+    end
+    hpxml_bldg.windows.each do |window|
+      next if window.overhangs_depth.nil?
 
-    window.overhangs_distance_to_bottom_of_window = 6.0
-  end
+      window.overhangs_distance_to_bottom_of_window = 6.0
+    end
 
-  # ---------- #
-  # HPXML HVAC #
-  # ---------- #
+    # ---------- #
+    # HPXML HVAC #
+    # ---------- #
 
-  hpxml_bldg.hvac_controls.add(id: "HVACControl#{hpxml_bldg.hvac_controls.size + 1}",
-                               heating_setpoint_temp: 68.0,
-                               cooling_setpoint_temp: 78.0)
+    hpxml_bldg.hvac_controls.add(id: "HVACControl#{hpxml_bldg.hvac_controls.size + 1}",
+                                 heating_setpoint_temp: 68.0,
+                                 cooling_setpoint_temp: 78.0)
 
-  # --------------- #
-  # HPXML MiscLoads #
-  # --------------- #
+    # --------------- #
+    # HPXML MiscLoads #
+    # --------------- #
 
-  if hpxml_bldg.plug_loads[0].kwh_per_year > 0
+    next unless hpxml_bldg.plug_loads[0].kwh_per_year > 0
+
     hpxml_bldg.plug_loads[0].weekday_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
     hpxml_bldg.plug_loads[0].weekend_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
     hpxml_bldg.plug_loads[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
@@ -208,19 +209,38 @@ end
 
 def apply_hpxml_modification(hpxml_file, hpxml)
   # Set detailed HPXML values for sample files
+
+  # ------------ #
+  # HPXML Header #
+  # ------------ #
+
+  # General logic for all files
+  hpxml.header.xml_generated_by = 'tasks.rb'
+  hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
+
+  # Logic that can only be applied based on the file name
+  if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
+    hpxml.header.allow_increased_fixed_capacities = true
+  end
+
+  if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
+    hpxml.header.manualj_heating_design_temp = 0
+    hpxml.header.manualj_cooling_design_temp = 100
+    hpxml.header.manualj_heating_setpoint = 60
+    hpxml.header.manualj_cooling_setpoint = 80
+    hpxml.header.manualj_humidity_setpoint = 0.55
+    hpxml.header.manualj_internal_loads_sensible = 4000
+    hpxml.header.manualj_internal_loads_latent = 200
+    hpxml.header.manualj_num_occupants = 5
+  end
+
+  if ['base-multiple-buildings.xml'].include? hpxml_file
+    hpxml.buildings[0].clothes_dryers[0].delete
+  end
+
   hpxml.buildings.each do |hpxml_bldg|
-    # ------------ #
-    # HPXML Header #
-    # ------------ #
-
-    # General logic for all files
-    hpxml.header.xml_generated_by = 'tasks.rb'
-    hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
-
     # Logic that can only be applied based on the file name
-    if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
-      hpxml.header.allow_increased_fixed_capacities = true
-    elsif ['base-misc-emissions.xml'].include? hpxml_file
+    if ['base-misc-emissions.xml'].include? hpxml_file
       hpxml_bldg.egrid_region = 'Western'
       hpxml_bldg.egrid_subregion = 'RMPA'
       hpxml_bldg.cambium_region_gea = 'RMPAc'
@@ -1640,16 +1660,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
-    end
-    if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
-      hpxml.header.manualj_heating_design_temp = 0
-      hpxml.header.manualj_cooling_design_temp = 100
-      hpxml.header.manualj_heating_setpoint = 60
-      hpxml.header.manualj_cooling_setpoint = 80
-      hpxml.header.manualj_humidity_setpoint = 0.55
-      hpxml.header.manualj_internal_loads_sensible = 4000
-      hpxml.header.manualj_internal_loads_latent = 200
-      hpxml.header.manualj_num_occupants = 5
     end
     if hpxml_file.include? 'heating-capacity-17f'
       hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
