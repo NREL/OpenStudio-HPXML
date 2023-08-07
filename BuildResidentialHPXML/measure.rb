@@ -3462,6 +3462,7 @@ class HPXMLFile
       # FIXME: Address this when multiple buildings
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
+      unique_hpxml_ids(hpxml_doc)
     end
 
     return hpxml_doc
