@@ -267,8 +267,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     puts "Generating #{hpxmls_files.size} HPXML files..."
 
     hpxmls_files.each_with_index do |(hpxml_file, parent), i|
-      next if !hpxml_file.include?('base-sfd2.xml')
-
       puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
       begin
