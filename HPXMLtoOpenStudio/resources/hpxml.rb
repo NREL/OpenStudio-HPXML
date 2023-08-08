@@ -1635,7 +1635,9 @@ class HPXML < Object
                          :under_slab_insulation_id,
                          :area,
                          :length,
-                         :exposed_perimeter]
+                         :exposed_perimeter,
+                         :interior_shading_id,
+                         :exterior_shading_id]
 
       # Look for pairs of surfaces that can be collapsed
       like_foundation_walls = {}
