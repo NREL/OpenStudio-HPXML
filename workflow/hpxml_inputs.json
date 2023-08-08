@@ -2397,51 +2397,6 @@
     "geothermal_loop_pipe_shank_spacing": 2.5,
     "geothermal_loop_borefield_configuration": "Lopsided U"
   },
-  "sample_files/base-hvac-geothermal-loop-ground-diffusivity.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_ground_diffusivity": 0.03
-  },
-  "sample_files/base-hvac-geothermal-loop-loop-flow.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_loop_flow": 10.0
-  },
-  "sample_files/base-hvac-geothermal-loop-boreholes-count.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_boreholes_count": 4
-  },
-  "sample_files/base-hvac-geothermal-loop-boreholes-length.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_boreholes_length": 350.0
-  },
-  "sample_files/base-hvac-geothermal-loop-boreholes-spacing.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_boreholes_spacing": 25.0
-  },
-  "sample_files/base-hvac-geothermal-loop-boreholes-diameter.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_boreholes_diameter": 6.0
-  },
-  "sample_files/base-hvac-geothermal-loop-grout-conductivity.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_grout_conductivity": 0.5
-  },
-  "sample_files/base-hvac-geothermal-loop-pipe-conductivity.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_pipe_conductivity": 0.3
-  },
-  "sample_files/base-hvac-geothermal-loop-pipe-diameter.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_pipe_diameter": "1\" pipe"
-  },
-  "sample_files/base-hvac-geothermal-loop-pipe-shank-spacing.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_pipe_shank_spacing": 2.5
-  },
-  "sample_files/base-hvac-geothermal-loop-borefield-configuration.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_boreholes_count": 5,
-    "geothermal_loop_borefield_configuration": "L"
-  },
   "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
@@ -3144,6 +3099,10 @@
   "sample_files/base-misc-ground-conductivity.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "site_ground_conductivity": 0.8
+  },
+  "sample_files/base-misc-ground-diffusivity.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "site_ground_diffusivity": 0.03
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
