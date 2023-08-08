@@ -546,15 +546,25 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   
 Soil information is entered in ``Soil``.
 
-  ================================  ========  ===========  ===========  ========  ========  ============================================================
-  Element                           Type      Units        Constraints  Required  Default   Notes
-  ================================  ========  ===========  ===========  ========  ========  ============================================================
-  ``Conductivity``                  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
-  ``extension/Diffusivity``         double    ft2/hr       > 0          No        0.0208    Diffusivity of the ground soil [#]_
-  ================================  ========  ===========  ===========  ========  ========  ============================================================
+  ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
+  Element                                                             Type              Units        Constraints      Required  Default   Notes
+  ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
+  ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_ [#]_
+  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        mixed     Moisture type or conductivity or diffusivity [#]_
+  ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
+  .. [#] SoilType choices are "unknown", "sand", or "clay".
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
+  .. [#] MoistureType choices are "mixed", "wet", or "dry".  
+  .. [#] | If Conductivity and extension/Diffusivity not provided, defaults based on SoilType/MoistureType:
+         | - **unknown**, **mixed/wet/dry**: 1.0 Btu/hr-ft-F and 0.0208 ft2/hr
+         | - **sand**, **mixed**: 0.5 Btu/hr-ft-F and 0.02 ft2/hr
+         | - **sand**, **wet**: Not supported
+         | - **sand**, **dry**: 0.199 Btu/hr-ft-F and 0.0111 ft2/hr
+         | - **clay**, **mixed**: 0.75 Btu/hr-ft-F and 0.0249 ft2/hr
+         | - **clay**, **wet**: 1.4 Btu/hr-ft-F and 0.0351 ft2/hr
+         | - **clay**, **dry**: 0.5174 Btu/hr-ft-F and 0.0207 ft2/hr
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
