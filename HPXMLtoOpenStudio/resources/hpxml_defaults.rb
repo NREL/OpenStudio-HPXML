@@ -483,12 +483,84 @@ class HPXMLDefaults
       hpxml.site.shielding_of_home_isdefaulted = true
     end
 
-    if hpxml.site.ground_conductivity.nil?
-      hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
-      hpxml.site.ground_conductivity_isdefaulted = true
+    if hpxml.site.soil_type.nil? && hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
+      hpxml.site.soil_type = HPXML::SiteSoilSoilTypeUnknown
+      hpxml.site.soil_type_isdefaulted = true
     end
 
-    if hpxml.site.ground_diffusivity.nil?
+    if hpxml.site.moisture_type.nil? && hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
+      hpxml.site.moisture_type = HPXML::SiteSoilMoistureTypeMixed
+      hpxml.site.moisture_type_isdefaulted = true
+    end
+
+    if hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
+      if hpxml.site.soil_type == HPXML::SiteSoilSoilTypeUnknown
+        hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
+        hpxml.site.ground_conductivity_isdefaulted = true
+
+        hpxml.site.ground_diffusivity = 0.0208 # ft^2/hr
+        hpxml.site.ground_diffusivity_isdefaulted = true
+      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeSand
+        if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
+          conductivity = UnitConversions.convert(0.8657, 'w/(m*k)', 'btu/(hr*ft*r)')
+          density = UnitConversions.convert(1601.8, 'kg/m^3', 'lbm/ft^3')
+          specific_heat = UnitConversions.convert(1.046 * 1000.0, 'j/(kg*k)', 'btu/(lbm*r)')
+
+          hpxml.site.ground_conductivity = conductivity # Btu/hr-ft-F
+          hpxml.site.ground_conductivity_isdefaulted = true
+
+          hpxml.site.ground_diffusivity = conductivity / (density * specific_heat) # ft^2/hr
+          hpxml.site.ground_diffusivity_isdefaulted = true
+        elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
+          fail 'Defaulting ground conductivity and diffusivity for wet sand is currently not supported.'
+        elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
+          conductivity = UnitConversions.convert(0.3445, 'w/(m*k)', 'btu/(hr*ft*r)')
+          density = UnitConversions.convert(1441.6, 'kg/m^3', 'lbm/ft^3')
+          specific_heat = UnitConversions.convert(0.836 * 1000.0, 'j/(kg*k)', 'btu/(lbm*r)')
+
+          hpxml.site.ground_conductivity = conductivity # Btu/hr-ft-F
+          hpxml.site.ground_conductivity_isdefaulted = true
+
+          hpxml.site.ground_diffusivity = conductivity / (density * specific_heat) # ft^2/hr
+          hpxml.site.ground_diffusivity_isdefaulted = true
+        end
+      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeClay
+        if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
+          conductivity = UnitConversions.convert(1.2982, 'w/(m*k)', 'btu/(hr*ft*r)')
+          density = UnitConversions.convert(2098.4, 'kg/m^3', 'lbm/ft^3')
+          specific_heat = UnitConversions.convert(0.962 * 1000.0, 'j/(kg*k)', 'btu/(lbm*r)')
+
+          hpxml.site.ground_conductivity = conductivity # Btu/hr-ft-F
+          hpxml.site.ground_conductivity_isdefaulted = true
+
+          hpxml.site.ground_diffusivity = conductivity / (density * specific_heat) # ft^2/hr
+          hpxml.site.ground_diffusivity_isdefaulted = true
+        elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
+          conductivity = UnitConversions.convert(2.4234, 'w/(m*k)', 'btu/(hr*ft*r)')
+          density = UnitConversions.convert(3203.6, 'kg/m^3', 'lbm/ft^3')
+          specific_heat = UnitConversions.convert(0.836 * 1000.0, 'j/(kg*k)', 'btu/(lbm*r)')
+
+          hpxml.site.ground_conductivity = conductivity # Btu/hr-ft-F
+          hpxml.site.ground_conductivity_isdefaulted = true
+
+          hpxml.site.ground_diffusivity = conductivity / (density * specific_heat) # ft^2/hr
+          hpxml.site.ground_diffusivity_isdefaulted = true
+        elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
+          conductivity = UnitConversions.convert(0.8957, 'w/(m*k)', 'btu/(hr*ft*r)')
+          density = UnitConversions.convert(1601.8, 'kg/m^3', 'lbm/ft^3')
+          specific_heat = UnitConversions.convert(1.046 * 1000.0, 'j/(kg*k)', 'btu/(lbm*r)')
+
+          hpxml.site.ground_conductivity = conductivity # Btu/hr-ft-F
+          hpxml.site.ground_conductivity_isdefaulted = true
+
+          hpxml.site.ground_diffusivity = conductivity / (density * specific_heat) # ft^2/hr
+          hpxml.site.ground_diffusivity_isdefaulted = true
+        end
+      end
+    elsif hpxml.site.ground_conductivity.nil?
+      hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
+      hpxml.site.ground_conductivity_isdefaulted = true
+    elsif hpxml.site.ground_diffusivity.nil?
       hpxml.site.ground_diffusivity = 0.0208 # ft^2/hr
       hpxml.site.ground_diffusivity_isdefaulted = true
     end

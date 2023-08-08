@@ -311,6 +311,12 @@ class HPXML < Object
   SidingTypeSyntheticStucco = 'synthetic stucco'
   SidingTypeVinyl = 'vinyl siding'
   SidingTypeWood = 'wood siding'
+  SiteSoilMoistureTypeMixed = 'mixed'
+  SiteSoilMoistureTypeWet = 'wet'
+  SiteSoilMoistureTypeDry = 'dry'
+  SiteSoilSoilTypeUnknown = 'unknown'
+  SiteSoilSoilTypeSand = 'sand'
+  SiteSoilSoilTypeClay = 'clay'
   SiteTypeUrban = 'urban'
   SiteTypeSuburban = 'suburban'
   SiteTypeRural = 'rural'
@@ -1459,7 +1465,7 @@ class HPXML < Object
 
   class Site < BaseElement
     ATTRS = [:site_type, :surroundings, :vertical_surroundings, :shielding_of_home, :orientation_of_front_of_home, :azimuth_of_front_of_home, :fuels,
-             :ground_conductivity, :ground_diffusivity]
+             :soil_type, :moisture_type, :ground_conductivity, :ground_diffusivity]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1483,8 +1489,10 @@ class HPXML < Object
           XMLHelper.add_element(fuel_types_available, 'Fuel', fuel, :string)
         end
       end
-      if (not @ground_conductivity.nil?) || (not @ground_diffusivity.nil?)
+      if (not @soil_type.nil?) || (not @moisture_type.nil?) || (not @ground_conductivity.nil?) || (not @ground_diffusivity.nil?)
         soil = XMLHelper.add_element(site, 'Soil')
+        XMLHelper.add_element(soil, 'SoilType', @soil_type, :string, @soil_type_isdefaulted) unless @soil_type.nil?
+        XMLHelper.add_element(soil, 'MoistureType', @moisture_type, :string, @moisture_type_isdefaulted) unless @moisture_type.nil?
         XMLHelper.add_element(soil, 'Conductivity', @ground_conductivity, :float, @ground_conductivity_isdefaulted) unless @ground_conductivity.nil?
         if not @ground_diffusivity.nil?
           extension = XMLHelper.create_elements_as_needed(soil, ['extension'])
@@ -1511,6 +1519,8 @@ class HPXML < Object
       @orientation_of_front_of_home = XMLHelper.get_value(site, 'OrientationOfFrontOfHome', :string)
       @azimuth_of_front_of_home = XMLHelper.get_value(site, 'AzimuthOfFrontOfHome', :integer)
       @fuels = XMLHelper.get_values(site, 'FuelTypesAvailable/Fuel', :string)
+      @soil_type = XMLHelper.get_value(site, 'Soil/SoilType', :string)
+      @moisture_type = XMLHelper.get_value(site, 'Soil/MoistureType', :string)
       @ground_conductivity = XMLHelper.get_value(site, 'Soil/Conductivity', :float)
       @ground_diffusivity = XMLHelper.get_value(site, 'Soil/extension/Diffusivity', :float)
     end
