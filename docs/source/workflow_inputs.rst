@@ -549,7 +549,7 @@ Soil information is entered in ``Soil``.
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
   Element                                                             Type              Units        Constraints      Required  Default   Notes
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
-  ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_ [#]_
+  ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_
   ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        mixed     Moisture type or conductivity or diffusivity [#]_
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
@@ -565,6 +565,10 @@ Soil information is entered in ``Soil``.
          | - **clay**, **mixed**: 0.75 Btu/hr-ft-F and 0.0249 ft2/hr
          | - **clay**, **wet**: 1.4 Btu/hr-ft-F and 0.0351 ft2/hr
          | - **clay**, **dry**: 0.5174 Btu/hr-ft-F and 0.0207 ft2/hr
+
+.. note::
+
+  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by GLHEPro.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
