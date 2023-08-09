@@ -26,7 +26,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       cfm_per_ton = 312.0
       max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
       fan_power = fan_power_rated * max_cfm
-      capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+      capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
 
       # Check cooling coil
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
@@ -54,7 +54,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 344.1
     max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+    capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -83,7 +83,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 400.0
     max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+    capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -463,11 +463,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       cfm_per_ton = 312.0
       max_cfm = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
       fan_power = fan_power_rated * max_cfm
-      clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+      clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
       cfm_per_ton = 384.1
       max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
       fan_power = fan_power_rated * max_cfm
-      htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg, false), 'Btu/hr', 'W')
+      htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg)[0], 'Btu/hr', 'W')
       supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
       # Check cooling coil
@@ -551,11 +551,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 344.1
     max_cfm = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+    clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
     cfm_per_ton = 352.2
     max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg, false), 'Btu/hr', 'W')
+    htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg)[0], 'Btu/hr', 'W')
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -601,11 +601,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 400.0
     max_cfm = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg, false), 'Btu/hr', 'W')
+    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
     cfm_per_ton = 301.9752
     max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.972, fan_power, :htg, false), 'Btu/hr', 'W')
+    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.972, fan_power, :htg)[0], 'Btu/hr', 'W')
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -650,11 +650,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 400.0
     max_cfm = UnitConversions.convert(heat_pump.cooling_capacity * 1.2, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity * 1.2, fan_power, :clg, false), 'Btu/hr', 'W')
+    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity * 1.2, fan_power, :clg)[0], 'Btu/hr', 'W')
     cfm_per_ton = 301.9752
     max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.812, fan_power, :htg, false), 'Btu/hr', 'W')
+    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.812, fan_power, :htg)[0], 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -696,7 +696,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cfm_per_ton = 400.0
     max_cfm = UnitConversions.convert(cooling_system.cooling_capacity * 1.2, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity * 1.2, fan_power, :clg, false), 'Btu/hr', 'W')
+    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity * 1.2, fan_power, :clg)[0], 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
