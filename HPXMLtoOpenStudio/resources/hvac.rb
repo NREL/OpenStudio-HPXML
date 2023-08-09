@@ -1134,7 +1134,8 @@ class HVAC
   def self.set_cool_curves_central_air_source(heat_pump, use_eer = false)
     hp_ap = heat_pump.additional_properties
     hp_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(heat_pump.compressor_type, use_eer)
-    hp_ap.cool_capacity_ratios = get_cool_capacity_ratios(heat_pump)
+    is_ducted = !heat_pump.distribution_system_idref.nil?
+    hp_ap.cool_capacity_ratios = get_cool_capacity_ratios(heat_pump, is_ducted)
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
@@ -1165,22 +1166,21 @@ class HVAC
       # Performance coefficients now needed for hvac sizing adjustment
       hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(heat_pump.compressor_type, system_type)
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
-      hp_ap.cool_eers = calc_eers_cooling_4speed(hp_ap.fan_power_rated)
     end
   end
 
-  def self.get_cool_capacity_ratios(hvac_system)
+  def self.get_cool_capacity_ratios(hvac_system, is_ducted)
     if hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       system_type = hvac_system.is_a?(HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
-      # FIXME: Use NEEP data analysis to assume capacity ratios
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeCentralAirConditioner].include? system_type
-        return [0.36, 1.0]
-      elsif [HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeMiniSplitAirConditioner].include? system_type
-        return [0.4889, 1.2]
+      # FIXME: IS is_ducted good enough to distinguish centrally_ducted and wall_placement? The same question applies to other places too.
+      if is_ducted
+        return [0.394, 1.0]
+      else
+        return [0.255, 1.0]
       end
     end
 
@@ -1272,6 +1272,45 @@ class HVAC
                                   efficiency_cop: min_cop_17,
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 17)
+  end
+
+  def self.set_cool_detailed_performance_data(hvac_system)
+    hvac_ap = hvac_system.additional_properties
+    is_ducted = !hvac_system.distribution_system_idref.nil?
+
+    # Default NEEP data inputs
+    detailed_performance_data = hvac_system.cooling_detailed_performance_data
+    
+    # performance data at 95F, maximum speed
+    # TODO: max_cop_95 = calc_cool_max_cop_95_from_seer(hvac_system.cooling_efficiency_seer, is_ducted)
+    max_cop_95 = 3.5 # FIXME: Use seer correlation instead
+    max_capacity_95 = hvac_system.cooling_capacity
+    detailed_performance_data.add(capacity: max_capacity_95,
+                                  efficiency_cop: max_cop_95,
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 95)
+    # performance data at 95F, minimum speed
+    min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
+    cop_ratio = is_ducted ? 1.231 : (0.01377 * hvac_system.cooling_efficiency_seer + 1.13948)
+    min_cop_95 = cop_ratio * max_cop_95
+    detailed_performance_data.add(capacity: min_capacity_95,
+                                  efficiency_cop: min_cop_95,
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 95)
+    # performance data at 82F, maximum speed
+    max_capacity_82 = max_capacity_95 * 1.033
+    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
+    detailed_performance_data.add(capacity: max_capacity_82,
+                                  efficiency_cop: max_cop_82,
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 82)
+    # performance data at 5F, minimum speed
+    min_capacity_82 = min_capacity_95 * 1.099
+    min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
+    detailed_performance_data.add(capacity: min_capacity_82,
+                                  efficiency_cop: min_cop_82,
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 82)
   end
 
   def self.get_heat_capacity_ratios(heat_pump, is_ducted = nil)
@@ -2029,35 +2068,6 @@ class HVAC
     return [calc_eer_from_eir(eir_1_a, fan_power_rated), eer_2]
   end
 
-  def self.calc_eers_from_eir_4speed(eer_nom, fan_power_rated, calc_type = 'seer')
-    # Returns EER A at minimum, intermediate, and nominal speed given EER A (and a fourth speed if calc_type != 'seer')
-
-    eir_nom = calc_eir_from_eer(eer_nom, fan_power_rated)
-
-    if calc_type == 'seer'
-      indices = [0, 1, 4]
-    else
-      indices = [0, 1, 2, 4]
-    end
-
-    cop_ratios = [1.07, 1.11, 1.08, 1.05, 1.0] # Gross cop
-
-    # Seer calculation is based on performance at three speeds
-    cops = [cop_ratios[indices[0]], cop_ratios[indices[1]], cop_ratios[indices[2]]]
-
-    if calc_type != 'seer'
-      cops << cop_ratios[indices[3]]
-    end
-
-    eers = []
-    cops.each do |mult|
-      eir = eir_nom / mult
-      eers << calc_eer_from_eir(eir, fan_power_rated)
-    end
-
-    return eers
-  end
-
   def self.calc_cop_from_eir(eir, fan_power_rated)
     cfm_per_ton = 400.0
     cfm_per_btuh = cfm_per_ton / 12000.0
@@ -2131,12 +2141,6 @@ class HVAC
     end
 
     return calc_eers_from_eir_2speed(eer_c, fan_power_rated)
-  end
-
-  def self.calc_eers_cooling_4speed(fan_power_rated)
-    # TODO: Placeholder
-
-    return calc_eers_from_eir_4speed(10.0, fan_power_rated, 'model')
   end
 
   def self.calc_seer_2speed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
@@ -2310,20 +2314,24 @@ class HVAC
   end
 
   def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)
+    # correlation from NEEP data analysis
     if is_ducted
-      a = 0.326001399
-      b = 3.668347697
-      c = -3.356721308
-      d = 0.035704406
-      e = -0.978554575
-
-      max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
-                   c * max_capacity_maintenance_5**2 +
-                   d * max_capacity_maintenance_5 * hspf + e
+      a = 0.3260
+      b = 3.668
+      c = -3.357
+      d = 0.0357
+      e = -0.9786
     else
-      # TODO: Wall placement equipment regression needs to be filled here
-      max_cop_47 = 4.0
+      a = 0.2194
+      b = 6.973
+      c = -4.996
+      d = 0.04351
+      e = -2.322
     end
+    
+    max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
+                 c * max_capacity_maintenance_5**2 +
+                 d * max_capacity_maintenance_5 * hspf + e
     return max_cop_47
   end
 
@@ -3140,7 +3148,8 @@ class HVAC
     return htg_coil
   end
 
-  def self.set_cool_rated_eirs(cooling_system)
+  def self.set_cool_rated_eirs(cooling_system, use_eer_cop)
+    return if use_eer_cop
     clg_ap = cooling_system.additional_properties
 
     clg_ap.cool_rated_eirs = []
@@ -3149,7 +3158,8 @@ class HVAC
     end
   end
 
-  def self.set_heat_rated_eirs(heating_system)
+  def self.set_heat_rated_eirs(heating_system, use_eer_cop)
+    return if use_eer_cop
     htg_ap = heating_system.additional_properties
 
     htg_ap.heat_rated_eirs = []
