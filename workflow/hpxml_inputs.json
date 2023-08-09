@@ -2541,6 +2541,12 @@
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
   },
+  "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed.xml"
+  },
+  "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml"
+  },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
   },

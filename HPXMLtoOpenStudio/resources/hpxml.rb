@@ -3954,8 +3954,8 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsKwPerTon, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_kw_per_ton, :float, @cooling_efficiency_kw_per_ton_isdefaulted)
       end
-      @cooling_detailed_performance_data.to_oga(cooling_system)
       XMLHelper.add_element(cooling_system, 'SensibleHeatFraction', @cooling_shr, :float, @cooling_shr_isdefaulted) unless @cooling_shr.nil?
+      @cooling_detailed_performance_data.to_oga(cooling_system)
       XMLHelper.add_element(cooling_system, 'IntegratedHeatingSystemFuel', @integrated_heating_system_fuel, :string) unless @integrated_heating_system_fuel.nil?
       XMLHelper.add_element(cooling_system, 'IntegratedHeatingSystemCapacity', @integrated_heating_system_capacity, :float, @integrated_heating_system_capacity_isdefaulted) unless @integrated_heating_system_capacity.nil?
       if not @integrated_heating_system_efficiency_percent.nil?

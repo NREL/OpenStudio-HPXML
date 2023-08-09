@@ -1710,6 +1710,48 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 2.28)
   end
+  if ['base-hvac-central-ac-only-var-speed-detailed-performance.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer = 17.25
+    clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 11700,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.47)
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 36000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.71)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 13200,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 6.34)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 40000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.53)
+  end
+  if ['base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer = 21.5
+    clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 10372,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.05)
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 42653,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.27)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 19456,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 8.03)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 40093,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.27)
+  end
   if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml'].include? hpxml_file
     # FUJITSU Halcyon Single-room Mini-Split Systems Slim
     # https://ashp.neep.org/#!/product/25352/7/25000///0
