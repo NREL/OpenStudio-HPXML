@@ -2767,11 +2767,11 @@ class HVAC
     data_array = Array.new(2) { Array.new }
     detailed_performance_data.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
-      next unless ['minimum', 'maximum'].include? data_point.capacity_description
+      next unless [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? data_point.capacity_description
 
-      if data_point.capacity_description == 'minimum'
+      if data_point.capacity_description == HPXML::CapacityDescriptionMinimum
         data_array[0] << data_point
-      else
+      elsif data_point.capacity_description == HPXML::CapacityDescriptionMaximum
         data_array[1] << data_point
       end
     end
