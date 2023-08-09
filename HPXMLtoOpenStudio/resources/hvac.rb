@@ -2747,36 +2747,20 @@ class HVAC
     return curve
   end
 
-  def self.convert_net_to_gross_capacity(net_cap, watts_per_cfm, cfm_per_ton, fan_ratio, mode)
-    net_cap_ton = UnitConversions.convert(net_cap, 'Btu/hr', 'ton')
-    net_cap_watts = UnitConversions.convert(net_cap, 'Btu/hr', 'w')
-    cfm = net_cap_ton * cfm_per_ton
-    fan_power = watts_per_cfm * cfm * (fan_ratio**3)
-    if mode == :clg
-      gross_cap_watts = net_cap_watts + fan_power
-    else
-      gross_cap_watts = net_cap_watts - fan_power
-    end
-    gross_cap_btu_hr = UnitConversions.convert(gross_cap_watts, 'w', 'Btu/hr')
-    return gross_cap_btu_hr
-  end
-
-  def self.convert_net_to_gross_capacity_cop(net_cap, fan_power, mode, output_cop, net_cop = nil)
+  def self.convert_net_to_gross_capacity_cop(net_cap, fan_power, mode, net_cop = nil)
     net_cap_watts = UnitConversions.convert(net_cap, 'Btu/hr', 'w')
     if mode == :clg
       gross_cap_watts = net_cap_watts + fan_power
     else
       gross_cap_watts = net_cap_watts - fan_power
     end
-    if output_cop
+    if not net_cop.nil?
       net_power = net_cap_watts / net_cop
       gross_power = net_power - fan_power
       gross_cop = gross_cap_watts / gross_power
-      return gross_cop
-    else
-      gross_cap_btu_hr = UnitConversions.convert(gross_cap_watts, 'w', 'Btu/hr')
-      return gross_cap_btu_hr
     end
+    gross_cap_btu_hr = UnitConversions.convert(gross_cap_watts, 'w', 'Btu/hr')
+    return gross_cap_btu_hr, gross_cop
   end
 
   def self.setup_neep_detailed_performance_data(detailed_performance_data)
@@ -2819,8 +2803,7 @@ class HVAC
         fan_ratio = cap_ratio * cfm_per_ton[speed] / cfm_per_ton[-1]
         max_cfm = UnitConversions.convert(max_speed_capacity, 'Btu/hr', 'ton') * cfm_per_ton[-1]
         fan_power = hvac_ap.fan_power_rated * max_cfm * (fan_ratio**3)
-        dp.gross_capacity = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, false)
-        dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, true, dp.efficiency_cop)
+        dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
     # convert to table lookup data
@@ -2954,7 +2937,7 @@ class HVAC
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = clg_ap.fan_power_rated * max_cfm * (clg_ap.cool_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * cooling_system.cooling_capacity
-        gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg, false)
+        gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
         clg_ap.cool_rated_capacities << gross_capacity
       end
     end
@@ -3070,7 +3053,7 @@ class HVAC
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = htg_ap.fan_power_rated * max_cfm * (htg_ap.heat_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * heating_system.heating_capacity
-        gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg, false)
+        gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
         htg_ap.heat_rated_capacities << gross_capacity
       end
     end
