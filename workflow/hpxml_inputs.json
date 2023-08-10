@@ -1705,6 +1705,9 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
+  },
   "sample_files/base-hvac-autosize.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_heating_capacity": null,

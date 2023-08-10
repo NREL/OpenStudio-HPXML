@@ -1710,6 +1710,46 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 2.28)
   end
+  if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].cooling_capacity = nil
+    hpxml.heat_pumps[0].heating_capacity = nil
+    hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
+    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
+    clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
+    htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 11700,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.47)
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 36000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.71)
+    clg_perf_data.add(outdoor_temperature: 80.0,
+                      capacity: 13200,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 6.34)
+    clg_perf_data.add(outdoor_temperature: 80.0,
+                      capacity: 40000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.53)
+    htg_perf_data.add(outdoor_temperature: 47.0,
+                      capacity: 10000,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.73)
+    htg_perf_data.add(outdoor_temperature: 47.0,
+                      capacity: 36000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.44)
+    htg_perf_data.add(outdoor_temperature: 8.0,
+                      capacity: 1900,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 0.81)
+    htg_perf_data.add(outdoor_temperature: 8.0,
+                      capacity: 19900,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.28)
+  end
   if ['base-hvac-central-ac-only-var-speed-detailed-performance.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity = nil
     hpxml.cooling_systems[0].cooling_efficiency_seer = 17.25
