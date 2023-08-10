@@ -1560,23 +1560,24 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Summary HVAC capacities
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
     @hpxml_bldgs.each do |hpxml_bldg|
+      unit_multiplier = hpxml_bldg.building_construction.number_of_units
       hpxml_bldg.hvac_systems.each do |hvac_system|
         if hvac_system.is_a? HPXML::HeatingSystem
           next if hvac_system.is_heat_pump_backup_system
 
-          htg_cap += hvac_system.heating_capacity.to_f
+          htg_cap += hvac_system.heating_capacity.to_f * unit_multiplier
         elsif hvac_system.is_a? HPXML::CoolingSystem
-          clg_cap += hvac_system.cooling_capacity.to_f
+          clg_cap += hvac_system.cooling_capacity.to_f * unit_multiplier
           if hvac_system.has_integrated_heating
-            htg_cap += hvac_system.integrated_heating_system_capacity.to_f
+            htg_cap += hvac_system.integrated_heating_system_capacity.to_f * unit_multiplier
           end
         elsif hvac_system.is_a? HPXML::HeatPump
-          htg_cap += hvac_system.heating_capacity.to_f
-          clg_cap += hvac_system.cooling_capacity.to_f
+          htg_cap += hvac_system.heating_capacity.to_f * unit_multiplier
+          clg_cap += hvac_system.cooling_capacity.to_f * unit_multiplier
           if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-            hp_backup_cap += hvac_system.backup_heating_capacity.to_f
+            hp_backup_cap += hvac_system.backup_heating_capacity.to_f * unit_multiplier
           elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
-            hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f
+            hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f * unit_multiplier
           end
         end
       end
@@ -1592,33 +1593,33 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # HVAC design loads
     results_out << [line_break]
-    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_total }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ducts }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_windows }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_skylights }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_doors }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_walls }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_roofs }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_floors }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_slabs }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ceilings }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_infilvent }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_total }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ducts }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_windows }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_skylights }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_doors }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_walls }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_roofs }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_floors }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_slabs }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ceilings }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_infilvent }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_intgains }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_total }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_ducts }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_infilvent }.sum(0.0).round(1)]
-    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_intgains }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_total * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ducts * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_windows * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_skylights * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_doors * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_walls * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_roofs * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_floors * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_slabs * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_ceilings * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_infilvent * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_total * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ducts * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Windows (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_windows * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Skylights (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_skylights * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Doors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_doors * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Walls (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_walls * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Roofs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_roofs * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Floors (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_floors * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Slabs (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_slabs * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_ceilings * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_infilvent * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_sens_intgains * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Total (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_total * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Ducts (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_ducts * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_infilvent * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)', @hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.hvac_plant.cdl_lat_intgains * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
 
     return results_out
   end

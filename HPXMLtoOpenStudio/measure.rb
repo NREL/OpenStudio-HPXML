@@ -1559,8 +1559,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
-        airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system,
-                                                            sequential_cool_load_fracs, living_zone, @hvac_unavailable_periods)
+        airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs,
+                                                            living_zone, @hvac_unavailable_periods,
+                                                            @hpxml_bldg.building_construction.number_of_units)
       end
     end
   end
@@ -1744,7 +1745,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_dehumidifiers(runner, model, spaces)
     return if @hpxml_bldg.dehumidifiers.size == 0
 
-    HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml_header.unavailable_periods)
+    HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hpxml_header.unavailable_periods,
+                             @hpxml_bldg.building_construction.number_of_units)
   end
 
   def check_distribution_system(hvac_distribution, system_type)
@@ -1996,13 +1998,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       fail 'Expected all InverterEfficiency values to be equal.'
     end
     @hpxml_bldg.pv_systems.each do |pv_system|
-      PV.apply(model, @nbeds, pv_system)
+      PV.apply(model, @nbeds, pv_system, @hpxml_bldg.building_construction.number_of_units)
     end
   end
 
   def add_generators(model)
     @hpxml_bldg.generators.each do |generator|
-      Generator.apply(model, @nbeds, generator)
+      Generator.apply(model, @nbeds, generator, @hpxml_bldg.building_construction.number_of_units)
     end
   end
 

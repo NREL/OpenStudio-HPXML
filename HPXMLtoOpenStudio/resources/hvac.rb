@@ -175,7 +175,7 @@ class HVAC
   end
 
   def self.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs, control_zone,
-                                    hvac_unavailable_periods)
+                                    hvac_unavailable_periods, unit_multiplier)
 
     obj_name = Constants.ObjectNameEvaporativeCooler
 
@@ -196,7 +196,7 @@ class HVAC
     air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, [0], sequential_cool_load_fracs, clg_cfm, nil, hvac_unavailable_periods)
 
     # Fan
-    fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
+    fan_watts_per_cfm = [2.79 * (clg_cfm / unit_multiplier)**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
     fan.addToNode(air_loop.supplyInletNode)
     disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system)
@@ -711,7 +711,7 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
-  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods)
+  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods, unit_multiplier)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -734,6 +734,9 @@ class HVAC
     total_capacity = dehumidifiers.map { |d| d.capacity }.sum
     avg_energy_factor = dehumidifiers.map { |d| d.energy_factor * d.capacity }.sum / total_capacity
     total_fraction_served = dehumidifiers.map { |d| d.fraction_served }.sum
+
+    # Apply unit multiplier
+    total_capacity *= unit_multiplier
 
     control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
@@ -3622,9 +3625,19 @@ class HVAC
     end
   end
 
-  def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
-    # Fraction of primary ducts (ducts outside conditioned space)
+  def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
+    # Equation based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
     f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    return f_out
+  end
+
+  def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
+    # Equations based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+
+    # Fraction of primary ducts (ducts outside conditioned space)
+    f_out = get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
 
     if duct_type == HPXML::DuctTypeSupply
       primary_duct_area = 0.27 * cfa_served * f_out
@@ -4209,16 +4222,16 @@ class HVAC
       htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
       htg_sys.electric_auxiliary_energy *= unit_multiplier unless htg_sys.electric_auxiliary_energy.nil?
+      htg_sys.fan_watts *= unit_multiplier unless htg_sys.fan_watts.nil?
       # FIXME: fan_coil_watts?
       # FIXME: shared_loop_watts?
-      # FIXME: fan_watts?
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity *= unit_multiplier
       clg_sys.cooling_airflow_cfm *= unit_multiplier
       clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
-      # FIXME: integrated_heating_system_capacity?
-      # FIXME: integrated_heating_system_airflow_cfm?
+      clg_sys.integrated_heating_system_capacity *= unit_multiplier unless clg_sys.integrated_heating_system_capacity.nil?
+      clg_sys.integrated_heating_system_airflow_cfm *= unit_multiplier unless clg_sys.integrated_heating_system_airflow_cfm.nil?
       # FIXME: shared_loop_watts?
       # FIXME: fan_coil_watts?
     end
@@ -4232,8 +4245,6 @@ class HVAC
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
       # FIXME: shared_loop_watts?
-      # FIXME: heating_airflow_cfm?
-      # FIXME: cooling_airflow_cfm?
     end
   end
 

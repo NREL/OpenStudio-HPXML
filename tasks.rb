@@ -1381,9 +1381,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
           hpxml_bldg.heating_systems[i].fraction_heat_load_served = 0.35
         end
       end
+    elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
+      hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
     elsif ['base-enclosure-2stories.xml',
-           'base-enclosure-2stories-garage.xml',
-           'base-hvac-ducts-area-fractions.xml'].include? hpxml_file
+           'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
       hpxml_bldg.hvac_distributions[0].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size}"
       hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
