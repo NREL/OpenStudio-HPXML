@@ -1532,13 +1532,13 @@ class HPXMLDefaults
                    HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
 
-      if hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        if hvac_system.cooling_detailed_performance_data.empty?
-          HVAC.set_cool_detailed_performance_data(hvac_system)
-        end
-        if is_hp && hvac_system.heating_detailed_performance_data.empty?
-          HVAC.set_heat_detailed_performance_data(hvac_system)
-        end
+      next unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+
+      if hvac_system.cooling_detailed_performance_data.empty?
+        HVAC.set_cool_detailed_performance_data(hvac_system)
+      end
+      if is_hp && hvac_system.heating_detailed_performance_data.empty?
+        HVAC.set_heat_detailed_performance_data(hvac_system)
       end
     end
   end

@@ -1280,7 +1280,7 @@ class HVAC
 
     # Default NEEP data inputs
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
-    
+
     # performance data at 95F, maximum speed
     max_cop_95 = is_ducted ? (0.1953 * hvac_system.cooling_efficiency_seer) : (0.08184 * hvac_system.cooling_efficiency_seer + 1.173)
     max_capacity_95 = hvac_system.cooling_capacity
@@ -2327,7 +2327,7 @@ class HVAC
       d = 0.04351
       e = -2.322
     end
-    
+
     max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
                  c * max_capacity_maintenance_5**2 +
                  d * max_capacity_maintenance_5 * hspf + e
@@ -3024,6 +3024,7 @@ class HVAC
 
   def self.set_cool_rated_eirs(cooling_system, use_eer_cop)
     return if use_eer_cop
+
     clg_ap = cooling_system.additional_properties
 
     clg_ap.cool_rated_eirs = []
@@ -3034,6 +3035,7 @@ class HVAC
 
   def self.set_heat_rated_eirs(heating_system, use_eer_cop)
     return if use_eer_cop
+
     htg_ap = heating_system.additional_properties
 
     htg_ap.heat_rated_eirs = []
@@ -4113,11 +4115,11 @@ class HVAC
     hpxml.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
       clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
-      if not clg_sys.cooling_detailed_performance_data.empty?
-        clg_sys.cooling_detailed_performance_data.each do |dp|
-          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
-          dp.capacity = [dp.capacity, min_capacity * speed].max
-        end
+      next unless not clg_sys.cooling_detailed_performance_data.empty?
+
+      clg_sys.cooling_detailed_performance_data.each do |dp|
+        speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+        dp.capacity = [dp.capacity, min_capacity * speed].max
       end
     end
     hpxml.heat_pumps.each do |hp_sys|
@@ -4138,11 +4140,11 @@ class HVAC
           dp.capacity = [dp.capacity, min_capacity * speed].max
         end
       end
-      if not hp_sys.cooling_detailed_performance_data.empty?
-        hp_sys.cooling_detailed_performance_data.each do |dp|
-          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
-          dp.capacity = [dp.capacity, min_capacity * speed].max
-        end
+      next unless not hp_sys.cooling_detailed_performance_data.empty?
+
+      hp_sys.cooling_detailed_performance_data.each do |dp|
+        speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+        dp.capacity = [dp.capacity, min_capacity * speed].max
       end
     end
   end

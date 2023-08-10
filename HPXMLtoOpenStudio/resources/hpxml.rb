@@ -6809,6 +6809,20 @@ class HPXML < Object
       self << CoolingPerformanceDataPoint.new(@hpxml_object, **kwargs)
     end
 
+    def check_for_errors
+      errors = []
+      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
+      outdoor_temps.each do |outdoor_temp|
+        num_min = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }.size
+        num_max = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }.size
+        if (num_min != 1) || (num_max != 1)
+          errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        end
+      end
+      return errors
+    end
+
     def from_oga(hvac_system)
       return if hvac_system.nil?
 
@@ -6866,6 +6880,20 @@ class HPXML < Object
   class HeatingDetailedPerformanceData < BaseArrayElement
     def add(**kwargs)
       self << HeatingPerformanceDataPoint.new(@hpxml_object, **kwargs)
+    end
+
+    def check_for_errors
+      errors = []
+      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
+      outdoor_temps.each do |outdoor_temp|
+        num_min = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }.size
+        num_max = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }.size
+        if (num_min != 1) || (num_max != 1)
+          errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        end
+      end
+      return errors
     end
 
     def from_oga(hvac_system)
