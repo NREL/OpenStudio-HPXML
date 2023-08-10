@@ -152,7 +152,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
     arg.setDisplayName('Site: Soil Type')
-    arg.setDescription('TODO. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Type of ground soil. If not provided, the OS-HPXML default is used.')
     args << arg
 
     site_moisture_type_choices = OpenStudio::StringVector.new
@@ -162,7 +162,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_moisture_type', site_moisture_type_choices, false)
     arg.setDisplayName('Site: Soil Moisture Type')
-    arg.setDescription('TODO. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Moisture level of the ground soil. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
