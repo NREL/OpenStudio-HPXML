@@ -323,18 +323,35 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.site.shielding_of_home = HPXML::ShieldingExposed
     hpxml.site.ground_conductivity = 0.8
     hpxml.site.ground_diffusivity = 0.9
+    hpxml.site.soil_type = HPXML::SiteSoilSoilTypeClay
+    hpxml.site.moisture_type = HPXML::SiteSoilMoistureTypeDry
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8, 0.9)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8, 0.9, HPXML::SiteSoilSoilTypeClay, HPXML::SiteSoilMoistureTypeDry)
 
     # Test defaults
     hpxml.site.site_type = nil
     hpxml.site.shielding_of_home = nil
     hpxml.site.ground_conductivity = nil
     hpxml.site.ground_diffusivity = nil
+    hpxml.site.soil_type = nil
+    hpxml.site.moisture_type = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0, 0.0208)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0, 0.0208, HPXML::SiteSoilSoilTypeUnknown, HPXML::SiteSoilMoistureTypeDry)
+
+    # Test defaults w/ gravel soil type
+    hpxml.site.soil_type = HPXML::SiteSoilSoilTypeGravel
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.231, 0.009, HPXML::SiteSoilSoilTypeGravel, HPXML::SiteSoilMoistureTypeDry)
+
+    # Test defaults w/ conductivity but no diffusivity
+    hpxml.site.ground_conductivity = 0.8
+    hpxml.site.soil_type = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.8, 0.0208, nil, nil)
   end
 
   def test_neighbor_buildings
@@ -3730,11 +3747,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_site_values(hpxml, site_type, shielding_of_home, ground_conductivity, ground_diffusivity)
+  def _test_default_site_values(hpxml, site_type, shielding_of_home, ground_conductivity, ground_diffusivity, soil_type, moisture_type)
     assert_equal(site_type, hpxml.site.site_type)
     assert_equal(shielding_of_home, hpxml.site.shielding_of_home)
     assert_equal(ground_conductivity, hpxml.site.ground_conductivity)
     assert_equal(ground_diffusivity, hpxml.site.ground_diffusivity)
+    if soil_type.nil?
+      assert_nil(hpxml.site.soil_type)
+    else
+      assert_equal(soil_type, hpxml.site.soil_type)
+    end
+    if moisture_type.nil?
+      assert_nil(hpxml.site.moisture_type)
+    else
+      assert_equal(moisture_type, hpxml.site.moisture_type)
+    end
   end
 
   def _test_default_neighbor_building_values(hpxml, azimuths)
