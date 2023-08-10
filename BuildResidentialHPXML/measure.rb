@@ -142,9 +142,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_soil_type_choices = OpenStudio::StringVector.new
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeUnknown
     site_soil_type_choices << HPXML::SiteSoilSoilTypeSand
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeSilt
     site_soil_type_choices << HPXML::SiteSoilSoilTypeClay
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeLoam
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeGravel
+    # site_soil_type_choices << HPXML::SiteSoilSoilTypeOther
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeUnknown
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
     arg.setDisplayName('Site: Soil Type')
@@ -152,9 +156,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_moisture_type_choices = OpenStudio::StringVector.new
-    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
     site_moisture_type_choices << HPXML::SiteSoilMoistureTypeWet
     site_moisture_type_choices << HPXML::SiteSoilMoistureTypeDry
+    # site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_moisture_type', site_moisture_type_choices, false)
     arg.setDisplayName('Site: Soil Moisture Type')
