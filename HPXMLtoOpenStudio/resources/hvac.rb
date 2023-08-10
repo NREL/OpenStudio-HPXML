@@ -1282,8 +1282,7 @@ class HVAC
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
     
     # performance data at 95F, maximum speed
-    # TODO: max_cop_95 = calc_cool_max_cop_95_from_seer(hvac_system.cooling_efficiency_seer, is_ducted)
-    max_cop_95 = 3.5 # FIXME: Use seer correlation instead
+    max_cop_95 = is_ducted ? 0.1953 * hvac_system.cooling_efficiency_seer : 3.5 # FIXME: Use seer correlation for wall placement
     max_capacity_95 = hvac_system.cooling_capacity
     detailed_performance_data.add(capacity: max_capacity_95,
                                   efficiency_cop: max_cop_95,
