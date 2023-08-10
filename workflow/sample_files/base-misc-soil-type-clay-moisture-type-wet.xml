@@ -42,7 +42,7 @@
           </FuelTypesAvailable>
           <Soil>
             <SoilType>clay</SoilType>
-            <MoistureType>dry</MoistureType>
+            <MoistureType>wet</MoistureType>
           </Soil>
         </Site>
         <BuildingConstruction>
