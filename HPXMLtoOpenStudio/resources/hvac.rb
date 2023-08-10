@@ -1133,7 +1133,8 @@ class HVAC
 
   def self.set_cool_curves_central_air_source(heat_pump, use_eer = false)
     hp_ap = heat_pump.additional_properties
-    hp_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(heat_pump.compressor_type, use_eer)
+    system_type = heat_pump.is_a?(HPXML::HeatPump) ? heat_pump.heat_pump_type : heat_pump.cooling_system_type
+    hp_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(heat_pump.compressor_type, system_type, use_eer)
     is_ducted = !heat_pump.distribution_system_idref.nil?
     hp_ap.cool_capacity_ratios = get_cool_capacity_ratios(heat_pump, is_ducted)
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1159,7 +1160,6 @@ class HVAC
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      system_type = heat_pump.is_a?(HPXML::HeatPump) ? heat_pump.heat_pump_type : heat_pump.cooling_system_type
       # From Carrier heat pump lab testing
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
@@ -1189,7 +1189,7 @@ class HVAC
 
   def self.set_heat_curves_central_air_source(heat_pump, use_cop = false)
     hp_ap = heat_pump.additional_properties
-    hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type, use_cop)
+    hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type, heat_pump.heat_pump_type, use_cop)
     heating_capacity_retention_temp = heat_pump.heating_capacity_17F.nil? ? heat_pump.heating_capacity_retention_temp : 17
     heating_capacity_retention_fraction = heat_pump.heating_capacity_17F.nil? ? heat_pump.heating_capacity_retention_fraction : (heat_pump.heating_capacity == 0.0 ? 0.0 : heat_pump.heating_capacity_17F / heat_pump.heating_capacity)
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
@@ -1218,7 +1218,6 @@ class HVAC
       hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
       hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump, is_ducted)
       hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
-      hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type)
     end
   end
 
@@ -1333,7 +1332,7 @@ class HVAC
     fail 'Unable to get heating capacity ratios.'
   end
 
-  def self.get_default_cool_cfm_per_ton(compressor_type, use_eer = false)
+  def self.get_default_cool_cfm_per_ton(compressor_type, system_type, use_eer = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       if not use_eer
@@ -1345,13 +1344,17 @@ class HVAC
       return [411.0083, 344.1]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       # FIXME: revisit these numbers
-      return [466.6667, 400.0]
+      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeHeatPumpAirToAir].include? system_type
+        return [466.6667, 400.0]
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
+        return [433.1356, 400.0]
+      end
     else
       fail 'Compressor type not supported.'
     end
   end
 
-  def self.get_default_heat_cfm_per_ton(compressor_type, use_cop_or_htg_sys = false)
+  def self.get_default_heat_cfm_per_ton(compressor_type, system_type, use_cop_or_htg_sys = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       if not use_cop_or_htg_sys
@@ -1363,7 +1366,11 @@ class HVAC
       return [391.3333, 352.2]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       # FIXME: revisit these numbers
-      return [566.8091, 301.9752]
+      if system_type == HPXML::HVACTypeHeatPumpAirToAir
+        return [566.8091, 353.3110]
+      elsif system_type == HPXML::HVACTypeHeatPumpMiniSplit
+        return [566.8091, 362.3702]
+      end
     else
       fail 'Compressor type not supported.'
     end
