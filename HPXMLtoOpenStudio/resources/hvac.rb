@@ -711,7 +711,7 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
-  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods)
+  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods, unit_multiplier)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -734,6 +734,9 @@ class HVAC
     total_capacity = dehumidifiers.map { |d| d.capacity }.sum
     avg_energy_factor = dehumidifiers.map { |d| d.energy_factor * d.capacity }.sum / total_capacity
     total_fraction_served = dehumidifiers.map { |d| d.fraction_served }.sum
+
+    # Apply unit multiplier
+    total_capacity *= unit_multiplier
 
     control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier

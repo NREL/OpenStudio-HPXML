@@ -31,28 +31,29 @@ class HPXMLTest < Minitest::Test
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
         # FIXME: Need to address these files
+        next if xml.include? 'real_homes'
         next if xml.include? 'base-bldgtype-multifamily'
+        next if xml.include? 'base-hvac-undersized'
+        next if xml.include? 'base-multiple-buildings.xml'
         next if xml.include? '-dehumidifier'
-        next if xml.include? '-battery'
+        # GSHP:
+        next if xml.include? 'ground-to-air'
+        next if xml.include? 'base-hvac-multiple'
+        # DHW:
         next if xml.include? '-desuperheater'
         next if xml.include?('-combi') || xml.include?('-indirect')
         next if xml.include?('-hpwh') || xml.include?('tank-heat-pump')
         next if xml.include? '-dhw-multiple'
         next if xml.include? '-stratified'
         next if xml.include? '-solar'
-        next if xml.include? 'base-foundation-belly-wing'
-        next if xml.include? 'ground-to-air'
+        # Ducts:
         next if xml.include? 'base-hvac-ducts'
-        next if xml.include? 'base-hvac-multiple'
-        next if xml.include? 'base-hvac-undersized'
-        next if xml.include? 'base-mechvent'
-        next if xml.include? '-pv'
+        next if xml.include? 'base-foundation-belly-wing'
+        # Battery:
+        next if xml.include? '-battery'
+        next if xml.include? 'base-residents-5'
         next if xml.include? 'base-misc-defaults'
         next if xml.include? 'base-misc-emissions'
-        next if xml.include? '-generators'
-        next if xml.include? 'base-multiple-buildings.xml'
-        next if xml.include? 'base-residents'
-        next if xml.include? 'real_homes'
 
         xmls << File.absolute_path(xml)
       end
@@ -1102,7 +1103,7 @@ class HPXMLTest < Minitest::Test
       if not fan_cfis.empty?
         if (fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
           # CFIS only, check for positive mech vent energy that is less than the energy if it had run 24/7
-          fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
           assert_operator(mv_energy, :>, 0)
           assert_operator(mv_energy, :<, fan_gj)
         end
@@ -1110,19 +1111,19 @@ class HPXMLTest < Minitest::Test
         # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
         fan_gj = 0
         if not fan_sup.empty?
-          fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
         end
         if not fan_exh.empty?
-          fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
         end
         if not fan_bal.empty?
-          fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
         end
         if not vent_fan_kitchen.empty?
-          fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.count * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
         end
         if not vent_fan_bath.empty?
-          fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
+          fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.count * 365.0, 'Wh', 'GJ') }.sum(0.0) * unit_multiplier
         end
         # Maximum error that can be caused by rounding
         assert_in_delta(mv_energy, fan_gj, 0.006)
@@ -1313,9 +1314,13 @@ class HPXMLTest < Minitest::Test
         else
           fail "Unexpected results key: #{key}."
         end
+        # Uncomment this line to debug:
+        # puts "[#{key}] 1x=#{val_1x * unit_multiplier} 10x=#{results_10x[key]}"
         assert((abs_val_delta < abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac < abs_frac_tol))
       end
     end
+
+    # FIXME: Compare timeseries output too
   end
 
   def _write_results(results, csv_out)
