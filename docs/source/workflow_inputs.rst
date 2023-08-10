@@ -550,25 +550,30 @@ Soil information is entered in ``Soil``.
   Element                                                             Type              Units        Constraints      Required  Default   Notes
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
   ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_
-  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        mixed     Moisture type or conductivity or diffusivity [#]_
+  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        dry       Moisture type or conductivity or diffusivity [#]_
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
-  .. [#] SoilType choices are "unknown", "sand", or "clay".
+  .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
-  .. [#] MoistureType choices are "mixed", "wet", or "dry".  
-  .. [#] | If Conductivity and extension/Diffusivity not provided, defaults based on SoilType/MoistureType:
-         | - **unknown**, **mixed/wet/dry**: 1.0 Btu/hr-ft-F and 0.0208 ft2/hr
-         | - **sand**, **mixed**: 0.5 Btu/hr-ft-F and 0.02 ft2/hr
-         | - **sand**, **wet**: Not supported
-         | - **sand**, **dry**: 0.199 Btu/hr-ft-F and 0.0111 ft2/hr
-         | - **clay**, **mixed**: 0.75 Btu/hr-ft-F and 0.0249 ft2/hr
-         | - **clay**, **wet**: 1.4 Btu/hr-ft-F and 0.0351 ft2/hr
-         | - **clay**, **dry**: 0.5174 Btu/hr-ft-F and 0.0207 ft2/hr
+  .. [#] MoistureType choices are "wet" or "dry".  
+  .. [#] If Conductivity and extension/Diffusivity not provided, defaults based on SoilType/MoistureType as follows:
+
+  ============  ==============  ==========================  =============
+  SoilType      MoistureType    Conductivity [Btu/hr-ft-F]  extension/Diffusivity [ft2/hr]
+  ============  ==============  ==========================  =============
+  sand/gravel   dry             0.231                       0.009
+  sand          wet             1.386                       0.032
+  silt/clay     dry             0.288                       0.012
+  silt/clay     wet             0.982                       0.019
+  loam          dry/wet         1.213                       0.035
+  gravel        wet             1.039                       0.029
+  unknown       dry/wet         1.0                         0.0208
+  ============  ==============  ==========================  =============
 
 .. note::
 
-  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by GLHEPro.
+  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881/ (with the exception of "unknown").
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
