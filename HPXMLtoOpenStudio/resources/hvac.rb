@@ -4239,6 +4239,12 @@ class HVAC
     hpxml.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
       clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
+      if not clg_sys.cooling_detailed_performance_data.empty?
+        clg_sys.cooling_detailed_performance_data.each do |dp|
+          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+          dp.capacity = [dp.capacity, min_capacity * speed].max
+        end
+      end
     end
     hpxml.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity = [hp_sys.cooling_capacity, min_capacity].max
@@ -4251,6 +4257,18 @@ class HVAC
       end
       if not hp_sys.backup_heating_capacity.nil?
         hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max
+      end
+      if not hp_sys.heating_detailed_performance_data.empty?
+        hp_sys.heating_detailed_performance_data.each do |dp|
+          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+          dp.capacity = [dp.capacity, min_capacity * speed].max
+        end
+      end
+      if not hp_sys.cooling_detailed_performance_data.empty?
+        hp_sys.cooling_detailed_performance_data.each do |dp|
+          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+          dp.capacity = [dp.capacity, min_capacity * speed].max
+        end
       end
     end
   end

@@ -1533,14 +1533,10 @@ class HPXMLDefaults
                    HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
 
       if hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        # Assign minimum capacity here to avoid E+ simulation error
-        min_capacity = 1.0
-        hvac_system.cooling_capacity = [hvac_system.cooling_capacity, min_capacity].max
         if hvac_system.cooling_detailed_performance_data.empty?
           HVAC.set_cool_detailed_performance_data(hvac_system)
         end
         if is_hp && hvac_system.heating_detailed_performance_data.empty?
-          hvac_system.heating_capacity = [hvac_system.heating_capacity, min_capacity].max
           HVAC.set_heat_detailed_performance_data(hvac_system)
         end
       end
