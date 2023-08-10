@@ -1915,17 +1915,18 @@ class HVACSizing
       bore_length = [bore_length_heat, bore_length_cool].max
       bore_depth = (bore_length / num_bore_holes).floor # ft
 
+      active_length = 5 # the active length starts about 5 ft below the surface
       for _i in 0..4
-        if (bore_depth < min_bore_depth) && (num_bore_holes > 1)
+        if (bore_depth + active_length < min_bore_depth) && (num_bore_holes > 1)
           num_bore_holes -= 1
           bore_depth = (bore_length / num_bore_holes).floor
-        elsif bore_depth > max_bore_depth
+        elsif bore_depth + active_length > max_bore_depth
           num_bore_holes += 1
           bore_depth = (bore_length / num_bore_holes).floor
         end
       end
 
-      bore_depth = (bore_length / num_bore_holes).floor + 5 # FIXME: why add the 5?
+      bore_depth = (bore_length / num_bore_holes).floor + active_length
     end
 
     if (bore_depth < min_bore_depth) || (bore_depth > max_bore_depth)
