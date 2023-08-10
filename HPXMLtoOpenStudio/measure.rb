@@ -1558,8 +1558,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
-        airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system,
-                                                            sequential_cool_load_fracs, living_zone, @hvac_unavailable_periods)
+        airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs,
+                                                            living_zone, @hvac_unavailable_periods,
+                                                            @hpxml_bldg.building_construction.number_of_units)
       end
     end
   end

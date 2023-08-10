@@ -178,14 +178,15 @@ class Lighting
       exterior_holiday_sch = nil
       exterior_holiday_col_name = SchedulesFile::ColumnLightingExteriorHoliday
       exterior_holiday_obj_name = Constants.ObjectNameLightingExteriorHoliday
+      exterior_holiday_kwh_per_day = lighting.holiday_kwh_per_day * unit_multiplier
       if not schedules_file.nil?
-        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: exterior_holiday_col_name, daily_kwh: lighting.holiday_kwh_per_day)
+        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: exterior_holiday_col_name, daily_kwh: exterior_holiday_kwh_per_day)
         exterior_holiday_sch = schedules_file.create_schedule_file(col_name: exterior_holiday_col_name)
       end
       if exterior_holiday_sch.nil?
         exterior_holiday_unavailable_periods = Schedule.get_unavailable_periods(runner, exterior_holiday_col_name, unavailable_periods)
         exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, exterior_holiday_obj_name + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, true, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day, lighting.holiday_period_end_month, lighting.holiday_period_end_day, unavailable_periods: exterior_holiday_unavailable_periods)
-        design_level = exterior_holiday_sch.calc_design_level_from_daily_kwh(lighting.holiday_kwh_per_day)
+        design_level = exterior_holiday_sch.calc_design_level_from_daily_kwh(exterior_holiday_kwh_per_day)
         exterior_holiday_sch = exterior_holiday_sch.schedule
       else
         runner.registerWarning("Both '#{exterior_holiday_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !lighting.holiday_weekday_fractions.nil?
