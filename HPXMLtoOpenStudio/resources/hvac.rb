@@ -2531,134 +2531,6 @@ class HVAC
     return hspf
   end
 
-  def self.calc_hspf_4speed(cop_47, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
-    n_max = 2
-    n_int = 1
-    n_min = 0
-
-    tin = 70.0
-    tout_3 = 17.0
-    tout_2 = 35.0
-    tout_0 = 62.0
-
-    eir_H1_2 = calc_eir_from_cop(cop_47[n_max], fan_power_rated)
-    eir_H3_2 = eir_H1_2 * MathTools.biquadratic(tin, tout_3, coeff_eir[n_max])
-
-    eir_adjv = calc_eir_from_cop(cop_47[n_int], fan_power_rated)
-    eir_H2_v = eir_adjv * MathTools.biquadratic(tin, tout_2, coeff_eir[n_int])
-
-    eir_H1_1 = calc_eir_from_cop(cop_47[n_min], fan_power_rated)
-    eir_H0_1 = eir_H1_1 * MathTools.biquadratic(tin, tout_0, coeff_eir[n_min])
-
-    q_H1_2 = capacity_ratios[n_max]
-    q_H3_2 = q_H1_2 * MathTools.biquadratic(tin, tout_3, coeff_q[n_max])
-
-    q_H2_v = capacity_ratios[n_int] * MathTools.biquadratic(tin, tout_2, coeff_q[n_int])
-
-    q_H1_1 = capacity_ratios[n_min]
-    q_H0_1 = q_H1_1 * MathTools.biquadratic(tin, tout_0, coeff_q[n_min])
-
-    cfm_Btu_h = 400.0 / 12000.0
-
-    q_H1_2_net = q_H1_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
-    q_H3_2_net = q_H3_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
-    q_H2_v_net = q_H2_v + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
-    q_H1_1_net = q_H1_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-    q_H0_1_net = q_H0_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-
-    p_H1_2 = q_H1_2 * eir_H1_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
-    p_H3_2 = q_H3_2 * eir_H3_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
-    p_H2_v = q_H2_v * eir_H2_v + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
-    p_H1_1 = q_H1_1 * eir_H1_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-    p_H0_1 = q_H0_1 * eir_H0_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-
-    q_H35_2 = 0.9 * (q_H3_2_net + 0.6 * (q_H1_2_net - q_H3_2_net))
-    p_H35_2 = 0.985 * (p_H3_2 + 0.6 * (p_H1_2 - p_H3_2))
-    q_H35_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (35.0 - 47.0)
-    p_H35_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (35.0 - 47.0)
-    n_Q = (q_H2_v_net - q_H35_1) / (q_H35_2 - q_H35_1)
-    m_Q = (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (1.0 - n_Q) + n_Q * (q_H35_2 - q_H3_2_net) / (35.0 - 17.0)
-    n_E = (p_H2_v - p_H35_1) / (p_H35_2 - p_H35_1)
-    m_E = (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (1.0 - n_E) + n_E * (p_H35_2 - p_H3_2) / (35.0 - 17.0)
-
-    t_OD = 5.0
-    dHR = q_H1_2_net * (65.0 - t_OD) / 60.0
-
-    c_T_3_1 = q_H1_1_net
-    c_T_3_2 = (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0)
-    c_T_3_3 = 0.77 * dHR / (65.0 - t_OD)
-    t_3 = (47.0 * c_T_3_2 + 65.0 * c_T_3_3 - c_T_3_1) / (c_T_3_2 + c_T_3_3)
-    q_HT3_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_3 - 47.0)
-    p_HT3_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_3 - 47.0)
-    cop_T3_1 = q_HT3_1 / p_HT3_1
-
-    c_T_v_1 = q_H2_v_net
-    c_T_v_3 = c_T_3_3
-    t_v = (35.0 * m_Q + 65 * c_T_v_3 - c_T_v_1) / (m_Q + c_T_v_3)
-    q_HTv_v = q_H2_v_net + m_Q * (t_v - 35.0)
-    p_HTv_v = p_H2_v + m_E * (t_v - 35.0)
-    cop_Tv_v = q_HTv_v / p_HTv_v
-
-    c_T_4_1 = q_H3_2_net
-    c_T_4_2 = (q_H35_2 - q_H3_2_net) / (35.0 - 17.0)
-    c_T_4_3 = c_T_v_3
-    t_4 = (17.0 * c_T_4_2 + 65.0 * c_T_4_3 - c_T_4_1) / (c_T_4_2 + c_T_4_3)
-    q_HT4_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) / (35.0 - 17.0) * (t_4 - 17.0)
-    p_HT4_2 = p_H3_2 + (p_H35_2 - p_H3_2) / (35.0 - 17.0) * (t_4 - 17.0)
-    cop_T4_2 = q_HT4_2 / p_HT4_2
-
-    d = (t_3**2.0 - t_4**2.0) / (t_v**2.0 - t_4**2.0)
-    b = (cop_T4_2 - cop_T3_1 - d * (cop_T4_2 - cop_Tv_v)) / (t_4 - t_3 - d * (t_4 - t_v))
-    c = (cop_T4_2 - cop_T3_1 - b * (t_4 - t_3)) / (t_4**2.0 - t_3**2.0)
-    a = cop_T4_2 - b * t_4 - c * t_4**2.0
-
-    t_bins = [62.0, 57.0, 52.0, 47.0, 42.0, 37.0, 32.0, 27.0, 22.0, 17.0, 12.0, 7.0, 2.0, -3.0, -8.0]
-    frac_hours = [0.132, 0.111, 0.103, 0.093, 0.100, 0.109, 0.126, 0.087, 0.055, 0.036, 0.026, 0.013, 0.006, 0.002, 0.001]
-
-    t_off = 10.0
-    t_on = t_off + 4
-    etot = 0.0
-    bLtot = 0.0
-    (0..14).each do |i|
-      bL = ((65.0 - t_bins[i]) / (65.0 - t_OD)) * 0.77 * dHR
-
-      q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[i] - 47.0)
-      p_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_bins[i] - 47.0)
-
-      if (t_bins[i] <= 17.0) || (t_bins[i] >= 45.0)
-        q_2 = q_H3_2_net + (q_H1_2_net - q_H3_2_net) * (t_bins[i] - 17.0) / (47.0 - 17.0)
-        p_2 = p_H3_2 + (p_H1_2 - p_H3_2) * (t_bins[i] - 17.0) / (47.0 - 17.0)
-      else
-        q_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) * (t_bins[i] - 17.0) / (35.0 - 17.0)
-        p_2 = p_H3_2 + (p_H35_2 - p_H3_2) * (t_bins[i] - 17.0) / (35.0 - 17.0)
-      end
-
-      if t_bins[i] <= t_off
-        delta = 0.0
-      elsif t_bins[i] >= t_on
-        delta = 1.0
-      else
-        delta = 0.5
-      end
-
-      if bL <= q_1
-        x_1 = bL / q_1
-        e_Tj_n = delta * x_1 * p_1 * frac_hours[i] / (1.0 - c_d * (1.0 - x_1))
-      elsif (q_1 < bL) && (bL <= q_2)
-        cop_T_j = a + b * t_bins[i] + c * t_bins[i]**2.0
-        e_Tj_n = delta * frac_hours[i] * bL / cop_T_j + (1.0 - delta) * bL * (frac_hours[i])
-      else
-        e_Tj_n = delta * frac_hours[i] * p_2 + frac_hours[i] * (bL - delta * q_2)
-      end
-
-      bLtot += frac_hours[i] * bL
-      etot += e_Tj_n
-    end
-
-    hspf = bLtot / (etot / 3.412)
-    return hspf
-  end
-
   def self.calc_fan_speed_ratios(capacity_ratios, rated_cfm_per_tons, rated_airflow_rate)
     fan_speed_ratios = []
     capacity_ratios.each_with_index do |capacity_ratio, i|
@@ -2826,7 +2698,8 @@ class HVAC
       outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
     end
     data_array.each_with_index do |data, speed|
-      user_out_db = data_array[speed].map { |dp| dp.outdoor_temperature }
+      data = data.sort_by { |dp| dp.outdoor_temperature }
+      user_out_db = data.map { |dp| dp.outdoor_temperature }
       outdoor_dry_bulbs.each do |new_pt|
         next if user_out_db.include? new_pt
 
@@ -2854,7 +2727,6 @@ class HVAC
         new_dp.gross_efficiency_cop = (new_pt - left_point) * cop_slope + left_dp.gross_efficiency_cop
         data << new_dp
       end
-      data = data.sort_by { |dp| dp.outdoor_temperature }
     end
   end
 
@@ -2882,8 +2754,10 @@ class HVAC
     end
     # table lookup output values
     data_array.each do |data|
+      # create a new array to temporarily store expanded data points, to concat after the existing data loop
       array_tmp = Array.new
       indoor_t.each do |t_i|
+        # introduce indoor conditions other than rated, expand to rated data points
         next if t_i == rated_t_i
 
         data_tmp = Array.new
@@ -2936,6 +2810,7 @@ class HVAC
 
     clg_coil = nil
     crankcase_heater_temp = 50 # F
+    # FIXME: rated condition shows up multiple times in the codes, consider creating a constant
     rated_iwb = 67.0
     rated_odb = 95.0
     if cooling_system.cooling_detailed_performance_data.empty?
