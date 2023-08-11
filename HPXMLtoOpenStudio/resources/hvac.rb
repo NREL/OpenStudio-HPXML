@@ -3607,24 +3607,31 @@ class HVAC
   def self.set_heat_pump_temperatures(heat_pump, runner = nil)
     hp_ap = heat_pump.additional_properties
 
+    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      hp_backup_fuel = heat_pump.backup_heating_fuel
+    elsif not heat_pump.backup_system.nil?
+      hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+    end
+
     # Sets:
     # 1. Minimum temperature (deg-F) for HP compressor operation
     # 2. Maximum temperature (deg-F) for HP supplemental heating operation
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
-
-      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-        hp_backup_fuel = heat_pump.backup_heating_fuel
-      elsif not heat_pump.backup_system.nil?
-        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
-      end
-      if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
-        runner.registerError('Switchover temperature should not be used for a heat pump with electric backup; use compressor lockout temperature instead.')
-      end
     else
       hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
+    end
+
+    # Error-checking
+    # Can't do this in Schematron because temperatures can be defaulted
+    if ((hp_ap.hp_min_temp - hp_ap.supp_max_temp).abs < 5) && (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
+      if not heat_pump.backup_heating_switchover_temp.nil?
+        runner.registerError('Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.')
+      else
+        runner.registerError('Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.')
+      end
     end
   end
 
