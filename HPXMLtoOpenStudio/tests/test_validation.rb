@@ -839,11 +839,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'emissions-wrong-filename' => ["Emissions File file path 'invalid-wrong-filename.csv' does not exist."],
                             'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
-                            'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should not be used for a heat pump with electric backup; use compressor lockout temperature instead.'],
                             'hvac-cooling-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature = 82.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.',
                                                                                     'Cooling detailed performance data for outdoor temperature = 81.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'hvac-heating-detailed-performance-incomplete-pair' => ['Heating detailed performance data for outdoor temperature = 5.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.',
                                                                                     'Heating detailed performance data for outdoor temperature = 4.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
+                            'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.'],
+                            'heat-pump-lockout-temps-elec-backup' => ['Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.'],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
@@ -987,6 +988,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-heating-detailed-performance-incomplete-pair'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
         hpxml.heat_pumps[0].heating_detailed_performance_data[-1].outdoor_temperature -= 1.0
+      elsif ['heat-pump-lockout-temps-elec-backup'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
+        hpxml.heat_pumps[0].compressor_lockout_temp = 35.0
+        hpxml.heat_pumps[0].backup_heating_lockout_temp = 35.0
       elsif ['hvac-invalid-distribution-system-type'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
