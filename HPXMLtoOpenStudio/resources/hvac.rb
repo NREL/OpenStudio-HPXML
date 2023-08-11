@@ -2319,6 +2319,14 @@ class HVAC
     end
   end
 
+  def self.calc_heat_rated_capacity_from_max_47(max_capacity_47, is_ducted)
+    if is_ducted
+      return max_capacity_47 * 0.972
+    else
+      return max_capacity_47 * 0.812
+    end
+  end
+
   def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)
     # correlation from NEEP data analysis
     if is_ducted

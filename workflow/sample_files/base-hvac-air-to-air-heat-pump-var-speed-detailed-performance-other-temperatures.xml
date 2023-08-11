@@ -326,6 +326,8 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
@@ -365,21 +367,21 @@
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
-                  <OutdoorTemperature>80.0</OutdoorTemperature>
-                  <Capacity>13200.0</Capacity>
+                  <OutdoorTemperature>105.0</OutdoorTemperature>
+                  <Capacity>10000.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>6.34</Value>
+                    <Value>3.9</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
-                  <OutdoorTemperature>80.0</OutdoorTemperature>
-                  <Capacity>40000.0</Capacity>
+                  <OutdoorTemperature>105.0</OutdoorTemperature>
+                  <Capacity>30000.0</Capacity>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>3.53</Value>
+                    <Value>2.3</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
               </CoolingDetailedPerformanceData>
@@ -403,21 +405,21 @@
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
-                  <OutdoorTemperature>8.0</OutdoorTemperature>
-                  <Capacity>1900.0</Capacity>
+                  <OutdoorTemperature>55.0</OutdoorTemperature>
+                  <Capacity>12000.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>0.81</Value>
+                    <Value>5.5</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
-                  <OutdoorTemperature>8.0</OutdoorTemperature>
-                  <Capacity>19900.0</Capacity>
+                  <OutdoorTemperature>55.0</OutdoorTemperature>
+                  <Capacity>45000.0</Capacity>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>2.28</Value>
+                    <Value>4.0</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
               </HeatingDetailedPerformanceData>

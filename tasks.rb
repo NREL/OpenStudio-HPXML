@@ -1663,8 +1663,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'].include? hpxml_file
     # YORK HMH7
     # https://ashp.neep.org/#!/product/64253/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = nil
-    hpxml.heat_pumps[0].heating_capacity = nil
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
     hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
     hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
@@ -1711,8 +1711,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       efficiency_cop: 2.28)
   end
   if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].cooling_capacity = nil
-    hpxml.heat_pumps[0].heating_capacity = nil
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
     hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
     hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
@@ -1725,14 +1725,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity: 36000,
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 2.71)
-    clg_perf_data.add(outdoor_temperature: 80.0,
-                      capacity: 13200,
+    clg_perf_data.add(outdoor_temperature: 105.0,
+                      capacity: 10000,
                       capacity_description: HPXML::CapacityDescriptionMinimum,
-                      efficiency_cop: 6.34)
-    clg_perf_data.add(outdoor_temperature: 80.0,
-                      capacity: 40000,
+                      efficiency_cop: 3.9)
+    clg_perf_data.add(outdoor_temperature: 105.0,
+                      capacity: 30000,
                       capacity_description: HPXML::CapacityDescriptionMaximum,
-                      efficiency_cop: 3.53)
+                      efficiency_cop: 2.3)
     htg_perf_data.add(outdoor_temperature: 47.0,
                       capacity: 10000,
                       capacity_description: HPXML::CapacityDescriptionMinimum,
@@ -1741,17 +1741,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity: 36000,
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 3.44)
-    htg_perf_data.add(outdoor_temperature: 8.0,
-                      capacity: 1900,
+    htg_perf_data.add(outdoor_temperature: 55.0,
+                      capacity: 12000,
                       capacity_description: HPXML::CapacityDescriptionMinimum,
-                      efficiency_cop: 0.81)
-    htg_perf_data.add(outdoor_temperature: 8.0,
-                      capacity: 19900,
+                      efficiency_cop: 5.5)
+    htg_perf_data.add(outdoor_temperature: 55.0,
+                      capacity: 45000,
                       capacity_description: HPXML::CapacityDescriptionMaximum,
-                      efficiency_cop: 2.28)
+                      efficiency_cop: 4.0)
   end
   if ['base-hvac-central-ac-only-var-speed-detailed-performance.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].cooling_capacity = 36000
     hpxml.cooling_systems[0].cooling_efficiency_seer = 17.25
     clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
@@ -1772,7 +1772,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       efficiency_cop: 3.53)
   end
   if ['base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].cooling_capacity = 36000
     hpxml.cooling_systems[0].cooling_efficiency_seer = 21.5
     clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
@@ -1795,8 +1795,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml'].include? hpxml_file
     # FUJITSU Halcyon Single-room Mini-Split Systems Slim
     # https://ashp.neep.org/#!/product/25352/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = nil
-    hpxml.heat_pumps[0].heating_capacity = nil
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
     hpxml.heat_pumps[0].cooling_efficiency_seer = 16.7
     hpxml.heat_pumps[0].heating_efficiency_hspf = 11.3
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
@@ -1845,8 +1845,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'].include? hpxml_file
     # BOSCH Bosch Climate 5000 ductless minisplit series
     # https://ashp.neep.org/#!/product/66076/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = nil
-    hpxml.heat_pumps[0].heating_capacity = nil
+    hpxml.heat_pumps[0].cooling_capacity = 36000
+    hpxml.heat_pumps[0].heating_capacity = 36000
     hpxml.heat_pumps[0].cooling_efficiency_seer = 21.5
     hpxml.heat_pumps[0].heating_efficiency_hspf = 10.5
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data

@@ -324,6 +324,7 @@
               <SystemIdentifier id='CoolingSystem1'/>
               <CoolingSystemType>mini-split</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
