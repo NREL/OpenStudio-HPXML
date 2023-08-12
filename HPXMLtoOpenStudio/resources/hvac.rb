@@ -1151,7 +1151,6 @@ class HVAC
       # From Carrier heat pump lab testing
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-      # Performance coefficients now needed for hvac sizing adjustment
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
     end
   end
