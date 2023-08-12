@@ -1353,10 +1353,15 @@ class HVACSizing
 
       entering_temp = @hpxml.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
-      coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
-
-      # FIXME: Replace performance coefficients with new defaulting correlations
-      total_cap_curve_value = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients)
+      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
+        odb_adj = (1.0 - 1.033) / (95.0 - 82.0) * (entering_temp - 95.0) + 1.0
+        idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(67, entering_temp, coefficients_1speed)
+        total_cap_curve_value = odb_adj * idb_adj
+      else
+        coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
+        total_cap_curve_value = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients)
+      end
       cool_cap_rated = hvac_sizing_values.Cool_Load_Tot / total_cap_curve_value
 
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1457,9 +1462,11 @@ class HVACSizing
 
       entering_temp = @hpxml.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
-      coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
+      coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
+      odb_adj = (1.0 - 1.033) / (95.0 - 82.0) * (entering_temp - 95.0) + 1.0
+      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(67, entering_temp, coefficients_1speed)
+      total_cap_curve_value = odb_adj * idb_adj
 
-      total_cap_curve_value = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       hvac_sizing_values.Cool_Capacity = (hvac_sizing_values.Cool_Load_Tot / total_cap_curve_value)
@@ -2005,13 +2012,7 @@ class HVACSizing
 
     hvac_heating_ap = hvac_heating.additional_properties
 
-    if hvac_heating_ap.heat_cap_ft_spec.size > 1
-      coefficients = hvac_heating_ap.heat_cap_ft_spec[-1]
-      capacity_ratio = hvac_heating_ap.heat_capacity_ratios[-1]
-    else
-      coefficients = hvac_heating_ap.heat_cap_ft_spec[0]
-      capacity_ratio = 1.0
-    end
+    capacity_ratio = hvac_heating_ap.heat_capacity_ratios[-1]
 
     if hvac_heating.is_a? HPXML::HeatPump
       if not hvac_heating.backup_heating_switchover_temp.nil?
@@ -2033,8 +2034,18 @@ class HVACSizing
       heating_db = @hpxml.header.manualj_heating_design_temp
     end
 
-    # FIXME: Replace performance coefficients with new defaulting correlations
-    heat_cap_rated = (heating_load / MathTools.biquadratic(@heat_setpoint, heating_db, coefficients)) / capacity_ratio
+    if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      capacity_retention_temp_1speed, capacity_retention_fraction_1speed = HVAC.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
+      coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
+      heating_capacity_retention_temperature, heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(hvac_heating.compressor_type, hvac_heating.heating_efficiency_hspf)
+      odb_adj = (1.0 - heating_capacity_retention_fraction) / (47.0 - heating_capacity_retention_temperature) * (heating_db - 47.0) + 1.0
+      idb_adj = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients_1speed) / MathTools.biquadratic(60, heating_db, coefficients_1speed)
+      adj_factor = odb_adj * idb_adj
+    else
+      coefficients = hvac_heating_ap.heat_cap_ft_spec[-1]
+      adj_factor = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients)
+    end
+    heat_cap_rated = (heating_load / adj_factor) / capacity_ratio
 
     if total_cap_curve_value.nil? # Heat pump has no cooling
       if @hpxml.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingMaxLoad

@@ -1043,7 +1043,18 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.get_cool_cap_eir_ft_spec(compressor_type, system_type = nil)
+  def self.get_default_heating_capacity_retention(compressor_type, hspf = nil)
+    retention_temp = 5.0
+    if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? compressor_type
+      retention_fraction = 0.425
+    elsif [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      ## Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+      retention_fraction = 0.0461 * hspf + 0.1594
+    end
+    return retention_temp, retention_fraction
+  end
+
+  def self.get_cool_cap_eir_ft_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
@@ -1052,19 +1063,6 @@ class HVAC
                      [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
       eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
                      [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
-    elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeCentralAirConditioner].include? system_type
-        # From Carrier heat pump lab testing
-        # FIXME: Currently keep the first and last sets, revisit and see how different it is between ASHP and MSHP
-        cap_ft_spec = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
-                       [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
-        eir_ft_spec = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
-                       [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
-      elsif [HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeMiniSplitAirConditioner].include? system_type
-        # From Daikin mini-split lab testing
-        cap_ft_spec = [[0.7531983499655835, 0.003618193903031667, 0.0, 0.006574385031351544, -6.87181191015432e-05, 0.0]] * 2
-        eir_ft_spec = [[-0.06376924779982301, -0.0013360593470367282, 1.413060577993827e-05, 0.019433076486584752, -4.91395947154321e-05, -4.909341249475308e-05]] * 2
-      end
     end
     return cap_ft_spec, eir_ft_spec
   end
@@ -1089,9 +1087,9 @@ class HVAC
     return cap_fflow_spec, eir_fflow_spec
   end
 
-  def self.get_heat_cap_eir_ft_spec(compressor_type, system_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+  def self.get_heat_cap_eir_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     # FIXME: The cap_ft_spec includes the capacity retention, so the indoor condition correction for vshp will include that too. While RESDX uses cutler coefficients directly. We ignore the user input capacity retention so it shouldn't cause too much inconsistency.
-    cap_ft_spec = calc_heat_cap_ft_spec(system_type, compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+    cap_ft_spec = calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
@@ -1101,16 +1099,6 @@ class HVAC
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
       eir_ft_spec = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
                      [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
-    elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      if system_type == HPXML::HVACTypeHeatPumpAirToAir
-        # FIXME: Currently keep the first and last sets, revisit and see how different it is between ASHP and MSHP
-        # From manufacturers data
-        eir_ft_spec = [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
-                       [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
-      elsif system_type == HPXML::HVACTypeHeatPumpMiniSplit
-        # From Daikin mini-split lab testing
-        eir_ft_spec = [[0.9999941697687026, 0.004684593830254383, 5.901286675833333e-05, -0.0028624467783091973, 1.3041120194135802e-05, -0.00016172918478765433]] * 2
-      end
     end
     return cap_ft_spec, eir_ft_spec
   end
@@ -1164,7 +1152,6 @@ class HVAC
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
       # Performance coefficients now needed for hvac sizing adjustment
-      hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(heat_pump.compressor_type, system_type)
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
     end
   end
@@ -1194,7 +1181,7 @@ class HVAC
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
     hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump)
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
-      hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+      hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       if not use_cop
         hp_ap.heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)]
         hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[0]
@@ -1205,14 +1192,12 @@ class HVAC
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
-      hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+      hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
       hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
       hp_ap.heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       is_ducted = !heat_pump.distribution_system_idref.nil?
-      # TODO: Remove the cap/eir ft coefficients later
-      hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heat_pump.compressor_type, heat_pump.heat_pump_type, 5.0, 0.0461 * heat_pump.heating_efficiency_hspf + 0.1594)
       hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
       hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
       hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump, is_ducted)
@@ -2014,26 +1999,19 @@ class HVAC
     end
   end
 
-  def self.calc_heat_cap_ft_spec(system_type, compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
-    if system_type == HPXML::HVACTypeHeatPumpMiniSplit
-      # Coefficients for the indoor temperature relationship are retained from the generic curve (Daikin lab data).
-      iat_slope = -0.005770375
-      iat_intercept = 0.403926296
+  def self.calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+    if compressor_type == HPXML::HVACCompressorTypeSingleStage
+      iat_slope = -0.002303414
+      iat_intercept = 0.18417308
+      num_speeds = 1
+    elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
+      iat_slope = -0.002947013
+      iat_intercept = 0.23168251
       num_speeds = 2
-    else
-      if compressor_type == HPXML::HVACCompressorTypeSingleStage
-        iat_slope = -0.002303414
-        iat_intercept = 0.18417308
-        num_speeds = 1
-      elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
-        iat_slope = -0.002947013
-        iat_intercept = 0.23168251
-        num_speeds = 2
-      elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        iat_slope = -0.002897048
-        iat_intercept = 0.209319129
-        num_speeds = 2
-      end
+    elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      iat_slope = -0.002897048
+      iat_intercept = 0.209319129
+      num_speeds = 2
     end
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
@@ -2753,7 +2731,8 @@ class HVAC
       rated_t_i = 67.0
     else
       # default capacity retention for single speed
-      cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, HPXML::HVACTypeHeatPumpAirToAir, 5.0, 0.425)
+      retention_temp, retention_fraction = get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
+      cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       indoor_t = [60.0, 70.0, 80.0]
       rated_t_i = 60.0
     end

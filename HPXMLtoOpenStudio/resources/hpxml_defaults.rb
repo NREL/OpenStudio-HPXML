@@ -1155,13 +1155,7 @@ class HPXMLDefaults
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_detailed_performance_data.empty?
 
-      heat_pump.heating_capacity_retention_temp = 5.0
-      if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
-        heat_pump.heating_capacity_retention_fraction = 0.425
-      elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
-        ## Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-        heat_pump.heating_capacity_retention_fraction = 0.0461 * heat_pump.heating_efficiency_hspf + 0.1594
-      end
+      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention_fraction(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
