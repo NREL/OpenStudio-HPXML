@@ -1840,7 +1840,7 @@ class HVACSizing
       if hvac_cooling.cooling_detailed_performance_data.empty?
         fixed_cooling_capacity = hvac_cooling.cooling_capacity
       else
-        fixed_cooling_capacity = hvac_cooling.cooling_detailed_performance_data.find{|dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum}.capacity
+        fixed_cooling_capacity = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
       end
     end
     if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
@@ -1856,7 +1856,7 @@ class HVACSizing
       if hvac_heating.heating_detailed_performance_data.empty?
         fixed_heating_capacity = hvac_heating.heating_capacity
       else
-        fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find{|dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum}.capacity
+        fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         is_ducted = !hvac_heating.distribution_system_idref.nil?
         fixed_heating_capacity = HVAC.calc_heat_rated_capacity_from_max_47(fixed_heating_capacity_max, is_ducted)
       end

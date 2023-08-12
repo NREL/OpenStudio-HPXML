@@ -1175,7 +1175,6 @@ class HVAC
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      system_type = hvac_system.is_a?(HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
       # FIXME: IS is_ducted good enough to distinguish centrally_ducted and wall_placement? The same question applies to other places too.
       if is_ducted
         return [0.394, 1.0]
@@ -1369,7 +1368,7 @@ class HVAC
       if system_type == HPXML::HVACTypeHeatPumpAirToAir
         return [566.8091, 353.3110]
       elsif system_type == HPXML::HVACTypeHeatPumpMiniSplit
-        return [566.8091, 362.3702]
+        return [555.6000, 362.3702]
       end
     else
       fail 'Compressor type not supported.'
@@ -2712,7 +2711,7 @@ class HVAC
     else
       outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
     end
-    data_array.each_with_index do |data, speed|
+    data_array.each_with_index do |data, _speed|
       data = data.sort_by { |dp| dp.outdoor_temperature }
       user_out_db = data.map { |dp| dp.outdoor_temperature }
       outdoor_dry_bulbs.each do |new_pt|
