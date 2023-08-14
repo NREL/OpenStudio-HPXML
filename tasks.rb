@@ -1663,10 +1663,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'].include? hpxml_file
     # YORK HMH7
     # https://ashp.neep.org/#!/product/64253/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = 36000
-    hpxml.heat_pumps[0].heating_capacity = 36000
-    hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
-    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
     htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
@@ -1711,10 +1707,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       efficiency_cop: 2.28)
   end
   if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].cooling_capacity = 36000
-    hpxml.heat_pumps[0].heating_capacity = 36000
-    hpxml.heat_pumps[0].cooling_efficiency_seer = 17.25
-    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.0
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
     htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
@@ -1751,8 +1743,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       efficiency_cop: 4.0)
   end
   if ['base-hvac-central-ac-only-var-speed-detailed-performance.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].cooling_capacity = 36000
-    hpxml.cooling_systems[0].cooling_efficiency_seer = 17.25
     clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
                       capacity: 11700,
@@ -1772,8 +1762,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       efficiency_cop: 3.53)
   end
   if ['base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].cooling_capacity = 36000
-    hpxml.cooling_systems[0].cooling_efficiency_seer = 21.5
     clg_perf_data = hpxml.cooling_systems[0].cooling_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
                       capacity: 10372,
@@ -1795,10 +1783,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml'].include? hpxml_file
     # FUJITSU Halcyon Single-room Mini-Split Systems Slim
     # https://ashp.neep.org/#!/product/25352/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = 36000
-    hpxml.heat_pumps[0].heating_capacity = 36000
-    hpxml.heat_pumps[0].cooling_efficiency_seer = 16.7
-    hpxml.heat_pumps[0].heating_efficiency_hspf = 11.3
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
     htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
@@ -1845,10 +1829,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'].include? hpxml_file
     # BOSCH Bosch Climate 5000 ductless minisplit series
     # https://ashp.neep.org/#!/product/66076/7/25000///0
-    hpxml.heat_pumps[0].cooling_capacity = 36000
-    hpxml.heat_pumps[0].heating_capacity = 36000
-    hpxml.heat_pumps[0].cooling_efficiency_seer = 21.5
-    hpxml.heat_pumps[0].heating_efficiency_hspf = 10.5
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
     htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
     clg_perf_data.add(outdoor_temperature: 95.0,
