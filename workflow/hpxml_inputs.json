@@ -2280,6 +2280,16 @@
   "sample_files/base-hvac-ducts-effective-rvalue.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-hvac-ducts-crawlspace.xml": {
+    "parent_hpxml": "sample_files/base-foundation-unvented-crawlspace.xml",
+    "ducts_supply_location": "crawlspace",
+    "ducts_return_location": "crawlspace"
+  },
+  "sample_files/base-hvac-ducts-attic.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "ducts_supply_location": "attic",
+    "ducts_return_location": "attic"
+  },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "ElectricResistance",
