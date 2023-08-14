@@ -1529,26 +1529,28 @@ Central Air Conditioner
 
 If a central air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
-  ================================================================  ======  ===========  ===========  ========  ==============  ===========================================================
-  Element                                                           Type    Units        Constraints  Required  Default         Notes
-  ================================================================  ======  ===========  ===========  ========  ==============  ===========================================================
-  ``DistributionSystem``                                            idref   See [#]_     Yes                                    ID of attached distribution system
-  ``CoolingCapacity``                                               double  Btu/hr       >= 0         No        autosized [#]_  Cooling output capacity
-  ``CompressorType``                                                string               See [#]_     No        See [#]_        Type of compressor
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double  Btu/Wh or #  > 0          Yes                       Rated efficiency [#]_
-  ``SensibleHeatFraction``                                          double  frac         0 - 1        No        See [#]_        Sensible heat fraction
-  ``extension/FanPowerWattsPerCFM``                                 double  W/cfm        >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
-  ``extension/AirflowDefectRatio``                                  double  frac         -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                   double  frac         -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/CrankcaseHeaterPowerWatts``                           double  W                         No        50.0            Crankcase heater power
-  ================================================================  ======  ===========  ===========  ========  ==============  ===========================================================
+  ================================================================  =======  ===========  ===========  ========  ==============  ===========================================================
+  Element                                                           Type     Units        Constraints  Required  Default         Notes
+  ================================================================  =======  ===========  ===========  ========  ==============  ===========================================================
+  ``DistributionSystem``                                            idref    See [#]_     Yes                                    ID of attached distribution system
+  ``CoolingCapacity``                                               double   Btu/hr       >= 0         No        autosized [#]_  Cooling output capacity
+  ``CompressorType``                                                string                See [#]_     No        See [#]_        Type of compressor
+  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh or #  > 0          Yes                       Rated efficiency [#]_
+  ``SensibleHeatFraction``                                          double   frac         0 - 1        No        See [#]_        Sensible heat fraction
+  ``CoolingDetailedPerformanceData``                                element                            No        <none>          Cooling detailed performance data [#]_
+  ``extension/FanPowerWattsPerCFM``                                 double   W/cfm        >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
+  ``extension/AirflowDefectRatio``                                  double   frac         -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                   double   frac         -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/CrankcaseHeaterPowerWatts``                           double   W                         No        50.0            Crankcase heater power
+  ================================================================  =======  ===========  ===========  ========  ==============  ===========================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
-  .. [#] If not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
+  .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
+  .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm.
   .. [#] If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -1648,6 +1650,7 @@ If a mini-split air conditioner is specified, additional information is entered 
   ``CoolingCapacity``                                               double    Btu/hr  >= 0         No        autosized [#]_  Cooling output capacity
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh  > 0          Yes                       Rated cooling efficiency [#]_
   ``SensibleHeatFraction``                                          double    frac    0 - 1        No        0.73            Sensible heat fraction
+  ``CoolingDetailedPerformanceData``                                element                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
@@ -1657,6 +1660,7 @@ If a mini-split air conditioner is specified, additional information is entered 
   .. [#] If DistributionSystem provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
+  .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          A non-zero airflow defect can only be applied for systems attached to a distribution system.
@@ -1753,26 +1757,28 @@ Air-to-Air Heat Pump
 
 If an air-to-air heat pump is specified, additional information is entered in ``HeatPump``.
 
-  ================================================================  ======  ========  ========================  ========  ==============  =================================================
-  Element                                                           Type    Units     Constraints               Required  Default         Notes
-  ================================================================  ======  ========  ========================  ========  ==============  =================================================
-  ``DistributionSystem``                                            idref             See [#]_                  Yes                       ID of attached distribution system
-  ``HeatingCapacity``                                               double  Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                                            double  Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
-  ``CoolingCapacity``                                               double  Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
-  ``CompressorType``                                                string            See [#]_                  No        See [#]_        Type of compressor
-  ``CompressorLockoutTemperature``                                  double  F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
-  ``CoolingSensibleHeatFraction``                                   double  frac      0 - 1                     No        See [#]_        Sensible heat fraction
-  ``FractionHeatLoadServed``                                        double  frac      0 - 1 [#]_                Yes                       Fraction of heating load served
-  ``FractionCoolLoadServed``                                        double  frac      0 - 1 [#]_                Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double  Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
-  ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double  Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
-  ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double  frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
-  ``extension/FanPowerWattsPerCFM``                                 double  W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AirflowDefectRatio``                                  double  frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                   double  frac      -0.9 - 9                  No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/CrankcaseHeaterPowerWatts``                           double  W                                   No        50.0            Crankcase heater power
-  ================================================================  ======  ========  ========================  ========  ==============  =================================================
+  ================================================================  =======  ========  ========================  ========  ==============  =================================================
+  Element                                                           Type     Units     Constraints               Required  Default         Notes
+  ================================================================  =======  ========  ========================  ========  ==============  =================================================
+  ``DistributionSystem``                                            idref              See [#]_                  Yes                       ID of attached distribution system
+  ``HeatingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                                            double   Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
+  ``CoolingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
+  ``CompressorType``                                                string             See [#]_                  No        See [#]_        Type of compressor
+  ``CompressorLockoutTemperature``                                  double   F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
+  ``CoolingSensibleHeatFraction``                                   double   frac      0 - 1                     No        See [#]_        Sensible heat fraction
+  ``FractionHeatLoadServed``                                        double   frac      0 - 1 [#]_                Yes                       Fraction of heating load served
+  ``FractionCoolLoadServed``                                        double   frac      0 - 1 [#]_                Yes                       Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
+  ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
+  ``CoolingDetailedPerformanceData``                                element                                      No        <none>          Cooling detailed performance data [#]_
+  ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
+  ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double   frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
+  ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/AirflowDefectRatio``                                  double   frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                   double   frac      -0.9 - 9                  No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/CrankcaseHeaterPowerWatts``                           double   W                                   No        50.0            Crankcase heater power
+  ================================================================  =======  ========  ========================  ========  ==============  =================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
@@ -1780,11 +1786,15 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
-  .. [#] If not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
+  .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
+  .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
+         HeatingDetailedPerformanceData must also be provided.
+  .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
+         CoolingDetailedPerformanceData must also be provided.
   .. [#] | If neither extension/HeatingCapacityRetention nor HeatingCapacity17F provided, heating capacity retention defaults based on CompressorType:
          | - **single/two stage**: 0.425 at 5F
          | - **variable speed**: 0.5 at 5F
@@ -1815,6 +1825,8 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``FractionCoolLoadServed``                                        double    frac      0 - 1 [#]_                Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
   ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
+  ``CoolingDetailedPerformanceData``                                element                                       No        <none>          Cooling detailed performance data [#]_
+  ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double    frac | F  >= 0, < 1 | <= 17         No        0.5 | 5         Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
@@ -1830,6 +1842,10 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 if ducted and HSPF = HSPF2 / 0.90 if ductless.
+  .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
+         HeatingDetailedPerformanceData must also be provided.
+  .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
+         CoolingDetailedPerformanceData must also be provided.
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
@@ -1862,7 +1878,7 @@ If a packaged terminal heat pump is specified, additional information is entered
   ``FractionHeatLoadServed``                                       double    frac      0 - 1 [#]_                Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                       double    frac      0 - 1 [#]_                Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh    > 0                       Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                       Yes                       Rated heating efficiency
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17         No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W                                   No        0.0             Crankcase heater power
   ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
@@ -1893,7 +1909,7 @@ If a room air conditioner with reverse cycle is specified, additional informatio
   ``FractionHeatLoadServed``                                       double    frac      0 - 1 [#]_                Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                       double    frac      0 - 1 [#]_                Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh    > 0                       Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                       Yes                       Rated heating efficiency
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17         No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W                                   No        0.0             Crankcase heater power
   ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
@@ -2031,6 +2047,62 @@ If a backup type of "separate" is provided, additional information is entered in
 
     - The conditioned space cannot be partially heated (i.e., the sum of all ``FractionHeatLoadServed`` must be 1).
     - There cannot be multiple backup heating systems.
+
+HPXML HVAC Detailed Perf. Data
+******************************
+
+Some air-source HVAC system types allow detailed heating/cooling performance data to be provided using the ``CoolingDetailedPerformanceData`` and ``HeatingDetailedPerformanceData`` elements, as described above.
+One source of detailed performance data is `NEEP's Cold Climate Air Source Heat Pump List <https://ashp.neep.org>`_.
+
+Linear interpolation/extrapolation is assumed for the capacity/efficiency performance outside of the given datapoints.
+
+.. _clg_detailed_perf_data:
+
+Detailed Cooling Performance Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For air-source HVAC systems with detailed cooling performance data, two or more pairs of minimum/maximum capacity data are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
+
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+  Element                            Type      Units   Constraints  Required  Default    Notes
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity``                       double    Btu/hr               Yes                  Cooling capacity at the specified outdoor temperature
+  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``  double    W/W                  Yes                  Cooling efficiency at the specified outdoor temperature
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+
+  .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
+         The other datapoint pairs can be at any temperature.
+  .. [#] CapacityDescription choices are "minimum" and "maximum".
+
+In addition, the parent object must have the ``CoolingCapacity`` specified.
+For heat pumps, :ref:`htg_detailed_perf_data` must also be provided.
+Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
+
+.. _htg_detailed_perf_data:
+
+Detailed Heating Performance Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For air-source HVAC systems with detailed heating performance data, two or more pairs of minimum/maximum capacity data are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
+
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+  Element                            Type      Units   Constraints  Required  Default    Notes
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity``                       double    Btu/hr               Yes                  Heating capacity at the specified outdoor temperature
+  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``  double    W/W                  Yes                  Heating efficiency at the specified outdoor temperature
+  =================================  ========  ======  ===========  ========  =========  ==========================================
+
+  .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
+         The other datapoint pairs can be at any temperature.
+  .. [#] CapacityDescription choices are "minimum" and "maximum".
+
+In addition, the parent object must have the ``HeatingCapacity`` specified.
+For heat pumps, :ref:`clg_detailed_perf_data` must also be provided.
+Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
 
 .. _hvac_control:
 

@@ -1220,8 +1220,6 @@
       <sch:assert role='ERROR' test='count(h:CompressorLockoutTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CompressorLockoutTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="EER" or h:Units="CEER"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="COP"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="COP"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeatingDetailedPerformanceData) &gt;= 0'>Expected 0 or more element(s) for xpath: HeatingDetailedPerformanceData</sch:assert> <!-- See [HeatingDetailedPerformanceData] -->
-      <sch:assert role='ERROR' test='count(h:CoolingDetailedPerformanceData) &gt;= 0'>Expected 0 or more element(s) for xpath: CoolingDetailedPerformanceData</sch:assert> <!-- See [CoolingDetailedPerformanceData] -->
       <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1'>Expected 1 element(s) for xpath: FractionHeatLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionCoolLoadServed) = 1'>Expected 1 element(s) for xpath: FractionCoolLoadServed</sch:assert>
