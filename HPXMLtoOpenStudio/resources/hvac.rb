@@ -533,8 +533,8 @@ class HVAC
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
-    # FIXME: EMS program to model pilot light
-    # Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
+    # EMS program to model pilot light
+    # FUTURE: Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
     set_boiler_pilot_light_ems_program(model, boiler, heating_system)
 
     if is_condensing && oat_reset_enabled
@@ -1088,7 +1088,6 @@ class HVAC
   end
 
   def self.get_heat_cap_eir_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
-    # FIXME: The cap_ft_spec includes the capacity retention, so the indoor condition correction for vshp will include that too. While RESDX uses cutler coefficients directly. We ignore the user input capacity retention so it shouldn't cause too much inconsistency.
     cap_ft_spec = calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
@@ -1161,7 +1160,6 @@ class HVAC
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      # FIXME: IS is_ducted good enough to distinguish centrally_ducted and wall_placement? The same question applies to other places too.
       if is_ducted
         return [0.394, 1.0]
       else
@@ -2672,7 +2670,6 @@ class HVAC
     # convert net to gross
     data_array.each_with_index do |data, speed|
       data.each do |dp|
-        # FIXME: What if user only provides one speed data for a specific outdoor temperature, add logic to ignore those.
         max_speed_capacity = data_array[-1].find { |dp_max| dp_max.outdoor_temperature == dp.outdoor_temperature }.capacity
         cap_ratio = dp.capacity / max_speed_capacity
         # fan ratio = (cfm per ton min/max) * (cap min/max)
