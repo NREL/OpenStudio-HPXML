@@ -1437,9 +1437,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationLivingSpace
     duct_location_choices << HPXML::LocationBasementConditioned
     duct_location_choices << HPXML::LocationBasementUnconditioned
+    duct_location_choices << HPXML::LocationCrawlspace
     duct_location_choices << HPXML::LocationCrawlspaceVented
     duct_location_choices << HPXML::LocationCrawlspaceUnvented
     duct_location_choices << HPXML::LocationCrawlspaceConditioned
+    duct_location_choices << HPXML::LocationAttic
     duct_location_choices << HPXML::LocationAtticVented
     duct_location_choices << HPXML::LocationAtticUnvented
     duct_location_choices << HPXML::LocationGarage
@@ -5049,7 +5051,7 @@ class HPXMLFile
         hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
       set_duct_leakages(args, hpxml.hvac_distributions[-1])
-      set_ducts(args, hpxml.hvac_distributions[-1])
+      set_ducts(hpxml, args, hpxml.hvac_distributions[-1])
     end
 
     if fan_coil_distribution_systems.size > 0
@@ -5074,13 +5076,48 @@ class HPXMLFile
                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   end
 
-  def self.set_ducts(args, hvac_distribution)
+  def self.get_ducts_location_from_foundation_type(foundation_type)
+    if foundation_type == HPXML::FoundationTypeCrawlspaceUnvented
+      return HPXML::LocationCrawlspaceUnvented
+    elsif foundation_type == HPXML::FoundationTypeCrawlspaceVented
+      return HPXML::LocationCrawlspaceVented
+    elsif foundation_type == HPXML::FoundationTypeCrawlspaceConditioned
+      return HPXML::LocationCrawlspaceConditioned
+    end
+  end
+
+  def self.get_ducts_location_from_attic_type(attic_type)
+    if attic_type == HPXML::AtticTypeUnvented
+      return HPXML::LocationAtticUnvented
+    elsif attic_type == HPXML::AtticTypeVented
+      return HPXML::LocationAtticVented
+    elsif attic_type == HPXML::AtticTypeConditioned
+      return HPXML::LocationLivingSpace
+    end
+  end
+
+  def self.set_ducts(hpxml, args, hvac_distribution)
+    foundation_type = hpxml.foundations[-1].foundation_type
+    attic_type = hpxml.attics[-1].attic_type
+
     if args[:ducts_supply_location].is_initialized
       ducts_supply_location = args[:ducts_supply_location].get
+
+      if ducts_supply_location == HPXML::LocationCrawlspace
+        ducts_supply_location = get_ducts_location_from_foundation_type(foundation_type)
+      elsif ducts_supply_location == HPXML::LocationAttic
+        ducts_supply_location = get_ducts_location_from_attic_type(attic_type)
+      end
     end
 
     if args[:ducts_return_location].is_initialized
       ducts_return_location = args[:ducts_return_location].get
+
+      if ducts_return_location == HPXML::LocationCrawlspace
+        ducts_return_location = get_ducts_location_from_foundation_type(foundation_type)
+      elsif ducts_return_location == HPXML::LocationAttic
+        ducts_return_location = get_ducts_location_from_attic_type(attic_type)
+      end
     end
 
     if args[:ducts_supply_surface_area].is_initialized
