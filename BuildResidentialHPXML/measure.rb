@@ -1804,8 +1804,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_location_choices << HPXML::LocationBasementConditioned
     water_heater_location_choices << HPXML::LocationBasementUnconditioned
     water_heater_location_choices << HPXML::LocationGarage
+    water_heater_location_choices << HPXML::LocationAttic
     water_heater_location_choices << HPXML::LocationAtticVented
     water_heater_location_choices << HPXML::LocationAtticUnvented
+    water_heater_location_choices << HPXML::LocationCrawlspace
     water_heater_location_choices << HPXML::LocationCrawlspaceVented
     water_heater_location_choices << HPXML::LocationCrawlspaceUnvented
     water_heater_location_choices << HPXML::LocationCrawlspaceConditioned
@@ -2221,9 +2223,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     battery_location_choices << HPXML::LocationLivingSpace
     battery_location_choices << HPXML::LocationBasementConditioned
     battery_location_choices << HPXML::LocationBasementUnconditioned
+    battery_location_choices << HPXML::LocationCrawlspace
     battery_location_choices << HPXML::LocationCrawlspaceVented
     battery_location_choices << HPXML::LocationCrawlspaceUnvented
     battery_location_choices << HPXML::LocationCrawlspaceConditioned
+    battery_location_choices << HPXML::LocationAttic
     battery_location_choices << HPXML::LocationAtticVented
     battery_location_choices << HPXML::LocationAtticUnvented
     battery_location_choices << HPXML::LocationGarage
@@ -5076,23 +5080,27 @@ class HPXMLFile
                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   end
 
-  def self.get_ducts_location_from_foundation_type(foundation_type)
+  def self.get_location_from_foundation_type(location, foundation_type)
     if foundation_type == HPXML::FoundationTypeCrawlspaceUnvented
       return HPXML::LocationCrawlspaceUnvented
     elsif foundation_type == HPXML::FoundationTypeCrawlspaceVented
       return HPXML::LocationCrawlspaceVented
     elsif foundation_type == HPXML::FoundationTypeCrawlspaceConditioned
       return HPXML::LocationCrawlspaceConditioned
+    else
+      fail "Specified '#{location}' but foundation type is '#{foundation_type}'."
     end
   end
 
-  def self.get_ducts_location_from_attic_type(attic_type)
+  def self.get_location_from_attic_type(attic_type)
     if attic_type == HPXML::AtticTypeUnvented
       return HPXML::LocationAtticUnvented
     elsif attic_type == HPXML::AtticTypeVented
       return HPXML::LocationAtticVented
     elsif attic_type == HPXML::AtticTypeConditioned
       return HPXML::LocationLivingSpace
+    else
+      fail "Specified '#{location}' but attic type is '#{foundation_type}'."
     end
   end
 
@@ -5104,9 +5112,9 @@ class HPXMLFile
       ducts_supply_location = args[:ducts_supply_location].get
 
       if ducts_supply_location == HPXML::LocationCrawlspace
-        ducts_supply_location = get_ducts_location_from_foundation_type(foundation_type)
+        ducts_supply_location = get_location_from_foundation_type(ducts_supply_location, foundation_type)
       elsif ducts_supply_location == HPXML::LocationAttic
-        ducts_supply_location = get_ducts_location_from_attic_type(attic_type)
+        ducts_supply_location = get_location_from_attic_type(ducts_supply_location, attic_type)
       end
     end
 
@@ -5114,9 +5122,9 @@ class HPXMLFile
       ducts_return_location = args[:ducts_return_location].get
 
       if ducts_return_location == HPXML::LocationCrawlspace
-        ducts_return_location = get_ducts_location_from_foundation_type(foundation_type)
+        ducts_return_location = get_location_from_foundation_type(ducts_return_location, foundation_type)
       elsif ducts_return_location == HPXML::LocationAttic
-        ducts_return_location = get_ducts_location_from_attic_type(attic_type)
+        ducts_return_location = get_location_from_attic_type(ducts_return_location, attic_type)
       end
     end
 
@@ -5507,8 +5515,17 @@ class HPXMLFile
       fuel_type = HPXML::FuelTypeElectricity
     end
 
+    foundation_type = hpxml.foundations[-1].foundation_type
+    attic_type = hpxml.attics[-1].attic_type
+
     if args[:water_heater_location].is_initialized
       location = args[:water_heater_location].get
+
+      if location == HPXML::LocationCrawlspace
+        location = get_location_from_foundation_type(location, foundation_type)
+      elsif location == HPXML::LocationAttic
+        location = get_location_from_attic_type(location, attic_type)
+      end
     end
 
     if args[:water_heater_tank_volume].is_initialized
@@ -5792,8 +5809,17 @@ class HPXMLFile
   def self.set_battery(hpxml, args)
     return unless args[:battery_present]
 
+    foundation_type = hpxml.foundations[-1].foundation_type
+    attic_type = hpxml.attics[-1].attic_type
+
     if args[:battery_location].is_initialized
       location = args[:battery_location].get
+
+      if location == HPXML::LocationCrawlspace
+        location = get_location_from_foundation_type(location, foundation_type)
+      elsif location == HPXML::LocationAttic
+        location = get_location_from_attic_type(location, attic_type)
+      end
     end
 
     if args[:battery_power].is_initialized
