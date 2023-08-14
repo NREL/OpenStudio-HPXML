@@ -1324,12 +1324,7 @@ class HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [411.0083, 344.1]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      # FIXME: revisit these numbers
-      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeHeatPumpAirToAir].include? system_type
-        return [466.6667, 400.0]
-      elsif [HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
-        return [433.1356, 400.0]
-      end
+      return [400.0, 400.0]
     else
       fail 'Compressor type not supported.'
     end
@@ -1346,12 +1341,7 @@ class HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [391.3333, 352.2]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      # FIXME: revisit these numbers
-      if system_type == HPXML::HVACTypeHeatPumpAirToAir
-        return [566.8091, 353.3110]
-      elsif system_type == HPXML::HVACTypeHeatPumpMiniSplit
-        return [555.6000, 362.3702]
-      end
+      return [400.0, 400.0]
     else
       fail 'Compressor type not supported.'
     end
