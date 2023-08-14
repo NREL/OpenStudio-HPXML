@@ -329,6 +329,7 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>natural gas</BackupSystemFuel>
