@@ -5092,7 +5092,7 @@ class HPXMLFile
     end
   end
 
-  def self.get_location_from_attic_type(attic_type)
+  def self.get_location_from_attic_type(location, attic_type)
     if attic_type == HPXML::AtticTypeUnvented
       return HPXML::LocationAtticUnvented
     elsif attic_type == HPXML::AtticTypeVented
