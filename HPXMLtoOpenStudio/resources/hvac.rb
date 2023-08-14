@@ -3613,24 +3613,42 @@ class HVAC
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
-
-      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-        hp_backup_fuel = heat_pump.backup_heating_fuel
-      elsif not heat_pump.backup_system.nil?
-        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
-      end
-      if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
-        runner.registerError('Switchover temperature should not be used for a heat pump with electric backup; use compressor lockout temperature instead.')
-      end
     else
       hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
     end
+
+    # Error-checking
+    # Can't do this in Schematron because temperatures can be defaulted
+    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      hp_backup_fuel = heat_pump.backup_heating_fuel
+    elsif not heat_pump.backup_system.nil?
+      hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+    end
+    if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
+      if (not hp_ap.hp_min_temp.nil?) && (not hp_ap.supp_max_temp.nil?) && ((hp_ap.hp_min_temp - hp_ap.supp_max_temp).abs < 5)
+        if not heat_pump.backup_heating_switchover_temp.nil?
+          runner.registerError('Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.')
+        else
+          runner.registerError('Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.')
+        end
+      end
+    end
+  end
+
+  def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
+    # Equation based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    return f_out
   end
 
   def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
+    # Equations based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+
     # Fraction of primary ducts (ducts outside conditioned space)
-    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    f_out = get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
 
     if duct_type == HPXML::DuctTypeSupply
       primary_duct_area = 0.27 * cfa_served * f_out

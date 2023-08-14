@@ -279,6 +279,31 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
+  # define the outputs that the measure will create
+  def outputs
+    result = OpenStudio::Measure::OSOutputVector.new
+
+    setup_outputs(true)
+
+    [@totals,
+     @fuels,
+     @end_uses,
+     @loads,
+     @unmet_hours,
+     @peak_fuels,
+     @peak_loads,
+     @component_loads,
+     @hot_water_uses,
+     @resilience].each do |outputs|
+      outputs.values.each do |obj|
+        output_name = OpenStudio::toUnderscoreCase("#{obj.name} #{obj.annual_units}")
+        result << OpenStudio::Measure::OSOutput.makeDoubleOutput(output_name.chomp('_'))
+      end
+    end
+
+    return result
+  end
+
   def get_arguments(runner, arguments, user_arguments)
     args = get_argument_values(runner, arguments, user_arguments)
     args.each do |k, val|
@@ -701,6 +726,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         months = ['June', 'July', 'August']
       elsif (season == PFT::Winter && is_northern_hemisphere) || (season == PFT::Summer && is_southern_hemisphere)
         months = ['December', 'January', 'February']
+      elsif season == PFT::Annual
+        months = ['Maximum of Months']
       end
       for month in months
         val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], 'ELECTRICITY:FACILITY {Maximum}', peak_fuel.annual_units)
@@ -2397,8 +2424,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuels
     @peak_fuels = {}
-    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Winter Total')
-    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Summer Total')
+    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total')
+    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total')
+    @peak_fuels[[FT::Elec, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total')
 
     @peak_fuels.each do |key, peak_fuel|
       fuel_type, peak_fuel_type = key

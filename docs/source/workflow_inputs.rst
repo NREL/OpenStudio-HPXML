@@ -334,7 +334,7 @@ If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor i
   wood pellets  --              --             --
   ============  ==============  =============  =============
 
-Default values in lb/MBtu (million Btu) are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICCC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
+Default values in lb/MBtu (million Btu) are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 
 If no default value is available, a warning will be issued.
 
@@ -372,7 +372,7 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ====================
 
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
 **Detailed**
 
@@ -408,7 +408,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] | If MarginalRate not provided, defaults to state, regional, or national average based on EIA data that can be found at:
+  .. [#] | If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
          | - **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
          | - **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
          | - **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
@@ -762,7 +762,7 @@ The presence of a flue or chimney with combustion air from conditioned space can
   ================================================  =======  =====  ===========  =========  ========  ===============================================
 
   .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
          | - heating system is non-electric Fireplace located in conditioned space, or
          | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
@@ -1336,7 +1336,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
          | - **air**: supply duct location with the largest area, otherwise "living space"
          | - **hydronic**: same default logic as :ref:`waterheatingsystems`
          | - **dse**: "living space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
-  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
+  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``SpaceHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
@@ -1472,10 +1472,10 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ``extension/FanPowerWatts``                           double   W       >= 0         No        40         Fan power
   ====================================================  =======  ======  ===========  ========  =========  ===================
 
-Portable/Fixed Heater
-~~~~~~~~~~~~~~~~~~~~~
+Space Heater
+~~~~~~~~~~~~
 
-If a portable heater or fixed heater is specified, additional information is entered in ``HeatingSystem``.
+If a space heater (portable or fixed) is specified, additional information is entered in ``HeatingSystem``.
 
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
@@ -2216,8 +2216,9 @@ Additional information is entered in each ``Ducts``.
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
-  .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
-  .. [#] FractionDuctArea and/or DuctSurfaceArea are required if DuctLocation is provided.
+  .. [#] The sum of all ``FractionDuctArea`` must each equal to 1, both for the supply side and return side.
+  .. [#] FractionDuctArea or DuctSurfaceArea are required if DuctLocation is provided.
+         If both are provided, DuctSurfaceArea will be used in the model.
   .. [#] | If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
          | - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
          | - **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
