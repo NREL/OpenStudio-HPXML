@@ -117,6 +117,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
+                            'hvac-msac-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
+                            'hvac-mshp-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
                             'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
                             'hvac-negative-crankcase-heater-watts' => ['Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.'],
                             'incomplete-integrated-heating' => ['Expected 1 element(s) for xpath: IntegratedHeatingSystemFractionHeatLoadServed'],
@@ -383,6 +385,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-location-heat-pump'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
         hpxml.heat_pumps[0].location = HPXML::LocationBasementUnconditioned
+      elsif ['hvac-msac-not-var-speed'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-mini-split-air-conditioner-only-ductless.xml'))
+        hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
+      elsif ['hvac-mshp-not-var-speed'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless.xml'))
+        hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
       elsif ['hvac-sizing-humidity-setpoint'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.header.manualj_humidity_setpoint = 50

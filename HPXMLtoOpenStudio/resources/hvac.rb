@@ -2681,7 +2681,7 @@ class HVAC
     else
       outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
     end
-    data_array.each_with_index do |data, _speed|
+    data_array.each do |data|
       data = data.sort_by { |dp| dp.outdoor_temperature }
       user_out_db = data.map { |dp| dp.outdoor_temperature }
       outdoor_dry_bulbs.each do |new_pt|
@@ -2690,11 +2690,11 @@ class HVAC
         right_point = user_out_db.find { |e| e > new_pt }
         left_point = user_out_db.reverse.find { |e| e < new_pt }
         if right_point.nil?
-          # expolation
+          # extrapolation
           right_point = user_out_db[-1]
           left_point = user_out_db[-2]
         elsif left_point.nil?
-          # expolation
+          # extrapolation
           right_point = user_out_db[1]
           left_point = user_out_db[0]
         end
