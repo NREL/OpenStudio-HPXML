@@ -415,7 +415,7 @@ class HVAC
     clg_coil = nil
 
     # Heating Coil (model w/ constant efficiency)
-    constant_table = create_table_lookup_constant(model)
+    constant_table = create_table_lookup_constant(model, 1)
     htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_table, constant_table, constant_table, constant_table, constant_table)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
@@ -2571,9 +2571,15 @@ class HVAC
     return vars, curve_output_values
   end
 
-  def self.create_table_lookup_constant(model)
-    var_constant = { name: 'constant_var', min: -100, max: 100, values: [0, 1] }
-    return create_table_lookup(model, 'ConstantTable', [var_constant], [1, 1], -100, 100)
+  def self.create_table_lookup_constant(model, value, table_name = nil, dimension = 1)
+    vars = []
+    for i in 1..dimension
+      var_constant = { name: 'constant_var', min: -100, max: 100, values: [0, 1] }
+      vars << var_constant
+    end
+    values = [value] * (2**dimension)
+    name = table_name.nil? ? 'ConstantTable' : table_name
+    return create_table_lookup(model, name, vars, values, -100, 100)
   end
 
   def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil, _rated_value = nil)
@@ -2797,7 +2803,7 @@ class HVAC
     end
 
     if clg_ap.num_speeds > 1
-      constant_table = create_table_lookup_constant(model)
+      constant_table = create_table_lookup_constant(model, 1)
     end
 
     clg_coil = nil
@@ -2833,24 +2839,26 @@ class HVAC
         clg_ap.cool_rated_capacities << rated_cap
         cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
         eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        cap_fff_curve = create_table_lookup_constant(model, 1, "Cool-CAP-fFF#{i + 1}")
+        eir_fff_curve = create_table_lookup_constant(model, 1, "Cool-CAP-fFF#{i + 1}")
       else
         cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
         eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
         # temperature independent variable values
         cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', cap_ft_spec_si)
         eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_wb, var_db], 'biquadratic', eir_ft_spec_si)
+        # air flow ratio independent variable values
+        cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_cap_fflow_spec[i])
+        eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
+        cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
+        eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
       end
-      # air flow ratio independent variable values
-      cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_cap_fflow_spec[i])
-      eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', clg_ap.cool_eir_fflow_spec[i])
       # part load ratio independent variable values
       plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', clg_ap.cool_plf_fplr_spec[i])
 
       cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
       eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
       plf_fplr_curve = create_table_lookup(model, "Cool-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
-      cap_fff_curve = create_table_lookup(model, "Cool-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
-      eir_fff_curve = create_table_lookup(model, "Cool-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
@@ -2907,7 +2915,7 @@ class HVAC
   def self.create_dx_heating_coil(model, obj_name, heating_system)
     htg_ap = heating_system.additional_properties
     if htg_ap.num_speeds > 1
-      constant_table = create_table_lookup_constant(model)
+      constant_table = create_table_lookup_constant(model, 1)
     end
 
     htg_coil = nil
@@ -2917,7 +2925,6 @@ class HVAC
     var_odb = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(-50, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
-    var_wb = { name: 'wet_bulb_temp', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(50, 'F', 'C'), sample_high: UnitConversions.convert(150, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
 
     rated_idb = 60.0
     rated_odb = 47.0
@@ -2949,6 +2956,8 @@ class HVAC
         htg_ap.heat_rated_capacities << rated_cap
         cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
         eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        cap_fff_curve = create_table_lookup_constant(model, 1, "Heat-CAP-fFF#{i + 1}")
+        eir_fff_curve = create_table_lookup_constant(model, 1, "Heat-CAP-fFF#{i + 1}")
       else
         cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
         eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
@@ -2956,11 +2965,13 @@ class HVAC
         # temperature independent variable values
         cap_ft_independent_vars, cap_ft_output_values = set_up_table_lookup_variables([var_idb, var_odb], 'biquadratic', cap_ft_spec_si)
         eir_ft_independent_vars, eir_ft_output_values = set_up_table_lookup_variables([var_idb, var_odb], 'biquadratic', eir_ft_spec_si)
-      end
 
-      # air flow ratio independent variable values
-      cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_cap_fflow_spec[i])
-      eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_eir_fflow_spec[i])
+        # air flow ratio independent variable values
+        cap_fff_independent_vars, cap_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_cap_fflow_spec[i])
+        eir_fff_independent_vars, eir_fff_output_values = set_up_table_lookup_variables([var_fff], 'quadratic', htg_ap.heat_eir_fflow_spec[i])
+        cap_fff_curve = create_table_lookup(model, "Heat-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
+        eir_fff_curve = create_table_lookup(model, "Heat-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
+      end
 
       # part load ratio independent variable values
       plf_fplr_independent_vars, plf_fplr_output_values = set_up_table_lookup_variables([var_fplr], 'quadratic', htg_ap.heat_plf_fplr_spec[i])
@@ -2968,9 +2979,6 @@ class HVAC
       cap_ft_curve = create_table_lookup(model, "Heat-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values)
       eir_ft_curve = create_table_lookup(model, "Heat-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values)
       plf_fplr_curve = create_table_lookup(model, "Heat-PLF-fPLR#{i + 1}", plf_fplr_independent_vars, plf_fplr_output_values, 0.7, 1)
-      cap_fff_curve = create_table_lookup(model, "Heat-CAP-fFF#{i + 1}", cap_fff_independent_vars, cap_fff_output_values, 0, 2)
-      eir_fff_curve = create_table_lookup(model, "Heat-EIR-fFF#{i + 1}", eir_fff_independent_vars, eir_fff_output_values, 0, 2)
-
       if htg_ap.num_speeds == 1
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
         if heating_system.heating_efficiency_cop.nil?
@@ -2999,8 +3007,7 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    defrosteir_independent_vars, defrosteir_output_values = set_up_table_lookup_variables([var_wb, var_odb], 'biquadratic', [0.1528, 0, 0, 0, 0, 0])
-    defrost_eir_curve = create_table_lookup(model, 'Defrosteir', defrosteir_independent_vars, defrosteir_output_values) # Heating defrost curve for reverse cycle
+    defrost_eir_curve = create_table_lookup_constant(model, 0.1528, 'Defrosteir', 2) # Heating defrost curve for reverse cycle
     htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
     htg_coil.setDefrostStrategy('ReverseCycle')
     htg_coil.setDefrostControl('Timed')
