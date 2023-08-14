@@ -78,6 +78,8 @@ __New Features__
 - Stochastic schedules for garage lighting and TV plug loads now use interior lighting and miscellaneous plug load schedules, respectively.
 - Performance improvement for HPXML files w/ large numbers of `Building` elements.
 - Weather cache files (\*foo-cache.csv) are no longer used/needed.
+- BuildResidentialHPXML measure:
+  - Adds optional argument for the number of dwelling units served by the recirculation system.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.

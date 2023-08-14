@@ -1970,6 +1970,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power. If not provided, the OS-HPXML default is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('hot_water_distribution_recirc_num_units_served', false)
+    arg.setDisplayName('Hot Water Distribution: Recirculation Number of Units Served')
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, number of dwelling units served by the recirculation system. Can only be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion recirculation pump power to the unit.")
+    arg.setUnits('#')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_pipe_r', false)
     arg.setDisplayName('Hot Water Distribution: Pipe Insulation Nominal R-Value')
     arg.setUnits('h-ft^2-R/Btu')
@@ -5606,25 +5612,43 @@ class HPXMLFile
       end
     end
 
-    if args[:hot_water_distribution_system_type] == HPXML::DHWDistTypeStandard
+    system_type = args[:hot_water_distribution_system_type]
+    if system_type == HPXML::DHWDistTypeStandard || ((system_type == HPXML::DHWDistTypeRecirc) && args[:hot_water_distribution_recirc_num_units_served].is_initialized && (args[:hot_water_distribution_recirc_num_units_served].get > 1))
       if args[:hot_water_distribution_standard_piping_length].is_initialized
         standard_piping_length = args[:hot_water_distribution_standard_piping_length].get
       end
-    else
-      if args[:hot_water_distribution_recirc_control_type].is_initialized
-        recirculation_control_type = args[:hot_water_distribution_recirc_control_type].get
-      end
+    end
 
-      if args[:hot_water_distribution_recirc_piping_length].is_initialized
-        recirculation_piping_length = args[:hot_water_distribution_recirc_piping_length].get
-      end
+    if system_type == HPXML::DHWDistTypeRecirc
+      if args[:hot_water_distribution_recirc_num_units_served].is_initialized && args[:hot_water_distribution_recirc_num_units_served].get > 1
+        system_type = HPXML::DHWDistTypeStandard
 
-      if args[:hot_water_distribution_recirc_branch_piping_length].is_initialized
-        recirculation_branch_piping_length = args[:hot_water_distribution_recirc_branch_piping_length].get
-      end
+        has_shared_recirculation = true
+        shared_recirculation_number_of_units_served = args[:hot_water_distribution_recirc_num_units_served].get
 
-      if args[:hot_water_distribution_recirc_pump_power].is_initialized
-        recirculation_pump_power = args[:hot_water_distribution_recirc_pump_power].get
+        if args[:hot_water_distribution_recirc_control_type].is_initialized
+          shared_recirculation_control_type = args[:hot_water_distribution_recirc_control_type].get
+        end
+
+        if args[:hot_water_distribution_recirc_pump_power].is_initialized
+          shared_recirculation_pump_power = args[:hot_water_distribution_recirc_pump_power].get
+        end
+      else
+        if args[:hot_water_distribution_recirc_control_type].is_initialized
+          recirculation_control_type = args[:hot_water_distribution_recirc_control_type].get
+        end
+
+        if args[:hot_water_distribution_recirc_piping_length].is_initialized
+          recirculation_piping_length = args[:hot_water_distribution_recirc_piping_length].get
+        end
+
+        if args[:hot_water_distribution_recirc_branch_piping_length].is_initialized
+          recirculation_branch_piping_length = args[:hot_water_distribution_recirc_branch_piping_length].get
+        end
+
+        if args[:hot_water_distribution_recirc_pump_power].is_initialized
+          recirculation_pump_power = args[:hot_water_distribution_recirc_pump_power].get
+        end
       end
     end
 
@@ -5633,7 +5657,7 @@ class HPXMLFile
     end
 
     hpxml.hot_water_distributions.add(id: "HotWaterDistribution#{hpxml.hot_water_distributions.size + 1}",
-                                      system_type: args[:hot_water_distribution_system_type],
+                                      system_type: system_type,
                                       standard_piping_length: standard_piping_length,
                                       recirculation_control_type: recirculation_control_type,
                                       recirculation_piping_length: recirculation_piping_length,
@@ -5642,7 +5666,11 @@ class HPXMLFile
                                       pipe_r_value: pipe_r_value,
                                       dwhr_facilities_connected: dwhr_facilities_connected,
                                       dwhr_equal_flow: dwhr_equal_flow,
-                                      dwhr_efficiency: dwhr_efficiency)
+                                      dwhr_efficiency: dwhr_efficiency,
+                                      has_shared_recirculation: has_shared_recirculation,
+                                      shared_recirculation_number_of_units_served: shared_recirculation_number_of_units_served,
+                                      shared_recirculation_pump_power: shared_recirculation_pump_power,
+                                      shared_recirculation_control_type: shared_recirculation_control_type)
   end
 
   def self.set_water_fixtures(hpxml, args)
