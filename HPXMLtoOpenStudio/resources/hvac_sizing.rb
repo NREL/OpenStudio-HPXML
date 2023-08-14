@@ -146,10 +146,11 @@ class HVACSizing
       next if [HPXML::LocationGround].include? location
 
       if [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? location
+          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
+          HPXML::LocationManufacturedHomeBelly].include? location
         @cool_design_temps[location] = calculate_scheduled_space_design_temps(location, @cool_setpoint, @hpxml.header.manualj_cooling_design_temp, weather.data.GroundMonthlyTemps.max)
         @heat_design_temps[location] = calculate_scheduled_space_design_temps(location, @heat_setpoint, @hpxml.header.manualj_heating_design_temp, weather.data.GroundMonthlyTemps.min)
-      elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? location
+      elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeUnderBelly].include? location
         @cool_design_temps[location] = @hpxml.header.manualj_cooling_design_temp
         @heat_design_temps[location] = @hpxml.header.manualj_heating_design_temp
       elsif HPXML::conditioned_locations.include? location
@@ -957,7 +958,7 @@ class HVACSizing
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         slab_is_insulated = false
-        if slab.under_slab_insulation_width > 0 && slab.under_slab_insulation_r_value > 0
+        if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
         elsif slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
           slab_is_insulated = true
@@ -1162,7 +1163,8 @@ class HVACSizing
       dse_Fregain = 0.0
 
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? duct.duct_location
+           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
+           HPXML::LocationManufacturedHomeBelly].include? duct.duct_location
       space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
       dse_Fregain = space_values[:f_regain]
 
@@ -1618,8 +1620,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow_Supp = 0.0
 
     elsif [HPXML::HVACTypeStove,
-           HPXML::HVACTypePortableHeater,
-           HPXML::HVACTypeFixedHeater,
+           HPXML::HVACTypeSpaceHeater,
            HPXML::HVACTypeWallFurnace,
            HPXML::HVACTypeFloorFurnace,
            HPXML::HVACTypeFireplace].include? @heating_type

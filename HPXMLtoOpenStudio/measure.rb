@@ -632,6 +632,12 @@ class OSModel
         surface.setWindExposure('NoWind')
       elsif floor.is_floor
         surface.setSunExposure('NoSun')
+        if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
+          foundation = @hpxml.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
+          if foundation.belly_wing_skirt_present
+            surface.setWindExposure('NoWind')
+          end
+        end
       end
 
       # Apply construction
@@ -1414,8 +1420,7 @@ class OSModel
                                       sequential_heat_load_fracs, living_zone, @hvac_unavailable_periods)
 
       elsif [HPXML::HVACTypeStove,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeSpaceHeater,
              HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
@@ -1669,6 +1674,32 @@ class OSModel
       if not added_ducts
         fail 'Unexpected error adding ducts to model.'
       end
+    end
+
+    # Duct leakage to outside warnings?
+    # Need to check here instead of in schematron in case duct locations are defaulted
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next if hvac_distribution.duct_leakage_measurements.empty?
+
+      # Skip if there's a duct outside conditioned space
+      next if hvac_distribution.ducts.select { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) }.size > 0
+
+      # Issue warning if duct leakage to outside above a certain threshold and ducts completely in conditioned space
+      issue_warning = false
+      units = hvac_distribution.duct_leakage_measurements[0].duct_leakage_units
+      lto_measurements = hvac_distribution.duct_leakage_measurements.select { |dlm| dlm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside }
+      sum_lto = lto_measurements.map { |dlm| dlm.duct_leakage_value }.sum(0.0)
+      if units == HPXML::UnitsCFM25
+        issue_warning = true if sum_lto > 0.04 * @cfa
+      elsif units == HPXML::UnitsCFM50
+        issue_warning = true if sum_lto > 0.06 * @cfa
+      elsif units == HPXML::UnitsPercent
+        issue_warning = true if sum_lto > 0.05
+      end
+      next unless issue_warning
+
+      runner.registerWarning('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
     end
 
     # Create HVAC availability sensor
@@ -2404,7 +2435,7 @@ class OSModel
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
-    if exterior_adjacent_to == HPXML::LocationOutside
+    if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
@@ -2581,11 +2612,17 @@ class OSModel
 
   def self.set_foundation_and_walls_top()
     @foundation_top = 0
+    @hpxml.floors.each do |floor|
+      # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
+      if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
+        @foundation_top = 2.0
+      end
+    end
     @hpxml.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       @foundation_top = top if top > @foundation_top
     end
-    @walls_top = @foundation_top + 8.0 * @ncfl_ag
+    @walls_top = @foundation_top + @hpxml.building_construction.average_ceiling_height * @ncfl_ag
   end
 
   def self.set_heating_and_cooling_seasons()

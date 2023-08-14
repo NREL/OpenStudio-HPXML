@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
+class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   ConstantDaySchedule = '0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1'
   ConstantMonthSchedule = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
 
@@ -302,7 +302,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.12522695139911635, 1.059331185615199, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
 
     # Test defaults w/ electricity JSON file
@@ -312,7 +312,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 1.059331185615199, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
   end
 
@@ -1392,9 +1392,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, false, nil)
   end
 
-  def test_portable_heaters
+  def test_space_heaters
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-portable-heater-gas-only.xml')
+    hpxml = _create_hpxml('base-hvac-space-heater-gas-only.xml')
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1407,23 +1407,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_portable_heater_values(hpxml_default.heating_systems[0], 0, nil)
-  end
-
-  def test_fixed_heaters
-    # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-fixed-heater-gas-only.xml')
-    hpxml.heating_systems[0].fan_watts = 22
-    hpxml.heating_systems[0].heating_capacity = 12345
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 22, 12345)
-
-    # Test defaults
-    hpxml.heating_systems[0].fan_watts = nil
-    hpxml.heating_systems[0].heating_capacity = nil
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 0, nil)
   end
 
   def test_fireplaces
