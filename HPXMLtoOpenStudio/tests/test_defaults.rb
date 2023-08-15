@@ -1506,12 +1506,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
     hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
-    max_cap_at_5f = hpxml.heat_pumps[0].heating_detailed_performance_data.find{ |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-    max_cap_at_47f = hpxml.heat_pumps[0].heating_detailed_performance_data.find{ |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+    max_cap_at_5f = hpxml.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+    max_cap_at_47f = hpxml.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, (max_cap_at_5f / max_cap_at_47f).round(5), 5.0, 40.0)
-    
+
     hpxml.heat_pumps[0].heating_capacity_17F = 9876
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()

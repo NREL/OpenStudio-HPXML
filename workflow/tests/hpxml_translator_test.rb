@@ -589,7 +589,7 @@ class HPXMLTest < Minitest::Test
         next if message.include?('GetDXCoils: Coil:Heating:DX') && message.include?('curve values')
       end
       # variable system SHR adjustment
-      if (hpxml.heat_pumps + hpxml.cooling_systems).select { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed}.size > 0
+      if (hpxml.heat_pumps + hpxml.cooling_systems).select { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed }.size > 0
         next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
       end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0

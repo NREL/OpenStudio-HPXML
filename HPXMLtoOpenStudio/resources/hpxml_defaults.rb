@@ -1146,13 +1146,13 @@ class HPXMLDefaults
       next unless heat_pump.heating_capacity_retention_fraction.nil?
       next unless heat_pump.heating_capacity_17F.nil?
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-      
+
       if not heat_pump.heating_detailed_performance_data.empty?
         # Calculate heating capacity retention at lowest outdoor drybulb
         detailed_performance_data = heat_pump.heating_detailed_performance_data
-        min_odb = detailed_performance_data.map{ |dp| dp.outdoor_temperature }.min
-        max_capacity_at_47 = detailed_performance_data.find{ |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        max_capacity_at_min_odb = detailed_performance_data.find{ |dp| dp.outdoor_temperature == min_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        min_odb = detailed_performance_data.map { |dp| dp.outdoor_temperature }.min
+        max_capacity_at_47 = detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity_at_min_odb = detailed_performance_data.find { |dp| dp.outdoor_temperature == min_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         heat_pump.heating_capacity_retention_fraction = (max_capacity_at_min_odb / max_capacity_at_47).round(4)
         heat_pump.heating_capacity_retention_temp = min_odb
       else
