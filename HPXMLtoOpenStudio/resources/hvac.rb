@@ -2296,11 +2296,11 @@ class HVAC
       d = 0.0357
       e = -0.9786
     else
-      a = 0.2194
-      b = 6.973
-      c = -4.996
-      d = 0.04351
-      e = -2.322
+      a = 0.1549
+      b = 9.421
+      c = -5.6
+      d = -0.1005
+      e = -1.5678
     end
 
     max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
