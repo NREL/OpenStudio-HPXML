@@ -1865,7 +1865,7 @@ class HVACSizing
       else
         fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         is_ducted = !hvac_heating.distribution_system_idref.nil?
-        fixed_heating_capacity = HVAC.calc_heat_rated_capacity_from_max_47(fixed_heating_capacity_max, is_ducted)
+        fixed_heating_capacity = fixed_heating_capacity_max * HVAC.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
       end
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity

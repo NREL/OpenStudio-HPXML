@@ -1212,7 +1212,9 @@ class HVAC
     min_capacity_maintenance_5 = get_heat_min_capacity_maintainence_5(is_ducted)
     # performance data at 47F, maximum speed
     max_cop_47 = calc_heat_max_cop_47_from_hspf(heat_pump.heating_efficiency_hspf, max_capacity_maintenance_5, is_ducted)
-    max_capacity_47 = calc_heat_max_capacity_47_from_rated(heat_pump.heating_capacity, is_ducted)
+    max_capacity_47 = heat_pump.heating_capacity / get_heat_capacity_ratio_from_max_to_rated(is_ducted)
+    # Model maximum capacity only, so airflow should be scaled to maximum capacity
+    heat_pump.heating_airflow_cfm /= get_heat_capacity_ratio_from_max_to_rated(is_ducted)
     detailed_performance_data.add(capacity: max_capacity_47,
                                   efficiency_cop: max_cop_47,
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
@@ -2271,20 +2273,8 @@ class HVAC
     end
   end
 
-  def self.calc_heat_max_capacity_47_from_rated(rated_capacity, is_ducted)
-    if is_ducted
-      return rated_capacity / 0.972
-    else
-      return rated_capacity / 0.812
-    end
-  end
-
-  def self.calc_heat_rated_capacity_from_max_47(max_capacity_47, is_ducted)
-    if is_ducted
-      return max_capacity_47 * 0.972
-    else
-      return max_capacity_47 * 0.812
-    end
+  def self.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
+    return (is_ducted ? 0.972 : 0.812)
   end
 
   def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)
@@ -2645,12 +2635,14 @@ class HVAC
     if mode == :clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
       hvac_ap.cooling_performance_data_array = data_array
-      hvac_ap.cool_rated_capacities = []
+      hvac_ap.cool_rated_capacities_gross = []
+      hvac_ap.cool_rated_capacities_net = []
       hvac_ap.cool_rated_eirs = []
     elsif mode == :htg
       cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
       hvac_ap.heating_performance_data_array = data_array
-      hvac_ap.heat_rated_capacities = []
+      hvac_ap.heat_rated_capacities_gross = []
+      hvac_ap.heat_rated_capacities_net = []
       hvac_ap.heat_rated_eirs = []
     end
     # convert net to gross
@@ -2796,12 +2788,14 @@ class HVAC
     rated_odb = 95.0
     if cooling_system.cooling_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
-      clg_ap.cool_rated_capacities = []
+      clg_ap.cool_rated_capacities_gross = []
+      clg_ap.cool_rated_capacities_net = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = clg_ap.fan_power_rated * max_cfm * (clg_ap.cool_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * cooling_system.cooling_capacity
+        clg_ap.cool_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
-        clg_ap.cool_rated_capacities << gross_capacity
+        clg_ap.cool_rated_capacities_gross << gross_capacity
       end
     end
 
@@ -2819,7 +2813,8 @@ class HVAC
         rated_cap = rate_dp.gross_capacity
         rated_eir = 1.0 / rate_dp.gross_efficiency_cop
         clg_ap.cool_rated_eirs << rated_eir
-        clg_ap.cool_rated_capacities << rated_cap
+        clg_ap.cool_rated_capacities_gross << rated_cap
+        clg_ap.cool_rated_capacities_net << rate_dp.capacity
         cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
         eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Cool-CAP-fFF#{i + 1}")
@@ -2862,8 +2857,8 @@ class HVAC
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
         clg_coil.setMaximumCyclingRate(3.0)
         clg_coil.setLatentCapacityTimeConstant(45.0)
-        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities[i], 'Btu/hr', 'W'))
-        clg_coil.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities[i], clg_ap.cool_rated_cfm_per_ton[0]))
+        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
+        clg_coil.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton[0]))
       else
         if clg_coil.nil?
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -2881,8 +2876,8 @@ class HVAC
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         stage.setMaximumCyclingRate(3.0)
         stage.setLatentCapacityTimeConstant(45.0)
-        stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities[i], 'Btu/hr', 'W'))
-        stage.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities[i], clg_ap.cool_rated_cfm_per_ton[i]))
+        stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
+        stage.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton[i]))
         clg_coil.addStage(stage)
       end
     end
@@ -2913,12 +2908,14 @@ class HVAC
     rated_odb = 47.0
     if heating_system.heating_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
-      htg_ap.heat_rated_capacities = []
+      htg_ap.heat_rated_capacities_net = []
+      htg_ap.heat_rated_capacities_gross = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = htg_ap.fan_power_rated * max_cfm * (htg_ap.heat_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * heating_system.heating_capacity
+        htg_ap.heat_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
-        htg_ap.heat_rated_capacities << gross_capacity
+        htg_ap.heat_rated_capacities_gross << gross_capacity
       end
     end
 
@@ -2936,7 +2933,8 @@ class HVAC
         rated_cap = rate_dp.gross_capacity
         rated_eir = 1.0 / rate_dp.gross_efficiency_cop
         htg_ap.heat_rated_eirs << rated_eir
-        htg_ap.heat_rated_capacities << rated_cap
+        htg_ap.heat_rated_capacities_net << rate_dp.capacity
+        htg_ap.heat_rated_capacities_gross << rated_cap
         cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
         eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Heat-CAP-fFF#{i + 1}")
@@ -2969,8 +2967,8 @@ class HVAC
         else # PTHP or room heat pump
           htg_coil.setRatedCOP(heating_system.heating_efficiency_cop)
         end
-        htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities[i], 'Btu/hr', 'W'))
-        htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities[i], htg_ap.heat_rated_cfm_per_ton[0]))
+        htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
+        htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[0]))
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -2981,8 +2979,8 @@ class HVAC
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_table)
         stage.setGrossRatedHeatingCOP(1.0 / htg_ap.heat_rated_eirs[i])
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
-        stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities[i], 'Btu/hr', 'W'))
-        stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities[i], htg_ap.heat_rated_cfm_per_ton[i]))
+        stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
+        stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[i]))
         htg_coil.addStage(stage)
       end
     end
