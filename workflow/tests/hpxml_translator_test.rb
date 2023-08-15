@@ -588,6 +588,10 @@ class HPXMLTest < Minitest::Test
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type }.size > 0
         next if message.include?('GetDXCoils: Coil:Heating:DX') && message.include?('curve values')
       end
+      # variable system SHR adjustment
+      if (hpxml.heat_pumps + hpxml.cooling_systems).select { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed}.size > 0
+        next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
+      end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
         # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
         # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
