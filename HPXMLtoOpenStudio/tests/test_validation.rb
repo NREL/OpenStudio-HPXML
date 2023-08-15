@@ -111,6 +111,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'heat-pump-capacity-17f' => ['Expected HeatingCapacity17F to be less than or equal to HeatingCapacity'],
                             'heat-pump-lockout-temperatures' => ['Expected CompressorLockoutTemperature to be less than or equal to BackupHeatingLockoutTemperature'],
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails]'],
+                            'hvac-detailed-performance-not-variable-speed' => ['Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]',
+                                                                               'Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]'],
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
@@ -365,6 +367,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.heat_pumps[-1].id = 'HeatPump2'
         hpxml.heat_pumps[-1].primary_heating_system = false
         hpxml.heat_pumps[-1].primary_cooling_system = false
+      elsif ['hvac-detailed-performance-not-variable-speed'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
+        hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
       elsif ['hvac-distribution-return-duct-leakage-missing'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-evap-cooler-only-ducted.xml'))
         hpxml.hvac_distributions[0].duct_leakage_measurements[-1].delete

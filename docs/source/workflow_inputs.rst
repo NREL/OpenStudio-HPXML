@@ -2050,7 +2050,7 @@ HPXML HVAC Detailed Perf. Data
 Some air-source HVAC system types allow detailed heating/cooling performance data to be provided using the ``CoolingDetailedPerformanceData`` and ``HeatingDetailedPerformanceData`` elements, as described above.
 One source of detailed performance data is `NEEP's Cold Climate Air Source Heat Pump List <https://ashp.neep.org>`_.
 
-Linear interpolation/extrapolation is assumed for the capacity/efficiency performance outside of the given datapoints.
+Currently detailed performance data can only be provided for variable-speed HVAC systems.
 
 .. _clg_detailed_perf_data:
 
@@ -2072,7 +2072,7 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
          The other datapoint pairs can be at any temperature.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must have the ``CoolingCapacity`` specified.
+In addition, the parent object must provide the ``CoolingCapacity`` and the ``CompressorType`` must be set to "variable speed".
 For heat pumps, :ref:`htg_detailed_perf_data` must also be provided.
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
@@ -2096,7 +2096,7 @@ For air-source HVAC systems with detailed heating performance data, two or more 
          The other datapoint pairs can be at any temperature.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must have the ``HeatingCapacity`` specified.
+In addition, the parent object must provide the ``HeatingCapacity`` and the ``CompressorType`` must be set to "variable speed".
 For heat pumps, :ref:`clg_detailed_perf_data` must also be provided.
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
 
