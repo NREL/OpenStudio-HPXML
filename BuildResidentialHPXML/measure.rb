@@ -3466,7 +3466,6 @@ class HPXMLFile
 
     if args[:apply_defaults]
       eri_version = Constants.ERIVersions[-1]
-      # FIXME: Address this when multiple buildings
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
       unique_hpxml_ids(hpxml_doc)
