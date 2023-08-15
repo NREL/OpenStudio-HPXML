@@ -81,7 +81,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cooling_system = hpxml.cooling_systems[0]
     fan_power_rated = 0.18
     cfm_per_ton = 400.0
-    cfm_per_ton_min = 466.6667
+    cfm_per_ton_min = 400.0
     clg_capacity_min_net = cooling_system.cooling_capacity * 0.394
     max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     min_cfm = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_min
@@ -606,7 +606,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     fan_power_rated = 0.18
     cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 466.6667
+    cfm_per_ton_clg_min = 400.0
     clg_capacity_min_net = heat_pump.cooling_capacity * 0.394
     max_cfm_cool = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
     min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
@@ -617,8 +617,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cop_min = 1.231 * cop_max
     clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, cop_min)[1]
     clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, cop_max)[1]
-    puts clg_cop_min
-    cfm_per_ton = 353.3110
+    cfm_per_ton = 400.0
     max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_power = fan_power_rated * max_cfm
     htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.972, fan_power, :htg)[0], 'Btu/hr', 'W')
@@ -636,7 +635,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [4.33, 3.54] # Expected values
+    cops = [4.23, 3.58] # Expected values
     cops.each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -664,7 +663,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     heat_pump = hpxml.heat_pumps[0]
     fan_power_rated = 0.18
     cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 466.6667
+    cfm_per_ton_clg_min = 400.0
     clg_dp_min = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     clg_dp_max = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     clg_capacity_min_net = clg_dp_min.capacity
@@ -688,8 +687,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
 
-    cfm_per_ton_htg_max = 353.3110
-    cfm_per_ton_htg_min = 555.6000
+    cfm_per_ton_htg_max = 400.0
+    cfm_per_ton_htg_min = 400.0
     htg_dp_min = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     htg_dp_max = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     htg_capacity_min_net = htg_dp_min.capacity
@@ -737,7 +736,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     heat_pump = hpxml.heat_pumps[0]
     fan_power_rated = 0.07
     cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 433.1356
+    cfm_per_ton_clg_min = 400.0
     clg_capacity_min_net = heat_pump.cooling_capacity * 0.255
     max_cfm_cool = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
     min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
@@ -749,7 +748,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cop_min = cop_ratio * cop_max
     clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, cop_min)[1]
     clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, cop_max)[1]
-    cfm_per_ton_htg = 362.3702
+    cfm_per_ton_htg = 400.0
     max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton_htg
     fan_power_htg_max = fan_power_rated * max_cfm
     htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.812, fan_power_htg_max, :htg)[0], 'Btu/hr', 'W')
@@ -791,7 +790,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     heat_pump = hpxml.heat_pumps[0]
     fan_power_rated = 0.07
     cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 433.1356
+    cfm_per_ton_clg_min = 400.0
     clg_dp_min = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     clg_dp_max = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     clg_capacity_min_net = clg_dp_min.capacity
@@ -815,8 +814,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
 
-    cfm_per_ton_htg_max = 362.3702
-    cfm_per_ton_htg_min = 566.8091
+    cfm_per_ton_htg_max = 400.0
+    cfm_per_ton_htg_min = 400.0
     htg_dp_min = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     htg_dp_max = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     htg_capacity_min_net = htg_dp_min.capacity
@@ -859,7 +858,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cooling_system = hpxml.cooling_systems[0]
     fan_power_rated = 0.07
     cfm_per_ton = 400.0
-    cfm_per_ton_min = 433.1356
+    cfm_per_ton_min = 400
     clg_capacity_min_net = cooling_system.cooling_capacity * 0.255
     max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
     min_cfm = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_min
