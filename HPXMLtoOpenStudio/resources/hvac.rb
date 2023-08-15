@@ -1265,7 +1265,9 @@ class HVAC
 
     # performance data at 95F, maximum speed
     max_cop_95 = is_ducted ? (0.1953 * hvac_system.cooling_efficiency_seer) : (0.08184 * hvac_system.cooling_efficiency_seer + 1.173)
-    max_capacity_95 = hvac_system.cooling_capacity
+    max_capacity_95 = hvac_system.cooling_capacity / get_cool_capacity_ratio_from_max_to_rated()
+    # Model maximum capacity only, so airflow should be scaled to maximum capacity
+    hvac_system.cooling_airflow_cfm /= get_cool_capacity_ratio_from_max_to_rated()
     detailed_performance_data.add(capacity: max_capacity_95,
                                   efficiency_cop: max_cop_95,
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
@@ -2275,6 +2277,10 @@ class HVAC
 
   def self.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
     return (is_ducted ? 0.972 : 0.812)
+  end
+
+  def self.get_cool_capacity_ratio_from_max_to_rated()
+    return 1.0
   end
 
   def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)

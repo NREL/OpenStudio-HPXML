@@ -1847,7 +1847,8 @@ class HVACSizing
       if hvac_cooling.cooling_detailed_performance_data.empty?
         fixed_cooling_capacity = hvac_cooling.cooling_capacity
       else
-        fixed_cooling_capacity = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        fixed_cooling_capacity_max = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        fixed_cooling_capacity = fixed_cooling_capacity_max * HVAC.get_cool_capacity_ratio_from_max_to_rated()
       end
     end
     if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
