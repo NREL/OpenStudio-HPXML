@@ -1489,7 +1489,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_default = _test_measure()
     _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 14.0, 8.0, 0.425, 5.0, 50.0)
 
-    # Test override capacity retention and capacity 17F w/ detailed performance data
+    # Test w/ detailed performance data
     hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
     hpxml.heat_pumps[0].cooling_shr = 0.88
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.66
@@ -1502,14 +1502,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.heat_pumps[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, nil, nil, 40.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, 0.1, 2.0, 40.0)
 
     hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
     hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+    max_cap_at_5f = hpxml.heat_pumps[0].heating_detailed_performance_data.find{ |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+    max_cap_at_47f = hpxml.heat_pumps[0].heating_detailed_performance_data.find{ |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, (max_cap_at_5f / max_cap_at_47f).round(5), 5.0, 40.0)
+    
     hpxml.heat_pumps[0].heating_capacity_17F = 9876
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, nil, nil, 40.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, nil, 9876, nil, 14.0, 8.0, nil, nil, 40.0)
   end
 
   def test_pthp

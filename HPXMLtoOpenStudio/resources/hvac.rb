@@ -1048,8 +1048,8 @@ class HVAC
     if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? compressor_type
       retention_fraction = 0.425
     elsif [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-      ## Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-      retention_fraction = 0.0461 * hspf + 0.1594
+      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+      retention_fraction = (0.0461 * hspf + 0.1594).round(4)
     end
     return retention_temp, retention_fraction
   end
@@ -1210,46 +1210,48 @@ class HVAC
     detailed_performance_data = heat_pump.heating_detailed_performance_data
     max_capacity_maintenance_5 = get_heat_max_capacity_maintainence_5(heat_pump)
     min_capacity_maintenance_5 = get_heat_min_capacity_maintainence_5(is_ducted)
-    # performance data at 47F, maximum speed
+
     max_cop_47 = calc_heat_max_cop_47_from_hspf(heat_pump.heating_efficiency_hspf, max_capacity_maintenance_5, is_ducted)
     max_capacity_47 = calc_heat_max_capacity_47_from_rated(heat_pump.heating_capacity, is_ducted)
-    detailed_performance_data.add(capacity: max_capacity_47,
-                                  efficiency_cop: max_cop_47,
+    min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
+    min_cop_47 = calc_heat_min_cop_47_from_hspf_max_cop_47(heat_pump.heating_efficiency_hspf, max_cop_47, is_ducted)
+    max_capacity_5 = max_capacity_47 * max_capacity_maintenance_5
+    max_cop_5 = calc_heat_max_cop_5_from_max_cop_47(max_cop_47, is_ducted)
+    min_capacity_5 = min_capacity_47 * min_capacity_maintenance_5
+    min_cop_5 = calc_heat_min_cop_5_from_min_cop_47(min_cop_47, is_ducted)
+    max_capacity_17 = (max_capacity_47 - max_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_capacity_47
+    max_cop_17 = (max_cop_47 - max_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_cop_47
+    min_capacity_17 = (min_capacity_47 - min_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_capacity_47
+    min_cop_17 = (min_cop_47 - min_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_cop_47
+
+    # performance data at 47F, maximum speed
+    detailed_performance_data.add(capacity: max_capacity_47.round(1),
+                                  efficiency_cop: max_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 47)
     # performance data at 47F, minimum speed
-    min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
-    min_cop_47 = calc_heat_min_cop_47_from_hspf_max_cop_47(heat_pump.heating_efficiency_hspf, max_cop_47, is_ducted)
-    detailed_performance_data.add(capacity: min_capacity_47,
-                                  efficiency_cop: min_cop_47,
+    detailed_performance_data.add(capacity: min_capacity_47.round(1),
+                                  efficiency_cop: min_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 47)
     # performance data at 5F, maximum speed
-    max_capacity_5 = max_capacity_47 * max_capacity_maintenance_5
-    max_cop_5 = calc_heat_max_cop_5_from_max_cop_47(max_cop_47, is_ducted)
-    detailed_performance_data.add(capacity: max_capacity_5,
-                                  efficiency_cop: max_cop_5,
+    detailed_performance_data.add(capacity: max_capacity_5.round(1),
+                                  efficiency_cop: max_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 5)
     # performance data at 5F, minimum speed
-    min_capacity_5 = min_capacity_47 * min_capacity_maintenance_5
-    min_cop_5 = calc_heat_min_cop_5_from_min_cop_47(min_cop_47, is_ducted)
-    detailed_performance_data.add(capacity: min_capacity_5,
-                                  efficiency_cop: min_cop_5,
+    detailed_performance_data.add(capacity: min_capacity_5.round(1),
+                                  efficiency_cop: min_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 5)
     # performance data at 17F, maximum speed
-    max_capacity_17 = (max_capacity_47 - max_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_capacity_47
-    max_cop_17 = (max_cop_47 - max_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_cop_47
-    detailed_performance_data.add(capacity: max_capacity_17,
-                                  efficiency_cop: max_cop_17,
+    detailed_performance_data.add(capacity: max_capacity_17.round(1),
+                                  efficiency_cop: max_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 17)
     # performance data at 17F, minimum speed
-    min_capacity_17 = (min_capacity_47 - min_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_capacity_47
-    min_cop_17 = (min_cop_47 - min_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_cop_47
-    detailed_performance_data.add(capacity: min_capacity_17,
-                                  efficiency_cop: min_cop_17,
+    detailed_performance_data.add(capacity: min_capacity_17.round(1),
+                                  efficiency_cop: min_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 17)
   end
@@ -1261,33 +1263,35 @@ class HVAC
     # Default NEEP data inputs
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
 
-    # performance data at 95F, maximum speed
+    cop_ratio = is_ducted ? 1.231 : (0.01377 * hvac_system.cooling_efficiency_seer + 1.13948)
+
     max_cop_95 = is_ducted ? (0.1953 * hvac_system.cooling_efficiency_seer) : (0.08184 * hvac_system.cooling_efficiency_seer + 1.173)
     max_capacity_95 = hvac_system.cooling_capacity
-    detailed_performance_data.add(capacity: max_capacity_95,
-                                  efficiency_cop: max_cop_95,
+    min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
+    min_cop_95 = cop_ratio * max_cop_95
+    max_capacity_82 = max_capacity_95 * 1.033
+    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
+    min_capacity_82 = min_capacity_95 * 1.099
+    min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
+
+    # performance data at 95F, maximum speed
+    detailed_performance_data.add(capacity: max_capacity_95.round(1),
+                                  efficiency_cop: max_cop_95.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 95)
     # performance data at 95F, minimum speed
-    min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
-    cop_ratio = is_ducted ? 1.231 : (0.01377 * hvac_system.cooling_efficiency_seer + 1.13948)
-    min_cop_95 = cop_ratio * max_cop_95
-    detailed_performance_data.add(capacity: min_capacity_95,
-                                  efficiency_cop: min_cop_95,
+    detailed_performance_data.add(capacity: min_capacity_95.round(1),
+                                  efficiency_cop: min_cop_95.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 95)
     # performance data at 82F, maximum speed
-    max_capacity_82 = max_capacity_95 * 1.033
-    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
-    detailed_performance_data.add(capacity: max_capacity_82,
-                                  efficiency_cop: max_cop_82,
+    detailed_performance_data.add(capacity: max_capacity_82.round(1),
+                                  efficiency_cop: max_cop_82.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 82)
-    # performance data at 5F, minimum speed
-    min_capacity_82 = min_capacity_95 * 1.099
-    min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
-    detailed_performance_data.add(capacity: min_capacity_82,
-                                  efficiency_cop: min_cop_82,
+    # performance data at 82F, minimum speed
+    detailed_performance_data.add(capacity: min_capacity_82.round(1),
+                                  efficiency_cop: min_cop_82.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 82)
   end

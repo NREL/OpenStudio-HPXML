@@ -1143,19 +1143,21 @@ class HPXMLDefaults
 
     # Default HP heating capacity retention
     hpxml.heat_pumps.each do |heat_pump|
-      # Ignore heating capacity retention if there's detailed performance data provided
-      if ((not heat_pump.heating_detailed_performance_data.empty?) && (not heat_pump.heating_capacity_retention_fraction.nil?)) ||
-         ((not heat_pump.heating_detailed_performance_data.empty?) && (not heat_pump.heating_capacity_17F.nil?))
-        heat_pump.heating_capacity_retention_temp = nil
-        heat_pump.heating_capacity_retention_fraction = nil
-        heat_pump.heating_capacity_17F = nil
-      end
       next unless heat_pump.heating_capacity_retention_fraction.nil?
       next unless heat_pump.heating_capacity_17F.nil?
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-      next unless heat_pump.heating_detailed_performance_data.empty?
-
-      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
+      
+      if not heat_pump.heating_detailed_performance_data.empty?
+        # Calculate heating capacity retention at lowest outdoor drybulb
+        detailed_performance_data = heat_pump.heating_detailed_performance_data
+        min_odb = detailed_performance_data.map{ |dp| dp.outdoor_temperature }.min
+        max_capacity_at_47 = detailed_performance_data.find{ |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity_at_min_odb = detailed_performance_data.find{ |dp| dp.outdoor_temperature == min_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        heat_pump.heating_capacity_retention_fraction = (max_capacity_at_min_odb / max_capacity_at_47).round(4)
+        heat_pump.heating_capacity_retention_temp = min_odb
+      else
+        heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
+      end
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
