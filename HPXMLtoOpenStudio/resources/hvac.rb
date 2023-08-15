@@ -1995,10 +1995,6 @@ class HVAC
       iat_slope = -0.002947013
       iat_intercept = 0.23168251
       num_speeds = 2
-    elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      iat_slope = -0.002897048
-      iat_intercept = 0.209319129
-      num_speeds = 2
     end
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
