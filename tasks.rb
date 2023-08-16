@@ -1706,6 +1706,54 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       capacity_description: HPXML::CapacityDescriptionMaximum,
                       efficiency_cop: 2.28)
   end
+  if ['base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'].include? hpxml_file
+    # YORK HMH7
+    # https://ashp.neep.org/#!/product/64253/7/25000///0
+    clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
+    htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 11700,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.47)
+    clg_perf_data.add(outdoor_temperature: 95.0,
+                      capacity: 36000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.71)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 13200,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 6.34)
+    clg_perf_data.add(outdoor_temperature: 82.0,
+                      capacity: 40000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.53)
+    htg_perf_data.add(outdoor_temperature: 47.0,
+                      capacity: 10000,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 4.73)
+    htg_perf_data.add(outdoor_temperature: 47.0,
+                      capacity: 36000,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 3.44)
+    htg_perf_data.add(outdoor_temperature: 17.0,
+                      capacity: 4200,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 1.84)
+    htg_perf_data.add(outdoor_temperature: 17.0,
+                      capacity: 24800,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.66)
+    htg_perf_data.add(outdoor_temperature: 5.0,
+                      capacity: 1900,
+                      capacity_description: HPXML::CapacityDescriptionMinimum,
+                      efficiency_cop: 0.81)
+    htg_perf_data.add(outdoor_temperature: 5.0,
+                      capacity: 19900,
+                      capacity_description: HPXML::CapacityDescriptionMaximum,
+                      efficiency_cop: 2.28)
+    hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
+    hpxml.heat_pumps[0].charge_defect_ratio = -0.25
+  end
   if ['base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml'].include? hpxml_file
     clg_perf_data = hpxml.heat_pumps[0].cooling_detailed_performance_data
     htg_perf_data = hpxml.heat_pumps[0].heating_detailed_performance_data

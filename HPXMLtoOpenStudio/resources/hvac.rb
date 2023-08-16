@@ -2676,7 +2676,7 @@ class HVAC
       outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
     end
     data_array.each do |data|
-      data = data.sort_by { |dp| dp.outdoor_temperature }
+      data.sort_by! { |dp| dp.outdoor_temperature }
       user_out_db = data.map { |dp| dp.outdoor_temperature }
       outdoor_dry_bulbs.each do |new_pt|
         next if user_out_db.include? new_pt
