@@ -62,6 +62,8 @@ class HVAC
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
 
+      # Model maximum capacity only, so airflow should be scaled to maximum capacity
+      cooling_system.cooling_airflow_cfm /= get_cool_capacity_ratio_from_max_to_rated()
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
@@ -87,6 +89,9 @@ class HVAC
 
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
+      is_ducted = !heating_system.distribution_system_idref.nil?
+      # Model maximum capacity only, so airflow should be scaled to maximum capacity
+      heating_system.heating_airflow_cfm /= get_heat_capacity_ratio_from_max_to_rated(is_ducted)
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
@@ -1223,9 +1228,6 @@ class HVAC
     min_capacity_17 = (min_capacity_47 - min_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_capacity_47
     min_cop_17 = (min_cop_47 - min_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_cop_47
 
-    # Model maximum capacity only, so airflow should be scaled to maximum capacity
-    heat_pump.heating_airflow_cfm /= get_heat_capacity_ratio_from_max_to_rated(is_ducted)
-
     # performance data at 47F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_47.round(1),
                                   efficiency_cop: max_cop_47.round(4),
@@ -1275,9 +1277,6 @@ class HVAC
     max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
     min_capacity_82 = min_capacity_95 * 1.099
     min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
-
-    # Model maximum capacity only, so airflow should be scaled to maximum capacity
-    hvac_system.cooling_airflow_cfm /= get_cool_capacity_ratio_from_max_to_rated()
 
     # performance data at 95F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_95.round(1),
