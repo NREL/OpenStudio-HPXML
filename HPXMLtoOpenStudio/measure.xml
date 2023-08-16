@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5d1404e7-0235-43a6-927c-96285e8bc94f</version_id>
-  <version_modified>2023-08-10T23:28:35Z</version_modified>
+  <version_id>6400e41d-9a36-4911-ae8c-34d55df1154a</version_id>
+  <version_modified>2023-08-16T19:52:34Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>217C22C5</checksum>
+      <checksum>0368073F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -142,7 +142,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14852A93</checksum>
+      <checksum>25CBA96D</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -280,7 +280,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>56B12A59</checksum>
+      <checksum>277212B8</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -316,7 +316,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7EBA7B4B</checksum>
+      <checksum>A3B00461</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -610,7 +610,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C3E0E96C</checksum>
+      <checksum>072FE99F</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
