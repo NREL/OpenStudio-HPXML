@@ -57,6 +57,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-water-heater-attic.xml' => 'base-sfd.xml',
       'extra-battery-crawlspace.xml' => 'base-sfd.xml',
       'extra-battery-attic.xml' => 'base-sfd.xml',
+      'extra-ashp-no-ducts.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
@@ -840,6 +841,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['extra-battery-attic.xml'].include? hpxml_file
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
+    elsif ['extra-ashp-no-ducts.xml'].include? hpxml_file
+      args['ducts_supply_location'] = HPXML::LocationLivingSpace
+      args['ducts_return_location'] = HPXML::LocationLivingSpace
+      args.delete('ducts_supply_surface_area')
+      args.delete('ducts_return_surface_area')
+      args['ducts_number_of_return_registers'] = 0
     elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
       args['ducts_supply_leakage_to_outside_value'] = 0.0
