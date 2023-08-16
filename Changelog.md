@@ -12,6 +12,7 @@ __New Features__
 - BuildResidentialHPXML measure:
   - Allow duct area fractions (as an alternative to duct areas in ft^2).
   - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
+  - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
 - Ground source heat pump enhancements:
   - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements
   - Allow optional inputs related to geothermal loop: loop flow, borehole count/length/spacing/diameter/configuration, grout conductivity, pipe conductivity/diameter/shank spacing.

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>fcca1b82-a6cd-4f07-95ef-c5f0ae3d4d4e</version_id>
-  <version_modified>2023-08-10T01:55:01Z</version_modified>
+  <version_id>8eefebe7-39ba-4158-bf6f-0e5e62b047bf</version_id>
+  <version_modified>2023-08-16T19:51:25Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3139,6 +3139,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -3149,6 +3153,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -3275,6 +3283,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -3285,6 +3297,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -3937,12 +3953,20 @@
           <display_name>garage</display_name>
         </choice>
         <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
+        </choice>
+        <choice>
           <value>attic - vented</value>
           <display_name>attic - vented</display_name>
         </choice>
         <choice>
           <value>attic - unvented</value>
           <display_name>attic - unvented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
         </choice>
         <choice>
           <value>crawlspace - vented</value>
@@ -4778,6 +4802,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -4788,6 +4816,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -6847,7 +6879,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AD83F2CF</checksum>
+      <checksum>8B606469</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -6859,7 +6891,649 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E0489256</checksum>
+      <checksum>4D646B5D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-mf.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>43C742D7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-mf.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>719386EA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfa.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3EDFF77E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfa.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>15844D47</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfd.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0EDB7B89</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfd.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FE3D9F28</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ashp-no-ducts.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1E5A4110</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ashp-no-ducts.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>25A402A8</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto-duct-locations.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5A934791</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto-duct-locations.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B1F3A9DC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FE5602EB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D0B6A33B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-battery-attic.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D51BE533</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-battery-attic.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6F137499</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-battery-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>661D7D82</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-battery-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ECFD3417</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-bills-fossil-fuel-rates.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D0A3B97E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-bills-fossil-fuel-rates.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1A8B031A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-dhw-solar-latitude.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A7C2B7BA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-dhw-solar-latitude.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E47F316F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ducts-attic.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>220FC56C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ducts-attic.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FE3D9F28</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ducts-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>260BCFBA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-ducts-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>430A95DD</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-emissions-fossil-fuel-factors.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>33A96DBA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-emissions-fossil-fuel-factors.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8F5636CC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-gable.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A261005</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-gable.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>38EE4C4A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-hip.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>59A8FD98</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-hip.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5E986A90</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B873462D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A030F529</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-partially-protruded.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0731DCF4</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-partially-protruded.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>865956E0</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-windows-shading.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ABA2497A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-windows-shading.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D91EACCC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>534EA5B4</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3191A21A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-pool-heater-with-zero-kwh.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>30E10060</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-pool-heater-with-zero-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>931A6FDB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-iecc-zone-different-than-epw.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>81D24049</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-iecc-zone-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>07347C1B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-eaves.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4C9ACEAD</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-eaves.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>152EF3DC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-no-rim-joists.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EB05893C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-no-rim-joists.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B54B2849</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-pv-roofpitch.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4073AE15</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-pv-roofpitch.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FE3D9F28</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-seasons-building-america.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ACB9D21D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-seasons-building-america.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C9400E71</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9ACA31BB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A322C24A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A75DB09F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CEE89131</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C08D5F37</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D4E00BA9</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heating-system.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F46F794B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A1EEC11A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heat-pump.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B86804DD</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>54FC2482</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C0DF1D2D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B0A82DC2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-refrigerator.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>099E9AD2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-refrigerator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FE3D9F28</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-ambient.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5249563D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-ambient.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>28046C34</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0906C531</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D5CB5CA3</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-hip.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E813C704</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-hip.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7F3FA83C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-flat.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1357966B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-flat.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>26DC7FE5</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-conditioned-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>16D4FC95</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-conditioned-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0857C909</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-exterior-corridor.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D64B55B8</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-exterior-corridor.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>15844D47</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-rear-units.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>447EF571</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>15844D47</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-middle.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>71C2310B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>64326872</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-right.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8A025503</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>64326872</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A94189AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4DAB400E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>93D236B9</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6321D9DB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0714A52B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-middle.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>839CB2FA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D64DDBCE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-right.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CC3A69F1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0EED5DEB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>86D800FE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C8526CAB</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-middle.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4F4267CF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7F3DC4AA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-right.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>55A1C4FD</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7F3DC4AA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D23B0D69</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1835989F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-state-code-different-than-epw.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8CB7E82C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-state-code-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A77F42FC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-time-zone-different-than-epw.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>17F90AC3</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-time-zone-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F041D2D6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-water-heater-attic.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>102E7196</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-water-heater-attic.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E3C7E737</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-water-heater-crawlspace.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F8DA3DDF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-water-heater-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>71B6C06D</checksum>
     </file>
   </files>
 </measure>
