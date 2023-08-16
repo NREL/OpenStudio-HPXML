@@ -1151,6 +1151,8 @@ class HPXMLDefaults
         # Calculate heating capacity retention at lowest outdoor drybulb
         detailed_performance_data = heat_pump.heating_detailed_performance_data
         min_odb = detailed_performance_data.map { |dp| dp.outdoor_temperature }.min
+        next if min_odb == 47 # No temperatures below the rating temperature; don't bother to calculate a retention factor
+
         max_capacity_at_47 = detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         max_capacity_at_min_odb = detailed_performance_data.find { |dp| dp.outdoor_temperature == min_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         heat_pump.heating_capacity_retention_fraction = (max_capacity_at_min_odb / max_capacity_at_47).round(4)
