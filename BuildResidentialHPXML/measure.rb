@@ -3360,6 +3360,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:window_aspect_ratio] <= 0)
     errors << 'Window aspect ratio must be greater than zero.' if error
 
+    if (args[:heating_system_type] != 'none' || args[:cooling_system_type] != 'none' || args[:heat_pump_type] != 'none')
+      if (args[:ducts_supply_surface_area].is_initialized && !args[:ducts_return_surface_area].is_initialized) || (args[:ducts_return_surface_area].is_initialized && !args[:ducts_supply_surface_area].is_initialized)
+        errors << 'Must have either both supply/return ducts surface area specified, or neither specified.'
+      elsif (!args[:ducts_supply_surface_area].is_initialized && !args[:ducts_return_surface_area].is_initialized) && (args[:ducts_number_of_return_registers].is_initialized && args[:ducts_number_of_return_registers].get == 0)
+        errors << 'Number of return registers must be greater than zero when both supply/return surface area not specified.'
+      end
+    end
+
     return errors
   end
 end

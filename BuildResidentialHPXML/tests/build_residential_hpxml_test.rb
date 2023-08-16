@@ -10,7 +10,7 @@ require 'fileutils'
 class BuildResidentialHPXMLTest < Minitest::Test
   def setup
     @output_path = File.join(File.dirname(__FILE__), 'extra_files')
-    @model_save = false # true helpful for debugging, i.e., can render osm in 3D
+    @model_save = true # true helpful for debugging, i.e., can render osm in 3D
   end
 
   def teardown
@@ -57,7 +57,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-water-heater-attic.xml' => 'base-sfd.xml',
       'extra-battery-crawlspace.xml' => 'base-sfd.xml',
       'extra-battery-attic.xml' => 'base-sfd.xml',
-      'extra-ashp-no-ducts.xml' => 'base-sfd.xml',
+      'extra-no-ducts.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
@@ -191,6 +191,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-garage-too-wide.xml' => 'base-sfd.xml',
       'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
+      'error-default-supply-surface-area-but-not-return.xml' => 'base-sfd.xml',
+      'error-default-duct-surface-areas-with-zero-return-registers.xml' => 'base-sfd.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
@@ -245,7 +247,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-invalid-window-aspect-ratio.xml' => 'Window aspect ratio must be greater than zero.',
       'error-garage-too-wide.xml' => 'Garage is as wide as the single-family detached unit.',
       'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.',
-      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."
+      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'.",
+      'error-default-supply-surface-area-but-not-return.xml' => 'Must have either both supply/return ducts surface area specified, or neither specified.',
+      'error-default-duct-surface-areas-with-zero-return-registers.xml' => 'Number of return registers must be greater than zero when both supply/return surface area not specified.'
     }
 
     expected_warnings = {
@@ -841,12 +845,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['extra-battery-attic.xml'].include? hpxml_file
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
-    elsif ['extra-ashp-no-ducts.xml'].include? hpxml_file
-      args['ducts_supply_location'] = HPXML::LocationLivingSpace
-      args['ducts_return_location'] = HPXML::LocationLivingSpace
-      args.delete('ducts_supply_surface_area')
-      args.delete('ducts_return_surface_area')
-      args['ducts_number_of_return_registers'] = 0
+    elsif ['extra-no-ducts.xml'].include? hpxml_file
+      # args.delete('ducts_supply_surface_area')
+      # args.delete('ducts_return_surface_area')
+      # args['ducts_number_of_return_registers'] = 0
     elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
       args['ducts_supply_leakage_to_outside_value'] = 0.0
@@ -1140,6 +1142,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_depth'] = 40
     elsif ['error-vented-attic-with-zero-floor-insulation.xml'].include? hpxml_file
       args['ceiling_assembly_r'] = 0
+    elsif ['error-default-supply-surface-area-but-not-return.xml'].include? hpxml_file
+      args.delete('ducts_supply_surface_area')
+    elsif ['error-default-duct-surface-areas-with-zero-return-registers.xml'].include? hpxml_file
+      args.delete('ducts_supply_surface_area')
+      args.delete('ducts_return_surface_area')
+      args['ducts_number_of_return_registers'] = 0
     end
 
     # Warning
