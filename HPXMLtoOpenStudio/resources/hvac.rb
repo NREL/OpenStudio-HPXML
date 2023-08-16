@@ -2720,7 +2720,7 @@ class HVAC
       retention_temp, retention_fraction = get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       indoor_t = [60.0, 70.0, 80.0]
-      rated_t_i = 60.0
+      rated_t_i = 70.0
     end
     data_array.each do |data|
       data.each do |dp|
@@ -2910,7 +2910,7 @@ class HVAC
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
 
-    rated_idb = 60.0
+    rated_idb = 70.0
     rated_odb = 47.0
     if heating_system.heating_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
