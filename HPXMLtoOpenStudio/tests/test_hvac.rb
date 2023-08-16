@@ -1154,6 +1154,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
   end
 
   def test_install_quality_furnace_central_air_conditioner_1_speed_ratio
