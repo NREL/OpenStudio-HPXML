@@ -3174,10 +3174,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    # Write HPXML file again if defaults applied
-    if args[:apply_defaults]
-      XMLHelper.write_file(hpxml_doc, hpxml_path)
-    end
     runner.registerInfo("Wrote file: #{hpxml_path}")
 
     # Uncomment for debugging purposes
@@ -3443,7 +3439,7 @@ class HPXMLFile
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_defaults]
-      # Check for invalid HPXML file
+      # Always check for invalid HPXML file before applying defaults
       if not validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
         return false
       end
@@ -3451,10 +3447,11 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       HPXMLDefaults.apply(runner, hpxml, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_oga()
+      XMLHelper.write_file(hpxml_doc, hpxml_path)
     end
 
     if args[:apply_validation]
-      # Check for invalid HPXML file
+      # Optionally check for invalid HPXML file (with or without defaults applied)
       if not validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
         return false
       end
