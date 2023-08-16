@@ -96,7 +96,7 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         if not heating_system.heating_detailed_performance_data.empty?
-          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg)
+          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, heating_system.compressor_lockout_temp)
         end
 
         # Heating Coil
@@ -2634,7 +2634,7 @@ class HVAC
     return data_array
   end
 
-  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode)
+  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, compressor_lockout_temp = nil)
     data_array = setup_neep_detailed_performance_data(detailed_performance_data)
 
     # convert net to gross, adds more data points for table lookup, etc.
@@ -2664,16 +2664,17 @@ class HVAC
       end
     end
     # convert to table lookup data
-    interpolate_to_odb_table_points(data_array, mode)
+    interpolate_to_odb_table_points(data_array, mode, compressor_lockout_temp)
     correct_ft_cap_eir(data_array, mode)
   end
 
-  def self.interpolate_to_odb_table_points(data_array, mode)
+  def self.interpolate_to_odb_table_points(data_array, mode, compressor_lockout_temp = nil)
     # Set of data used for table lookup
     if mode == :clg
       outdoor_dry_bulbs = [55.0, 82.0, 95.0, 125.0]
     else
-      outdoor_dry_bulbs = [5.0, 10.0, 17.0, 47.0, 60.0]
+      min_temp = compressor_lockout_temp.nil? ? 0.0 : compressor_lockout_temp
+      outdoor_dry_bulbs = [min_temp, 5.0, 17.0, 47.0, 60.0].sort
     end
     data_array.each do |data|
       data.sort_by! { |dp| dp.outdoor_temperature }
