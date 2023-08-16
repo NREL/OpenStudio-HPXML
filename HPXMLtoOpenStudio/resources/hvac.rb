@@ -2290,17 +2290,17 @@ class HVAC
   def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)
     # correlation from NEEP data analysis
     if is_ducted
-      a = 0.3260
-      b = 3.668
-      c = -3.357
-      d = 0.0357
-      e = -0.9786
+      a = 0.4348
+      b = 0.008923
+      c = 1.090
+      d = -0.1861
+      e = -0.07564
     else
-      a = 0.1549
-      b = 9.421
-      c = -5.6
-      d = -0.1005
-      e = -1.5678
+      a = 0.1914
+      b = -1.822
+      c = 1.364
+      d = -0.07783
+      e = 2.221
     end
 
     max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
