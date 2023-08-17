@@ -550,25 +550,28 @@ Soil information is entered in ``Soil``.
   Element                                                             Type              Units        Constraints      Required  Default   Notes
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
   ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_
-  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        dry       Moisture type or conductivity or diffusivity [#]_
+  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        mixed     Moisture type or conductivity or diffusivity [#]_
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
-  .. [#] MoistureType choices are "wet" or "dry".  
-  .. [#] If Conductivity and extension/Diffusivity not provided, defaults based on SoilType/MoistureType as follows:
+  .. [#] MoistureType choices are "dry", "wet", or "mixed".
+  .. [#] If Conductivity and extension/Diffusivity not provided, defaults based on SoilType and MoistureType as follows:
 
   ============  ==============  ==========================  =============
   SoilType      MoistureType    Conductivity [Btu/hr-ft-F]  extension/Diffusivity [ft2/hr]
   ============  ==============  ==========================  =============
   sand/gravel   dry             0.231                       0.009
   sand          wet             1.386                       0.032
+  sand          mixed           0.809                       0.021
   silt/clay     dry             0.288                       0.012
   silt/clay     wet             0.982                       0.019
-  loam          dry/wet         1.213                       0.035
+  silt/clay     mixed           0.635                       0.016
+  loam          dry/wet/mixed   1.213                       0.035
   gravel        wet             1.039                       0.029
-  unknown       dry/wet         1.0                         0.0208
+  gravel        mixed           0.635                       0.019
+  unknown       dry/wet/mixed   1.000                       0.021
   ============  ==============  ==========================  =============
 
 .. note::
