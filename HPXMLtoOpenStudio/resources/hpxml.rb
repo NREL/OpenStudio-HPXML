@@ -6836,7 +6836,7 @@ class HPXML < Object
 
   class CoolingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :indoor_wetbulb, :capacity, :capacity_fraction_of_nominal,
-             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop]
+             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop, :isdefaulted]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6853,6 +6853,7 @@ class HPXML < Object
     def to_oga(hvac_system)
       detailed_performance_data = XMLHelper.create_elements_as_needed(hvac_system, ['CoolingDetailedPerformanceData'])
       performance_data_point = XMLHelper.add_element(detailed_performance_data, 'PerformanceDataPoint')
+      XMLHelper.add_attribute(performance_data_point, 'dataSource', 'software') if @isdefaulted
       XMLHelper.add_element(performance_data_point, 'OutdoorTemperature', @outdoor_temperature, :float, @outdoor_temperature_isdefaulted) unless @outdoor_temperature.nil?
       XMLHelper.add_element(performance_data_point, 'IndoorTemperature', @indoor_temperature, :float, @indoor_temperature_isdefaulted) unless @indoor_temperature.nil?
       XMLHelper.add_element(performance_data_point, 'IndoorWetbulbTemperature', @indoor_wetbulb, :float, @indoor_wetbulb_isdefaulted) unless @indoor_wetbulb.nil?
@@ -6909,7 +6910,8 @@ class HPXML < Object
 
   class HeatingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :capacity, :capacity_fraction_of_nominal,
-             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop]
+             :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop,
+             :isdefaulted]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6926,6 +6928,7 @@ class HPXML < Object
     def to_oga(hvac_system)
       detailed_performance_data = XMLHelper.create_elements_as_needed(hvac_system, ['HeatingDetailedPerformanceData'])
       performance_data_point = XMLHelper.add_element(detailed_performance_data, 'PerformanceDataPoint')
+      XMLHelper.add_attribute(performance_data_point, 'dataSource', 'software') if @isdefaulted
       XMLHelper.add_element(performance_data_point, 'OutdoorTemperature', @outdoor_temperature, :float, @outdoor_temperature_isdefaulted) unless @outdoor_temperature.nil?
       XMLHelper.add_element(performance_data_point, 'IndoorTemperature', @indoor_temperature, :float, @indoor_temperature_isdefaulted) unless @indoor_temperature.nil?
       XMLHelper.add_element(performance_data_point, 'Capacity', @capacity, :float, @capacity_isdefaulted) unless @capacity.nil?

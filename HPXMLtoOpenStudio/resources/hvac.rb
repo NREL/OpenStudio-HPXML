@@ -1210,7 +1210,7 @@ class HVAC
     hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
 
-    # Default NEEP data inputs
+    # Default data inputs based on NEEP data
     detailed_performance_data = heat_pump.heating_detailed_performance_data
     max_capacity_maintenance_5 = get_heat_max_capacity_maintainence_5(heat_pump)
     min_capacity_maintenance_5 = get_heat_min_capacity_maintainence_5(is_ducted)
@@ -1223,48 +1223,38 @@ class HVAC
     max_cop_5 = calc_heat_max_cop_5_from_max_cop_47(max_cop_47, is_ducted)
     min_capacity_5 = min_capacity_47 * min_capacity_maintenance_5
     min_cop_5 = calc_heat_min_cop_5_from_min_cop_47(min_cop_47, is_ducted)
-    max_capacity_17 = (max_capacity_47 - max_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_capacity_47
-    max_cop_17 = (max_cop_47 - max_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + max_cop_47
-    min_capacity_17 = (min_capacity_47 - min_capacity_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_capacity_47
-    min_cop_17 = (min_cop_47 - min_cop_5) / (47.0 - 5.0) * (17.0 - 47.0) + min_cop_47
 
     # performance data at 47F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_47.round(1),
                                   efficiency_cop: max_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
-                                  outdoor_temperature: 47)
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true)
     # performance data at 47F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_47.round(1),
                                   efficiency_cop: min_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
-                                  outdoor_temperature: 47)
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true)
     # performance data at 5F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_5.round(1),
                                   efficiency_cop: max_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
-                                  outdoor_temperature: 5)
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true)
     # performance data at 5F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_5.round(1),
                                   efficiency_cop: min_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
-                                  outdoor_temperature: 5)
-    # performance data at 17F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_17.round(1),
-                                  efficiency_cop: max_cop_17.round(4),
-                                  capacity_description: HPXML::CapacityDescriptionMaximum,
-                                  outdoor_temperature: 17)
-    # performance data at 17F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_17.round(1),
-                                  efficiency_cop: min_cop_17.round(4),
-                                  capacity_description: HPXML::CapacityDescriptionMinimum,
-                                  outdoor_temperature: 17)
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true)
   end
 
   def self.set_cool_detailed_performance_data(hvac_system)
     hvac_ap = hvac_system.additional_properties
     is_ducted = !hvac_system.distribution_system_idref.nil?
 
-    # Default NEEP data inputs
+    # Default data inputs based on NEEP data
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
 
     cop_ratio = is_ducted ? 1.231 : (0.01377 * hvac_system.cooling_efficiency_seer + 1.13948)
@@ -1282,22 +1272,26 @@ class HVAC
     detailed_performance_data.add(capacity: max_capacity_95.round(1),
                                   efficiency_cop: max_cop_95.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
-                                  outdoor_temperature: 95)
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true)
     # performance data at 95F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_95.round(1),
                                   efficiency_cop: min_cop_95.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
-                                  outdoor_temperature: 95)
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true)
     # performance data at 82F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_82.round(1),
                                   efficiency_cop: max_cop_82.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
-                                  outdoor_temperature: 82)
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true)
     # performance data at 82F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_82.round(1),
                                   efficiency_cop: min_cop_82.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
-                                  outdoor_temperature: 82)
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true)
   end
 
   def self.get_heat_capacity_ratios(heat_pump, is_ducted = nil)
