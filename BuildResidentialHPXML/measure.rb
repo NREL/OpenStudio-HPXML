@@ -141,6 +141,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('ft^2/hr')
     args << arg
 
+    site_soil_type_choices = OpenStudio::StringVector.new
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeSand
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeSilt
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeClay
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeLoam
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeGravel
+    # site_soil_type_choices << HPXML::SiteSoilSoilTypeOther
+    site_soil_type_choices << HPXML::SiteSoilSoilTypeUnknown
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
+    arg.setDisplayName('Site: Soil Type')
+    arg.setDescription('Type of ground soil. If not provided, the OS-HPXML default is used.')
+    args << arg
+
+    site_moisture_type_choices = OpenStudio::StringVector.new
+    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeWet
+    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeDry
+    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_moisture_type', site_moisture_type_choices, false)
+    arg.setDisplayName('Site: Soil Moisture Type')
+    arg.setDescription('Moisture level of the ground soil. If not provided, the OS-HPXML default is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
     arg.setDisplayName('Site: Zip Code')
     arg.setDescription('Zip code of the home address.')
@@ -3964,6 +3988,14 @@ class HPXMLFile
 
     if args[:site_ground_diffusivity].is_initialized
       hpxml.site.ground_diffusivity = args[:site_ground_diffusivity].get
+    end
+
+    if args[:site_soil_type].is_initialized
+      hpxml.site.soil_type = args[:site_soil_type].get
+    end
+
+    if args[:site_moisture_type].is_initialized
+      hpxml.site.moisture_type = args[:site_moisture_type].get
     end
 
     if args[:site_type].is_initialized

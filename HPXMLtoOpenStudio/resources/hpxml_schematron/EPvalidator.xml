@@ -306,6 +306,10 @@
   <sch:pattern>
     <sch:title>[Soil]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:Soil'>
+      <sch:assert role='ERROR' test='count(h:SoilType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoilType</sch:assert>
+      <sch:assert role='ERROR' test='h:SoilType[text()="sand" or text()="silt" or text()="clay" or text()="loam" or text()="gravel" or text()="unknown"] or not(h:SoilType)'>Expected SoilType to be 'sand' or 'silt' or 'clay' or 'loam' or 'gravel' or 'unknown'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MoistureType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MoistureType</sch:assert>
+      <sch:assert role='ERROR' test='h:MoistureType[text()="dry" or text()="wet" or text()="mixed"] or not(h:MoistureType)'>Expected MoistureType to be 'dry' or 'wet' or 'mixed'</sch:assert>      
       <sch:assert role='ERROR' test='count(h:Conductivity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Conductivity</sch:assert>
       <sch:assert role='ERROR' test='number(h:Conductivity) &gt; 0 or not(h:Conductivity)'>Expected Conductivity to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:Diffusivity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/Diffusivity</sch:assert>      
