@@ -3108,64 +3108,9 @@
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "site_ground_diffusivity": 0.03
   },
-  "sample_files/base-misc-soil-type-sand-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "sand",
-    "site_moisture_type": "wet"
-  },
   "sample_files/base-misc-soil-type-sand-moisture-type-dry.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "site_soil_type": "sand",
-    "site_moisture_type": "dry"
-  },
-  "sample_files/base-misc-soil-type-silt-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "silt",
-    "site_moisture_type": "wet"
-  },
-  "sample_files/base-misc-soil-type-silt-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "silt",
-    "site_moisture_type": "dry"
-  },
-  "sample_files/base-misc-soil-type-clay-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "clay",
-    "site_moisture_type": "wet"
-  },
-  "sample_files/base-misc-soil-type-clay-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "clay",
-    "site_moisture_type": "dry"
-  },
-  "sample_files/base-misc-soil-type-loam-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "loam",
-    "site_moisture_type": "wet"
-  },
-  "sample_files/base-misc-soil-type-loam-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "loam",
-    "site_moisture_type": "dry"
-  },
-  "sample_files/base-misc-soil-type-gravel-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "gravel",
-    "site_moisture_type": "wet"
-  },
-  "sample_files/base-misc-soil-type-gravel-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "gravel",
-    "site_moisture_type": "dry"
-  },
-  "sample_files/base-misc-soil-type-unknown-moisture-type-wet.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "unknown",
-    "site_moisture_type": "wet"
-  },
-  "sample_files/base-misc-soil-type-unknown-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "unknown",
     "site_moisture_type": "dry"
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
