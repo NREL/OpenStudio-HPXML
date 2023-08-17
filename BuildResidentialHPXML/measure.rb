@@ -158,7 +158,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     site_moisture_type_choices = OpenStudio::StringVector.new
     site_moisture_type_choices << HPXML::SiteSoilMoistureTypeWet
     site_moisture_type_choices << HPXML::SiteSoilMoistureTypeDry
-    # site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
+    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_moisture_type', site_moisture_type_choices, false)
     arg.setDisplayName('Site: Soil Moisture Type')
