@@ -342,7 +342,6 @@
               <SystemIdentifier id='HeatPump1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>separate</BackupType>
               <BackupSystem idref='HeatingSystem1'/>
