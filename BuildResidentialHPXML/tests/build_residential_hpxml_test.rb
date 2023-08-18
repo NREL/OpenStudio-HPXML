@@ -246,9 +246,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-invalid-window-aspect-ratio.xml' => 'Window aspect ratio must be greater than zero.',
       'error-garage-too-wide.xml' => 'Garage is as wide as the single-family detached unit.',
       'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.',
-      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'.",
-      'error-default-supply-surface-area-but-not-return.xml' => 'Must have either both supply/return ducts surface area specified, or neither specified.',
-      'error-default-duct-surface-areas-with-zero-return-registers.xml' => 'Number of return registers must be greater than zero when both supply/return surface area not specified.'
+      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."
     }
 
     expected_warnings = {
@@ -1137,12 +1135,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_depth'] = 40
     elsif ['error-vented-attic-with-zero-floor-insulation.xml'].include? hpxml_file
       args['ceiling_assembly_r'] = 0
-    elsif ['error-default-supply-surface-area-but-not-return.xml'].include? hpxml_file
-      args.delete('ducts_supply_surface_area')
-    elsif ['error-default-duct-surface-areas-with-zero-return-registers.xml'].include? hpxml_file
-      args.delete('ducts_supply_surface_area')
-      args.delete('ducts_return_surface_area')
-      args['ducts_number_of_return_registers'] = 0
     end
 
     # Warning
