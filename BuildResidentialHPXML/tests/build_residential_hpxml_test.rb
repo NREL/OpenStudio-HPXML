@@ -190,8 +190,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-garage-too-wide.xml' => 'base-sfd.xml',
       'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
-      'error-default-supply-surface-area-but-not-return.xml' => 'base-sfd.xml',
-      'error-default-duct-surface-areas-with-zero-return-registers.xml' => 'base-sfd.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
