@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9f2df5ae-54e3-400e-87c3-c38564dca2bf</version_id>
-  <version_modified>2023-08-15T23:02:31Z</version_modified>
+  <version_id>3525b6dd-b95f-40a8-baae-816f76e60d0d</version_id>
+  <version_modified>2023-08-18T15:33:51Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E8D802F6</checksum>
+      <checksum>A1D26240</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -238,13 +238,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A44D72CA</checksum>
+      <checksum>BB3746D5</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>82F193F9</checksum>
+      <checksum>6D1EF5A7</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -274,13 +274,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A90911AC</checksum>
+      <checksum>E9609704</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>464DB145</checksum>
+      <checksum>41195277</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -520,7 +520,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EFE90794</checksum>
+      <checksum>ABA9140B</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>

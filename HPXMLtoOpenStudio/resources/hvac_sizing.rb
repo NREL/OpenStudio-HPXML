@@ -1355,8 +1355,8 @@ class HVACSizing
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
-        odb_adj = (1.0 - 1.033) / (95.0 - 82.0) * (entering_temp - 95.0) + 1.0
-        idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(67, entering_temp, coefficients_1speed)
+        odb_adj = (1.0 - 1.033) / (HVAC::AirSourceCoolRatedODB - 82.0) * (entering_temp - HVAC::AirSourceCoolRatedODB) + 1.0
+        idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
         total_cap_curve_value = odb_adj * idb_adj
       else
         coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
@@ -1463,8 +1463,8 @@ class HVACSizing
       entering_temp = @hpxml.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
       coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
-      odb_adj = (1.0 - 1.033) / (95.0 - 82.0) * (entering_temp - 95.0) + 1.0
-      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(67, entering_temp, coefficients_1speed)
+      odb_adj = (1.0 - 1.033) / (HVAC::AirSourceCoolRatedODB - 82.0) * (entering_temp - HVAC::AirSourceCoolRatedODB) + 1.0
+      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
       total_cap_curve_value = odb_adj * idb_adj
 
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1847,7 +1847,7 @@ class HVACSizing
       if hvac_cooling.cooling_detailed_performance_data.empty?
         fixed_cooling_capacity = hvac_cooling.cooling_capacity
       else
-        fixed_cooling_capacity_max = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        fixed_cooling_capacity_max = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
         fixed_cooling_capacity = fixed_cooling_capacity_max * HVAC.get_cool_capacity_ratio_from_max_to_rated()
       end
     end
@@ -1864,9 +1864,8 @@ class HVACSizing
       if hvac_heating.heating_detailed_performance_data.empty?
         fixed_heating_capacity = hvac_heating.heating_capacity
       else
-        fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        is_ducted = !hvac_heating.distribution_system_idref.nil?
-        fixed_heating_capacity = fixed_heating_capacity_max * HVAC.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
+        fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        fixed_heating_capacity = fixed_heating_capacity_max * HVAC.get_heat_capacity_ratio_from_max_to_rated(!hvac_heating.distribution_system_idref.nil?)
       end
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity
@@ -2039,7 +2038,7 @@ class HVACSizing
       capacity_retention_temp_1speed, capacity_retention_fraction_1speed = HVAC.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
       heating_capacity_retention_temperature, heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(hvac_heating.compressor_type, hvac_heating.heating_efficiency_hspf)
-      odb_adj = (1.0 - heating_capacity_retention_fraction) / (47.0 - heating_capacity_retention_temperature) * (heating_db - 47.0) + 1.0
+      odb_adj = (1.0 - heating_capacity_retention_fraction) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temperature) * (heating_db - HVAC::AirSourceHeatRatedODB) + 1.0
       idb_adj = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients_1speed) / MathTools.biquadratic(60, heating_db, coefficients_1speed)
       adj_factor = odb_adj * idb_adj
     else

@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class HVAC
+  AirSourceHeatRatedODB = 47.0 # degF, Rated outdoor drybulb for air-source systems, heating
+  AirSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for air-source systems, heating
+  AirSourceCoolRatedODB = 95.0 # degF, Rated outdoor drybulb for air-source systems, cooling
+  AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
+
   def self.apply_air_source_hvac_systems(model, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          control_zone, hvac_unavailable_periods)
@@ -1209,20 +1214,25 @@ class HVAC
   def self.set_heat_detailed_performance_data(heat_pump)
     hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
+    hspf = heat_pump.heating_efficiency_hspf
 
     # Default data inputs based on NEEP data
     detailed_performance_data = heat_pump.heating_detailed_performance_data
-    max_capacity_maintenance_5 = get_heat_max_capacity_maintainence_5(heat_pump)
-    min_capacity_maintenance_5 = get_heat_min_capacity_maintainence_5(is_ducted)
+    max_cap_maint_5 = get_heat_max_capacity_maintainence_5(heat_pump)
 
-    max_cop_47 = calc_heat_max_cop_47_from_hspf(heat_pump.heating_efficiency_hspf, max_capacity_maintenance_5, is_ducted)
+    if is_ducted
+      a, b, c, d, e = 0.4348, 0.008923, 1.090, -0.1861, -0.07564
+    else
+      a, b, c, d, e = 0.1914, -1.822, 1.364, -0.07783, 2.221
+    end
+    max_cop_47 = a * hspf + b * max_cap_maint_5 + c * max_cap_maint_5**2 + d * max_cap_maint_5 * hspf + e
     max_capacity_47 = heat_pump.heating_capacity / get_heat_capacity_ratio_from_max_to_rated(is_ducted)
     min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
-    min_cop_47 = calc_heat_min_cop_47_from_hspf_max_cop_47(heat_pump.heating_efficiency_hspf, max_cop_47, is_ducted)
-    max_capacity_5 = max_capacity_47 * max_capacity_maintenance_5
-    max_cop_5 = calc_heat_max_cop_5_from_max_cop_47(max_cop_47, is_ducted)
-    min_capacity_5 = min_capacity_47 * min_capacity_maintenance_5
-    min_cop_5 = calc_heat_min_cop_5_from_min_cop_47(min_cop_47, is_ducted)
+    min_cop_47 = is_ducted ? max_cop_47 * (-0.0306 * hspf + 1.5385) : max_cop_47 * (-0.01698 * hspf + 1.5907)
+    max_capacity_5 = max_capacity_47 * max_cap_maint_5
+    max_cop_5 = is_ducted ? max_cop_47 * 0.587 : max_cop_47 * 0.671
+    min_capacity_5 = is_ducted ? min_capacity_47 * 1.106 : min_capacity_47 * 0.611
+    min_cop_5 = is_ducted ? min_cop_47 * 0.502 : min_cop_47 * 0.538
 
     # performance data at 47F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_47.round(1),
@@ -1253,16 +1263,15 @@ class HVAC
   def self.set_cool_detailed_performance_data(hvac_system)
     hvac_ap = hvac_system.additional_properties
     is_ducted = !hvac_system.distribution_system_idref.nil?
+    seer = hvac_system.cooling_efficiency_seer
 
     # Default data inputs based on NEEP data
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
 
-    cop_ratio = is_ducted ? 1.231 : (0.01377 * hvac_system.cooling_efficiency_seer + 1.13948)
-
-    max_cop_95 = is_ducted ? (0.1953 * hvac_system.cooling_efficiency_seer) : (0.08184 * hvac_system.cooling_efficiency_seer + 1.173)
+    max_cop_95 = is_ducted ? 0.1953 * seer : 0.08184 * seer + 1.173
     max_capacity_95 = hvac_system.cooling_capacity / get_cool_capacity_ratio_from_max_to_rated()
     min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
-    min_cop_95 = cop_ratio * max_cop_95
+    min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
     max_capacity_82 = max_capacity_95 * 1.033
     max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
     min_capacity_82 = min_capacity_95 * 1.099
@@ -2003,7 +2012,7 @@ class HVAC
     # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
     x_A = heating_capacity_retention_temp
     y_A = heating_capacity_retention_fraction
-    x_B = 47.0 # 47F is the rating point
+    x_B = HVAC::AirSourceHeatRatedODB
     y_B = 1.0
 
     oat_slope = (y_B - y_A) / (x_B - x_A)
@@ -2262,15 +2271,7 @@ class HVAC
     else
       fail 'Missing heating capacity retention or 17F heating capacity.'
     end
-    return 1.0 - (1.0 - heating_capacity_retention_fraction) * (47.0 - 5.0) / (47.0 - heating_capacity_retention_temp)
-  end
-
-  def self.get_heat_min_capacity_maintainence_5(is_ducted)
-    if is_ducted
-      return 1.106
-    else
-      return 0.611
-    end
+    return 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
   end
 
   def self.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
@@ -2279,52 +2280,6 @@ class HVAC
 
   def self.get_cool_capacity_ratio_from_max_to_rated()
     return 1.0
-  end
-
-  def self.calc_heat_max_cop_47_from_hspf(hspf, max_capacity_maintenance_5, is_ducted)
-    # correlation from NEEP data analysis
-    if is_ducted
-      a = 0.4348
-      b = 0.008923
-      c = 1.090
-      d = -0.1861
-      e = -0.07564
-    else
-      a = 0.1914
-      b = -1.822
-      c = 1.364
-      d = -0.07783
-      e = 2.221
-    end
-
-    max_cop_47 = a * hspf + b * max_capacity_maintenance_5 +
-                 c * max_capacity_maintenance_5**2 +
-                 d * max_capacity_maintenance_5 * hspf + e
-    return max_cop_47
-  end
-
-  def self.calc_heat_min_cop_47_from_hspf_max_cop_47(hspf, max_cop_47, is_ducted)
-    if is_ducted
-      return max_cop_47 * (-0.0306 * hspf + 1.5385)
-    else
-      return max_cop_47 * (-0.01698 * hspf + 1.5907)
-    end
-  end
-
-  def self.calc_heat_max_cop_5_from_max_cop_47(max_cop_47, is_ducted)
-    if is_ducted
-      return max_cop_47 * 0.587
-    else
-      return max_cop_47 * 0.671
-    end
-  end
-
-  def self.calc_heat_min_cop_5_from_min_cop_47(min_cop_47, is_ducted)
-    if is_ducted
-      return min_cop_47 * 0.502
-    else
-      return min_cop_47 * 0.538
-    end
   end
 
   def self.calc_hspf_1speed(cop_47, c_d, fan_power_rated, coeff_eir, coeff_q)
@@ -2613,9 +2568,9 @@ class HVAC
     return gross_cap_btu_hr, gross_cop
   end
 
-  def self.setup_neep_detailed_performance_data(detailed_performance_data)
+  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, compressor_lockout_temp = nil)
     data_array = Array.new(2) { Array.new }
-    detailed_performance_data.each do |data_point|
+    detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
       next unless [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? data_point.capacity_description
 
@@ -2625,11 +2580,6 @@ class HVAC
         data_array[1] << data_point
       end
     end
-    return data_array
-  end
-
-  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, compressor_lockout_temp = nil)
-    data_array = setup_neep_detailed_performance_data(detailed_performance_data)
 
     # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
@@ -2671,33 +2621,34 @@ class HVAC
       outdoor_dry_bulbs = [min_temp, 5.0, 17.0, 47.0, 60.0].sort
     end
     data_array.each do |data|
-      data.sort_by! { |dp| dp.outdoor_temperature }
-      user_out_db = data.map { |dp| dp.outdoor_temperature }
-      outdoor_dry_bulbs.each do |new_pt|
-        next if user_out_db.include? new_pt
+      user_odbs = data.map { |dp| dp.outdoor_temperature }
+      outdoor_dry_bulbs.each do |new_odb|
+        next if user_odbs.include? new_odb
 
-        right_point = user_out_db.find { |e| e > new_pt }
-        left_point = user_out_db.reverse.find { |e| e < new_pt }
-        if right_point.nil?
+        right_odb = user_odbs.find { |e| e > new_odb }
+        left_odb = user_odbs.reverse.find { |e| e < new_odb }
+        if right_odb.nil?
           # extrapolation
-          right_point = user_out_db[-1]
-          left_point = user_out_db[-2]
-        elsif left_point.nil?
+          right_odb = user_odbs[-1]
+          left_odb = user_odbs[-2]
+        elsif left_odb.nil?
           # extrapolation
-          right_point = user_out_db[1]
-          left_point = user_out_db[0]
+          right_odb = user_odbs[1]
+          left_odb = user_odbs[0]
         end
-        right_dp = data.find { |dp| dp.outdoor_temperature == right_point }
-        left_dp = data.find { |dp| dp.outdoor_temperature == left_point }
-        cap_slope = (right_dp.gross_capacity - left_dp.gross_capacity) / (right_point - left_point)
-        cop_slope = (right_dp.gross_efficiency_cop - left_dp.gross_efficiency_cop) / (right_point - left_point)
-        new_dp = left_dp.dup
-        new_dp.outdoor_temperature = new_pt
-        new_dp.capacity = nil
-        new_dp.capacity_description = nil
-        new_dp.efficiency_cop = nil
-        new_dp.gross_capacity = (new_pt - left_point) * cap_slope + left_dp.gross_capacity
-        new_dp.gross_efficiency_cop = (new_pt - left_point) * cop_slope + left_dp.gross_efficiency_cop
+        right_dp = data.find { |dp| dp.outdoor_temperature == right_odb }
+        left_dp = data.find { |dp| dp.outdoor_temperature == left_odb }
+        cap_slope = (right_dp.gross_capacity - left_dp.gross_capacity) / (right_odb - left_odb)
+        cop_slope = (right_dp.gross_efficiency_cop - left_dp.gross_efficiency_cop) / (right_odb - left_odb)
+
+        if mode == :clg
+          new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
+        else
+          new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
+        end
+        new_dp.outdoor_temperature = new_odb
+        new_dp.gross_capacity = (new_odb - left_odb) * cap_slope + left_dp.gross_capacity
+        new_dp.gross_efficiency_cop = (new_odb - left_odb) * cop_slope + left_dp.gross_efficiency_cop
         data << new_dp
       end
     end
@@ -2709,13 +2660,13 @@ class HVAC
     if mode == :clg
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       indoor_t = [50.0, 67.0, 80.0]
-      rated_t_i = 67.0
+      rated_t_i = HVAC::AirSourceCoolRatedIWB
     else
       # default capacity retention for single speed
       retention_temp, retention_fraction = get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       indoor_t = [60.0, 70.0, 80.0]
-      rated_t_i = 70.0
+      rated_t_i = HVAC::AirSourceHeatRatedIDB
     end
     data_array.each do |data|
       data.each do |dp|
@@ -2778,15 +2729,6 @@ class HVAC
       clg_type = cooling_system.heat_pump_type
     end
 
-    if clg_ap.num_speeds > 1
-      constant_table = create_table_lookup_constant(model, 1)
-    end
-
-    clg_coil = nil
-    crankcase_heater_temp = 50 # F
-    # FIXME: rated condition shows up multiple times in the codes, consider creating a constant
-    rated_iwb = 67.0
-    rated_odb = 95.0
     if cooling_system.cooling_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
       clg_ap.cool_rated_capacities_gross = []
@@ -2800,24 +2742,25 @@ class HVAC
       end
     end
 
+    clg_coil = nil
+    constant_table = nil
+    crankcase_heater_temp = 50 # F
     for i in 0..(clg_ap.num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
-        data_speed = clg_ap.cooling_performance_data_array[i]
-        # sort by the order of independent vars
-        data_speed = data_speed.sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
-        var_wb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
-        var_db[:values] = data_speed.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        detailed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
+        var_wb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
+        var_db[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_wb, var_db]
         eir_ft_independent_vars = [var_wb, var_db]
 
-        rate_dp = data_speed.find { |dp| (dp.indoor_wetbulb == rated_iwb) && (dp.outdoor_temperature == rated_odb) }
+        rate_dp = detailed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
         rated_cap = rate_dp.gross_capacity
         rated_eir = 1.0 / rate_dp.gross_efficiency_cop
         clg_ap.cool_rated_eirs << rated_eir
         clg_ap.cool_rated_capacities_gross << rated_cap
         clg_ap.cool_rated_capacities_net << rate_dp.capacity
-        cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
-        eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        cap_ft_output_values = detailed_performance_data.map { |dp| dp.gross_capacity / rated_cap }
+        eir_ft_output_values = detailed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Cool-CAP-fFF#{i + 1}")
         eir_fff_curve = create_table_lookup_constant(model, 1, "Cool-EIR-fFF#{i + 1}")
       else
@@ -2868,6 +2811,7 @@ class HVAC
           clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_heater_temp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
+          constant_table = create_table_lookup_constant(model, 1)
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_table)
         stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
@@ -2893,24 +2837,15 @@ class HVAC
 
   def self.create_dx_heating_coil(model, obj_name, heating_system)
     htg_ap = heating_system.additional_properties
-    if htg_ap.num_speeds > 1
-      constant_table = create_table_lookup_constant(model, 1)
-    end
 
-    htg_coil = nil
-    crankcase_heater_temp = 50 # F
     # independent variables
     var_idb = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(40, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_odb = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: [], sample_low: UnitConversions.convert(-50, 'F', 'C'), sample_high: UnitConversions.convert(90, 'F', 'C'), sample_step: UnitConversions.convert(5, 'deltaF', 'deltaC') }
     var_fff = { name: 'air_flow_rate_ratio', min: 0.0, max: 2.0, values: [], sample_low: 0, sample_high: 2, sample_step: 0.1 }
     var_fplr = { name: 'part_load_ratio', min: 0.0, max: 1.0, values: [], sample_low: 0, sample_high: 1, sample_step: 0.1 }
 
-    rated_idb = 70.0
-    rated_odb = 47.0
     if heating_system.heating_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
-      htg_ap.heat_rated_capacities_net = []
-      htg_ap.heat_rated_capacities_gross = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = htg_ap.fan_power_rated * max_cfm * (htg_ap.heat_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * heating_system.heating_capacity
@@ -2920,24 +2855,25 @@ class HVAC
       end
     end
 
+    htg_coil = nil
+    constant_table = nil
+    crankcase_heater_temp = 50 # F
     for i in 0..(htg_ap.num_speeds - 1)
       if not heating_system.heating_detailed_performance_data.empty?
-        data_speed = htg_ap.heating_performance_data_array[i]
-        # sort by the order of independent vars
-        data_speed = data_speed.sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
-        var_idb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
-        var_odb[:values] = data_speed.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        detailed_performance_data = htg_ap.heating_performance_data_array[i].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
+        var_idb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
+        var_odb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_idb, var_odb]
         eir_ft_independent_vars = [var_idb, var_odb]
 
-        rate_dp = data_speed.find { |dp| (dp.indoor_temperature == rated_idb) && (dp.outdoor_temperature == rated_odb) }
+        rate_dp = detailed_performance_data.find { |dp| (dp.indoor_temperature == HVAC::AirSourceHeatRatedIDB) && (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) }
         rated_cap = rate_dp.gross_capacity
         rated_eir = 1.0 / rate_dp.gross_efficiency_cop
         htg_ap.heat_rated_eirs << rated_eir
         htg_ap.heat_rated_capacities_net << rate_dp.capacity
         htg_ap.heat_rated_capacities_gross << rated_cap
-        cap_ft_output_values = data_speed.map { |dp| dp.gross_capacity / rated_cap }
-        eir_ft_output_values = data_speed.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        cap_ft_output_values = detailed_performance_data.map { |dp| dp.gross_capacity / rated_cap }
+        eir_ft_output_values = detailed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Heat-CAP-fFF#{i + 1}")
         eir_fff_curve = create_table_lookup_constant(model, 1, "Heat-EIR-fFF#{i + 1}")
       else
@@ -2976,6 +2912,7 @@ class HVAC
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+          constant_table = create_table_lookup_constant(model, 1)
         end
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_table)
         stage.setGrossRatedHeatingCOP(1.0 / htg_ap.heat_rated_eirs[i])
