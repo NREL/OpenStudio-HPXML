@@ -2844,6 +2844,8 @@ class HVAC
 
     if heating_system.heating_detailed_performance_data.empty?
       max_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+      htg_ap.heat_rated_capacities_gross = []
+      htg_ap.heat_rated_capacities_net = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_power = htg_ap.fan_power_rated * max_cfm * (htg_ap.heat_fan_speed_ratios[speed]**3)
         net_capacity = capacity_ratio * heating_system.heating_capacity
