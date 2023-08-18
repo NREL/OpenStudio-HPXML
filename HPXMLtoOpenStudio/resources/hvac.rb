@@ -2747,20 +2747,18 @@ class HVAC
     crankcase_heater_temp = 50 # F
     for i in 0..(clg_ap.num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
-        detailed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
-        var_wb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
-        var_db[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        speed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
+        var_wb[:values] = speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
+        var_db[:values] = speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_wb, var_db]
         eir_ft_independent_vars = [var_wb, var_db]
 
-        rate_dp = detailed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
-        rated_cap = rate_dp.gross_capacity
-        rated_eir = 1.0 / rate_dp.gross_efficiency_cop
-        clg_ap.cool_rated_eirs << rated_eir
-        clg_ap.cool_rated_capacities_gross << rated_cap
+        rate_dp = speed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
+        clg_ap.cool_rated_eirs << 1.0 / rate_dp.gross_efficiency_cop
+        clg_ap.cool_rated_capacities_gross << rate_dp.gross_capacity
         clg_ap.cool_rated_capacities_net << rate_dp.capacity
-        cap_ft_output_values = detailed_performance_data.map { |dp| dp.gross_capacity / rated_cap }
-        eir_ft_output_values = detailed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        cap_ft_output_values = speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity }
+        eir_ft_output_values = speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Cool-CAP-fFF#{i + 1}")
         eir_fff_curve = create_table_lookup_constant(model, 1, "Cool-EIR-fFF#{i + 1}")
       else
@@ -2860,20 +2858,18 @@ class HVAC
     crankcase_heater_temp = 50 # F
     for i in 0..(htg_ap.num_speeds - 1)
       if not heating_system.heating_detailed_performance_data.empty?
-        detailed_performance_data = htg_ap.heating_performance_data_array[i].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
-        var_idb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
-        var_odb[:values] = detailed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        speed_performance_data = htg_ap.heating_performance_data_array[i].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
+        var_idb[:values] = speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
+        var_odb[:values] = speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
         cap_ft_independent_vars = [var_idb, var_odb]
         eir_ft_independent_vars = [var_idb, var_odb]
 
-        rate_dp = detailed_performance_data.find { |dp| (dp.indoor_temperature == HVAC::AirSourceHeatRatedIDB) && (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) }
-        rated_cap = rate_dp.gross_capacity
-        rated_eir = 1.0 / rate_dp.gross_efficiency_cop
-        htg_ap.heat_rated_eirs << rated_eir
+        rate_dp = speed_performance_data.find { |dp| (dp.indoor_temperature == HVAC::AirSourceHeatRatedIDB) && (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) }
+        htg_ap.heat_rated_eirs << 1.0 / rate_dp.gross_efficiency_cop
         htg_ap.heat_rated_capacities_net << rate_dp.capacity
-        htg_ap.heat_rated_capacities_gross << rated_cap
-        cap_ft_output_values = detailed_performance_data.map { |dp| dp.gross_capacity / rated_cap }
-        eir_ft_output_values = detailed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / rated_eir }
+        htg_ap.heat_rated_capacities_gross << rate_dp.gross_capacity
+        cap_ft_output_values = speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity }
+        eir_ft_output_values = speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) }
         cap_fff_curve = create_table_lookup_constant(model, 1, "Heat-CAP-fFF#{i + 1}")
         eir_fff_curve = create_table_lookup_constant(model, 1, "Heat-EIR-fFF#{i + 1}")
       else
