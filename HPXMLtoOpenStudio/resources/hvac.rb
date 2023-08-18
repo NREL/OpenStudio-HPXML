@@ -1182,8 +1182,7 @@ class HVAC
   def self.set_heat_curves_central_air_source(heat_pump, use_cop = false)
     hp_ap = heat_pump.additional_properties
     hp_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heat_pump.compressor_type, use_cop)
-    heating_capacity_retention_temp = heat_pump.heating_capacity_17F.nil? ? heat_pump.heating_capacity_retention_temp : 17
-    heating_capacity_retention_fraction = heat_pump.heating_capacity_17F.nil? ? heat_pump.heating_capacity_retention_fraction : (heat_pump.heating_capacity == 0.0 ? 0.0 : heat_pump.heating_capacity_17F / heat_pump.heating_capacity)
+    heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump)
     hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heat_pump.compressor_type)
     hp_ap.heat_capacity_ratios = get_heat_capacity_ratios(heat_pump)
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -2262,16 +2261,21 @@ class HVAC
   end
 
   def self.get_heat_max_capacity_maintainence_5(heat_pump)
+    heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump)
+    return 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
+  end
+
+  def self.get_heating_capacity_retention(heat_pump)
     if not heat_pump.heating_capacity_17F.nil?
       heating_capacity_retention_temp = 17.0
-      heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      heating_capacity_retention_fraction = heat_pump.heating_capacity == 0.0 ? 0.0 : heat_pump.heating_capacity_17F / heat_pump.heating_capacity
     elsif not heat_pump.heating_capacity_retention_fraction.nil?
       heating_capacity_retention_temp = heat_pump.heating_capacity_retention_temp
       heating_capacity_retention_fraction = heat_pump.heating_capacity_retention_fraction
     else
       fail 'Missing heating capacity retention or 17F heating capacity.'
     end
-    return 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
+    return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end
 
   def self.get_heat_capacity_ratio_from_max_to_rated(is_ducted)

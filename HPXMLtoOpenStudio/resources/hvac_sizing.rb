@@ -1354,9 +1354,8 @@ class HVACSizing
       entering_temp = @hpxml.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
         odb_adj = (1.0 - 1.033) / (HVAC::AirSourceCoolRatedODB - 82.0) * (entering_temp - HVAC::AirSourceCoolRatedODB) + 1.0
-        idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
+        idb_adj = adjust_indoor_condition_var_speed(HVAC::AirSourceCoolRatedIWB, entering_temp, @wetbulb_indoor_cooling, :clg)
         total_cap_curve_value = odb_adj * idb_adj
       else
         coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
@@ -1462,9 +1461,8 @@ class HVACSizing
 
       entering_temp = @hpxml.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap)
-      coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
       odb_adj = (1.0 - 1.033) / (HVAC::AirSourceCoolRatedODB - 82.0) * (entering_temp - HVAC::AirSourceCoolRatedODB) + 1.0
-      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
+      idb_adj = adjust_indoor_condition_var_speed(HVAC::AirSourceCoolRatedIWB, entering_temp, @wetbulb_indoor_cooling, :clg)
       total_cap_curve_value = odb_adj * idb_adj
 
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1665,6 +1663,18 @@ class HVACSizing
       fail "Unexpected heating type: #{@heating_type}."
 
     end
+  end
+
+  def self.adjust_indoor_condition_var_speed(rated_indoor_temp, adjusted_outdoor_temp, adjusted_indoor_temp, mode)
+    if mode == :clg
+      coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
+    elsif mode == :htg
+      capacity_retention_temp_1speed, capacity_retention_fraction_1speed = HVAC.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
+      coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
+    end
+      return MathTools.biquadratic(adjusted_indoor_temp, adjusted_outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, adjusted_outdoor_temp, coefficients_1speed)
+      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
+      idb_adj = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients_1speed) / MathTools.biquadratic(60, heating_db, coefficients_1speed)
   end
 
   def self.apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
@@ -2035,11 +2045,9 @@ class HVACSizing
     end
 
     if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      capacity_retention_temp_1speed, capacity_retention_fraction_1speed = HVAC.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
-      coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
-      heating_capacity_retention_temperature, heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(hvac_heating.compressor_type, hvac_heating.heating_efficiency_hspf)
+      heating_capacity_retention_temperature, heating_capacity_retention_fraction = HVAC.get_heating_capacity_retention(hvac_heating)
       odb_adj = (1.0 - heating_capacity_retention_fraction) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temperature) * (heating_db - HVAC::AirSourceHeatRatedODB) + 1.0
-      idb_adj = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients_1speed) / MathTools.biquadratic(60, heating_db, coefficients_1speed)
+      idb_adj = adjust_indoor_condition_var_speed(HVAC::AirSourceHeatRatedIDB, heating_db, @heat_setpoint, :htg)
       adj_factor = odb_adj * idb_adj
     else
       coefficients = hvac_heating_ap.heat_cap_ft_spec[-1]
