@@ -1673,8 +1673,6 @@ class HVACSizing
       coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
     end
       return MathTools.biquadratic(adjusted_indoor_temp, adjusted_outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, adjusted_outdoor_temp, coefficients_1speed)
-      idb_adj = MathTools.biquadratic(@wetbulb_indoor_cooling, entering_temp, coefficients_1speed) / MathTools.biquadratic(HVAC::AirSourceCoolRatedIWB, entering_temp, coefficients_1speed)
-      idb_adj = MathTools.biquadratic(@heat_setpoint, heating_db, coefficients_1speed) / MathTools.biquadratic(60, heating_db, coefficients_1speed)
   end
 
   def self.apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
