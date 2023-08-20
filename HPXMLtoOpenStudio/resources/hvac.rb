@@ -2664,18 +2664,20 @@ class HVAC
       data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
       data_sorted.each_with_index do |dp, i|
         next unless i < (data_sorted.size - 1)
+
         cap_diff = data_sorted[i + 1].gross_capacity - dp.gross_capacity
         odb_diff = data_sorted[i + 1].outdoor_temperature - dp.outdoor_temperature
         cop_diff = data_sorted[i + 1].gross_efficiency_cop - dp.gross_efficiency_cop
         if mode == :clg
-          eir_rated = 1 / data_sorted.find{|dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB}.gross_efficiency_cop
+          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.gross_efficiency_cop
         else
-          eir_rated = 1 / data_sorted.find{|dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB}.gross_efficiency_cop
+          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.gross_efficiency_cop
         end
         eir_diff = ((1 / data_sorted[i + 1].gross_efficiency_cop) / eir_rated) - ((1 / dp.gross_efficiency_cop) / eir_rated)
         n_pt = (eir_diff.abs / tol).ceil() - 1
         eir_interval = eir_diff / (n_pt + 1)
         next if n_pt < 1
+
         for i in 1..n_pt
           if mode == :clg
             new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)

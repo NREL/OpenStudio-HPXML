@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>454be750-6a0b-4acf-9ab5-53b386e8d9f1</version_id>
-  <version_modified>2023-08-18T19:24:49Z</version_modified>
+  <version_id>ca5a693c-7b2b-4679-8c09-1659fcf171dd</version_id>
+  <version_modified>2023-08-20T16:38:13Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2271,7 +2271,7 @@
     <argument>
       <name>cooling_system_cooling_compressor_type</name>
       <display_name>Cooling System: Cooling Compressor Type</display_name>
-      <description>The compressor type of the cooling system. Only applies to central air conditioner. If not provided, the OS-HPXML default is used.</description>
+      <description>The compressor type of the cooling system. Only applies to central air conditioner and mini-split. If not provided, the OS-HPXML default is used.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -2535,7 +2535,7 @@
     <argument>
       <name>heat_pump_cooling_compressor_type</name>
       <display_name>Heat Pump: Cooling Compressor Type</display_name>
-      <description>The compressor type of the heat pump. Only applies to air-to-air. If not provided, the OS-HPXML default is used.</description>
+      <description>The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default is used.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6741,7 +6741,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>EB330C72</checksum>
+      <checksum>54976D40</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -6753,7 +6753,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9CC9525F</checksum>
+      <checksum>A9F05151</checksum>
     </file>
   </files>
 </measure>

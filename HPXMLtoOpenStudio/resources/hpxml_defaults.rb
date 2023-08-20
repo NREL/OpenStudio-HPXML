@@ -1148,15 +1148,10 @@ class HPXMLDefaults
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
       if not heat_pump.heating_detailed_performance_data.empty?
-        # Calculate heating capacity retention at lowest outdoor drybulb
-        detailed_performance_data = heat_pump.heating_detailed_performance_data
-        min_odb = detailed_performance_data.map { |dp| dp.outdoor_temperature }.min
-        min_odb = detailed_performance_data.map { |dp| dp.outdoor_temperature }.max if min_odb == 47 # No temperatures below the rating temperature; 
-
-        max_capacity_at_47 = detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        max_capacity_at_min_odb = detailed_performance_data.find { |dp| dp.outdoor_temperature == min_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        heat_pump.heating_capacity_retention_fraction = (max_capacity_at_min_odb / max_capacity_at_47).round(4)
-        heat_pump.heating_capacity_retention_temp = min_odb
+        # Calculate heating capacity retention at 5F outdoor drybulb
+        target_odb = 5.0
+        heat_pump.heating_capacity_retention_fraction = calculate_capacity_retention_from_detailed_perf_data(heat_pump, target_odb)
+        heat_pump.heating_capacity_retention_temp = target_odb
       else
         heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
       end
@@ -3057,5 +3052,33 @@ class HPXMLDefaults
       return true
     end
     return false
+  end
+
+  def self.calculate_capacity_retention_from_detailed_perf_data(heat_pump, target_odb)
+    detailed_performance_data = heat_pump.heating_detailed_performance_data
+    max_capacity_47 = detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+    dp_target = detailed_performance_data.find { |dp| dp.outdoor_temperature == target_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+    if not dp_target.nil?
+      # Datapoint at target ODB exists
+      heat_pump.heating_capacity_retention_fraction = (dp_target.capacity / max_capacity_47).round(5)
+    else
+      min_odb = detailed_performance_data.map { |dp| dp.outdoor_temperature }.min
+      if min_odb < target_odb
+        # Interpolate between closest datapoints
+        odb1 = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort.reverse.find { |odb| odb <= target_odb }
+        odb2 = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort.find { |odb| odb >= target_odb }
+        max_capacity1 = detailed_performance_data.find { |dp| dp.outdoor_temperature == odb1 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity2 = detailed_performance_data.find { |dp| dp.outdoor_temperature == odb2 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity_target = max_capacity1 + (max_capacity2 - max_capacity1) / (odb2 - odb1) * (odb1 - target_odb)
+        heat_pump.heating_capacity_retention_fraction = (max_capacity_target / max_capacity_47).round(5)
+      else
+        # Extrapolate downward from closest datapoints
+        odb1, odb2 = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort[0..1]
+        max_capacity1 = detailed_performance_data.find { |dp| dp.outdoor_temperature == odb1 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity2 = detailed_performance_data.find { |dp| dp.outdoor_temperature == odb2 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+        max_capacity_target = [max_capacity1 - (max_capacity2 - max_capacity1) / (odb2 - odb1) * (odb1 - target_odb), 0.0].max
+        heat_pump.heating_capacity_retention_fraction = (max_capacity_target / max_capacity_47).round(5)
+      end
+    end
   end
 end
