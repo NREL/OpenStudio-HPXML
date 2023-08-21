@@ -2423,6 +2423,30 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-1ton.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "heat_pump_heating_capacity": 12000,
+    "heat_pump_cooling_capacity": 12000,
+    "heat_pump_backup_heating_capacity": 12000
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-2ton.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "heat_pump_heating_capacity": 24000,
+    "heat_pump_cooling_capacity": 24000,
+    "heat_pump_backup_heating_capacity": 24000
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-4ton.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "heat_pump_heating_capacity": 48000,
+    "heat_pump_cooling_capacity": 48000,
+    "heat_pump_backup_heating_capacity": 48000
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-5ton.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "heat_pump_heating_capacity": 60000,
+    "heat_pump_cooling_capacity": 60000,
+    "heat_pump_backup_heating_capacity": 60000
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump_heating_capacity": 0,
