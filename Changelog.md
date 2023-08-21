@@ -13,6 +13,7 @@ __New Features__
   - Allow duct area fractions (as an alternative to duct areas in ft^2).
   - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
+  - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
   - Add soil and moisture type arguments for determining ground conductivity and diffusivity.
 - Ground source heat pump enhancements:
   - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements.
