@@ -562,16 +562,16 @@ Soil information is entered in ``Soil``.
   ============  ==============  ==========================  =============
   SoilType      MoistureType    Conductivity [Btu/hr-ft-F]  extension/Diffusivity [ft2/hr]
   ============  ==============  ==========================  =============
-  sand/gravel   dry             0.231                       0.009
-  sand          wet             1.386                       0.032
-  sand          mixed           0.809                       0.021
-  silt/clay     dry             0.288                       0.012
-  silt/clay     wet             0.982                       0.019
-  silt/clay     mixed           0.635                       0.016
-  loam          dry/wet/mixed   1.213                       0.035
-  gravel        wet             1.039                       0.029
-  gravel        mixed           0.635                       0.019
-  unknown       dry/wet/mixed   1.000                       0.021
+  unknown       dry/wet/mixed   1.0000                      0.0208
+  sand/gravel   dry             0.2311                      0.0097
+  sand          wet             1.3865                      0.0322
+  sand          mixed           0.8088                      0.0210
+  silt/clay     dry             0.2889                      0.0120
+  silt/clay     wet             0.9821                      0.0194
+  silt/clay     mixed           0.6355                      0.0157
+  loam          dry/wet/mixed   1.2132                      0.0353
+  gravel        wet             1.0399                      0.0291
+  gravel        mixed           0.6355                      0.0194
   ============  ==============  ==========================  =============
 
 .. note::
