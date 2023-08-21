@@ -1157,6 +1157,8 @@ class HVAC
       hp_ap.cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.cool_capacity_ratios, hp_ap.cool_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_ft_spec)
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       # From Carrier heat pump lab testing
+      hp_ap.cooling_capacity_retention_temperature = 82.0
+      hp_ap.cooling_capacity_retention_fraction = 1.033
       hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
       hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
       hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(heat_pump.compressor_type)
@@ -1271,7 +1273,7 @@ class HVAC
     max_capacity_95 = hvac_system.cooling_capacity / get_cool_capacity_ratio_from_max_to_rated()
     min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
-    max_capacity_82 = max_capacity_95 * 1.033
+    max_capacity_82 = max_capacity_95 * get_cool_max_capacity_retention_82(hvac_ap)
     max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
     min_capacity_82 = min_capacity_95 * 1.099
     min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
@@ -2263,6 +2265,12 @@ class HVAC
   def self.get_heat_max_capacity_maintainence_5(heat_pump)
     heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump)
     return 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) / (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
+  end
+
+  def self.get_cool_max_capacity_retention_82(clg_ap)
+    cooling_capacity_retention_temp = clg_ap.cooling_capacity_retention_temperature
+    cooling_capacity_retention_fraction = clg_ap.cooling_capacity_retention_fraction
+    return 1.0 - (1.0 - cooling_capacity_retention_fraction) * (HVAC::AirSourceCoolRatedODB - 82.0) / (HVAC::AirSourceCoolRatedODB - cooling_capacity_retention_temp)
   end
 
   def self.get_heating_capacity_retention(heat_pump)
