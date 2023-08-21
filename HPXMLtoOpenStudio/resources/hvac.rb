@@ -2626,37 +2626,52 @@ class HVAC
       outdoor_dry_bulbs = [min_temp, 5.0, 17.0, 47.0, 60.0].sort
     end
     data_array.each do |data|
+      capacity_description = data[0].capacity_description
       user_odbs = data.map { |dp| dp.outdoor_temperature }
-      outdoor_dry_bulbs.each do |new_odb|
-        next if user_odbs.include? new_odb
-
-        right_odb = user_odbs.find { |e| e > new_odb }
-        left_odb = user_odbs.reverse.find { |e| e < new_odb }
-        if right_odb.nil?
-          # extrapolation
-          right_odb = user_odbs[-1]
-          left_odb = user_odbs[-2]
-        elsif left_odb.nil?
-          # extrapolation
-          right_odb = user_odbs[1]
-          left_odb = user_odbs[0]
-        end
-        right_dp = data.find { |dp| dp.outdoor_temperature == right_odb }
-        left_dp = data.find { |dp| dp.outdoor_temperature == left_odb }
-        cap_slope = (right_dp.gross_capacity - left_dp.gross_capacity) / (right_odb - left_odb)
-        cop_slope = (right_dp.gross_efficiency_cop - left_dp.gross_efficiency_cop) / (right_odb - left_odb)
+      outdoor_dry_bulbs.each do |target_odb|
+        next if user_odbs.include? target_odb
 
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
           new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
         end
-        new_dp.outdoor_temperature = new_odb
-        new_dp.gross_capacity = (new_odb - left_odb) * cap_slope + left_dp.gross_capacity
-        new_dp.gross_efficiency_cop = (new_odb - left_odb) * cop_slope + left_dp.gross_efficiency_cop
+        new_dp.outdoor_temperature = target_odb
+        new_dp.gross_capacity = interpolate_to_odb_table_point(data, capacity_description, target_odb, :gross_capacity)
+        new_dp.gross_efficiency_cop = interpolate_to_odb_table_point(data, capacity_description, target_odb, :gross_efficiency_cop)
         data << new_dp
       end
     end
+  end
+
+  def self.interpolate_to_odb_table_point(detailed_performance_data, capacity_description, target_odb, property)
+    data = detailed_performance_data.select { |dp| dp.capacity_description == capacity_description }
+
+    target_dp = data.find { |dp| dp.outdoor_temperature == target_odb }
+    if not target_dp.nil?
+      return target_dp.send(property)
+    end
+
+    # Property can be :capacity, :efficiency_cop, etc.
+    user_odbs = data.map { |dp| dp.outdoor_temperature }.uniq
+
+    right_odb = user_odbs.find { |e| e > target_odb }
+    left_odb = user_odbs.reverse.find { |e| e < target_odb }
+    if right_odb.nil?
+      # extrapolation
+      right_odb = user_odbs[-1]
+      left_odb = user_odbs[-2]
+    elsif left_odb.nil?
+      # extrapolation
+      right_odb = user_odbs[1]
+      left_odb = user_odbs[0]
+    end
+    right_dp = data.find { |dp| dp.outdoor_temperature == right_odb }
+    left_dp = data.find { |dp| dp.outdoor_temperature == left_odb }
+
+    slope = (right_dp.send(property) - left_dp.send(property)) / (right_odb - left_odb)
+    val = (target_odb - left_odb) * slope + left_dp.send(property)
+    return val
   end
 
   def self.add_data_point_adaptive_step_size(data_array, mode, tol = 1.0)
