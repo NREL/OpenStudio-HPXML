@@ -223,6 +223,37 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert(hpxml.heat_pumps[0].heating_capacity_17F > htg_17f_cap)
     assert(hpxml.heat_pumps[0].backup_heating_capacity > htg_bak_cap)
     assert(hpxml.heat_pumps[0].cooling_capacity > clg_cap)
+
+    # Test heat pump
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+    hpxml.header.allow_increased_fixed_capacities = true
+    htg_capacities_detailed = []
+    clg_capacities_detailed = []
+    hpxml.heat_pumps[0].heating_capacity /= 10.0
+    hpxml.heat_pumps[0].heating_detailed_performance_data.each do |dp|
+      dp.capacity /= 10.0
+      htg_capacities_detailed << dp.capacity
+    end
+    hpxml.heat_pumps[0].backup_heating_capacity /= 10.0
+    hpxml.heat_pumps[0].cooling_capacity /= 10.0
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.each do |dp|
+      dp.capacity /= 10.0
+      clg_capacities_detailed << dp.capacity
+    end
+    htg_cap = hpxml.heat_pumps[0].heating_capacity
+    htg_bak_cap = hpxml.heat_pumps[0].backup_heating_capacity
+    clg_cap = hpxml.heat_pumps[0].cooling_capacity
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    _model, hpxml = _test_measure(args_hash)
+    assert(hpxml.heat_pumps[0].heating_capacity > htg_cap)
+    assert(hpxml.heat_pumps[0].backup_heating_capacity > htg_bak_cap)
+    assert(hpxml.heat_pumps[0].cooling_capacity > clg_cap)
+    hpxml.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, i|
+      assert(dp.capacity > htg_capacities_detailed[i])
+    end
+    hpxml.heat_pumps[0].cooling_detailed_performance_data.each_with_index do |dp, i|
+      assert(dp.capacity > clg_capacities_detailed[i])
+    end
   end
 
   def test_manual_j_sizing_inputs

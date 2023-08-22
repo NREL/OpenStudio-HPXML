@@ -1881,13 +1881,19 @@ class HVACSizing
       end
     end
     if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
-      prev_capacity = hvac_sizing_values.Cool_Capacity
-      hvac_sizing_values.Cool_Capacity = fixed_cooling_capacity
-      if @hpxml.header.allow_increased_fixed_capacities
-        hvac_sizing_values.Cool_Capacity = [hvac_sizing_values.Cool_Capacity, prev_capacity].max
+      # scaling factor = fixed / autosized
+      scaling_factor = fixed_cooling_capacity / hvac_sizing_values.Heat_Capacity
+      if (not @hpxml.header.allow_increased_fixed_capacities) || (@hpxml.header.allow_increased_fixed_capacities && scaling_factor > 1.0)
+        # fixed > autosized or not allow increase, use fixed capacity
+        # scale autosized capacity and airflow to be fixed
+        hvac_sizing_values.Cool_Capacity = fixed_cooling_capacity
+        hvac_sizing_values.Cool_Airflow *= scaling_factor
+        hvac_sizing_values.Cool_Capacity_Sens *= scaling_factor
+        # Use user provided nominal capacity for reporting when detailed performance data is provided
+        hvac_sizing_values.Cool_Capacity = hvac_cooling.cooling_capacity unless hvac_cooling.cooling_detailed_performance_data.empty?
+      else # allow increase fixed capacity and autosized > fixed
+        scale_detailed_performance_data_capacities(hvac_cooling.cooling_detailed_performance_data, 1 / scaling_factor) unless hvac_cooling.cooling_detailed_performance_data.empty? # scale detailed performance data up
       end
-      hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity_Sens * hvac_sizing_values.Cool_Capacity / prev_capacity
-      hvac_sizing_values.Cool_Airflow = hvac_sizing_values.Cool_Airflow * hvac_sizing_values.Cool_Capacity / prev_capacity
     end
     if not hvac_heating.nil?
       if hvac_heating.heating_detailed_performance_data.empty?
@@ -1900,12 +1906,18 @@ class HVACSizing
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity
     end
     if (not fixed_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity > 0)
-      prev_capacity = hvac_sizing_values.Heat_Capacity
-      hvac_sizing_values.Heat_Capacity = fixed_heating_capacity
-      if @hpxml.header.allow_increased_fixed_capacities
-        hvac_sizing_values.Heat_Capacity = [hvac_sizing_values.Heat_Capacity, prev_capacity].max
+      # scaling factor = fixed / autosized
+      scaling_factor = fixed_heating_capacity / hvac_sizing_values.Heat_Capacity
+      if (not @hpxml.header.allow_increased_fixed_capacities) || (@hpxml.header.allow_increased_fixed_capacities && scaling_factor > 1.0)
+        # fixed > autosized or not allow increase, use fixed capacity
+        # scale autosized capacity and airflow to be fixed
+        hvac_sizing_values.Heat_Capacity = fixed_heating_capacity
+        hvac_sizing_values.Heat_Airflow *= scaling_factor
+        # Use user provided nominal capacity for reporting when detailed performance data is provided
+        hvac_sizing_values.Heat_Capacity = hvac_heating.heating_capacity unless hvac_heating.heating_detailed_performance_data.empty?
+      else # allow increase fixed capacity and autosized > fixed
+        scale_detailed_performance_data_capacities(hvac_heating.heating_detailed_performance_data, 1 / scaling_factor) unless hvac_heating.heating_detailed_performance_data.empty? # scale detailed performance data up
       end
-      hvac_sizing_values.Heat_Airflow = hvac_sizing_values.Heat_Airflow * hvac_sizing_values.Heat_Capacity / prev_capacity
     end
     if hvac_heating.is_a? HPXML::HeatPump
       if not hvac_heating.backup_heating_capacity.nil?
@@ -1921,6 +1933,12 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity_Supp = [hvac_sizing_values.Heat_Capacity_Supp, prev_capacity].max
       end
       hvac_sizing_values.Heat_Airflow_Supp = hvac_sizing_values.Heat_Airflow_Supp * hvac_sizing_values.Heat_Capacity_Supp / prev_capacity
+    end
+  end
+
+  def self.scale_detailed_performance_data_capacities(detailed_performance_data, scaling_factor)
+    detailed_performance_data.each do |dp|
+      dp.capacity *= scaling_factor
     end
   end
 
