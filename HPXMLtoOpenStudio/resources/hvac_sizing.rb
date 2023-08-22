@@ -1882,7 +1882,7 @@ class HVACSizing
     end
     if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
       # scaling factor = fixed / autosized
-      scaling_factor = fixed_cooling_capacity / hvac_sizing_values.Heat_Capacity
+      scaling_factor = fixed_cooling_capacity / hvac_sizing_values.Cool_Capacity
       if (not @hpxml.header.allow_increased_fixed_capacities) || (@hpxml.header.allow_increased_fixed_capacities && scaling_factor > 1.0)
         # fixed > autosized or not allow increase, use fixed capacity
         # scale autosized capacity and airflow to be fixed
@@ -1914,9 +1914,9 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = fixed_heating_capacity
         hvac_sizing_values.Heat_Airflow *= scaling_factor
         # Use user provided nominal capacity for reporting when detailed performance data is provided
-        hvac_sizing_values.Heat_Capacity = hvac_heating.heating_capacity unless hvac_heating.heating_detailed_performance_data.empty?
+        hvac_sizing_values.Heat_Capacity = hvac_heating.heating_capacity unless (hvac_heating.nil? || hvac_heating.heating_detailed_performance_data.empty?)
       else # allow increase fixed capacity and autosized > fixed
-        scale_detailed_performance_data_capacities(hvac_heating.heating_detailed_performance_data, 1 / scaling_factor) unless hvac_heating.heating_detailed_performance_data.empty? # scale detailed performance data up
+        scale_detailed_performance_data_capacities(hvac_heating.heating_detailed_performance_data, 1 / scaling_factor) unless (hvac_heating.nil? || hvac_heating.heating_detailed_performance_data.empty?)# scale detailed performance data up
       end
     end
     if hvac_heating.is_a? HPXML::HeatPump
