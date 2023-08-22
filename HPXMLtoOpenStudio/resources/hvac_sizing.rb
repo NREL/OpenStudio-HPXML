@@ -1811,44 +1811,40 @@ class HVACSizing
       end
 
       if not heat_airflow_rated_defect_ratio.empty?
-        cap_htg_ratios = []
-        for speed in 0..(heat_airflow_rated_defect_ratio.size - 1)
-          htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_airflow_fault_heating_coeff()
-          a1_AF_Qgr_h = htg_fff_cap_coeff[0]
-          a2_AF_Qgr_h = htg_fff_cap_coeff[1]
-          a3_AF_Qgr_h = htg_fff_cap_coeff[2]
+        htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_airflow_fault_heating_coeff()
+        a1_AF_Qgr_h = htg_fff_cap_coeff[0]
+        a2_AF_Qgr_h = htg_fff_cap_coeff[1]
+        a3_AF_Qgr_h = htg_fff_cap_coeff[2]
 
-          qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
+        qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
 
-          a1_CH_Qgr_h = qgr_values[0]
-          a2_CH_Qgr_h = qgr_values[2]
-          a3_CH_Qgr_h = qgr_values[3]
+        a1_CH_Qgr_h = qgr_values[0]
+        a2_CH_Qgr_h = qgr_values[2]
+        a3_CH_Qgr_h = qgr_values[3]
 
-          qh1_CH = a1_CH_Qgr_h
-          qh2_CH = a2_CH_Qgr_h * UnitConversions.convert(@hpxml.header.manualj_heating_design_temp, 'F', 'C')
-          qh3_CH = a3_CH_Qgr_h * f_ch
-          y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
+        qh1_CH = a1_CH_Qgr_h
+        qh2_CH = a2_CH_Qgr_h * UnitConversions.convert(@hpxml.header.manualj_heating_design_temp, 'F', 'C')
+        qh3_CH = a3_CH_Qgr_h * f_ch
+        y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
 
-          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[2] * ff_chg_values[1] + qgr_values[3] * f_ch) * f_ch)).round(3)
-          ff_AF_h = heat_airflow_rated_defect_ratio[speed].round(3)
-          ff_AF_comb_h = ff_ch_h * ff_AF_h
+        ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[2] * ff_chg_values[1] + qgr_values[3] * f_ch) * f_ch)).round(3)
+        ff_AF_h = heat_airflow_rated_defect_ratio[-1].round(3)
+        ff_AF_comb_h = ff_ch_h * ff_AF_h
 
-          qh_AF_CH = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_ch_h) + (a3_AF_Qgr_h * ff_ch_h * ff_ch_h)
-          p_CH_Q_h = y_CH_Q_h / qh_AF_CH
+        qh_AF_CH = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_ch_h) + (a3_AF_Qgr_h * ff_ch_h * ff_ch_h)
+        p_CH_Q_h = y_CH_Q_h / qh_AF_CH
 
-          p_AF_Q_h = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_AF_comb_h) + (a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h)
+        p_AF_Q_h = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_AF_comb_h) + (a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h)
 
-          heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
+        heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
 
-          # calculate the capacity impact by defects
-          ff_AF_h_nodefect = heat_airflow_rated_ratio[speed].round(3)
-          heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
-          cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_nodefect)
-          cap_htg_ratios << cap_htg_ratio
-        end
+        # calculate the capacity impact by defects
+        ff_AF_h_nodefect = heat_airflow_rated_ratio[-1].round(3)
+        heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
+        cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_nodefect)
 
         prev_capacity = hvac_sizing_values.Heat_Capacity
-        hvac_sizing_values.Heat_Capacity *= cap_htg_ratios.max
+        hvac_sizing_values.Heat_Capacity *= cap_htg_ratio
         if prev_capacity > 0 # Preserve cfm/ton
           hvac_sizing_values.Heat_Airflow = hvac_sizing_values.Heat_Airflow * hvac_sizing_values.Heat_Capacity / prev_capacity
         else
