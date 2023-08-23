@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4a462b3c-cbf5-48d9-a0f7-320a9dbd35c7</version_id>
-  <version_modified>2023-08-10T02:49:31Z</version_modified>
+  <version_id>e60f8926-981c-4fd3-a452-af1f055c4a7f</version_id>
+  <version_modified>2023-08-23T17:04:09Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3009,6 +3009,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -3019,6 +3023,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -3145,6 +3153,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -3155,6 +3167,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -3807,12 +3823,20 @@
           <display_name>garage</display_name>
         </choice>
         <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
+        </choice>
+        <choice>
           <value>attic - vented</value>
           <display_name>attic - vented</display_name>
         </choice>
         <choice>
           <value>attic - unvented</value>
           <display_name>attic - unvented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
         </choice>
         <choice>
           <value>crawlspace - vented</value>
@@ -4648,6 +4672,10 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
+          <value>crawlspace</value>
+          <display_name>crawlspace</display_name>
+        </choice>
+        <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
@@ -4658,6 +4686,10 @@
         <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic</value>
+          <display_name>attic</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -6717,7 +6749,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B1338E66</checksum>
+      <checksum>E6A0F25F</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -6729,7 +6761,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D04329AF</checksum>
+      <checksum>46CDD184</checksum>
     </file>
   </files>
 </measure>
