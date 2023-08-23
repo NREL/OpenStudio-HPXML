@@ -3453,7 +3453,7 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       # FIXME: Address this when multiple buildings
       HPXMLDefaults.apply(runner, hpxml, hpxml.buildings[0], eri_version, weather, epw_file: epw_file)
-      hpxml_doc = hpxml.to_oga()
+      hpxml_doc = hpxml.to_doc()
       XMLHelper.write_file(hpxml_doc, hpxml_path)
     end
 
