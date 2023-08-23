@@ -1243,12 +1243,12 @@ class HVAC
     #EWT: 60F EAT: 70F AFR: 1200 cfm, WFR: 4.5 gpm
 
     #Original Curves
-    hp_ap.heat_cap_curve_spec = [[-5.12650150, -0.93997630, 7.21443206, 0.121065721, 0.051809805]]
-    hp_ap.heat_power_curve_spec = [[-7.73235249, 6.43390775, 2.29152262, -0.175598629, 0.005888871]]
+    #hp_ap.heat_cap_curve_spec = [[-5.12650150, -0.93997630, 7.21443206, 0.121065721, 0.051809805]]
+    #hp_ap.heat_power_curve_spec = [[-7.73235249, 6.43390775, 2.29152262, -0.175598629, 0.005888871]]
     
     #New Curves
-    #hp_ap.heat_cap_curve_spec = [[-2.8856338034273, -1.6778500241106, 5.260130239858, 0.14494409107989, 0.0668852197329635]]
-    #hp_ap.heat_power_curve_spec = [[-8.26436129656785, 7.90753205049897, 1.35314908441674, -0.329253752696977, 0.0217528505490971]]
+    hp_ap.heat_cap_curve_spec = [[-2.8856338034273, -1.6778500241106, 5.260130239858, 0.14494409107989, 0.0668852197329635]]
+    hp_ap.heat_power_curve_spec = [[-8.26436129656785, 7.90753205049897, 1.35314908441674, -0.329253752696977, 0.0217528505490971]]
 
     heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.heating_efficiency_cop * (1.0 - fan_adjust_kw))
     hp_ap.heat_rated_eirs = [heat_eir]
