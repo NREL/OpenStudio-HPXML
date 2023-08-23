@@ -2498,7 +2498,7 @@ class HVAC
       ind_var.setName(var[:name])
       ind_var.setMinimumValue(var[:min])
       ind_var.setMaximumValue(var[:max])
-      ind_var.setExtrapolationMethod('Linear')
+      ind_var.setExtrapolationMethod('Constant')
       ind_var.setValues(var[:values])
       table.addIndependentVariable(ind_var)
     end
