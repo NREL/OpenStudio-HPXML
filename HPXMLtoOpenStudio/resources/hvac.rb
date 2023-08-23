@@ -252,6 +252,9 @@ class HVAC
     clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
     clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
     clg_coil.setRatedWaterFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
+    clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80,'F','C'))
+    clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80,'F','C'))
+    clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67,'F','C'))
     clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
     clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
@@ -264,6 +267,8 @@ class HVAC
     htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / hp_ap.heat_rated_eirs[0])
     htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
     htg_coil.setRatedWaterFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
+    htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60,'F','C'))
+    htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70,'F','C'))
     htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
@@ -1225,9 +1230,9 @@ class HVAC
     #hp_ap.cool_sh_curve_spec = [[4.54172823345154, 14.7653304889134, -18.3541272090485, -0.74401391092935, 0.545560799548833, 0.0182620032235494]]
     
     #New Curves
-    hp_ap.cool_cap_curve_spec = [[-5.3302353686228, 7.25970738268463, -1.40598101486819, 0.243623639765751, 0.0370540199326719]]
-    hp_ap.cool_power_curve_spec = [[-4.27541344174033, 0.327251221159689, 4.6333958033598, 0.156794881888411, -0.169903158839819]]
-    hp_ap.cool_sh_curve_spec = [[0.549095740448267, 18.2966873068295, -18.7273135045696, -0.135117563023619, 0.471732189860108, -0.0016102484815832]]
+    hp_ap.cool_cap_curve_spec = [[-5.45013866666657, 7.42301402824225, -1.43760846638838, 0.249103937703341, 0.0378875477019811]]
+    hp_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
+    hp_ap.cool_sh_curve_spec = [[0.56143829895505, 18.7079597251858, -19.1482655264078, -0.138154731772664, 0.4823357726442, -0.00164644360129174]]
 
     hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr]
     # FUTURE: Reconcile these fan/pump adjustments with ANSI/RESNET/ICC 301-2019 Section 4.4.5
@@ -1247,8 +1252,8 @@ class HVAC
     #hp_ap.heat_power_curve_spec = [[-7.73235249, 6.43390775, 2.29152262, -0.175598629, 0.005888871]]
     
     #New Curves
-    hp_ap.heat_cap_curve_spec = [[-2.8856338034273, -1.6778500241106, 5.260130239858, 0.14494409107989, 0.0668852197329635]]
-    hp_ap.heat_power_curve_spec = [[-8.26436129656785, 7.90753205049897, 1.35314908441674, -0.329253752696977, 0.0217528505490971]]
+    hp_ap.heat_cap_curve_spec = [[-3.04714037601818, -1.7717579227605, 5.55453544312946, 0.153056493748853, 0.070628730979525]]
+    hp_ap.heat_power_curve_spec = [[-8.40883018520825, 8.04576322484112, 1.37680341623847, -0.335009421166367, 0.0221331110472605]]
 
     heat_eir = (1.0 - heat_pump.heating_efficiency_cop * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.heating_efficiency_cop * (1.0 - fan_adjust_kw))
     hp_ap.heat_rated_eirs = [heat_eir]
