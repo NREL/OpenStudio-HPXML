@@ -2684,18 +2684,22 @@ class HVAC
       # Determine min/max ODB temperatures to cover full range of heat pump operation
       if mode == :clg
         outdoor_dry_bulbs = []
-        outdoor_dry_bulbs << 55.0 # Min cooling ODB
         # Calculate ODB temperature at which COP or capacity is zero
-        odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop)
-        odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity)
-        outdoor_dry_bulbs << [odb_at_zero_cop, odb_at_zero_capacity, weather_temp].min
+        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, true)
+        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, false)
+        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, 55.0].max # Min cooling ODB
+        outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
       else
         outdoor_dry_bulbs = []
         # Calculate ODB temperature at which COP or capacity is zero
-        odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop)
-        odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity)
-        outdoor_dry_bulbs << [odb_at_zero_cop, odb_at_zero_capacity, compressor_lockout_temp, weather_temp].max
-        outdoor_dry_bulbs << 60.0 # Max heating ODB
+        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, false)
+        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, true)
+        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, compressor_lockout_temp, weather_temp].max # Min heating ODB
+        outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
       end
       capacity_description = data[0].capacity_description
       outdoor_dry_bulbs.each do |target_odb|
@@ -2714,11 +2718,11 @@ class HVAC
     end
   end
 
-  def self.calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, property)
-    if mode == :clg
+  def self.calculate_odb_at_zero_cop_or_capacity(data, _mode, user_odbs, property, find_high)
+    if find_high
       odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
       odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[-2] }
-    elsif mode == :htg
+    else
       odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[0] }
       odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[1] }
     end
@@ -2726,9 +2730,9 @@ class HVAC
     slope = (odb_dp1.send(property) - odb_dp2.send(property)) / (odb_dp1.outdoor_temperature - odb_dp2.outdoor_temperature)
 
     # Datapoints don't trend toward zero COP?
-    if (mode == :clg && slope >= 0)
+    if (find_high && slope >= 0)
       return 999999.0
-    elsif (mode == :htg && slope <= 0)
+    elsif (!find_high && slope <= 0)
       return -999999.0
     end
 
@@ -2737,9 +2741,9 @@ class HVAC
 
     # Return a slightly larger (or smaller, for cooling) ODB so things don't blow up
     delta_odb = 1.0
-    if mode == :clg
+    if find_high
       return target_odb - delta_odb
-    elsif mode == :htg
+    else
       return target_odb + delta_odb
     end
   end
