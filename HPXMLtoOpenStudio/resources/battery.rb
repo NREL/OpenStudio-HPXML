@@ -39,7 +39,7 @@ class Battery
 
     nominal_capacity_kwh *= unit_multiplier
     usable_capacity_kwh *= unit_multiplier
-    rated_power_output *= rated_power_output
+    rated_power_output *= unit_multiplier
 
     is_outside = (battery.location == HPXML::LocationOutside)
     if not is_outside
