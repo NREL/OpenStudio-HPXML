@@ -86,25 +86,14 @@ def create_hpxmls
 
     if hpxml_path.include? 'base-multiple-buildings.xml'
       # Create duplicates of the Building
-      # FUTURE: Instead of this, call the BuildResHPXML measure multiple times
+      # FIXME: Instead of this, call the BuildResHPXML measure multiple times
       # using the new capability in https://github.com/NREL/OpenStudio-HPXML/pull/1452
       hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
       building_element = XMLHelper.get_element(hpxml_element, 'Building')
-      for i in 2..3
+      for _i in 2..3
         new_building_element = Marshal.load(Marshal.dump(building_element)) # Deep copy
-
-        # Make all IDs unique so the HPXML is valid
-        new_building_element.each_node do |node|
-          next unless node.is_a?(Oga::XML::Element)
-
-          if not XMLHelper.get_attribute_value(node, 'id').nil?
-            XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}_#{i}")
-          elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
-            XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}_#{i}")
-          end
-        end
-
         hpxml_element.children << new_building_element
+        hpxml.set_unique_hpxml_ids(hpxml_doc, true)
       end
     end
 
