@@ -1258,7 +1258,7 @@ class HVAC
     # Default data inputs based on NEEP data
     detailed_performance_data = hvac_system.cooling_detailed_performance_data
 
-    max_cop_95 = is_ducted ? 0.1953 * seer : 0.08184 * seer + 1.173
+    max_cop_95 = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707
     max_capacity_95 = hvac_system.cooling_capacity / get_cool_capacity_ratio_from_max_to_rated()
     min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)

@@ -743,7 +743,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     fan_power_clg_max = fan_power_rated * max_cfm_cool
     fan_power_clg_min = fan_power_clg_max * ((min_cfm_cool / max_cfm_cool)**3)
     clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg)[0], 'Btu/hr', 'W')
-    cop_max = 0.08184 * heat_pump.cooling_efficiency_seer + 1.173
+    cop_max = 0.06635 * heat_pump.cooling_efficiency_seer + 1.8707
     cop_ratio = 0.01377 * heat_pump.cooling_efficiency_seer + 1.13948
     cop_min = cop_ratio * cop_max
     clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, cop_min)[1]
@@ -869,7 +869,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cop_max = 0.08184 * cooling_system.cooling_efficiency_seer + 1.173
+    cop_max = 0.06635 * cooling_system.cooling_efficiency_seer + 1.8707
     cop_ratio = 0.01377 * cooling_system.cooling_efficiency_seer + 1.13948
     cop_min = cop_ratio * cop_max
     cops = [HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_min, :clg, cop_min)[1], HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, cop_max)[1]] # Expected values
