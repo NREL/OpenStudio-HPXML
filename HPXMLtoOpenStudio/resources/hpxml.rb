@@ -2330,6 +2330,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(roof, 'Pitch', @pitch, :float) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
+      XMLHelper.add_element(roof, 'RadiantBarrierLocation', @radiant_barrier_location, :string, @radiant_barrier_location_isdefaulted) unless @radiant_barrier_location.nil?
       XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(roof, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
@@ -2374,6 +2375,7 @@ class HPXML < Object
       @framing_spacing = XMLHelper.get_value(roof, 'Rafters/Spacing', :float)
       @pitch = XMLHelper.get_value(roof, 'Pitch', :float)
       @radiant_barrier = XMLHelper.get_value(roof, 'RadiantBarrier', :boolean)
+      @radiant_barrier_location = XMLHelper.get_value(roof, 'RadiantBarrierLocation', :string)
       @radiant_barrier_grade = XMLHelper.get_value(roof, 'RadiantBarrierGrade', :integer)
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
