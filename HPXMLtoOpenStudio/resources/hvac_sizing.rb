@@ -958,7 +958,7 @@ class HVACSizing
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         slab_is_insulated = false
-        if slab.under_slab_insulation_width > 0 && slab.under_slab_insulation_r_value > 0
+        if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
         elsif slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
           slab_is_insulated = true
@@ -1620,8 +1620,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow_Supp = 0.0
 
     elsif [HPXML::HVACTypeStove,
-           HPXML::HVACTypePortableHeater,
-           HPXML::HVACTypeFixedHeater,
+           HPXML::HVACTypeSpaceHeater,
            HPXML::HVACTypeWallFurnace,
            HPXML::HVACTypeFloorFurnace,
            HPXML::HVACTypeFireplace].include? @heating_type

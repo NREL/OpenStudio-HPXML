@@ -180,7 +180,6 @@ class HPXML < Object
   HVACTypeElectricResistance = 'ElectricResistance'
   HVACTypeEvaporativeCooler = 'evaporative cooler'
   HVACTypeFireplace = 'Fireplace'
-  HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
@@ -190,9 +189,9 @@ class HPXML < Object
   HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'
   HVACTypeHeatPumpRoom = 'room air conditioner with reverse cycle'
   HVACTypeMiniSplitAirConditioner = 'mini-split'
-  HVACTypePortableHeater = 'PortableHeater'
-  HVACTypeRoomAirConditioner = 'room air conditioner'
   HVACTypePTAC = 'packaged terminal air conditioner'
+  HVACTypeRoomAirConditioner = 'room air conditioner'
+  HVACTypeSpaceHeater = 'SpaceHeater'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
   HydronicTypeBaseboard = 'baseboard'
@@ -212,12 +211,14 @@ class HPXML < Object
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
+  LocationAttic = 'attic'
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
+  LocationCrawlspace = 'crawlspace'
   LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
@@ -499,7 +500,9 @@ class HPXML < Object
      'HeatPumpFuel',
      'BackupSystemFuel',
      'FuelType',
-     'IntegratedHeatingSystemFuel'].each do |fuel_name|
+     'IntegratedHeatingSystemFuel',
+     'Heater/Type'].each do |fuel_name|
+      fuel = HPXML::HeaterTypeGas if fuel_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
       if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
         return true
       end
