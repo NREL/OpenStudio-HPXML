@@ -474,6 +474,26 @@ class HPXML < Object
     @buildings = Buildings.new(self, hpxml)
   end
 
+  def set_unique_hpxml_ids(hpxml_doc, last_building_only = false)
+    buildings = XMLHelper.get_elements(hpxml_doc, '/HPXML/Building')
+
+    # Make all IDs unique so the HPXML is valid
+    buildings.each_with_index do |building, i|
+      next if last_building_only && (i != buildings.size - 1)
+
+      bldg_no = "_#{i + 1}"
+      building.each_node do |node|
+        next unless node.is_a?(Oga::XML::Element)
+
+        if not XMLHelper.get_attribute_value(node, 'id').nil?
+          XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}#{bldg_no}")
+        elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
+          XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}#{bldg_no}")
+        end
+      end
+    end
+  end
+
   # Class to store additional properties on an HPXML object that are not intended
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
@@ -1086,11 +1106,11 @@ class HPXML < Object
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
       if (not @state_code.nil?) || (not @zip_code.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
         building_site = XMLHelper.add_element(building, 'Site')
-        site_id = XMLHelper.add_element(building_site, 'SiteID')
+        building_site_id = XMLHelper.add_element(building_site, 'SiteID')
         if @site_id.nil?
-          XMLHelper.add_attribute(site_id, 'id', 'SiteID')
+          XMLHelper.add_attribute(building_site_id, 'id', 'SiteID')
         else
-          XMLHelper.add_attribute(site_id, 'id', @site_id)
+          XMLHelper.add_attribute(building_site_id, 'id', @site_id)
         end
         if (not @state_code.nil?) || (not @zip_code.nil?)
           address = XMLHelper.add_element(building_site, 'Address')

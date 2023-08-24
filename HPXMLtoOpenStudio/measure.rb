@@ -256,7 +256,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Remove duplicate lengthy tmains schedules
     # FIXME: Develop a generic way to remove unused/duplicate schedules; maybe unused
     # schedules will be correctly removed when the meta_measure.rb code is uncommented?
-    preserve_sched_name = model.getSiteWaterMainsTemperature.temperatureSchedule.get.name.to_s
+    if model.getSiteWaterMainsTemperature.temperatureSchedule.is_initialized
+      preserve_sched_name = model.getSiteWaterMainsTemperature.temperatureSchedule.get.name.to_s
+    end
     model.getScheduleIntervals.each do |sched|
       next unless sched.name.to_s.include? 'mains_temperature_schedule'
       next if sched.name.to_s == preserve_sched_name
@@ -2012,7 +2014,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @hpxml_bldg.batteries.each do |battery|
       # Assign space
       battery.additional_properties.space = get_space_from_location(battery.location, spaces)
-      Battery.apply(runner, model, @hpxml_bldg.pv_systems, battery, @schedules_file)
+      Battery.apply(runner, model, @hpxml_bldg.pv_systems, battery, @schedules_file, @hpxml_bldg.building_construction.number_of_units)
     end
   end
 

@@ -3455,7 +3455,7 @@ class HPXMLFile
     renumber_hpxml_ids(hpxml_bldg)
 
     hpxml_doc = hpxml.to_doc()
-    unique_hpxml_ids(hpxml_doc)
+    hpxml.set_unique_hpxml_ids(hpxml_doc, true)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_defaults]
@@ -3467,7 +3467,7 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
-      unique_hpxml_ids(hpxml_doc)
+      hpxml.set_unique_hpxml_ids(hpxml_doc, true)
       XMLHelper.write_file(hpxml_doc, hpxml_path)
     end
 
@@ -6525,25 +6525,6 @@ class HPXMLFile
         if surf.respond_to? :under_slab_insulation_id
           surf.under_slab_insulation_id = "#{surf_name}#{i + 1}UnderSlabInsulation"
         end
-      end
-    end
-  end
-
-  def self.unique_hpxml_ids(hpxml_doc)
-    hpxml = XMLHelper.get_element(hpxml_doc, '/HPXML')
-    buildings = XMLHelper.get_elements(hpxml, 'Building')
-    n = buildings.size
-    bldg_no = ''
-    bldg_no = "_#{n}" if n > 1
-
-    # Make all IDs unique so the HPXML is valid
-    buildings[-1].each_node do |node|
-      next unless node.is_a?(Oga::XML::Element)
-
-      if not XMLHelper.get_attribute_value(node, 'id').nil?
-        XMLHelper.add_attribute(node, 'id', "#{XMLHelper.get_attribute_value(node, 'id')}#{bldg_no}")
-      elsif not XMLHelper.get_attribute_value(node, 'idref').nil?
-        XMLHelper.add_attribute(node, 'idref', "#{XMLHelper.get_attribute_value(node, 'idref')}#{bldg_no}")
       end
     end
   end
