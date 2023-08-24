@@ -3455,7 +3455,7 @@ class HPXMLFile
     renumber_hpxml_ids(hpxml_bldg)
 
     hpxml_doc = hpxml.to_doc()
-    hpxml.set_unique_hpxml_ids(hpxml_doc, true)
+    hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
     XMLHelper.write_file(hpxml_doc, hpxml_path)
 
     if args[:apply_defaults]
@@ -3467,7 +3467,7 @@ class HPXMLFile
       eri_version = Constants.ERIVersions[-1]
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
       hpxml_doc = hpxml.to_doc()
-      hpxml.set_unique_hpxml_ids(hpxml_doc, true)
+      hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)
     end
 
