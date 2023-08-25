@@ -270,7 +270,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def shift_geometry(unit_model, unit_number)
     # Shift units so they aren't right on top and shade each other
     # FIXME: Need to determine the value below based on the model
-    y_shift = 100.0 * unit_number # meters
+    y_shift = 200.0 * unit_number # meters
 
     # shift the unit so it's not right on top of the previous one
     unit_model.getSpaces.sort.each do |space|
