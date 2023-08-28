@@ -69,7 +69,7 @@ class Battery
 
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
-    unless is_outside
+    if not is_outside
       elcs.setThermalZone(battery.additional_properties.space.thermalZone.get)
     end
     elcs.setRadiativeFraction(0.9 * frac_sens)

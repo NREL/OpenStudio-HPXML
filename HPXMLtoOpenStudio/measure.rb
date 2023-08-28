@@ -301,7 +301,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     unit_model.getEnergyManagementSystemSensors.each do |sensor|
       ems_map[sensor.name.to_s] = make_variable_name(sensor.name, unit_number)
-      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty?
+      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty? || sensor.keyName.downcase == 'environment'
     end
 
     unit_model.getEnergyManagementSystemActuators.each do |actuator|

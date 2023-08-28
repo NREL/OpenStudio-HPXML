@@ -2824,16 +2824,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
                     Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
-                    Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool }[subcategory]
-        if end_use.nil? && (subcategory == Constants.ObjectNameWaterHeaterAdjustment)
-          end_use = EUT::HotWater
-        end
-        if end_use.nil? && (subcategory == Constants.ObjectNameBoilerPilotLight)
-          end_use = EUT::Heating
-        end
-        if end_use.nil? && (subcategory == Constants.ObjectNameBatteryLossesAdjustment)
-          end_use = EUT::Battery
-        end
+                    Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool,
+                    Constants.ObjectNameWaterHeaterAdjustment => EUT::HotWater,
+                    Constants.ObjectNameBoilerPilotLight => EUT::Heating,
+                    Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery }[subcategory]
         if not end_use.nil?
           # Use Output:Meter instead of Output:Variable because they incorporate thermal zone multipliers
           if object.space.is_initialized
