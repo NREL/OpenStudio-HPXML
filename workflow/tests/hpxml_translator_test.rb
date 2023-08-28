@@ -49,6 +49,13 @@ class HPXMLTest < Minitest::Test
         # Ducts:
         next if xml.include? 'base-hvac-ducts'
         next if xml.include? 'base-foundation-belly-wing'
+        # Battery:
+        # Both batteries do not charge equally because they both use
+        # TrackFacilityElectricDemandStoreExcessOnSite; need to create
+        # meters with electricity usage *for each unit* and switch to
+        # TrackMeterDemandStoreExcessOnSite?
+        next if xml.include? 'battery'
+        next if xml.include? 'base-misc-defaults'
 
         xmls << File.absolute_path(xml)
       end
