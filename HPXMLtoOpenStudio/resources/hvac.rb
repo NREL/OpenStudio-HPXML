@@ -68,8 +68,6 @@ class HVAC
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
 
-      # Model maximum capacity only, so airflow should be scaled to maximum capacity
-      cooling_system.cooling_airflow_cfm /= get_cool_capacity_ratio_from_max_to_rated()
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
@@ -96,8 +94,6 @@ class HVAC
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
       is_ducted = !heating_system.distribution_system_idref.nil?
-      # Model maximum capacity only, so airflow should be scaled to maximum capacity
-      heating_system.heating_airflow_cfm /= get_heat_capacity_ratio_from_max_to_rated(is_ducted)
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
@@ -1154,6 +1150,7 @@ class HVAC
   end
 
   def self.get_cool_capacity_ratios(hvac_system, is_ducted)
+    # For each speed, ratio of capacity to nominal capacity
     if hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -1215,7 +1212,7 @@ class HVAC
       a, b, c, d, e = 0.1914, -1.822, 1.364, -0.07783, 2.221
     end
     max_cop_47 = a * hspf + b * max_cap_maint_5 + c * max_cap_maint_5**2 + d * max_cap_maint_5 * hspf + e
-    max_capacity_47 = heat_pump.heating_capacity / get_heat_capacity_ratio_from_max_to_rated(is_ducted)
+    max_capacity_47 = heat_pump.heating_capacity * get_heat_capacity_ratios(heat_pump, is_ducted)[-1]
     min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
     min_cop_47 = is_ducted ? max_cop_47 * (-0.0306 * hspf + 1.5385) : max_cop_47 * (-0.01698 * hspf + 1.5907)
     max_capacity_5 = max_capacity_47 * max_cap_maint_5
@@ -1249,16 +1246,16 @@ class HVAC
                                   isdefaulted: true)
   end
 
-  def self.set_cool_detailed_performance_data(hvac_system)
-    hvac_ap = hvac_system.additional_properties
-    is_ducted = !hvac_system.distribution_system_idref.nil?
-    seer = hvac_system.cooling_efficiency_seer
+  def self.set_cool_detailed_performance_data(heat_pump)
+    hvac_ap = heat_pump.additional_properties
+    is_ducted = !heat_pump.distribution_system_idref.nil?
+    seer = heat_pump.cooling_efficiency_seer
 
     # Default data inputs based on NEEP data
-    detailed_performance_data = hvac_system.cooling_detailed_performance_data
+    detailed_performance_data = heat_pump.cooling_detailed_performance_data
 
     max_cop_95 = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707
-    max_capacity_95 = hvac_system.cooling_capacity / get_cool_capacity_ratio_from_max_to_rated()
+    max_capacity_95 = heat_pump.cooling_capacity * get_cool_capacity_ratios(heat_pump, is_ducted)[-1]
     min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
     max_capacity_82 = max_capacity_95 * get_cool_max_capacity_retention_82(hvac_ap)
@@ -1293,20 +1290,26 @@ class HVAC
   end
 
   def self.get_heat_capacity_ratios(heat_pump, is_ducted = nil)
+    # For each speed, ratio of capacity to nominal capacity
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if is_ducted
+        nominal_to_max_ratio = 0.972
+      else
+        nominal_to_max_ratio = 0.812
+      end
       if is_ducted && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         # central ducted
-        return [0.358, 1.0]
+        return [0.358 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
       elsif !is_ducted
         # wall placement
-        return [0.252, 1.0]
+        return [0.252 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
       else
         # ducted minisplit
-        return [0.305, 1.0]
+        return [0.305 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
       end
     end
 
@@ -2272,14 +2275,6 @@ class HVAC
       fail 'Missing heating capacity retention or 17F heating capacity.'
     end
     return heating_capacity_retention_temp, heating_capacity_retention_fraction
-  end
-
-  def self.get_heat_capacity_ratio_from_max_to_rated(is_ducted)
-    return (is_ducted ? 0.972 : 0.812)
-  end
-
-  def self.get_cool_capacity_ratio_from_max_to_rated()
-    return 1.0
   end
 
   def self.calc_hspf_1speed(cop_47, c_d, fan_power_rated, coeff_eir, coeff_q)

@@ -1865,7 +1865,7 @@ class HVACSizing
         fixed_cooling_capacity = hvac_cooling.cooling_capacity
       else
         fixed_cooling_capacity_max = hvac_cooling.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        fixed_cooling_capacity = fixed_cooling_capacity_max * HVAC.get_cool_capacity_ratio_from_max_to_rated()
+        fixed_cooling_capacity = fixed_cooling_capacity_max / HVAC.get_cool_capacity_ratios(hvac_cooling, !hvac_cooling.distribution_system_idref.nil?)[-1]
       end
     end
     if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
@@ -1888,7 +1888,7 @@ class HVACSizing
         fixed_heating_capacity = hvac_heating.heating_capacity
       else
         fixed_heating_capacity_max = hvac_heating.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        fixed_heating_capacity = fixed_heating_capacity_max * HVAC.get_heat_capacity_ratio_from_max_to_rated(!hvac_heating.distribution_system_idref.nil?)
+        fixed_heating_capacity = fixed_heating_capacity_max / HVAC.get_heat_capacity_ratios(hvac_heating, !hvac_heating.distribution_system_idref.nil?)[-1]
       end
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity
