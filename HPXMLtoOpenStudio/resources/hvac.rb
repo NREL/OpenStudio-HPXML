@@ -102,8 +102,7 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         if not heating_system.heating_detailed_performance_data.empty?
-          compressor_lockout_temp = heating_system.compressor_lockout_temp.nil? ? heating_system.backup_heating_switchover_temp : heating_system.compressor_lockout_temp
-          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, weather_min_drybulb, compressor_lockout_temp)
+          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, weather_min_drybulb, htg_ap.hp_min_temp)
         end
 
         # Heating Coil
