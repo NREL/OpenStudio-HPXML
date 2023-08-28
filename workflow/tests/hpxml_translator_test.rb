@@ -455,7 +455,7 @@ class HPXMLTest < Minitest::Test
     end
     bill_results = _get_bill_results(bills_csv_path)
     results = _get_simulation_results(annual_csv_path, xml, unit_multiplier)
-    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0], unit_multiplier)
+    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0])
     if unit_multiplier > 1
       _check_unit_multiplier_results(results_1x, results, unit_multiplier)
     end
@@ -513,7 +513,7 @@ class HPXMLTest < Minitest::Test
     return results
   end
 
-  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg, unit_multiplier)
+  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg)
     assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
@@ -746,7 +746,7 @@ class HPXMLTest < Minitest::Test
     assert_equal(0, num_invalid_output_meters)
     assert_equal(0, num_invalid_output_variables)
 
-    return if unit_multiplier > 1
+    return if hpxml_bldg.building_construction.number_of_units > 1
 
     # Timestep
     timestep = hpxml_header.timestep.nil? ? 60 : hpxml_header.timestep
