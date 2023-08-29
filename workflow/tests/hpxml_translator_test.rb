@@ -36,9 +36,6 @@ class HPXMLTest < Minitest::Test
         next if xml.include? 'base-hvac-undersized'
         next if xml.include? 'base-multiple-buildings.xml'
         next if xml.include? '-dehumidifier'
-        # GSHP:
-        next if xml.include? 'ground-to-air'
-        next if xml.include? 'base-hvac-multiple'
         # DHW:
         next if xml.include? '-desuperheater'
         next if xml.include?('-combi') || xml.include?('-indirect')
