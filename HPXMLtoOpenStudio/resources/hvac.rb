@@ -93,7 +93,6 @@ class HVAC
 
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
-      is_ducted = !heating_system.distribution_system_idref.nil?
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
@@ -1212,7 +1211,7 @@ class HVAC
       a, b, c, d, e = 0.1914, -1.822, 1.364, -0.07783, 2.221
     end
     max_cop_47 = a * hspf + b * max_cap_maint_5 + c * max_cap_maint_5**2 + d * max_cap_maint_5 * hspf + e
-    max_capacity_47 = heat_pump.heating_capacity * get_heat_capacity_ratios(heat_pump, is_ducted)[-1]
+    max_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[-1]
     min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
     min_cop_47 = is_ducted ? max_cop_47 * (-0.0306 * hspf + 1.5385) : max_cop_47 * (-0.01698 * hspf + 1.5907)
     max_capacity_5 = max_capacity_47 * max_cap_maint_5
@@ -1247,7 +1246,7 @@ class HVAC
   end
 
   def self.set_cool_detailed_performance_data(heat_pump)
-    hvac_ap = heat_pump.additional_properties
+    hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
     seer = heat_pump.cooling_efficiency_seer
 
@@ -1255,10 +1254,10 @@ class HVAC
     detailed_performance_data = heat_pump.cooling_detailed_performance_data
 
     max_cop_95 = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707
-    max_capacity_95 = heat_pump.cooling_capacity * get_cool_capacity_ratios(heat_pump, is_ducted)[-1]
-    min_capacity_95 = max_capacity_95 / hvac_ap.cool_capacity_ratios[-1] * hvac_ap.cool_capacity_ratios[0]
+    max_capacity_95 = heat_pump.cooling_capacity * hp_ap.cool_capacity_ratios[-1]
+    min_capacity_95 = max_capacity_95 / hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
-    max_capacity_82 = max_capacity_95 * get_cool_max_capacity_retention_82(hvac_ap)
+    max_capacity_82 = max_capacity_95 * get_cool_max_capacity_retention_82(hp_ap)
     max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
     min_capacity_82 = min_capacity_95 * 1.099
     min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)

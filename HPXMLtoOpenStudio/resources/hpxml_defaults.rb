@@ -2891,14 +2891,25 @@ class HPXMLDefaults
 
         # Heating capacities
         if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
+          scaling_factor = hvac_sizing_values.Heat_Capacity.round / htg_sys.heating_capacity unless htg_sys.heating_capacity.nil?
           # Heating capacity @ 17F
           if htg_sys.is_a? HPXML::HeatPump
             if (not htg_sys.heating_capacity.nil?) && (not htg_sys.heating_capacity_17F.nil?)
               # Fixed value entered; scale w/ heating_capacity in case allow_increased_fixed_capacities=true
-              htg_cap_17f = htg_sys.heating_capacity_17F * hvac_sizing_values.Heat_Capacity.round / htg_sys.heating_capacity
+              htg_cap_17f = htg_sys.heating_capacity_17F * scaling_factor
               if (htg_sys.heating_capacity_17F - htg_cap_17f).abs >= 1.0
                 htg_sys.heating_capacity_17F = htg_cap_17f.round
                 htg_sys.heating_capacity_17F_isdefaulted = true
+              end
+            end
+          end
+          if not htg_sys.heating_detailed_performance_data.empty?
+            # Fixed values entered; Scale w/ heating_capacity in case allow_increased_fixed_capacities=true
+            htg_sys.heating_detailed_performance_data.each do |dp|
+              htg_cap_dp = dp.capacity * scaling_factor
+              if (dp.capacity - htg_cap_dp).abs >= 1.0
+                dp.capacity = htg_cap_dp.round
+                dp.capacity_isdefaulted = true
               end
             end
           end
@@ -2938,6 +2949,17 @@ class HPXMLDefaults
 
       # Cooling capacities
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)
+        scaling_factor = hvac_sizing_values.Cool_Capacity.round / clg_sys.cooling_capacity unless clg_sys.cooling_capacity.nil?
+        if not clg_sys.cooling_detailed_performance_data.empty?
+          # Fixed values entered; Scale w/ cooling_capacity in case allow_increased_fixed_capacities=true
+          clg_sys.cooling_detailed_performance_data.each do |dp|
+            clg_cap_dp = dp.capacity * scaling_factor
+            if (dp.capacity - clg_cap_dp).abs >= 1.0
+              dp.capacity = clg_cap_dp.round
+              dp.capacity_isdefaulted = true
+            end
+          end
+        end
         clg_sys.cooling_capacity = hvac_sizing_values.Cool_Capacity.round
         clg_sys.cooling_capacity_isdefaulted = true
       end
