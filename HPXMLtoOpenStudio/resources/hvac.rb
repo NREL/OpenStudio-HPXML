@@ -2771,7 +2771,7 @@ class HVAC
     return val
   end
 
-  def self.add_data_point_adaptive_step_size(data_array, mode, tol = 1.0)
+  def self.add_data_point_adaptive_step_size(data_array, mode, tol = 0.1)
     data_array.each do |data|
       data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
       data_sorted.each_with_index do |dp, i|
