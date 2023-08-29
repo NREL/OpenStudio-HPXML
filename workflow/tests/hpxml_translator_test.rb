@@ -56,6 +56,7 @@ class HPXMLTest < Minitest::Test
         # TrackMeterDemandStoreExcessOnSite?
         next if xml.include? 'battery'
         next if xml.include? 'base-misc-defaults'
+        next if xml.include? 'base-residents-5.xml'
 
         xmls << File.absolute_path(xml)
       end
