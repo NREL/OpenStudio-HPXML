@@ -32,7 +32,8 @@ class HPXMLTest < Minitest::Test
         next if xml.end_with? '-10x.xml'
         # FIXME: Need to address these files
         next if xml.include? 'real_homes'
-        next if xml.include? 'base-bldgtype-multifamily'
+        next if xml.include? 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump'
+        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple'
         next if xml.include? 'base-multiple-buildings.xml'
         next if xml.include? '-dehumidifier'
         # DHW:
