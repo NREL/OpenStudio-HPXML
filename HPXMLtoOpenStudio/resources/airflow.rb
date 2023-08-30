@@ -967,7 +967,7 @@ class Airflow
 
       duct_subroutine = OpenStudio::Model::EnergyManagementSystemSubroutine.new(model)
       duct_subroutine.setName("#{object_name_idx} duct subroutine")
-      duct_subroutine.addLine("Set AH_MFR = #{ah_mfr_var.name}")
+      duct_subroutine.addLine("Set AH_MFR = #{ah_mfr_var.name} / #{unit_multiplier}")
       duct_subroutine.addLine('If AH_MFR>0')
       duct_subroutine.addLine("  Set AH_Tout = #{ah_tout_var.name}")
       duct_subroutine.addLine("  Set AH_Wout = #{ah_wout_var.name}")
@@ -976,7 +976,7 @@ class Airflow
       duct_subroutine.addLine("  Set Fan_RTF = #{@fan_rtf_var[object].name}")
       duct_subroutine.addLine("  Set DZ_T = #{dz_t_var.name}")
       duct_subroutine.addLine("  Set DZ_W = #{dz_w_var.name}")
-      duct_subroutine.addLine("  Set AH_VFR = #{ah_vfr_var.name}")
+      duct_subroutine.addLine("  Set AH_VFR = #{ah_vfr_var.name} / #{unit_multiplier}")
       duct_subroutine.addLine('  Set h_SA = (@HFnTdbW AH_Tout AH_Wout)') # J/kg
       duct_subroutine.addLine('  Set h_RA = (@HFnTdbW RA_T RA_W)') # J/kg
       duct_subroutine.addLine('  Set h_fg = (@HfgAirFnWTdb AH_Wout AH_Tout)') # J/kg
@@ -986,14 +986,14 @@ class Airflow
       if not leakage_fracs[HPXML::DuctTypeSupply].nil?
         duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[HPXML::DuctTypeSupply]}") # frac
       elsif not leakage_cfm25s[HPXML::DuctTypeSupply].nil?
-        duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeSupply], 'cfm', 'm^3/s').round(6)} / (#{@fan_mfr_max_var[object].name} * 1.0135)") # frac
+        duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeSupply], 'cfm', 'm^3/s').round(6)} / (#{@fan_mfr_max_var[object].name}/#{unit_multiplier} * 1.0135)") # frac
       else
         duct_subroutine.addLine('  Set f_sup = 0.0') # frac
       end
       if not leakage_fracs[HPXML::DuctTypeReturn].nil?
         duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[HPXML::DuctTypeReturn]}") # frac
       elsif not leakage_cfm25s[HPXML::DuctTypeReturn].nil?
-        duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeReturn], 'cfm', 'm^3/s').round(6)} / (#{@fan_mfr_max_var[object].name} * 1.0135)") # frac
+        duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeReturn], 'cfm', 'm^3/s').round(6)} / (#{@fan_mfr_max_var[object].name}/#{unit_multiplier} * 1.0135)") # frac
       else
         duct_subroutine.addLine('  Set f_ret = 0.0') # frac
       end
@@ -1115,6 +1115,7 @@ class Airflow
         add_cfis_duct_losses = (vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler)
         if add_cfis_duct_losses
           # Calculate additional CFIS duct losses during fan-only mode
+          # FIXME: Need to update for unit multiplier
           duct_program.addLine("If #{@cfis_f_damper_extra_open_var[cfis_id].name} > 0")
           duct_program.addLine("  Set cfis_m3s = (#{@fan_mfr_max_var[object].name} * #{vent_mech.cfis_vent_mode_airflow_fraction} / 1.16097654)") # Density of 1.16097654 was back calculated using E+ results
           duct_program.addLine("  Set #{@fan_rtf_var[object].name} = #{@cfis_f_damper_extra_open_var[cfis_id].name}") # Need to use global vars to sync duct_program and infiltration program of different calling points

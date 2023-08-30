@@ -241,7 +241,7 @@ class HVAC
       hp_ap.fluid_type = Constants.FluidWater
       runner.registerWarning("Specified #{hp_ap.fluid_type} fluid type and 0 fraction of glycol, so assuming #{Constants.FluidWater} fluid type.")
     end
-    
+
     # Apply unit multiplier
     hp_ap.GSHP_Loop_flow *= unit_multiplier
     hp_ap.GSHP_Bore_Holes = hp_ap.GSHP_Bore_Holes.to_i * unit_multiplier

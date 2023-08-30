@@ -33,19 +33,14 @@ class HPXMLTest < Minitest::Test
         # FIXME: Need to address these files
         next if xml.include? 'real_homes'
         next if xml.include? 'base-bldgtype-multifamily'
-        next if xml.include? 'base-hvac-undersized'
         next if xml.include? 'base-multiple-buildings.xml'
         next if xml.include? '-dehumidifier'
         # DHW:
-        next if xml.include? '-desuperheater'
         next if xml.include?('-combi') || xml.include?('-indirect')
         next if xml.include?('-hpwh') || xml.include?('tank-heat-pump')
         next if xml.include? '-dhw-multiple'
         next if xml.include? '-stratified'
         next if xml.include? '-solar'
-        # Ducts:
-        next if xml.include? 'base-hvac-ducts'
-        next if xml.include? 'base-foundation-belly-wing'
         # Battery:
         # Both batteries do not charge equally because they both use
         # TrackFacilityElectricDemandStoreExcessOnSite; need to create
