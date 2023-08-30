@@ -270,7 +270,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def shift_geometry(unit_model, unit_number)
     # Shift units so they aren't right on top and shade each other
     # FIXME: Need to determine the value below based on the model
-    y_shift = 100.0 * unit_number # meters
+    y_shift = 200.0 * unit_number # meters
 
     # shift the unit so it's not right on top of the previous one
     unit_model.getSpaces.sort.each do |space|
@@ -301,7 +301,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     unit_model.getEnergyManagementSystemSensors.each do |sensor|
       ems_map[sensor.name.to_s] = make_variable_name(sensor.name, unit_number)
-      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty?
+      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty? || sensor.keyName.downcase == 'environment'
     end
 
     unit_model.getEnergyManagementSystemActuators.each do |actuator|
@@ -1669,7 +1669,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                 living_zone, @hpxml_bldg.site.ground_conductivity, @hvac_unavailable_periods)
+                                                                 living_zone, @hpxml_bldg.site.ground_conductivity, @hvac_unavailable_periods,
+                                                                 @hpxml_bldg.building_construction.number_of_units)
 
       end
 
