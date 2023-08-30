@@ -328,9 +328,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unit_model.getEnergyManagementSystemSubroutines.each do |subroutine|
       ems_map[subroutine.name.to_s] = make_variable_name(subroutine.name, unit_number)
     end
-
+    
     # variables in program lines don't get updated automatically
-    characters = ['', ' ', ',', '(', ')', '+', '-', '*', '/', ';']
+    lhs_characters = [' ', ',', '(', ')', '+', '-', '*', '/', ';']
+    rhs_characters = [''] + lhs_characters
     (unit_model.getEnergyManagementSystemPrograms + unit_model.getEnergyManagementSystemSubroutines).each do |program|
       new_lines = []
       program.lines.each do |line|
@@ -338,19 +339,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           next unless line.include?(old_name)
 
           # old_name between at least 1 character, with the exception of '' on left and ' ' on right
-          characters.each do |lhs|
+          lhs_characters.each do |lhs|
             next unless line.include?("#{lhs}#{old_name}")
 
-            characters.each do |rhs|
+            rhs_characters.each do |rhs|
               next unless line.include?("#{lhs}#{old_name}#{rhs}")
               next if lhs == '' && ['', ' '].include?(rhs)
 
               line.gsub!("#{lhs}#{old_name}#{rhs}", "#{lhs}#{new_name}#{rhs}")
             end
           end
-        end
-        while line.include? "unit#{unit_number + 1}_unit#{unit_number + 1}_"
-          line.gsub!("unit#{unit_number + 1}_unit#{unit_number + 1}_", "unit#{unit_number + 1}_")
         end
         new_lines << line
       end
