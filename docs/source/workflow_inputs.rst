@@ -1345,6 +1345,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
 
 Electric Resistance
 ~~~~~~~~~~~~~~~~~~~
@@ -1748,6 +1749,7 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
          Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
 
@@ -2681,7 +2683,12 @@ If the in-unit distribution system is specified as recirculation, additional inf
   ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
   =================================  =======  =====  ===========  ========  ========  =====================================
 
-  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+  .. [#] | ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+         | - manual demand control: The pump only runs when a user presses a button indicating they are about to use hot water.
+         | - presence sensor demand control: The pump only runs when a sensor detects someone is present at the faucet.
+         | - temperature: The pump runs based on monitoring temperature at some point in the system.
+         | - timer: The pump is controlled by a timer.
+         | - no control: The pump runs continuously.
   .. [#] | If RecirculationPipingLoopLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          | RecircPipeL = 2.0 * (2.0 * (CFA / NCfl)^0.5 + 10.0 * NCfl + 5.0 * Bsmnt) - 20.0
          | where
@@ -2774,6 +2781,8 @@ If not entered, the simulation will not include solar hot water.
   .. [#] SystemType only choice is "hot water".
 
 Solar hot water systems can be described with either simple or detailed inputs.
+It is recommended to use detailed inputs and allow EnergyPlus to calculate the solar contribution to the hot water load;
+the simple inputs are provided if equivalent calculations are performed in another software tool.
 
 Simple Inputs
 ~~~~~~~~~~~~~
@@ -2792,6 +2801,10 @@ To define a simple solar hot water system, additional information is entered in 
   .. [#] ConnectedTo must reference a ``WaterHeatingSystem``.
          The referenced water heater cannot be a space-heating boiler nor attached to a desuperheater.
   .. [#] If ConnectedTo not provided, solar fraction will apply to all water heaters in the building.
+
+.. warning::
+
+  The solar fraction will reduce the hot water load equally for every EnergyPlus timestep (even during nights and cloudy events).
 
 Detailed Inputs
 ~~~~~~~~~~~~~~~
