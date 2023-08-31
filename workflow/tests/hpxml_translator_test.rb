@@ -30,11 +30,10 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
+        next if xml.include? 'base-multiple-buildings.xml' # Tested by test_multiple_buildings()
         # FIXME: Need to address these files
-        next if xml.include? 'real_homes'
+        # Misc:
         next if xml.include? 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump'
-        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple'
-        next if xml.include? 'base-multiple-buildings.xml'
         next if xml.include? '-dehumidifier'
         # DHW:
         next if xml.include?('-combi') || xml.include?('-indirect')
@@ -42,6 +41,10 @@ class HPXMLTest < Minitest::Test
         next if xml.include? '-dhw-multiple'
         next if xml.include? '-stratified'
         next if xml.include? '-solar'
+        next if xml.include? 'house026'
+        next if xml.include? 'house030'
+        next if xml.include? 'house039'
+        next if xml.include? 'house049'
         # Battery:
         # Both batteries do not charge equally because they both use
         # TrackFacilityElectricDemandStoreExcessOnSite; need to create
@@ -50,6 +53,9 @@ class HPXMLTest < Minitest::Test
         next if xml.include? 'battery'
         next if xml.include? 'base-misc-defaults'
         next if xml.include? 'base-residents-5.xml'
+        # Won't work until https://github.com/NREL/EnergyPlus/pull/10131
+        # is available in E+
+        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple'
 
         xmls << File.absolute_path(xml)
       end
@@ -384,8 +390,9 @@ class HPXMLTest < Minitest::Test
     if apply_unit_multiplier
       # Create copy of the HPXML where the number of Building elements is doubled
       # and each Building is assigned a unit multiplier of 5 (2x5=10).
-      hpxml = HPXML.new(hpxml_path: xml)
-      for i in 0..hpxml.buildings.size - 1
+      hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
+      n_bldgs = hpxml.buildings.size
+      for i in 0..n_bldgs - 1
         hpxml_bldg = hpxml.buildings[i]
         if hpxml_bldg.building_construction.number_of_units.nil?
           hpxml_bldg.building_construction.number_of_units = 1
@@ -411,9 +418,7 @@ class HPXMLTest < Minitest::Test
     # FIXME: Revert this when ALL timeseries outputs work
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly total --monthly fuels --monthly enduses --monthly systemuses --monthly emissions --monthly emissionfuels --monthly emissionenduses --monthly hotwater --monthly loads --monthly componentloads --monthly unmethours --monthly temperatures --monthly weather"
     # command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
-    if xml.include? 'base-multiple-buildings.xml'
-      command += ' -b MyBuilding'
-    elsif unit_multiplier > 1
+    if unit_multiplier > 1
       command += ' -b ALL'
     end
     success = system(command)

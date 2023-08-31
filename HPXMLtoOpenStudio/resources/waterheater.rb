@@ -308,7 +308,7 @@ class Waterheater
 
       mains_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Mains Water Temperature')
       mains_temp_sensor.setName('Mains Temperature')
-      mains_temp_sensor.setKeyName('*')
+      mains_temp_sensor.setKeyName('Environment')
 
       # Program
       combi_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)

@@ -328,7 +328,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unit_model.getEnergyManagementSystemSubroutines.each do |subroutine|
       ems_map[subroutine.name.to_s] = make_variable_name(subroutine.name, unit_number)
     end
-    
+
     # variables in program lines don't get updated automatically
     lhs_characters = [' ', ',', '(', ')', '+', '-', '*', '/', ';']
     rhs_characters = [''] + lhs_characters
