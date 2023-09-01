@@ -341,7 +341,7 @@ class HVAC
     pump.setMinimumFlowRate(0)
     pump.setPumpControlType('Intermittent')
     pump.addToNode(plant_loop.supplyInletNode)
-    if heat_pump.cooling_capacity > 1.0 * unit_multiplier
+    if heat_pump.cooling_capacity > 1.0
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')

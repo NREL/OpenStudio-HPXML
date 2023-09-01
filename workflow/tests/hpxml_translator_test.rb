@@ -416,7 +416,7 @@ class HPXMLTest < Minitest::Test
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
     # FIXME: Revert this when ALL timeseries outputs work
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly total --monthly fuels --monthly enduses --monthly systemuses --monthly emissions --monthly emissionfuels --monthly emissionenduses --monthly hotwater --monthly loads --monthly componentloads --monthly unmethours --monthly temperatures --monthly weather"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly total --monthly fuels --monthly enduses --monthly systemuses --monthly emissions --monthly emissionfuels --monthly emissionenduses --monthly hotwater --monthly loads --monthly componentloads --monthly unmethours --monthly temperatures --monthly weather --monthly airflows"
     # command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
     if unit_multiplier > 1
       command += ' -b ALL'

@@ -475,6 +475,19 @@ class Airflow
     manager.setName("#{vent_program.name} calling manager")
     manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     manager.addProgram(vent_program)
+
+    create_timeseries_flowrate_ems_output_var(model, nv_flow_actuator.name.to_s, vent_program)
+    create_timeseries_flowrate_ems_output_var(model, whf_flow_actuator.name.to_s, vent_program)
+  end
+
+  def self.create_timeseries_flowrate_ems_output_var(model, ems_var_name, ems_program)
+    # This is only used to report timeseries flow rates when requested
+    ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ems_var_name)
+    ems_output_var.setName("#{ems_var_name}_timeseries_outvar")
+    ems_output_var.setTypeOfDataInVariable('Averaged')
+    ems_output_var.setUpdateFrequency('ZoneTimestep')
+    ems_output_var.setEMSProgramOrSubroutineName(ems_program)
+    ems_output_var.setUnits('m^/s')
   end
 
   def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, unavailable_periods = [])
@@ -1630,6 +1643,9 @@ class Airflow
       infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
     end
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
+
+    create_timeseries_flowrate_ems_output_var(model, 'Qfan', infil_program)
+    create_timeseries_flowrate_ems_output_var(model, infil_flow_actuator.name.to_s, infil_program)
   end
 
   def self.calculate_fan_loads(infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, q_var, preconditioned = false)

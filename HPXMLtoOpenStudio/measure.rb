@@ -492,10 +492,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @nbeds = @hpxml_bldg.building_construction.number_of_bedrooms
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml_bldg)
 
-    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
-    HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # Apply unit multipliers to HVAC systems and water heaters
     HVAC.apply_unit_multiplier(@hpxml_bldg)
+    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
+    HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # Make adjustments for modeling purposes
     @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
     @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
@@ -2614,6 +2614,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     ocf = model.getOutputControlFiles
     ocf.setOutputAUDIT(@debug)
+    ocf.setOutputCSV(@debug)
     ocf.setOutputBND(@debug)
     ocf.setOutputEIO(@debug)
     ocf.setOutputESO(@debug)

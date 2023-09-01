@@ -511,11 +511,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Airflow outputs (timeseries only)
     if args[:include_timeseries_airflows]
-      @airflows.values.each do |airflow|
-        # FIXME: Need to address this
-        ems_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == airflow.ems_program }
-        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{airflow.ems_variable}_timeseries_outvar,#{airflow.ems_variable},Averaged,ZoneTimestep,#{ems_program.name},m^3/s;").get
-        result << OpenStudio::IdfObject.load("Output:Variable,*,#{airflow.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
+      @airflows.each do |_airflow_type, airflow|
+        ems_programs = @model.getEnergyManagementSystemPrograms.select { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == airflow.ems_program }
+        ems_programs.each do |ems_program|
+          unit_prefix = ems_programs.size > 1 ? "#{ems_program.name.to_s.split('_')[0]}_" : ''
+          result << OpenStudio::IdfObject.load("Output:Variable,*,#{unit_prefix}#{airflow.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
+        end
       end
     end
 
@@ -1103,7 +1104,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Airflows
     if args[:include_timeseries_airflows]
       @airflows.each do |_airflow_type, airflow|
-        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{airflow.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, args[:timeseries_frequency])
+        # FUTURE: This works but may incur a performance penalty.
+        # Switch to creating a single EMS program that sums the airflows from
+        # the individual dwelling units and then just grab those outputs here.
+        for i in 0..@hpxml_bldgs.size - 1
+          unit_prefix = @hpxml_bldgs.size > 1 ? "unit#{i + 1}_" : ''
+          unit_multiplier = @hpxml_bldgs[i].building_construction.number_of_units
+          values = get_report_variable_data_timeseries(['EMS'], ["#{unit_prefix}#{airflow.ems_variable}_timeseries_outvar"], UnitConversions.convert(unit_multiplier, 'm^3/s', 'cfm'), 0, args[:timeseries_frequency])
+          if airflow.timeseries_output.empty?
+            airflow.timeseries_output = values
+          else
+            airflow.timeseries_output = airflow.timeseries_output.zip(values).map { |x, y| x + y }
+          end
+        end
       end
     end
 
