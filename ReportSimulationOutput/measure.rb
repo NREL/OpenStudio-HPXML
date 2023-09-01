@@ -513,8 +513,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_airflows]
       @airflows.each do |_airflow_type, airflow|
         ems_programs = @model.getEnergyManagementSystemPrograms.select { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == airflow.ems_program }
-        ems_programs.each do |ems_program|
-          unit_prefix = ems_programs.size > 1 ? "#{ems_program.name.to_s.split('_')[0]}_" : ''
+        ems_programs.each_with_index do |_ems_program, i|
+          unit_prefix = ems_programs.size > 1 ? "unit#{i + 1}_" : ''
           result << OpenStudio::IdfObject.load("Output:Variable,*,#{unit_prefix}#{airflow.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
         end
       end

@@ -67,10 +67,11 @@ class HPXMLTest < Minitest::Test
     all_bill_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
-      all_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
+      results = _run_xml(xml, Parallel.worker_number)
+      all_results[xml_name], all_bill_results[xml_name], timeseries_results = results
 
       # Also run with a 10x unit multiplier and check how the results compare to the original run
-      _run_xml(xml, Parallel.worker_number, true, all_results[xml_name])
+      _run_xml(xml, Parallel.worker_number, true, all_results[xml_name], timeseries_results)
     end
 
     _write_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
@@ -386,7 +387,7 @@ class HPXMLTest < Minitest::Test
 
   private
 
-  def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil)
+  def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
     if apply_unit_multiplier
       # Create copy of the HPXML where the number of Building elements is doubled
       # and each Building is assigned a unit multiplier of 5 (2x5=10).
@@ -453,45 +454,50 @@ class HPXMLTest < Minitest::Test
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
     bill_results = _get_bill_results(bills_csv_path)
-    results = _get_simulation_results(annual_csv_path, xml, unit_multiplier)
-    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0])
+    results = _get_simulation_results(annual_csv_path)
+    timeseries_results = _get_simulation_timeseries_results(timeseries_csv_path)
+    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0], unit_multiplier)
     if unit_multiplier > 1
-      _check_unit_multiplier_results(results_1x, results, unit_multiplier)
+      _check_unit_multiplier_results(results_1x, results, timeseries_results_1x, timeseries_results, unit_multiplier)
     end
 
-    return results, bill_results
+    return results, bill_results, timeseries_results
   end
 
-  def _get_simulation_results(annual_csv_path, xml, unit_multiplier)
+  def _get_simulation_results(annual_csv_path)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
       next if row.nil? || (row.size < 2)
+      # FIXME: Remove these lines and prevent these results from being
+      # written to the CSV in the _write_results method instead. That
+      # way the results between 1x and 10x will be checked.
       next if row[0].start_with? 'System Use:'
       next if row[0].start_with? 'Emissions:'
 
       results[row[0]] = Float(row[1])
     end
 
-    # Check discrepancy between total load and sum of component loads
-    if not xml.include? 'ASHRAE_Standard_140'
-      sum_component_htg_loads = results.select { |k, _v| k.start_with? 'Component Load: Heating:' }.values.sum(0.0)
-      sum_component_clg_loads = results.select { |k, _v| k.start_with? 'Component Load: Cooling:' }.values.sum(0.0)
-      total_htg_load_delivered = results['Load: Heating: Delivered (MBtu)']
-      total_clg_load_delivered = results['Load: Cooling: Delivered (MBtu)']
-      abs_htg_load_delta = (total_htg_load_delivered - sum_component_htg_loads).abs
-      abs_clg_load_delta = (total_clg_load_delivered - sum_component_clg_loads).abs
-      avg_htg_load = [total_htg_load_delivered, sum_component_htg_loads].sum / 2.0
-      avg_clg_load = [total_clg_load_delivered, sum_component_clg_loads].sum / 2.0
-      if avg_htg_load > 0
-        abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
+    return results
+  end
+
+  def _get_simulation_timeseries_results(timeseries_csv_path)
+    results = {}
+    headers = nil
+    CSV.foreach(timeseries_csv_path).with_index do |row, i|
+      row = row[1..-1] # Skip time column
+      if i == 0 # Header row
+        headers = row
+        next
+      elsif i == 1 # Units row
+        headers = headers.zip(row).map { |header, units| "#{header} (#{units})" }
+        next
       end
-      if avg_clg_load > 0
-        abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
+
+      for i in 0..row.size - 1
+        results[headers[i]] = [] if results[headers[i]].nil?
+        results[headers[i]] << Float(row[i])
       end
-      # Check that the difference is less than 1.5 MBtu or less than 10%
-      assert((abs_htg_load_delta < 1.5 * unit_multiplier) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
-      assert((abs_clg_load_delta < 1.5 * unit_multiplier) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
     end
 
     return results
@@ -512,7 +518,7 @@ class HPXMLTest < Minitest::Test
     return results
   end
 
-  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg)
+  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg, unit_multiplier)
     assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
@@ -744,6 +750,27 @@ class HPXMLTest < Minitest::Test
     end
     assert_equal(0, num_invalid_output_meters)
     assert_equal(0, num_invalid_output_variables)
+
+    # Check discrepancy between total load and sum of component loads
+    if not hpxml_path.include? 'ASHRAE_Standard_140'
+      sum_component_htg_loads = results.select { |k, _v| k.start_with? 'Component Load: Heating:' }.values.sum(0.0)
+      sum_component_clg_loads = results.select { |k, _v| k.start_with? 'Component Load: Cooling:' }.values.sum(0.0)
+      total_htg_load_delivered = results['Load: Heating: Delivered (MBtu)']
+      total_clg_load_delivered = results['Load: Cooling: Delivered (MBtu)']
+      abs_htg_load_delta = (total_htg_load_delivered - sum_component_htg_loads).abs
+      abs_clg_load_delta = (total_clg_load_delivered - sum_component_clg_loads).abs
+      avg_htg_load = [total_htg_load_delivered, sum_component_htg_loads].sum / 2.0
+      avg_clg_load = [total_clg_load_delivered, sum_component_clg_loads].sum / 2.0
+      if avg_htg_load > 0
+        abs_htg_load_frac = abs_htg_load_delta / avg_htg_load
+      end
+      if avg_clg_load > 0
+        abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
+      end
+      # Check that the difference is less than 1.5 MBtu or less than 10%
+      assert((abs_htg_load_delta < 1.5 * unit_multiplier) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
+      assert((abs_clg_load_delta < 1.5 * unit_multiplier) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
+    end
 
     return if hpxml_bldg.building_construction.number_of_units > 1
 
@@ -1299,60 +1326,114 @@ class HPXMLTest < Minitest::Test
     GC.start()
   end
 
-  def _check_unit_multiplier_results(results_1x, results_10x, unit_multiplier)
+  def _check_unit_multiplier_results(annual_results_1x, annual_results_10x, timeseries_results_1x, timeseries_results_10x, unit_multiplier)
     # Check that results_10x are expected compared to results_1x
-    assert_equal(results_1x.keys.sort, results_10x.keys.sort)
-    results_1x.each do |key, val_1x|
-      if key.include?('HVAC Design Temperature')
-        assert_equal(val_1x, results_10x[key])
-      elsif key.include?('Unmet Hours')
-        # Check that the difference is less than 20 hrs
-        assert_in_delta(val_1x, results_10x[key], 20)
+
+    def get_tolerances(key)
+      # FIXME: Tighten these tolerances
+      if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
+        # Check that the energy difference is less than 0.5 MBtu or less than 5%
+        abs_delta_tol = 0.5 # MBtu
+        abs_frac_tol = 0.05
+        if key.include?('(kBtu)')
+          abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kBtu')
+        elsif key.include?('(kWh)')
+          abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kWh')
+        end
+      elsif key.include?('Peak Electricity:')
+        # Check that the peak electricity difference is less than 1000 W or less than 10%
+        # Wider tolerances than others because a small change in when an event (like the
+        # water heating firing) occurs can significantly impact the peak.
+        abs_delta_tol = 1000.0
+        abs_frac_tol = 0.1
+      elsif key.include?('Peak Load:')
+        # Check that the peak load difference is less than 0.5 kBtu/hr or less than 5%
+        abs_delta_tol = 0.5
+        abs_frac_tol = 0.05
+      elsif key.include?('Hot Water:')
+        # Check that the hot water usage difference is less than 10 gal/yr or less than 1%
+        abs_delta_tol = 10.0
+        abs_frac_tol = 0.01
+      elsif key.include?('Resilience: Battery')
+        # Check that the battery resilience difference is less than 1 hr or less than 1%
+        abs_delta_tol = 1.0
+        abs_frac_tol = 0.01
+      elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:')
+        # Check that the HVAC capacity/design load difference is less than 500 Btu/h or less than 1%
+        abs_delta_tol = 500.0
+        abs_frac_tol = 0.01
+      elsif key.include?('Airflow:')
+        # Check that airflow rate difference is less than 0.1 cfm or less than 1%
+        abs_delta_tol = 0.1
+        abs_frac_tol = 0.01
+      elsif key.include?('Unmet Hours:')
+        # Check that the unmet hours difference is less than 20 hrs
+        abs_delta_tol = 20
+        abs_frac_tol = nil
+      elsif key.include?('HVAC Design Temperature:') || key.include?('Weather:')
+        # Check that there is no difference
+        abs_delta_tol = 0
+        abs_frac_tol = nil
       else
-        # Compare 10 * 1x results to 10x results
-        abs_val_delta = (val_1x * unit_multiplier - results_10x[key]).abs
-        avg_val = [val_1x * unit_multiplier, results_10x[key]].sum / 2.0
-        if avg_val > 0
-          abs_val_frac = abs_val_delta / avg_val
-        end
-        # FIXME: Tighten these tolerances
-        if key.include?('(MBtu)')
-          # Check that the energy difference is less than 0.5 MBtu or less than 5%
-          abs_delta_tol = 0.5
-          abs_frac_tol = 0.05
-        elsif key.include?('Peak Electricity')
-          # Check that the peak electricity difference is less than 1000 W or less than 10%
-          # Wider tolerances than others because a small change in when an event (like the
-          # water heating firing) occurs can significantly impact the peak.
-          abs_delta_tol = 1000.0
-          abs_frac_tol = 0.1
-        elsif key.include?('Peak Load')
-          # Check that the peak load difference is less than 0.5 kBtu/hr or less than 5%
-          abs_delta_tol = 0.5
-          abs_frac_tol = 0.05
-        elsif key.include?('Hot Water')
-          # Check that the hot water usage difference is less than 10 gal/yr or less than 1%
-          abs_delta_tol = 10.0
-          abs_frac_tol = 0.01
-        elsif key.include?('Resilience: Battery')
-          # Check that the battery resilience difference is less than 1 hr or less than 1%
-          next # FIXME: Need to address
-          abs_delta_tol = 1.0
-          abs_frac_tol = 0.01
-        elsif key.include?('HVAC Capacity') || key.include?('HVAC Design Load')
-          # Check that the HVAC capacity/design load difference is less than 500 Btu/h or less than 1%
-          abs_delta_tol = 500.0
-          abs_frac_tol = 0.01
-        else
-          fail "Unexpected results key: #{key}."
-        end
-        # Uncomment this line to debug:
-        # puts "[#{key}] 1x=#{val_1x * unit_multiplier} 10x=#{results_10x[key]}"
-        assert((abs_val_delta < abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac < abs_frac_tol))
+        fail "Unexpected results key: #{key}."
       end
+
+      return abs_delta_tol, abs_frac_tol
     end
 
-    # FIXME: Compare timeseries output too
+    # Number of systems and thermal zones change between the 1x and 10x runs,
+    # so remove these from the comparison
+    ['System Use:', 'Temperature:'].each do |key|
+      annual_results_1x.delete_if { |k, _v| k.start_with? key }
+      annual_results_10x.delete_if { |k, _v| k.start_with? key }
+      timeseries_results_1x.delete_if { |k, _v| k.start_with? key }
+      timeseries_results_10x.delete_if { |k, _v| k.start_with? key }
+    end
+
+    # Compare annual and timeseries results
+    assert_equal(annual_results_1x.keys.sort, annual_results_10x.keys.sort)
+    assert_equal(timeseries_results_1x.keys.sort, timeseries_results_10x.keys.sort)
+
+    { annual_results_1x => annual_results_10x,
+      timeseries_results_1x => timeseries_results_10x }.each do |results_1x, results_10x|
+      results_1x.each do |key, vals_1x|
+        next if key.include?('Resilience: Battery') # FIXME: Need to address
+
+        abs_delta_tol, abs_frac_tol = get_tolerances(key)
+        vals_10x = results_10x[key]
+        if not vals_1x.is_a? Array
+          vals_1x = [vals_1x]
+          vals_10x = [vals_10x]
+        end
+
+        vals_1x.zip(vals_10x).each do |val_1x, val_10x|
+          if not (key.include?('Unmet Hours') ||
+                  key.include?('HVAC Design Temperature') ||
+                  key.include?('Weather'))
+            # These outputs shouldn't change based on the unit multiplier
+            val_1x *= unit_multiplier
+          end
+
+          abs_val_delta = (val_1x - val_10x).abs
+          avg_val = [val_1x, val_10x].sum / 2.0
+          if avg_val > 0
+            abs_val_frac = abs_val_delta / avg_val
+          end
+
+          # Uncomment this line to debug:
+          # puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
+          if abs_frac_tol.nil?
+            if abs_delta_tol == 0
+              assert_equal(val_1x, val_10x)
+            else
+              assert_in_delta(val_1x, val_10x, abs_delta_tol)
+            end
+          else
+            assert((abs_val_delta < abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac < abs_frac_tol))
+          end
+        end
+      end
+    end
   end
 
   def _write_results(results, csv_out)
