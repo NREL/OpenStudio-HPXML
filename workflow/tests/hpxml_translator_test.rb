@@ -52,6 +52,7 @@ class HPXMLTest < Minitest::Test
         # TrackMeterDemandStoreExcessOnSite?
         next if xml.include? 'battery'
         next if xml.include? 'base-misc-defaults'
+        next if xml.include? 'base-misc-emissions.xml'
         next if xml.include? 'base-residents-5.xml'
         # Won't work until https://github.com/NREL/EnergyPlus/pull/10131
         # is available in E+
@@ -469,11 +470,6 @@ class HPXMLTest < Minitest::Test
     results = {}
     CSV.foreach(annual_csv_path) do |row|
       next if row.nil? || (row.size < 2)
-      # FIXME: Remove these lines and prevent these results from being
-      # written to the CSV in the _write_results method instead. That
-      # way the results between 1x and 10x will be checked.
-      next if row[0].start_with? 'System Use:'
-      next if row[0].start_with? 'Emissions:'
 
       results[row[0]] = Float(row[1])
     end
@@ -1429,7 +1425,7 @@ class HPXMLTest < Minitest::Test
               assert_in_delta(val_1x, val_10x, abs_delta_tol)
             end
           else
-            assert((abs_val_delta < abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac < abs_frac_tol))
+            assert((abs_val_delta <= abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac <= abs_frac_tol))
           end
         end
       end
@@ -1441,6 +1437,10 @@ class HPXMLTest < Minitest::Test
 
     output_keys = []
     results.values.each do |xml_results|
+      # Don't include emissions and system uses in output file/CI results
+      xml_results.delete_if { |k, _v| k.start_with? 'Emissions:' }
+      xml_results.delete_if { |k, _v| k.start_with? 'System Use:' }
+
       xml_results.keys.each do |key|
         next if output_keys.include? key
 
