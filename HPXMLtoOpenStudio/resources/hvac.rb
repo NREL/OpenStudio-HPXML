@@ -2883,7 +2883,6 @@ class HVAC
     end
 
     clg_coil = nil
-    constant_table = nil
     crankcase_heater_temp = 50 # F
     for i in 0..(clg_ap.num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
@@ -2981,7 +2980,6 @@ class HVAC
     end
 
     htg_coil = nil
-    constant_table = nil
     crankcase_heater_temp = 50 # F
     for i in 0..(htg_ap.num_speeds - 1)
       if not heating_system.heating_detailed_performance_data.empty?
@@ -3160,10 +3158,13 @@ class HVAC
     hvac_ap = hvac_system.additional_properties
 
     if use_eer_cop
+      # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      # Ductless, installed and rated value should be equal
-      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
+      # Ductless
+      # Should typically have the same fan power as installed, but we need to use a fixed value
+      # so that, e.g., grade 3 installation quality (0.58 W/cfm) has the appropriate effect.
+      hvac_ap.fan_power_rated = 0.07 # W/cfm
     else
       # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
       if hvac_system.cooling_efficiency_seer <= 14
