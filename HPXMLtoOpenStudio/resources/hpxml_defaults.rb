@@ -657,6 +657,10 @@ class HPXMLDefaults
         roof.radiant_barrier = false
         roof.radiant_barrier_isdefaulted = true
       end
+      if roof.radiant_barrier && roof.radiant_barrier_location.nil?
+        roof.radiant_barrier_location = HPXML::RadiantBarrierLocationTopsideOfTrussUnderSheathing
+        roof.radiant_barrier_location_isdefaulted = true
+      end
       if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
         roof.radiant_barrier_grade = 1
         roof.radiant_barrier_grade_isdefaulted = true

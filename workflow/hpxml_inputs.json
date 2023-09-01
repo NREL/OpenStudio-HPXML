@@ -738,6 +738,11 @@
     "roof_radiant_barrier": true,
     "roof_radiant_barrier_grade": 2
   },
+  "sample_files/base-atticroof-radiant-barrier-location.xml": {
+    "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
+    "roof_radiant_barrier": true,
+    "roof_radiant_barrier_location": "top side of truss under sheathing"
+  },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "ceiling_assembly_r": 2.1,

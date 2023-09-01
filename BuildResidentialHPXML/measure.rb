@@ -632,6 +632,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    roof_radiant_barrier_location_choices = OpenStudio::StringVector.new
+    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationUndersideOfRafters
+    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationAtticFloor
+    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationBelowBottomChordOfTruss
+    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationTopsideOfTrussUnderSheathing
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_location', roof_radiant_barrier_location_choices, false)
+    arg.setDisplayName('Roof: Radiant Barrier Location')
+    arg.setDescription('The location of the radiant barrier. If not provided, the OS-HPXML default is used.')
+    arg.setDefaultValue(HPXML::RadiantBarrierLocationTopsideOfTrussUnderSheathing)
+    args << arg
+
+
     roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
     roof_radiant_barrier_grade_choices << '1'
     roof_radiant_barrier_grade_choices << '2'
@@ -4044,6 +4057,9 @@ class HPXMLFile
       end
 
       radiant_barrier = args[:roof_radiant_barrier]
+      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_location].is_initialized
+        radiant_barrier_location = args[:roof_radiant_barrier_location].get
+      end
       if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
         radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
       end
@@ -4062,6 +4078,7 @@ class HPXMLFile
                       roof_color: roof_color,
                       pitch: args[:geometry_roof_pitch],
                       radiant_barrier: radiant_barrier,
+                      radiant_barrier_location: radiant_barrier_location,
                       radiant_barrier_grade: radiant_barrier_grade,
                       insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml.roofs[-1].id

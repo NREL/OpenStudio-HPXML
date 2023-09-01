@@ -270,6 +270,10 @@ class HPXML < Object
   PVTrackingType1Axis = '1-axis'
   PVTrackingType1AxisBacktracked = '1-axis backtracked'
   PVTrackingType2Axis = '2-axis'
+  RadiantBarrierLocationUndersideOfRafters = 'underside of rafters'
+  RadiantBarrierLocationAtticFloor = 'attic floor'
+  RadiantBarrierLocationBelowBottomChordOfTruss = 'below bottom chord of truss'
+  RadiantBarrierLocationTopsideOfTrussUnderSheathing = 'top side of truss under sheathing'
   ResidentialTypeApartment = 'apartment unit'
   ResidentialTypeManufactured = 'manufactured home'
   ResidentialTypeSFA = 'single-family attached'
@@ -2238,7 +2242,7 @@ class HPXML < Object
 
   class Roof < BaseElement
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
-             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
+             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier, :radiant_barrier_location,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
              :insulation_continuous_r_value, :radiant_barrier_grade, :insulation_grade,
              :interior_finish_type, :interior_finish_thickness, :framing_factor,
