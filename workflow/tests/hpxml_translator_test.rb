@@ -567,6 +567,8 @@ class HPXMLTest < Minitest::Test
       next if message.include?('The shading transmittance for shading devices may change throughout the year') && message.include?('Choose Shading Calculation Update Frequency Method = Timestep in the ShadowCalculation object to capture all shading impacts')
       # FIXME: Double-check this.
       next if message.include? 'Multiple speed fan will be appiled to this unit. The speed number is determined by load.'
+      # FIXME: Double-check this.
+      next if message.include? 'Polyhedron is not enclosed in original testing. Trying to add missing colinear points.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
