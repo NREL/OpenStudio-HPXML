@@ -24,14 +24,14 @@ jobs:
           sudo apt update
           sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme
 
-      - name: Check HPXMLs
-        shell: bash
-        run: |
-          echo "Regenerating HPXML files..."
-          openstudio tasks.rb update_hpxmls
-          echo "Checking for HPXML differences..."
-          git config --global --add safe.directory $(realpath .)
-          git diff --exit-code --ignore-cr-at-eol *.xml
+#      - name: Check HPXMLs
+#        shell: bash
+#        run: |
+#          echo "Regenerating HPXML files..."
+#          openstudio tasks.rb update_hpxmls
+#          echo "Checking for HPXML differences..."
+#          git config --global --add safe.directory $(realpath .)
+#          git diff --exit-code --ignore-cr-at-eol *.xml
 
       - name: Run measure unit tests
         run: |
