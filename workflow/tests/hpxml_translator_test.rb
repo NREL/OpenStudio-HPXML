@@ -457,6 +457,8 @@ class HPXMLTest < Minitest::Test
       next if message.start_with? 'Info: '
       next if message.start_with? 'Executing command'
       next if message.include? 'Could not find state average'
+      # FIXME: Double-check this.
+      next if message.include? 'Polyhedron is not enclosed in original testing. Trying to add missing colinear points.'
 
       if hpxml.clothes_washers.empty?
         next if message.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
@@ -567,8 +569,6 @@ class HPXMLTest < Minitest::Test
       next if message.include?('The shading transmittance for shading devices may change throughout the year') && message.include?('Choose Shading Calculation Update Frequency Method = Timestep in the ShadowCalculation object to capture all shading impacts')
       # FIXME: Double-check this.
       next if message.include? 'Multiple speed fan will be appiled to this unit. The speed number is determined by load.'
-      # FIXME: Double-check this.
-      next if message.include? 'Polyhedron is not enclosed in original testing. Trying to add missing colinear points.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
