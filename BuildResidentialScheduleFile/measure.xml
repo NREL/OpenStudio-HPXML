@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>eef5a8ee-8396-415f-b0b2-04d0f3e4e108</version_id>
-  <version_modified>2023-09-05T20:47:06Z</version_modified>
+  <version_id>be54fce8-de7a-46b1-a1ba-ec86f5cb12a7</version_id>
+  <version_modified>2023-09-05T21:27:45Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -71,6 +71,14 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>building_id</name>
+      <display_name>BuildingID</display_name>
+      <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to apply schedules to all the HPXML Buildings (dwelling units) of a multifamily building.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
   </arguments>
   <outputs />
   <provenances />
@@ -94,7 +102,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>50A182A0</checksum>
+      <checksum>A1DF0987</checksum>
     </file>
     <file>
       <filename>README.md</filename>
@@ -892,7 +900,7 @@
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5E289C51</checksum>
+      <checksum>7BA678BD</checksum>
     </file>
   </files>
 </measure>

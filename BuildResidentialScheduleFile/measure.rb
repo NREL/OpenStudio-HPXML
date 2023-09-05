@@ -68,10 +68,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    # arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
-    # arg.setDisplayName('BuildingID')
-    # arg.setDescription("The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to run all the HPXML Buildings (dwelling units) of a multifamily building in a single model.")
-    # args << arg
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
+    arg.setDisplayName('BuildingID')
+    arg.setDescription("The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to apply schedules to all the HPXML Buildings (dwelling units) of a multifamily building.")
+    args << arg
 
     return args
   end
@@ -104,22 +104,27 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
 
-    # FIXME: Relax this constraint (using a new building_id measure argument?)
-    # if hpxml.buildings.size > 1
-    # runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
-    # return false
-    # end
-    # hpxml_bldg = hpxml.buildings[0]
-
     debug = false
     if args[:debug].is_initialized
       debug = args[:debug].get
     end
     args[:debug] = debug
 
+    if hpxml.buildings.size > 1 && !args[:building_id].is_initialized
+      fail "Argument 'building_id' required if there are multiple Building elements in the HPXML file."
+    end
+
     doc = XMLHelper.parse_file(hpxml_path)
     hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
     hpxml.buildings.each do |hpxml_bldg|
+      building_id = hpxml_bldg.building_id
+
+      if hpxml.buildings.size > 1
+        if args[:building_id].get != 'ALL'
+          next if args[:building_id].get != building_id
+        end
+      end
+
       # exit if number of occupants is zero
       if hpxml_bldg.building_occupancy.number_of_residents == 0
         runner.registerInfo('Number of occupants set to zero; skipping generation of stochastic schedules.')
@@ -135,7 +140,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       return false if not success
 
       XMLHelper.get_elements(hpxml_doc, 'Building').each do |building|
-        next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') != hpxml_bldg.building_id
+        next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') != building_id
 
         # modify the hpxml with the schedules path
         extension = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'extension'])
