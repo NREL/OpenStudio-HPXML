@@ -2496,7 +2496,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @loads[LT::HeatingHeatPumpBackup] = Load.new(variables: get_object_outputs(LT, LT::HeatingHeatPumpBackup))
     @loads[LT::Cooling] = Load.new(ems_variable: 'loads_clg_tot')
     @loads[LT::HotWaterDelivered] = Load.new(variables: get_object_outputs(LT, LT::HotWaterDelivered))
-    # FIXME: The loads below do not incorporate the unit multiplier
     @loads[LT::HotWaterTankLosses] = Load.new(variables: get_object_outputs(LT, LT::HotWaterTankLosses),
                                               is_negative: true)
     @loads[LT::HotWaterDesuperheater] = Load.new(variables: get_object_outputs(LT, LT::HotWaterDesuperheater))
