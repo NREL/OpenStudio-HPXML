@@ -1397,10 +1397,6 @@ class SchedulesFile
     export()
   end
 
-  def set_unit_model(unit_model)
-    @model = unit_model
-  end
-
   def nil?
     if @schedules.nil?
       return true

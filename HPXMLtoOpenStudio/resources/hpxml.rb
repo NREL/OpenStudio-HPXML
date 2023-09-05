@@ -1076,7 +1076,7 @@ class HPXML < Object
   end
 
   class Building < BaseElement
-    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction,
+    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :schedules,
                    :climate_and_risk_zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
@@ -1143,6 +1143,7 @@ class HPXML < Object
       @neighbor_buildings.to_doc(building)
       @building_occupancy.to_doc(building)
       @building_construction.to_doc(building)
+      @schedules.to_doc(building)
       @climate_and_risk_zones.to_doc(building)
       @air_infiltration_measurements.to_doc(building)
       @air_infiltration.to_doc(building)
@@ -1214,6 +1215,7 @@ class HPXML < Object
       @neighbor_buildings = NeighborBuildings.new(self, building)
       @building_occupancy = BuildingOccupancy.new(self, building)
       @building_construction = BuildingConstruction.new(self, building)
+      @schedules = Schedules.new(self, building)
       @climate_and_risk_zones = ClimateandRiskZones.new(self, building)
       @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, building)
       @air_infiltration = AirInfiltration.new(self, building)
@@ -1901,6 +1903,37 @@ class HPXML < Object
       @building_footprint_area = XMLHelper.get_value(building_construction, 'BuildingFootprintArea', :float)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
+    end
+  end
+
+  class Schedules < BaseElement
+    ATTRS = [:schedules_filepaths]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
+        bldg_summary = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary'])
+        extension = XMLHelper.create_elements_as_needed(bldg_summary, ['extension'])
+        @schedules_filepaths.each do |schedules_filepath|
+          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+        end
+      end
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      extension = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary/extension')
+      return if extension.nil?
+
+      @schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
     end
   end
 
