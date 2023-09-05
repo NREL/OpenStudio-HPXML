@@ -68,6 +68,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    # arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
+    # arg.setDisplayName('BuildingID')
+    # arg.setDescription("The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file. Use 'ALL' to run all the HPXML Buildings (dwelling units) of a multifamily building in a single model.")
+    # args << arg
+
     return args
   end
 
@@ -97,41 +102,54 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:hpxml_output_path] = hpxml_output_path
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
 
     # FIXME: Relax this constraint (using a new building_id measure argument?)
-    if hpxml.buildings.size > 1
-      runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
-      return false
+    # if hpxml.buildings.size > 1
+    # runner.registerError('Cannot currently handle an HPXML with multiple Building elements.')
+    # return false
+    # end
+    # hpxml_bldg = hpxml.buildings[0]
+
+    debug = false
+    if args[:debug].is_initialized
+      debug = args[:debug].get
     end
-    hpxml_bldg = hpxml.buildings[0]
+    args[:debug] = debug
 
-    # exit if number of occupants is zero
-    if hpxml_bldg.building_occupancy.number_of_residents == 0
-      runner.registerInfo('Number of occupants set to zero; skipping generation of stochastic schedules.')
-      return true
-    end
-
-    # create EpwFile object
-    epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
-    epw_file = OpenStudio::EpwFile.new(epw_path)
-
-    # create the schedules
-    success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
-    return false if not success
-
-    # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
-    extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['Building', 'BuildingDetails', 'BuildingSummary', 'extension'])
-    schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
-    if !schedules_filepaths.include?(args[:output_csv_path])
-      XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
-    end
+    hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
+    hpxml.buildings.each do |hpxml_bldg|
+      # exit if number of occupants is zero
+      if hpxml_bldg.building_occupancy.number_of_residents == 0
+        runner.registerInfo('Number of occupants set to zero; skipping generation of stochastic schedules.')
+        return true
+      end
 
-    # write out the modified hpxml
-    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
-      XMLHelper.write_file(doc, hpxml_output_path)
-      runner.registerInfo("Wrote file: #{hpxml_output_path}")
+      # create EpwFile object
+      epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
+      epw_file = OpenStudio::EpwFile.new(epw_path)
+
+      # create the schedules
+      success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
+      return false if not success
+
+      XMLHelper.get_elements(hpxml_doc, 'Building').each do |building|
+        next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') != hpxml_bldg.building_id
+
+        # modify the hpxml with the schedules path
+        extension = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'extension'])
+        schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
+        if !schedules_filepaths.include?(args[:output_csv_path])
+          XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
+        end
+
+        # write out the modified hpxml
+        if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
+          XMLHelper.write_file(doc, hpxml_output_path)
+          runner.registerInfo("Wrote file: #{hpxml_output_path}")
+        end
+      end
     end
 
     return true
@@ -198,12 +216,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:geometry_num_occupants] = hpxml_bldg.building_occupancy.number_of_residents
     end
     args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
-
-    debug = false
-    if args[:debug].is_initialized
-      debug = args[:debug].get
-    end
-    args[:debug] = debug
   end
 end
 
