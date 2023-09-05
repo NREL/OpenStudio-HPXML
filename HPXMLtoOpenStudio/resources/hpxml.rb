@@ -1930,10 +1930,7 @@ class HPXML < Object
     def from_doc(building)
       return if building.nil?
 
-      extension = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary/extension')
-      return if extension.nil?
-
-      @schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
+      @schedules_filepaths = XMLHelper.get_values(building, 'BuildingDetails/BuildingSummary/extension/SchedulesFilePath', :string)
     end
   end
 

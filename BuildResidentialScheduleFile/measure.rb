@@ -122,7 +122,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
-    extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
+    extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['Building', 'BuildingDetails', 'BuildingSummary', 'extension'])
     schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
     if !schedules_filepaths.include?(args[:output_csv_path])
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)

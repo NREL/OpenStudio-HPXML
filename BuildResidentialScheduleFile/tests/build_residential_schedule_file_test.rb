@@ -43,7 +43,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -84,7 +84,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('ColumnNames') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -127,7 +127,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -164,7 +164,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -195,7 +195,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -231,7 +231,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.header.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -279,7 +279,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(1, info_msgs.size)
     assert(info_msgs.any? { |info_msg| info_msg.include?('Number of occupants set to zero; skipping generation of stochastic schedules.') })
     assert(!File.exist?(@args_hash['output_csv_path']))
-    assert_empty(hpxml.header.schedules_filepaths)
+    assert_empty(hpxml.buildings[0].schedules.schedules_filepaths)
   end
 
   def _test_measure(expect_fail: false)
