@@ -157,6 +157,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
+          schedules_file.set_unit_model(unit_model) # otherwise we find Schedule:File in @model (from create_schedule_file) without External:File
           create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
