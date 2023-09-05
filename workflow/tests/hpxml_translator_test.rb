@@ -246,54 +246,55 @@ class HPXMLTest < Minitest::Test
     assert_equal(base_results, default_results)
   end
 
-  # def test_template_osws
-    # # Check that simulation works using template-*.osw
-    # require 'json'
+  def test_template_osws
+    skip # FIXME: Temporarily disabled
+    # Check that simulation works using template-*.osw
+    require 'json'
 
-    # ['template-run-hpxml.osw',
-     # 'template-run-hpxml-with-stochastic-occupancy.osw',
-     # 'template-run-hpxml-with-stochastic-occupancy-subset.osw',
-     # 'template-build-and-run-hpxml-with-stochastic-occupancy.osw'].each do |osw_name|
-      # osw_path = File.join(File.dirname(__FILE__), '..', osw_name)
+    ['template-run-hpxml.osw',
+     'template-run-hpxml-with-stochastic-occupancy.osw',
+     'template-run-hpxml-with-stochastic-occupancy-subset.osw',
+     'template-build-and-run-hpxml-with-stochastic-occupancy.osw'].each do |osw_name|
+      osw_path = File.join(File.dirname(__FILE__), '..', osw_name)
 
-      # # Create derivative OSW for testing
-      # osw_path_test = osw_path.gsub('.osw', '_test.osw')
-      # FileUtils.cp(osw_path, osw_path_test)
+      # Create derivative OSW for testing
+      osw_path_test = osw_path.gsub('.osw', '_test.osw')
+      FileUtils.cp(osw_path, osw_path_test)
 
-      # # Turn on debug mode
-      # json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-      # measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
-      # json[:steps][measure_index][:arguments][:debug] = true
+      # Turn on debug mode
+      json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+      measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
+      json[:steps][measure_index][:arguments][:debug] = true
 
-      # if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-        # # CI checks out the repo as "project", so update dir name
-        # json[:steps][measure_index][:measure_dir_name] = 'project'
-      # end
+      if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+        # CI checks out the repo as "project", so update dir name
+        json[:steps][measure_index][:measure_dir_name] = 'project'
+      end
 
-      # File.open(osw_path_test, 'w') do |f|
-        # f.write(JSON.pretty_generate(json))
-      # end
+      File.open(osw_path_test, 'w') do |f|
+        f.write(JSON.pretty_generate(json))
+      end
 
-      # command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
-      # system(command, err: File::NULL)
+      command = "\"#{OpenStudio.getOpenStudioCLI}\" run -w \"#{osw_path_test}\""
+      system(command, err: File::NULL)
 
-      # # Check for output files
-      # assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
-      # assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
+      # Check for output files
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv'))
 
-      # # Check for debug files
-      # assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
-      # hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
-      # assert(File.exist? hpxml_defaults_path)
+      # Check for debug files
+      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'in.osm'))
+      hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+      assert(File.exist? hpxml_defaults_path)
 
-      # # Cleanup
-      # File.delete(osw_path_test)
-      # xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built.xml')
-      # File.delete(xml_path_test) if File.exist?(xml_path_test)
-      # xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built-stochastic-schedules.xml')
-      # File.delete(xml_path_test) if File.exist?(xml_path_test)
-    # end
-  # end
+      # Cleanup
+      File.delete(osw_path_test)
+      xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built.xml')
+      File.delete(xml_path_test) if File.exist?(xml_path_test)
+      xml_path_test = File.join(File.dirname(__FILE__), '..', 'run', 'built-stochastic-schedules.xml')
+      File.delete(xml_path_test) if File.exist?(xml_path_test)
+    end
+  end
 
   def test_multiple_building_ids
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
