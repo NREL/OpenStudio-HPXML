@@ -461,9 +461,6 @@ class HPXMLTest < Minitest::Test
       next if message.start_with? 'Info: '
       next if message.start_with? 'Executing command'
       next if message.include? 'Could not find state average'
-      # FIXME: Double-check these
-      next if message.include? 'Polyhedron is not enclosed in original testing. Trying to add missing colinear points.'
-      next if message.include? 'Polyhedron is not enclosed.'
 
       if hpxml.clothes_washers.empty?
         next if message.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
