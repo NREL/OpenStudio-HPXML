@@ -359,6 +359,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unit_model.objects.each do |model_object|
       next if model_object.name.nil?
 
+      if unit_number == 0
+        # OpenStudio is unhappy if these schedules are renamed
+        next if model_object.name.to_s == unit_model.alwaysOnContinuousSchedule.name.to_s
+        next if model_object.name.to_s == unit_model.alwaysOnDiscreteSchedule.name.to_s
+        next if model_object.name.to_s == unit_model.alwaysOffDiscreteSchedule.name.to_s
+      end
+
       model_object.setName(make_variable_name(model_object.name, unit_number))
     end
   end
