@@ -589,6 +589,9 @@ class HPXMLTest < Minitest::Test
       if hpxml_path.include? 'base-location-AMY-2012.xml'
         next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
       end
+      if hpxml_bldg.building_construction.number_of_units > 1
+        next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
+      end
 
       # FIXME: Revert this eventually
       next if message.include? 'Cannot currently handle an HPXML with multiple Building elements'
