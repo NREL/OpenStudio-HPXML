@@ -1076,7 +1076,7 @@ class HPXML < Object
   end
 
   class Building < BaseElement
-    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :schedules,
+    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :header,
                    :climate_and_risk_zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
@@ -1143,7 +1143,7 @@ class HPXML < Object
       @neighbor_buildings.to_doc(building)
       @building_occupancy.to_doc(building)
       @building_construction.to_doc(building)
-      @schedules.to_doc(building)
+      @header.to_doc(building)
       @climate_and_risk_zones.to_doc(building)
       @air_infiltration_measurements.to_doc(building)
       @air_infiltration.to_doc(building)
@@ -1215,7 +1215,7 @@ class HPXML < Object
       @neighbor_buildings = NeighborBuildings.new(self, building)
       @building_occupancy = BuildingOccupancy.new(self, building)
       @building_construction = BuildingConstruction.new(self, building)
-      @schedules = Schedules.new(self, building)
+      @header = BuildingHeader.new(self, building)
       @climate_and_risk_zones = ClimateandRiskZones.new(self, building)
       @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, building)
       @air_infiltration = AirInfiltration.new(self, building)
@@ -1906,7 +1906,7 @@ class HPXML < Object
     end
   end
 
-  class Schedules < BaseElement
+  class BuildingHeader < BaseElement
     ATTRS = [:schedules_filepaths]
     attr_accessor(*ATTRS)
 

@@ -43,7 +43,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -84,7 +84,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('ColumnNames') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -127,7 +127,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -164,7 +164,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -195,7 +195,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -231,7 +231,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].schedules.schedules_filepaths,
+                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -279,7 +279,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(1, info_msgs.size)
     assert(info_msgs.any? { |info_msg| info_msg.include?('Number of occupants set to zero; skipping generation of stochastic schedules.') })
     assert(!File.exist?(@args_hash['output_csv_path']))
-    assert_empty(hpxml.buildings[0].schedules.schedules_filepaths)
+    assert_empty(hpxml.buildings[0].header.schedules_filepaths)
   end
 
   def test_multiple_buildings
@@ -299,8 +299,10 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
     hpxml.buildings.each do |hpxml_bldg|
+      next if hpxml_bldg.building_id != 'MyBuilding'
+
       sf = SchedulesFile.new(model: model,
-                             schedules_paths: hpxml_bldg.schedules.schedules_filepaths,
+                             schedules_paths: hpxml_bldg.header.schedules_filepaths,
                              year: 2007,
                              output_path: @tmp_schedule_file_path)
 
@@ -342,26 +344,26 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
       if building_id == @args_hash['building_id']
         sf = SchedulesFile.new(model: model,
-                               schedules_paths: hpxml_bldg.schedules.schedules_filepaths,
+                               schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                year: 2007,
                                output_path: @tmp_schedule_file_path)
 
-        assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(534, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnCookingRange, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(213, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(134, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesWasher, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(151, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(356, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnCookingRange, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(165, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(101, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesWasher, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(166, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(3250, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnCeilingFan, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(4840, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsOther, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(4840, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsTV, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(298, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(325, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
-        assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(226, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(244, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
+        assert_in_epsilon(894, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
         assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
       else
-        assert_empty(hpxml_bldg.schedules.schedules_filepaths)
+        assert_empty(hpxml_bldg.header.schedules_filepaths)
       end
     end
   end

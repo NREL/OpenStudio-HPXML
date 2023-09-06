@@ -4013,7 +4013,7 @@ class HPXMLFile
       schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
 
-    hpxml_bldg.schedules.schedules_filepaths = schedules_filepaths
+    hpxml_bldg.header.schedules_filepaths = schedules_filepaths
   end
 
   def self.set_climate_and_risk_zones(hpxml_bldg, args)

@@ -191,7 +191,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
     model, hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    schedules_paths = hpxml_bldg.schedules.schedules_filepaths.collect { |sfp|
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(args_hash['hpxml_path']),
                           'Schedules')
@@ -242,7 +242,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
                                          end_day: 28,
                                          natvent_availability: HPXML::ScheduleUnavailable)
 
-    schedules_paths = hpxml_bldg.schedules.schedules_filepaths.collect { |sfp|
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(args_hash['hpxml_path']),
                           'Schedules')
@@ -281,7 +281,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml'))
     model, hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    schedules_paths = hpxml_bldg.schedules.schedules_filepaths.collect { |sfp|
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(args_hash['hpxml_path']),
                           'Schedules')
@@ -322,7 +322,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-power-outage.xml'))
     model, hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    schedules_paths = hpxml_bldg.schedules.schedules_filepaths.collect { |sfp|
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(args_hash['hpxml_path']),
                           'Schedules')
@@ -375,7 +375,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
                                          end_day: 27,
                                          end_hour: 24)
 
-    schedules_paths = hpxml_bldg.schedules.schedules_filepaths.collect { |sfp|
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(args_hash['hpxml_path']),
                           'Schedules')

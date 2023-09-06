@@ -114,16 +114,26 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       fail "Argument 'building_id' required if there are multiple Building elements in the HPXML file."
     end
 
+    # random seed
+    if args[:schedules_random_seed].is_initialized
+      args[:random_seed] = args[:schedules_random_seed].get
+      runner.registerInfo("Retrieved the schedules random seed; setting it to #{args[:random_seed]}.")
+    else
+      args[:random_seed] = 1
+      runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
+    end
+
+    filename, ext = args[:output_csv_path].split('.')
+
     doc = XMLHelper.parse_file(hpxml_path)
     hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
-    hpxml.buildings.each do |hpxml_bldg|
+    hpxml.buildings.each_with_index do |hpxml_bldg, i|
       building_id = hpxml_bldg.building_id
 
-      if hpxml.buildings.size > 1
-        if args[:building_id].get != 'ALL'
-          next if args[:building_id].get != building_id
-        end
-      end
+      next if hpxml.buildings.size > 1 && args[:building_id].get != 'ALL' && args[:building_id].get != building_id
+
+      # deterministically vary schedules across building units
+      args[:random_seed] *= (i + 1)
 
       # exit if number of occupants is zero
       if hpxml_bldg.building_occupancy.number_of_residents == 0
@@ -134,6 +144,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       # create EpwFile object
       epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
       epw_file = OpenStudio::EpwFile.new(epw_path)
+
+      # output csv path
+      args[:output_csv_path] = "#{filename}.#{ext}"
+      if i > 0
+        bldg_no = "_#{i + 1}"
+        args[:output_csv_path] = "#{filename}#{bldg_no}.#{ext}"
+      end
 
       # create the schedules
       success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
@@ -211,8 +228,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:state] = 'CO'
     args[:state] = epw_file.stateProvinceRegion if Constants.StateCodesMap.keys.include?(epw_file.stateProvinceRegion)
     args[:state] = hpxml_bldg.state_code if !hpxml_bldg.state_code.nil?
-
-    args[:random_seed] = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
     args[:column_names] = args[:schedules_column_names].get.split(',').map(&:strip) if args[:schedules_column_names].is_initialized
 
     if hpxml_bldg.building_occupancy.number_of_residents.nil?
