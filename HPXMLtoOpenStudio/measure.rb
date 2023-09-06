@@ -130,6 +130,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
       weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
       epw_file = OpenStudio::EpwFile.new(epw_path)
+      hpxml.buildings.each_with_index do |hpxml_bldg, i|
+        next if i == 0
+        next if Location.get_epw_path(hpxml_bldg, hpxml_path) == epw_path
+
+        fail 'Weather station EPW filepath has different values across dwelling units.'
+      end
 
       # Apply HPXML defaults upfront; process schedules & emissions
       check_file_references(hpxml.header, hpxml_path)
@@ -216,15 +222,30 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
-    # FIXME: Need to throw a warning/error if different values between the model
-    # object and unit_model object.
+    uuid_regex = /\{(.*?)\}/
     unique_objects.each do |idd_obj, osm_class|
+      first_model_object = nil
       hpxml_osm_map.values.each do |unit_model|
         next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
 
-        unit_model_objects << unit_model.send("get#{osm_class}")
-        break
+        model_object = unit_model.send("get#{osm_class}")
+        if first_model_object.nil?
+          first_model_object = model_object
+        else
+          # Throw error if different values between this model_object and first_model_object
+          if model_object.to_s.gsub(uuid_regex, '') != first_model_object.to_s.gsub(uuid_regex, '')
+            fail "Unique object (#{idd_obj}) has different values across dwelling units."
+          end
+
+          # Need to check any referenced child objects too
+          if idd_obj == 'OS:Site:WaterMainsTemperature'
+            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
+              fail "Unique object (#{idd_obj}) has different values across dwelling units."
+            end
+          end
+        end
       end
+      unit_model_objects << first_model_object unless first_model_object.nil?
     end
 
     hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
@@ -395,7 +416,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Init
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
     set_defaults_and_globals()
-    # FIXME: Need to address this
     Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
 
@@ -529,7 +549,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_simulation_params(model)
-    # FIXME: Address this
     SimControls.apply(model, @hpxml_header, @hpxml_bldg)
   end
 
