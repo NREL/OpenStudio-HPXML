@@ -136,11 +136,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hpxml_sch_map = {}
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
         check_schedule_references(hpxml.header, hpxml_bldg.header, hpxml_path)
+        in_schedules_csv = 'in.schedules.csv'
+        if i > 0
+          in_schedules_csv = "in.schedules#{i + 1}.csv"
+        end
         schedules_file = SchedulesFile.new(runner: runner, model: model,
                                            schedules_paths: hpxml.header.schedules_filepaths + hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
-                                           output_path: File.join(output_dir, "in.schedules#{i + 1}.csv"))
+                                           output_path: File.join(output_dir, in_schedules_csv))
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
