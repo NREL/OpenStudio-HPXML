@@ -4236,8 +4236,6 @@ class HVAC
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
       htg_sys.electric_auxiliary_energy *= unit_multiplier unless htg_sys.electric_auxiliary_energy.nil?
       htg_sys.fan_watts *= unit_multiplier unless htg_sys.fan_watts.nil?
-      # FIXME: fan_coil_watts?
-      # FIXME: shared_loop_watts?
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity *= unit_multiplier
@@ -4245,8 +4243,6 @@ class HVAC
       clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
       clg_sys.integrated_heating_system_capacity *= unit_multiplier unless clg_sys.integrated_heating_system_capacity.nil?
       clg_sys.integrated_heating_system_airflow_cfm *= unit_multiplier unless clg_sys.integrated_heating_system_airflow_cfm.nil?
-      # FIXME: shared_loop_watts?
-      # FIXME: fan_coil_watts?
     end
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity *= unit_multiplier
@@ -4257,7 +4253,6 @@ class HVAC
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
-      # FIXME: shared_loop_watts?
     end
   end
 

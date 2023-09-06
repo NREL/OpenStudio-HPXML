@@ -200,8 +200,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_unit_model_to_model(model, hpxml_osm_map)
-    unit_model_objects = []
-
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
                        'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
                        'OS:OutputControl:Files' => 'OutputControlFiles',
@@ -222,70 +220,57 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
+    unit_model_objects = []
+    unique_handles_to_skip = []
     uuid_regex = /\{(.*?)\}/
     unique_objects.each do |idd_obj, osm_class|
-      first_model_object = nil
+      first_model_object_by_type = nil
       hpxml_osm_map.values.each do |unit_model|
         next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
 
         model_object = unit_model.send("get#{osm_class}")
-        if first_model_object.nil?
-          first_model_object = model_object
+
+        if first_model_object_by_type.nil?
+          # Retain object for model
+          unit_model_objects << model_object
+          first_model_object_by_type = model_object
+          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+            unit_model_objects << unit_model.getObjectsByName(model_object.temperatureSchedule.get.name.to_s)[0]
+          end
         else
-          # Throw error if different values between this model_object and first_model_object
-          if model_object.to_s.gsub(uuid_regex, '') != first_model_object.to_s.gsub(uuid_regex, '')
+          # Throw error if different values between this model_object and first_model_object_by_type
+          if model_object.to_s.gsub(uuid_regex, '') != first_model_object_by_type.to_s.gsub(uuid_regex, '')
             fail "Unique object (#{idd_obj}) has different values across dwelling units."
           end
 
-          # Need to check any referenced child objects too
-          if idd_obj == 'OS:Site:WaterMainsTemperature'
-            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
+          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object_by_type.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
               fail "Unique object (#{idd_obj}) has different values across dwelling units."
             end
           end
         end
+
+        unique_handles_to_skip << model_object.handle.to_s
+        if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+          unique_handles_to_skip << model_object.temperatureSchedule.get.handle.to_s
+        end
       end
-      unit_model_objects << first_model_object unless first_model_object.nil?
     end
 
     hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
       shift_geometry(unit_model, unit_number)
-
-      # Prefix all objects with name using unit number
-      # FUTURE: Create objects with unique names up front so we don't have to do this
       prefix_all_unit_model_objects(unit_model, unit_number)
 
+      # Handle remaining (non-unique) objects now
       unit_model.objects.each do |obj|
         next if unit_number > 0 && obj.to_Building.is_initialized
-
-        # Skip unique objects
-        is_unique = false
-        unique_objects.values.each do |osm_class|
-          next unless obj.send("to_#{osm_class}").is_initialized
-
-          is_unique = true
-          break
-        end
-        next if is_unique
+        next if unique_handles_to_skip.include? obj.handle.to_s
 
         unit_model_objects << obj
       end
     end
 
     model.addObjects(unit_model_objects, true)
-
-    # Remove duplicate lengthy tmains schedules
-    # FIXME: Develop a generic way to remove unused/duplicate schedules; maybe unused
-    # schedules will be correctly removed when the meta_measure.rb code is uncommented?
-    if model.getSiteWaterMainsTemperature.temperatureSchedule.is_initialized
-      preserve_sched_name = model.getSiteWaterMainsTemperature.temperatureSchedule.get.name.to_s
-    end
-    model.getScheduleIntervals.each do |sched|
-      next unless sched.name.to_s.include? 'mains_temperature_schedule'
-      next if sched.name.to_s == preserve_sched_name
-
-      sched.remove
-    end
   end
 
   def shift_geometry(unit_model, unit_number)
@@ -317,6 +302,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def prefix_all_unit_model_objects(unit_model, unit_number)
+    # Prefix all objects with name using unit number
+    # FUTURE: Create objects with unique names up front so we don't have to do this
+
     # EMS objects
     ems_map = {}
 
