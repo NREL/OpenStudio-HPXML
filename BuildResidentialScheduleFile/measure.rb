@@ -123,7 +123,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
     end
 
-    filename, ext = args[:output_csv_path].split('.')
+    filename, _ = args[:output_csv_path].split('.csv')
 
     doc = XMLHelper.parse_file(hpxml_path)
     hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
@@ -146,10 +146,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       epw_file = OpenStudio::EpwFile.new(epw_path)
 
       # output csv path
-      args[:output_csv_path] = "#{filename}.#{ext}"
+      args[:output_csv_path] = "#{filename}.csv"
       if i > 0
         bldg_no = "_#{i + 1}"
-        args[:output_csv_path] = "#{filename}#{bldg_no}.#{ext}"
+        args[:output_csv_path] = "#{filename}#{bldg_no}.csv"
       end
 
       # create the schedules

@@ -229,6 +229,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
+  # Logic that can only be applied based on file name
+  if ['base-schedules-detailed-occupancy-stochastic-hpxml-header.xml'].include? hpxml_file
+    hpxml.header.schedules_filepaths << '../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv'
+  end
+
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true

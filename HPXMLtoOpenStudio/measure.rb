@@ -134,13 +134,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # Apply HPXML defaults upfront; process schedules & emissions
       check_emissions_references(hpxml.header, hpxml_path)
       hpxml_sch_map = {}
-      hpxml.buildings.each do |hpxml_bldg|
-        check_schedule_references(hpxml_bldg.schedules, hpxml_path)
+      hpxml.buildings.each_with_index do |hpxml_bldg, i|
+        check_schedule_references(hpxml.header, hpxml_bldg.header, hpxml_path)
         schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                           schedules_paths: hpxml_bldg.header.schedules_filepaths,
+                                           schedules_paths: hpxml.header.schedules_filepaths + hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
-                                           output_path: File.join(output_dir, 'in.schedules.csv'))
+                                           output_path: File.join(output_dir, "in.schedules#{i + 1}.csv"))
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
@@ -461,9 +461,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def check_schedule_references(hpxml_schedules, hpxml_path)
+  def check_schedule_references(hpxml_header, hpxml_bldg_header, hpxml_path)
     # Check/update file references
-    hpxml_schedules.schedules_filepaths = hpxml_schedules.schedules_filepaths.collect { |sfp|
+    hpxml_header.schedules_filepaths = hpxml_header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
+    hpxml_bldg_header.schedules_filepaths = hpxml_bldg_header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(hpxml_path),
                           'Schedules')
