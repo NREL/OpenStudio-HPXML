@@ -1285,26 +1285,32 @@ class HPXML < Object
       return false
     end
 
-    # FIXME: Need to double-check this wrt/ multiple buildings
-    def has_fuel(fuel, hpxml_doc = nil)
-      # If calling multiple times, pass in hpxml_doc for better performance
-      if hpxml_doc.nil?
-        hpxml_doc = to_doc
-      end
-      ['HeatingSystemFuel',
-       'CoolingSystemFuel',
-       'HeatPumpFuel',
-       'BackupSystemFuel',
-       'FuelType',
-       'IntegratedHeatingSystemFuel',
-       'Heater/Type'].each do |fuel_name|
-        fuel = HPXML::HeaterTypeGas if fuel_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
-        if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
-          return true
+    def has_fuels(fuels_array, hpxml_doc)
+      # Returns a hash with whether each fuel in fuels_array exists
+      # in the HPXML Building
+      has_fuels = {}
+      fuels_array.each do |fuel|
+        has_fuels[fuel] = false
+        ['HeatingSystemFuel',
+         'CoolingSystemFuel',
+         'HeatPumpFuel',
+         'BackupSystemFuel',
+         'FuelType',
+         'IntegratedHeatingSystemFuel',
+         'Heater/Type'].each do |fuel_element_name|
+          if fuel_element_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
+            fuel_element_value = HPXML::HeaterTypeGas
+          else
+            fuel_element_value = fuel
+          end
+          if XMLHelper.has_element(hpxml_doc, "/HPXML/Building[BuildingID/@id='#{@building_id}']//#{fuel_element_name}[text() = '#{fuel_element_value}']")
+            has_fuels[fuel] = true
+            break
+          end
         end
       end
 
-      return false
+      return has_fuels
     end
 
     def predominant_heating_fuel
