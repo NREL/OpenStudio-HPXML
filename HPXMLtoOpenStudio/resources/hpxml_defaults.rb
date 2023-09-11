@@ -602,20 +602,36 @@ class HPXMLDefaults
   end
 
   def self.apply_foundations(hpxml)
-    return unless hpxml.has_location(HPXML::LocationCrawlspaceVented)
+    if hpxml.has_location(HPXML::LocationCrawlspaceVented)
+      vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+      if vented_crawls.empty?
+        hpxml.foundations.add(id: 'VentedCrawlspace',
+                              foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawls << hpxml.foundations[-1]
+      end
+      vented_crawls.each do |vented_crawl|
+        next unless vented_crawl.vented_crawlspace_sla.nil?
 
-    vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
-    if vented_crawls.empty?
-      hpxml.foundations.add(id: 'VentedCrawlspace',
-                            foundation_type: HPXML::FoundationTypeCrawlspaceVented)
-      vented_crawls << hpxml.foundations[-1]
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl.vented_crawlspace_sla_isdefaulted = true
+        break # EPvalidator.xml only allows a single ventilation rate
+      end
     end
-    vented_crawls.each do |vented_crawl|
-      next unless vented_crawl.vented_crawlspace_sla.nil?
 
-      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
-      vented_crawl.vented_crawlspace_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+    if hpxml.has_location(HPXML::LocationManufacturedHomeUnderBelly)
+      belly_and_wing_foundations = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+      if belly_and_wing_foundations.empty?
+        hpxml.foundations.add(id: 'BellyAndWing',
+                              foundation_type: HPXML::FoundationTypeBellyAndWing)
+        belly_and_wing_foundations << hpxml.foundations[-1]
+      end
+      belly_and_wing_foundations.each do |foundation|
+        next unless foundation.belly_wing_skirt_present.nil?
+
+        foundation.belly_wing_skirt_present_isdefaulted = true
+        foundation.belly_wing_skirt_present = true
+        break
+      end
     end
   end
 
@@ -858,6 +874,16 @@ class HPXMLDefaults
       if slab.carpet_fraction.nil?
         slab.carpet_fraction = conditioned_slab ? 0.8 : 0.0
         slab.carpet_fraction_isdefaulted = true
+      end
+      if slab.connected_foundation_walls.empty?
+        if slab.depth_below_grade.nil?
+          slab.depth_below_grade = 0.0
+          slab.depth_below_grade_isdefaulted = true
+        end
+      else
+        if !slab.depth_below_grade.nil?
+          slab.depth_below_grade = nil # Ignore Slab/DepthBelowGrade; use values from adjacent foundation walls instead
+        end
       end
     end
   end
@@ -1323,8 +1349,7 @@ class HPXMLDefaults
         end
       elsif [HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeSpaceHeater,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
           heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
@@ -1443,7 +1468,7 @@ class HPXMLDefaults
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
-        HVAC.set_cool_rated_shrs_gross(cooling_system)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
@@ -1453,7 +1478,7 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
         HVAC.set_cool_curves_mshp(cooling_system, num_speeds)
-        HVAC.set_cool_rated_shrs_gross(cooling_system)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
@@ -1465,8 +1490,7 @@ class HPXMLDefaults
     end
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeStove,
-                   HPXML::HVACTypePortableHeater,
-                   HPXML::HVACTypeFixedHeater,
+                   HPXML::HVACTypeSpaceHeater,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
@@ -1489,7 +1513,7 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_cool_rated_shrs_gross(heat_pump)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
@@ -1504,7 +1528,7 @@ class HPXMLDefaults
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_cool_rated_shrs_gross(heat_pump)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)
@@ -1645,10 +1669,18 @@ class HPXMLDefaults
         next unless duct.duct_fraction_area.nil?
 
         if duct.duct_type == HPXML::DuctTypeSupply
-          duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
+          if total_supply_area > 0
+            duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
+          else
+            duct.duct_fraction_area = (1.0 / supply_ducts.size).round(3) # Arbitrary
+          end
           duct.duct_fraction_area_isdefaulted = true
         elsif duct.duct_type == HPXML::DuctTypeReturn
-          duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
+          if total_return_area > 0
+            duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
+          else
+            duct.duct_fraction_area = (1.0 / return_ducts.size).round(3) # Arbitrary
+          end
           duct.duct_fraction_area_isdefaulted = true
         end
       end
@@ -3004,7 +3036,7 @@ class HPXMLDefaults
           HPXML::HVACTypeWallFurnace,
           HPXML::HVACTypeFloorFurnace,
           HPXML::HVACTypeStove,
-          HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
+          HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
         if not heating_system.heating_efficiency_afue.nil?
           next if heating_system.heating_efficiency_afue >= 0.89
         elsif not heating_system.heating_efficiency_percent.nil?
