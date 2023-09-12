@@ -576,7 +576,7 @@ Soil information is entered in ``Soil``.
 
 .. note::
 
-  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881/ (with the exception of "unknown").
+  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by `<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -1957,7 +1957,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                       Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0          See [#]_                  Number of dwelling units served
-  ``AttachedToGeothermalLoop``                     idref             See [#]_     No                        ID of attached geothermal loop
+  ``AttachedToGeothermalLoop``                     idref             See [#]_     No [#]_                   ID of attached geothermal loop
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -1973,6 +1973,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] AttachedToGeothermalLoop must reference a ``GeothermalLoop``.
+  .. [#] If not provided, the ground-to-air heat pump will be automatically attached to a geothermal loop that is entirely defaulted.
   .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
   .. [#] Pump power is calculated using PumpPowerWattsPerTon and the cooling capacity in tons, unless the system only provides heating, in which case the heating capacity in tons is used instead.
          Any pump power that is shared by multiple dwelling units should be included in SharedLoopWatts, *not* PumpPowerWattsPerTon, so that shared loop pump power attributed to the dwelling unit is calculated.
@@ -2080,7 +2081,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``SystemIdentifier``                      id                                              Yes                       Unique identifier
   ``LoopConfiguration``                     string                         See [#]_         Yes
   ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_  Water flow rate through the geothermal loop
-  ``BoreholesOrTrenches/Count``             integer                        > 0              No [#]_   autosized [#]_
+  ``BoreholesOrTrenches/Count``             integer                        > 0 [#]_         No        autosized [#]_
   ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_  Length (i.e., average depth) of each borehole
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
@@ -2101,7 +2102,10 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **U**: 7, 9, or 10
          | - **Lopsided U**: 6, 7, 8, 9, or 10
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
-  .. [#] BoreholesOrTrenches/Length must be between 79 ft and 500 ft.
+  .. [#] | BoreholesOrTrenches/Length must be between 79 ft and 500 ft.
+         | To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
+         | BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
+         | BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
@@ -2112,15 +2116,15 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          | - **standard**: 0.23 Btu/hr-ft-F
          | - **thermally enhanced**: 0.46 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
-  .. [#] Sum of U-tube spacing and pipe outer diameter.
+  .. [#] | ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
+         | - **0.75 in pipe**: 1.050 in
+         | - **1.0 in pipe**: 1.315 in
+         | - **1.25 in pipe**: 1.660 in
   .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
 
 .. note::
 
-  For a given combination of ``extension/BorefieldConfiguration``, ``BoreholesOrTrenches/Count``, ``BoreholesOrTrenches/Spacing``, ``BoreholesOrTrenches/Length``, and ``BoreholesOrTrenches/Diameter``, g-function values are determined using the `G-Function Library <https://gdr.openei.org/submissions/1325>`_ (from the Geothermal Data Repository).
-  To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
-  ``BoreholesOrTrenches/Length`` therefore has a minimum of 24 m (or 79 ft).
-  ``BoreholesOrTrenches/Length``, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
+  For a given combination of ``extension/BorefieldConfiguration``, ``BoreholesOrTrenches/Count``, ``BoreholesOrTrenches/Spacing``, ``BoreholesOrTrenches/Length``, and ``BoreholesOrTrenches/Diameter`` g-function values are determined using the `G-Function Library <https://gdr.openei.org/submissions/1325>`_ (from the Geothermal Data Repository).
 
 .. _hvac_control:
 
