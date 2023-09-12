@@ -4072,6 +4072,20 @@ class HPXML < Object
              :shank_spacing]
     attr_accessor(*ATTRS)
 
+    def heat_pumps
+      list = []
+      @hpxml_object.heat_pumps.each do |heat_pump|
+        next if heat_pump.geothermal_loop_idref.nil?
+        next unless heat_pump.geothermal_loop_idref == @id
+
+        list << heat_pump
+      end
+
+      if list.size == 0
+        fail "Geothermal loop '#{@id}' found but no heat pump attached to it."
+      end
+    end
+
     def delete
       @hpxml_object.geothermal_loops.delete(self)
       @hpxml_object.heat_pumps.each do |heat_pump|
@@ -4083,6 +4097,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      begin; heat_pumps; rescue StandardError => e; errors << e.message; end
       return errors
     end
 

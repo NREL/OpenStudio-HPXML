@@ -881,6 +881,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof' => ["Calculated a negative net surface area for surface 'Roof1'."],
+                            'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary' => ['Could not find a primary refrigerator.'],
@@ -1127,6 +1128,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['net-area-negative-wall'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.windows[0].area = 1000
+      elsif ['orphaned-geothermal-loop'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-geothermal-loop.xml'))
+        hpxml.heat_pumps[0].geothermal_loop_idref = nil
       elsif ['orphaned-hvac-distribution'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-furnace-gas-room-ac.xml'))
         hpxml.heating_systems[0].delete
