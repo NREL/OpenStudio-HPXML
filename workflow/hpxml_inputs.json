@@ -2423,6 +2423,15 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-ground-diffusivity.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "site_ground_diffusivity": 0.03
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-soil-moisture-type.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "site_soil_type": "sand",
+    "site_moisture_type": "dry"
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump_heating_capacity": 0,
@@ -3103,15 +3112,6 @@
   "sample_files/base-misc-ground-conductivity.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "site_ground_conductivity": 0.8
-  },
-  "sample_files/base-misc-ground-diffusivity.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_ground_diffusivity": 0.03
-  },
-  "sample_files/base-misc-soil-type-sand-moisture-type-dry.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "sand",
-    "site_moisture_type": "dry"
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
