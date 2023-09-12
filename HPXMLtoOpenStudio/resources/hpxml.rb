@@ -4072,6 +4072,11 @@ class HPXML < Object
 
     def delete
       @hpxml_object.geothermal_loops.delete(self)
+      @hpxml_object.heat_pumps.each do |heat_pump|
+        next unless heat_pump.geothermal_loop_idref == @id
+
+        heat_pump.geothermal_loop_idref = nil
+      end
     end
 
     def check_for_errors
