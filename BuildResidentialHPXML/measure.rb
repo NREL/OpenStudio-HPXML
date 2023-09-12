@@ -5105,13 +5105,13 @@ class HPXMLFile
     end
 
     if args[:geothermal_loop_pipe_diameter].is_initialized
-      pipe_size = args[:geothermal_loop_pipe_diameter].get
-      if pipe_size == '3/4" pipe'
-        pipe_size = 0.75
-      elsif pipe_size == '1" pipe'
-        pipe_size = 1.0
-      elsif pipe_size == '1-1/4" pipe'
-        pipe_size = 1.25
+      pipe_diameter = args[:geothermal_loop_pipe_diameter].get
+      if pipe_diameter == '3/4" pipe'
+        pipe_diameter = 0.75
+      elsif pipe_diameter == '1" pipe'
+        pipe_diameter = 1.0
+      elsif pipe_diameter == '1-1/4" pipe'
+        pipe_diameter = 1.25
       end
     end
 
@@ -5132,7 +5132,7 @@ class HPXMLFile
                                bore_diameter: bore_diameter,
                                grout_type: grout_type,
                                pipe_type: pipe_type,
-                               pipe_size: pipe_size,
+                               pipe_diameter: pipe_diameter,
                                shank_spacing: shank_spacing,
                                bore_config: bore_config)
     hpxml.heat_pumps[-1].geothermal_loop_idref = hpxml.geothermal_loops[-1].id

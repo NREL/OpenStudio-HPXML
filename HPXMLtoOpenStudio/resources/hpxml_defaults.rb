@@ -1595,9 +1595,9 @@ class HPXMLDefaults
           heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
         end
 
-        if heat_pump.geothermal_loop.pipe_size.nil?
-          heat_pump.geothermal_loop.pipe_size = 0.75 # in
-          heat_pump.geothermal_loop.pipe_size_isdefaulted = true
+        if heat_pump.geothermal_loop.pipe_diameter.nil?
+          heat_pump.geothermal_loop.pipe_diameter = 0.75 # in
+          heat_pump.geothermal_loop.pipe_diameter_isdefaulted = true
         end
 
         HVAC.set_gshp_assumptions(heat_pump, weather)
@@ -3054,7 +3054,7 @@ class HPXMLDefaults
               geothermal_loop.num_bore_holes_isdefaulted = true
             end
             if geothermal_loop.bore_length.nil?
-              geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth # this is the length (i.e., depth) of each borehole?
+              geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth
               geothermal_loop.bore_length_isdefaulted = true
             end
             if geothermal_loop.bore_config.nil?

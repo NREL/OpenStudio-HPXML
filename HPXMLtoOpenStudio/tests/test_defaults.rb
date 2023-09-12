@@ -1703,7 +1703,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.geothermal_loops[0].grout_type = HPXML::GeothermalLoopGroutTypeThermallyEnhanced
     hpxml.geothermal_loops[0].grout_conductivity = 6
     hpxml.geothermal_loops[0].pipe_conductivity = 7
-    hpxml.geothermal_loops[0].pipe_size = 1.0
+    hpxml.geothermal_loops[0].pipe_diameter = 1.0
     hpxml.geothermal_loops[0].shank_spacing = 9
     hpxml.geothermal_loops[0].bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1719,7 +1719,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.geothermal_loops[0].grout_type = nil
     hpxml.geothermal_loops[0].grout_conductivity = nil
     hpxml.geothermal_loops[0].pipe_conductivity = nil
-    hpxml.geothermal_loops[0].pipe_size = nil
+    hpxml.geothermal_loops[0].pipe_diameter = nil
     hpxml.geothermal_loops[0].shank_spacing = nil
     hpxml.geothermal_loops[0].bore_config = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -4300,7 +4300,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def _test_default_geothermal_loop_values(geothermal_loop, loop_configuration, loop_flow,
                                            num_bore_holes, bore_spacing, bore_length, bore_diameter,
-                                           grout_type, grout_conductivity, pipe_conductivity, pipe_size, shank_spacing,
+                                           grout_type, grout_conductivity, pipe_conductivity, pipe_diameter, shank_spacing,
                                            bore_config)
     assert_equal(loop_configuration, geothermal_loop.loop_configuration)
     if loop_flow.nil?
@@ -4323,7 +4323,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(grout_type, geothermal_loop.grout_type)
     assert_equal(grout_conductivity, geothermal_loop.grout_conductivity)
     assert_equal(pipe_conductivity, geothermal_loop.pipe_conductivity)
-    assert_equal(pipe_size, geothermal_loop.pipe_size)
+    assert_equal(pipe_diameter, geothermal_loop.pipe_diameter)
     assert_equal(shank_spacing, geothermal_loop.shank_spacing)
     assert_equal(bore_config, geothermal_loop.bore_config)
   end
