@@ -299,6 +299,8 @@
       <sch:assert role='ERROR' test='count(h:ShieldingofHome) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ShieldingofHome</sch:assert>
       <sch:assert role='ERROR' test='count(h:Soil) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Soil</sch:assert> <!-- See [Soil] -->
       <sch:assert role='ERROR' test='count(h:extension/h:Neighbors) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/Neighbors</sch:assert> <!-- See [Neighbors] -->
+      <!-- Deprecated old GroundConductivity input; see https://github.com/NREL/OpenStudio-HPXML/issues/1202 -->
+      <sch:assert role='ERROR' test='count(h:extension/h:GroundConductivity) = 0'>extension/GroundConductivity has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/Site/Soil/Conductivity</sch:assert>
     </sch:rule>
   </sch:pattern>
 
