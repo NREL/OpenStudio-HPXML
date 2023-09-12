@@ -1382,6 +1382,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
+    geothermal_loop_borefield_configuration_choices << 'none'
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationRectangle
     # geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationZonedRectangle
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle
@@ -1390,9 +1391,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationU
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationLopsidedU
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, true)
     arg.setDisplayName('Geothermal Loop: Borefield Configuration')
     arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
+    arg.setDefaultValue('none')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
@@ -5072,9 +5074,9 @@ class HPXMLFile
   end
 
   def self.set_geothermal_loop(hpxml, args)
-    heat_pump_type = args[:heat_pump_type]
+    bore_config = args[:geothermal_loop_borefield_configuration]
 
-    return if heat_pump_type != HPXML::HVACTypeHeatPumpGroundToAir
+    return if bore_config == 'none'
 
     if args[:geothermal_loop_loop_flow].is_initialized
       loop_flow = args[:geothermal_loop_loop_flow].get
@@ -5119,13 +5121,10 @@ class HPXMLFile
       shank_spacing = args[:geothermal_loop_pipe_shank_spacing].get
     end
 
-    if args[:geothermal_loop_borefield_configuration].is_initialized
-      bore_config = args[:geothermal_loop_borefield_configuration].get
-    end
-
     hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
                                loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical,
                                loop_flow: loop_flow,
+                               bore_config: bore_config,
                                num_bore_holes: num_bore_holes,
                                bore_length: bore_length,
                                bore_spacing: bore_spacing,
@@ -5133,8 +5132,7 @@ class HPXMLFile
                                grout_type: grout_type,
                                pipe_type: pipe_type,
                                pipe_diameter: pipe_diameter,
-                               shank_spacing: shank_spacing,
-                               bore_config: bore_config)
+                               shank_spacing: shank_spacing)
     hpxml.heat_pumps[-1].geothermal_loop_idref = hpxml.geothermal_loops[-1].id
   end
 
