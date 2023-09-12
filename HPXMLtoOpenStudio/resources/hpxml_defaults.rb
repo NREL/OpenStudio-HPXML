@@ -497,74 +497,53 @@ class HPXMLDefaults
       if hpxml.site.soil_type == HPXML::SiteSoilTypeSand
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2311 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0097 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 1.3865 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0322 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2311 + 1.3865) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0097 + 0.0322) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
+        hpxml.site.ground_conductivity_isdefaulted = true
+        hpxml.site.ground_diffusivity_isdefaulted = true
       elsif hpxml.site.soil_type == HPXML::SiteSoilTypeSilt || hpxml.site.soil_type == HPXML::SiteSoilTypeClay
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2889 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0120 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 0.9821 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0194 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2889 + 0.9821) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0120 + 0.0194) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
+        hpxml.site.ground_conductivity_isdefaulted = true
+        hpxml.site.ground_diffusivity_isdefaulted = true
       elsif hpxml.site.soil_type == HPXML::SiteSoilTypeLoam
         hpxml.site.ground_conductivity = 1.2132 # Btu/hr-ft-F
-        hpxml.site.ground_conductivity_isdefaulted = true
-
         hpxml.site.ground_diffusivity = 0.0353 # ft^2/hr
+
+        hpxml.site.ground_conductivity_isdefaulted = true
         hpxml.site.ground_diffusivity_isdefaulted = true
       elsif hpxml.site.soil_type == HPXML::SiteSoilTypeGravel
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2311 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0097 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 1.0399 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0291 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2311 + 1.0399) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0097 + 0.0291) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
+        hpxml.site.ground_conductivity_isdefaulted = true
+        hpxml.site.ground_diffusivity_isdefaulted = true
       elsif hpxml.site.soil_type == HPXML::SiteSoilTypeUnknown
         hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
-        hpxml.site.ground_conductivity_isdefaulted = true
-
         hpxml.site.ground_diffusivity = 0.0208 # ft^2/hr
+
+        hpxml.site.ground_conductivity_isdefaulted = true
         hpxml.site.ground_diffusivity_isdefaulted = true
       end
     elsif hpxml.site.ground_conductivity.nil?

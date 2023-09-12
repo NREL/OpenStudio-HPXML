@@ -519,7 +519,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
       elsif ['invalid-soil-type'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
-        hpxml.site.soil_type = HPXML::SiteSoilSoilTypeOther
+        hpxml.site.soil_type = HPXML::SiteSoilTypeOther
       elsif ['invalid-shared-vent-in-unit-flowrate'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-multifamily-shared-mechvent.xml'))
         hpxml.ventilation_fans[0].rated_flow_rate = 80
