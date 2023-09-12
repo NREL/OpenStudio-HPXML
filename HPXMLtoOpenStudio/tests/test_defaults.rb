@@ -4303,18 +4303,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                            grout_type, grout_conductivity, pipe_conductivity, pipe_diameter, shank_spacing,
                                            bore_config)
     assert_equal(loop_configuration, geothermal_loop.loop_configuration)
-    if loop_flow.nil?
+    if loop_flow.nil? # nil implies an autosized value
       assert(geothermal_loop.loop_flow > 0)
     else
       assert_equal(loop_flow, geothermal_loop.loop_flow)
     end
-    if num_bore_holes.nil?
+    if num_bore_holes.nil? # nil implies an autosized value
       assert(geothermal_loop.num_bore_holes > 0)
     else
       assert_equal(num_bore_holes, geothermal_loop.num_bore_holes)
     end
     assert_equal(bore_spacing, geothermal_loop.bore_spacing)
-    if bore_length.nil?
+    if bore_length.nil? # nil implies an autosized value
       assert(geothermal_loop.bore_length > 0)
     else
       assert_equal(bore_length, geothermal_loop.bore_length)

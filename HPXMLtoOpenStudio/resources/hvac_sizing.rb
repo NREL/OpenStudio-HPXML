@@ -1916,7 +1916,7 @@ class HVACSizing
       bore_depth = (bore_length / num_bore_holes).floor # ft
 
       active_length = 5 # the active length starts about 5 ft below the surface
-      for _i in 0..4
+      for _i in 0..active_length - 1
         if (bore_depth + active_length < min_bore_depth) && (num_bore_holes > 1)
           num_bore_holes -= 1
           bore_depth = (bore_length / num_bore_holes).floor

@@ -69,7 +69,6 @@ class UnitConversions
     ['ft^2', 'in^2'] => 144.0,
     ['ft^2', 'm^2'] => 0.09290304,
     ['m^2', 'ft^2'] => 1.0 / 0.09290304,
-    ['m^2/s', 'ft^2/hr'] => 38750.1,
 
     # Volume
     ['ft^3', 'gal'] => 7.480519480579059,
@@ -82,6 +81,9 @@ class UnitConversions
 
     # Mass
     ['lbm', 'kg'] => 0.45359237,
+
+    # Area Flow Rate
+    ['m^2/s', 'ft^2/hr'] => 38750.1,
 
     # Volume Flow Rate
     ['m^3/s', 'gal/min'] => 15850.323141615143,
