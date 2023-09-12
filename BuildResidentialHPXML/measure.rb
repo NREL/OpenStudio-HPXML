@@ -142,13 +142,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_soil_type_choices = OpenStudio::StringVector.new
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeSand
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeSilt
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeClay
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeLoam
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeGravel
-    # site_soil_type_choices << HPXML::SiteSoilSoilTypeOther
-    site_soil_type_choices << HPXML::SiteSoilSoilTypeUnknown
+    site_soil_type_choices << HPXML::SiteSoilTypeSand
+    site_soil_type_choices << HPXML::SiteSoilTypeSilt
+    site_soil_type_choices << HPXML::SiteSoilTypeClay
+    site_soil_type_choices << HPXML::SiteSoilTypeLoam
+    site_soil_type_choices << HPXML::SiteSoilTypeGravel
+    # site_soil_type_choices << HPXML::SiteSoilTypeOther
+    site_soil_type_choices << HPXML::SiteSoilTypeUnknown
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
     arg.setDisplayName('Site: Soil Type')

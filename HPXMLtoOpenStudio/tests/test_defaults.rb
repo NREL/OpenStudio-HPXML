@@ -323,11 +323,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.site.shielding_of_home = HPXML::ShieldingExposed
     hpxml.site.ground_conductivity = 0.8
     hpxml.site.ground_diffusivity = 0.9
-    hpxml.site.soil_type = HPXML::SiteSoilSoilTypeClay
+    hpxml.site.soil_type = HPXML::SiteSoilTypeClay
     hpxml.site.moisture_type = HPXML::SiteSoilMoistureTypeDry
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8, 0.9, HPXML::SiteSoilSoilTypeClay, HPXML::SiteSoilMoistureTypeDry)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, HPXML::ShieldingExposed, 0.8, 0.9, HPXML::SiteSoilTypeClay, HPXML::SiteSoilMoistureTypeDry)
 
     # Test defaults
     hpxml.site.site_type = nil
@@ -338,13 +338,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.site.moisture_type = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0, 0.0208, HPXML::SiteSoilSoilTypeUnknown, HPXML::SiteSoilMoistureTypeMixed)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.0, 0.0208, HPXML::SiteSoilTypeUnknown, HPXML::SiteSoilMoistureTypeMixed)
 
     # Test defaults w/ gravel soil type
-    hpxml.site.soil_type = HPXML::SiteSoilSoilTypeGravel
+    hpxml.site.soil_type = HPXML::SiteSoilTypeGravel
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.6355, 0.0194, HPXML::SiteSoilSoilTypeGravel, HPXML::SiteSoilMoistureTypeMixed)
+    _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.6355, 0.0194, HPXML::SiteSoilTypeGravel, HPXML::SiteSoilMoistureTypeMixed)
 
     # Test defaults w/ conductivity but no diffusivity
     hpxml.site.ground_conductivity = 0.8
