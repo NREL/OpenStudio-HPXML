@@ -2395,8 +2395,8 @@
     "geothermal_loop_boreholes_length": 314.961,
     "geothermal_loop_boreholes_spacing": 16.4042,
     "geothermal_loop_boreholes_diameter": 5.905512,
-    "geothermal_loop_grout_conductivity": 0.5,
-    "geothermal_loop_pipe_conductivity": 0.3,
+    "geothermal_loop_grout_type": "standard",
+    "geothermal_loop_pipe_type": "standard",
     "geothermal_loop_pipe_diameter": "1\" pipe",
     "geothermal_loop_pipe_shank_spacing": 2.5,
     "geothermal_loop_borefield_configuration": "Lopsided U"

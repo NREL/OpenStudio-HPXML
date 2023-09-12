@@ -1628,9 +1628,14 @@ class HPXMLDefaults
           end
         end
 
-        if heat_pump.geothermal_loop.pipe_cond.nil?
-          heat_pump.geothermal_loop.pipe_cond = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
-          heat_pump.geothermal_loop.pipe_cond_isdefaulted = true
+        if heat_pump.geothermal_loop.pipe_conductivity.nil?
+          if heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopPipeTypeStandard
+            heat_pump.geothermal_loop.pipe_conductivity = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
+            heat_pump.geothermal_loop.pipe_conductivity_isdefaulted = true
+          elsif heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopPipeTypeThermallyEnhanced
+            heat_pump.geothermal_loop.pipe_conductivity = 0.46 # Btu/h-ft-R; FIXME
+            heat_pump.geothermal_loop.pipe_conductivity_isdefaulted = true
+          end
         end
 
         if heat_pump.geothermal_loop.shank_spacing.nil?

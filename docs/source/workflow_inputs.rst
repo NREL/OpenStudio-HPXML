@@ -2085,7 +2085,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
-  ``Pipe/Conductivity``                     double            Btu/hr-ft-F  > 0              No        0.23
+  ``Pipe/Type`` or ``Pipe/Conductivity``    string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Pipe type or conductivity [#]_
   ``Pipe/Diameter``                         double            in           See [#]_         No        0.75
   ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_        Center-to-center distance between two branches of a vertical U-tube
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
@@ -2107,6 +2107,10 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
          | - **standard**: 0.4 Btu/hr-ft-F
          | - **thermally enhanced**: 0.8 Btu/hr-ft-F
+  .. [#] Pipe/Type choices are "standard" or "thermally enhanced".
+  .. [#] | If Pipe/Conductivity not provided, defaults based on Pipe/Type:
+         | - **standard**: 0.23 Btu/hr-ft-F
+         | - **thermally enhanced**: 0.46 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] Sum of U-tube spacing and pipe outer diameter.
   .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".

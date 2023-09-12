@@ -717,7 +717,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     geothermal_loop = hpxml.geothermal_loops[0]
     bore_radius = UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm')
     grout_conductivity = UnitConversions.convert(geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)')
-    pipe_cond = UnitConversions.convert(geothermal_loop.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)')
+    pipe_conductivity = UnitConversions.convert(geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)')
     shank_spacing = UnitConversions.convert(geothermal_loop.shank_spacing, 'in', 'm')
 
     # Check ghx
@@ -725,7 +725,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     ghx = model.getGroundHeatExchangerVerticals[0]
     assert_in_epsilon(bore_radius, ghx.boreHoleRadius.get, 0.01)
     assert_in_epsilon(grout_conductivity, ghx.groutThermalConductivity.get, 0.01)
-    assert_in_epsilon(pipe_cond, ghx.pipeThermalConductivity.get, 0.01)
+    assert_in_epsilon(pipe_conductivity, ghx.pipeThermalConductivity.get, 0.01)
     assert_in_epsilon(shank_spacing, ghx.uTubeDistance.get, 0.01)
 
     # Check G-Functions
