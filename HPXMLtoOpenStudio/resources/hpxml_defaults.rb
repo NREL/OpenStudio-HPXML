@@ -493,6 +493,7 @@ class HPXMLDefaults
       hpxml.site.moisture_type_isdefaulted = true
     end
 
+    # Conductivity/diffusivity values come from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881 (with the exception of "unknown")
     if hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
       if hpxml.site.soil_type == HPXML::SiteSoilTypeSand
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
