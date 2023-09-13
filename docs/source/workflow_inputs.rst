@@ -549,15 +549,16 @@ Soil information is entered in ``Soil``.
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
   Element                                                             Type              Units        Constraints      Required  Default   Notes
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
-  ``SoilType`` or ``Conductivity`` or ``extension/Diffusivity``       string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Soil type or themal conductivity [#]_ or diffusivity [#]_
-  ``MoistureType`` or ``Conductivity`` or ``extension/Diffusivity``   string or double  ft2/hr       See [#]_ or > 0  No        mixed     Moisture type or conductivity or diffusivity [#]_
+  ``Conductivity`` or ``SoilType``/``MoistureType``                   string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Themal conductivity [#]_ or soil/moisture type
+  ``extension/Diffusivity`` or ``SoilType``/``MoistureType``          string or double  ft2/hr       See or > 0       No        mixed     Diffusivity [#]_ or soil/moisture type
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
-  .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
+  .. [#] | SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
+         | MoistureType choices are "dry", "wet", or "mixed".
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
-  .. [#] MoistureType choices are "dry", "wet", or "mixed".
-  .. [#] If Conductivity and extension/Diffusivity not provided, defaults based on SoilType and MoistureType as follows:
+
+If Conductivity and extension/Diffusivity not provided, defaults based on SoilType and MoistureType as follows:
 
   ============  ==============  ==========================  =============
   SoilType      MoistureType    Conductivity [Btu/hr-ft-F]  extension/Diffusivity [ft2/hr]

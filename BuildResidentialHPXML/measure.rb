@@ -129,40 +129,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default is used.')
     args << arg
 
+    site_soil_and_moisture_type_choices = OpenStudio::StringVector.new
+    Constants.SoilTypes.each do |soil_type|
+      Constants.MoistureTypes.each do |moisture_type|
+        site_soil_and_moisture_type_choices << "#{soil_type}, #{moisture_type}"
+      end
+    end
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_and_moisture_type', site_soil_and_moisture_type_choices, false)
+    arg.setDisplayName('Site: Soil and Moisture Type')
+    arg.setDescription('Type of soil and moisture. This is used to inform ground conductivity and diffusivity. If not provided, the OS-HPXML default is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_conductivity', false)
     arg.setDisplayName('Site: Ground Conductivity')
-    arg.setDescription('Conductivity of the ground soil. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Conductivity of the ground soil. If provided, overrides the previous site and moisture type input.')
     arg.setUnits('Btu/hr-ft-F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_diffusivity', false)
     arg.setDisplayName('Site: Ground Diffusivity')
-    arg.setDescription('Diffusivity of the ground soil. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('Diffusivity of the ground soil. If provided, overrides the previous site and moisture type input.')
     arg.setUnits('ft^2/hr')
-    args << arg
-
-    site_soil_type_choices = OpenStudio::StringVector.new
-    site_soil_type_choices << HPXML::SiteSoilTypeSand
-    site_soil_type_choices << HPXML::SiteSoilTypeSilt
-    site_soil_type_choices << HPXML::SiteSoilTypeClay
-    site_soil_type_choices << HPXML::SiteSoilTypeLoam
-    site_soil_type_choices << HPXML::SiteSoilTypeGravel
-    # site_soil_type_choices << HPXML::SiteSoilTypeOther
-    site_soil_type_choices << HPXML::SiteSoilTypeUnknown
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
-    arg.setDisplayName('Site: Soil Type')
-    arg.setDescription('Type of ground soil. If not provided, the OS-HPXML default is used.')
-    args << arg
-
-    site_moisture_type_choices = OpenStudio::StringVector.new
-    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeWet
-    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeDry
-    site_moisture_type_choices << HPXML::SiteSoilMoistureTypeMixed
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_moisture_type', site_moisture_type_choices, false)
-    arg.setDisplayName('Site: Soil Moisture Type')
-    arg.setDescription('Moisture level of the ground soil. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
@@ -4006,12 +3994,10 @@ class HPXMLFile
       hpxml.site.ground_diffusivity = args[:site_ground_diffusivity].get
     end
 
-    if args[:site_soil_type].is_initialized
-      hpxml.site.soil_type = args[:site_soil_type].get
-    end
-
-    if args[:site_moisture_type].is_initialized
-      hpxml.site.moisture_type = args[:site_moisture_type].get
+    if args[:site_soil_and_moisture_type].is_initialized
+      soil_type, moisture_type = args[:site_soil_and_moisture_type].get.split(', ')
+      hpxml.site.soil_type = soil_type
+      hpxml.site.moisture_type = moisture_type
     end
 
     if args[:site_type].is_initialized
@@ -5084,6 +5070,10 @@ class HPXMLFile
     loop_configuration = args[:geothermal_loop_configuration]
 
     return if loop_configuration == 'none'
+
+    if args[:geothermal_loop_borefield_configuration].is_initialized
+      bore_config = args[:geothermal_loop_borefield_configuration].get
+    end
 
     if args[:geothermal_loop_loop_flow].is_initialized
       loop_flow = args[:geothermal_loop_loop_flow].get

@@ -2432,8 +2432,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-soil-moisture-type.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "site_soil_type": "sand",
-    "site_moisture_type": "dry"
+    "site_soil_and_moisture_type": "sand, dry"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
