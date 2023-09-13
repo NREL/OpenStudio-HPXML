@@ -1427,20 +1427,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('in')
     args << arg
 
-    geothermal_loop_grout_type_choices = OpenStudio::StringVector.new
-    geothermal_loop_grout_type_choices << HPXML::GeothermalLoopGroutTypeStandard
-    geothermal_loop_grout_type_choices << HPXML::GeothermalLoopGroutTypeThermallyEnhanced
+    geothermal_loop_grout_or_pipe_type_choices = OpenStudio::StringVector.new
+    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeStandard
+    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_grout_type', geothermal_loop_grout_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_grout_type', geothermal_loop_grout_or_pipe_type_choices, false)
     arg.setDisplayName('Geothermal Loop: Grout Type')
     arg.setDescription("Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
     args << arg
 
-    geothermal_loop_pipe_type_choices = OpenStudio::StringVector.new
-    geothermal_loop_pipe_type_choices << HPXML::GeothermalLoopPipeTypeStandard
-    geothermal_loop_pipe_type_choices << HPXML::GeothermalLoopPipeTypeThermallyEnhanced
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_type', geothermal_loop_pipe_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_type', geothermal_loop_grout_or_pipe_type_choices, false)
     arg.setDisplayName('Geothermal Loop: Pipe Type')
     arg.setDescription("Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
     args << arg
