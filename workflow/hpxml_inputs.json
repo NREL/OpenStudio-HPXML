@@ -105,7 +105,7 @@
     "heat_pump_backup_type": "none",
     "heat_pump_backup_fuel": "electricity",
     "heat_pump_backup_heating_efficiency": 0,
-    "geothermal_loop_borefield_configuration": "none",
+    "geothermal_loop_configuration": "none",
     "heating_system_2_type": "none",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_heating_efficiency": 0,
@@ -474,7 +474,7 @@
     "heat_pump_backup_type": "none",
     "heat_pump_backup_fuel": "electricity",
     "heat_pump_backup_heating_efficiency": 0,
-    "geothermal_loop_borefield_configuration": "none",
+    "geothermal_loop_configuration": "none",
     "heating_system_2_type": "none",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_heating_efficiency": 0,
@@ -2392,6 +2392,8 @@
   },
   "sample_files/base-hvac-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "geothermal_loop_configuration": "vertical",
+    "geothermal_loop_borefield_configuration": "Lopsided U",
     "geothermal_loop_loop_flow": 10.0,
     "geothermal_loop_boreholes_count": 9,
     "geothermal_loop_boreholes_length": 314.961,
@@ -2400,8 +2402,7 @@
     "geothermal_loop_grout_type": "standard",
     "geothermal_loop_pipe_type": "standard",
     "geothermal_loop_pipe_diameter": "1\" pipe",
-    "geothermal_loop_pipe_shank_spacing": 2.5,
-    "geothermal_loop_borefield_configuration": "Lopsided U"
+    "geothermal_loop_pipe_shank_spacing": 2.5    
   },
   "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",

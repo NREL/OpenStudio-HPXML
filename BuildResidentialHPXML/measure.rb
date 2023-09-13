@@ -1381,8 +1381,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
+    geothermal_loop_configuration_choices = OpenStudio::StringVector.new
+    geothermal_loop_configuration_choices << 'none'
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationDiagonal
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationHorizontal
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
+    geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, true)
+    arg.setDisplayName('Geothermal Loop: Configuration')
+    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.")
+    arg.setDefaultValue('none')
+    args << arg
+
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    geothermal_loop_borefield_configuration_choices << 'none'
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationRectangle
     # geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationZonedRectangle
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle
@@ -1391,10 +1403,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationU
     geothermal_loop_borefield_configuration_choices << HPXML::GeothermalLoopBorefieldConfigurationLopsidedU
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Borefield Configuration')
     arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
-    arg.setDefaultValue('none')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
@@ -5070,9 +5081,9 @@ class HPXMLFile
   end
 
   def self.set_geothermal_loop(hpxml, args)
-    bore_config = args[:geothermal_loop_borefield_configuration]
+    loop_configuration = args[:geothermal_loop_configuration]
 
-    return if bore_config == 'none'
+    return if loop_configuration == 'none'
 
     if args[:geothermal_loop_loop_flow].is_initialized
       loop_flow = args[:geothermal_loop_loop_flow].get
@@ -5118,7 +5129,7 @@ class HPXMLFile
     end
 
     hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
-                               loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical,
+                               loop_configuration: loop_configuration,
                                loop_flow: loop_flow,
                                bore_config: bore_config,
                                num_bore_holes: num_bore_holes,

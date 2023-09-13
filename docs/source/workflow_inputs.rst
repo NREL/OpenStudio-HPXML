@@ -2079,7 +2079,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   Element                                   Type              Units        Constraints      Required  Default         Notes
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
   ``SystemIdentifier``                      id                                              Yes                       Unique identifier
-  ``LoopConfiguration``                     string                         See [#]_         Yes
+  ``LoopConfiguration``                     string                         vertical         Yes
   ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_  Water flow rate through the geothermal loop
   ``BoreholesOrTrenches/Count``             integer                        > 0 [#]_         No        autosized [#]_
   ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_  Length (i.e., average depth) of each borehole
@@ -2092,7 +2092,6 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
-  .. [#] LoopConfiguration must be "vertical".
   .. [#] LoopFlow autosized per TODO.
   .. [#] | If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
          | - **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
