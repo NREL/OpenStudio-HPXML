@@ -576,7 +576,7 @@ Soil information is entered in ``Soil``.
 
 .. note::
 
-  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by `<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
+  Default Conductivity and extension/Diffusivity values based on SoilType/MoistureType provided by Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement. Application to very Low Enthalpy Geothermal Energy Systems <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -2114,7 +2114,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   .. [#] Pipe/Type choices are "standard" or "thermally enhanced".
   .. [#] | If Pipe/Conductivity not provided, defaults based on Pipe/Type:
          | - **standard**: 0.23 Btu/hr-ft-F
-         | - **thermally enhanced**: 0.46 Btu/hr-ft-F
+         | - **thermally enhanced**: 0.40 Btu/hr-ft-F
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
   .. [#] | ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
          | - **0.75 in pipe**: 1.050 in
