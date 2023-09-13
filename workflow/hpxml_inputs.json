@@ -2044,7 +2044,7 @@
     "heat_pump_sizing_methodology": "HERS",
     "heating_system_2_heating_capacity": null
   },
-  "sample_files/MSHP, SEER 16, 9.2 HSPF, Max Load.xml": {
+  "sample_files/Integrated Electricity - MSHP, SEER 16, 9.2 HSPF, Max Load.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_cooling_efficiency": 16,
     "heat_pump_heating_efficiency": 9.2,
@@ -2059,21 +2059,50 @@
     "heat_pump_heating_capacity_retention_fraction": 0.5,
     "heat_pump_heating_capacity_retention_temp": 5
   },
-  "sample_files/MSHP, SEER 16, 9.5 HSPF, CCHP, Max Load.xml": {
-    "parent_hpxml": "sample_files/MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
+  "sample_files/Integrated Electricity - MSHP, SEER 16, 9.5 HSPF, CCHP, Max Load.xml": {
+    "parent_hpxml": "sample_files/Integrated Electricity - MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
     "heat_pump_cooling_efficiency": 16,
     "heat_pump_heating_efficiency": 9.5,
     "heat_pump_heating_capacity_retention_fraction": 0.7,
     "heat_pump_heating_capacity_retention_temp": 5
   },
-  "sample_files/MSHP, SEER 20, 11 HSPF, CCHP, Max Load.xml": {
-    "parent_hpxml": "sample_files/MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
+  "sample_files/Integrated Electricity - MSHP, SEER 20, 11 HSPF, CCHP, Max Load.xml": {
+    "parent_hpxml": "sample_files/Integrated Electricity - MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
     "heat_pump_cooling_efficiency": 20,
     "heat_pump_heating_efficiency": 11,
     "heat_pump_heating_capacity_retention_fraction": 0.9,
     "heat_pump_heating_capacity_retention_temp": 5
   },
-  "sample_files/MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml": {
+  "sample_files/Integrated Gas - MSHP, SEER 16, 9.2 HSPF, Max Load.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "heat_pump_cooling_efficiency": 16,
+    "heat_pump_heating_efficiency": 9.2,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_backup_heating_capacity": null,
+    "heat_pump_sizing_methodology": "MaxLoad",
+    "heat_pump_backup_type": "integrated",
+    "heat_pump_backup_fuel": "natural gas",
+    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup_heating_capacity": null,
+    "heat_pump_heating_capacity_retention_fraction": 0.5,
+    "heat_pump_heating_capacity_retention_temp": 5
+  },
+  "sample_files/Integrated Gas - MSHP, SEER 16, 9.5 HSPF, CCHP, Max Load.xml": {
+    "parent_hpxml": "sample_files/Integrated Gas - MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
+    "heat_pump_cooling_efficiency": 16,
+    "heat_pump_heating_efficiency": 9.5,
+    "heat_pump_heating_capacity_retention_fraction": 0.7,
+    "heat_pump_heating_capacity_retention_temp": 5
+  },
+  "sample_files/Integrated Gas - MSHP, SEER 20, 11 HSPF, CCHP, Max Load.xml": {
+    "parent_hpxml": "sample_files/Integrated Gas - MSHP, SEER 16, 9.2 HSPF, Max Load.xml",
+    "heat_pump_cooling_efficiency": 20,
+    "heat_pump_heating_efficiency": 11,
+    "heat_pump_heating_capacity_retention_fraction": 0.9,
+    "heat_pump_heating_capacity_retention_temp": 5
+  },
+  "sample_files/Separate Gas - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_cooling_efficiency": 16,
     "heat_pump_heating_efficiency": 9.2,
@@ -2092,15 +2121,48 @@
     "heating_system_2_heating_capacity": null,
     "heating_system_2_fraction_heat_load_served": 0
   },
-  "sample_files/MSHP, SEER 16, 9.5 HSPF, CCHP, Separate Backup, Max Load.xml": {
-    "parent_hpxml": "sample_files/MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
+  "sample_files/Separate Gas - MSHP, SEER 16, 9.5 HSPF, CCHP, Separate Backup, Max Load.xml": {
+    "parent_hpxml": "sample_files/Separate Gas - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
     "heat_pump_cooling_efficiency": 16,
     "heat_pump_heating_efficiency": 9.5,
     "heat_pump_heating_capacity_retention_fraction": 0.7,
     "heat_pump_heating_capacity_retention_temp": 5
   },
-  "sample_files/MSHP, SEER 20, 11 HSPF, CCHP, Separate Backup, Max Load.xml": {
-    "parent_hpxml": "sample_files/MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
+  "sample_files/Separate Gas - MSHP, SEER 20, 11 HSPF, CCHP, Separate Backup, Max Load.xml": {
+    "parent_hpxml": "sample_files/Separate Gas - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
+    "heat_pump_cooling_efficiency": 20,
+    "heat_pump_heating_efficiency": 11,
+    "heat_pump_heating_capacity_retention_fraction": 0.9,
+    "heat_pump_heating_capacity_retention_temp": 5
+  },
+  "sample_files/Separate Electricity - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "heat_pump_cooling_efficiency": 16,
+    "heat_pump_heating_efficiency": 9.2,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_backup_heating_capacity": null,
+    "heat_pump_sizing_methodology": "MaxLoad",
+    "heat_pump_backup_type": "separate",
+    "heat_pump_backup_fuel": "electricity",
+    "heat_pump_backup_heating_capacity": null,
+    "heat_pump_heating_capacity_retention_fraction": 0.5,
+    "heat_pump_heating_capacity_retention_temp": 5,
+    "heating_system_2_type": "WallFurnace",
+    "heating_system_2_fuel": "electricity",
+    "heating_system_2_heating_efficiency": 0.60,
+    "heating_system_2_heating_capacity": null,
+    "heating_system_2_fraction_heat_load_served": 0
+  },
+  "sample_files/Separate Electricity - MSHP, SEER 16, 9.5 HSPF, CCHP, Separate Backup, Max Load.xml": {
+    "parent_hpxml": "sample_files/Separate Electricity - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
+    "heat_pump_cooling_efficiency": 16,
+    "heat_pump_heating_efficiency": 9.5,
+    "heat_pump_heating_capacity_retention_fraction": 0.7,
+    "heat_pump_heating_capacity_retention_temp": 5
+  },
+  "sample_files/Separate Electricity - MSHP, SEER 20, 11 HSPF, CCHP, Separate Backup, Max Load.xml": {
+    "parent_hpxml": "sample_files/Separate Electricity - MSHP, SEER 16, 9.2 HSPF, Separate Backup, Max Load.xml",
     "heat_pump_cooling_efficiency": 20,
     "heat_pump_heating_efficiency": 11,
     "heat_pump_heating_capacity_retention_fraction": 0.9,
