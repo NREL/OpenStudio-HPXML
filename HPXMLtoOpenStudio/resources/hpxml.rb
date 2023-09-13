@@ -168,8 +168,8 @@ class HPXML < Object
   GeothermalLoopLoopConfigurationHorizontal = 'horizontal'
   GeothermalLoopLoopConfigurationOther = 'other'
   GeothermalLoopLoopConfigurationVertical = 'vertical'
-  GeothermalLoopGroutTypeStandard = 'standard'
-  GeothermalLoopGroutTypeThermallyEnhanced = 'thermally enhanced'
+  GeothermalLoopGroutOrPipeTypeStandard = 'standard'
+  GeothermalLoopGroutOrPipeTypeThermallyEnhanced = 'thermally enhanced'
   GeothermalLoopPipeTypeStandard = 'standard'
   GeothermalLoopPipeTypeThermallyEnhanced = 'thermally enhanced'
   HeaterTypeElectricResistance = 'electric resistance'
@@ -4122,7 +4122,7 @@ class HPXML < Object
         XMLHelper.add_element(grout, 'Type', @grout_type, :string, @grout_type_isdefaulted) unless @grout_type.nil?
         XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
       end
-      if (not @pipe_conductivity.nil?) || (not @pipe_diameter.nil?) || (not @shank_spacing.nil?)
+      if (not @pipe_type.nil?) || (not @pipe_conductivity.nil?) || (not @pipe_diameter.nil?) || (not @shank_spacing.nil?)
         pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
         XMLHelper.add_element(pipe, 'Type', @pipe_type, :string, @pipe_type_isdefaulted) unless @pipe_type.nil?
         XMLHelper.add_element(pipe, 'Conductivity', @pipe_conductivity, :float, @pipe_conductivity_isdefaulted) unless @pipe_conductivity.nil?

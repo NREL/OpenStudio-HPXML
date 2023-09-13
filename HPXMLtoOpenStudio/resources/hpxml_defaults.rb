@@ -1590,60 +1590,67 @@ class HPXMLDefaults
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+        if heat_pump.geothermal_loop.nil?
+          hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
+                                     loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical)
+          heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
+        end
+
+        if heat_pump.geothermal_loop.pipe_diameter.nil?
+          heat_pump.geothermal_loop.pipe_diameter = 0.75 # in
+          heat_pump.geothermal_loop.pipe_diameter_isdefaulted = true
+        end
+
         HVAC.set_gshp_assumptions(heat_pump, weather)
         HVAC.set_curves_gshp(heat_pump)
 
+        if heat_pump.geothermal_loop.bore_spacing.nil?
+          heat_pump.geothermal_loop.bore_spacing = 16.4 # ft, distance between bores
+          heat_pump.geothermal_loop.bore_spacing_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.bore_diameter.nil?
+          heat_pump.geothermal_loop.bore_diameter = 5.0 # in
+          heat_pump.geothermal_loop.bore_diameter_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.grout_type.nil? && heat_pump.geothermal_loop.grout_conductivity.nil?
+          heat_pump.geothermal_loop.grout_type = HPXML::GeothermalLoopGroutOrPipeTypeStandard
+          heat_pump.geothermal_loop.grout_type_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.grout_conductivity.nil?
+          if heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeStandard
+            heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
+          elsif heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
+            heat_pump.geothermal_loop.grout_conductivity = 0.8 # Btu/h-ft-R
+          end
+          heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.pipe_type.nil? && heat_pump.geothermal_loop.pipe_conductivity.nil?
+          heat_pump.geothermal_loop.pipe_type = HPXML::GeothermalLoopGroutOrPipeTypeStandard
+          heat_pump.geothermal_loop.pipe_type_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.pipe_conductivity.nil?
+          if heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopGroutOrPipeTypeStandard
+            heat_pump.geothermal_loop.pipe_conductivity = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
+          elsif heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
+            heat_pump.geothermal_loop.pipe_conductivity = 0.40 # Btu/h-ft-R; 0.7 W/m-K from https://www.dropbox.com/scl/fi/91yp8e9v34vdh1isvrfvy/GeoPerformX-Spec-Sheet.pdf?rlkey=kw7p01gs46z9lfjs78bo8aujq&dl=0
+          end
+          heat_pump.geothermal_loop.pipe_conductivity_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.shank_spacing.nil?
+          hp_ap = heat_pump.additional_properties
+          heat_pump.geothermal_loop.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
+          heat_pump.geothermal_loop.shank_spacing_isdefaulted = true
+        end
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
       end
-    end
-    hpxml.geothermal_loops.each do |geothermal_loop|
-      if geothermal_loop.pipe_diameter.nil?
-        geothermal_loop.pipe_diameter = 0.75 # in
-        geothermal_loop.pipe_diameter_isdefaulted = true
-      end
-
-      if geothermal_loop.bore_spacing.nil?
-        geothermal_loop.bore_spacing = 16.4 # ft, distance between bores
-        geothermal_loop.bore_spacing_isdefaulted = true
-      end
-
-      if geothermal_loop.bore_diameter.nil?
-        geothermal_loop.bore_diameter = 5.0 # in
-        geothermal_loop.bore_diameter_isdefaulted = true
-      end
-
-      if geothermal_loop.grout_type.nil? && geothermal_loop.grout_conductivity.nil?
-        geothermal_loop.grout_type = HPXML::GeothermalLoopGroutTypeStandard
-        geothermal_loop.grout_type_isdefaulted = true
-      end
-
-      if geothermal_loop.grout_conductivity.nil?
-        if geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeStandard
-          geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
-          geothermal_loop.grout_conductivity_isdefaulted = true
-        elsif geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeThermallyEnhanced
-          geothermal_loop.grout_conductivity = 0.8 # Btu/h-ft-R
-          geothermal_loop.grout_conductivity_isdefaulted = true
-        end
-      end
-
-      if geothermal_loop.pipe_conductivity.nil?
-        if geothermal_loop.pipe_type == HPXML::GeothermalLoopPipeTypeStandard
-          geothermal_loop.pipe_conductivity = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
-          geothermal_loop.pipe_conductivity_isdefaulted = true
-        elsif geothermal_loop.pipe_type == HPXML::GeothermalLoopPipeTypeThermallyEnhanced
-          geothermal_loop.pipe_conductivity = 0.46 # Btu/h-ft-R; FIXME
-          geothermal_loop.pipe_conductivity_isdefaulted = true
-        end
-      end
-
-      next unless geothermal_loop.shank_spacing.nil?
-
-      hp_ap = heat_pump.additional_properties
-      geothermal_loop.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
-      geothermal_loop.shank_spacing_isdefaulted = true
     end
   end
 

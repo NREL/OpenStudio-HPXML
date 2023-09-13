@@ -82,9 +82,6 @@ class UnitConversions
     # Mass
     ['lbm', 'kg'] => 0.45359237,
 
-    # Area Flow Rate
-    ['m^2/s', 'ft^2/hr'] => 38750.1,
-
     # Volume Flow Rate
     ['m^3/s', 'gal/min'] => 15850.323141615143,
     ['m^3/s', 'cfm'] => 2118.880003289315,
@@ -135,6 +132,9 @@ class UnitConversions
     # Thermal Conductivity
     ['btu/(hr*ft*r)', 'w/(m*k)'] => 1.731,
     ['btu*in/(hr*ft^2*r)', 'w/(m*k)'] => 0.14425,
+
+    # Thermal Diffusivity
+    ['m^2/s', 'ft^2/hr'] => 38750.1,
 
     # Infiltration
     ['ft^2/(s^2*r)', 'l^2/(s^2*cm^4*k)'] => 0.001672,
