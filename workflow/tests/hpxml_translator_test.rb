@@ -28,7 +28,7 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs = [File.absolute_path(File.join(@this_dir, '..', 'sample_files')),
                          File.absolute_path(File.join(@this_dir, '..', 'real_homes'))]
     sample_files_dirs.each do |sample_files_dir|
-      Dir["#{sample_files_dir}/*dhw-multiple*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
         next if xml.include? 'base-multiple-buildings.xml' # Tested by test_multiple_buildings()
         # FIXME: Need to address these files
@@ -56,14 +56,14 @@ class HPXMLTest < Minitest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     all_bill_results = {}
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
       results = _run_xml(xml, Parallel.worker_number)
       all_results[xml_name], all_bill_results[xml_name], timeseries_results = results
 
       # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
       # unit multiplier) and check how the results compare to the original run
-      _run_xml(xml, Parallel.worker_number + 1, true, all_results[xml_name], timeseries_results)
+      _run_xml(xml, Parallel.worker_number, true, all_results[xml_name], timeseries_results)
     end
 
     _write_results(all_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
@@ -1419,9 +1419,9 @@ class HPXMLTest < Minitest::Test
           end
 
           # Uncomment these lines to debug:
-          if (val_1x != 0) || (val_10x != 0)
-            puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
-          end
+          # if val_1x != 0 or val_10x != 0
+          #   puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
+          # end
           if abs_frac_tol.nil?
             if abs_delta_tol == 0
               assert_equal(val_1x, val_10x)
