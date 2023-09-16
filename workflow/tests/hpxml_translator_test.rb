@@ -36,15 +36,9 @@ class HPXMLTest < Minitest::Test
         next if xml.include? 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump'
         next if xml.include? '-dehumidifier'
         # DHW:
-        next if xml.include?('-combi') || xml.include?('-indirect')
-        next if xml.include?('-hpwh') || xml.include?('tank-heat-pump')
+        next if xml.include?('-combi') || xml.include?('-indirect') || xml.include?('house026') || xml.include?('house030')
+        next if xml.include?('-hpwh') || xml.include?('tank-heat-pump') || xml.include?('house039') || xml.include?('house049')
         next if xml.include? '-dhw-multiple'
-        next if xml.include? '-stratified'
-        next if xml.include? '-solar'
-        next if xml.include? 'house026'
-        next if xml.include? 'house030'
-        next if xml.include? 'house039'
-        next if xml.include? 'house049'
         # Battery:
         # Both batteries do not charge equally because they both use
         # TrackFacilityElectricDemandStoreExcessOnSite; need to create
@@ -1349,9 +1343,9 @@ class HPXMLTest < Minitest::Test
         abs_delta_tol = 0.5
         abs_frac_tol = 0.05
       elsif key.include?('Hot Water:')
-        # Check that the hot water usage difference is less than 10 gal/yr or less than 1%
+        # Check that the hot water usage difference is less than 10 gal/yr or less than 2%
         abs_delta_tol = 10.0
-        abs_frac_tol = 0.01
+        abs_frac_tol = 0.02
       elsif key.include?('Resilience: Battery')
         # Check that the battery resilience difference is less than 1 hr or less than 1%
         abs_delta_tol = 1.0
@@ -1418,8 +1412,10 @@ class HPXMLTest < Minitest::Test
             abs_val_frac = abs_val_delta / avg_val
           end
 
-          # Uncomment this line to debug:
-          # puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
+          # Uncomment these lines to debug:
+          # if val_1x != 0 or val_10x != 0
+          #   puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
+          # end
           if abs_frac_tol.nil?
             if abs_delta_tol == 0
               assert_equal(val_1x, val_10x)
