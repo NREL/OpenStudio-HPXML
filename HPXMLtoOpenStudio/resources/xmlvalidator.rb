@@ -56,7 +56,8 @@ class XMLValidator
           # Try to retrieve SystemIdentifier
           context_element = hpxml_doc.xpath(current_context.gsub('h:', ''))[current_context_idx]
           if context_element.nil?
-            puts report_doc.to_xml # FIXME: Temporary
+            puts "hpxml_path: #{hpxml_path}" # FIXME: Temporary
+            puts "report_doc: #{report_doc.to_xml}" # FIXME: Temporary
             fail "Could not find element at xpath '#{current_context}' with index #{current_context_idx}."
           end
 
