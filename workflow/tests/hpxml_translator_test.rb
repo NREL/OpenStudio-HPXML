@@ -65,7 +65,8 @@ class HPXMLTest < Minitest::Test
       results = _run_xml(xml, Parallel.worker_number)
       all_results[xml_name], all_bill_results[xml_name], timeseries_results = results
 
-      # Also run with a 10x unit multiplier and check how the results compare to the original run
+      # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
+      # unit multiplier) and check how the results compare to the original run
       _run_xml(xml, Parallel.worker_number, true, all_results[xml_name], timeseries_results)
     end
 

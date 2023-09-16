@@ -31,12 +31,12 @@ class Waterheater
   end
 
   def self.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier)
-    water_heating_system.heating_capacity = 100000000000.0
+    water_heating_system.heating_capacity = 100000000000.0 * unit_multiplier
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, t_set_c, eri_version, unit_multiplier)
 
-    act_vol = 1.0
+    act_vol = 1.0 * unit_multiplier
     _u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
     new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater,
                                    water_heating_system: water_heating_system,
@@ -553,8 +553,7 @@ class Waterheater
       tank_volume = 0.2271 * unit_multiplier
       tank_height = 1.3755 * unit_multiplier
     else
-      storage_diam = (4.0 * UnitConversions.convert(storage_volume, 'gal', 'ft^3') / 3.0 / Math::PI)**(1.0 / 3.0) # ft
-      storage_ht = 3.0 * storage_diam # ft
+      storage_ht = 4.5 * unit_multiplier # ft
       tank_volume = UnitConversions.convert(storage_volume, 'gal', 'm^3')
       tank_height = UnitConversions.convert(storage_ht, 'ft', 'm')
     end
@@ -635,7 +634,7 @@ class Waterheater
     swh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     swh_program.setName("#{obj_name} Controller")
     swh_program.addLine("If #{coll_sensor.name} > #{tank_source_sensor.name}")
-    swh_program.addLine("Set #{swh_pump_actuator.name} = 100")
+    swh_program.addLine("Set #{swh_pump_actuator.name} = 100 * #{unit_multiplier}")
     swh_program.addLine('Else')
     swh_program.addLine("Set #{swh_pump_actuator.name} = 0")
     swh_program.addLine('EndIf')
