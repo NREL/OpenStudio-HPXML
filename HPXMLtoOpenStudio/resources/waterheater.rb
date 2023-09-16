@@ -87,7 +87,7 @@ class Waterheater
     if not schedules_file.nil?
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
       # Sensed schedule
-      setpoint_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      setpoint_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
       if not setpoint_schedule.nil?
         Schedule.set_schedule_type_limits(model, setpoint_schedule, Constants.ScheduleTypeLimitsTemperature)
 
@@ -543,20 +543,16 @@ class Waterheater
     pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
-    num_nodes = 8
-
     storage_tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     storage_tank.setName(obj_name + ' storage tank')
     storage_tank.setSourceSideEffectiveness(heat_ex_eff)
     storage_tank.setTankShape('VerticalCylinder')
     if (solar_thermal_system.collector_type == HPXML::SolarThermalTypeICS) || (fluid_type == Constants.FluidWater) # Use a 60 gal tank dummy tank for direct systems, storage volume for ICS is assumed to be collector volume
-      tank_volume = 0.2271 * unit_multiplier
-      tank_height = 1.3755 * unit_multiplier
+      tank_volume = UnitConversions.convert(60 * unit_multiplier, 'gal', 'm^3')
     else
-      storage_ht = 4.5 * unit_multiplier # ft
       tank_volume = UnitConversions.convert(storage_volume, 'gal', 'm^3')
-      tank_height = UnitConversions.convert(storage_ht, 'ft', 'm')
     end
+    tank_height = UnitConversions.convert(4.5, 'ft', 'm')
     storage_tank.setTankVolume(tank_volume)
     storage_tank.setTankHeight(tank_height)
     storage_tank.setUseSideOutletHeight(tank_height)
@@ -574,7 +570,6 @@ class Waterheater
     storage_tank.setHeaterThermalEfficiency(1)
     storage_tank.ambientTemperatureSchedule.get.remove
     set_wh_ambient(loc_space, loc_schedule, storage_tank)
-    storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
     storage_tank.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
     storage_tank.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
     storage_tank.setUseSideEffectiveness(1)
@@ -582,25 +577,13 @@ class Waterheater
     storage_tank.setSourceSideOutletHeight(0)
     storage_tank.setInletMode('Fixed')
     storage_tank.setIndirectWaterHeatingRecoveryTime(1.5)
-    storage_tank.setNumberofNodes(num_nodes)
+    storage_tank.setNumberofNodes(8)
     storage_tank.setAdditionalDestratificationConductivity(0)
-    ua_adj = get_stratified_tank_ua_adjustments(u_tank, tank_volume, tank_height, unit_multiplier, num_nodes)
-    storage_tank.setNode1AdditionalLossCoefficient(ua_adj[0])
-    storage_tank.setNode2AdditionalLossCoefficient(ua_adj[1])
-    storage_tank.setNode3AdditionalLossCoefficient(ua_adj[2])
-    storage_tank.setNode4AdditionalLossCoefficient(ua_adj[3])
-    storage_tank.setNode5AdditionalLossCoefficient(ua_adj[4])
-    storage_tank.setNode6AdditionalLossCoefficient(ua_adj[5])
-    storage_tank.setNode7AdditionalLossCoefficient(ua_adj[6])
-    storage_tank.setNode8AdditionalLossCoefficient(ua_adj[7])
-    storage_tank.setNode9AdditionalLossCoefficient(ua_adj[8])
-    storage_tank.setNode10AdditionalLossCoefficient(ua_adj[9])
-    storage_tank.setNode11AdditionalLossCoefficient(ua_adj[10])
-    storage_tank.setNode12AdditionalLossCoefficient(ua_adj[11])
     storage_tank.setSourceSideDesignFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
     storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
     storage_tank.setUseSideDesignFlowRate(UnitConversions.convert(storage_volume, 'gal', 'm^3') / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
+    set_stratified_tank_ua(storage_tank, u_tank, unit_multiplier)
     storage_tank.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
     storage_tank.additionalProperties.setFeature('ObjectType', Constants.ObjectNameSolarHotWater) # Used by reporting measure
 
@@ -649,7 +632,6 @@ class Waterheater
   private
 
   def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier)
-    h_tank *= unit_multiplier
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 * unit_multiplier # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
@@ -777,14 +759,11 @@ class Waterheater
     u_tank = ((5.678 * tank_ua) / a_tank) * (1.0 - solar_fraction)
 
     v_actual *= unit_multiplier
-    h_tank *= unit_multiplier
     e_cap *= unit_multiplier
     parasitics *= unit_multiplier
 
     h_UE = (1.0 - (3.5 / 12.0)) * h_tank # in the 3rd node of the tank (counting from top)
     h_LE = (1.0 - (9.5 / 12.0)) * h_tank # in the 10th node of the tank (counting from top)
-
-    num_nodes = 6
 
     tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     tank.setName("#{obj_name_hpwh} tank")
@@ -809,24 +788,10 @@ class Waterheater
     tank.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
     tank.setOnCycleParasiticFuelConsumptionRate(parasitics)
     tank.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-    tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
     tank.ambientTemperatureSchedule.get.remove
     tank.setAmbientTemperatureSchedule(hpwh_tamb)
-    tank.setNumberofNodes(num_nodes)
+    tank.setNumberofNodes(6)
     tank.setAdditionalDestratificationConductivity(0)
-    ua_adj = get_stratified_tank_ua_adjustments(u_tank, v_actual, h_tank, unit_multiplier, num_nodes)
-    tank.setNode1AdditionalLossCoefficient(ua_adj[0])
-    tank.setNode2AdditionalLossCoefficient(ua_adj[1])
-    tank.setNode3AdditionalLossCoefficient(ua_adj[2])
-    tank.setNode4AdditionalLossCoefficient(ua_adj[3])
-    tank.setNode5AdditionalLossCoefficient(ua_adj[4])
-    tank.setNode6AdditionalLossCoefficient(ua_adj[5])
-    tank.setNode7AdditionalLossCoefficient(ua_adj[6])
-    tank.setNode8AdditionalLossCoefficient(ua_adj[7])
-    tank.setNode9AdditionalLossCoefficient(ua_adj[8])
-    tank.setNode10AdditionalLossCoefficient(ua_adj[9])
-    tank.setNode11AdditionalLossCoefficient(ua_adj[10])
-    tank.setNode12AdditionalLossCoefficient(ua_adj[11])
     tank.setUseSideDesignFlowRate(UnitConversions.convert(v_actual, 'gal', 'm^3') / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
     tank.setSourceSideDesignFlowRate(0)
     tank.setSourceSideFlowControlMode('')
@@ -834,6 +799,7 @@ class Waterheater
     tank.setSourceSideOutletHeight(0)
     tank.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
     tank.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
+    set_stratified_tank_ua(tank, u_tank, unit_multiplier)
     tank.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
     return tank
@@ -1003,7 +969,7 @@ class Waterheater
 
     op_mode_schedule = nil
     if not schedules_file.nil?
-      op_mode_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterOperatingMode)
+      op_mode_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnWaterHeaterOperatingMode)
     end
 
     # Sensor on op_mode_schedule
@@ -1054,37 +1020,46 @@ class Waterheater
     return hpwh_ctrl_program
   end
 
-  def self.get_stratified_tank_ua_adjustments(u_tank, vol_tank, h_tank, unit_multiplier, num_nodes)
-    ua_adj = [0] * 12
+  def self.set_stratified_tank_ua(tank, u_tank, unit_multiplier)
+    node_ua = [0] * 12 # Max number of nodes in E+ stratified tank model
+    if unit_multiplier == 1
+      tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
+    else
+      tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(0)
 
-    # FIXME: For some reason, this method doesn't improve the tank losses
-    # for a 10x run relative to a 1x run relative to not doing these adjustments.
-    return ua_adj
+      # Calculate UA for each node; this is needed to accommodate unit multipliers where
+      # the surface area for each node is not scaled proportionally.
+      vol_tank = UnitConversions.convert(tank.tankVolume.get, 'm^3', 'gal')
+      h_tank = UnitConversions.convert(tank.tankHeight.get, 'm', 'ft')
 
-    return ua_adj if u_tank.nil?
-    return ua_adj if unit_multiplier == 1
+      # Calculate areas for tank w/o unit multiplier
+      a_tank, a_side = calc_tank_areas(vol_tank / unit_multiplier, h_tank)
+      a_top = (a_tank - a_side) / 2.0
+      num_nodes = tank.numberofNodes
 
-    a_tank, a_side = calc_tank_areas(vol_tank, h_tank)
-    a_tank_no_mult, a_side_no_mult = calc_tank_areas(vol_tank / unit_multiplier, h_tank / unit_multiplier)
-
-    a_top = (a_tank - a_side) / 2.0
-    a_top_no_mult = (a_tank_no_mult - a_side_no_mult) / 2.0
-
-    # Calculate UA adjustment for each node
-    for node_num in 0..num_nodes - 1
-      # These node area calculations are based on the E+ WaterThermalTankData::SetupStratifiedNodes() method
-      a_node = a_side / num_nodes
-      a_node_no_mult = a_side_no_mult / num_nodes
-      if (node_num == 0) || (node_num == num_nodes - 1)
-        # Top or bottom node
-        a_node += a_top
-        a_node_no_mult += a_top_no_mult
+      # Calculate desired UA for each node
+      for node_num in 0..num_nodes - 1
+        # These node area calculations are based on the E+ WaterThermalTankData::SetupStratifiedNodes() method
+        a_node = a_side / num_nodes
+        if (node_num == 0) || (node_num == num_nodes - 1) # Top or bottom node
+          a_node += a_top
+        end
+        node_ua[node_num] = u_tank.to_f * UnitConversions.convert(a_node, 'ft^2', 'm^2') * unit_multiplier
       end
-      target_ua = u_tank * UnitConversions.convert(a_node_no_mult, 'ft^2', 'm^2') * unit_multiplier
-      actual_ua = u_tank * UnitConversions.convert(a_node, 'ft^2', 'm^2')
-      ua_adj[node_num] = (target_ua - actual_ua).round(4)
     end
-    return ua_adj
+
+    tank.setNode1AdditionalLossCoefficient(node_ua[0])
+    tank.setNode2AdditionalLossCoefficient(node_ua[1])
+    tank.setNode3AdditionalLossCoefficient(node_ua[2])
+    tank.setNode4AdditionalLossCoefficient(node_ua[3])
+    tank.setNode5AdditionalLossCoefficient(node_ua[4])
+    tank.setNode6AdditionalLossCoefficient(node_ua[5])
+    tank.setNode7AdditionalLossCoefficient(node_ua[6])
+    tank.setNode8AdditionalLossCoefficient(node_ua[7])
+    tank.setNode9AdditionalLossCoefficient(node_ua[8])
+    tank.setNode10AdditionalLossCoefficient(node_ua[9])
+    tank.setNode11AdditionalLossCoefficient(node_ua[10])
+    tank.setNode12AdditionalLossCoefficient(node_ua[11])
   end
 
   def self.get_combi_boiler_and_plant_loop(model, heating_source_id)
@@ -1662,44 +1637,25 @@ class Waterheater
     act_vol *= unit_multiplier
 
     if tank_model_type == HPXML::WaterHeaterTankModelTypeStratified
-      h_tank = UnitConversions.convert(get_tank_height(), 'ft', 'm')
-      h_tank *= unit_multiplier
-      # height of upper and lower element based on TRNSYS assumptions for an ERWH
-      h_UE = 0.733333333 * h_tank # node 4
-      h_LE = 0.133333333 * h_tank # node 13
-
-      num_nodes = 12
+      h_tank = get_tank_height() # ft
 
       # Add a WaterHeater:Stratified to the model
       new_heater = OpenStudio::Model::WaterHeaterStratified.new(model)
       new_heater.setEndUseSubcategory('Domestic Hot Water')
-      new_heater.setTankHeight(h_tank)
+      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
+      new_heater.setTankHeight(UnitConversions.convert(h_tank, 'ft', 'm'))
       new_heater.setMaximumTemperatureLimit(90)
       new_heater.setHeaterPriorityControl('MasterSlave')
       configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
       new_heater.setHeater1Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
-      new_heater.setHeater1Height(h_UE)
+      new_heater.setHeater1Height(UnitConversions.convert(h_tank * 0.733333333, 'ft', 'm')) # node 4; height of upper element based on TRNSYS assumptions for an ERWH
       new_heater.setHeater1DeadbandTemperatureDifference(5.556)
       new_heater.setHeater2Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
-      new_heater.setHeater2Height(h_LE)
+      new_heater.setHeater2Height(UnitConversions.convert(h_tank * 0.733333333, 'ft', 'm')) # node 13; height of upper element based on TRNSYS assumptions for an ERWH
       new_heater.setHeater2DeadbandTemperatureDifference(5.556)
       new_heater.setHeaterThermalEfficiency(1)
-      new_heater.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u) unless u.nil?
-      new_heater.setNumberofNodes(num_nodes)
+      new_heater.setNumberofNodes(12)
       new_heater.setAdditionalDestratificationConductivity(0)
-      ua_adj = get_stratified_tank_ua_adjustments(u, act_vol, h_tank, unit_multiplier, num_nodes)
-      new_heater.setNode1AdditionalLossCoefficient(ua_adj[0])
-      new_heater.setNode2AdditionalLossCoefficient(ua_adj[1])
-      new_heater.setNode3AdditionalLossCoefficient(ua_adj[2])
-      new_heater.setNode4AdditionalLossCoefficient(ua_adj[3])
-      new_heater.setNode5AdditionalLossCoefficient(ua_adj[4])
-      new_heater.setNode6AdditionalLossCoefficient(ua_adj[5])
-      new_heater.setNode7AdditionalLossCoefficient(ua_adj[6])
-      new_heater.setNode8AdditionalLossCoefficient(ua_adj[7])
-      new_heater.setNode9AdditionalLossCoefficient(ua_adj[8])
-      new_heater.setNode10AdditionalLossCoefficient(ua_adj[9])
-      new_heater.setNode11AdditionalLossCoefficient(ua_adj[10])
-      new_heater.setNode12AdditionalLossCoefficient(ua_adj[11])
       new_heater.setUseSideDesignFlowRate(UnitConversions.convert(act_vol, 'gal', 'm^3') / 60.1)
       new_heater.setSourceSideDesignFlowRate(0)
       new_heater.setSourceSideFlowControlMode('')
@@ -1707,8 +1663,10 @@ class Waterheater
       new_heater.setSourceSideOutletHeight(0)
       new_heater.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
       new_heater.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
+      set_stratified_tank_ua(new_heater, u, unit_multiplier)
     else
       new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
       configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
       new_heater.setMaximumTemperatureLimit(99.0)
@@ -1758,7 +1716,6 @@ class Waterheater
     end
 
     new_heater.setName(name)
-    new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
     new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
     set_wh_ambient(loc_space, loc_schedule, new_heater)
 
@@ -1793,7 +1750,7 @@ class Waterheater
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
       new_schedule = ScheduleConstant.new(model, Constants.ObjectNameWaterHeaterSetpoint, t_set_c, Constants.ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)
@@ -1810,7 +1767,7 @@ class Waterheater
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
       new_schedule = ScheduleConstant.new(model, Constants.ObjectNameWaterHeaterSetpoint, t_set_c, Constants.ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)

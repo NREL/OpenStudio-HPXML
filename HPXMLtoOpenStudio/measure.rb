@@ -139,7 +139,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Apply HPXML defaults upfront; process schedules & emissions
       check_file_references(hpxml.header, hpxml_path)
-      schedules_file = SchedulesFile.new(runner: runner, model: model,
+      schedules_file = SchedulesFile.new(runner: runner,
                                          schedules_paths: hpxml.header.schedules_filepaths,
                                          year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                          unavailable_periods: hpxml.header.unavailable_periods,
@@ -159,7 +159,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          schedules_file.set_unit_model(unit_model) # otherwise we find Schedule:File in model without External:File
           create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
