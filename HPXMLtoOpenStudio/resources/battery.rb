@@ -160,8 +160,8 @@ class Battery
 
     battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     battery_losses_program.setName('battery_losses')
-    battery_losses_program.addLine("Set charge_losses = -1 * 0.5 * #{charge_sensor.name} * (1 - #{battery.round_trip_efficiency})")
-    battery_losses_program.addLine("Set discharge_losses = -1 * 0.5 * #{discharge_sensor.name} * (1 - #{battery.round_trip_efficiency})")
+    battery_losses_program.addLine("Set charge_losses = -1 * #{charge_sensor.name} * (1 - #{battery.round_trip_efficiency} ** 0.5)")
+    battery_losses_program.addLine("Set discharge_losses = -1 * #{discharge_sensor.name} * (1 - #{battery.round_trip_efficiency} ** 0.5 )")
     # battery_losses_program.addLine("Set production_decrement_losses = -1 * 0.5 * #{production_decrement_sensor.name} * (1 - #{battery.round_trip_efficiency})")
     # battery_losses_program.addLine("Set losses = charge_losses + discharge_losses + production_decrement_losses")
     battery_losses_program.addLine('Set losses = charge_losses + discharge_losses')
