@@ -423,7 +423,7 @@ HVAC Capacities
 ~~~~~~~~~~~~~~~
 
 System outputs are listed below.
-Capacities for individual HVAC systems can be found in the `in.xml` file.
+Capacities for individual HVAC systems can be found in the ``in.xml`` file.
 
    ====================================================  ====================
    Type                                                  Notes
@@ -447,7 +447,7 @@ HVAC Design Temperatures
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Design temperatures are used in the design load calculations for autosizing of HVAC equipment; see :ref:`hvac_sizing_control` for how they are derived.
-Design temperatures can also be found in the `in.xml` file.
+Design temperatures can also be found in the ``in.xml`` file.
 
    =====================================================================  ====================
    Type                                                                   Notes
@@ -462,8 +462,8 @@ HVAC Design Loads
 ~~~~~~~~~~~~~~~~~
 
 Design load outputs, used for autosizing of HVAC equipment, are listed below.
-Design loads are based on block load ACCA Manual J calculations using 1%/99% design temperatures.
-Design loads can also be found in the `in.xml` file.
+Design loads are based on block load ACCA Manual J calculations using :ref:`hvac_design_temps`.
+Design loads can also be found in the ``in.xml`` file.
 
    =====================================================================  ====================
    Type                                                                   Notes
