@@ -740,8 +740,8 @@ class Schedule
     rule.setApplySunday(true)
   end
 
-  def self.get_unavailable_periods(schedule_name, unavailable_periods)
-    return unavailable_periods.select { |p| Schedule.unavailable_period_applies(schedule_name, p.column_name) }
+  def self.get_unavailable_periods(runner, schedule_name, unavailable_periods)
+    return unavailable_periods.select { |p| Schedule.unavailable_period_applies(runner, schedule_name, p.column_name) }
   end
 
   def self.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
@@ -1256,9 +1256,10 @@ class Schedule
     return unavailable_periods_csv_data
   end
 
-  def self.unavailable_period_applies(schedule_name, col_name)
+  def self.unavailable_period_applies(runner, schedule_name, col_name)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = get_unavailable_periods_csv_data
+
     end
     @unavailable_periods_csv_data.each do |csv_row|
       next if csv_row['Schedule Name'] != schedule_name
@@ -1273,6 +1274,13 @@ class Schedule
         fail "Value is not a valid integer for row='#{schedule_name}' and column='#{col_name}' in unavailable_periods.csv."
       end
       if applies == 1
+        if not runner.nil?
+          if schedule_name == SchedulesFile::ColumnHVAC
+            runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.')
+          elsif schedule_name == SchedulesFile::ColumnWaterHeater
+            runner.registerWarning('It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.')
+          end
+        end
         return true
       elsif applies == 0
         return false
@@ -1381,6 +1389,7 @@ class SchedulesFile
 
     import()
     battery_schedules
+    expand_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(unavailable_periods)
     convert_setpoints
@@ -1633,6 +1642,16 @@ class SchedulesFile
     end
   end
 
+  def expand_schedules
+    # Expand schedules with fewer elements such that all the schedules have the same number of elements
+    max_size = @schedules.map { |_k, v| v.size }.uniq.max
+    @schedules.each do |col, values|
+      if values.size < max_size
+        @schedules[col] = values.map { |v| [v] * (max_size / values.size) }.flatten
+      end
+    end
+  end
+
   def set_unavailable_periods(unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -1659,13 +1678,13 @@ class SchedulesFile
         end
 
         # Skip those unaffected
-        next unless Schedule.unavailable_period_applies(schedule_name2, column_name)
+        next unless Schedule.unavailable_period_applies(@runner, schedule_name2, column_name)
 
         @tmp_schedules[column_name].each_with_index do |_ts, i|
           if schedule_name == ColumnWaterHeaterSetpoint
             # Temperature of tank < 2C indicates of possibility of freeze.
             @tmp_schedules[schedule_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[column_name][i] == 1.0
-          else
+          elsif ![SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(schedule_name)
             @tmp_schedules[schedule_name][i] *= (1.0 - @tmp_schedules[column_name][i])
           end
         end

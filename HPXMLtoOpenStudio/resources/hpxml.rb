@@ -120,6 +120,7 @@ class HPXML < Object
   FoundationTypeCrawlspaceConditioned = 'ConditionedCrawlspace'
   FoundationTypeCrawlspaceUnvented = 'UnventedCrawlspace'
   FoundationTypeCrawlspaceVented = 'VentedCrawlspace'
+  FoundationTypeBellyAndWing = 'BellyAndWing'
   FoundationTypeSlab = 'SlabOnGrade'
   FoundationWallTypeConcreteBlock = 'concrete block'
   FoundationWallTypeConcreteBlockFoamCore = 'concrete block foam core'
@@ -179,7 +180,6 @@ class HPXML < Object
   HVACTypeElectricResistance = 'ElectricResistance'
   HVACTypeEvaporativeCooler = 'evaporative cooler'
   HVACTypeFireplace = 'Fireplace'
-  HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
@@ -189,9 +189,9 @@ class HPXML < Object
   HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'
   HVACTypeHeatPumpRoom = 'room air conditioner with reverse cycle'
   HVACTypeMiniSplitAirConditioner = 'mini-split'
-  HVACTypePortableHeater = 'PortableHeater'
-  HVACTypeRoomAirConditioner = 'room air conditioner'
   HVACTypePTAC = 'packaged terminal air conditioner'
+  HVACTypeRoomAirConditioner = 'room air conditioner'
+  HVACTypeSpaceHeater = 'SpaceHeater'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
   HydronicTypeBaseboard = 'baseboard'
@@ -211,12 +211,14 @@ class HPXML < Object
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
+  LocationAttic = 'attic'
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
+  LocationCrawlspace = 'crawlspace'
   LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
@@ -227,6 +229,8 @@ class HPXML < Object
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
+  LocationManufacturedHomeBelly = 'manufactured home belly'
+  LocationManufacturedHomeUnderBelly = 'manufactured home underbelly'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
@@ -496,7 +500,9 @@ class HPXML < Object
      'HeatPumpFuel',
      'BackupSystemFuel',
      'FuelType',
-     'IntegratedHeatingSystemFuel'].each do |fuel_name|
+     'IntegratedHeatingSystemFuel',
+     'Heater/Type'].each do |fuel_name|
+      fuel = HPXML::HeaterTypeGas if fuel_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
       if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
         return true
       end
@@ -1978,8 +1984,9 @@ class HPXML < Object
 
   class Foundation < BaseElement
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
-             :attached_to_slab_idrefs, :attached_to_floor_idrefs, :attached_to_foundation_wall_idrefs,
-             :attached_to_wall_idrefs, :attached_to_rim_joist_idrefs]
+             :belly_wing_skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
+             :attached_to_foundation_wall_idrefs, :attached_to_wall_idrefs,
+             :attached_to_rim_joist_idrefs]
     attr_accessor(*ATTRS)
 
     def attached_slabs
@@ -2056,6 +2063,8 @@ class HPXML < Object
         return LocationCrawlspaceConditioned
       elsif @foundation_type == FoundationTypeSlab
         return LocationLivingSpace
+      elsif @foundation_type == FoundationTypeBellyAndWing
+        return LocationManufacturedHomeUnderBelly
       else
         fail "Unexpected foundation type: '#{@foundation_type}'."
       end
@@ -2122,6 +2131,9 @@ class HPXML < Object
         elsif @foundation_type == FoundationTypeCrawlspaceConditioned
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
+        elsif @foundation_type == FoundationTypeBellyAndWing
+          belly_and_wing = XMLHelper.add_element(foundation_type_el, 'BellyAndWing')
+          XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean, @belly_wing_skirt_present_isdefaulted) unless @belly_wing_skirt_present.nil?
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
@@ -2179,6 +2191,9 @@ class HPXML < Object
         @foundation_type = FoundationTypeAmbient
       elsif XMLHelper.has_element(foundation, 'FoundationType/AboveApartment')
         @foundation_type = FoundationTypeAboveApartment
+      elsif XMLHelper.has_element(foundation, 'FoundationType/BellyAndWing')
+        @foundation_type = FoundationTypeBellyAndWing
+        @belly_wing_skirt_present = XMLHelper.get_value(foundation, 'FoundationType/BellyAndWing/SkirtPresent', :boolean)
       end
       if @foundation_type == FoundationTypeCrawlspaceVented
         @vented_crawlspace_sla = XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='#{UnitsSLA}']/Value", :float)
@@ -2417,6 +2432,10 @@ class HPXML < Object
 
     def is_conditioned
       return HPXML::is_conditioned(self)
+    end
+
+    def net_area
+      return area
     end
 
     def delete
@@ -2727,6 +2746,26 @@ class HPXML < Object
       return val
     end
 
+    def connected_slabs
+      return @hpxml_object.slabs.select { |s| s.connected_foundation_walls.include? self }
+    end
+
+    def exposed_fraction
+      # Calculate total slab exposed perimeter
+      slab_exposed_length = connected_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
+
+      # Calculate total length of exterior foundation walls
+      ext_adjacent_fnd_walls = connected_slabs.map { |s| s.connected_foundation_walls.select { |fw| fw.is_exterior } }.flatten.uniq
+      wall_total_length = ext_adjacent_fnd_walls.map { |fw| fw.area / fw.height }.sum
+
+      # Calculate exposed fraction
+      if slab_exposed_length < wall_total_length
+        return slab_exposed_length / wall_total_length
+      end
+
+      return 1.0
+    end
+
     def is_exterior
       if @exterior_adjacent_to == LocationGround
         return true
@@ -2896,11 +2935,7 @@ class HPXML < Object
     end
 
     def is_exterior
-      if @exterior_adjacent_to == LocationOutside
-        return true
-      end
-
-      return false
+      return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
     end
 
     def is_interior
@@ -3062,6 +3097,10 @@ class HPXML < Object
       return HPXML::is_conditioned(self)
     end
 
+    def connected_foundation_walls
+      return @hpxml_object.foundation_walls.select { |fw| interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to }
+    end
+
     def delete
       @hpxml_object.slabs.delete(self)
       @hpxml_object.foundations.each do |foundation|
@@ -3085,7 +3124,7 @@ class HPXML < Object
       XMLHelper.add_element(slab, 'Area', @area, :float) unless @area.nil?
       XMLHelper.add_element(slab, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
       XMLHelper.add_element(slab, 'ExposedPerimeter', @exposed_perimeter, :float) unless @exposed_perimeter.nil?
-      XMLHelper.add_element(slab, 'DepthBelowGrade', @depth_below_grade, :float) unless @depth_below_grade.nil?
+      XMLHelper.add_element(slab, 'DepthBelowGrade', @depth_below_grade, :float, @depth_below_grade_isdefaulted) unless @depth_below_grade.nil?
       insulation = XMLHelper.add_element(slab, 'PerimeterInsulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @perimeter_insulation_id.nil?
@@ -3806,7 +3845,7 @@ class HPXML < Object
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
              :fan_watts_per_cfm, :charge_defect_ratio, :cooling_airflow_cfm, :location, :primary_system,
              :integrated_heating_system_fuel, :integrated_heating_system_capacity, :integrated_heating_system_efficiency_percent,
-             :integrated_heating_system_fraction_heat_load_served, :integrated_heating_system_airflow_cfm, :htg_seed_id]
+             :integrated_heating_system_fraction_heat_load_served, :integrated_heating_system_airflow_cfm, :htg_seed_id, :crankcase_heater_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3918,6 +3957,7 @@ class HPXML < Object
       XMLHelper.add_extension(cooling_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(cooling_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(cooling_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
+      XMLHelper.add_extension(cooling_system, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       XMLHelper.add_extension(cooling_system, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       if @primary_system
@@ -3959,6 +3999,7 @@ class HPXML < Object
       @shared_loop_watts = XMLHelper.get_value(cooling_system, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(cooling_system, 'extension/SharedLoopMotorEfficiency', :float)
       @fan_coil_watts = XMLHelper.get_value(cooling_system, 'extension/FanCoilWatts', :float)
+      @crankcase_heater_watts = XMLHelper.get_value(cooling_system, 'extension/CrankcaseHeaterPowerWatts', :float)
       @clg_seed_id = XMLHelper.get_value(cooling_system, 'extension/CoolingSeedId', :string)
       @htg_seed_id = XMLHelper.get_value(cooling_system, 'extension/HeatingSeedId', :string)
       primary_cooling_system = HPXML::get_idref(XMLHelper.get_element(cooling_system, '../PrimarySystems/PrimaryCoolingSystem'))
@@ -4002,7 +4043,8 @@ class HPXML < Object
              :heating_efficiency_hspf2, :heating_efficiency_cop, :third_party_certification, :htg_seed_id, :clg_seed_id,
              :pump_watts_per_ton, :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
-             :heating_airflow_cfm, :cooling_airflow_cfm, :location, :primary_heating_system, :primary_cooling_system]
+             :heating_airflow_cfm, :cooling_airflow_cfm, :location, :primary_heating_system, :primary_cooling_system,
+             :heating_capacity_retention_fraction, :heating_capacity_retention_temp, :crankcase_heater_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -4147,6 +4189,12 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
+      if (not @heating_capacity_retention_fraction.nil?) || (not @heating_capacity_retention_temp.nil?)
+        htg_cap_retention = XMLHelper.add_extension(heat_pump, 'HeatingCapacityRetention')
+        XMLHelper.add_element(htg_cap_retention, 'Fraction', @heating_capacity_retention_fraction, :float, @heating_capacity_retention_fraction_isdefaulted) unless @heating_capacity_retention_fraction.nil?
+        XMLHelper.add_element(htg_cap_retention, 'Temperature', @heating_capacity_retention_temp, :float, @heating_capacity_retention_temp_isdefaulted) unless @heating_capacity_retention_temp.nil?
+      end
+      XMLHelper.add_extension(heat_pump, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       if @primary_heating_system
@@ -4202,6 +4250,9 @@ class HPXML < Object
       @pump_watts_per_ton = XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon', :float)
       @shared_loop_watts = XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heat_pump, 'extension/SharedLoopMotorEfficiency', :float)
+      @heating_capacity_retention_fraction = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Fraction', :float)
+      @heating_capacity_retention_temp = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Temperature', :float)
+      @crankcase_heater_watts = XMLHelper.get_value(heat_pump, 'extension/CrankcaseHeaterPowerWatts', :float)
       @htg_seed_id = XMLHelper.get_value(heat_pump, 'extension/HeatingSeedId', :string)
       @clg_seed_id = XMLHelper.get_value(heat_pump, 'extension/CoolingSeedId', :string)
       primary_heating_system = HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryHeatingSystem'))
@@ -4996,6 +5047,16 @@ class HPXML < Object
         next unless solar_thermal_system.water_heating_system_idref == @id
 
         solar_thermal_system.water_heating_system_idref = nil
+      end
+      @hpxml_object.clothes_washers.each do |clothes_washer|
+        next unless clothes_washer.water_heating_system_idref == @id
+
+        clothes_washer.water_heating_system_idref = nil
+      end
+      @hpxml_object.dishwashers.each do |dishwasher|
+        next unless dishwasher.water_heating_system_idref == @id
+
+        dishwasher.water_heating_system_idref = nil
       end
     end
 
@@ -6758,6 +6819,7 @@ class HPXML < Object
                        :exposed_perimeter]
 
     # Look for pairs of surfaces that can be collapsed
+    like_foundation_walls = {}
     surf_types.each do |surf_type, surfaces|
       next unless surf_types_of_interest.nil? || surf_types_of_interest.include?(surf_type)
 
@@ -6774,12 +6836,20 @@ class HPXML < Object
             next if attribute.to_s.end_with? '_isdefaulted'
             next if attrs_to_ignore.include? attribute
             next if (surf_type == :foundation_walls) && ([:azimuth, :orientation].include? attribute) # Azimuth of foundation walls is irrelevant
+            next if (surf_type == :foundation_walls) && (attribute == :depth_below_grade) # Ignore BG depth difference; we will later calculate an effective BG depth for the combined surface
             next if surf.send(attribute) == surf2.send(attribute)
 
             match = false
             break
           end
           next unless match
+
+          if (surf_type == :foundation_walls) && (surf.depth_below_grade != surf2.depth_below_grade)
+            if like_foundation_walls[surf].nil?
+              like_foundation_walls[surf] = [{ bgdepth: surf.depth_below_grade, length: surf.area / surf.height }]
+            end
+            like_foundation_walls[surf] << { bgdepth: surf2.depth_below_grade, length: surf2.area / surf2.height }
+          end
 
           # Update values
           if (not surf.area.nil?) && (not surf2.area.nil?)
@@ -6808,6 +6878,11 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
+    end
+
+    like_foundation_walls.each do |foundation_wall, properties|
+      # Calculate weighted-average (by length) below-grade depth
+      foundation_wall.depth_below_grade = properties.map { |p| p[:bgdepth] * p[:length] }.sum(0.0) / properties.map { |p| p[:length] }.sum
     end
   end
 

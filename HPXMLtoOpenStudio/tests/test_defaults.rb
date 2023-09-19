@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
+class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   ConstantDaySchedule = '0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1'
   ConstantMonthSchedule = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
 
@@ -302,7 +302,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.11362695139911635, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.12522695139911635, 1.059331185615199, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
 
     # Test defaults w/ electricity JSON file
@@ -312,7 +312,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     hpxml_default.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 0.7169975308418142, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 1.059331185615199, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
   end
 
@@ -809,26 +809,39 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.slabs[0].thickness = 7.0
     hpxml.slabs[0].carpet_r_value = 1.1
     hpxml.slabs[0].carpet_fraction = 0.5
+    hpxml.slabs[0].depth_below_grade = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 7.0, 1.1, 0.5)
+    _test_default_slab_values(hpxml_default.slabs[0], 7.0, 1.1, 0.5, nil)
 
     # Test defaults w/ conditioned basement
     hpxml.slabs[0].thickness = nil
     hpxml.slabs[0].carpet_r_value = nil
     hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8)
+    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8, nil)
 
     # Test defaults w/ crawlspace
     hpxml = _create_hpxml('base-foundation-unvented-crawlspace.xml')
     hpxml.slabs[0].thickness = nil
     hpxml.slabs[0].carpet_r_value = nil
     hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_slab_values(hpxml_default.slabs[0], 0.0, 0.0, 0.0)
+    _test_default_slab_values(hpxml_default.slabs[0], 0.0, 0.0, 0.0, nil)
+
+    # Test defaults w/ slab-on-grade
+    hpxml = _create_hpxml('base-foundation-slab.xml')
+    hpxml.slabs[0].thickness = nil
+    hpxml.slabs[0].carpet_r_value = nil
+    hpxml.slabs[0].carpet_fraction = nil
+    hpxml.slabs[0].depth_below_grade = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_slab_values(hpxml_default.slabs[0], 4.0, 2.0, 0.8, 0.0)
   end
 
   def test_windows
@@ -1124,16 +1137,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml.cooling_systems[0].cooling_capacity = 12345
     hpxml.cooling_systems[0].cooling_efficiency_seer = 12.0
+    hpxml.cooling_systems[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0, 40.0)
 
     # Test defaults - SEER2
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_efficiency_seer2 = 11.4
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0)
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0, 40.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -1142,9 +1156,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = nil
     hpxml.cooling_systems[0].airflow_defect_ratio = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, 12.0)
+    _test_default_central_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, 12.0, 50.0)
   end
 
   def test_room_air_conditioners
@@ -1152,16 +1167,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-room-ac-only.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.88
     hpxml.cooling_systems[0].cooling_capacity = 12345
+    hpxml.cooling_systems[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.88, 12345)
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.88, 12345, 40.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil)
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil, 0.0)
   end
 
   def test_evaporative_coolers
@@ -1187,9 +1204,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = -0.11
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml.cooling_systems[0].cooling_capacity = 12345
+    hpxml.cooling_systems[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.78, 0.66, -0.11, -0.22, 12345, 19.0)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.78, 0.66, -0.11, -0.22, 12345, 19.0, 40.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -1197,22 +1215,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].charge_defect_ratio = nil
     hpxml.cooling_systems[0].airflow_defect_ratio = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.18, 0, 0, nil, 19.0)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.18, 0, 0, nil, 19.0, 50.0)
 
     # Test defaults w/ ductless
     hpxml.cooling_systems[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 19.0)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 19.0, 50.0)
 
     # Test defaults w/ ductless - SEER2
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_efficiency_seer2 = 13.3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 13.3)
+    _test_default_mini_split_air_conditioner_values(hpxml_default.cooling_systems[0], 0.73, 0.07, 0, 0, nil, 13.3, 50.0)
   end
 
   def test_ptac
@@ -1220,16 +1239,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-ptac-with-heating-electricity.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.75
     hpxml.cooling_systems[0].cooling_capacity = 12345
+    hpxml.cooling_systems[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.75, 12345)
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.75, 12345, 40.0)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil)
+    _test_default_room_air_conditioner_ptac_values(hpxml_default.cooling_systems[0], 0.65, nil, 0.0)
   end
 
   def test_furnaces
@@ -1371,9 +1392,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_stove_values(hpxml_default.heating_systems[0], 40, nil, false, nil)
   end
 
-  def test_portable_heaters
+  def test_space_heaters
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-portable-heater-gas-only.xml')
+    hpxml = _create_hpxml('base-hvac-space-heater-gas-only.xml')
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1386,23 +1407,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_portable_heater_values(hpxml_default.heating_systems[0], 0, nil)
-  end
-
-  def test_fixed_heaters
-    # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base-hvac-fixed-heater-gas-only.xml')
-    hpxml.heating_systems[0].fan_watts = 22
-    hpxml.heating_systems[0].heating_capacity = 12345
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 22, 12345)
-
-    # Test defaults
-    hpxml.heating_systems[0].fan_watts = nil
-    hpxml.heating_systems[0].heating_capacity = nil
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default.heating_systems[0], 0, nil)
   end
 
   def test_fireplaces
@@ -1441,13 +1445,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.22
     hpxml.heat_pumps[0].cooling_capacity = 12345
     hpxml.heat_pumps[0].heating_capacity = 23456
-    hpxml.heat_pumps[0].heating_capacity_17F = 9876
     hpxml.heat_pumps[0].backup_heating_capacity = 34567
     hpxml.heat_pumps[0].cooling_efficiency_seer = 14.0
     hpxml.heat_pumps[0].heating_efficiency_hspf = 8.0
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = 0.1
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = 2.0
+    hpxml.heat_pumps[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, nil, 34567, 14.0, 8.0, 0.1, 2.0, 40.0)
+
+    # Test w/ heating capacity 17F
+    hpxml.heat_pumps[0].heating_capacity_17F = 9876
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, nil, nil, 40.0)
 
     # Test defaults - SEER2/HSPF2
     hpxml.heat_pumps[0].cooling_efficiency_seer = nil
@@ -1456,7 +1470,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_efficiency_hspf2 = 6.8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, nil, nil, 40.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
@@ -1468,9 +1482,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 14.0, 8.0)
+    _test_default_air_to_air_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil, nil, nil, nil, 14.0, 8.0, 0.425, 5.0, 50.0)
   end
 
   def test_pthp
@@ -1479,18 +1494,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].cooling_shr = 0.88
     hpxml.heat_pumps[0].cooling_capacity = 12345
     hpxml.heat_pumps[0].heating_capacity = 23456
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = 0.1
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = 2.0
+    hpxml.heat_pumps[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.88, 12345, 23456)
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.88, 12345, 23456, nil, 0.1, 2.0, 40.0)
+
+    # Test w/ heating capacity 17F
+    hpxml.heat_pumps[0].heating_capacity_17F = 9876
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.88, 12345, 23456, 9876, nil, nil, 40.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].heating_capacity_17F = nil
+    hpxml.heat_pumps[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil)
+    _test_default_pthp_values(hpxml_default.heat_pumps[0], 0.65, nil, nil, nil, 0.425, 5.0, 0.0)
   end
 
   def test_mini_split_heat_pumps
@@ -1502,11 +1530,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.22
     hpxml.heat_pumps[0].cooling_capacity = 12345
     hpxml.heat_pumps[0].heating_capacity = 23456
-    hpxml.heat_pumps[0].heating_capacity_17F = 9876
     hpxml.heat_pumps[0].backup_heating_capacity = 34567
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = 0.1
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = 2.0
+    hpxml.heat_pumps[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 19.0, 10.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, nil, 34567, 19.0, 10.0, 0.1, 2.0, 40.0)
+
+    # Test w/ heating capacity 17F
+    hpxml.heat_pumps[0].heating_capacity_17F = 9876
+    hpxml.heat_pumps[0].heating_capacity_retention_fraction = nil
+    hpxml.heat_pumps[0].heating_capacity_retention_temp = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.78, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 19.0, 10.0, nil, nil, 40.0)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
@@ -1517,15 +1555,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].crankcase_heater_watts = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil, 19.0, 10.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.18, 0, 0, nil, nil, nil, nil, 19.0, 10.0, 0.5, 5.0, 50.0)
 
     # Test defaults w/ ductless and no backup
     hpxml.heat_pumps[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 19.0, 10.0)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 19.0, 10.0, 0.5, 5.0, 50.0)
 
     # Test defaults w/ ductless - SEER2/HSPF2
     hpxml.heat_pumps[0].cooling_efficiency_seer = nil
@@ -1534,7 +1573,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].heating_efficiency_hspf2 = 6.8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 13.3, 7.56)
+    _test_default_mini_split_heat_pump_values(hpxml_default.heat_pumps[0], 0.73, 0.07, 0, 0, nil, nil, nil, nil, 13.3, 7.56, 0.5, 5.0, 50.0)
   end
 
   def test_heat_pump_temperatures
@@ -3792,10 +3831,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_slab_values(slab, thickness, carpet_r_value, carpet_fraction)
+  def _test_default_slab_values(slab, thickness, carpet_r_value, carpet_fraction, depth_below_grade)
     assert_equal(thickness, slab.thickness)
     assert_equal(carpet_r_value, slab.carpet_r_value)
     assert_equal(carpet_fraction, slab.carpet_fraction)
+    if depth_below_grade.nil?
+      assert_nil(slab.depth_below_grade)
+    else
+      assert_equal(depth_below_grade, slab.depth_below_grade)
+    end
   end
 
   def _test_default_window_values(hpxml, ext_summer_sfs, ext_winter_sfs, int_summer_sfs, int_winter_sfs, fraction_operable, azimuths)
@@ -3839,12 +3883,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_central_air_conditioner_values(cooling_system, shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio,
-                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer)
+                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer, crankcase_heater_watts)
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(compressor_type, cooling_system.compressor_type)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
+    assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
@@ -3857,8 +3902,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity)
+  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_capacity, crankcase_heater_watts)
     assert_equal(shr, cooling_system.cooling_shr)
+    assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
@@ -3875,11 +3921,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_mini_split_air_conditioner_values(cooling_system, shr, fan_watts_per_cfm, charge_defect_ratio,
-                                                      airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer)
+                                                      airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer, crankcase_heater_watts)
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
+    assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
@@ -4000,12 +4047,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_air_to_air_heat_pump_values(heat_pump, shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio,
                                                 airflow_defect_ratio, cooling_capacity, heating_capacity,
                                                 heating_capacity_17F, backup_heating_capacity,
-                                                cooling_efficiency_seer, heating_efficiency_hspf)
+                                                cooling_efficiency_seer, heating_efficiency_hspf,
+                                                heating_capacity_retention_fraction, heating_capacity_retention_temp,
+                                                crankcase_heater_watts)
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(compressor_type, heat_pump.compressor_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
+    assert_equal(crankcase_heater_watts, heat_pump.crankcase_heater_watts)
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
@@ -4017,7 +4067,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_equal(heating_capacity, heat_pump.heating_capacity)
     end
     if heating_capacity_17F.nil?
-      # assert(heat_pump.heating_capacity_17F > 0) # FUTURE
+      assert_nil(heat_pump.heating_capacity_17F)
     else
       assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
     end
@@ -4036,30 +4086,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(heating_efficiency_hspf, heat_pump.heating_efficiency_hspf)
     end
-  end
-
-  def _test_default_pthp_values(heat_pump, shr, cooling_capacity, heating_capacity)
-    assert_equal(shr, heat_pump.cooling_shr)
-    if cooling_capacity.nil?
-      assert(heat_pump.cooling_capacity > 0)
+    if heating_capacity_retention_fraction.nil?
+      assert_nil(heat_pump.heating_capacity_retention_fraction)
     else
-      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
+      assert_in_delta(heating_capacity_retention_fraction, heat_pump.heating_capacity_retention_fraction, 0.01)
     end
-    if heating_capacity.nil?
-      assert(heat_pump.heating_capacity > 0)
+    if heating_capacity_retention_temp.nil?
+      assert_nil(heat_pump.heating_capacity_retention_temp)
     else
-      assert_equal(heating_capacity, heat_pump.heating_capacity)
+      assert_equal(heating_capacity_retention_temp, heat_pump.heating_capacity_retention_temp)
     end
   end
 
-  def _test_default_mini_split_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, charge_defect_ratio,
-                                                airflow_defect_ratio, cooling_capacity, heating_capacity,
-                                                heating_capacity_17F, backup_heating_capacity,
-                                                cooling_efficiency_seer, heating_efficiency_hspf)
+  def _test_default_pthp_values(heat_pump, shr, cooling_capacity, heating_capacity, heating_capacity_17F,
+                                heating_capacity_retention_fraction, heating_capacity_retention_temp,
+                                crankcase_heater_watts)
     assert_equal(shr, heat_pump.cooling_shr)
-    assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
-    assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
-    assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
+    assert_equal(crankcase_heater_watts, heat_pump.crankcase_heater_watts)
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
@@ -4071,7 +4114,45 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_equal(heating_capacity, heat_pump.heating_capacity)
     end
     if heating_capacity_17F.nil?
-      # assert(heat_pump.heating_capacity_17F > 0) # FUTURE
+      assert_nil(heat_pump.heating_capacity_17F)
+    else
+      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
+    end
+    if heating_capacity_retention_fraction.nil?
+      assert_nil(heat_pump.heating_capacity_retention_fraction)
+    else
+      assert_in_delta(heating_capacity_retention_fraction, heat_pump.heating_capacity_retention_fraction, 0.01)
+    end
+    if heating_capacity_retention_temp.nil?
+      assert_nil(heat_pump.heating_capacity_retention_temp)
+    else
+      assert_equal(heating_capacity_retention_temp, heat_pump.heating_capacity_retention_temp)
+    end
+  end
+
+  def _test_default_mini_split_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, charge_defect_ratio,
+                                                airflow_defect_ratio, cooling_capacity, heating_capacity,
+                                                heating_capacity_17F, backup_heating_capacity,
+                                                cooling_efficiency_seer, heating_efficiency_hspf,
+                                                heating_capacity_retention_fraction, heating_capacity_retention_temp,
+                                                crankcase_heater_watts)
+    assert_equal(shr, heat_pump.cooling_shr)
+    assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
+    assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
+    assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
+    assert_equal(crankcase_heater_watts, heat_pump.crankcase_heater_watts)
+    if cooling_capacity.nil?
+      assert(heat_pump.cooling_capacity > 0)
+    else
+      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
+    end
+    if heating_capacity.nil?
+      assert(heat_pump.heating_capacity > 0)
+    else
+      assert_equal(heating_capacity, heat_pump.heating_capacity)
+    end
+    if heating_capacity_17F.nil?
+      assert_nil(heat_pump.heating_capacity_17F)
     else
       assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
     end
@@ -4091,6 +4172,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_equal(heating_efficiency_hspf, heat_pump.heating_efficiency_hspf)
     end
     assert_equal(HPXML::HVACCompressorTypeVariableSpeed, heat_pump.compressor_type)
+    if heating_capacity_retention_fraction.nil?
+      assert_nil(heat_pump.heating_capacity_retention_fraction)
+    else
+      assert_in_delta(heating_capacity_retention_fraction, heat_pump.heating_capacity_retention_fraction, 0.01)
+    end
+    if heating_capacity_retention_temp.nil?
+      assert_nil(heat_pump.heating_capacity_retention_temp)
+    else
+      assert_equal(heating_capacity_retention_temp, heat_pump.heating_capacity_retention_temp)
+    end
   end
 
   def _test_default_heat_pump_temperature_values(heat_pump, compressor_lockout_temp, backup_heating_lockout_temp,

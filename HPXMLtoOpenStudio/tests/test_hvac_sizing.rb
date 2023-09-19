@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
+class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
@@ -207,7 +207,7 @@ class HPXMLtoOpenStudioHVACSizingTest < MiniTest::Test
     assert(hpxml.cooling_systems[0].cooling_capacity > clg_cap)
 
     # Test heat pump
-    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml')
     hpxml.header.allow_increased_fixed_capacities = true
     hpxml.heat_pumps[0].heating_capacity /= 10.0
     hpxml.heat_pumps[0].heating_capacity_17F /= 10.0
