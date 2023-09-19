@@ -199,8 +199,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     column_name = hpxml.header.unavailable_periods[0].column_name
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: schedules_paths,
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
                            year: 2007,
                            unavailable_periods: hpxml.header.unavailable_periods,
                            output_path: @tmp_schedule_file_path)
@@ -248,8 +247,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
                           'Schedules')
     }
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: schedules_paths,
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
                            year: 2007,
                            unavailable_periods: hpxml.header.unavailable_periods,
                            output_path: @tmp_schedule_file_path)
@@ -289,8 +287,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     column_name = hpxml.header.unavailable_periods[0].column_name
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: schedules_paths,
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
                            year: 2007,
                            unavailable_periods: hpxml.header.unavailable_periods,
                            output_path: @tmp_schedule_file_path)
@@ -330,8 +327,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     column_name = hpxml.header.unavailable_periods[0].column_name
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: schedules_paths,
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
                            year: 2007,
                            unavailable_periods: hpxml.header.unavailable_periods,
                            output_path: @tmp_schedule_file_path)
@@ -381,8 +377,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
                           'Schedules')
     }
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: schedules_paths,
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
                            year: 2007,
                            unavailable_periods: hpxml.header.unavailable_periods,
                            output_path: @tmp_schedule_file_path)

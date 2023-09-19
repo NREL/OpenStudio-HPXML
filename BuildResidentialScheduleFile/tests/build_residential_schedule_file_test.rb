@@ -32,7 +32,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
@@ -42,8 +42,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -78,13 +77,12 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @args_hash['schedules_type'] = 'stochastic'
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     @args_hash['schedules_column_names'] = columns.join(', ')
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('ColumnNames') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -116,7 +114,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     @args_hash['debug'] = true
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
@@ -126,8 +124,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -153,7 +150,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     @args_hash['schedules_random_seed'] = 1
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
@@ -163,8 +160,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -184,7 +180,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
 
     @args_hash['schedules_random_seed'] = 2
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
@@ -194,8 +190,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 
@@ -220,7 +215,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
-    model, hpxml, result = _test_measure()
+    _model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
@@ -230,8 +225,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
 
-    sf = SchedulesFile.new(model: model,
-                           schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+    sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: 2007,
                            output_path: @tmp_schedule_file_path)
 

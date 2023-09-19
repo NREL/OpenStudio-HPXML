@@ -15,11 +15,7 @@ class HPXMLDefaults
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
 
     # Check for presence of fuels once
-    has_fuel = {}
-    hpxml_doc = hpxml.to_doc
-    Constants.FossilFuels.each do |fuel|
-      has_fuel[fuel] = hpxml_bldg.has_fuel(fuel, hpxml_doc)
-    end
+    has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
     apply_header(hpxml.header, epw_file, weather)
     apply_header_sizing(hpxml.header, hpxml_bldg, weather, nbeds)
