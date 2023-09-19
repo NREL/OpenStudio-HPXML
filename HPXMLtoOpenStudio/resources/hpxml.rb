@@ -395,14 +395,13 @@ class HPXML < Object
   WindowClassLightCommercial = 'light commercial'
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
-    @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
     @warnings = []
 
     hpxml_doc = nil
     if not hpxml_path.nil?
-      @doc = XMLHelper.parse_file(hpxml_path)
+      doc = XMLHelper.parse_file(hpxml_path)
 
       # Validate against XSD schema
       if not schema_validator.nil?
@@ -413,7 +412,7 @@ class HPXML < Object
       end
 
       # Check HPXML version
-      hpxml_doc = XMLHelper.get_element(@doc, '/HPXML')
+      hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml_doc, 'schemaVersion'))
 
       # Handle multiple buildings
@@ -459,14 +458,15 @@ class HPXML < Object
     @buildings.each do |_building|
       @errors += buildings.check_for_errors()
     end
+    @errors.map! { |e| "#{hpxml_path}: #{e}" }
     return unless @errors.empty?
   end
 
   def to_doc()
-    @doc = _create_hpxml_document()
-    @header.to_doc(@doc)
-    @buildings.to_doc(@doc)
-    return @doc
+    doc = _create_hpxml_document()
+    @header.to_doc(doc)
+    @buildings.to_doc(doc)
+    return doc
   end
 
   def from_doc(hpxml)
@@ -1636,8 +1636,6 @@ class HPXML < Object
       if num_clg_shared > 1
         errors << 'More than one shared cooling system found.'
       end
-
-      errors.map! { |e| "#{@hpxml_path}: #{e}" }
 
       return errors
     end
