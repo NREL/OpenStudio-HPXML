@@ -2325,13 +2325,7 @@ class OSModel
       s = "Set hr_#{loadtype} = hr_#{loadtype}"
       sensors.each do |sensor|
         if sensor.name.to_s.include? 'gain'
-          # Workaround for https://github.com/NREL/EnergyPlus/issues/9934
-          # FUTURE: Remove when the issue is resolved
-          if loadtype == 'infil'
-            s += " - (#{sensor.name} * 3600)"
-          else
-            s += " - #{sensor.name}"
-          end
+          s += " - #{sensor.name}"
         elsif sensor.name.to_s.include? 'loss'
           s += " + #{sensor.name}"
         end
