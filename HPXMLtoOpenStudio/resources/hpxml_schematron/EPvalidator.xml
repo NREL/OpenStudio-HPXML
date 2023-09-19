@@ -345,6 +345,8 @@
       <sch:assert role='ERROR' test='count(h:ConditionedBuildingVolume) + count(h:AverageCeilingHeight) &gt;= 0'>Expected 0 or more element(s) for xpath: ConditionedBuildingVolume | AverageCeilingHeight</sch:assert>
       <!-- Deprecated old HasFlueOrChimney input; see https://github.com/NREL/OpenStudio-HPXML/issues/1350 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HasFlueOrChimney) = 0'>extension/HasFlueOrChimney has been replaced by /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:NumberofUnits) &gt; 1'>NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.</sch:report>
     </sch:rule>
   </sch:pattern>
   

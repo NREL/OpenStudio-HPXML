@@ -130,10 +130,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
       weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
       epw_file = OpenStudio::EpwFile.new(epw_path)
+      hpxml.buildings.each_with_index do |hpxml_bldg, i|
+        next if i == 0
+        next if Location.get_epw_path(hpxml_bldg, hpxml_path) == epw_path
+
+        fail 'Weather station EPW filepath has different values across dwelling units.'
+      end
 
       # Apply HPXML defaults upfront; process schedules & emissions
       check_file_references(hpxml.header, hpxml_path)
-      schedules_file = SchedulesFile.new(runner: runner, model: model,
+      schedules_file = SchedulesFile.new(runner: runner,
                                          schedules_paths: hpxml.header.schedules_filepaths,
                                          year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                          unavailable_periods: hpxml.header.unavailable_periods,
@@ -153,7 +159,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          schedules_file.set_unit_model(unit_model) # otherwise we find Schedule:File in model without External:File
           create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, epw_file, weather, debug, schedules_file, eri_version)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
@@ -194,8 +199,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_unit_model_to_model(model, hpxml_osm_map)
-    unit_model_objects = []
-
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
                        'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
                        'OS:OutputControl:Files' => 'OutputControlFiles',
@@ -216,55 +219,57 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
-    # FIXME: Need to throw a warning/error if different values between the model
-    # object and unit_model object.
+    unit_model_objects = []
+    unique_handles_to_skip = []
+    uuid_regex = /\{(.*?)\}/
     unique_objects.each do |idd_obj, osm_class|
+      first_model_object_by_type = nil
       hpxml_osm_map.values.each do |unit_model|
         next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
 
-        unit_model_objects << unit_model.send("get#{osm_class}")
-        break
+        model_object = unit_model.send("get#{osm_class}")
+
+        if first_model_object_by_type.nil?
+          # Retain object for model
+          unit_model_objects << model_object
+          first_model_object_by_type = model_object
+          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+            unit_model_objects << unit_model.getObjectsByName(model_object.temperatureSchedule.get.name.to_s)[0]
+          end
+        else
+          # Throw error if different values between this model_object and first_model_object_by_type
+          if model_object.to_s.gsub(uuid_regex, '') != first_model_object_by_type.to_s.gsub(uuid_regex, '')
+            fail "Unique object (#{idd_obj}) has different values across dwelling units."
+          end
+
+          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object_by_type.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
+              fail "Unique object (#{idd_obj}) has different values across dwelling units."
+            end
+          end
+        end
+
+        unique_handles_to_skip << model_object.handle.to_s
+        if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
+          unique_handles_to_skip << model_object.temperatureSchedule.get.handle.to_s
+        end
       end
     end
 
     hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
       shift_geometry(unit_model, unit_number)
-
-      # Prefix all objects with name using unit number
-      # FUTURE: Create objects with unique names up front so we don't have to do this
       prefix_all_unit_model_objects(unit_model, unit_number)
 
+      # Handle remaining (non-unique) objects now
       unit_model.objects.each do |obj|
         next if unit_number > 0 && obj.to_Building.is_initialized
-
-        # Skip unique objects
-        is_unique = false
-        unique_objects.values.each do |osm_class|
-          next unless obj.send("to_#{osm_class}").is_initialized
-
-          is_unique = true
-          break
-        end
-        next if is_unique
+        next if unique_handles_to_skip.include? obj.handle.to_s
 
         unit_model_objects << obj
       end
     end
 
     model.addObjects(unit_model_objects, true)
-
-    # Remove duplicate lengthy tmains schedules
-    # FIXME: Develop a generic way to remove unused/duplicate schedules; maybe unused
-    # schedules will be correctly removed when the meta_measure.rb code is uncommented?
-    if model.getSiteWaterMainsTemperature.temperatureSchedule.is_initialized
-      preserve_sched_name = model.getSiteWaterMainsTemperature.temperatureSchedule.get.name.to_s
-    end
-    model.getScheduleIntervals.each do |sched|
-      next unless sched.name.to_s.include? 'mains_temperature_schedule'
-      next if sched.name.to_s == preserve_sched_name
-
-      sched.remove
-    end
   end
 
   def shift_geometry(unit_model, unit_number)
@@ -296,6 +301,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def prefix_all_unit_model_objects(unit_model, unit_number)
+    # Prefix all objects with name using unit number
+    # FUTURE: Create objects with unique names up front so we don't have to do this
+
     # EMS objects
     ems_map = {}
 
@@ -330,7 +338,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # variables in program lines don't get updated automatically
-    characters = ['', ' ', ',', '(', ')', '+', '-', '*', '/', ';']
+    lhs_characters = [' ', ',', '(', ')', '+', '-', '*', '/', ';']
+    rhs_characters = [''] + lhs_characters
     (unit_model.getEnergyManagementSystemPrograms + unit_model.getEnergyManagementSystemSubroutines).each do |program|
       new_lines = []
       program.lines.each do |line|
@@ -338,19 +347,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           next unless line.include?(old_name)
 
           # old_name between at least 1 character, with the exception of '' on left and ' ' on right
-          characters.each do |lhs|
+          lhs_characters.each do |lhs|
             next unless line.include?("#{lhs}#{old_name}")
 
-            characters.each do |rhs|
+            rhs_characters.each do |rhs|
               next unless line.include?("#{lhs}#{old_name}#{rhs}")
               next if lhs == '' && ['', ' '].include?(rhs)
 
               line.gsub!("#{lhs}#{old_name}#{rhs}", "#{lhs}#{new_name}#{rhs}")
             end
           end
-        end
-        while line.include? "unit#{unit_number + 1}_unit#{unit_number + 1}_"
-          line.gsub!("unit#{unit_number + 1}_unit#{unit_number + 1}_", "unit#{unit_number + 1}_")
         end
         new_lines << line
       end
@@ -360,6 +366,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # All model objects
     unit_model.objects.each do |model_object|
       next if model_object.name.nil?
+
+      if unit_number == 0
+        # OpenStudio is unhappy if these schedules are renamed
+        next if model_object.name.to_s == unit_model.alwaysOnContinuousSchedule.name.to_s
+        next if model_object.name.to_s == unit_model.alwaysOnDiscreteSchedule.name.to_s
+        next if model_object.name.to_s == unit_model.alwaysOffDiscreteSchedule.name.to_s
+      end
 
       model_object.setName(make_variable_name(model_object.name, unit_number))
     end
@@ -390,7 +403,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Init
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
     set_defaults_and_globals()
-    # FIXME: Need to address this
     Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
 
@@ -494,10 +506,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @nbeds = @hpxml_bldg.building_construction.number_of_bedrooms
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml_bldg)
 
-    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
-    HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # Apply unit multipliers to HVAC systems and water heaters
     HVAC.apply_unit_multiplier(@hpxml_bldg)
+    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
+    HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # Make adjustments for modeling purposes
     @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
     @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
@@ -524,7 +536,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def add_simulation_params(model)
-    # FIXME: Address this
     SimControls.apply(model, @hpxml_header, @hpxml_bldg)
   end
 
@@ -2616,6 +2627,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     ocf = model.getOutputControlFiles
     ocf.setOutputAUDIT(@debug)
+    ocf.setOutputCSV(@debug)
     ocf.setOutputBND(@debug)
     ocf.setOutputEIO(@debug)
     ocf.setOutputESO(@debug)

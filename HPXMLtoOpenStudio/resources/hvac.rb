@@ -341,7 +341,7 @@ class HVAC
     pump.setMinimumFlowRate(0)
     pump.setPumpControlType('Intermittent')
     pump.addToNode(plant_loop.supplyInletNode)
-    if heat_pump.cooling_capacity > 1.0 * unit_multiplier
+    if heat_pump.cooling_capacity > 1.0
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
@@ -802,7 +802,7 @@ class HVAC
     if not schedules_file.nil?
       annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
       ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: ceiling_fan_col_name, annual_kwh: annual_kwh)
-      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: ceiling_fan_col_name)
+      ceiling_fan_sch = schedules_file.create_schedule_file(model, col_name: ceiling_fan_col_name)
     end
     if ceiling_fan_sch.nil?
       ceiling_fan_unavailable_periods = Schedule.get_unavailable_periods(runner, ceiling_fan_col_name, unavailable_periods)
@@ -836,10 +836,10 @@ class HVAC
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
-      heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
+      heating_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHeatingSetpoint)
     end
     if not schedules_file.nil?
-      cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
+      cooling_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnCoolingSetpoint)
     end
 
     # permit mixing detailed schedules with simple schedules
@@ -4236,8 +4236,6 @@ class HVAC
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
       htg_sys.electric_auxiliary_energy *= unit_multiplier unless htg_sys.electric_auxiliary_energy.nil?
       htg_sys.fan_watts *= unit_multiplier unless htg_sys.fan_watts.nil?
-      # FIXME: fan_coil_watts?
-      # FIXME: shared_loop_watts?
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity *= unit_multiplier
@@ -4245,8 +4243,6 @@ class HVAC
       clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
       clg_sys.integrated_heating_system_capacity *= unit_multiplier unless clg_sys.integrated_heating_system_capacity.nil?
       clg_sys.integrated_heating_system_airflow_cfm *= unit_multiplier unless clg_sys.integrated_heating_system_airflow_cfm.nil?
-      # FIXME: shared_loop_watts?
-      # FIXME: fan_coil_watts?
     end
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity *= unit_multiplier
@@ -4257,7 +4253,6 @@ class HVAC
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
-      # FIXME: shared_loop_watts?
     end
   end
 

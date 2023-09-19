@@ -50,7 +50,7 @@ class HotWaterAndAppliances
       cw_object_name = Constants.ObjectNameClothesWasher
       if not schedules_file.nil?
         cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: cw_col_name, daily_kwh: cw_annual_kwh / 365.0)
-        cw_power_schedule = schedules_file.create_schedule_file(col_name: cw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        cw_power_schedule = schedules_file.create_schedule_file(model, col_name: cw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cw_power_schedule.nil?
         cw_unavailable_periods = Schedule.get_unavailable_periods(runner, cw_col_name, unavailable_periods)
@@ -82,7 +82,7 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: cd_col_name, annual_kwh: cd_annual_kwh)
         cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: cd_col_name, annual_therm: cd_annual_therm)
-        cd_schedule = schedules_file.create_schedule_file(col_name: cd_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        cd_schedule = schedules_file.create_schedule_file(model, col_name: cd_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cd_schedule.nil?
         cd_unavailable_periods = Schedule.get_unavailable_periods(runner, cd_col_name, unavailable_periods)
@@ -115,7 +115,7 @@ class HotWaterAndAppliances
       dw_obj_name = Constants.ObjectNameDishwasher
       if not schedules_file.nil?
         dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: dw_col_name, daily_kwh: dw_annual_kwh / 365.0)
-        dw_power_schedule = schedules_file.create_schedule_file(col_name: dw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        dw_power_schedule = schedules_file.create_schedule_file(model, col_name: dw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if dw_power_schedule.nil?
         dw_unavailable_periods = Schedule.get_unavailable_periods(runner, dw_col_name, unavailable_periods)
@@ -146,7 +146,7 @@ class HotWaterAndAppliances
       fridge_obj_name = Constants.ObjectNameRefrigerator
       if not schedules_file.nil?
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
-        fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        fridge_schedule = schedules_file.create_schedule_file(model, col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fridge_schedule.nil?
         fridge_unavailable_periods = Schedule.get_unavailable_periods(runner, fridge_col_name, unavailable_periods)
@@ -177,7 +177,7 @@ class HotWaterAndAppliances
       freezer_obj_name = Constants.ObjectNameFreezer
       if not schedules_file.nil?
         freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: freezer_col_name, annual_kwh: fz_annual_kwh)
-        freezer_schedule = schedules_file.create_schedule_file(col_name: freezer_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        freezer_schedule = schedules_file.create_schedule_file(model, col_name: freezer_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if freezer_schedule.nil?
         freezer_unavailable_periods = Schedule.get_unavailable_periods(runner, freezer_col_name, unavailable_periods)
@@ -209,7 +209,7 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: cook_col_name, annual_kwh: cook_annual_kwh)
         cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: cook_col_name, annual_therm: cook_annual_therm)
-        cook_schedule = schedules_file.create_schedule_file(col_name: cook_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        cook_schedule = schedules_file.create_schedule_file(model, col_name: cook_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cook_schedule.nil?
         cook_unavailable_periods = Schedule.get_unavailable_periods(runner, cook_col_name, unavailable_periods)
@@ -272,7 +272,7 @@ class HotWaterAndAppliances
       fixtures_col_name = SchedulesFile::ColumnHotWaterFixtures
       fixtures_obj_name = Constants.ObjectNameFixtures
       if not schedules_file.nil?
-        fixtures_schedule = schedules_file.create_schedule_file(col_name: fixtures_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        fixtures_schedule = schedules_file.create_schedule_file(model, col_name: fixtures_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fixtures_schedule.nil?
         fixtures_unavailable_periods = Schedule.get_unavailable_periods(runner, fixtures_col_name, unavailable_periods)
@@ -345,7 +345,7 @@ class HotWaterAndAppliances
           water_cw_schedule = nil
           if not schedules_file.nil?
             cw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterClothesWasher, daily_water: cw_gpd)
-            water_cw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+            water_cw_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
           end
           if water_cw_schedule.nil?
             cw_peak_flow = cw_schedule_obj.calc_design_level_from_daily_gpm(cw_gpd)
@@ -372,7 +372,7 @@ class HotWaterAndAppliances
       water_dw_schedule = nil
       if not schedules_file.nil?
         dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterDishwasher, daily_water: dw_gpd)
-        water_dw_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHotWaterDishwasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        water_dw_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHotWaterDishwasher, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if water_dw_schedule.nil?
         dw_peak_flow = dw_schedule_obj.calc_design_level_from_daily_gpm(dw_gpd)

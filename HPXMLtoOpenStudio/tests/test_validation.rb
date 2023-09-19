@@ -681,6 +681,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
+                              'unit-multiplier' => ['NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
                                                 'Depth is greater than 72 feet; this may indicate incorrect units.',
@@ -797,6 +798,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.slabs[0].exposed_perimeter = 0
+      elsif ['unit-multiplier'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.building_construction.number_of_units = 5
       elsif ['wrong-units'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-overhangs.xml')
         hpxml_bldg.slabs[0].thickness = 0.5
@@ -894,10 +898,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unattached-shared-dishwasher-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for dishwasher"],
                             'unattached-shared-dishwasher-water-heater' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."],
-                            'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."] }
+                            'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."],
+                            'unique-objects-vary-across-units-epw' => ['Weather station EPW filepath has different values across dwelling units.'],
+                            'unique-objects-vary-across-units-dst' => ['Unique object (OS:RunPeriodControl:DaylightSavingTime) has different values across dwelling units.'],
+                            'unique-objects-vary-across-units-tmains' => ['Unique object (OS:Site:WaterMainsTemperature) has different values across dwelling units.'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
+      building_id = nil
       # Create HPXML object
       if ['battery-bad-values-max-not-one'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
@@ -1249,6 +1257,23 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['unavailable-period-missing-column'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-vacancy.xml')
         hpxml.header.unavailable_periods[0].column_name = 'foobar'
+      elsif ['unique-objects-vary-across-units-epw'].include? error_case
+        building_id = 'ALL'
+        hpxml, hpxml_bldg = _create_hpxml('base-multiple-buildings.xml', building_id: building_id)
+        hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
+      elsif ['unique-objects-vary-across-units-dst'].include? error_case
+        building_id = 'ALL'
+        hpxml, hpxml_bldg = _create_hpxml('base-multiple-buildings.xml', building_id: building_id)
+        hpxml_bldg.dst_begin_month = 3
+        hpxml_bldg.dst_begin_day = 15
+        hpxml_bldg.dst_end_month = 10
+        hpxml_bldg.dst_end_day = 15
+      elsif ['unique-objects-vary-across-units-tmains'].include? error_case
+        building_id = 'ALL'
+        hpxml, hpxml_bldg = _create_hpxml('base-multiple-buildings.xml', building_id: building_id)
+        hpxml_bldg.hot_water_distributions[0].dwhr_facilities_connected = HPXML::DWHRFacilitiesConnectedOne
+        hpxml_bldg.hot_water_distributions[0].dwhr_equal_flow = true
+        hpxml_bldg.hot_water_distributions[0].dwhr_efficiency = 0.55
       else
         fail "Unhandled case: #{error_case}."
       end
@@ -1268,7 +1293,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       end
 
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-      _test_measure('error', expected_errors)
+      _test_measure('error', expected_errors, building_id: building_id)
     end
   end
 
@@ -1356,6 +1381,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
+      building_id = nil
       # Create HPXML object
       if ['cfis-undersized-supplemental-fan'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
@@ -1426,7 +1452,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       hpxml_doc = hpxml.to_doc()
 
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-      _test_measure('warning', expected_warnings)
+      _test_measure('warning', expected_warnings, building_id: building_id)
     end
   end
 
@@ -1450,7 +1476,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     end
   end
 
-  def _test_measure(error_or_warning, expected_errors_or_warnings)
+  def _test_measure(error_or_warning, expected_errors_or_warnings, building_id: nil)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
@@ -1462,6 +1488,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     args_hash['debug'] = true
     args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
+    args_hash['building_id'] = building_id unless building_id.nil?
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
@@ -1525,8 +1552,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     end
   end
 
-  def _create_hpxml(hpxml_name)
-    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
+  def _create_hpxml(hpxml_name, building_id: nil)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name), building_id: building_id)
+    if not hpxml.errors.empty?
+      hpxml.errors.each do |error|
+        puts error
+      end
+      flunk "Did not successfully create HPXML file: #{hpxml_name}"
+    end
     return hpxml, hpxml.buildings[0]
   end
 end

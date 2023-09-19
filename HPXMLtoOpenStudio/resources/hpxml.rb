@@ -395,14 +395,13 @@ class HPXML < Object
   WindowClassLightCommercial = 'light commercial'
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
-    @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
     @warnings = []
 
     hpxml_doc = nil
     if not hpxml_path.nil?
-      @doc = XMLHelper.parse_file(hpxml_path)
+      doc = XMLHelper.parse_file(hpxml_path)
 
       # Validate against XSD schema
       if not schema_validator.nil?
@@ -413,7 +412,7 @@ class HPXML < Object
       end
 
       # Check HPXML version
-      hpxml_doc = XMLHelper.get_element(@doc, '/HPXML')
+      hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml_doc, 'schemaVersion'))
 
       # Handle multiple buildings
@@ -459,14 +458,15 @@ class HPXML < Object
     @buildings.each do |_building|
       @errors += buildings.check_for_errors()
     end
+    @errors.map! { |e| "#{hpxml_path}: #{e}" }
     return unless @errors.empty?
   end
 
   def to_doc()
-    @doc = _create_hpxml_document()
-    @header.to_doc(@doc)
-    @buildings.to_doc(@doc)
-    return @doc
+    doc = _create_hpxml_document()
+    @header.to_doc(doc)
+    @buildings.to_doc(doc)
+    return doc
   end
 
   def from_doc(hpxml)
@@ -1285,26 +1285,32 @@ class HPXML < Object
       return false
     end
 
-    # FIXME: Need to double-check this wrt/ multiple buildings
-    def has_fuel(fuel, hpxml_doc = nil)
-      # If calling multiple times, pass in hpxml_doc for better performance
-      if hpxml_doc.nil?
-        hpxml_doc = to_doc
-      end
-      ['HeatingSystemFuel',
-       'CoolingSystemFuel',
-       'HeatPumpFuel',
-       'BackupSystemFuel',
-       'FuelType',
-       'IntegratedHeatingSystemFuel',
-       'Heater/Type'].each do |fuel_name|
-        fuel = HPXML::HeaterTypeGas if fuel_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
-        if XMLHelper.has_element(hpxml_doc, "//#{fuel_name}[text() = '#{fuel}']")
-          return true
+    def has_fuels(fuels_array, hpxml_doc)
+      # Returns a hash with whether each fuel in fuels_array exists
+      # in the HPXML Building
+      has_fuels = {}
+      fuels_array.each do |fuel|
+        has_fuels[fuel] = false
+        ['HeatingSystemFuel',
+         'CoolingSystemFuel',
+         'HeatPumpFuel',
+         'BackupSystemFuel',
+         'FuelType',
+         'IntegratedHeatingSystemFuel',
+         'Heater/Type'].each do |fuel_element_name|
+          if fuel_element_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
+            fuel_element_value = HPXML::HeaterTypeGas
+          else
+            fuel_element_value = fuel
+          end
+          if XMLHelper.has_element(hpxml_doc, "/HPXML/Building[BuildingID/@id='#{@building_id}']//#{fuel_element_name}[text() = '#{fuel_element_value}']")
+            has_fuels[fuel] = true
+            break
+          end
         end
       end
 
-      return false
+      return has_fuels
     end
 
     def predominant_heating_fuel
@@ -1630,8 +1636,6 @@ class HPXML < Object
       if num_clg_shared > 1
         errors << 'More than one shared cooling system found.'
       end
-
-      errors.map! { |e| "#{@hpxml_path}: #{e}" }
 
       return errors
     end
@@ -5345,6 +5349,16 @@ class HPXML < Object
         next unless solar_thermal_system.water_heating_system_idref == @id
 
         solar_thermal_system.water_heating_system_idref = nil
+      end
+      @parent_object.clothes_washers.each do |clothes_washer|
+        next unless clothes_washer.water_heating_system_idref == @id
+
+        clothes_washer.water_heating_system_idref = nil
+      end
+      @parent_object.dishwashers.each do |dishwasher|
+        next unless dishwasher.water_heating_system_idref == @id
+
+        dishwasher.water_heating_system_idref = nil
       end
     end
 

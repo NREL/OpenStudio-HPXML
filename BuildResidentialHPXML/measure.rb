@@ -650,7 +650,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, false)
     arg.setDisplayName('Roof: Radiant Barrier Grade')
     arg.setDescription('The grade of the radiant barrier. If not provided, the OS-HPXML default is used.')
-    arg.setDefaultValue('1')
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new
@@ -1198,9 +1197,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF
     heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF2
     heat_pump_heating_efficiency_type_choices << HPXML::UnitsCOP
-
-    heat_pump_fuel_choices = OpenStudio::StringVector.new
-    heat_pump_fuel_choices << HPXML::FuelTypeElectricity
 
     heat_pump_backup_type_choices = OpenStudio::StringVector.new
     heat_pump_backup_type_choices << 'none'
