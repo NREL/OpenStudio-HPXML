@@ -423,7 +423,6 @@ HVAC Capacities
 ~~~~~~~~~~~~~~~
 
 System outputs are listed below.
-Autosized HVAC systems are based on HVAC design temperatures/loads described below.
 Capacities for individual HVAC systems can be found in the `in.xml` file.
 
    ====================================================  ====================
@@ -433,6 +432,16 @@ Capacities for individual HVAC systems can be found in the `in.xml` file.
    HVAC Capacity: Heating (Btu/h)                        Total HVAC heating capacity
    HVAC Capacity: Heat Pump Backup (Btu/h)               Total HVAC heat pump backup capacity
    ====================================================  ====================
+
+.. note::
+
+  Autosized HVAC systems are based on :ref:`hvac_design_temps` and :ref:`hvac_design_loads`.
+
+  For heat pumps with a minimum compressor lockout temperature greater than the heating design temperature (e.g., a dual-fuel heat pump in a cold climate), the compressor will be sized based on heating design loads calculated at the compressor lockout temperature.
+  This is done to prevent unutilized capacity at temperatures below the compressor lockout temperature.
+  Any heat pump backup will still be based on heating design loads calculated using the heating design temperature.
+  
+.. _hvac_design_temps:
 
 HVAC Design Temperatures
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -446,6 +455,8 @@ Design temperatures can also be found in the `in.xml` file.
    HVAC Design Temperature: Heating (F)                                   99% heating drybulb temperature
    HVAC Design Temperature: Cooling (F)                                   1% cooling drybulb temperature
    =====================================================================  ====================
+
+.. _hvac_design_loads:
 
 HVAC Design Loads
 ~~~~~~~~~~~~~~~~~
