@@ -5340,12 +5340,12 @@ class HPXML < Object
 
         solar_thermal_system.water_heating_system_idref = nil
       end
-      @hpxml_object.clothes_washers.each do |clothes_washer|
+      @parent_object.clothes_washers.each do |clothes_washer|
         next unless clothes_washer.water_heating_system_idref == @id
 
         clothes_washer.water_heating_system_idref = nil
       end
-      @hpxml_object.dishwashers.each do |dishwasher|
+      @parent_object.dishwashers.each do |dishwasher|
         next unless dishwasher.water_heating_system_idref == @id
 
         dishwasher.water_heating_system_idref = nil
