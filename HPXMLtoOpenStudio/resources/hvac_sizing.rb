@@ -1938,14 +1938,16 @@ class HVACSizing
       bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     end
 
-    valid_configs = HVAC.valid_borefield_configs
-    valid_num_bores = valid_configs[bore_config]['num_boreholes']
+    valid_configs = HVAC.valid_bore_configs
+    g_functions_filename = valid_configs[bore_config]
+    g_functions_json = HVAC.get_g_functions_json(g_functions_filename)
+    valid_num_bores = HVAC.get_valid_num_bores(g_functions_json)
+
     unless valid_num_bores.include? num_bore_holes
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
-    g_functions_filename = valid_configs[bore_config]['filename']
-    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
     hvac_sizing_values.GSHP_Loop_flow = loop_flow
     hvac_sizing_values.GSHP_Bore_Depth = bore_depth
@@ -2672,12 +2674,7 @@ class HVACSizing
     return nom_length_heat, nom_length_cool
   end
 
-  def self.gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
-    require 'json'
-
-    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
-    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
-
+  def self.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
     actuals = { 'b' => UnitConversions.convert(bore_spacing, 'ft', 'm'),
                 'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
                 'rb' => UnitConversions.convert(bore_diameter / 2.0, 'in', 'm') }
@@ -2729,12 +2726,8 @@ class HVACSizing
       correction_factor = Math.log(rb_actual_over_rb)
       g_functions = g_functions.map { |v| v - correction_factor }
 
-      fail "Found different logtimes for '#{bore_config}' with H=#{h1} and H=#{h2}." if logtimes[0] != logtimes[1]
-
       return logtimes[0], g_functions
     end
-
-    fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
   end
 
   def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
@@ -2763,8 +2756,6 @@ class HVACSizing
         end
       end
     end
-
-    fail "Could not find g-values for '#{bore_config}' with '#{num_bore_holes}' boreholes."
   end
 
   def self.calculate_average_r_value(surfaces)

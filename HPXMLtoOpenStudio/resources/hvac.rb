@@ -3401,14 +3401,39 @@ class HVAC
     end
   end
 
-  def self.valid_borefield_configs
-    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => { 'num_boreholes' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'filename' => 'rectangle_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => { 'num_boreholes' => [8, 10], 'filename' => 'Open_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationC => { 'num_boreholes' => [7, 9], 'filename' => 'C_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationL => { 'num_boreholes' => [4, 5, 6, 7, 8, 9, 10], 'filename' => 'L_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationU => { 'num_boreholes' => [7, 9, 10], 'filename' => 'U_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => { 'num_boreholes' => [6, 7, 8, 9, 10], 'filename' => 'LopU_configurations_5m_v1.0.json' } }
+  def self.valid_bore_configs
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }
     return valid_configs
+  end
+
+  def self.get_g_functions_json(g_functions_filename)
+    require 'json'
+
+    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
+    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
+    return g_functions_json
+  end
+
+  def self.get_valid_num_bores(g_functions_json)
+    valid_num_bores = []
+    g_functions_json.each do |_key_1, values_1|
+      if values_1.keys.include?(:bore_locations)
+        valid_num_bores << values_1[:bore_locations].size
+      else
+        values_1.each do |_key_2, values_2|
+          if values_2.keys.include?(:bore_locations)
+            valid_num_bores << values_2[:bore_locations]
+          end
+        end
+      end
+    end
+
+    return valid_num_bores
   end
 
   def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
