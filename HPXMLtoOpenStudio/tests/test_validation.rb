@@ -880,7 +880,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-bad-values-negative' => ["Schedule min value for column 'lighting_interior' must be non-negative."],
                             'schedule-detailed-bad-values-non-numeric' => ["Schedule value must be numeric for column 'lighting_interior'."],
                             'schedule-detailed-bad-values-mode-negative' => ["Schedule value for column 'water_heater_operating_mode' must be either 0 or 1."],
-                            'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
+                            'schedule-detailed-duplicate-columns-building' => ["Schedule column name 'occupants' is duplicated."],
+                            'schedule-detailed-duplicate-columns-header' => ["Schedule column name 'occupants' is duplicated."],
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
@@ -1161,13 +1162,20 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         csv_data[1][0] = -0.5
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['schedule-detailed-duplicate-columns'].include? error_case
+      elsif ['schedule-detailed-duplicate-columns-building'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = []
         hpxml_bldg.header.schedules_filepaths << @tmp_csv_path
         hpxml_bldg.header.schedules_filepaths << @tmp_csv_path
+      elsif ['schedule-detailed-duplicate-columns-header'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
+        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
+        hpxml.header.schedules_filepaths = []
+        hpxml.header.schedules_filepaths << @tmp_csv_path
+        hpxml.header.schedules_filepaths << @tmp_csv_path
       elsif ['schedule-detailed-wrong-filename'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << 'invalid-wrong-filename.csv'

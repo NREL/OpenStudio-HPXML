@@ -222,7 +222,7 @@
       <sch:assert role='ERROR' test='count(h:BuildingSummary/h:Site) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BuildingSummary/Site</sch:assert> <!-- See [Site] -->
       <sch:assert role='ERROR' test='count(h:BuildingSummary/h:BuildingOccupancy) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BuildingSummary/BuildingOccupancy</sch:assert> <!-- See [BuildingOccupancy]-->
       <sch:assert role='ERROR' test='count(h:BuildingSummary/h:BuildingConstruction) = 1'>Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction</sch:assert> <!-- See [BuildingConstruction] -->
-      <sch:assert role='ERROR' test='count(h:BuildingSummary/h:extension/h:SchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BuildingSummary/extension/SchedulesFilePath</sch:assert> <!-- See [SchedulesFilePath] -->
+      <sch:assert role='ERROR' test='count(h:BuildingSummary/h:extension/h:SchedulesFilePath) &gt;= 0'>Expected 0 or more element(s) for xpath: BuildingSummary/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:ClimateandRiskZones/h:ClimateZoneIECC) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ClimateandRiskZones/ClimateZoneIECC</sch:assert> <!-- See [ClimateZoneIECC] -->
       <sch:assert role='ERROR' test='count(h:ClimateandRiskZones/h:WeatherStation) = 1'>Expected 1 element(s) for xpath: ClimateandRiskZones/WeatherStation</sch:assert> <!-- See [WeatherStation] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
@@ -348,13 +348,6 @@
       <sch:assert role='ERROR' test='count(h:extension/h:HasFlueOrChimney) = 0'>extension/HasFlueOrChimney has been replaced by /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:NumberofUnits) &gt; 1'>NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.</sch:report>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[SchedulesFilePath]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:extension'>
-      <sch:assert role='ERROR' test='count(h:SchedulesFilePath) = 1'>Expected 1 element(s) for xpath: SchedulesFilePath</sch:assert>
     </sch:rule>
   </sch:pattern>
 
