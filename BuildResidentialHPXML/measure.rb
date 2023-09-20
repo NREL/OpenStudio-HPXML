@@ -3389,7 +3389,7 @@ class HPXMLFile
     set_neighbor_buildings(hpxml_bldg, args)
     set_building_occupancy(hpxml_bldg, args)
     set_building_construction(hpxml_bldg, args)
-    set_schedules(hpxml_bldg, args)
+    set_building_header(hpxml_bldg, args)
     set_climate_and_risk_zones(hpxml_bldg, args)
     set_air_infiltration_measurements(hpxml_bldg, args)
     set_roofs(hpxml_bldg, args, sorted_surfaces)
@@ -4004,12 +4004,10 @@ class HPXMLFile
     end
   end
 
-  def self.set_schedules(hpxml_bldg, args)
+  def self.set_building_header(hpxml_bldg, args)
     if args[:schedules_filepaths].is_initialized
-      schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
+      hpxml_bldg.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
-
-    hpxml_bldg.header.schedules_filepaths = schedules_filepaths
   end
 
   def self.set_climate_and_risk_zones(hpxml_bldg, args)

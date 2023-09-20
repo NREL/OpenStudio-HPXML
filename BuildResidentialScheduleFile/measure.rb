@@ -123,6 +123,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
     end
 
+    # create EpwFile object
+    epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
+    epw_file = OpenStudio::EpwFile.new(epw_path)
+
     filename, _ = args[:output_csv_path].split('.csv')
 
     doc = XMLHelper.parse_file(hpxml_path)
@@ -137,20 +141,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       # exit if number of occupants is zero
       if hpxml_bldg.building_occupancy.number_of_residents == 0
-        runner.registerInfo('Number of occupants set to zero; skipping generation of stochastic schedules.')
-        return true
+        runner.registerInfo("#{building_id}: Number of occupants set to zero; skipping generation of stochastic schedules.")
+        next
       end
-
-      # create EpwFile object
-      epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
-      epw_file = OpenStudio::EpwFile.new(epw_path)
 
       # output csv path
       args[:output_csv_path] = "#{filename}.csv"
-      if i > 0
-        bldg_no = "_#{i + 1}"
-        args[:output_csv_path] = "#{filename}#{bldg_no}.csv"
-      end
+      args[:output_csv_path] = "#{filename}_#{i + 1}.csv" if i > 0
 
       # create the schedules
       success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
@@ -165,16 +162,19 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
         if !schedules_filepaths.include?(args[:output_csv_path])
           XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
         end
-
-        # write out the modified hpxml
-        if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
-          XMLHelper.write_file(doc, hpxml_output_path)
-          runner.registerInfo("Wrote file: #{hpxml_output_path}")
-        end
+        write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
       end
     end
 
     return true
+  end
+
+  def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
+    # write out the modified hpxml
+    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
+      XMLHelper.write_file(doc, hpxml_output_path)
+      runner.registerInfo("Wrote file: #{hpxml_output_path}")
+    end
   end
 
   def create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
