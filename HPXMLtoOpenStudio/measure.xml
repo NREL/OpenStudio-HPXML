@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f23cf77e-6d31-456f-a1f9-ed29e1218ce2</version_id>
-  <version_modified>2023-09-21T18:02:07Z</version_modified>
+  <version_id>46b6e23d-dca1-4ae7-8c40-81614e3e3f2b</version_id>
+  <version_modified>2023-09-21T21:47:17Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -205,12 +205,6 @@
       <checksum>63C6A1E2</checksum>
     </file>
     <file>
-      <filename>data/ground_temperatures.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4A8CF593</checksum>
-    </file>
-    <file>
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -286,7 +280,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3D862AA0</checksum>
+      <checksum>167C7185</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -472,7 +466,7 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A339FD67</checksum>
+      <checksum>4E537F4B</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -586,7 +580,7 @@
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E2A8E928</checksum>
+      <checksum>002A1C1B</checksum>
     </file>
     <file>
       <filename>util.rb</filename>

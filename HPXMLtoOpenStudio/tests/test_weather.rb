@@ -4,7 +4,6 @@ require_relative '../resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
-require_relative '../measure.rb'
 require_relative '../resources/weather.rb'
 require_relative '../resources/unit_conversions.rb'
 require_relative '../resources/psychrometrics.rb'
@@ -219,26 +218,29 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     ['USA_CO_Denver.Intl.AP.725650_TMY3.epw',
      'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw',
      'ZAF_Cape.Town.688160_IWEC.epw',
-     'US_CO_Boulder_AMY_2012.epw'].each do |epw_filename|
+     'US_CO_Boulder_AMY_2012.epw',
+     'USA_FL_Miami.Intl.AP.722020_TMY3.epw',
+     'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw',
+     'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'].each do |epw_filename|
       weather = WeatherProcess.new(epw_path: File.join(weather_dir, epw_filename), runner: runner)
       ground_temp_f = weather.data.GroundMonthlyTemps.sum(0.0) / weather.data.GroundMonthlyTemps.size
-      uground_temp_f = weather.data.UndisturbedGroundMonthlyTemps.sum(0.0) / weather.data.UndisturbedGroundMonthlyTemps.size
 
       if epw_filename == 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-        gtf = 51.74
-        ugtf = 53.24
+        gtf = 53.25
       elsif epw_filename == 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
-        gtf = 77.14
-        ugtf = 76.36
+        gtf = 76.38
       elsif epw_filename == 'ZAF_Cape.Town.688160_IWEC.epw'
-        gtf = 62.0
-        ugtf = 62.57
+        gtf = 62.6
       elsif epw_filename == 'US_CO_Boulder_AMY_2012.epw'
-        gtf = 49.53
-        ugtf = 51.22
+        gtf = 51.24
+      elsif epw_filename == 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
+        gtf = 75.69
+      elsif epw_filename == 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
+        gtf = 74.42
+      elsif epw_filename == 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
+        gtf = 41.97
       end
       assert_in_delta(gtf, ground_temp_f, 0.01)
-      assert_in_delta(ugtf, uground_temp_f, 0.01)
     end
   end
 end

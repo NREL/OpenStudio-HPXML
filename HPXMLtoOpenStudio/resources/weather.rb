@@ -10,7 +10,7 @@ end
 class WeatherData
   def initialize
   end
-  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :UndisturbedGroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
+  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
   attr_accessor(*ATTRS)
 end
 
@@ -121,7 +121,6 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_ground_temperatures
-    calc_undisturbed_ground_temperatures
     @data.WSF = calc_ashrae_622_wsf(rowdata)
 
     if not epwHasDesignData
@@ -309,17 +308,12 @@ class WeatherProcess
     bo = (data.MonthlyAvgDrybulbs.max - data.MonthlyAvgDrybulbs.min) * 0.5
 
     @data.GroundMonthlyTemps = []
+    adj_annual_avg_drybulb_c = 0.91 * UnitConversions.convert(data.AnnualAvgDrybulb, 'F', 'C') + 1.82
+    adj_annual_avg_drybulb_f = UnitConversions.convert(adj_annual_avg_drybulb_c, 'C', 'F')
     for i in 0..11
       theta = amon[i] * 24.0
-      @data.GroundMonthlyTemps << UnitConversions.convert(data.AnnualAvgDrybulb - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
+      @data.GroundMonthlyTemps << UnitConversions.convert(adj_annual_avg_drybulb_f - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
     end
-  end
-
-  def calc_undisturbed_ground_temperatures
-    # Return monthly undisturbed ground temperatures.
-
-    adj_ground_monthly_temps_c = @data.GroundMonthlyTemps.map { |x| 0.91 * UnitConversions.convert(x, 'F', 'C') + 1.82 }
-    @data.UndisturbedGroundMonthlyTemps = adj_ground_monthly_temps_c.map { |x| UnitConversions.convert(x, 'C', 'F') }
   end
 
   def self.calc_mains_temperatures(avgOAT, maxDiffMonthlyAvgOAT, latitude, year)
@@ -348,22 +342,5 @@ class WeatherProcess
       mainsMonthlyTemps[m - 1] = avgOAT + 6 + tmains_ratio * maxDiffMonthlyAvgOAT / 2 * Math.sin(deg_rad * (0.986 * ((m * 30 - 15) - 15 - tmains_lag) + sign * 90))
     end
     return mainsAvgTemp, mainsMonthlyTemps, mainsDailyTemps
-  end
-
-  def self.get_undisturbed_ground_temperature(weather, climate_zone_iecc)
-    ground_temps_csv = File.join(File.dirname(__FILE__), 'data', 'ground_temperatures.csv')
-    if not File.exist?(ground_temps_csv)
-      fail 'Could not find ground_temperatures.csv'
-    end
-
-    iecc_zone = (climate_zone_iecc.nil? ? nil : climate_zone_iecc.zone)
-    if not iecc_zone.nil?
-      require 'csv'
-
-      CSV.foreach(ground_temps_csv) do |row|
-        return UnitConversions.convert(Float(row[1]), 'C', 'F') if row[0].to_s == iecc_zone
-      end
-    end
-    return weather.data.AnnualAvgDrybulb
   end
 end
