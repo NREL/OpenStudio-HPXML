@@ -24,8 +24,6 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    # next if !hpxml_filename.include? 'multiple-buildings'
-
     puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
@@ -56,7 +54,8 @@ def create_hpxmls
     if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
       sch_args = { 'hpxml_path' => hpxml_path,
                    'output_csv_path' => csv_path,
-                   'hpxml_output_path' => hpxml_path }
+                   'hpxml_output_path' => hpxml_path,
+                   'building_id' => 'ALL' }
       measures['BuildResidentialScheduleFile'] = [sch_args]
       schedules_regenerated << csv_path
     end
@@ -236,6 +235,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
 
   if ['base-multiple-buildings.xml'].include? hpxml_file
     hpxml.buildings[0].clothes_dryers[0].delete
+  end
+
+  if ['base-schedules-detailed-occupancy-stochastic-two-buildings.xml'].include? hpxml_file
+    hpxml.buildings[-1].header.schedules_filepaths.delete_at(0)
   end
 
   hpxml.buildings.each do |hpxml_bldg|

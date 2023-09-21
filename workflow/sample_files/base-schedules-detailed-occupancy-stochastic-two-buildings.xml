@@ -11,8 +11,10 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv</SchedulesFilePath>
       <UtilityBillScenarios>
+        <UtilityBillScenario>
+          <Name>Bills</Name>
+        </UtilityBillScenario>
         <UtilityBillScenario>
           <Name>Bills</Name>
         </UtilityBillScenario>
@@ -52,6 +54,9 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv</SchedulesFilePath>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -974,6 +979,14 @@
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
         </ClothesWasher>
+        <ClothesDryer>
+          <SystemIdentifier id='ClothesDryer1_2'/>
+          <Location>living space</Location>
+          <FuelType>electricity</FuelType>
+          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <Vented>true</Vented>
+          <VentedFlowRate>150.0</VentedFlowRate>
+        </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_2'/>
           <Location>living space</Location>
