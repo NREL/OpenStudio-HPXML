@@ -3427,7 +3427,7 @@ class HVAC
       else
         values_1.each do |_key_2, values_2|
           if values_2.keys.include?(:bore_locations)
-            valid_num_bores << values_2[:bore_locations]
+            valid_num_bores << values_2[:bore_locations].size
           end
         end
       end
