@@ -148,6 +148,7 @@ class Battery
     loss_adj_object_def.setFractionLatent(0)
     loss_adj_object_def.setFractionLost(frac_lost)
     loss_adj_object.setSchedule(model.alwaysOnDiscreteSchedule)
+    loss_adj_object.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBatteryLossesAdjustment)
 
     battery_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(loss_adj_object, *EPlus::EMSActuatorOtherEquipmentPower, loss_adj_object.space.get)
     battery_adj_actuator.setName('battery loss_adj_act')
@@ -162,18 +163,9 @@ class Battery
     battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     battery_losses_pcm.addProgram(battery_losses_program)
 
-    # FIXME: Shouldn't need this; can use OtherEquipment output var instead
-    battery_losses_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'losses')
-    battery_losses_output_var.setName("#{obj_name} outvar")
-    battery_losses_output_var.setTypeOfDataInVariable('Summed')
-    battery_losses_output_var.setUpdateFrequency('SystemTimestep')
-    battery_losses_output_var.setEMSProgramOrSubroutineName(battery_losses_program)
-    battery_losses_output_var.setUnits('J')
-
     elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
-    elcs.additionalProperties.setFeature('BatteryLosses', battery_losses_output_var.name.to_s)
   end
 
   def self.get_battery_default_values(has_garage = false)
@@ -196,5 +188,16 @@ class Battery
 
   def self.get_kWh_from_Ah(nominal_capacity_ah, nominal_voltage)
     return nominal_capacity_ah * nominal_voltage / 1000.0
+  end
+
+  def self.get_usable_capacity_kWh(battery)
+    usable_capacity_kwh = battery.usable_capacity_kwh
+    if usable_capacity_kwh.nil?
+      usable_capacity_kwh = get_kWh_from_Ah(battery.usable_capacity_ah, battery.nominal_voltage) # kWh
+    end
+    return usable_capacity_kwh
+  end
+
+  def self.get_min_max_state_of_charge()
   end
 end

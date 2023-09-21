@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e0b554c2-00fd-48f8-9887-1c3a5f16e8ac</version_id>
-  <version_modified>2023-09-18T22:41:43Z</version_modified>
+  <version_id>c9ab4d33-650f-437b-ac77-8864239d44e2</version_id>
+  <version_modified>2023-09-21T19:40:07Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>22E6C60C</checksum>
+      <checksum>84D4708E</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -238,7 +238,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2C95C0DB</checksum>
+      <checksum>103DB6D6</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -478,7 +478,7 @@
       <filename>xmlvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7CA1A066</checksum>
+      <checksum>CE56630D</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
