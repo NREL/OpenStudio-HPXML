@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>46b6e23d-dca1-4ae7-8c40-81614e3e3f2b</version_id>
-  <version_modified>2023-09-21T21:47:17Z</version_modified>
+  <version_id>8676fd01-a9d6-465b-a209-0b4fe50e975e</version_id>
+  <version_modified>2023-09-21T23:13:44Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -502,7 +502,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>29313C59</checksum>
+      <checksum>405B5555</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -580,7 +580,7 @@
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>002A1C1B</checksum>
+      <checksum>689B062B</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
