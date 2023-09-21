@@ -3389,6 +3389,7 @@ class HPXMLFile
     set_neighbor_buildings(hpxml_bldg, args)
     set_building_occupancy(hpxml_bldg, args)
     set_building_construction(hpxml_bldg, args)
+    set_building_header(hpxml_bldg, args)
     set_climate_and_risk_zones(hpxml_bldg, args)
     set_air_infiltration_measurements(hpxml_bldg, args)
     set_roofs(hpxml_bldg, args, sorted_surfaces)
@@ -3559,9 +3560,6 @@ class HPXMLFile
       hpxml.header.natvent_days_per_week = args[:window_natvent_availability].get
     end
 
-    if args[:schedules_filepaths].is_initialized
-      hpxml.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
-    end
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
       hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
@@ -4003,6 +4001,12 @@ class HPXMLFile
 
     if args[:unit_multiplier].is_initialized
       hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier].get
+    end
+  end
+
+  def self.set_building_header(hpxml_bldg, args)
+    if args[:schedules_filepaths].is_initialized
+      hpxml_bldg.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
     end
   end
 
