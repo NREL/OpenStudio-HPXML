@@ -138,14 +138,19 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # Apply HPXML defaults upfront; process schedules & emissions
-      check_file_references(hpxml.header, hpxml_path)
-      schedules_file = SchedulesFile.new(runner: runner,
-                                         schedules_paths: hpxml.header.schedules_filepaths,
-                                         year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
-                                         unavailable_periods: hpxml.header.unavailable_periods,
-                                         output_path: File.join(output_dir, 'in.schedules.csv'))
-      hpxml.buildings.each do |hpxml_bldg|
+      hpxml_sch_map = {}
+      check_emissions_references(hpxml.header, hpxml_path)
+      hpxml.buildings.each_with_index do |hpxml_bldg, i|
+        check_schedule_references(hpxml_bldg.header, hpxml_path)
+        in_schedules_csv = 'in.schedules.csv'
+        in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
+        schedules_file = SchedulesFile.new(runner: runner,
+                                           schedules_paths: hpxml_bldg.header.schedules_filepaths,
+                                           year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
+                                           unavailable_periods: hpxml.header.unavailable_periods,
+                                           output_path: File.join(output_dir, in_schedules_csv))
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
+        hpxml_sch_map[hpxml_bldg] = schedules_file
       end
       validate_emissions_files(hpxml.header)
 
@@ -156,6 +161,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # Create OpenStudio model
       hpxml_osm_map = {}
       hpxml.buildings.each do |hpxml_bldg|
+        schedules_file = hpxml_sch_map[hpxml_bldg]
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
@@ -457,14 +463,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_batteries(runner, model, spaces)
   end
 
-  def check_file_references(hpxml_header, hpxml_path)
+  def check_emissions_references(hpxml_header, hpxml_path)
     # Check/update file references
-    hpxml_header.schedules_filepaths = hpxml_header.schedules_filepaths.collect { |sfp|
-      FilePath.check_path(sfp,
-                          File.dirname(hpxml_path),
-                          'Schedules')
-    }
-
     hpxml_header.emissions_scenarios.each do |scenario|
       if hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
         fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
@@ -475,6 +475,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                                             File.dirname(hpxml_path),
                                                             'Emissions File')
     end
+  end
+
+  def check_schedule_references(hpxml_bldg_header, hpxml_path)
+    # Check/update file references
+    hpxml_bldg_header.schedules_filepaths = hpxml_bldg_header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
   end
 
   def validate_emissions_files(hpxml_header)

@@ -616,7 +616,7 @@ class HPXML < Object
              :software_program_version, :eri_calculation_version, :co2index_calculation_version, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :heat_pump_sizing_methodology, :allow_increased_fixed_capacities, :apply_ashrae140_assumptions,
-             :energystar_calculation_version, :schedules_filepaths, :extension_properties, :iecc_eri_calculation_version,
+             :energystar_calculation_version, :extension_properties, :iecc_eri_calculation_version,
              :zerh_calculation_version, :temperature_capacitance_multiplier, :natvent_days_per_week,
              :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
@@ -709,12 +709,6 @@ class HPXML < Object
         XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
       end
       XMLHelper.add_extension(software_info, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
-      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
-        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        @schedules_filepaths.each do |schedules_filepath|
-          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
-        end
-      end
       if (not @shading_summer_begin_month.nil?) || (not @shading_summer_begin_day.nil?) || (not @shading_summer_end_month.nil?) || (not @shading_summer_end_day.nil?)
         window_shading_season = XMLHelper.create_elements_as_needed(software_info, ['extension', 'ShadingControl'])
         XMLHelper.add_element(window_shading_season, 'SummerBeginMonth', @shading_summer_begin_month, :integer, @shading_summer_begin_month_isdefaulted) unless @shading_summer_begin_month.nil?
@@ -770,7 +764,6 @@ class HPXML < Object
       @manualj_internal_loads_sensible = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
       @manualj_internal_loads_latent = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
       @manualj_num_occupants = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
-      @schedules_filepaths = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
       @extension_properties = {}
       XMLHelper.get_elements(hpxml, 'SoftwareInfo/extension/AdditionalProperties').each do |property|
         property.children.each do |child|
@@ -1076,7 +1069,7 @@ class HPXML < Object
   end
 
   class Building < BaseElement
-    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction,
+    CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :header,
                    :climate_and_risk_zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
@@ -1143,6 +1136,7 @@ class HPXML < Object
       @neighbor_buildings.to_doc(building)
       @building_occupancy.to_doc(building)
       @building_construction.to_doc(building)
+      @header.to_doc(building)
       @climate_and_risk_zones.to_doc(building)
       @air_infiltration_measurements.to_doc(building)
       @air_infiltration.to_doc(building)
@@ -1214,6 +1208,7 @@ class HPXML < Object
       @neighbor_buildings = NeighborBuildings.new(self, building)
       @building_occupancy = BuildingOccupancy.new(self, building)
       @building_construction = BuildingConstruction.new(self, building)
+      @header = BuildingHeader.new(self, building)
       @climate_and_risk_zones = ClimateandRiskZones.new(self, building)
       @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, building)
       @air_infiltration = AirInfiltration.new(self, building)
@@ -1907,6 +1902,34 @@ class HPXML < Object
       @building_footprint_area = XMLHelper.get_value(building_construction, 'BuildingFootprintArea', :float)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
+    end
+  end
+
+  class BuildingHeader < BaseElement
+    ATTRS = [:schedules_filepaths]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
+        bldg_summary = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary'])
+        extension = XMLHelper.create_elements_as_needed(bldg_summary, ['extension'])
+        @schedules_filepaths.each do |schedules_filepath|
+          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+        end
+      end
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      @schedules_filepaths = XMLHelper.get_values(building, 'BuildingDetails/BuildingSummary/extension/SchedulesFilePath', :string)
     end
   end
 

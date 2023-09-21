@@ -999,69 +999,57 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless key == RT::Battery
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
 
-      resilience.variables.map { |v| v[0] }.uniq.each do |sys_id|
-        keys = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
-        vars = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
+      # FIXME: Need to address this
+      hpxml_bldg = @hpxml_bldgs[0]
 
-        minimum_storage_state_of_charge_fraction = nil
-        batt_kwh = nil
-        batt_kw = nil
-        batt_roundtrip_eff = nil
-        batt_loss = nil
+      next if hpxml_bldg.batteries.empty?
 
-        # FIXME: Need to address this
-        @hpxml_bldgs[0].batteries.each do |battery|
-          @model.getElectricLoadCenterDistributions.each do |elcd|
-            battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
-            next unless (battery_id.is_initialized && battery_id.get == battery.id)
+      battery = hpxml_bldg.batteries[0]
 
-            minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
-          end
+      resilience_frequency = 'timestep'
+      ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
+      if args[:timeseries_frequency] != 'timestep'
+        resilience_frequency = 'hourly'
+        ts_per_hr = 1
+      end
 
-          batt_kw = battery.rated_power_output / 1000.0
-          batt_roundtrip_eff = battery.round_trip_efficiency
+      vars = ['Electric Storage Charge Fraction']
+      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
+      batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
 
-          @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-            battery_id = elcs.additionalProperties.getFeatureAsString('HPXML_ID')
-            next unless (battery_id.is_initialized && battery_id.get == battery.id)
+      vars = ['Other Equipment Electricity Energy']
+      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
+      batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
 
-            batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
-            batt_loss = elcs.additionalProperties.getFeatureAsString('BatteryLosses').get
-          end
-        end
+      elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
 
-        resilience_frequency = 'timestep'
-        ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
-        if args[:timeseries_frequency] != 'timestep'
-          resilience_frequency = 'hourly'
-          ts_per_hr = 1
-        end
+      min_soc = elcd.minimumStorageStateofChargeFraction
+      batt_kw = battery.rated_power_output / 1000.0
+      batt_roundtrip_eff = battery.round_trip_efficiency
+      batt_kwh = Battery.get_usable_capacity_kWh(battery)
 
-        batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
-        batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
-        elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        batt_loss = get_report_variable_data_timeseries(['EMS'], [batt_loss], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
-        elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
+      batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
+      elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
+      elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
 
-        resilience_timeseries = []
-        n_timesteps = crit_load.size
-        (0...n_timesteps).each do |init_time_step|
-          resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
-        end
+      resilience_timeseries = []
+      n_timesteps = crit_load.size
+      (0...n_timesteps).each do |init_time_step|
+        resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+      end
 
-        resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
+      resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
 
-        next unless args[:include_timeseries_resilience]
+      next unless args[:include_timeseries_resilience]
 
-        resilience.timeseries_output = resilience_timeseries
+      resilience.timeseries_output = resilience_timeseries
 
-        # Aggregate up from hourly to the desired timeseries frequency
-        if ['daily', 'monthly'].include? args[:timeseries_frequency]
-          resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
-        end
+      # Aggregate up from hourly to the desired timeseries frequency
+      if ['daily', 'monthly'].include? args[:timeseries_frequency]
+        resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
       end
     end
 
@@ -2929,6 +2917,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         return { RT::Battery => ['Electric Storage Charge Fraction'] }
+
+      elsif object.to_OtherEquipment.is_initialized
+        if object_type == Constants.ObjectNameBatteryLossesAdjustment
+          return { RT::Battery => ["Other Equipment #{EPlus::FuelTypeElectricity} Energy"] }
+        end
+
       end
     end
 
