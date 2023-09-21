@@ -141,7 +141,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hpxml_sch_map = {}
       check_emissions_references(hpxml.header, hpxml_path)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
-        check_schedule_references(hpxml.header, hpxml_bldg.header, hpxml_path)
+        check_schedule_references(hpxml_bldg.header, hpxml_path)
         in_schedules_csv = 'in.schedules.csv'
         in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
         schedules_file = SchedulesFile.new(runner: runner,
@@ -477,13 +477,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def check_schedule_references(hpxml_header, hpxml_bldg_header, hpxml_path)
+  def check_schedule_references(hpxml_bldg_header, hpxml_path)
     # Check/update file references
-    hpxml_header.schedules_filepaths = hpxml_header.schedules_filepaths.collect { |sfp|
-      FilePath.check_path(sfp,
-                          File.dirname(hpxml_path),
-                          'Schedules')
-    }
     hpxml_bldg_header.schedules_filepaths = hpxml_bldg_header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(hpxml_path),
