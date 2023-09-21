@@ -16,7 +16,7 @@ __New Features__
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 
 __Bugfixes__
-- Fixes battery resilience output so that it includes battery losses.
+- Fixes battery resilience output to properly incorporate battery losses.
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 - Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
