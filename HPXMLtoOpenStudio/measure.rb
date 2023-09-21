@@ -145,7 +145,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         in_schedules_csv = 'in.schedules.csv'
         in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
         schedules_file = SchedulesFile.new(runner: runner,
-                                           schedules_paths: hpxml.header.schedules_filepaths + hpxml_bldg.header.schedules_filepaths,
+                                           schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(output_dir, in_schedules_csv))

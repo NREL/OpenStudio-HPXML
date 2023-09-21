@@ -3382,9 +3382,6 @@
     "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
     "schedules_power_outage_period": "Dec 1 5 - Jan 31 14"
   },
-  "sample_files/base-schedules-detailed-occupancy-stochastic-hpxml-header.xml": {
-    "parent_hpxml": "sample_files/base.xml"
-  },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
