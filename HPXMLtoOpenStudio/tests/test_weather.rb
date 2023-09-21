@@ -214,56 +214,31 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
   end
 
   def test_ground_temperatures
-    hpxml = HPXML.new(hpxml_path: File.join(weather_dir, '..', 'workflow', 'sample_files', 'base.xml'))
-    climate_zone_iecc = hpxml.climate_and_risk_zones.climate_zone_ieccs[0]
-
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: File.join(weather_dir, hpxml.climate_and_risk_zones.weather_station_epw_filepath), runner: runner)
 
-    iecc_zones = Constants.IECCZones + ['7A', '7AK', '7B', '8AK']
-    iecc_zones.each do |iz|
-      climate_zone_iecc.zone = iz
-      ground_temp_f = WeatherProcess.get_undisturbed_ground_temperature(weather, climate_zone_iecc)
-      if iz == '1A'
-        gtf = 25.9
-      elsif iz == '2A'
-        gtf = 20.9
-      elsif iz == '2B'
-        gtf = 25.0
-      elsif iz == '3A'
-        gtf = 17.9
-      elsif iz == '3B'
-        gtf = 19.7
-      elsif iz == '3C'
-        gtf = 17.0
-      elsif iz == '4A'
-        gtf = 14.7
-      elsif iz == '4B'
-        gtf = 16.3
-      elsif iz == '4C'
-        gtf = 13.3
-      elsif iz == '5A'
-        gtf = 11.5
-      elsif iz == '5B'
-        gtf = 12.9
-      elsif iz == '6A'
-        gtf = 9.0
-      elsif iz == '6B'
-        gtf = 9.3
-      elsif iz == '7A'
-        gtf = 7.0
-      elsif iz == '7AK'
-        gtf = 5.4
-      elsif iz == '7B'
-        gtf = 6.5
-      elsif iz == '8AK'
-        gtf = 2.3
-      elsif ['1B', '1C', '2C', '5C', '6C', '7', '8'].include?(iz)
-        gtf = UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C')
-      else
-        fail "No expected value for #{iz}"
+    ['USA_CO_Denver.Intl.AP.725650_TMY3.epw',
+     'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw',
+     'ZAF_Cape.Town.688160_IWEC.epw',
+     'US_CO_Boulder_AMY_2012.epw'].each do |epw_filename|
+      weather = WeatherProcess.new(epw_path: File.join(weather_dir, epw_filename), runner: runner)
+      ground_temp_f = weather.data.GroundMonthlyTemps.sum(0.0) / weather.data.GroundMonthlyTemps.size
+      uground_temp_f = weather.data.UndisturbedGroundMonthlyTemps.sum(0.0) / weather.data.UndisturbedGroundMonthlyTemps.size
+
+      if epw_filename == 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+        gtf = 51.74
+        ugtf = 53.24
+      elsif epw_filename == 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
+        gtf = 77.14
+        ugtf = 76.36
+      elsif epw_filename == 'ZAF_Cape.Town.688160_IWEC.epw'
+        gtf = 62.0
+        ugtf = 62.57
+      elsif epw_filename == 'US_CO_Boulder_AMY_2012.epw'
+        gtf = 49.53
+        ugtf = 51.22
       end
-      assert_equal(UnitConversions.convert(gtf, 'C', 'F'), ground_temp_f)
+      assert_in_delta(gtf, ground_temp_f, 0.01)
+      assert_in_delta(ugtf, uground_temp_f, 0.01)
     end
   end
 end

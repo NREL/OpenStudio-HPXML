@@ -10,7 +10,7 @@ end
 class WeatherData
   def initialize
   end
-  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
+  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :UndisturbedGroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
   attr_accessor(*ATTRS)
 end
 
@@ -121,6 +121,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_ground_temperatures
+    calc_undisturbed_ground_temperatures
     @data.WSF = calc_ashrae_622_wsf(rowdata)
 
     if not epwHasDesignData
@@ -312,6 +313,13 @@ class WeatherProcess
       theta = amon[i] * 24.0
       @data.GroundMonthlyTemps << UnitConversions.convert(data.AnnualAvgDrybulb - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
     end
+  end
+
+  def calc_undisturbed_ground_temperatures
+    # Return monthly undisturbed ground temperatures.
+
+    adj_ground_monthly_temps_c = @data.GroundMonthlyTemps.map { |x| 0.91 * UnitConversions.convert(x, 'F', 'C') + 1.82 }
+    @data.UndisturbedGroundMonthlyTemps = adj_ground_monthly_temps_c.map { |x| UnitConversions.convert(x, 'C', 'F') }
   end
 
   def self.calc_mains_temperatures(avgOAT, maxDiffMonthlyAvgOAT, latitude, year)
