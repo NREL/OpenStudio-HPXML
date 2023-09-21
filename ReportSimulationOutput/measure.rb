@@ -961,6 +961,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @resilience.each do |key, resilience|
       next unless key == RT::Battery
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
+      next if @hpxml.batteries.empty?
 
       resilience_frequency = 'timestep'
       ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
