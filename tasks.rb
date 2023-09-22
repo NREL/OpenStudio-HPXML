@@ -237,6 +237,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.buildings[0].clothes_dryers[0].delete
   end
 
+  # Need to assign schedules_filepaths in BuildResidentialHPXML to trigger running BuildResidentialScheduleFile
   if ['base-schedules-detailed-occupancy-stochastic-two-buildings.xml'].include? hpxml_file
     hpxml.buildings[-1].header.schedules_filepaths.delete_at(0)
   end
