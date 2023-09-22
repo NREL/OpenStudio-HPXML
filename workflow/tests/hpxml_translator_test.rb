@@ -30,7 +30,7 @@ class HPXMLTest < Minitest::Test
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
         next if xml.include? 'base-multiple-buildings.xml' # Tested by test_multiple_buildings()
-        next if xml.include? 'base-two-buildings'
+        next if xml.include? 'two-buildings'
         # FIXME: Need to address these files
         # Misc:
         next if xml.include? 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump'
