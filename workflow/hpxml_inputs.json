@@ -3396,7 +3396,7 @@
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-two-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hpxml_path_in": "workflow/sample_files/base-schedules-detailed-occupancy-stochastic.xml",
+    "hpxml_path_in": "workflow/sample_files/base.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {
