@@ -414,9 +414,6 @@ class HPXMLTest < Minitest::Test
     if unit_multiplier > 1
       command += ' -b ALL'
     end
-    if xml.include? 'base-two-buildings.xml'
-      command += ' -b ALL'
-    end
     success = system(command)
 
     if unit_multiplier > 1
