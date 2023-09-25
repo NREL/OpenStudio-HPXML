@@ -2010,7 +2010,7 @@ class HVACSizing
       end
     end
     if (not min_compressor_temp.nil?) && (min_compressor_temp > @hpxml.header.manualj_heating_design_temp)
-      # Calculate the heating load at the switchover temperature to limit uninitialized capacity
+      # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = @hpxml.header.manualj_heating_design_temp
       @hpxml.header.manualj_heating_design_temp = min_compressor_temp
       _alternate_bldg_design_loads, alternate_all_hvac_sizing_values = calculate(weather, @hpxml, @cfa, [hvac_system])
