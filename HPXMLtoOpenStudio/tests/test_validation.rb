@@ -115,6 +115,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
                             'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
+                            'hvac-gshp-invalid-bore-depth' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
@@ -378,6 +379,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-gshp-invalid-bore-config'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-geothermal-loop.xml'))
         hpxml.geothermal_loops[0].bore_config = 'Invalid'
+      elsif ['hvac-gshp-invalid-bore-depth'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-geothermal-loop.xml'))
+        hpxml.geothermal_loops[0].bore_length = 1260
       elsif ['hvac-location-heating-system'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-boiler-oil-only.xml'))
         hpxml.heating_systems[0].location = HPXML::LocationBasementUnconditioned
