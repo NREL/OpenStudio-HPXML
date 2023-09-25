@@ -1903,10 +1903,10 @@ class HVACSizing
       num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
     end
 
-    min_bore_depth = Float(UnitConversions.convert(24.0, 'm', 'ft').round) # based on g-function library
+    min_bore_depth = UnitConversions.convert(24.0, 'm', 'ft').round # based on g-function library
     # In NY the following is the depth that requires a mining permit, which has been a barrier for Dandelion Energy with installing GSHPs.
     # Sounds like people are pushing ever deeper but for now we can apply this limit and add a note about where it came from.
-    max_bore_depth = 500.0 # ft
+    max_bore_depth = 500 # ft
 
     bore_depth = geothermal_loop.bore_length
     if bore_depth.nil?
@@ -1930,7 +1930,7 @@ class HVACSizing
     end
 
     if (bore_depth < min_bore_depth) || (bore_depth > max_bore_depth)
-      fail "Bore depth (#{bore_depth}) not between #{min_bore_depth.round(3)} and #{max_bore_depth.round(3)} ft."
+      fail "Bore depth (#{bore_depth} ft) not between #{min_bore_depth} and #{max_bore_depth} ft."
     end
 
     bore_config = geothermal_loop.bore_config

@@ -855,8 +855,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
-                            'hvac-gshp-invalid-bore-depth' => ['Bore depth (1260.0) not between 79.0 and 500.0 ft.'],
+                            'hvac-gshp-invalid-bore-depth-autosized' => ['Bore depth (552 ft) not between 79 and 500 ft.'],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported."],
+                            'hvac-gshp-invalid-num-bore-holes-autosized' => ["Number of bore holes (11) with borefield configuration 'Rectangle' not supported."],
                             'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' and cooling system 'CoolingSystem1' are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
@@ -1019,12 +1020,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.heating_systems << hpxml.heating_systems[0].dup
         hpxml.heating_systems[1].id = "HeatingSystem#{hpxml.heating_systems.size}"
         hpxml.heating_systems[0].primary_system = false
-      elsif ['hvac-gshp-invalid-bore-depth'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-geothermal-loop.xml'))
-        hpxml.geothermal_loops[0].bore_length = 1260
+      elsif ['hvac-gshp-invalid-bore-depth-autosized'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump.xml'))
+        hpxml.site.ground_conductivity = 0.1
       elsif ['hvac-gshp-invalid-num-bore-holes'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-geothermal-loop.xml'))
         hpxml.geothermal_loops[0].num_bore_holes = 5
+      elsif ['hvac-gshp-invalid-num-bore-holes-autosized'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump.xml'))
+        hpxml.heat_pumps[0].cooling_capacity *= 2
+        hpxml.site.ground_conductivity = 0.08
       elsif ['hvac-inconsistent-fan-powers'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.cooling_systems[0].fan_watts_per_cfm = 0.55
