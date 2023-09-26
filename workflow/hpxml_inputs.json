@@ -205,8 +205,8 @@
     "misc_fuel_loads_fireplace_fuel_type": "natural gas",
     "pool_present": false,
     "pool_heater_type": "none",
-    "hot_tub_present": false,
-    "hot_tub_heater_type": "none",
+    "permanent_spa_present": false,
+    "permanent_spa_heater_type": "none",
     "combine_like_surfaces": false
   },
   "tests/ASHRAE_Standard_140/L110AC.xml": {
@@ -607,8 +607,8 @@
     "misc_fuel_loads_fireplace_fuel_type": "natural gas",
     "pool_present": false,
     "pool_heater_type": "none",
-    "hot_tub_present": false,
-    "hot_tub_heater_type": "none",
+    "permanent_spa_present": false,
+    "permanent_spa_heater_type": "none",
     "utility_bill_scenario_names": "Bills",
     "combine_like_surfaces": true
   },
@@ -3113,18 +3113,18 @@
     "pool_pump_annual_kwh": 2700,
     "pool_heater_type": "gas fired",
     "pool_heater_annual_therm": 500,
-    "hot_tub_present": true,
-    "hot_tub_pump_annual_kwh": 1000,
-    "hot_tub_heater_type": "electric resistance",
-    "hot_tub_heater_annual_kwh": 1300
+    "permanent_spa_present": true,
+    "permanent_spa_pump_annual_kwh": 1000,
+    "permanent_spa_heater_type": "electric resistance",
+    "permanent_spa_heater_annual_kwh": 1300
   },
   "sample_files/base-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon.xml",
     "misc_fuel_loads_grill_fuel_type": "fuel oil",
     "misc_fuel_loads_fireplace_fuel_type": "wood pellets",
     "pool_heater_type": "none",
-    "hot_tub_heater_type": "heat pump",
-    "hot_tub_heater_annual_kwh": 260
+    "permanent_spa_heater_type": "heat pump",
+    "permanent_spa_heater_annual_kwh": 260
   },
   "sample_files/base-misc-loads-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3184,12 +3184,12 @@
     "pool_heater_type": "gas fired",
     "pool_heater_annual_therm": 500,
     "pool_heater_usage_multiplier": 0.9,
-    "hot_tub_present": true,
-    "hot_tub_pump_annual_kwh": 1000,
-    "hot_tub_pump_usage_multiplier": 0.9,
-    "hot_tub_heater_type": "electric resistance",
-    "hot_tub_heater_annual_kwh": 1300,
-    "hot_tub_heater_usage_multiplier": 0.9
+    "permanent_spa_present": true,
+    "permanent_spa_pump_annual_kwh": 1000,
+    "permanent_spa_pump_usage_multiplier": 0.9,
+    "permanent_spa_heater_type": "electric resistance",
+    "permanent_spa_heater_annual_kwh": 1300,
+    "permanent_spa_heater_usage_multiplier": 0.9
   },
   "sample_files/base-multiple-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3309,8 +3309,8 @@
     "misc_fuel_loads_fireplace_annual_therm": null,
     "pool_pump_annual_kwh": null,
     "pool_heater_annual_therm": null,
-    "hot_tub_pump_annual_kwh": null,
-    "hot_tub_heater_annual_kwh": null
+    "permanent_spa_pump_annual_kwh": null,
+    "permanent_spa_heater_annual_kwh": null
   },
   "sample_files/base-residents-1-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon2.xml",
@@ -3324,8 +3324,8 @@
     "misc_fuel_loads_fireplace_annual_therm": null,
     "pool_pump_annual_kwh": null,
     "pool_heater_annual_therm": null,
-    "hot_tub_pump_annual_kwh": null,
-    "hot_tub_heater_annual_kwh": null
+    "permanent_spa_pump_annual_kwh": null,
+    "permanent_spa_heater_annual_kwh": null
   },
   "sample_files/base-residents-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>7c849980-9e94-4592-9cc8-c87acb1b90bc</version_id>
-  <version_modified>2023-09-14T23:51:55Z</version_modified>
+  <version_id>33151973-6b3c-43c9-a7d3-a0f32bdd8926</version_id>
+  <version_modified>2023-09-26T16:58:47Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6284,9 +6284,9 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>hot_tub_present</name>
-      <display_name>Hot Tub: Present</display_name>
-      <description>Whether there is a hot tub.</description>
+      <name>permanent_spa_present</name>
+      <display_name>Permanent Spa: Present</display_name>
+      <description>Whether there is a permanent spa.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -6303,26 +6303,26 @@
       </choices>
     </argument>
     <argument>
-      <name>hot_tub_pump_annual_kwh</name>
-      <display_name>Hot Tub: Pump Annual kWh</display_name>
-      <description>The annual energy consumption of the hot tub pump. If not provided, the OS-HPXML default is used.</description>
+      <name>permanent_spa_pump_annual_kwh</name>
+      <display_name>Permanent Spa: Pump Annual kWh</display_name>
+      <description>The annual energy consumption of the permanent spa pump. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>kWh/yr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>hot_tub_pump_usage_multiplier</name>
-      <display_name>Hot Tub: Pump Usage Multiplier</display_name>
-      <description>Multiplier on the hot tub pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.</description>
+      <name>permanent_spa_pump_usage_multiplier</name>
+      <display_name>Permanent Spa: Pump Usage Multiplier</display_name>
+      <description>Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>hot_tub_heater_type</name>
-      <display_name>Hot Tub: Heater Type</display_name>
-      <description>The type of hot tub heater. Use 'none' if there is no hot tub heater.</description>
+      <name>permanent_spa_heater_type</name>
+      <display_name>Permanent Spa: Heater Type</display_name>
+      <description>The type of permanent spa heater. Use 'none' if there is no permanent spa heater.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -6347,27 +6347,27 @@
       </choices>
     </argument>
     <argument>
-      <name>hot_tub_heater_annual_kwh</name>
-      <display_name>Hot Tub: Heater Annual kWh</display_name>
-      <description>The annual energy consumption of the electric resistance hot tub heater. If not provided, the OS-HPXML default is used.</description>
+      <name>permanent_spa_heater_annual_kwh</name>
+      <display_name>Permanent Spa: Heater Annual kWh</display_name>
+      <description>The annual energy consumption of the electric resistance permanent spa heater. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>kWh/yr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>hot_tub_heater_annual_therm</name>
-      <display_name>Hot Tub: Heater Annual therm</display_name>
-      <description>The annual energy consumption of the gas fired hot tub heater. If not provided, the OS-HPXML default is used.</description>
+      <name>permanent_spa_heater_annual_therm</name>
+      <display_name>Permanent Spa: Heater Annual therm</display_name>
+      <description>The annual energy consumption of the gas fired permanent spa heater. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <units>therm/yr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>hot_tub_heater_usage_multiplier</name>
-      <display_name>Hot Tub: Heater Usage Multiplier</display_name>
-      <description>Multiplier on the hot tub heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.</description>
+      <name>permanent_spa_heater_usage_multiplier</name>
+      <display_name>Permanent Spa: Heater Usage Multiplier</display_name>
+      <description>Multiplier on the permanent spa heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6740,7 +6740,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9519F913</checksum>
+      <checksum>9CF40C8C</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -6752,7 +6752,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9CC9525F</checksum>
+      <checksum>151CD1BB</checksum>
     </file>
   </files>
 </measure>

@@ -57,10 +57,10 @@ class HPXML < Object
                  :water_heating, :solar_thermal_systems, :pv_systems, :inverters, :generators,
                  :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
-                 :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
+                 :ceiling_fans, :pools, :permanent_spas, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
-  NameSpace = 'http://hpxmlonline.com/2019/10'
+  NameSpace = 'http://hpxmlonline.com/2023/09'
 
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
@@ -765,7 +765,7 @@ class HPXML < Object
     @ceiling_fans.to_oga(@doc)
     @lighting.to_oga(@doc)
     @pools.to_oga(@doc)
-    @hot_tubs.to_oga(@doc)
+    @permanent_spas.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @fuel_loads.to_oga(@doc)
     return @doc
@@ -821,7 +821,7 @@ class HPXML < Object
     @ceiling_fans = CeilingFans.new(self, hpxml)
     @lighting = Lighting.new(self, hpxml)
     @pools = Pools.new(self, hpxml)
-    @hot_tubs = HotTubs.new(self, hpxml)
+    @permanent_spas = PermanentSpas.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @fuel_loads = FuelLoads.new(self, hpxml)
   end
@@ -6482,8 +6482,8 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(pool, 'Type', @type, :string) unless @type.nil?
       if @type != HPXML::TypeNone
-        pumps = XMLHelper.add_element(pool, 'PoolPumps')
-        pool_pump = XMLHelper.add_element(pumps, 'PoolPump')
+        pumps = XMLHelper.add_element(pool, 'Pumps')
+        pool_pump = XMLHelper.add_element(pumps, 'Pump')
         sys_id = XMLHelper.add_element(pool_pump, 'SystemIdentifier')
         if not @pump_id.nil?
           XMLHelper.add_attribute(sys_id, 'id', @pump_id)
@@ -6527,7 +6527,7 @@ class HPXML < Object
     def from_oga(pool)
       @id = HPXML::get_id(pool)
       @type = XMLHelper.get_value(pool, 'Type', :string)
-      pool_pump = XMLHelper.get_element(pool, 'PoolPumps/PoolPump')
+      pool_pump = XMLHelper.get_element(pool, 'Pumps/Pump')
       if not pool_pump.nil?
         @pump_id = HPXML::get_id(pool_pump)
         @pump_type = XMLHelper.get_value(pool_pump, 'Type', :string)
@@ -6551,21 +6551,21 @@ class HPXML < Object
     end
   end
 
-  class HotTubs < BaseArrayElement
+  class PermanentSpas < BaseArrayElement
     def add(**kwargs)
-      self << HotTub.new(@hpxml_object, **kwargs)
+      self << PermanentSpa.new(@hpxml_object, **kwargs)
     end
 
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/HotTubs/HotTub').each do |hot_tub|
-        self << HotTub.new(@hpxml_object, hot_tub)
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Spas/PermanentSpa').each do |spa|
+        self << PermanentSpa.new(@hpxml_object, spa)
       end
     end
   end
 
-  class HotTub < BaseElement
+  class PermanentSpa < BaseElement
     ATTRS = [:id, :type, :heater_id, :heater_type, :heater_load_units, :heater_load_value, :heater_usage_multiplier,
              :pump_id, :pump_type, :pump_kwh_per_year, :pump_usage_multiplier,
              :heater_weekday_fractions, :heater_weekend_fractions, :heater_monthly_multipliers,
@@ -6573,7 +6573,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.hot_tubs.delete(self)
+      @hpxml_object.permanent_spas.delete(self)
     end
 
     def check_for_errors
@@ -6584,33 +6584,33 @@ class HPXML < Object
     def to_oga(doc)
       return if nil?
 
-      hot_tubs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'HotTubs'])
-      hot_tub = XMLHelper.add_element(hot_tubs, 'HotTub')
-      sys_id = XMLHelper.add_element(hot_tub, 'SystemIdentifier')
+      spas = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Spas'])
+      spa = XMLHelper.add_element(spas, 'PermanentSpa')
+      sys_id = XMLHelper.add_element(spa, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(hot_tub, 'Type', @type, :string) unless @type.nil?
+      XMLHelper.add_element(spa, 'Type', @type, :string) unless @type.nil?
       if @type != HPXML::TypeNone
-        pumps = XMLHelper.add_element(hot_tub, 'HotTubPumps')
-        hot_tub_pump = XMLHelper.add_element(pumps, 'HotTubPump')
-        sys_id = XMLHelper.add_element(hot_tub_pump, 'SystemIdentifier')
+        pumps = XMLHelper.add_element(spa, 'Pumps')
+        spa_pump = XMLHelper.add_element(pumps, 'Pump')
+        sys_id = XMLHelper.add_element(spa_pump, 'SystemIdentifier')
         if not @pump_id.nil?
           XMLHelper.add_attribute(sys_id, 'id', @pump_id)
         else
           XMLHelper.add_attribute(sys_id, 'id', @id + 'Pump')
         end
-        XMLHelper.add_element(hot_tub_pump, 'Type', @pump_type, :string)
+        XMLHelper.add_element(spa_pump, 'Type', @pump_type, :string)
         if @pump_type != HPXML::TypeNone
           if not @pump_kwh_per_year.nil?
-            load = XMLHelper.add_element(hot_tub_pump, 'Load')
+            load = XMLHelper.add_element(spa_pump, 'Load')
             XMLHelper.add_element(load, 'Units', UnitsKwhPerYear, :string)
             XMLHelper.add_element(load, 'Value', @pump_kwh_per_year, :float, @pump_kwh_per_year_isdefaulted)
           end
-          XMLHelper.add_extension(hot_tub_pump, 'UsageMultiplier', @pump_usage_multiplier, :float, @pump_usage_multiplier_isdefaulted) unless @pump_usage_multiplier.nil?
-          XMLHelper.add_extension(hot_tub_pump, 'WeekdayScheduleFractions', @pump_weekday_fractions, :string, @pump_weekday_fractions_isdefaulted) unless @pump_weekday_fractions.nil?
-          XMLHelper.add_extension(hot_tub_pump, 'WeekendScheduleFractions', @pump_weekend_fractions, :string, @pump_weekend_fractions_isdefaulted) unless @pump_weekend_fractions.nil?
-          XMLHelper.add_extension(hot_tub_pump, 'MonthlyScheduleMultipliers', @pump_monthly_multipliers, :string, @pump_monthly_multipliers_isdefaulted) unless @pump_monthly_multipliers.nil?
+          XMLHelper.add_extension(spa_pump, 'UsageMultiplier', @pump_usage_multiplier, :float, @pump_usage_multiplier_isdefaulted) unless @pump_usage_multiplier.nil?
+          XMLHelper.add_extension(spa_pump, 'WeekdayScheduleFractions', @pump_weekday_fractions, :string, @pump_weekday_fractions_isdefaulted) unless @pump_weekday_fractions.nil?
+          XMLHelper.add_extension(spa_pump, 'WeekendScheduleFractions', @pump_weekend_fractions, :string, @pump_weekend_fractions_isdefaulted) unless @pump_weekend_fractions.nil?
+          XMLHelper.add_extension(spa_pump, 'MonthlyScheduleMultipliers', @pump_monthly_multipliers, :string, @pump_monthly_multipliers_isdefaulted) unless @pump_monthly_multipliers.nil?
         end
-        heater = XMLHelper.add_element(hot_tub, 'Heater')
+        heater = XMLHelper.add_element(spa, 'Heater')
         sys_id = XMLHelper.add_element(heater, 'SystemIdentifier')
         if not @heater_id.nil?
           XMLHelper.add_attribute(sys_id, 'id', @heater_id)
@@ -6632,20 +6632,20 @@ class HPXML < Object
       end
     end
 
-    def from_oga(hot_tub)
-      @id = HPXML::get_id(hot_tub)
-      @type = XMLHelper.get_value(hot_tub, 'Type', :string)
-      hot_tub_pump = XMLHelper.get_element(hot_tub, 'HotTubPumps/HotTubPump')
-      if not hot_tub_pump.nil?
-        @pump_id = HPXML::get_id(hot_tub_pump)
-        @pump_type = XMLHelper.get_value(hot_tub_pump, 'Type', :string)
-        @pump_kwh_per_year = XMLHelper.get_value(hot_tub_pump, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
-        @pump_usage_multiplier = XMLHelper.get_value(hot_tub_pump, 'extension/UsageMultiplier', :float)
-        @pump_weekday_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekdayScheduleFractions', :string)
-        @pump_weekend_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekendScheduleFractions', :string)
-        @pump_monthly_multipliers = XMLHelper.get_value(hot_tub_pump, 'extension/MonthlyScheduleMultipliers', :string)
+    def from_oga(spa)
+      @id = HPXML::get_id(spa)
+      @type = XMLHelper.get_value(spa, 'Type', :string)
+      spa_pump = XMLHelper.get_element(spa, 'Pumps/Pump')
+      if not spa_pump.nil?
+        @pump_id = HPXML::get_id(spa_pump)
+        @pump_type = XMLHelper.get_value(spa_pump, 'Type', :string)
+        @pump_kwh_per_year = XMLHelper.get_value(spa_pump, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
+        @pump_usage_multiplier = XMLHelper.get_value(spa_pump, 'extension/UsageMultiplier', :float)
+        @pump_weekday_fractions = XMLHelper.get_value(spa_pump, 'extension/WeekdayScheduleFractions', :string)
+        @pump_weekend_fractions = XMLHelper.get_value(spa_pump, 'extension/WeekendScheduleFractions', :string)
+        @pump_monthly_multipliers = XMLHelper.get_value(spa_pump, 'extension/MonthlyScheduleMultipliers', :string)
       end
-      heater = XMLHelper.get_element(hot_tub, 'Heater')
+      heater = XMLHelper.get_element(spa, 'Heater')
       if not heater.nil?
         @heater_id = HPXML::get_id(heater)
         @heater_type = XMLHelper.get_value(heater, 'Type', :string)
@@ -6789,8 +6789,6 @@ class HPXML < Object
     doc = XMLHelper.create_doc('1.0', 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
     XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
-    XMLHelper.add_attribute(hpxml, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-    XMLHelper.add_attribute(hpxml, 'xsi:schemaLocation', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
     return doc
   end

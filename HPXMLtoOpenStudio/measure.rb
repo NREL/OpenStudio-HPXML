@@ -219,8 +219,8 @@ class OSModel
     add_mfls(runner, model, spaces)
     add_lighting(runner, model, epw_file, spaces)
 
-    # Pools & Hot Tubs
-    add_pools_and_hot_tubs(runner, model, spaces)
+    # Pools & Permanent Spas
+    add_pools_and_permanent_spas(runner, model, spaces)
 
     # Other
     add_cooling_season(model, weather)
@@ -1621,27 +1621,27 @@ class OSModel
                    @schedules_file, @cfa, @hpxml.header.unavailable_periods)
   end
 
-  def self.add_pools_and_hot_tubs(runner, model, spaces)
+  def self.add_pools_and_permanent_spas(runner, model, spaces)
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(runner, model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace],
-                                             @schedules_file, @hpxml.header.unavailable_periods)
+      MiscLoads.apply_pool_or_permanent_spa_heater(runner, model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace],
+                                                   @schedules_file, @hpxml.header.unavailable_periods)
       next if pool.pump_type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_pump(runner, model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace],
-                                           @schedules_file, @hpxml.header.unavailable_periods)
+      MiscLoads.apply_pool_or_permanent_spa_pump(runner, model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace],
+                                                 @schedules_file, @hpxml.header.unavailable_periods)
     end
 
-    @hpxml.hot_tubs.each do |hot_tub|
-      next if hot_tub.type == HPXML::TypeNone
+    @hpxml.permanent_spas.each do |spa|
+      next if spa.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(runner, model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace],
-                                             @schedules_file, @hpxml.header.unavailable_periods)
-      next if hot_tub.pump_type == HPXML::TypeNone
+      MiscLoads.apply_pool_or_permanent_spa_heater(runner, model, spa, Constants.ObjectNameMiscPermanentSpaHeater, spaces[HPXML::LocationLivingSpace],
+                                                   @schedules_file, @hpxml.header.unavailable_periods)
+      next if spa.pump_type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_pump(runner, model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace],
-                                           @schedules_file, @hpxml.header.unavailable_periods)
+      MiscLoads.apply_pool_or_permanent_spa_pump(runner, model, spa, Constants.ObjectNameMiscPermanentSpaPump, spaces[HPXML::LocationLivingSpace],
+                                                 @schedules_file, @hpxml.header.unavailable_periods)
     end
   end
 
