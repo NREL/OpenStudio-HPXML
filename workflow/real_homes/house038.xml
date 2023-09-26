@@ -594,12 +594,12 @@
         <Pool>
           <SystemIdentifier id='Pool1'/>
           <Type>unknown</Type>
-          <PoolPumps>
-            <PoolPump>
+          <Pumps>
+            <Pump>
               <SystemIdentifier id='PoolPump'/>
               <Type>single speed</Type>
-            </PoolPump>
-          </PoolPumps>
+            </Pump>
+          </Pumps>
           <Heater>
             <SystemIdentifier id='PoolHeater'/>
             <Type>none</Type>
