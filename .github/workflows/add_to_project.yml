@@ -1,0 +1,17 @@
+name: Add issue to project
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - transferred
+
+jobs:
+  add-to-project:
+    name: Add pull request or issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: https://github.com/NREL/OpenStudio-HPXML/projects/2
+          github-token: ${{ secrets.GHB_TOKEN }}
