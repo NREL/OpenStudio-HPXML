@@ -102,7 +102,7 @@ def create_hpxmls
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
       next if abs_hpxml_files.include? File.absolute_path(hpxml)
 
-      # puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
+      puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
     end
   end
 end
