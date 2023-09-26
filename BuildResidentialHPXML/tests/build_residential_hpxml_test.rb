@@ -629,7 +629,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hot_tub_present'] = false
       args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
     elsif ['base-sfd2.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
     elsif ['base-sfa.xml'].include? hpxml_file
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
@@ -645,9 +645,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_right'] = 0
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     elsif ['base-sfa2.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
     elsif ['base-sfa3.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
     elsif ['base-mf.xml'].include? hpxml_file
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
       args['geometry_unit_cfa'] = 900.0
@@ -674,11 +674,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['door_area'] = 20.0
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     elsif ['base-mf2.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
     elsif ['base-mf3.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
     elsif ['base-mf4.xml'].include? hpxml_file
-      args['hpxml_path_in'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
     end
 
     # Extras

@@ -42,9 +42,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path_in', false)
-    arg.setDisplayName('HPXML File Path In')
-    arg.setDescription('Absolute/relative path of the existing HPXML file.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('existing_hpxml_path', false)
+    arg.setDisplayName('Existing HPXML File Path')
+    arg.setDescription('Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
@@ -3175,14 +3175,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     # Existing HPXML File
-    if args[:hpxml_path_in].is_initialized
-      hpxml_path_in = args[:hpxml_path_in].get
-      unless (Pathname.new hpxml_path_in).absolute?
-        hpxml_path_in = File.expand_path(hpxml_path_in)
+    if args[:existing_hpxml_path].is_initialized
+      existing_hpxml_path = args[:existing_hpxml_path].get
+      unless (Pathname.new existing_hpxml_path).absolute?
+        existing_hpxml_path = File.expand_path(existing_hpxml_path)
       end
     end
 
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -3379,7 +3379,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, epw_path, hpxml_path, hpxml_path_in)
+  def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
       weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
@@ -3394,7 +3394,7 @@ class HPXMLFile
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path_in, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: existing_hpxml_path, building_id: 'ALL')
 
     set_header(hpxml, args)
     hpxml_bldg = add_building(hpxml, args)

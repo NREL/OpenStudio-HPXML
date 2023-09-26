@@ -56,7 +56,7 @@ def create_hpxmls
     num_apply_measures = hpxml_path.include?('base-multiple-buildings') ? 3 : 1
 
     for i in 1..num_apply_measures
-      measures['BuildResidentialHPXML'][0]['hpxml_path_in'] = hpxml_path if i > 1
+      measures['BuildResidentialHPXML'][0]['existing_hpxml_path'] = hpxml_path if i > 1
       if hpxml_path.include? 'base-multiple-buildings-varied-occupancy'
         suffix = "_#{i}" if i > 1
         measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
