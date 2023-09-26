@@ -3195,15 +3195,13 @@
     "hot_tub_heater_annual_kwh": 1300,
     "hot_tub_heater_usage_multiplier": 0.9
   },
-  "sample_files/base-two-buildings.xml": {
+  "sample_files/base-multiple-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hpxml_path_in": "workflow/sample_files/base.xml",
     "clothes_dryer_present": false,
     "utility_bill_scenario_names": null
   },
-  "sample_files/base-multiple-buildings.xml": {
+  "sample_files/base-multiple-buildings-varied-occupancy.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hpxml_path_in": "workflow/sample_files/base-two-buildings.xml",
     "clothes_dryer_present": false,
     "utility_bill_scenario_names": null
   },
@@ -3392,11 +3390,6 @@
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
-  },
-  "sample_files/base-schedules-detailed-occupancy-stochastic-two-buildings.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hpxml_path_in": "workflow/sample_files/base.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {

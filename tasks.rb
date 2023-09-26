@@ -49,32 +49,42 @@ def create_hpxmls
     measures = {}
     measures['BuildResidentialHPXML'] = [json_input]
 
-    # Re-generate stochastic schedule CSV?
-    csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
-    if (not csv_path.nil?) && ((not schedules_regenerated.include? csv_path) || hpxml_filename.include?('two-buildings'))
-      sch_args = { 'hpxml_path' => hpxml_path,
-                   'output_csv_path' => csv_path,
-                   'hpxml_output_path' => hpxml_path,
-                   'building_id' => 'ALL' }
-      measures['BuildResidentialScheduleFile'] = [sch_args]
-      schedules_regenerated << csv_path
-    end
-
     measures_dir = File.dirname(__FILE__)
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    # Apply measure
-    success = apply_measures(measures_dir, measures, runner, model)
+    num_apply_measures = hpxml_path.include?('base-multiple-buildings') ? 3 : 1
 
-    # Report errors
-    runner.result.stepErrors.each do |s|
-      puts "Error: #{s}"
-    end
+    for i in 1..num_apply_measures
+      measures['BuildResidentialHPXML'][0]['hpxml_path_in'] = hpxml_path if i > 1
+      if hpxml_path.include? 'base-multiple-buildings-varied-occupancy'
+        suffix = "_#{i}" if i > 1
+        measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
+      end
 
-    if not success
-      puts "\nError: Did not successfully generate #{hpxml_filename}."
-      exit!
+      # Re-generate stochastic schedule CSV?
+      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
+      if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
+        sch_args = { 'hpxml_path' => hpxml_path,
+                     'output_csv_path' => csv_path,
+                     'hpxml_output_path' => hpxml_path,
+                     'building_id' => "MyBuilding#{suffix}" }
+        measures['BuildResidentialScheduleFile'] = [sch_args]
+        schedules_regenerated << csv_path
+      end
+
+      # Apply measure
+      success = apply_measures(measures_dir, measures, runner, model)
+
+      # Report errors
+      runner.result.stepErrors.each do |s|
+        puts "Error: #{s}"
+      end
+
+      if not success
+        puts "\nError: Did not successfully generate #{hpxml_filename}."
+        exit!
+      end
     end
 
     hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
@@ -102,7 +112,7 @@ def create_hpxmls
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
       next if abs_hpxml_files.include? File.absolute_path(hpxml)
 
-      # puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
+      puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
     end
   end
 end
@@ -231,15 +241,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.manualj_internal_loads_sensible = 4000
     hpxml.header.manualj_internal_loads_latent = 200
     hpxml.header.manualj_num_occupants = 5
-  end
-
-  if ['base-multiple-buildings.xml'].include? hpxml_file
-    hpxml.buildings[0].clothes_dryers[0].delete
-  end
-
-  # Need to assign schedules_filepaths in BuildResidentialHPXML to trigger running BuildResidentialScheduleFile
-  if ['base-schedules-detailed-occupancy-stochastic-two-buildings.xml'].include? hpxml_file
-    hpxml.buildings[-1].header.schedules_filepaths.delete_at(0)
   end
 
   hpxml.buildings.each do |hpxml_bldg|
