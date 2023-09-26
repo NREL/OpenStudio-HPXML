@@ -423,8 +423,7 @@ HVAC Capacities
 ~~~~~~~~~~~~~~~
 
 System outputs are listed below.
-Autosized HVAC systems are based on HVAC design temperatures/loads described below.
-Capacities for individual HVAC systems can be found in the `in.xml` file.
+Capacities for individual HVAC systems can be found in the ``in.xml`` file.
 
    ====================================================  ====================
    Type                                                  Notes
@@ -434,11 +433,21 @@ Capacities for individual HVAC systems can be found in the `in.xml` file.
    HVAC Capacity: Heat Pump Backup (Btu/h)               Total HVAC heat pump backup capacity
    ====================================================  ====================
 
+.. note::
+
+  Autosized HVAC systems are based on :ref:`hvac_design_temps` and :ref:`hvac_design_loads`.
+
+  For heat pumps with a minimum compressor lockout temperature greater than the heating design temperature (e.g., a dual-fuel heat pump in a cold climate), the compressor will be sized based on heating design loads calculated at the compressor lockout temperature.
+  This is done to prevent unutilized capacity at temperatures below the compressor lockout temperature.
+  Any heat pump backup will still be based on heating design loads calculated using the heating design temperature.
+  
+.. _hvac_design_temps:
+
 HVAC Design Temperatures
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Design temperatures are used in the design load calculations for autosizing of HVAC equipment; see :ref:`hvac_sizing_control` for how they are derived.
-Design temperatures can also be found in the `in.xml` file.
+Design temperatures can also be found in the ``in.xml`` file.
 
    =====================================================================  ====================
    Type                                                                   Notes
@@ -447,12 +456,14 @@ Design temperatures can also be found in the `in.xml` file.
    HVAC Design Temperature: Cooling (F)                                   1% cooling drybulb temperature
    =====================================================================  ====================
 
+.. _hvac_design_loads:
+
 HVAC Design Loads
 ~~~~~~~~~~~~~~~~~
 
 Design load outputs, used for autosizing of HVAC equipment, are listed below.
-Design loads are based on block load ACCA Manual J calculations using 1%/99% design temperatures.
-Design loads can also be found in the `in.xml` file.
+Design loads are based on block load ACCA Manual J calculations using :ref:`hvac_design_temps`.
+Design loads can also be found in the ``in.xml`` file.
 
    =====================================================================  ====================
    Type                                                                   Notes
