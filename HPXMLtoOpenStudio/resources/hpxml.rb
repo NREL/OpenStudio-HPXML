@@ -218,6 +218,7 @@ class HPXML < Object
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
+  LocationConditionedSpace = 'conditioned space'
   LocationCrawlspace = 'crawlspace'
   LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
@@ -228,7 +229,6 @@ class HPXML < Object
   LocationGround = 'ground'
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
-  LocationLivingSpace = 'living space'
   LocationManufacturedHomeBelly = 'manufactured home belly'
   LocationManufacturedHomeUnderBelly = 'manufactured home underbelly'
   LocationOtherExterior = 'other exterior'
@@ -1854,7 +1854,7 @@ class HPXML < Object
       return if @attic_type.nil?
 
       if [AtticTypeCathedral, AtticTypeConditioned, AtticTypeFlatRoof, AtticTypeBelowApartment].include? @attic_type
-        return LocationLivingSpace
+        return LocationConditionedSpace
       elsif [AtticTypeUnvented].include? @attic_type
         return LocationAtticUnvented
       elsif [AtticTypeVented].include? @attic_type
@@ -2048,7 +2048,7 @@ class HPXML < Object
       return if @foundation_type.nil?
 
       if [FoundationTypeSlab, FoundationTypeAboveApartment].include? @foundation_type
-        return LocationLivingSpace
+        return LocationConditionedSpace
       elsif [FoundationTypeAmbient].include? @foundation_type
         return LocationOutside
       elsif [FoundationTypeBasementConditioned].include? @foundation_type
@@ -2062,7 +2062,7 @@ class HPXML < Object
       elsif @foundation_type == FoundationTypeCrawlspaceConditioned
         return LocationCrawlspaceConditioned
       elsif @foundation_type == FoundationTypeSlab
-        return LocationLivingSpace
+        return LocationConditionedSpace
       elsif @foundation_type == FoundationTypeBellyAndWing
         return LocationManufacturedHomeUnderBelly
       else
@@ -2915,7 +2915,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def is_ceiling
-      # From the perspective of the living space
+      # From the perspective of the conditioned space
       if @floor_or_ceiling.nil?
         ceiling_locations = [LocationAtticUnconditioned,
                              LocationAtticVented,
@@ -7009,20 +7009,20 @@ class HPXML < Object
   end
 
   def self.conditioned_locations
-    return [HPXML::LocationLivingSpace,
+    return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned,
             HPXML::LocationOtherHousingUnit]
   end
 
   def self.conditioned_locations_this_unit
-    return [HPXML::LocationLivingSpace,
+    return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
   end
 
   def self.conditioned_finished_locations
-    return [HPXML::LocationLivingSpace,
+    return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned]
   end
 
@@ -7041,8 +7041,8 @@ class HPXML < Object
       return true
     elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
           conditioned_locations.include?(surface.exterior_adjacent_to)
-      # E.g., floor between living space and conditioned basement, or
-      # wall between living space and "other housing unit"
+      # E.g., floor between conditioned space and conditioned basement, or
+      # wall between conditioned space and "other housing unit"
       return true
     end
 

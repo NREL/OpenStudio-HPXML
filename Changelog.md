@@ -3,6 +3,7 @@
 __New Features__
 - **Breaking change**: Updates to official HPXML v4.0:
   - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09
+  - Replaces "living space" with "conditioned space", which better represents what is modeled.
   - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.

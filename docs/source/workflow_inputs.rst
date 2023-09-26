@@ -56,7 +56,7 @@ Default values would be used for the refrigerator energy use, location, and sche
 
   <Refrigerator>
     <SystemIdentifier id='Refrigerator1'/>
-    <Location dataSource='software'>living space</Location>
+    <Location dataSource='software'>conditioned space</Location>
     <RatedAnnualkWh dataSource='software'>691.0</RatedAnnualkWh>
     <PrimaryIndicator dataSource='software'>true</PrimaryIndicator>
     <extension>
@@ -828,7 +828,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                                        Assembly R-value [#]_
   ======================================  =================  ================  =====================  =========  ==============================  ==================================
 
-  .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "living space", or "garage".
+  .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "conditioned space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, and it's a *pitched* roof, modeled as four surfaces of equal area facing every direction.
@@ -846,7 +846,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          | - **concrete**: dark=0.90, medium dark=0.83, medium=0.75, light=0.65, reflective=0.50
          | - **cool roof**: 0.30
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
-  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space, otherwise "none".
+  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Rim Joists
@@ -871,7 +871,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
+  .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, and it's an *exterior* rim joist, modeled as four surfaces of equal area facing every direction.
@@ -911,12 +911,12 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
+  .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructuralInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, and it's an *exterior* wall, modeled as four surfaces of equal area facing every direction.
-         Azimuth/Orientation is irrelevant for *interior* walls (e.g., between living space and garage).
+         Azimuth/Orientation is irrelevant for *interior* walls (e.g., between conditioned space and garage).
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", "masonite siding", "composite shingle siding", "asbestos siding", "synthetic stucco", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] | If SolarAbsorptance not provided, defaults based on Color:
@@ -926,7 +926,7 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
          | - **light**: 0.50
          | - **reflective**: 0.30
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
-  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space or basement - conditioned, otherwise "none".
+  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Foundation Walls
@@ -1008,11 +1008,11 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home underbelly".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
+  .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
-  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
+  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space and the surface is a ceiling, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior
     air films, and insulation installation grade. For a manufactured home belly
     where the area of the belly wrap is different and usually greater than the
@@ -1054,7 +1054,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``extension/CarpetRValue``                               double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
 
-  .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
+  .. [#] InteriorAdjacentTo choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
@@ -1330,12 +1330,12 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "living space"
-         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **none**: "conditioned space"
+         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
          | - **hydronic**: same default logic as :ref:`waterheatingsystems`
-         | - **dse**: "living space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
+         | - **dse**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``SpaceHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
@@ -1516,11 +1516,11 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                 Fraction of cooling load served
   ==========================  ========  ======  ===========  ========  ========  ===============================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "living space"
-         | - **air**: supply duct location with the largest area, otherwise "living space"
-         | - **dse**: "living space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
+         | - **none**: "conditioned space"
+         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
+         | - **dse**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1737,12 +1737,12 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
-  .. [#] UnitLocation choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "living space"
-         | - **air**: supply duct location with the largest area, otherwise "living space"
+         | - **none**: "conditioned space"
+         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
          | - **hydronic**: same default logic as :ref:`waterheatingsystems`
-         | - **dse**: "living space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         | - **dse**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
@@ -2214,10 +2214,10 @@ Additional information is entered in each ``Ducts``.
          Fully buried ducts have insulation that just covers the top of the ducts.
          Deeply buried ducts have insulation that continues above the top of the ducts.
          See the `Building America Solution Center <https://basc.pnnl.gov/resource-guides/ducts-buried-attic-insulation>`_ for more information.
-  .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home belly".
+  .. [#] DuctLocation choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home belly".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
-         If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
+  .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "conditioned space".
+         If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "conditioned space".
   .. [#] The sum of all ``FractionDuctArea`` must each equal to 1, both for the supply side and return side.
   .. [#] FractionDuctArea or DuctSurfaceArea are required if DuctLocation is provided.
          If both are provided, DuctSurfaceArea will be used in the model.
@@ -2493,11 +2493,11 @@ If not entered, the simulation will not include water heating.
   =========================  =======  =======  ===========  ========  ========  ================================================================
 
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
-  .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] | If Location not provided, defaults to the first present space type:
-         | - **IECC zones 1-3, excluding 3A**: "garage", "living space"
-         | - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "living space"
+         | - **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         | - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -2907,7 +2907,7 @@ If not entered, the simulation will not include batteries.
   ``RoundTripEfficiency``                               double   frac       0 - 1                    No        0.925     Round trip efficiency
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] If Location not provided, defaults to "garage" if a garage is present, otherwise "outside".
   .. [#] BatteryType only choice is "Li-ion".
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.9 if UsableCapacity provided, else (RatedPowerOutput / 1000) / 0.5 if RatedPowerOutput provided, else 10 kWh.
@@ -2959,22 +2959,22 @@ HPXML Clothes Washer
 A single clothes washer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesWasher``.
 If not entered, the simulation will not include a clothes washer.
 
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
-  Element                                                                 Type     Units        Constraints  Required  Default       Notes
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
-  ``SystemIdentifier``                                                    id                                 Yes                     Unique identifier
-  ``IsSharedAppliance``                                                   boolean                            No        false         Whether it serves multiple dwelling units [#]_
-  ``Location``                                                            string                See [#]_     No        living space  Location
-  ``IntegratedModifiedEnergyFactor`` or ``ModifiedEnergyFactor``          double   ft3/kWh/cyc  > 0          No        See [#]_      Efficiency [#]_
-  ``AttachedToWaterHeatingSystem`` or ``AttachedToHotWaterDistribution``  idref                 See [#]_     See [#]_                ID of attached water heater or distribution system
-  ``extension/UsageMultiplier``                                           double                >= 0         No        1.0           Multiplier on energy & hot water usage
-  ``extension/WeekdayScheduleFractions``                                  array                              No        See [#]_      24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``                                  array                              No                      24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``                                array                              No        See [#]_      12 comma-separated monthly multipliers
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
+  Element                                                                 Type     Units        Constraints  Required  Default            Notes
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
+  ``SystemIdentifier``                                                    id                                 Yes                          Unique identifier
+  ``IsSharedAppliance``                                                   boolean                            No        false              Whether it serves multiple dwelling units [#]_
+  ``Location``                                                            string                See [#]_     No        conditioned space  Location
+  ``IntegratedModifiedEnergyFactor`` or ``ModifiedEnergyFactor``          double   ft3/kWh/cyc  > 0          No        See [#]_           Efficiency [#]_
+  ``AttachedToWaterHeatingSystem`` or ``AttachedToHotWaterDistribution``  idref                 See [#]_     See [#]_                     ID of attached water heater or distribution system
+  ``extension/UsageMultiplier``                                           double                >= 0         No        1.0                Multiplier on energy & hot water usage
+  ``extension/WeekdayScheduleFractions``                                  array                              No        See [#]_           24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``                                  array                              No                           24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``                                array                              No        See [#]_           12 comma-separated monthly multipliers
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
 
   .. [#] For example, a clothes washer in a shared laundry room of a MF building.
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If neither IntegratedModifiedEnergyFactor nor ModifiedEnergyFactor provided, the following default values representing a standard clothes washer from 2006 will be used:
          IntegratedModifiedEnergyFactor = 1.0,
@@ -3013,24 +3013,24 @@ HPXML Clothes Dryer
 A single clothes dryer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesDryer``.
 If not entered, the simulation will not include a clothes dryer.
 
-  ============================================  =======  ======  ===========  ========  ============  ==============================================
-  Element                                       Type     Units   Constraints  Required  Default       Notes
-  ============================================  =======  ======  ===========  ========  ============  ==============================================
-  ``SystemIdentifier``                          id                            Yes                     Unique identifier
-  ``IsSharedAppliance``                         boolean                       No        false         Whether it serves multiple dwelling units [#]_
-  ``Location``                                  string           See [#]_     No        living space  Location
-  ``FuelType``                                  string           See [#]_     Yes                     Fuel type
-  ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_      Efficiency [#]_
-  ``Vented``                                    boolean                       No        true          Whether dryer is vented
-  ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_      Exhaust flow rate during operation
-  ``extension/UsageMultiplier``                 double           >= 0         No        1.0           Multiplier on energy use
-  ``extension/WeekdayScheduleFractions``        array                         No        See [#]_      24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``        array                         No                      24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``      array                         No        See [#]_      12 comma-separated monthly multipliers
-  ============================================  =======  ======  ===========  ========  ============  ==============================================
+  ============================================  =======  ======  ===========  ========  =================  ==============================================
+  Element                                       Type     Units   Constraints  Required  Default            Notes
+  ============================================  =======  ======  ===========  ========  =================  ==============================================
+  ``SystemIdentifier``                          id                            Yes                          Unique identifier
+  ``IsSharedAppliance``                         boolean                       No        false              Whether it serves multiple dwelling units [#]_
+  ``Location``                                  string           See [#]_     No        conditioned space  Location
+  ``FuelType``                                  string           See [#]_     Yes                          Fuel type
+  ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_           Efficiency [#]_
+  ``Vented``                                    boolean                       No        true               Whether dryer is vented
+  ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_           Exhaust flow rate during operation
+  ``extension/UsageMultiplier``                 double           >= 0         No        1.0                Multiplier on energy use
+  ``extension/WeekdayScheduleFractions``        array                         No        See [#]_           24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``        array                         No                           24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``      array                         No        See [#]_           12 comma-separated monthly multipliers
+  ============================================  =======  ======  ===========  ========  =================  ==============================================
 
   .. [#] For example, a clothes dryer in a shared laundry room of a MF building.
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If neither CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
@@ -3050,22 +3050,22 @@ HPXML Dishwasher
 A single dishwasher can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dishwasher``.
 If not entered, the simulation will not include a dishwasher.
 
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
-  Element                                                                 Type     Units        Constraints  Required  Default       Notes
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
-  ``SystemIdentifier``                                                    id                                 Yes                     Unique identifier
-  ``IsSharedAppliance``                                                   boolean                            No        false         Whether it serves multiple dwelling units [#]_
-  ``Location``                                                            string                See [#]_     No        living space  Location
-  ``RatedAnnualkWh`` or ``EnergyFactor``                                  double   kWh/yr or #  > 0          No        See [#]_      EnergyGuide label consumption/efficiency [#]_
-  ``AttachedToWaterHeatingSystem`` or ``AttachedToHotWaterDistribution``  idref                 See [#]_     See [#]_                ID of attached water heater or distribution system
-  ``extension/UsageMultiplier``                                           double                >= 0         No        1.0           Multiplier on energy & hot water usage
-  ``extension/WeekdayScheduleFractions``                                  array                              No        See [#]_      24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``                                  array                              No                      24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``                                array                              No        See [#]_      12 comma-separated monthly multipliers
-  ======================================================================  =======  ===========  ===========  ========  ============  ==============================================
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
+  Element                                                                 Type     Units        Constraints  Required  Default            Notes
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
+  ``SystemIdentifier``                                                    id                                 Yes                          Unique identifier
+  ``IsSharedAppliance``                                                   boolean                            No        false              Whether it serves multiple dwelling units [#]_
+  ``Location``                                                            string                See [#]_     No        conditioned space  Location
+  ``RatedAnnualkWh`` or ``EnergyFactor``                                  double   kWh/yr or #  > 0          No        See [#]_           EnergyGuide label consumption/efficiency [#]_
+  ``AttachedToWaterHeatingSystem`` or ``AttachedToHotWaterDistribution``  idref                 See [#]_     See [#]_                     ID of attached water heater or distribution system
+  ``extension/UsageMultiplier``                                           double                >= 0         No        1.0                Multiplier on energy & hot water usage
+  ``extension/WeekdayScheduleFractions``                                  array                              No        See [#]_           24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``                                  array                              No                           24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``                                array                              No        See [#]_           12 comma-separated monthly multipliers
+  ======================================================================  =======  ===========  ===========  ========  =================  ==============================================
 
   .. [#] For example, a dishwasher in a shared mechanical room of a MF building.
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If neither RatedAnnualkWh nor EnergyFactor provided, the following default values representing a standard dishwasher from 2006 will be used:
          RatedAnnualkWh = 467,
@@ -3114,10 +3114,10 @@ If not entered, the simulation will not include a refrigerator.
   ``extension/MonthlyScheduleMultipliers``               array                         No        See [#]_  12 comma-separated monthly multipliers
   =====================================================  =======  ======  ===========  ========  ========  ======================================
 
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided and is the *primary* refrigerator, defaults to "living space".
-         If Location not provided and is a *secondary* refrigerator, defaults to the first present space type: "garage", "basement - unconditioned", "basement - conditioned", or "living space".
+  .. [#] If Location not provided and is the *primary* refrigerator, defaults to "conditioned space".
+         If Location not provided and is a *secondary* refrigerator, defaults to the first present space type: "garage", "basement - unconditioned", "basement - conditioned", or "conditioned space".
   .. [#] If RatedAnnualkWh not provided, it will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          RatedAnnualkWh = 637.0 + 18.0 * NumberofBedrooms.
   .. [#] If multiple refrigerators are specified, there must be exactly one refrigerator described with PrimaryIndicator=true.
@@ -3146,9 +3146,9 @@ If not entered, the simulation will not include a standalone freezer.
   ``extension/MonthlyScheduleMultipliers``               array                        No        See [#]_    12 comma-separated monthly multipliers
   =====================================================  ======  ======  ===========  ========  ==========  ======================================
 
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided, defaults to "garage" if present, otherwise "basement - unconditioned" if present, otherwise "basement - conditioned" if present, otherwise "living space".
+  .. [#] If Location not provided, defaults to "garage" if present, otherwise "basement - unconditioned" if present, otherwise "basement - conditioned" if present, otherwise "conditioned space".
   .. [#] RatedAnnualkWh default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
@@ -3176,14 +3176,14 @@ If not entered, the simulation will not include a dehumidifier.
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   
   .. [#] Type choices are "portable" or "whole-home".
-  .. [#] Location only choice is "living space".
+  .. [#] Location only choice is "conditioned space".
   .. [#] If multiple dehumidifiers are entered, they must all have the same setpoint or an error will be generated.
   .. [#] The sum of all ``FractionDehumidificationLoadServed`` (across all Dehumidifiers) must be less than or equal to 1.
 
 .. note::
 
   Dehumidifiers are currently modeled as located within conditioned space; the model is not suited for a dehumidifier in, e.g., a wet unconditioned basement or crawlspace.
-  Therefore the dehumidifier Location is currently restricted to "living space".
+  Therefore the dehumidifier Location is currently restricted to "conditioned space".
 
 HPXML Cooking Range/Oven
 ************************
@@ -3191,20 +3191,20 @@ HPXML Cooking Range/Oven
 A single cooking range can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/CookingRange``.
 If not entered, the simulation will not include a cooking range/oven.
 
-  ========================================  =======  ======  ===========  ========  ============  ======================================
-  Element                                   Type     Units   Constraints  Required  Default       Notes
-  ========================================  =======  ======  ===========  ========  ============  ======================================
-  ``SystemIdentifier``                      id                            Yes                     Unique identifier
-  ``Location``                              string           See [#]_     No        living space  Location
-  ``FuelType``                              string           See [#]_     Yes                     Fuel type
-  ``IsInduction``                           boolean                       No        false         Induction range?
-  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on energy use
-  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_      24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``    array                         No                      24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_      12 comma-separated monthly multipliers
-  ========================================  =======  ======  ===========  ========  ============  ======================================
+  ========================================  =======  ======  ===========  ========  =================  ======================================
+  Element                                   Type     Units   Constraints  Required  Default            Notes
+  ========================================  =======  ======  ===========  ========  =================  ======================================
+  ``SystemIdentifier``                      id                            Yes                          Unique identifier
+  ``Location``                              string           See [#]_     No        conditioned space  Location
+  ``FuelType``                              string           See [#]_     Yes                          Fuel type
+  ``IsInduction``                           boolean                       No        false              Induction range?
+  ``extension/UsageMultiplier``             double           >= 0         No        1.0                Multiplier on energy use
+  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_           24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``    array                         No                           24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_           12 comma-separated monthly multipliers
+  ========================================  =======  ======  ===========  ========  =================  ======================================
 
-  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 22 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011".
@@ -3587,31 +3587,31 @@ HPXML Locations
 
 The various locations used in an HPXML file are defined as follows:
 
-  ==============================  =======================================================  =======================================  =================
-  Value                           Description                                              Temperature                              Building Type
-  ==============================  =======================================================  =======================================  =================
-  outside                         Ambient environment                                      Weather data                             Any
-  ground                                                                                   EnergyPlus calculation                   Any
-  living space                    Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
-  attic - vented                                                                           EnergyPlus calculation                   Any
-  attic - unvented                                                                         EnergyPlus calculation                   Any
-  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
-  basement - unconditioned                                                                 EnergyPlus calculation                   Any
-  crawlspace - vented                                                                      EnergyPlus calculation                   Any
-  crawlspace - unvented                                                                    EnergyPlus calculation                   Any
-  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
-  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                             Manufactured only
-  manufactured home belly         Within the belly                                         Same as living space                     Manufactured only              
-  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
-  other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only
-  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of living space/outside; min of 50F  SFA/MF only
-  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F      SFA/MF only
-  other exterior                  Water heater outside                                     Weather data                             Any
-  exterior wall                   Ducts in exterior wall                                   Avg of living space/outside              Any
-  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                   Any
-  roof deck                       Ducts on roof deck (outside)                             Weather data                             Any
-  ==============================  =======================================================  =======================================  =================
+  ==============================  =======================================================  ============================================  =================
+  Value                           Description                                              Temperature                                   Building Type
+  ==============================  =======================================================  ============================================  =================
+  outside                         Ambient environment                                      Weather data                                  Any
+  ground                                                                                   EnergyPlus calculation                        Any
+  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
+  attic - vented                                                                           EnergyPlus calculation                        Any
+  attic - unvented                                                                         EnergyPlus calculation                        Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
+  basement - unconditioned                                                                 EnergyPlus calculation                        Any
+  crawlspace - vented                                                                      EnergyPlus calculation                        Any
+  crawlspace - unvented                                                                    EnergyPlus calculation                        Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
+  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                        Any
+  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                  Manufactured only
+  manufactured home belly         Within the belly                                         Same as conditioned space                     Manufactured only              
+  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                     SFA/MF only
+  other heated space              E.g., shared laundry/equipment space                     Avg of conditioned space/outside; min of 68F  SFA/MF only
+  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of conditioned space/outside; min of 50F  SFA/MF only
+  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F           SFA/MF only
+  other exterior                  Water heater outside                                     Weather data                                  Any
+  exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside              Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                        Any
+  roof deck                       Ducts on roof deck (outside)                             Weather data                                  Any
+  ==============================  =======================================================  ============================================  =================
 
 Validating & Debugging Errors
 -----------------------------
