@@ -198,6 +198,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-garage-too-wide.xml' => 'base-sfd.xml',
       'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
+      'error-different-weather-station-epw.xml' => 'base-sfd.xml',
+      'error-different-window-natvent-availability.xml' => 'base-sfd.xml',
+      'error-same-utility-bill-scenario-name.xml' => 'base-sfd.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
@@ -252,7 +255,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-invalid-window-aspect-ratio.xml' => 'Window aspect ratio must be greater than zero.',
       'error-garage-too-wide.xml' => 'Garage is as wide as the single-family detached unit.',
       'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.',
-      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."
+      'error-vented-attic-with-zero-floor-insulation.xml' => "Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'.",
+      'error-different-weather-station-epw.xml' => 'MyBuilding: hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath=USA_CO_Denver.Intl.AP.725650_TMY3.epw; cannot set weather_station_epw_filepath=USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw.',
+      'error-different-window-natvent-availability.xml' => 'hpxml.header.natvent_days_per_week=3; cannot set window_natvent_availability=4.',
+      'error-same-utility-bill-scenario-name.xml' => "HPXML header already includes utility bill scenario 'Bills'."
     }
 
     expected_warnings = {
@@ -628,8 +634,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
       args['hot_tub_present'] = false
       args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
+      args['utility_bill_scenario_names'] = 'Bills'
     elsif ['base-sfd2.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['utility_bill_scenario_names'] = 'Bills2'
     elsif ['base-sfa.xml'].include? hpxml_file
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
@@ -646,8 +654,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     elsif ['base-sfa2.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
+      args['utility_bill_scenario_names'] = 'Bills2'
     elsif ['base-sfa3.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
+      args['utility_bill_scenario_names'] = 'Bills3'
     elsif ['base-mf.xml'].include? hpxml_file
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
       args['geometry_unit_cfa'] = 900.0
@@ -675,10 +685,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     elsif ['base-mf2.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
+      args['utility_bill_scenario_names'] = 'Bills2'
     elsif ['base-mf3.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
+      args['utility_bill_scenario_names'] = 'Bills3'
     elsif ['base-mf4.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
+      args['utility_bill_scenario_names'] = 'Bills4'
     end
 
     # Extras
@@ -1163,6 +1176,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_depth'] = 40
     elsif ['error-vented-attic-with-zero-floor-insulation.xml'].include? hpxml_file
       args['ceiling_assembly_r'] = 0
+    elsif ['error-different-weather-station-epw.xml'].include? hpxml_file
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['weather_station_epw_filepath'] = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
+    elsif ['error-different-window-natvent-availability.xml'].include? hpxml_file
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['window_natvent_availability'] = 4
+    elsif ['error-same-utility-bill-scenario-name.xml'].include? hpxml_file
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['utility_bill_scenario_names'] = 'Bills'
     end
 
     # Warning

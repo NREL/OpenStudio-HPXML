@@ -3396,6 +3396,10 @@ class HPXMLFile
 
     hpxml = HPXML.new(hpxml_path: existing_hpxml_path, building_id: 'ALL')
 
+    if not validate_arguments_against_existing_hpxml(runner, hpxml, args)
+      return false
+    end
+
     set_header(hpxml, args)
     hpxml_bldg = add_building(hpxml, args)
     set_site(hpxml_bldg, args)
@@ -3476,6 +3480,37 @@ class HPXMLFile
     end
 
     return hpxml_doc
+  end
+
+  def self.validate_arguments_against_existing_hpxml(runner, hpxml, args)
+    errors = []
+
+    if !hpxml.header.natvent_days_per_week.nil? && args[:window_natvent_availability].is_initialized && (hpxml.header.natvent_days_per_week != args[:window_natvent_availability].get)
+      errors << "hpxml.header.natvent_days_per_week=#{hpxml.header.natvent_days_per_week}; cannot set window_natvent_availability=#{args[:window_natvent_availability].get}."
+    end
+
+    if !hpxml.header.utility_bill_scenarios.empty? && args[:utility_bill_scenario_names].is_initialized
+      utility_bill_scenario_names = hpxml.header.utility_bill_scenarios.collect { |bill_scenario| bill_scenario.name }
+      bills_scenario_names = args[:utility_bill_scenario_names].get.split(',').map(&:strip)
+      bills_scenario_names.each do |bills_scenario_name|
+        if utility_bill_scenario_names.include?(bills_scenario_name)
+          errors << "HPXML header already includes utility bill scenario '#{bills_scenario_name}'."
+        end
+      end
+    end
+
+    hpxml.buildings.each do |hpxml_bldg|
+      if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath != args[:weather_station_epw_filepath]
+        errors << "#{hpxml_bldg.building_id}: hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath=#{hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath}; cannot set weather_station_epw_filepath=#{args[:weather_station_epw_filepath]}."
+      end
+    end
+
+    errors.each do |error|
+      runner.registerError(error)
+    end
+    return true if errors.empty?
+
+    return false
   end
 
   def self.validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
