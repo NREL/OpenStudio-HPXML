@@ -1618,7 +1618,7 @@ class Constructions
   end
 
   def self.apply_window_skylight_shading(model, window_or_skylight, index, shading_vertices, parent_surface, sub_surface, shading_group,
-                                         shading_schedules, shading_ems, name, hpxml_header)
+                                         shading_schedules, shading_ems, name, hpxml_header, hpxml_bldg)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
@@ -1636,13 +1636,13 @@ class Constructions
       # Determine transmittance values throughout the year
       trans_values = []
       num_days_in_year = Constants.NumDaysInYear(hpxml_header.sim_calendar_year)
-      if not hpxml_header.shading_summer_begin_month.nil?
+      if not hpxml_bldg.header.shading_summer_begin_month.nil?
         summer_start_day_num = Schedule.get_day_num_from_month_day(hpxml_header.sim_calendar_year,
-                                                                   hpxml_header.shading_summer_begin_month,
-                                                                   hpxml_header.shading_summer_begin_day)
+                                                                   hpxml_bldg.header.shading_summer_begin_month,
+                                                                   hpxml_bldg.header.shading_summer_begin_day)
         summer_end_day_num = Schedule.get_day_num_from_month_day(hpxml_header.sim_calendar_year,
-                                                                 hpxml_header.shading_summer_end_month,
-                                                                 hpxml_header.shading_summer_end_day)
+                                                                 hpxml_bldg.header.shading_summer_end_month,
+                                                                 hpxml_bldg.header.shading_summer_end_day)
         for i in 0..(num_days_in_year - 1)
           day_num = i + 1
           if summer_end_day_num >= summer_start_day_num

@@ -231,7 +231,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
 
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
-    hpxml.header.allow_increased_fixed_capacities = true
+    hpxml_bldg.header.allow_increased_fixed_capacities = true
   elsif ['base-misc-emissions.xml'].include? hpxml_file
     hpxml_bldg.egrid_region = 'Western'
     hpxml_bldg.egrid_subregion = 'RMPA'
@@ -1644,14 +1644,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
   end
   if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
-    hpxml.header.manualj_heating_design_temp = 0
-    hpxml.header.manualj_cooling_design_temp = 100
-    hpxml.header.manualj_heating_setpoint = 60
-    hpxml.header.manualj_cooling_setpoint = 80
-    hpxml.header.manualj_humidity_setpoint = 0.55
-    hpxml.header.manualj_internal_loads_sensible = 4000
-    hpxml.header.manualj_internal_loads_latent = 200
-    hpxml.header.manualj_num_occupants = 5
+    hpxml_bldg.header.manualj_heating_design_temp = 0
+    hpxml_bldg.header.manualj_cooling_design_temp = 100
+    hpxml_bldg.header.manualj_heating_setpoint = 60
+    hpxml_bldg.header.manualj_cooling_setpoint = 80
+    hpxml_bldg.header.manualj_humidity_setpoint = 0.55
+    hpxml_bldg.header.manualj_internal_loads_sensible = 4000
+    hpxml_bldg.header.manualj_internal_loads_latent = 200
+    hpxml_bldg.header.manualj_num_occupants = 5
   end
   if hpxml_file.include? 'heating-capacity-17f'
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction

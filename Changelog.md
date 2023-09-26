@@ -3,6 +3,14 @@
 __New Features__
 - **Breaking change**: Updates to newer proposed HPXML v4.0:
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
+- Allows simulating whole multifamily (MF) buildings, where each dwelling unit is described by a separate `Building` element.
+  - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
+  - Adds a `building_id` argument to the HPXMLtoOpenStudio, BuildResidentialHPXML, and BuildResidentialScheduleFile measures for whole MF HPXML files.
+  - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across MF dwelling units:
+    - `HVACSizingControl`
+    - `ShadingControl`
+    - `SchedulesFilePath`
+    - `NaturalVentilationAvailabilityDaysperWeek`
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - Adds "Peak Electricity: Annual Total (W)" output.
@@ -14,7 +22,6 @@ __New Features__
   - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
-- **Breaking change**: Replaces `SoftwareInfo/extension/SchedulesFilePath` with `BuildingSummary/extension/SchedulesFilePath`.
 
 __Bugfixes__
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.

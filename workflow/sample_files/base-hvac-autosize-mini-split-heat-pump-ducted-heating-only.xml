@@ -11,9 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <HVACSizingControl>
-        <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
-      </HVACSizingControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
@@ -54,6 +51,11 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <HVACSizingControl>
+            <HeatPumpSizingMethodology>HERS</HeatPumpSizingMethodology>
+          </HVACSizingControl>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>

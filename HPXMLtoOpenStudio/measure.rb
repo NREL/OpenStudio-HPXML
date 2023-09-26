@@ -1319,8 +1319,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
-        shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @hpxml_header)
+        shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group, shading_schedules,
+                                                                    shading_ems, Constants.ObjectNameWindowShade, @hpxml_header, @hpxml_bldg)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1397,8 +1397,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @hpxml_header)
+      shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group, shading_schedules,
+                                                                  shading_ems, Constants.ObjectNameSkylightShade, @hpxml_header, @hpxml_bldg)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')
