@@ -218,6 +218,7 @@ end
 
 def apply_hpxml_modification(hpxml_file, hpxml)
   # Set detailed HPXML values for sample files
+  hpxml_bldg = hpxml.buildings[0]
 
   # ------------ #
   # HPXML Header #
