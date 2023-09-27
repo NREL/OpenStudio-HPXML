@@ -157,8 +157,8 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Well Pump (MBtu)
    End Use: Electricity: Pool Heater (MBtu)
    End Use: Electricity: Pool Pump (MBtu)
-   End Use: Electricity: Hot Tub Heater (MBtu)
-   End Use: Electricity: Hot Tub Pump (MBtu)
+   End Use: Electricity: Permanent Spa Heater (MBtu)
+   End Use: Electricity: Permanent Spa Pump (MBtu)
    End Use: Electricity: PV (MBtu)                                   Negative value for any power produced
    End Use: Electricity: Generator (MBtu)                            Negative value for any power produced
    End Use: Electricity: Battery (MBtu)                              Positive value for charging (including efficiency losses); negative value for discharging
@@ -169,7 +169,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Natural Gas: Range/Oven (MBtu)
    End Use: Natural Gas: Mech Vent Preheating (MBtu)
    End Use: Natural Gas: Pool Heater (MBtu)
-   End Use: Natural Gas: Hot Tub Heater (MBtu)
+   End Use: Natural Gas: Permanent Spa Heater (MBtu)
    End Use: Natural Gas: Grill (MBtu)
    End Use: Natural Gas: Lighting (MBtu)
    End Use: Natural Gas: Fireplace (MBtu)

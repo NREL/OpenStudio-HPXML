@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='4.0'>
+<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
@@ -618,8 +618,8 @@
         <Pool>
           <SystemIdentifier id='Pool1'/>
           <Type>unknown</Type>
-          <PoolPumps>
-            <PoolPump>
+          <Pumps>
+            <Pump>
               <SystemIdentifier id='Pool1Pump'/>
               <Type>unknown</Type>
               <Load>
@@ -631,21 +631,21 @@
                 <WeekendScheduleFractions>0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003</WeekendScheduleFractions>
                 <MonthlyScheduleMultipliers>1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154</MonthlyScheduleMultipliers>
               </extension>
-            </PoolPump>
-          </PoolPumps>
+            </Pump>
+          </Pumps>
           <Heater>
             <SystemIdentifier id='Pool1Heater'/>
             <Type>none</Type>
           </Heater>
         </Pool>
       </Pools>
-      <HotTubs>
-        <HotTub>
-          <SystemIdentifier id='HotTub1'/>
+      <Spas>
+        <PermanentSpa>
+          <SystemIdentifier id='PermanentSpa1'/>
           <Type>unknown</Type>
-          <HotTubPumps>
-            <HotTubPump>
-              <SystemIdentifier id='HotTub1Pump'/>
+          <Pumps>
+            <Pump>
+              <SystemIdentifier id='PermanentSpa1Pump'/>
               <Type>unknown</Type>
               <Load>
                 <Units>kWh/year</Units>
@@ -656,10 +656,10 @@
                 <WeekendScheduleFractions>0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024</WeekendScheduleFractions>
                 <MonthlyScheduleMultipliers>0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837</MonthlyScheduleMultipliers>
               </extension>
-            </HotTubPump>
-          </HotTubPumps>
+            </Pump>
+          </Pumps>
           <Heater>
-            <SystemIdentifier id='HotTub1Heater'/>
+            <SystemIdentifier id='PermanentSpa1Heater'/>
             <Type>heat pump</Type>
             <Load>
               <Units>kWh/year</Units>
@@ -671,8 +671,8 @@
               <MonthlyScheduleMultipliers>0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921</MonthlyScheduleMultipliers>
             </extension>
           </Heater>
-        </HotTub>
-      </HotTubs>
+        </PermanentSpa>
+      </Spas>
       <MiscLoads>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
