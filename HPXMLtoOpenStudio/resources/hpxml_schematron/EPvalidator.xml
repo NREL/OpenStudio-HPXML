@@ -289,6 +289,15 @@
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="interior"]) = 0'>No interior lighting specified, the model will not include interior lighting energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="exterior"]) = 0'>No exterior lighting specified, the model will not include exterior lighting energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="garage"]) = 0 and count(h:Enclosure/h:Walls/h:Wall[h:InteriorAdjacentTo="garage" or h:ExteriorAdjacentTo="garage"]) &gt; 0'>No garage lighting specified, the model will not include garage lighting energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="sauna"]]) &gt; 0'>Plug load type 'sauna' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="aquarium"]]) &gt; 0'>Plug load type 'aquarium' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="water bed"]]) &gt; 0'>Plug load type 'water bed' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="space heater"]]) &gt; 0'>Plug load type 'space heater' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="computer"]]) &gt; 0'>Plug load type 'computer' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV CRT"]]) &gt; 0'>Plug load type 'TV CRT' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV plasma"]]) &gt; 0'>Plug load type 'TV plasma' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="other"]]) &gt; 0'>Fuel load type 'other' is not currently handled, the fuel load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:Spas/h:PortableSpa) &gt; 0'>Portable spa is not currently handled, the portable spa will not be modeled.</sch:report>
     </sch:rule>
   </sch:pattern>  
   
