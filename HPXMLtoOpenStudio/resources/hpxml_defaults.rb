@@ -17,11 +17,12 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
-    apply_header(hpxml.header, epw_file, weather)
-    apply_header_sizing(hpxml.header, hpxml_bldg, weather, nbeds)
-    apply_building(hpxml_bldg, epw_file)
+    apply_header(hpxml.header, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
+    apply_building(hpxml_bldg, epw_file)
+    apply_building_header(hpxml.header, hpxml_bldg, weather)
+    apply_building_header_sizing(hpxml_bldg, weather, nbeds)
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
@@ -62,7 +63,7 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(hpxml.header, hpxml_bldg, weather, cfa)
+    apply_hvac_sizing(hpxml_bldg, weather, cfa)
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -103,7 +104,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml_header, epw_file, weather)
+  def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -142,11 +143,6 @@ class HPXMLDefaults
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
-    if hpxml_header.natvent_days_per_week.nil?
-      hpxml_header.natvent_days_per_week = 3
-      hpxml_header.natvent_days_per_week_isdefaulted = true
-    end
-
     hpxml_header.unavailable_periods.each do |unavailable_period|
       if unavailable_period.begin_hour.nil?
         unavailable_period.begin_hour = 0
@@ -161,82 +157,89 @@ class HPXMLDefaults
         unavailable_period.natvent_availability_isdefaulted = true
       end
     end
+  end
 
-    if hpxml_header.shading_summer_begin_month.nil? || hpxml_header.shading_summer_begin_day.nil? || hpxml_header.shading_summer_end_month.nil? || hpxml_header.shading_summer_end_day.nil?
-      if not weather.nil?
-        # Default based on Building America seasons
-        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
-        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, sim_calendar_year)
-        if not begin_month.nil? # Check if no summer
-          hpxml_header.shading_summer_begin_month = begin_month
-          hpxml_header.shading_summer_begin_day = begin_day
-          hpxml_header.shading_summer_end_month = end_month
-          hpxml_header.shading_summer_end_day = end_day
-          hpxml_header.shading_summer_begin_month_isdefaulted = true
-          hpxml_header.shading_summer_begin_day_isdefaulted = true
-          hpxml_header.shading_summer_end_month_isdefaulted = true
-          hpxml_header.shading_summer_end_day_isdefaulted = true
-        end
+  def self.apply_building_header_sizing(hpxml_bldg, weather, nbeds)
+    if hpxml_bldg.header.manualj_heating_design_temp.nil?
+      hpxml_bldg.header.manualj_heating_design_temp = weather.design.HeatingDrybulb.round(2)
+      hpxml_bldg.header.manualj_heating_design_temp_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_cooling_design_temp.nil?
+      hpxml_bldg.header.manualj_cooling_design_temp = weather.design.CoolingDrybulb.round(2)
+      hpxml_bldg.header.manualj_cooling_design_temp_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_heating_setpoint.nil?
+      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_heating_setpoint_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_cooling_setpoint.nil?
+      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_cooling_setpoint_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_humidity_setpoint.nil?
+      hpxml_bldg.header.manualj_humidity_setpoint = 0.5 # 50%
+      if hpxml_bldg.dehumidifiers.size > 0
+        hpxml_bldg.header.manualj_humidity_setpoint = [hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.dehumidifiers[0].rh_setpoint].min
       end
+      hpxml_bldg.header.manualj_humidity_setpoint_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_internal_loads_sensible.nil?
+      if hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
+        hpxml_bldg.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
+      else
+        hpxml_bldg.header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
+      end
+      hpxml_bldg.header.manualj_internal_loads_sensible_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_internal_loads_latent.nil?
+      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    end
+
+    if hpxml_bldg.header.manualj_num_occupants.nil?
+      hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
     end
   end
 
-  def self.apply_header_sizing(hpxml_header, hpxml_bldg, weather, nbeds)
-    if hpxml_header.allow_increased_fixed_capacities.nil?
-      hpxml_header.allow_increased_fixed_capacities = false
-      hpxml_header.allow_increased_fixed_capacities_isdefaulted = true
+  def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
+    if hpxml_bldg.header.natvent_days_per_week.nil?
+      hpxml_bldg.header.natvent_days_per_week = 3
+      hpxml_bldg.header.natvent_days_per_week_isdefaulted = true
     end
 
-    if hpxml_header.heat_pump_sizing_methodology.nil? && (hpxml_bldg.heat_pumps.size > 0)
-      hpxml_header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingHERS
-      hpxml_header.heat_pump_sizing_methodology_isdefaulted = true
+    if hpxml_bldg.header.heat_pump_sizing_methodology.nil? && (hpxml_bldg.heat_pumps.size > 0)
+      hpxml_bldg.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingHERS
+      hpxml_bldg.header.heat_pump_sizing_methodology_isdefaulted = true
     end
 
-    if hpxml_header.manualj_heating_design_temp.nil?
-      hpxml_header.manualj_heating_design_temp = weather.design.HeatingDrybulb.round(2)
-      hpxml_header.manualj_heating_design_temp_isdefaulted = true
+    if hpxml_bldg.header.allow_increased_fixed_capacities.nil?
+      hpxml_bldg.header.allow_increased_fixed_capacities = false
+      hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
     end
 
-    if hpxml_header.manualj_cooling_design_temp.nil?
-      hpxml_header.manualj_cooling_design_temp = weather.design.CoolingDrybulb.round(2)
-      hpxml_header.manualj_cooling_design_temp_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_heating_setpoint.nil?
-      hpxml_header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
-      hpxml_header.manualj_heating_setpoint_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_cooling_setpoint.nil?
-      hpxml_header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
-      hpxml_header.manualj_cooling_setpoint_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_humidity_setpoint.nil?
-      hpxml_header.manualj_humidity_setpoint = 0.5 # 50%
-      if hpxml_bldg.dehumidifiers.size > 0
-        hpxml_header.manualj_humidity_setpoint = [hpxml_header.manualj_humidity_setpoint, hpxml_bldg.dehumidifiers[0].rh_setpoint].min
+    if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
+      if not weather.nil?
+        # Default based on Building America seasons
+        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
+        if not begin_month.nil? # Check if no summer
+          hpxml_bldg.header.shading_summer_begin_month = begin_month
+          hpxml_bldg.header.shading_summer_begin_day = begin_day
+          hpxml_bldg.header.shading_summer_end_month = end_month
+          hpxml_bldg.header.shading_summer_end_day = end_day
+          hpxml_bldg.header.shading_summer_begin_month_isdefaulted = true
+          hpxml_bldg.header.shading_summer_begin_day_isdefaulted = true
+          hpxml_bldg.header.shading_summer_end_month_isdefaulted = true
+          hpxml_bldg.header.shading_summer_end_day_isdefaulted = true
+        end
       end
-      hpxml_header.manualj_humidity_setpoint_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_internal_loads_sensible.nil?
-      if hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
-        hpxml_header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
-      else
-        hpxml_header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
-      end
-      hpxml_header.manualj_internal_loads_sensible_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_internal_loads_latent.nil?
-      hpxml_header.manualj_internal_loads_latent = 0.0 # Btuh
-      hpxml_header.manualj_internal_loads_latent_isdefaulted = true
-    end
-
-    if hpxml_header.manualj_num_occupants.nil?
-      hpxml_header.manualj_num_occupants = nbeds + 1 # Per Manual J
-      hpxml_header.manualj_num_occupants_isdefaulted = true
     end
   end
 
@@ -2815,11 +2818,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(hpxml_header, hpxml_bldg, weather, cfa)
+  def self.apply_hvac_sizing(hpxml_bldg, weather, cfa)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
 
     # Calculate building design loads and equipment capacities/airflows
-    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml_header, hpxml_bldg, cfa, hvac_systems)
+    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml_bldg, cfa, hvac_systems)
 
     hvacpl = hpxml_bldg.hvac_plant
     tol = 10 # Btuh

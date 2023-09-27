@@ -383,7 +383,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].location = HPXML::LocationBasementUnconditioned
       elsif ['hvac-sizing-humidity-setpoint'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml.header.manualj_humidity_setpoint = 50
+        hpxml_bldg.header.manualj_humidity_setpoint = 50
       elsif ['hvac-negative-crankcase-heater-watts'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.cooling_systems[0].crankcase_heater_watts = -10
@@ -492,10 +492,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       elsif ['invalid-natvent-availability'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml.header.natvent_days_per_week = 8
+        hpxml_bldg.header.natvent_days_per_week = 8
       elsif ['invalid-natvent-availability2'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml.header.natvent_days_per_week = -1
+        hpxml_bldg.header.natvent_days_per_week = -1
       elsif ['invalid-number-of-bedrooms-served'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-pv.xml')
         hpxml_bldg.pv_systems[0].number_of_bedrooms_served = 3
@@ -1081,11 +1081,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.header.sim_end_month = 4
         hpxml.header.sim_end_day = 31
       elsif ['invalid-shading-season'].include? error_case
-        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
-        hpxml.header.shading_summer_begin_month = 3
-        hpxml.header.shading_summer_begin_day = 10
-        hpxml.header.shading_summer_end_month = 4
-        hpxml.header.shading_summer_end_day = 31
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.header.shading_summer_begin_month = 3
+        hpxml_bldg.header.shading_summer_begin_day = 10
+        hpxml_bldg.header.shading_summer_end_month = 4
+        hpxml_bldg.header.shading_summer_end_day = 31
       elsif ['invalid-unavailable-period'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.unavailable_periods.add(column_name: 'Power Outage',

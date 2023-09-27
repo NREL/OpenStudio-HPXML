@@ -112,7 +112,7 @@ class Airflow
     living_ach50 *= a_ext unless living_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
 
-    apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_header.natvent_days_per_week,
+    apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_bldg.header.natvent_days_per_week,
                                                   infil_volume, infil_height, unavailable_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml_bldg.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             has_flue_chimney_in_cond_space, living_ach50, living_const_ach, infil_volume, infil_height,

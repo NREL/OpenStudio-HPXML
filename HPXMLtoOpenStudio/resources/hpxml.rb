@@ -613,15 +613,10 @@ class HPXML < Object
       super(hpxml_object, *args)
     end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction, :software_program_used,
-             :software_program_version, :eri_calculation_version, :co2index_calculation_version, :timestep,
+             :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
-             :heat_pump_sizing_methodology, :allow_increased_fixed_capacities, :apply_ashrae140_assumptions,
-             :energystar_calculation_version, :extension_properties, :iecc_eri_calculation_version,
-             :zerh_calculation_version, :temperature_capacitance_multiplier, :natvent_days_per_week,
-             :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
-             :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
-             :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
-             :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants]
+             :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
+             :iecc_eri_calculation_version, :zerh_calculation_version]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -644,7 +639,6 @@ class HPXML < Object
         end
       end
 
-      errors += HPXML::check_dates('Shading Summer Season', @shading_summer_begin_month, @shading_summer_begin_day, @shading_summer_end_month, @shading_summer_end_day)
       errors += @emissions_scenarios.check_for_errors
       errors += @utility_bill_scenarios.check_for_errors
       errors += @unavailable_periods.check_for_errors
@@ -692,36 +686,6 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'CalendarYear', @sim_calendar_year, :integer, @sim_calendar_year_isdefaulted) unless @sim_calendar_year.nil?
         XMLHelper.add_element(simulation_control, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
       end
-      if (not @heat_pump_sizing_methodology.nil?) || (not @allow_increased_fixed_capacities.nil?)
-        hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'HVACSizingControl'])
-        XMLHelper.add_element(hvac_sizing_control, 'HeatPumpSizingMethodology', @heat_pump_sizing_methodology, :string, @heat_pump_sizing_methodology_isdefaulted) unless @heat_pump_sizing_methodology.nil?
-        XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
-      end
-      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?)
-        manualj_sizing_inputs = XMLHelper.create_elements_as_needed(software_info, ['extension', 'HVACSizingControl', 'ManualJInputs'])
-        XMLHelper.add_element(manualj_sizing_inputs, 'HeatingDesignTemperature', @manualj_heating_design_temp, :float, @manualj_heating_design_temp_isdefaulted) unless @manualj_heating_design_temp.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'CoolingDesignTemperature', @manualj_cooling_design_temp, :float, @manualj_cooling_design_temp_isdefaulted) unless @manualj_cooling_design_temp.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'HeatingSetpoint', @manualj_heating_setpoint, :float, @manualj_heating_setpoint_isdefaulted) unless @manualj_heating_setpoint.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'CoolingSetpoint', @manualj_cooling_setpoint, :float, @manualj_cooling_setpoint_isdefaulted) unless @manualj_cooling_setpoint.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'HumiditySetpoint', @manualj_humidity_setpoint, :float, @manualj_humidity_setpoint_isdefaulted) unless @manualj_humidity_setpoint.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
-        XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
-      end
-      XMLHelper.add_extension(software_info, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
-      if (not @shading_summer_begin_month.nil?) || (not @shading_summer_begin_day.nil?) || (not @shading_summer_end_month.nil?) || (not @shading_summer_end_day.nil?)
-        window_shading_season = XMLHelper.create_elements_as_needed(software_info, ['extension', 'ShadingControl'])
-        XMLHelper.add_element(window_shading_season, 'SummerBeginMonth', @shading_summer_begin_month, :integer, @shading_summer_begin_month_isdefaulted) unless @shading_summer_begin_month.nil?
-        XMLHelper.add_element(window_shading_season, 'SummerBeginDayOfMonth', @shading_summer_begin_day, :integer, @shading_summer_begin_day_isdefaulted) unless @shading_summer_begin_day.nil?
-        XMLHelper.add_element(window_shading_season, 'SummerEndMonth', @shading_summer_end_month, :integer, @shading_summer_end_month_isdefaulted) unless @shading_summer_end_month.nil?
-        XMLHelper.add_element(window_shading_season, 'SummerEndDayOfMonth', @shading_summer_end_day, :integer, @shading_summer_end_day_isdefaulted) unless @shading_summer_end_day.nil?
-      end
-      if (not @extension_properties.nil?) && (not @extension_properties.empty?)
-        properties = XMLHelper.create_elements_as_needed(software_info, ['extension', 'AdditionalProperties'])
-        @extension_properties.each do |key, value|
-          XMLHelper.add_element(properties, key, value, :string)
-        end
-      end
       @emissions_scenarios.to_doc(software_info)
       @utility_bill_scenarios.to_doc(software_info)
       @unavailable_periods.to_doc(software_info)
@@ -748,31 +712,7 @@ class HPXML < Object
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
-      @natvent_days_per_week = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
-      @shading_summer_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginMonth', :integer)
-      @shading_summer_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerBeginDayOfMonth', :integer)
-      @shading_summer_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerEndMonth', :integer)
-      @shading_summer_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ShadingControl/SummerEndDayOfMonth', :integer)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
-      @heat_pump_sizing_methodology = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/HeatPumpSizingMethodology', :string)
-      @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
-      @manualj_heating_design_temp = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/HeatingDesignTemperature', :float)
-      @manualj_cooling_design_temp = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/CoolingDesignTemperature', :float)
-      @manualj_heating_setpoint = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/HeatingSetpoint', :float)
-      @manualj_cooling_setpoint = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/CoolingSetpoint', :float)
-      @manualj_humidity_setpoint = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/HumiditySetpoint', :float)
-      @manualj_internal_loads_sensible = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
-      @manualj_internal_loads_latent = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
-      @manualj_num_occupants = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
-      @extension_properties = {}
-      XMLHelper.get_elements(hpxml, 'SoftwareInfo/extension/AdditionalProperties').each do |property|
-        property.children.each do |child|
-          next unless child.is_a? Oga::XML::Element
-
-          @extension_properties[child.name] = child.text
-          @extension_properties[child.name] = nil if @extension_properties[child.name].empty?
-        end
-      end
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @utility_bill_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @unavailable_periods.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
@@ -1082,6 +1022,7 @@ class HPXML < Object
     ATTRS = [:building_id, :site_id, :state_code, :zip_code, :time_zone_utc_offset, :egrid_region,
              :egrid_subregion, :cambium_region_gea, :dst_enabled, :dst_begin_month,
              :dst_begin_day, :dst_end_month, :dst_end_day, :event_type]
+
     attr_accessor(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -1906,22 +1847,57 @@ class HPXML < Object
   end
 
   class BuildingHeader < BaseElement
-    ATTRS = [:schedules_filepaths]
+    ATTRS = [:schedules_filepaths, :extension_properties, :natvent_days_per_week,
+             :heat_pump_sizing_methodology, :allow_increased_fixed_capacities,
+             :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
+             :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
+             :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
+             :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants]
     attr_accessor(*ATTRS)
 
     def check_for_errors
       errors = []
+      errors += HPXML::check_dates('Shading Summer Season', @shading_summer_begin_month, @shading_summer_begin_day, @shading_summer_end_month, @shading_summer_end_day)
       return errors
     end
 
     def to_doc(building)
       return if nil?
 
+      building_summary = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary'])
+      if (not @heat_pump_sizing_methodology.nil?) || (not @allow_increased_fixed_capacities.nil?)
+        hvac_sizing_control = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACSizingControl'])
+        XMLHelper.add_element(hvac_sizing_control, 'HeatPumpSizingMethodology', @heat_pump_sizing_methodology, :string, @heat_pump_sizing_methodology_isdefaulted) unless @heat_pump_sizing_methodology.nil?
+        XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
+      end
+      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?)
+        manualj_sizing_inputs = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACSizingControl', 'ManualJInputs'])
+        XMLHelper.add_element(manualj_sizing_inputs, 'HeatingDesignTemperature', @manualj_heating_design_temp, :float, @manualj_heating_design_temp_isdefaulted) unless @manualj_heating_design_temp.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'CoolingDesignTemperature', @manualj_cooling_design_temp, :float, @manualj_cooling_design_temp_isdefaulted) unless @manualj_cooling_design_temp.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'HeatingSetpoint', @manualj_heating_setpoint, :float, @manualj_heating_setpoint_isdefaulted) unless @manualj_heating_setpoint.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'CoolingSetpoint', @manualj_cooling_setpoint, :float, @manualj_cooling_setpoint_isdefaulted) unless @manualj_cooling_setpoint.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'HumiditySetpoint', @manualj_humidity_setpoint, :float, @manualj_humidity_setpoint_isdefaulted) unless @manualj_humidity_setpoint.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
+      end
+      XMLHelper.add_extension(building_summary, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
       if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
-        bldg_summary = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary'])
-        extension = XMLHelper.create_elements_as_needed(bldg_summary, ['extension'])
         @schedules_filepaths.each do |schedules_filepath|
-          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+          XMLHelper.add_extension(building_summary, 'SchedulesFilePath', schedules_filepath, :string)
+        end
+      end
+      if (not @shading_summer_begin_month.nil?) || (not @shading_summer_begin_day.nil?) || (not @shading_summer_end_month.nil?) || (not @shading_summer_end_day.nil?)
+        window_shading_season = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'ShadingControl'])
+        XMLHelper.add_element(window_shading_season, 'SummerBeginMonth', @shading_summer_begin_month, :integer, @shading_summer_begin_month_isdefaulted) unless @shading_summer_begin_month.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerBeginDayOfMonth', @shading_summer_begin_day, :integer, @shading_summer_begin_day_isdefaulted) unless @shading_summer_begin_day.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerEndMonth', @shading_summer_end_month, :integer, @shading_summer_end_month_isdefaulted) unless @shading_summer_end_month.nil?
+        XMLHelper.add_element(window_shading_season, 'SummerEndDayOfMonth', @shading_summer_end_day, :integer, @shading_summer_end_day_isdefaulted) unless @shading_summer_end_day.nil?
+      end
+      if (not @extension_properties.nil?) && (not @extension_properties.empty?)
+        properties = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'AdditionalProperties'])
+        @extension_properties.each do |key, value|
+          XMLHelper.add_element(properties, key, value, :string)
         end
       end
     end
@@ -1930,6 +1906,30 @@ class HPXML < Object
       return if building.nil?
 
       @schedules_filepaths = XMLHelper.get_values(building, 'BuildingDetails/BuildingSummary/extension/SchedulesFilePath', :string)
+      @natvent_days_per_week = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/NaturalVentilationAvailabilityDaysperWeek', :integer)
+      @shading_summer_begin_month = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/ShadingControl/SummerBeginMonth', :integer)
+      @shading_summer_begin_day = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/ShadingControl/SummerBeginDayOfMonth', :integer)
+      @shading_summer_end_month = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/ShadingControl/SummerEndMonth', :integer)
+      @shading_summer_end_day = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/ShadingControl/SummerEndDayOfMonth', :integer)
+      @heat_pump_sizing_methodology = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/HeatPumpSizingMethodology', :string)
+      @allow_increased_fixed_capacities = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
+      @manualj_heating_design_temp = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/HeatingDesignTemperature', :float)
+      @manualj_cooling_design_temp = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/CoolingDesignTemperature', :float)
+      @manualj_heating_setpoint = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/HeatingSetpoint', :float)
+      @manualj_cooling_setpoint = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/CoolingSetpoint', :float)
+      @manualj_humidity_setpoint = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/HumiditySetpoint', :float)
+      @manualj_internal_loads_sensible = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
+      @manualj_internal_loads_latent = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
+      @manualj_num_occupants = XMLHelper.get_value(building, 'BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
+      @extension_properties = {}
+      XMLHelper.get_elements(building, 'BuildingDetails/BuildingSummary/extension/AdditionalProperties').each do |property|
+        property.children.each do |child|
+          next unless child.is_a? Oga::XML::Element
+
+          @extension_properties[child.name] = child.text
+          @extension_properties[child.name] = nil if @extension_properties[child.name].empty?
+        end
+      end
     end
   end
 

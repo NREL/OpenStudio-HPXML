@@ -3605,10 +3605,6 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
 
-    if args[:window_natvent_availability].is_initialized
-      hpxml.header.natvent_days_per_week = args[:window_natvent_availability].get
-    end
-
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
       hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
@@ -3648,18 +3644,6 @@ class HPXMLFile
 
     if args[:simulation_control_temperature_capacitance_multiplier].is_initialized
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier].get
-    end
-
-    if args[:window_shading_summer_season].is_initialized
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:window_shading_summer_season].get)
-      hpxml.header.shading_summer_begin_month = begin_month
-      hpxml.header.shading_summer_begin_day = begin_day
-      hpxml.header.shading_summer_end_month = end_month
-      hpxml.header.shading_summer_end_day = end_day
-    end
-
-    if args[:heat_pump_sizing_methodology].is_initialized
-      hpxml.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
     end
 
     if args[:emissions_scenario_names].is_initialized
@@ -3894,16 +3878,6 @@ class HPXMLFile
                                                 pv_monthly_grid_connection_fee_dollars: pv_monthly_grid_connection_fee_dollars)
       end
     end
-
-    if args[:additional_properties].is_initialized
-      extension_properties = {}
-      additional_properties = args[:additional_properties].get.split('|').map(&:strip)
-      additional_properties.each do |additional_property|
-        key, value = additional_property.split('=').map(&:strip)
-        extension_properties[key] = value
-      end
-      hpxml.header.extension_properties = extension_properties
-    end
   end
 
   def self.add_building(hpxml, args)
@@ -4056,6 +4030,32 @@ class HPXMLFile
   def self.set_building_header(hpxml_bldg, args)
     if args[:schedules_filepaths].is_initialized
       hpxml_bldg.header.schedules_filepaths = args[:schedules_filepaths].get.split(',').map(&:strip)
+    end
+
+    if args[:heat_pump_sizing_methodology].is_initialized
+      hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
+    end
+
+    if args[:window_natvent_availability].is_initialized
+      hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability].get
+    end
+
+    if args[:window_shading_summer_season].is_initialized
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:window_shading_summer_season].get)
+      hpxml_bldg.header.shading_summer_begin_month = begin_month
+      hpxml_bldg.header.shading_summer_begin_day = begin_day
+      hpxml_bldg.header.shading_summer_end_month = end_month
+      hpxml_bldg.header.shading_summer_end_day = end_day
+    end
+
+    if args[:additional_properties].is_initialized
+      extension_properties = {}
+      additional_properties = args[:additional_properties].get.split('|').map(&:strip)
+      additional_properties.each do |additional_property|
+        key, value = additional_property.split('=').map(&:strip)
+        extension_properties[key] = value
+      end
+      hpxml_bldg.header.extension_properties = extension_properties
     end
   end
 
