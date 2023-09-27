@@ -3568,6 +3568,25 @@ class HPXMLFile
     return true
   end
 
+  def self.unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability = nil)
+    hpxml.header.unavailable_periods.each do |unavailable_period|
+      begin_hour = 0 if begin_hour.nil?
+      end_hour = 24 if end_hour.nil?
+
+      next unless (unavailable_period.column_name == column_name) &&
+                  (unavailable_period.begin_month == begin_month) &&
+                  (unavailable_period.begin_day == begin_day) &&
+                  (unavailable_period.begin_hour == begin_hour) &&
+                  (unavailable_period.end_month == end_month) &&
+                  (unavailable_period.end_day == end_day) &&
+                  (unavailable_period.end_hour == end_hour)
+      if unavailable_period.natvent_availability == natvent_availability
+        return true
+      end
+    end
+    return false
+  end
+
   def self.set_header(runner, hpxml, args)
     errors = []
 
@@ -3577,7 +3596,12 @@ class HPXMLFile
 
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
-      hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
+
+      natvent_availability = HPXML::ScheduleUnavailable
+
+      if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
+        hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+      end
     end
     if args[:schedules_power_outage_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_power_outage_period].get)
@@ -3586,7 +3610,9 @@ class HPXMLFile
         natvent_availability = args[:schedules_power_outage_window_natvent_availability].get
       end
 
-      hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+      if not unavailable_period_exists(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
+        hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+      end
     end
 
     if args[:software_info_program_used].is_initialized
@@ -3637,7 +3663,6 @@ class HPXMLFile
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier].get
     end
 
-    existing_emissions_scenario_names = hpxml.header.emissions_scenarios.collect { |emissions_scenario| emissions_scenario.name }
     if args[:emissions_scenario_names].is_initialized
       emissions_scenario_names = args[:emissions_scenario_names].get.split(',').map(&:strip)
       emissions_types = args[:emissions_types].get.split(',').map(&:strip)
@@ -3686,10 +3711,6 @@ class HPXMLFile
       emissions_scenarios.each do |emissions_scenario|
         name, emissions_type, elec_units, elec_value_or_schedule_filepath, elec_num_headers, elec_column_num, fuel_units, natural_gas_value, propane_value, fuel_oil_value, coal_value, wood_value, wood_pellets_value = emissions_scenario
 
-        if existing_emissions_scenario_names.include?(name)
-          errors << "HPXML header already includes an emissions scenario named '#{name}'."
-        end
-
         elec_value = Float(elec_value_or_schedule_filepath) rescue nil
         if elec_value.nil?
           elec_schedule_filepath = elec_value_or_schedule_filepath
@@ -3702,6 +3723,36 @@ class HPXMLFile
         coal_value = Float(coal_value) rescue nil
         wood_value = Float(wood_value) rescue nil
         wood_pellets_value = Float(wood_pellets_value) rescue nil
+
+        emissions_scenario_exists = false
+        hpxml.header.emissions_scenarios.each do |es|
+          next if es.name != name
+
+          if (!emissions_type.nil? && es.emissions_type != emissions_type) ||
+             (!wood_pellets_value.nil? && es.elec_units != elec_units) ||
+             (!elec_value.nil? && es.elec_value != elec_value) ||
+             (!elec_schedule_filepath.nil? && es.elec_schedule_filepath != elec_schedule_filepath) ||
+             (!elec_num_headers.nil? && es.elec_schedule_number_of_header_rows != elec_num_headers) ||
+             (!elec_column_num.nil? && es.elec_schedule_column_number != elec_column_num) ||
+             (!fuel_units.nil? && es.natural_gas_units != fuel_units) ||
+             (!natural_gas_value.nil? && es.natural_gas_value != natural_gas_value) ||
+             (!fuel_units.nil? && es.propane_units != fuel_units) ||
+             (!propane_value.nil? && es.propane_value != propane_value) ||
+             (!fuel_units.nil? && es.fuel_oil_units != fuel_units) ||
+             (!fuel_oil_value.nil? && es.fuel_oil_value != fuel_oil_value) ||
+             (!fuel_units.nil? && es.coal_units != fuel_units) ||
+             (!coal_value.nil? && es.coal_value != coal_value) ||
+             (!fuel_units.nil? && es.wood_units != fuel_units) ||
+             (!wood_value.nil? && es.wood_value != wood_value) ||
+             (!fuel_units.nil? && es.wood_pellets_units != fuel_units) ||
+             (!wood_pellets_value.nil? && es.wood_pellets_value != wood_pellets_value)
+            errors << "HPXML header already includes an emissions scenario named '#{name}'."
+          else
+            emissions_scenario_exists = true
+          end
+        end
+
+        next unless not emissions_scenario_exists
 
         hpxml.header.emissions_scenarios.add(name: name,
                                              emissions_type: emissions_type,
@@ -3725,7 +3776,6 @@ class HPXMLFile
       end
     end
 
-    existing_bill_scenario_names = hpxml.header.utility_bill_scenarios.collect { |bill_scenario| bill_scenario.name }
     if args[:utility_bill_scenario_names].is_initialized
       bills_scenario_names = args[:utility_bill_scenario_names].get.split(',').map(&:strip)
 
@@ -3818,10 +3868,6 @@ class HPXMLFile
       bills_scenarios.each do |bills_scenario|
         name, elec_tariff_filepath, elec_fixed_charge, natural_gas_fixed_charge, propane_fixed_charge, fuel_oil_fixed_charge, coal_fixed_charge, wood_fixed_charge, wood_pellets_fixed_charge, elec_marginal_rate, natural_gas_marginal_rate, propane_marginal_rate, fuel_oil_marginal_rate, coal_marginal_rate, wood_marginal_rate, wood_pellets_marginal_rate, pv_compensation_type, pv_net_metering_annual_excess_sellback_rate_type, pv_net_metering_annual_excess_sellback_rate, pv_feed_in_tariff_rate, pv_monthly_grid_connection_fee_unit, pv_monthly_grid_connection_fee = bills_scenario
 
-        if existing_bill_scenario_names.include?(name)
-          errors << "HPXML header already includes a utility bill scenario named '#{name}'."
-        end
-
         elec_tariff_filepath = (elec_tariff_filepath.to_s.include?('.') ? elec_tariff_filepath : nil)
         elec_fixed_charge = Float(elec_fixed_charge) rescue nil
         natural_gas_fixed_charge = Float(natural_gas_fixed_charge) rescue nil
@@ -3856,6 +3902,39 @@ class HPXMLFile
         elsif pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollars
           pv_monthly_grid_connection_fee_dollars = Float(pv_monthly_grid_connection_fee) rescue nil
         end
+
+        utility_bill_scenario_exists = false
+        hpxml.header.utility_bill_scenarios.each do |ubs|
+          next if ubs.name != name
+
+          if (!elec_tariff_filepath.nil? && ubs.elec_tariff_filepath != elec_tariff_filepath) ||
+             (!elec_fixed_charge.nil? && ubs.elec_fixed_charge != elec_fixed_charge) ||
+             (!natural_gas_fixed_charge.nil? && ubs.natural_gas_fixed_charge != natural_gas_fixed_charge) ||
+             (!propane_fixed_charge.nil? && ubs.propane_fixed_charge != propane_fixed_charge) ||
+             (!fuel_oil_fixed_charge.nil? && ubs.fuel_oil_fixed_charge != fuel_oil_fixed_charge) ||
+             (!coal_fixed_charge.nil? && ubs.coal_fixed_charge != coal_fixed_charge) ||
+             (!wood_fixed_charge.nil? && ubs.wood_fixed_charge != wood_fixed_charge) ||
+             (!wood_pellets_fixed_charge.nil? && ubs.wood_pellets_fixed_charge != wood_pellets_fixed_charge) ||
+             (!elec_marginal_rate.nil? && ubs.elec_marginal_rate != elec_marginal_rate) ||
+             (!natural_gas_marginal_rate.nil? && ubs.natural_gas_marginal_rate != natural_gas_marginal_rate) ||
+             (!propane_marginal_rate.nil? && ubs.propane_marginal_rate != propane_marginal_rate) ||
+             (!fuel_oil_marginal_rate.nil? && ubs.fuel_oil_marginal_rate != fuel_oil_marginal_rate) ||
+             (!coal_marginal_rate.nil? && ubs.coal_marginal_rate != coal_marginal_rate) ||
+             (!wood_marginal_rate.nil? && ubs.wood_marginal_rate != wood_marginal_rate) ||
+             (!wood_pellets_marginal_rate.nil? && ubs.wood_pellets_marginal_rate != wood_pellets_marginal_rate) ||
+             (!pv_compensation_type.nil? && ubs.pv_compensation_type != pv_compensation_type) ||
+             (!pv_net_metering_annual_excess_sellback_rate_type.nil? && ubs.pv_net_metering_annual_excess_sellback_rate_type != pv_net_metering_annual_excess_sellback_rate_type) ||
+             (!pv_net_metering_annual_excess_sellback_rate.nil? && ubs.pv_net_metering_annual_excess_sellback_rate != pv_net_metering_annual_excess_sellback_rate) ||
+             (!pv_feed_in_tariff_rate.nil? && ubs.pv_feed_in_tariff_rate != pv_feed_in_tariff_rate) ||
+             (!pv_monthly_grid_connection_fee_dollars_per_kw.nil? && ubs.pv_monthly_grid_connection_fee_dollars_per_kw != pv_monthly_grid_connection_fee_dollars_per_kw) ||
+             (!pv_monthly_grid_connection_fee_dollars.nil? && ubs.pv_monthly_grid_connection_fee_dollars != pv_monthly_grid_connection_fee_dollars)
+            errors << "HPXML header already includes a utility bill scenario named '#{name}'."
+          else
+            utility_bill_scenario_exists = true
+          end
+        end
+
+        next unless not utility_bill_scenario_exists
 
         hpxml.header.utility_bill_scenarios.add(name: name,
                                                 elec_tariff_filepath: elec_tariff_filepath,

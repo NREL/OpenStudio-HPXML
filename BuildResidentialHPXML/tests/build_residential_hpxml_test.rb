@@ -34,6 +34,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'base-mf4.xml' => 'base-mf.xml',
 
       'base-sfd-header.xml' => 'base-sfd.xml',
+      'base-sfd-header-no-duplicates.xml' => 'base-sfd-header.xml',
 
       # Extra files to test
       'extra-auto.xml' => 'base-sfd.xml',
@@ -696,6 +697,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['base-sfd-header.xml'].include? hpxml_file
       args['software_info_program_used'] = 'Program'
       args['software_info_program_version'] = '1'
+      args['schedules_vacancy_period'] = 'Jan 2 - Jan 5'
+      args['schedules_power_outage_period'] = 'Feb 10 - Feb 12'
+      args['schedules_power_outage_window_natvent_availability'] = HPXML::ScheduleAvailable
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
       args['simulation_control_run_period_calendar_year'] = 2007
       args['simulation_control_temperature_capacitance_multiplier'] = 1.0
@@ -704,6 +708,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['emissions_electricity_units'] = 'kg/MWh'
       args['emissions_electricity_values_or_filepaths'] = '1'
       args['utility_bill_scenario_names'] = 'Bills'
+    elsif ['base-sfd-header-no-duplicates.xml'].include? hpxml_file
+      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
     end
 
     # Extras
@@ -1204,10 +1210,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['utility_bill_scenario_names'] = 'Bills2'
     elsif ['error-same-emissions-scenario-name.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['utility_bill_scenario_names'] = 'Bills2'
+      args['emissions_types'] = 'CO2'
     elsif ['error-same-utility-bill-scenario-name.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['emissions_scenario_names'] = 'Emissions2'
+      args['utility_bill_electricity_fixed_charges'] = '13.0'
     end
 
     # Warning
