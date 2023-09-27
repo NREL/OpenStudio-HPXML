@@ -570,7 +570,7 @@ class HPXMLTest < Minitest::Test
       # FIXME: Double-check this. May be addressed by https://github.com/NREL/OpenStudio-HPXML/pull/1175?
       next if message.include?('The shading transmittance for shading devices may change throughout the year') && message.include?('Choose Shading Calculation Update Frequency Method = Timestep in the ShadowCalculation object to capture all shading impacts')
       # FIXME: Double-check this.
-      next if message.include? 'Multiple speed fan will be appiled to this unit. The speed number is determined by load.'
+      next if message.include? 'Multiple speed fan will be applied to this unit. The speed number is determined by load.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0

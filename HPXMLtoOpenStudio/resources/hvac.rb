@@ -70,8 +70,8 @@ class HVAC
         else
           htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
           htg_coil.setGasBurnerEfficiency(cooling_system.integrated_heating_system_efficiency_percent)
-          htg_coil.setParasiticElectricLoad(0)
-          htg_coil.setParasiticGasLoad(0)
+          htg_coil.setOnCycleParasiticElectricLoad(0)
+          htg_coil.setOffCycleParasiticGasLoad(0)
           htg_coil.setFuelType(EPlus.fuel_type(cooling_system.integrated_heating_system_fuel))
         end
         htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W'))
@@ -104,8 +104,8 @@ class HVAC
         else
           htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
           htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
-          htg_coil.setParasiticElectricLoad(0)
-          htg_coil.setParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
+          htg_coil.setOnCycleParasiticElectricLoad(0)
+          htg_coil.setOffCycleParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
           htg_coil.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
         end
         htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
@@ -657,8 +657,8 @@ class HVAC
     else
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_coil.setGasBurnerEfficiency(efficiency)
-      htg_coil.setParasiticElectricLoad(0.0)
-      htg_coil.setParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
+      htg_coil.setOnCycleParasiticElectricLoad(0.0)
+      htg_coil.setOffCycleParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
       htg_coil.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
     end
     htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
@@ -1648,8 +1648,8 @@ class HVAC
     else
       htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
-      htg_supp_coil.setParasiticElectricLoad(0)
-      htg_supp_coil.setParasiticGasLoad(0)
+      htg_supp_coil.setOnCycleParasiticElectricLoad(0)
+      htg_supp_coil.setOffCycleParasiticGasLoad(0)
       htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
