@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sch:schema xmlns:sch='http://purl.oclc.org/dsdl/schematron'>
   <sch:title>HPXML Schematron Validator: EnergyPlus Simulation</sch:title>
-  <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
+  <sch:ns uri='http://hpxmlonline.com/2023/09' prefix='h'/>
   
   <sch:pattern>
     <sch:title>[Root]</sch:title>
@@ -261,7 +261,7 @@
       <sch:assert role='ERROR' test='count(h:Lighting) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Lighting</sch:assert> <!-- See [Lighting] -->
       <sch:assert role='ERROR' test='count(h:Lighting/h:CeilingFan) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Lighting/CeilingFan</sch:assert> <!-- See [CeilingFan] -->
       <sch:assert role='ERROR' test='count(h:Pools/h:Pool) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pools/Pool</sch:assert> <!-- See [Pool] -->
-      <sch:assert role='ERROR' test='count(h:HotTubs/h:HotTub) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotTubs/HotTub</sch:assert> <!-- See [HotTub] -->
+      <sch:assert role='ERROR' test='count(h:Spas/h:PermanentSpa) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Spas/PermanentSpa</sch:assert> <!-- See [PermanentSpa] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) = 1'>Expected 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="other"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV other"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]</sch:assert> <!-- See [PlugLoad] -->
@@ -289,6 +289,15 @@
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="interior"]) = 0'>No interior lighting specified, the model will not include interior lighting energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="exterior"]) = 0'>No exterior lighting specified, the model will not include exterior lighting energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Lighting/h:LightingGroup[h:Location="garage"]) = 0 and count(h:Enclosure/h:Walls/h:Wall[h:InteriorAdjacentTo="garage" or h:ExteriorAdjacentTo="garage"]) &gt; 0'>No garage lighting specified, the model will not include garage lighting energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="sauna"]]) &gt; 0'>Plug load type 'sauna' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="aquarium"]]) &gt; 0'>Plug load type 'aquarium' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="water bed"]]) &gt; 0'>Plug load type 'water bed' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="space heater"]]) &gt; 0'>Plug load type 'space heater' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="computer"]]) &gt; 0'>Plug load type 'computer' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV CRT"]]) &gt; 0'>Plug load type 'TV CRT' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV plasma"]]) &gt; 0'>Plug load type 'TV plasma' is not currently handled, the plug load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="other"]]) &gt; 0'>Fuel load type 'other' is not currently handled, the fuel load will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:Spas/h:PortableSpa) &gt; 0'>Portable spa is not currently handled, the portable spa will not be modeled.</sch:report>
     </sch:rule>
   </sch:pattern>  
   
@@ -2123,14 +2132,14 @@
     <sch:title>[Pool]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool'>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
-      <sch:assert role='ERROR' test='count(h:PoolPumps/h:PoolPump) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PoolPumps/PoolPump</sch:assert> <!-- See [PoolPump] -->
+      <sch:assert role='ERROR' test='count(h:Pumps/h:Pump) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pumps/Pump</sch:assert> <!-- See [PoolPump] -->
       <sch:assert role='ERROR' test='count(h:Heater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heater</sch:assert> <!-- See [PoolHeater] -->
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[PoolPump]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:PoolPumps/h:PoolPump'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:Pumps/h:Pump'>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
       <sch:assert role='ERROR' test='count(h:Load[h:Units="kWh/year"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Load[Units="kWh/year"]/Value</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
@@ -2154,17 +2163,17 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[HotTub]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub'>
+    <sch:title>[PermanentSpa]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Spas/h:PermanentSpa'>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HotTubPumps/h:HotTubPump) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotTubPumps/HotTubPump</sch:assert> <!-- See [HotTubPump] -->
-      <sch:assert role='ERROR' test='count(h:Heater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heater</sch:assert> <!-- See [HotTubHeater] -->
+      <sch:assert role='ERROR' test='count(h:Pumps/h:Pump) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pumps/Pump</sch:assert> <!-- See [PermanentSpaPump] -->
+      <sch:assert role='ERROR' test='count(h:Heater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heater</sch:assert> <!-- See [PermanentSpaHeater] -->
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[HotTubPump]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:HotTubPumps/h:HotTubPump'>
+    <sch:title>[PermanentSpaPump]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Spas/h:PermanentSpa/h:Pumps/h:Pump'>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
       <sch:assert role='ERROR' test='count(h:Load[h:Units="kWh/year"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Load[Units="kWh/year"]/Value</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
@@ -2173,10 +2182,10 @@
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
     </sch:rule>
   </sch:pattern>
-
+  
   <sch:pattern>
-    <sch:title>[HotTubHeater]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:Heater'>
+    <sch:title>[PermanentSpaHeater]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Spas/h:PermanentSpa/h:Heater'>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
       <sch:assert role='ERROR' test='h:Type[text()="none" or text()="gas fired" or text()="electric resistance" or text()="heat pump"] or not(h:Type)'>Expected Type to be 'gas fired' or 'electric resistance' or 'heat pump'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Load[h:Units="kWh/year" or h:Units="therm/year"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Load[Units="kWh/year" or Units="therm/year"]/Value</sch:assert>

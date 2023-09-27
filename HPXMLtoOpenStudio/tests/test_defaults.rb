@@ -3273,62 +3273,62 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_pool_pump_values(hpxml_default.pools[0], 2496, 1.0, Schedule.PoolPumpWeekdayFractions, Schedule.PoolPumpWeekendFractions, Schedule.PoolPumpMonthlyMultipliers)
   end
 
-  def test_hot_tubs
+  def test_permanent_spas
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-misc-loads-large-uncommon.xml')
-    hot_tub = hpxml.hot_tubs[0]
-    hot_tub.heater_load_units = HPXML::UnitsThermPerYear
-    hot_tub.heater_load_value = 1000
-    hot_tub.heater_usage_multiplier = 0.8
-    hot_tub.heater_weekday_fractions = ConstantDaySchedule
-    hot_tub.heater_weekend_fractions = ConstantDaySchedule
-    hot_tub.heater_monthly_multipliers = ConstantMonthSchedule
-    hot_tub.pump_kwh_per_year = 3000
-    hot_tub.pump_usage_multiplier = 0.7
-    hot_tub.pump_weekday_fractions = ConstantDaySchedule
-    hot_tub.pump_weekend_fractions = ConstantDaySchedule
-    hot_tub.pump_monthly_multipliers = ConstantMonthSchedule
+    spa = hpxml.permanent_spas[0]
+    spa.heater_load_units = HPXML::UnitsThermPerYear
+    spa.heater_load_value = 1000
+    spa.heater_usage_multiplier = 0.8
+    spa.heater_weekday_fractions = ConstantDaySchedule
+    spa.heater_weekend_fractions = ConstantDaySchedule
+    spa.heater_monthly_multipliers = ConstantMonthSchedule
+    spa.pump_kwh_per_year = 3000
+    spa.pump_usage_multiplier = 0.7
+    spa.pump_weekday_fractions = ConstantDaySchedule
+    spa.pump_weekend_fractions = ConstantDaySchedule
+    spa.pump_monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsThermPerYear, 1000, 0.8, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
-    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 3000, 0.7, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_permanent_spa_heater_values(hpxml_default.permanent_spas[0], HPXML::UnitsThermPerYear, 1000, 0.8, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_permanent_spa_pump_values(hpxml_default.permanent_spas[0], 3000, 0.7, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
-    hot_tub = hpxml.hot_tubs[0]
-    hot_tub.heater_load_units = nil
-    hot_tub.heater_load_value = nil
-    hot_tub.heater_usage_multiplier = nil
-    hot_tub.heater_weekday_fractions = nil
-    hot_tub.heater_weekend_fractions = nil
-    hot_tub.heater_monthly_multipliers = nil
-    hot_tub.pump_kwh_per_year = nil
-    hot_tub.pump_usage_multiplier = nil
-    hot_tub.pump_weekday_fractions = nil
-    hot_tub.pump_weekend_fractions = nil
-    hot_tub.pump_monthly_multipliers = nil
+    spa = hpxml.permanent_spas[0]
+    spa.heater_load_units = nil
+    spa.heater_load_value = nil
+    spa.heater_usage_multiplier = nil
+    spa.heater_weekday_fractions = nil
+    spa.heater_weekend_fractions = nil
+    spa.heater_monthly_multipliers = nil
+    spa.pump_kwh_per_year = nil
+    spa.pump_usage_multiplier = nil
+    spa.pump_weekday_fractions = nil
+    spa.pump_weekend_fractions = nil
+    spa.pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 1125, 1.0, Schedule.HotTubHeaterWeekdayFractions, Schedule.HotTubHeaterWeekendFractions, Schedule.HotTubHeaterMonthlyMultipliers)
-    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, Schedule.HotTubPumpWeekdayFractions, Schedule.HotTubPumpWeekendFractions, Schedule.HotTubPumpMonthlyMultipliers)
+    _test_default_permanent_spa_heater_values(hpxml_default.permanent_spas[0], HPXML::UnitsKwhPerYear, 1125, 1.0, Schedule.PermanentSpaHeaterWeekdayFractions, Schedule.PermanentSpaHeaterWeekendFractions, Schedule.PermanentSpaHeaterMonthlyMultipliers)
+    _test_default_permanent_spa_pump_values(hpxml_default.permanent_spas[0], 1111, 1.0, Schedule.PermanentSpaPumpWeekdayFractions, Schedule.PermanentSpaPumpWeekendFractions, Schedule.PermanentSpaPumpMonthlyMultipliers)
 
     # Test defaults 2
     hpxml = _create_hpxml('base-misc-loads-large-uncommon2.xml')
-    hot_tub = hpxml.hot_tubs[0]
-    hot_tub.heater_load_units = nil
-    hot_tub.heater_load_value = nil
-    hot_tub.heater_usage_multiplier = nil
-    hot_tub.heater_weekday_fractions = nil
-    hot_tub.heater_weekend_fractions = nil
-    hot_tub.heater_monthly_multipliers = nil
-    hot_tub.pump_kwh_per_year = nil
-    hot_tub.pump_usage_multiplier = nil
-    hot_tub.pump_weekday_fractions = nil
-    hot_tub.pump_weekend_fractions = nil
-    hot_tub.pump_monthly_multipliers = nil
+    spa = hpxml.permanent_spas[0]
+    spa.heater_load_units = nil
+    spa.heater_load_value = nil
+    spa.heater_usage_multiplier = nil
+    spa.heater_weekday_fractions = nil
+    spa.heater_weekend_fractions = nil
+    spa.heater_monthly_multipliers = nil
+    spa.pump_kwh_per_year = nil
+    spa.pump_usage_multiplier = nil
+    spa.pump_weekday_fractions = nil
+    spa.pump_weekend_fractions = nil
+    spa.pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 225, 1.0, Schedule.HotTubHeaterWeekdayFractions, Schedule.HotTubHeaterWeekendFractions, Schedule.HotTubHeaterMonthlyMultipliers)
-    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, Schedule.HotTubPumpWeekdayFractions, Schedule.HotTubPumpWeekendFractions, Schedule.HotTubPumpMonthlyMultipliers)
+    _test_default_permanent_spa_heater_values(hpxml_default.permanent_spas[0], HPXML::UnitsKwhPerYear, 225, 1.0, Schedule.PermanentSpaHeaterWeekdayFractions, Schedule.PermanentSpaHeaterWeekendFractions, Schedule.PermanentSpaHeaterMonthlyMultipliers)
+    _test_default_permanent_spa_pump_values(hpxml_default.permanent_spas[0], 1111, 1.0, Schedule.PermanentSpaPumpWeekdayFractions, Schedule.PermanentSpaPumpWeekendFractions, Schedule.PermanentSpaPumpMonthlyMultipliers)
   end
 
   def test_plug_loads
@@ -4805,45 +4805,45 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(monthly_mults, pool.pump_monthly_multipliers)
   end
 
-  def _test_default_hot_tub_heater_values(hot_tub, load_units, load_value, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_permanent_spa_heater_values(spa, load_units, load_value, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     if load_units.nil?
-      assert_nil(hot_tub.heater_load_units)
+      assert_nil(spa.heater_load_units)
     else
-      assert_equal(load_units, hot_tub.heater_load_units)
+      assert_equal(load_units, spa.heater_load_units)
     end
     if load_value.nil?
-      assert_nil(hot_tub.heater_load_value)
+      assert_nil(spa.heater_load_value)
     else
-      assert_in_epsilon(load_value, hot_tub.heater_load_value, 0.01)
+      assert_in_epsilon(load_value, spa.heater_load_value, 0.01)
     end
     if usage_multiplier.nil?
-      assert_nil(hot_tub.heater_usage_multiplier)
+      assert_nil(spa.heater_usage_multiplier)
     else
-      assert_equal(usage_multiplier, hot_tub.heater_usage_multiplier)
+      assert_equal(usage_multiplier, spa.heater_usage_multiplier)
     end
     if weekday_sch.nil?
-      assert_nil(hot_tub.heater_weekday_fractions)
+      assert_nil(spa.heater_weekday_fractions)
     else
-      assert_equal(weekday_sch, hot_tub.heater_weekday_fractions)
+      assert_equal(weekday_sch, spa.heater_weekday_fractions)
     end
     if weekend_sch.nil?
-      assert_nil(hot_tub.heater_weekend_fractions)
+      assert_nil(spa.heater_weekend_fractions)
     else
-      assert_equal(weekend_sch, hot_tub.heater_weekend_fractions)
+      assert_equal(weekend_sch, spa.heater_weekend_fractions)
     end
     if monthly_mults.nil?
-      assert_nil(hot_tub.heater_monthly_multipliers)
+      assert_nil(spa.heater_monthly_multipliers)
     else
-      assert_equal(monthly_mults, hot_tub.heater_monthly_multipliers)
+      assert_equal(monthly_mults, spa.heater_monthly_multipliers)
     end
   end
 
-  def _test_default_hot_tub_pump_values(hot_tub, kwh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(kwh_per_year, hot_tub.pump_kwh_per_year, 0.01)
-    assert_equal(usage_multiplier, hot_tub.pump_usage_multiplier)
-    assert_equal(weekday_sch, hot_tub.pump_weekday_fractions)
-    assert_equal(weekend_sch, hot_tub.pump_weekend_fractions)
-    assert_equal(monthly_mults, hot_tub.pump_monthly_multipliers)
+  def _test_default_permanent_spa_pump_values(spa, kwh_per_year, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    assert_in_epsilon(kwh_per_year, spa.pump_kwh_per_year, 0.01)
+    assert_equal(usage_multiplier, spa.pump_usage_multiplier)
+    assert_equal(weekday_sch, spa.pump_weekday_fractions)
+    assert_equal(weekend_sch, spa.pump_weekend_fractions)
+    assert_equal(monthly_mults, spa.pump_monthly_multipliers)
   end
 
   def _test_default_plug_load_values(hpxml, load_type, kwh_per_year, frac_sensible, frac_latent, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)

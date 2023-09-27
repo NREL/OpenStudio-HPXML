@@ -220,8 +220,8 @@ The column names available in the schedule CSV files are:
   ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                           No
   ``pool_pump``                    frac   Pool pump energy use schedule.                                                     No
   ``pool_heater``                  frac   Pool heater energy use schedule.                                                   No
-  ``hot_tub_pump``                 frac   Hot tub pump energy use schedule.                                                  No
-  ``hot_tub_heater``               frac   Hot tub heater energy use schedule.                                                No
+  ``permanent_spa_pump``           frac   Permanent spa pump energy use schedule.                                            No
+  ``permanent_spa_heater``         frac   Permanent spa heater energy use schedule.                                          No
   ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                                 Yes
   ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                             Yes
   ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
@@ -3334,8 +3334,8 @@ Ceiling fan energy use is calculated per the Energy Rating Rated Home in `ANSI/R
   A reduced cooling setpoint can be specified for months when ceiling fans are operating.
   See :ref:`hvac_control` for more information.
 
-HPXML Pools & Hot Tubs
-----------------------
+HPXML Pools & Permanent Spas
+----------------------------
 
 HPXML Pools
 ***********
@@ -3356,8 +3356,8 @@ If not entered, the simulation will not include a pool.
 Pool Pump
 ~~~~~~~~~
 
-If a pool is specified, a single pool pump can be entered as a ``Pool/PoolPumps/PoolPump``.
-If not entered, the simulation will not include a pool heater.
+If a pool is specified, a single pool pump can be entered as a ``Pool/Pumps/Pump``.
+If not entered, the simulation will not include a pool pump.
 
   ========================================  =======  ======  ===========  ========  ============  ======================================
   Element                                   Type     Units   Constraints  Required  Default       Notes
@@ -3406,67 +3406,67 @@ If not entered, the simulation will not include a pool heater.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
-HPXML Hot Tubs
-**************
+HPXML Permanent Spas
+********************
 
-A single hot tub can be entered as a ``/HPXML/Building/BuildingDetails/HotTubs/HotTub``.
-If not entered, the simulation will not include a hot tub.
+A single permanent spa can be entered as a ``/HPXML/Building/BuildingDetails/Spas/PermanentSpa``.
+If not entered, the simulation will not include a permanent spa.
 
   ====================  =======  ======  ===========  ========  ============  =================
   Element               Type     Units   Constraints  Required  Default       Notes
   ====================  =======  ======  ===========  ========  ============  =================
   ``SystemIdentifier``  id                            Yes                     Unique identifier
-  ``Type``              string           See [#]_     Yes                     Hot tub type
+  ``Type``              string           See [#]_     Yes                     Permanent spa type
   ====================  =======  ======  ===========  ========  ============  =================
 
   .. [#] Type choices are "in ground", "on ground", "above ground", "other", "unknown", or "none".
-         If "none" is entered, the simulation will not include a hot tub.
+         If "none" is entered, the simulation will not include a permanent spa.
 
-Hot Tub Pump
-~~~~~~~~~~~~
+Permanent Spa Pump
+~~~~~~~~~~~~~~~~~~
 
-If a hot tub is specified, a single hot tub pump can be entered as a ``HotTub/HotTubPumps/HotTubPump``.
-If not entered, the simulation will not include a hot tub pump.
+If a permanent spa is specified, a single permanent spa pump can be entered as a ``PermanentSpa/Pumps/Pump``.
+If not entered, the simulation will not include a permanent spa pump.
 
   ========================================  =======  ======  ===========  ========  ============  ======================================
   Element                                   Type     Units   Constraints  Required  Default       Notes
   ========================================  =======  ======  ===========  ========  ============  ======================================
   ``SystemIdentifier``                      id                            Yes                     Unique identifier
-  ``Type``                                  string           See [#]_     Yes                     Hot tub pump type
-  ``Load[Units="kWh/year"]/Value``          double   kWh/yr  >= 0         No        See [#]_      Hot tub pump energy use
-  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on hot tub pump energy use
+  ``Type``                                  string           See [#]_     Yes                     Permanent spa pump type
+  ``Load[Units="kWh/year"]/Value``          double   kWh/yr  >= 0         No        See [#]_      Permanent spa pump energy use
+  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on permanent spa pump energy use
   ``extension/WeekdayScheduleFractions``    array                         No        See [#]_      24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``    array                         No                      24 comma-separated weekend fractions
   ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_      12 comma-separated monthly multipliers
   ========================================  =======  ======  ===========  ========  ============  ======================================
 
   .. [#] Type choices are "single speed", "multi speed", "variable speed", "variable flow", "other", "unknown", or "none".
-         If "none" is entered, the simulation will not include a hot tub pump.
+         If "none" is entered, the simulation will not include a permanent spa pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 59.5 / 0.059 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921".
 
-Hot Tub Heater
-~~~~~~~~~~~~~~
+Permanent Spa Heater
+~~~~~~~~~~~~~~~~~~~~
 
-If a hot tub is specified, a hot tub heater can be entered as a ``HotTub/Heater``.
-If not entered, the simulation will not include a hot tub heater.
+If a permanent spa is specified, a permanent spa heater can be entered as a ``PermanentSpa/Heater``.
+If not entered, the simulation will not include a permanent spa heater.
 
   ======================================================  =======  ==================  ===========  ========  ========  =======================================
   Element                                                 Type     Units               Constraints  Required  Default   Notes
   ======================================================  =======  ==================  ===========  ========  ========  =======================================
   ``SystemIdentifier``                                    id                                        Yes                 Unique identifier
-  ``Type``                                                string                       See [#]_     Yes                 Hot tub heater type
-  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Hot tub heater energy use
-  ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on hot tub heater energy use
+  ``Type``                                                string                       See [#]_     Yes                 Permanent spa heater type
+  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Permanent spa heater energy use
+  ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on permanent spa heater energy use
   ``extension/WeekdayScheduleFractions``                  array                                     No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``                  array                                     No                  24 comma-separated weekend fractions
   ``extension/MonthlyScheduleMultipliers``                array                                     No        See [#]_  12 comma-separated monthly multipliers
   ======================================================  =======  ==================  ===========  ========  ========  =======================================
 
   .. [#] Type choices are "none, "gas fired", "electric resistance", or "heat pump".
-         If "none" is entered, the simulation will not include a hot tub heater.
+         If "none" is entered, the simulation will not include a permanent spa heater.
   .. [#] | If Value not provided, defaults as follows:
          | - **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          | - **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)

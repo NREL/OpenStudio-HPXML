@@ -609,8 +609,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['misc_fuel_loads_fireplace_fuel_type'] = HPXML::FuelTypeNaturalGas
       args['pool_present'] = false
       args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
-      args['hot_tub_present'] = false
-      args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
+      args['permanent_spa_present'] = false
+      args['permanent_spa_heater_type'] = HPXML::HeaterTypeElectricResistance
     elsif ['base-sfa.xml'].include? hpxml_file
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
@@ -775,9 +775,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pool_heater_type'] = HPXML::HeaterTypeGas
       args['pool_heater_annual_kwh'] = 0
     elsif ['extra-gas-hot-tub-heater-with-zero-kwh.xml'].include? hpxml_file
-      args['hot_tub_present'] = true
-      args['hot_tub_heater_type'] = HPXML::HeaterTypeGas
-      args['hot_tub_heater_annual_kwh'] = 0
+      args['permanent_spa_present'] = true
+      args['permanent_spa_heater_type'] = HPXML::HeaterTypeGas
+      args['permanent_spa_heater_annual_kwh'] = 0
     elsif ['extra-no-rim-joists.xml'].include? hpxml_file
       args.delete('geometry_rim_joist_height')
       args.delete('rim_joist_assembly_r')

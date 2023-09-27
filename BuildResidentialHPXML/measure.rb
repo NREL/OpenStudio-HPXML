@@ -2935,44 +2935,44 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hot_tub_present', true)
-    arg.setDisplayName('Hot Tub: Present')
-    arg.setDescription('Whether there is a hot tub.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_present', true)
+    arg.setDisplayName('Permanent Spa: Present')
+    arg.setDescription('Whether there is a permanent spa.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_tub_pump_annual_kwh', false)
-    arg.setDisplayName('Hot Tub: Pump Annual kWh')
-    arg.setDescription('The annual energy consumption of the hot tub pump. If not provided, the OS-HPXML default is used.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_pump_annual_kwh', false)
+    arg.setDisplayName('Permanent Spa: Pump Annual kWh')
+    arg.setDescription('The annual energy consumption of the permanent spa pump. If not provided, the OS-HPXML default is used.')
     arg.setUnits('kWh/yr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_tub_pump_usage_multiplier', false)
-    arg.setDisplayName('Hot Tub: Pump Usage Multiplier')
-    arg.setDescription('Multiplier on the hot tub pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_pump_usage_multiplier', false)
+    arg.setDisplayName('Permanent Spa: Pump Usage Multiplier')
+    arg.setDescription('Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_tub_heater_type', heater_type_choices, true)
-    arg.setDisplayName('Hot Tub: Heater Type')
-    arg.setDescription("The type of hot tub heater. Use '#{HPXML::TypeNone}' if there is no hot tub heater.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('permanent_spa_heater_type', heater_type_choices, true)
+    arg.setDisplayName('Permanent Spa: Heater Type')
+    arg.setDescription("The type of permanent spa heater. Use '#{HPXML::TypeNone}' if there is no permanent spa heater.")
     arg.setDefaultValue(HPXML::TypeNone)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_tub_heater_annual_kwh', false)
-    arg.setDisplayName('Hot Tub: Heater Annual kWh')
-    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} hot tub heater. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_heater_annual_kwh', false)
+    arg.setDisplayName('Permanent Spa: Heater Annual kWh')
+    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} permanent spa heater. If not provided, the OS-HPXML default is used.")
     arg.setUnits('kWh/yr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_tub_heater_annual_therm', false)
-    arg.setDisplayName('Hot Tub: Heater Annual therm')
-    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeGas} hot tub heater. If not provided, the OS-HPXML default is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_heater_annual_therm', false)
+    arg.setDisplayName('Permanent Spa: Heater Annual therm')
+    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeGas} permanent spa heater. If not provided, the OS-HPXML default is used.")
     arg.setUnits('therm/yr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_tub_heater_usage_multiplier', false)
-    arg.setDisplayName('Hot Tub: Heater Usage Multiplier')
-    arg.setDescription('Multiplier on the hot tub heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_heater_usage_multiplier', false)
+    arg.setDisplayName('Permanent Spa: Heater Usage Multiplier')
+    arg.setDescription('Multiplier on the permanent spa heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
@@ -3427,7 +3427,7 @@ class HPXMLFile
     set_misc_fuel_loads_lighting(hpxml, args)
     set_misc_fuel_loads_fireplace(hpxml, args)
     set_pool(hpxml, args)
-    set_hot_tub(hpxml, args)
+    set_permanent_spa(hpxml, args)
     collapse_surfaces(hpxml, args)
     renumber_hpxml_ids(hpxml)
 
@@ -6357,46 +6357,46 @@ class HPXMLFile
                     heater_usage_multiplier: heater_usage_multiplier)
   end
 
-  def self.set_hot_tub(hpxml, args)
-    return unless args[:hot_tub_present]
+  def self.set_permanent_spa(hpxml, args)
+    return unless args[:permanent_spa_present]
 
-    if args[:hot_tub_pump_annual_kwh].is_initialized
-      pump_kwh_per_year = args[:hot_tub_pump_annual_kwh].get
+    if args[:permanent_spa_pump_annual_kwh].is_initialized
+      pump_kwh_per_year = args[:permanent_spa_pump_annual_kwh].get
     end
 
-    if args[:hot_tub_pump_usage_multiplier].is_initialized
-      pump_usage_multiplier = args[:hot_tub_pump_usage_multiplier].get
+    if args[:permanent_spa_pump_usage_multiplier].is_initialized
+      pump_usage_multiplier = args[:permanent_spa_pump_usage_multiplier].get
     end
 
-    hot_tub_heater_type = args[:hot_tub_heater_type]
+    permanent_spa_heater_type = args[:permanent_spa_heater_type]
 
-    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(hot_tub_heater_type)
-      if args[:hot_tub_heater_annual_kwh].is_initialized
+    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa_heater_type)
+      if args[:permanent_spa_heater_annual_kwh].is_initialized
         heater_load_units = HPXML::UnitsKwhPerYear
-        heater_load_value = args[:hot_tub_heater_annual_kwh].get
+        heater_load_value = args[:permanent_spa_heater_annual_kwh].get
       end
     end
 
-    if [HPXML::HeaterTypeGas].include?(hot_tub_heater_type)
-      if args[:hot_tub_heater_annual_therm].is_initialized
+    if [HPXML::HeaterTypeGas].include?(permanent_spa_heater_type)
+      if args[:permanent_spa_heater_annual_therm].is_initialized
         heater_load_units = HPXML::UnitsThermPerYear
-        heater_load_value = args[:hot_tub_heater_annual_therm].get
+        heater_load_value = args[:permanent_spa_heater_annual_therm].get
       end
     end
 
-    if args[:hot_tub_heater_usage_multiplier].is_initialized
-      heater_usage_multiplier = args[:hot_tub_heater_usage_multiplier].get
+    if args[:permanent_spa_heater_usage_multiplier].is_initialized
+      heater_usage_multiplier = args[:permanent_spa_heater_usage_multiplier].get
     end
 
-    hpxml.hot_tubs.add(id: "HotTub#{hpxml.hot_tubs.size + 1}",
-                       type: HPXML::TypeUnknown,
-                       pump_type: HPXML::TypeUnknown,
-                       pump_kwh_per_year: pump_kwh_per_year,
-                       pump_usage_multiplier: pump_usage_multiplier,
-                       heater_type: hot_tub_heater_type,
-                       heater_load_units: heater_load_units,
-                       heater_load_value: heater_load_value,
-                       heater_usage_multiplier: heater_usage_multiplier)
+    hpxml.permanent_spas.add(id: "PermanentSpa#{hpxml.permanent_spas.size + 1}",
+                             type: HPXML::TypeUnknown,
+                             pump_type: HPXML::TypeUnknown,
+                             pump_kwh_per_year: pump_kwh_per_year,
+                             pump_usage_multiplier: pump_usage_multiplier,
+                             heater_type: permanent_spa_heater_type,
+                             heater_load_units: heater_load_units,
+                             heater_load_value: heater_load_value,
+                             heater_usage_multiplier: heater_usage_multiplier)
   end
 
   def self.collapse_surfaces(hpxml, args)
