@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, runner, plug_load, obj_name, living_space, apply_ashrae140_assumptions, schedules_file, unavailable_periods)
+  def self.apply_plug(model, runner, plug_load, obj_name, conditioned_space, apply_ashrae140_assumptions, schedules_file, unavailable_periods)
     kwh = 0
     if not plug_load.nil?
       kwh = plug_load.kwh_per_year * plug_load.usage_multiplier
@@ -50,7 +50,7 @@ class MiscLoads
     mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
     mel.setName(obj_name)
     mel.setEndUseSubcategory(obj_name)
-    mel.setSpace(living_space)
+    mel.setSpace(conditioned_space)
     mel_def.setName(obj_name)
     mel_def.setDesignLevel(space_design_level)
     mel_def.setFractionRadiant(rad_frac)
@@ -59,7 +59,7 @@ class MiscLoads
     mel.setSchedule(sch)
   end
 
-  def self.apply_fuel(model, runner, fuel_load, obj_name, living_space, schedules_file, unavailable_periods)
+  def self.apply_fuel(model, runner, fuel_load, obj_name, conditioned_space, schedules_file, unavailable_periods)
     therm = 0
 
     if not fuel_load.nil?
@@ -101,7 +101,7 @@ class MiscLoads
     mfl.setName(obj_name)
     mfl.setEndUseSubcategory(obj_name)
     mfl.setFuelType(EPlus.fuel_type(fuel_load.fuel_type))
-    mfl.setSpace(living_space)
+    mfl.setSpace(conditioned_space)
     mfl_def.setName(obj_name)
     mfl_def.setDesignLevel(space_design_level)
     mfl_def.setFractionRadiant(0.6 * sens_frac)
@@ -110,7 +110,7 @@ class MiscLoads
     mfl.setSchedule(sch)
   end
 
-  def self.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, obj_name, living_space, schedules_file, unavailable_periods)
+  def self.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, obj_name, conditioned_space, schedules_file, unavailable_periods)
     return if pool_or_spa.heater_type == HPXML::TypeNone
 
     heater_kwh = 0
@@ -150,7 +150,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
+      mel.setSpace(conditioned_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
@@ -173,7 +173,7 @@ class MiscLoads
       mfl.setName(obj_name)
       mfl.setEndUseSubcategory(obj_name)
       mfl.setFuelType(EPlus.fuel_type(HPXML::FuelTypeNaturalGas))
-      mfl.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
+      mfl.setSpace(conditioned_space) # no heat gain, so assign the equipment to an arbitrary space
       mfl_def.setName(obj_name)
       mfl_def.setDesignLevel(space_design_level)
       mfl_def.setFractionRadiant(0)
@@ -183,7 +183,7 @@ class MiscLoads
     end
   end
 
-  def self.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, obj_name, living_space, schedules_file, unavailable_periods)
+  def self.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, obj_name, conditioned_space, schedules_file, unavailable_periods)
     pump_kwh = 0
 
     # Create schedule
@@ -218,7 +218,7 @@ class MiscLoads
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
       mel.setName(obj_name)
       mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space) # no heat gain, so assign the equipment to an arbitrary space
+      mel.setSpace(conditioned_space) # no heat gain, so assign the equipment to an arbitrary space
       mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
