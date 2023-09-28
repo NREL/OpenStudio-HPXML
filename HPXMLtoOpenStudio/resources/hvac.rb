@@ -514,7 +514,7 @@ class HVAC
     boiler.setBoilerFlowMode('LeavingSetpointModulated')
     boiler.setOptimumPartLoadRatio(1.0)
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
-    boiler.setParasiticElectricLoad(0)
+    boiler.setOnCycleParasiticElectricLoad(0)
     boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
