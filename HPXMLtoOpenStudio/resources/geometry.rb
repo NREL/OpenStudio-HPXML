@@ -356,10 +356,10 @@ class Geometry
   end
 
   def self.set_zone_volumes(spaces, hpxml, apply_ashrae140_assumptions)
-    # Living space
+    # Conditioned space
     volume = UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3')
-    spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(volume)
-    spaces[HPXML::LocationLivingSpace].setVolume(volume)
+    spaces[HPXML::LocationConditionedSpace].thermalZone.get.setVolume(volume)
+    spaces[HPXML::LocationConditionedSpace].setVolume(volume)
 
     # Basement, crawlspace, garage
     spaces.keys.each do |location|
