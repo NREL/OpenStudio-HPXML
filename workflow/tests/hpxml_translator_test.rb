@@ -30,9 +30,6 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
-        # FIXME: Need to address new required PLF curve
-        next if xml.include? 'ground-to-air'
-        next if xml.include? 'base-hvac-multiple.xml'
 
         xmls << File.absolute_path(xml)
       end
