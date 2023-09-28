@@ -57,7 +57,7 @@ class HPXML < Object
                  :water_heating, :solar_thermal_systems, :pv_systems, :inverters, :generators,
                  :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
-                 :ceiling_fans, :pools, :permanent_spas, :plug_loads, :fuel_loads]
+                 :ceiling_fans, :pools, :permanent_spas, :portable_spas, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
   NameSpace = 'http://hpxmlonline.com/2023/09'
@@ -136,9 +136,10 @@ class HPXML < Object
   FloorTypeSIP = 'StructuralInsulatedPanel'
   FloorTypeSteelFrame = 'SteelFrame'
   FloorTypeConcrete = 'SolidConcrete'
+  FuelLoadTypeFireplace = 'fireplace'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
-  FuelLoadTypeFireplace = 'fireplace'
+  FuelLoadTypeOther = 'other'
   FuelTypeCoal = 'coal'
   FuelTypeCoalAnthracite = 'anthracite coal'
   FuelTypeCoalBituminous = 'bituminous coal'
@@ -255,9 +256,16 @@ class HPXML < Object
   OrientationSoutheast = 'southeast'
   OrientationSouthwest = 'southwest'
   OrientationWest = 'west'
+  PlugLoadTypeAquarium = 'aquarium'
+  PlugLoadTypeComputer = 'computer'
   PlugLoadTypeElectricVehicleCharging = 'electric vehicle charging'
   PlugLoadTypeOther = 'other'
+  PlugLoadTypeSauna = 'sauna'
+  PlugLoadTypeSpaceHeater = 'space heater'
   PlugLoadTypeTelevision = 'TV other'
+  PlugLoadTypeTelevisionCRT = 'TV CRT'
+  PlugLoadTypeTelevisionPlasma = 'TV plasma'
+  PlugLoadTypeWaterBed = 'water bed'
   PlugLoadTypeWellPump = 'well pump'
   PVAnnualExcessSellbackRateTypeRetailElectricityCost = 'Retail Electricity Cost'
   PVAnnualExcessSellbackRateTypeUserSpecified = 'User-Specified'
@@ -766,6 +774,7 @@ class HPXML < Object
     @lighting.to_oga(@doc)
     @pools.to_oga(@doc)
     @permanent_spas.to_oga(@doc)
+    @portable_spas.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @fuel_loads.to_oga(@doc)
     return @doc
@@ -822,6 +831,7 @@ class HPXML < Object
     @lighting = Lighting.new(self, hpxml)
     @pools = Pools.new(self, hpxml)
     @permanent_spas = PermanentSpas.new(self, hpxml)
+    @portable_spas = PortableSpas.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @fuel_loads = FuelLoads.new(self, hpxml)
   end
@@ -6656,6 +6666,47 @@ class HPXML < Object
         @heater_weekend_fractions = XMLHelper.get_value(heater, 'extension/WeekendScheduleFractions', :string)
         @heater_monthly_multipliers = XMLHelper.get_value(heater, 'extension/MonthlyScheduleMultipliers', :string)
       end
+    end
+  end
+
+  class PortableSpas < BaseArrayElement
+    def add(**kwargs)
+      self << PortableSpa.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Spas/PortableSpa').each do |spa|
+        self << PortableSpa.new(@hpxml_object, spa)
+      end
+    end
+  end
+
+  class PortableSpa < BaseElement
+    ATTRS = [:id]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.portable_spas.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      spas = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Spas'])
+      spa = XMLHelper.add_element(spas, 'PortableSpa')
+      sys_id = XMLHelper.add_element(spa, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+    end
+
+    def from_oga(spa)
+      @id = HPXML::get_id(spa)
     end
   end
 

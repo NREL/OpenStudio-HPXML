@@ -632,6 +632,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
                               'erv-atre-low' => ['Adjusted total recovery efficiency should typically be at least half of the adjusted sensible recovery efficiency.'],
                               'erv-tre-low' => ['Total recovery efficiency should typically be at least half of the sensible recovery efficiency.'],
+                              'fuel-load-type-other' => ["Fuel load type 'other' is not currently handled, the fuel load will not be modeled."],
                               'garage-ventilation' => ['Ventilation fans for the garage are not currently modeled.'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
                               'heat-pump-low-backup-lockout-temp' => ['BackupHeatingLockoutTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
@@ -680,6 +681,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
+                              'plug-load-type-sauna' => ["Plug load type 'sauna' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-aquarium' => ["Plug load type 'aquarium' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-water-bed' => ["Plug load type 'water bed' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-space-heater' => ["Plug load type 'space heater' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-computer' => ["Plug load type 'computer' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-tv-crt' => ["Plug load type 'TV CRT' is not currently handled, the plug load will not be modeled."],
+                              'plug-load-type-tv-plasma' => ["Plug load type 'TV plasma' is not currently handled, the plug load will not be modeled."],
+                              'portable-spa' => ['Portable spa is not currently handled, the portable spa will not be modeled.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
@@ -715,6 +724,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['erv-atre-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-erv-atre-asre.xml'))
         hpxml.ventilation_fans[0].total_recovery_efficiency_adjusted = 0.1
+      elsif ['fuel-load-type-other'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-loads-large-uncommon.xml'))
+        hpxml.fuel_loads[0].fuel_load_type = HPXML::FuelLoadTypeOther
       elsif ['erv-tre-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-mechvent-erv.xml'))
         hpxml.ventilation_fans[0].total_recovery_efficiency = 0.1
@@ -794,6 +806,30 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
+      elsif ['plug-load-type-sauna'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSauna
+      elsif ['plug-load-type-aquarium'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeAquarium
+      elsif ['plug-load-type-water-bed'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeWaterBed
+      elsif ['plug-load-type-space-heater'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSpaceHeater
+      elsif ['plug-load-type-computer'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeComputer
+      elsif ['plug-load-type-tv-crt'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeTelevisionCRT
+      elsif ['plug-load-type-tv-plasma'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeTelevisionPlasma
+      elsif ['portable-spa'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.portable_spas.add(id: 'PorableSpa')
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0
