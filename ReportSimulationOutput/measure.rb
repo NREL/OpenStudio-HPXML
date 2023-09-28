@@ -495,10 +495,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
       # Also report thermostat setpoints
       if has_heating
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationConditionedSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
       if has_cooling
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationConditionedSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
     end
 
@@ -1059,7 +1059,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @zone_temps[sp_name] = ZoneTemp.new
         @zone_temps[sp_name].name = "Temperature: #{sp_name}"
         @zone_temps[sp_name].timeseries_units = 'F'
-        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationLivingSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationConditionedSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
       end
     end
 
@@ -2272,8 +2272,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WellPump]))
     @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolHeater]))
     @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolPump]))
-    @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubHeater]))
-    @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubPump]))
+    @end_uses[[FT::Elec, EUT::PermanentSpaHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PermanentSpaHeater]))
+    @end_uses[[FT::Elec, EUT::PermanentSpaPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PermanentSpaPump]))
     @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PV]),
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
@@ -2287,7 +2287,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::RangeOven]))
     @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::MechVentPreheat]))
     @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PoolHeater]))
-    @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotTubHeater]))
+    @end_uses[[FT::Gas, EUT::PermanentSpaHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PermanentSpaHeater]))
     @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Grill]))
     @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Lighting]))
     @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Fireplace]))
@@ -2768,8 +2768,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscTelevision => EUT::Television,
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
                     Constants.ObjectNameMiscPoolPump => EUT::PoolPump,
-                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
-                    Constants.ObjectNameMiscHotTubPump => EUT::HotTubPump,
+                    Constants.ObjectNameMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
+                    Constants.ObjectNameMiscPermanentSpaPump => EUT::PermanentSpaPump,
                     Constants.ObjectNameMiscElectricVehicleCharging => EUT::Vehicle,
                     Constants.ObjectNameMiscWellPump => EUT::WellPump }[object.to_ElectricEquipment.get.endUseSubcategory]
         if not end_use.nil?
@@ -2784,7 +2784,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscLighting => EUT::Lighting,
                     Constants.ObjectNameMiscFireplace => EUT::Fireplace,
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
-                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
+                    Constants.ObjectNameMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
                     Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool }[object.to_OtherEquipment.get.endUseSubcategory]
         if not end_use.nil?
