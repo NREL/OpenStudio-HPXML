@@ -53,7 +53,7 @@
           </EmissionsFactor>
         </EmissionsScenario>
         <EmissionsScenario>
-          <Name>eGRID RMPA</Name>
+          <Name>eGRID RMPA 2</Name>
           <EmissionsType>NOx</EmissionsType>
           <EmissionsFactor>
             <FuelType>electricity</FuelType>
