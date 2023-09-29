@@ -3726,10 +3726,12 @@ class HPXMLFile
 
         emissions_scenario_exists = false
         hpxml.header.emissions_scenarios.each do |es|
-          next if es.name != name
+          if (es.name != name) || (es.name == name && es.emissions_type != emissions_type)
+            next
+          end
 
-          if (!emissions_type.nil? && es.emissions_type != emissions_type) ||
-             (!wood_pellets_value.nil? && es.elec_units != elec_units) ||
+          if (es.emissions_type != emissions_type) ||
+             (!elec_units.nil? && es.elec_units != elec_units) ||
              (!elec_value.nil? && es.elec_value != elec_value) ||
              (!elec_schedule_filepath.nil? && es.elec_schedule_filepath != elec_schedule_filepath) ||
              (!elec_num_headers.nil? && es.elec_schedule_number_of_header_rows != elec_num_headers) ||
