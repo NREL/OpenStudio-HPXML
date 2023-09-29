@@ -93,7 +93,7 @@ class Lighting
       ltg_def = OpenStudio::Model::LightsDefinition.new(model)
       ltg = OpenStudio::Model::Lights.new(ltg_def)
       ltg.setName(interior_obj_name)
-      ltg.setSpace(spaces[HPXML::LocationLivingSpace])
+      ltg.setSpace(spaces[HPXML::LocationConditionedSpace])
       ltg.setEndUseSubcategory(interior_obj_name)
       ltg_def.setName(interior_obj_name)
       ltg_def.setLightingLevel(design_level)

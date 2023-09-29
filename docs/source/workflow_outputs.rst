@@ -157,8 +157,8 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Well Pump (MBtu)
    End Use: Electricity: Pool Heater (MBtu)
    End Use: Electricity: Pool Pump (MBtu)
-   End Use: Electricity: Hot Tub Heater (MBtu)
-   End Use: Electricity: Hot Tub Pump (MBtu)
+   End Use: Electricity: Permanent Spa Heater (MBtu)
+   End Use: Electricity: Permanent Spa Pump (MBtu)
    End Use: Electricity: PV (MBtu)                                   Negative value for any power produced
    End Use: Electricity: Generator (MBtu)                            Negative value for any power produced
    End Use: Electricity: Battery (MBtu)                              Positive value for charging (including efficiency losses); negative value for discharging
@@ -169,7 +169,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Natural Gas: Range/Oven (MBtu)
    End Use: Natural Gas: Mech Vent Preheating (MBtu)
    End Use: Natural Gas: Pool Heater (MBtu)
-   End Use: Natural Gas: Hot Tub Heater (MBtu)
+   End Use: Natural Gas: Permanent Spa Heater (MBtu)
    End Use: Natural Gas: Grill (MBtu)
    End Use: Natural Gas: Lighting (MBtu)
    End Use: Natural Gas: Fireplace (MBtu)
@@ -521,7 +521,7 @@ Depending on the outputs requested, the file may include:
    Total Loads                          Heating, cooling, and hot water loads (in kBtu).
    Component Loads                      Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
    Unmet Hours                          Heating and cooling unmet hours.
-   Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., living space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
+   Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
    Resilience                           Resilience outputs (currently only average resilience hours for battery storage).
@@ -534,7 +534,7 @@ Timestamps in the output use the start-of-period convention unless you have requ
 Additional timestamp columns can be optionally requested that reflect daylight saving time (DST) and/or coordinated universal time (UTC).
 Most outputs will be summed over the hour (e.g., energy) but some will be averaged over the hour (e.g., temperatures, airflows).
 
-Note that if the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported zone temperature for the living space will reflect a fully conditioned home due to the way these systems are modeled in EnergyPlus.
+Note that if the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported zone temperature for the conditioned space will reflect a fully conditioned home due to the way these systems are modeled in EnergyPlus.
 
 .. _bill_outputs:
 
