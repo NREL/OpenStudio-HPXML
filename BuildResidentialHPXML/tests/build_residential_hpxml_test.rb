@@ -1210,7 +1210,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['utility_bill_scenario_names'] = 'Bills2'
     elsif ['error-same-emissions-scenario-name.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['emissions_types'] = 'CO2'
+      args['emissions_electricity_values_or_filepaths'] = '2'
     elsif ['error-same-utility-bill-scenario-name.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['utility_bill_electricity_fixed_charges'] = '13.0'
