@@ -1386,9 +1386,6 @@ class HPXMLTest < Minitest::Test
         if not vals_1x.is_a? Array
           vals_1x = [vals_1x]
           vals_10x = [vals_10x]
-        else
-          # Reduce the annual tolerance for each month's tolerance
-          abs_delta_tol /= 12.0 unless abs_delta_tol.nil?
         end
 
         vals_1x.zip(vals_10x).each do |val_1x, val_10x|
