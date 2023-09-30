@@ -1005,6 +1005,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           batteries << battery
         end
       end
+      next if batteries.empty?
 
       if batteries.size > 1
         # When modeling individual dwelling units, OS-HPXML only allows a single battery
