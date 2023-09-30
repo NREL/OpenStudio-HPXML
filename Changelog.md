@@ -8,12 +8,12 @@ __New Features__
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
 - Allows simulating whole multifamily (MF) buildings, where each dwelling unit is described by a separate `Building` element.
   - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
-  - Adds a `building_id` argument to the HPXMLtoOpenStudio, BuildResidentialHPXML, and BuildResidentialScheduleFile measures for whole MF HPXML files.
   - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across MF dwelling units:
     - `HVACSizingControl`
     - `ShadingControl`
     - `SchedulesFilePath`
     - `NaturalVentilationAvailabilityDaysperWeek`
+  - Note: Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if `NumberofUnits` is 1.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".

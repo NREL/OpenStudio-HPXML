@@ -229,6 +229,11 @@ class HVAC
                                          control_zone, ground_conductivity, hvac_unavailable_periods,
                                          unit_multiplier)
 
+    if unit_multiplier > 1
+      # FIXME: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
+      fail 'NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'
+    end
+
     obj_name = Constants.ObjectNameGroundSourceHeatPump
 
     hp_ap = heat_pump.additional_properties
@@ -721,6 +726,11 @@ class HVAC
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
       fail 'All dehumidifiers must have the same setpoint but multiple setpoints were specified.'
+    end
+
+    if unit_multiplier > 1
+      # FIXME: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
+      fail 'NumberofUnits greater than 1 is not supported for dehumidifiers.'
     end
 
     # Dehumidifier coefficients
