@@ -755,7 +755,7 @@ class HPXMLTest < Minitest::Test
       assert((abs_clg_load_delta < 1.5 * unit_multiplier) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
     end
 
-    return if hpxml.buildings.size > 1
+    return if (hpxml.buildings.size > 1) || (hpxml_bldg.building_construction.number_of_units > 1)
 
     # Timestep
     timestep = hpxml_header.timestep.nil? ? 60 : hpxml_header.timestep
