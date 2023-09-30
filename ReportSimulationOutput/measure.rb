@@ -999,12 +999,24 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless key == RT::Battery
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
 
-      # FIXME: Need to address this
-      hpxml_bldg = @hpxml_bldgs[0]
+      batteries = []
+      @hpxml_bldgs.each do |hpxml_bldg|
+        hpxml_bldg.batteries.each do |battery|
+          batteries << battery
+        end
+      end
+      next if batteries.empty?
 
-      next if hpxml_bldg.batteries.empty?
+      if batteries.size > 1
+        # When modeling individual dwelling units, OS-HPXML only allows a single battery
+        # When modeling whole SFA/MF buildings, OS-HPXML does not currently allow batteries
+        fail 'Unexpected error.'
+      end
 
-      battery = hpxml_bldg.batteries[0]
+      battery = batteries[0]
+
+      elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
+      next if elcd.nil?
 
       resilience_frequency = 'timestep'
       ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
@@ -1020,8 +1032,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       vars = ['Other Equipment Electricity Energy']
       keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
       batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-
-      elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
 
       min_soc = elcd.minimumStorageStateofChargeFraction
       batt_kw = battery.rated_power_output / 1000.0

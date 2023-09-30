@@ -30,22 +30,7 @@ class HPXMLTest < Minitest::Test
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
         next if xml.include? 'base-multiple-buildings' # Tested by test_multiple_buildings()
-        # FIXME: Need to address these files
-        # Misc:
-        next if xml.include? 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump'
-        next if xml.include? '-dehumidifier'
-        # Battery:
-        # Both batteries do not charge equally because they both use
-        # TrackFacilityElectricDemandStoreExcessOnSite; need to create
-        # meters with electricity usage *for each unit* and switch to
-        # TrackMeterDemandStoreExcessOnSite?
-        next if xml.include? 'battery'
-        next if xml.include? 'base-misc-defaults'
-        next if xml.include? 'base-misc-emissions.xml'
-        next if xml.include? 'base-residents-5.xml'
-        # Won't work until https://github.com/NREL/EnergyPlus/pull/10131
-        # is available in E+
-        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple'
+        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple' # FIXME: Won't work w/ unit multipliers until https://github.com/NREL/EnergyPlus/pull/10131 is available in E+
 
         xmls << File.absolute_path(xml)
       end
@@ -381,26 +366,38 @@ class HPXMLTest < Minitest::Test
   private
 
   def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
+    unit_multiplier = 1
     if apply_unit_multiplier
+      hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
+      hpxml.buildings.each do |hpxml_bldg|
+        next unless hpxml_bldg.building_construction.number_of_units.nil?
+
+        hpxml_bldg.building_construction.number_of_units = 1
+      end
+      orig_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
+
       # Create copy of the HPXML where the number of Building elements is doubled
       # and each Building is assigned a unit multiplier of 5 (2x5=10).
-      hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
       n_bldgs = hpxml.buildings.size
       for i in 0..n_bldgs - 1
         hpxml_bldg = hpxml.buildings[i]
-        if hpxml_bldg.building_construction.number_of_units.nil?
-          hpxml_bldg.building_construction.number_of_units = 1
+        if hpxml_bldg.dehumidifiers.size > 0
+          # FIXME: Dehumidifiers currently don't give good results w/ unit multipliers
+        elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
+          # FIXME: GSHPs currently don't give good results w/ unit multipliers
+        elsif hpxml_bldg.batteries.size > 0
+          # FIXME: Batteries currently don't work with whole SFA/MF buildings
+          return
+        else
+          hpxml_bldg.building_construction.number_of_units *= 5
         end
-        hpxml_bldg.building_construction.number_of_units *= 5
         hpxml.buildings << hpxml_bldg.dup
       end
       xml.gsub!('.xml', '-10x.xml')
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc)
       XMLHelper.write_file(hpxml_doc, xml)
-      unit_multiplier = 10
-    else
-      unit_multiplier = 1
+      unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
     end
 
     print "Testing #{File.basename(xml)}...\n"
@@ -409,9 +406,7 @@ class HPXMLTest < Minitest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    # FIXME: Revert this when resilience timeseries works
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly total --monthly fuels --monthly enduses --monthly systemuses --monthly emissions --monthly emissionfuels --monthly emissionenduses --monthly hotwater --monthly loads --monthly componentloads --monthly unmethours --monthly temperatures --monthly weather --monthly airflows"
-    # command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
     if unit_multiplier > 1
       command += ' -b ALL'
     end
@@ -450,7 +445,7 @@ class HPXMLTest < Minitest::Test
     bill_results = _get_bill_results(bills_csv_path)
     results = _get_simulation_results(annual_csv_path)
     timeseries_results = _get_simulation_timeseries_results(timeseries_csv_path)
-    _verify_outputs(rundir, xml, results, hpxml.header, hpxml.buildings[0], unit_multiplier)
+    _verify_outputs(rundir, xml, results, hpxml, unit_multiplier)
     if unit_multiplier > 1
       _check_unit_multiplier_results(hpxml.buildings[0], results_1x, results, timeseries_results_1x, timeseries_results, unit_multiplier)
     end
@@ -507,9 +502,11 @@ class HPXMLTest < Minitest::Test
     return results
   end
 
-  def _verify_outputs(rundir, hpxml_path, results, hpxml_header, hpxml_bldg, unit_multiplier)
+  def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
+    hpxml_header = hpxml.header
+    hpxml_bldg = hpxml.buildings[0]
     sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
     # Collapse windows further using same logic as measure.rb
@@ -564,7 +561,7 @@ class HPXMLTest < Minitest::Test
       if hpxml_bldg.windows.empty?
         next if message.include? 'No windows specified, the model will not include window heat transfer.'
       end
-      if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_header.schedules_filepaths.empty?
+      if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
         next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
       end
       if hpxml_path.include? 'base-location-capetown-zaf.xml'
@@ -763,7 +760,7 @@ class HPXMLTest < Minitest::Test
       assert((abs_clg_load_delta < 1.5 * unit_multiplier) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
     end
 
-    return if hpxml_bldg.building_construction.number_of_units > 1
+    return if (hpxml.buildings.size > 1) || (hpxml_bldg.building_construction.number_of_units > 1)
 
     # Timestep
     timestep = hpxml_header.timestep.nil? ? 60 : hpxml_header.timestep
@@ -1388,9 +1385,8 @@ class HPXMLTest < Minitest::Test
     { annual_results_1x => annual_results_10x,
       timeseries_results_1x => timeseries_results_10x }.each do |results_1x, results_10x|
       results_1x.each do |key, vals_1x|
-        next if key.include?('Resilience: Battery') # FIXME: Need to address
-
         abs_delta_tol, abs_frac_tol = get_tolerances(key)
+
         vals_10x = results_10x[key]
         if not vals_1x.is_a? Array
           vals_1x = [vals_1x]

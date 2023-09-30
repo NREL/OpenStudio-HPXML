@@ -937,7 +937,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."],
                             'unique-objects-vary-across-units-epw' => ['Weather station EPW filepath has different values across dwelling units.'],
                             'unique-objects-vary-across-units-dst' => ['Unique object (OS:RunPeriodControl:DaylightSavingTime) has different values across dwelling units.'],
-                            'unique-objects-vary-across-units-tmains' => ['Unique object (OS:Site:WaterMainsTemperature) has different values across dwelling units.'] }
+                            'unique-objects-vary-across-units-tmains' => ['Unique object (OS:Site:WaterMainsTemperature) has different values across dwelling units.'],
+                            'whole-mf-building-batteries' => ['Modeling batteries for whole SFA/MF buildings is not currently supported.'],
+                            'whole-mf-building-dehumidifiers-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for dehumidifiers.'],
+                            'whole-mf-building-gshps-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -1310,6 +1313,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hot_water_distributions[0].dwhr_facilities_connected = HPXML::DWHRFacilitiesConnectedOne
         hpxml_bldg.hot_water_distributions[0].dwhr_equal_flow = true
         hpxml_bldg.hot_water_distributions[0].dwhr_efficiency = 0.55
+      elsif ['whole-mf-building-batteries'].include? error_case
+        building_id = 'ALL'
+        hpxml, hpxml_bldg = _create_hpxml('base-multiple-buildings.xml', building_id: building_id)
+        hpxml_bldg.batteries.add(id: 'Battery1',
+                                 type: HPXML::BatteryTypeLithiumIon)
+      elsif ['whole-mf-building-dehumidifiers-unit-multiplier'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-appliances-dehumidifier.xml')
+        hpxml_bldg.building_construction.number_of_units = 2
+      elsif ['whole-mf-building-gshps-unit-multiplier'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
+        hpxml_bldg.building_construction.number_of_units = 2
       else
         fail "Unhandled case: #{error_case}."
       end
