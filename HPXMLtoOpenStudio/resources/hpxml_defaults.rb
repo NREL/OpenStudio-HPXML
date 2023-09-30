@@ -18,9 +18,9 @@ class HPXMLDefaults
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
     apply_header(hpxml.header, epw_file)
+    apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
-    apply_building(hpxml_bldg, epw_file)
     apply_building_header(hpxml.header, hpxml_bldg, weather)
     apply_building_header_sizing(hpxml_bldg, weather, nbeds)
     apply_site(hpxml_bldg)
