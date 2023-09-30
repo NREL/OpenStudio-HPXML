@@ -364,16 +364,21 @@ class HPXMLTest < Minitest::Test
   private
 
   def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
+    unit_multiplier = 1
     if apply_unit_multiplier
+      hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
+      hpxml.buildings.each do |hpxml_bldg|
+        next unless hpxml_bldg.building_construction.number_of_units.nil?
+
+        hpxml_bldg.building_construction.number_of_units = 1
+      end
+      orig_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
+
       # Create copy of the HPXML where the number of Building elements is doubled
       # and each Building is assigned a unit multiplier of 5 (2x5=10).
-      hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
       n_bldgs = hpxml.buildings.size
       for i in 0..n_bldgs - 1
         hpxml_bldg = hpxml.buildings[i]
-        if hpxml_bldg.building_construction.number_of_units.nil?
-          hpxml_bldg.building_construction.number_of_units = 1
-        end
         if hpxml_bldg.dehumidifiers.size > 0
           # FIXME: Dehumidifiers currently don't give good results w/ unit multipliers
         elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
@@ -390,9 +395,7 @@ class HPXMLTest < Minitest::Test
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc)
       XMLHelper.write_file(hpxml_doc, xml)
-      unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
-    else
-      unit_multiplier = 1
+      unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
     end
 
     print "Testing #{File.basename(xml)}...\n"
