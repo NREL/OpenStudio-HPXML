@@ -520,8 +520,8 @@ class HVAC
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
-    # FIXME: EMS program to model pilot light
-    # Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
+    # EMS program to model pilot light
+    # FUTURE: Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
     set_boiler_pilot_light_ems_program(model, boiler, heating_system)
 
     if is_condensing && oat_reset_enabled
@@ -709,7 +709,7 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
-  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods)
+  def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -733,7 +733,7 @@ class HVAC
     avg_energy_factor = dehumidifiers.map { |d| d.energy_factor * d.capacity }.sum / total_capacity
     total_fraction_served = dehumidifiers.map { |d| d.fraction_served }.sum
 
-    control_zone = living_space.thermalZone.get
+    control_zone = conditioned_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
     rh_setpoint = dehumidifiers[0].rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
@@ -773,11 +773,11 @@ class HVAC
     zone_hvac.additionalProperties.setFeature('HPXML_ID', dehumidifier_id) # Used by reporting measure
 
     if total_fraction_served < 1.0
-      adjust_dehumidifier_load_EMS(total_fraction_served, zone_hvac, model, living_space)
+      adjust_dehumidifier_load_EMS(total_fraction_served, zone_hvac, model, conditioned_space)
     end
   end
 
-  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space, schedules_file,
+  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
     obj_name = Constants.ObjectNameCeilingFan
     medium_cfm = 3000.0 # From ANSI 301-2019
@@ -813,7 +813,7 @@ class HVAC
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
     equip.setName(equip_def.name.to_s)
-    equip.setSpace(living_space)
+    equip.setSpace(conditioned_space)
     equip_def.setDesignLevel(ceiling_fan_design_level)
     equip_def.setFractionRadiant(0.558)
     equip_def.setFractionLatent(0)
@@ -822,7 +822,7 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
+  def self.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
@@ -862,10 +862,10 @@ class HVAC
 
     # Set the setpoint schedules
     thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-    thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
+    thermostat_setpoint.setName("#{conditioned_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_sch)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
-    living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+    conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
   def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
@@ -1548,15 +1548,23 @@ class HVAC
         fan_or_pump_program.addLine("Set #{fan_or_pump_var}_#{mode} = 0")
       end
       sensors.each_with_index do |(mode, sensor), i|
-        str_prefix = (i == 0 ? 'If' : 'ElseIf')
+        if i == 0
+          if_else_str = "If #{sensor.name} > 0"
+        elsif i == sensors.size - 1
+          # Use else for last mode to make sure we don't miss any energy use
+          # See https://github.com/NREL/OpenStudio-HPXML/issues/1424
+          if_else_str = 'Else'
+        else
+          if_else_str = "ElseIf #{sensor.name} > 0"
+        end
         if mode == 'primary_htg' && sensors.keys[i + 1] == 'backup_htg'
           # HP with both primary and backup heating
           # If both are operating, apportion energy use
-          fan_or_pump_program.addLine("#{str_prefix} (#{sensor.name} > 0) && (#{sensors.values[i + 1].name} > 0)")
+          fan_or_pump_program.addLine("#{if_else_str} && (#{sensors.values[i + 1].name} > 0)")
           fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name} * #{sensor.name} / (#{sensor.name} + #{sensors.values[i + 1].name})")
           fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{sensors.keys[i + 1]} = #{fan_or_pump_sensor.name} * #{sensors.values[i + 1].name} / (#{sensor.name} + #{sensors.values[i + 1].name})")
         end
-        fan_or_pump_program.addLine("#{str_prefix} #{sensor.name} > 0")
+        fan_or_pump_program.addLine(if_else_str)
         fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
       end
       fan_or_pump_program.addLine('EndIf')
@@ -1583,7 +1591,7 @@ class HVAC
     end
   end
 
-  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, conditioned_space)
     # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
 
     # sensor
@@ -1603,7 +1611,7 @@ class HVAC
     dehumidifier_load_adj_def.setFractionLost(0)
     dehumidifier_load_adj = OpenStudio::Model::OtherEquipment.new(dehumidifier_load_adj_def)
     dehumidifier_load_adj.setName("#{zone_hvac.name} sens htg adj")
-    dehumidifier_load_adj.setSpace(living_space)
+    dehumidifier_load_adj.setSpace(conditioned_space)
     dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
 
     dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower, dehumidifier_load_adj.space.get)
@@ -3605,24 +3613,42 @@ class HVAC
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
-
-      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-        hp_backup_fuel = heat_pump.backup_heating_fuel
-      elsif not heat_pump.backup_system.nil?
-        hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
-      end
-      if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
-        runner.registerError('Switchover temperature should not be used for a heat pump with electric backup; use compressor lockout temperature instead.')
-      end
     else
       hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
     end
+
+    # Error-checking
+    # Can't do this in Schematron because temperatures can be defaulted
+    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      hp_backup_fuel = heat_pump.backup_heating_fuel
+    elsif not heat_pump.backup_system.nil?
+      hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+    end
+    if (hp_backup_fuel == HPXML::FuelTypeElectricity) && (not runner.nil?)
+      if (not hp_ap.hp_min_temp.nil?) && (not hp_ap.supp_max_temp.nil?) && ((hp_ap.hp_min_temp - hp_ap.supp_max_temp).abs < 5)
+        if not heat_pump.backup_heating_switchover_temp.nil?
+          runner.registerError('Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.')
+        else
+          runner.registerError('Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.')
+        end
+      end
+    end
+  end
+
+  def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
+    # Equation based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    return f_out
   end
 
   def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
+    # Equations based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+
     # Fraction of primary ducts (ducts outside conditioned space)
-    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    f_out = get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
 
     if duct_type == HPXML::DuctTypeSupply
       primary_duct_area = 0.27 * cfa_served * f_out
@@ -3653,7 +3679,7 @@ class HVAC
         break
       end
     end
-    secondary_duct_location = HPXML::LocationLivingSpace
+    secondary_duct_location = HPXML::LocationConditionedSpace
 
     return primary_duct_location, secondary_duct_location
   end

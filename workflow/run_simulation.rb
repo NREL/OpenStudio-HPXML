@@ -59,6 +59,7 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
   args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
   args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
+  args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
   args['user_output_variables'] = timeseries_output_variables.join(', ') unless timeseries_output_variables.empty?
   update_args_hash(measures, measure_subdir, args)
 
@@ -77,7 +78,7 @@ end
 
 timeseries_types = ['ALL', 'total', 'fuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
                     'emissionenduses', 'hotwater', 'loads', 'componentloads',
-                    'unmethours', 'temperatures', 'airflows', 'weather']
+                    'unmethours', 'temperatures', 'airflows', 'weather', 'resilience']
 
 options = {}
 OptionParser.new do |opts|
