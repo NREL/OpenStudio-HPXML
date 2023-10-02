@@ -998,6 +998,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @resilience.each do |key, resilience|
       next unless key == RT::Battery
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
+      next if resilience.variables.empty?
 
       batteries = []
       @hpxml_bldgs.each do |hpxml_bldg|
