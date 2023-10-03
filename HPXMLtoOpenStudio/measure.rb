@@ -137,7 +137,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         fail 'Weather station EPW filepath has different values across dwelling units.'
       end
 
-      if building_id == 'ALL'
+      if (building_id == 'ALL') && (hpxml.buildings.size > 1)
         if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.batteries.size }.sum > 0
           # FIXME: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
           # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
