@@ -1607,7 +1607,9 @@ class HPXML < Object
                          :under_slab_insulation_id,
                          :area,
                          :length,
-                         :exposed_perimeter]
+                         :exposed_perimeter,
+                         :interior_shading_id,
+                         :exterior_shading_id]
 
       # Look for pairs of surfaces that can be collapsed
       like_foundation_walls = {}
@@ -3517,8 +3519,8 @@ class HPXML < Object
   class Window < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
-             :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :overhangs_depth,
+             :interior_shading_id, :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
+             :exterior_shading_id, :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
              :fraction_operable, :performance_class, :wall_idref]
     attr_accessor(*ATTRS)
@@ -3589,7 +3591,11 @@ class HPXML < Object
       if (not @exterior_shading_type.nil?) || (not @exterior_shading_factor_summer.nil?) || (not @exterior_shading_factor_winter.nil?)
         exterior_shading = XMLHelper.add_element(window, 'ExteriorShading')
         sys_id = XMLHelper.add_element(exterior_shading, 'SystemIdentifier')
-        XMLHelper.add_attribute(sys_id, 'id', "#{id}ExteriorShading")
+        if @exterior_shading_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', "#{id}ExteriorShading")
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @exterior_shading_id)
+        end
         XMLHelper.add_element(exterior_shading, 'Type', @exterior_shading_type, :string) unless @exterior_shading_type.nil?
         XMLHelper.add_element(exterior_shading, 'SummerShadingCoefficient', @exterior_shading_factor_summer, :float, @exterior_shading_factor_summer_isdefaulted) unless @exterior_shading_factor_summer.nil?
         XMLHelper.add_element(exterior_shading, 'WinterShadingCoefficient', @exterior_shading_factor_winter, :float, @exterior_shading_factor_winter_isdefaulted) unless @exterior_shading_factor_winter.nil?
@@ -3597,7 +3603,11 @@ class HPXML < Object
       if (not @interior_shading_type.nil?) || (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?)
         interior_shading = XMLHelper.add_element(window, 'InteriorShading')
         sys_id = XMLHelper.add_element(interior_shading, 'SystemIdentifier')
-        XMLHelper.add_attribute(sys_id, 'id', "#{id}InteriorShading")
+        if @interior_shading_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', "#{id}InteriorShading")
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @interior_shading_id)
+        end
         XMLHelper.add_element(interior_shading, 'Type', @interior_shading_type, :string) unless @interior_shading_type.nil?
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
@@ -3640,9 +3650,11 @@ class HPXML < Object
       @gas_fill = XMLHelper.get_value(window, 'GasFill', :string)
       @ufactor = XMLHelper.get_value(window, 'UFactor', :float)
       @shgc = XMLHelper.get_value(window, 'SHGC', :float)
+      @exterior_shading_id = HPXML::get_id(window, 'ExteriorShading/SystemIdentifier')
       @exterior_shading_type = XMLHelper.get_value(window, 'ExteriorShading/Type', :string)
       @exterior_shading_factor_summer = XMLHelper.get_value(window, 'ExteriorShading/SummerShadingCoefficient', :float)
       @exterior_shading_factor_winter = XMLHelper.get_value(window, 'ExteriorShading/WinterShadingCoefficient', :float)
+      @interior_shading_id = HPXML::get_id(window, 'InteriorShading/SystemIdentifier')
       @interior_shading_type = XMLHelper.get_value(window, 'InteriorShading/Type', :string)
       @interior_shading_factor_summer = XMLHelper.get_value(window, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(window, 'InteriorShading/WinterShadingCoefficient', :float)

@@ -3197,7 +3197,13 @@
   },
   "sample_files/base-multiple-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "clothes_dryer_present": false
+    "clothes_dryer_present": false,
+    "utility_bill_scenario_names": null
+  },
+  "sample_files/base-multiple-buildings-varied-occupancy.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "clothes_dryer_present": false,
+    "utility_bill_scenario_names": null
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",

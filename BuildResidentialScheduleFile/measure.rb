@@ -147,7 +147,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       # output csv path
       args[:output_csv_path] = "#{filename}.csv"
-      args[:output_csv_path] = "#{filename}_#{i + 1}.csv" if i > 0
+      args[:output_csv_path] = "#{filename}_#{i + 1}.csv" if i > 0 && args[:building_id].get == 'ALL'
 
       # create the schedules
       success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>281ad8f6-3e19-4e32-bb0d-b52e399aae3b</version_id>
-  <version_modified>2023-09-28T16:21:23Z</version_modified>
+  <version_id>158958f4-24a0-465c-aca9-7c7bab723fc2</version_id>
+  <version_modified>2023-10-03T15:04:52Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -17,6 +17,14 @@
       <description>Absolute/relative path of the HPXML file.</description>
       <type>String</type>
       <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>existing_hpxml_path</name>
+      <display_name>Existing HPXML File Path</display_name>
+      <description>Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).</description>
+      <type>String</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -6748,7 +6756,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>91835523</checksum>
+      <checksum>E436A82D</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -6760,7 +6768,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EE3ADA7A</checksum>
+      <checksum>B79B8310</checksum>
     </file>
   </files>
 </measure>

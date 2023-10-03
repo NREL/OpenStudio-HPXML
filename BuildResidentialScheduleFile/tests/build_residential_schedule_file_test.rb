@@ -298,6 +298,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                              output_path: @tmp_schedule_file_path)
 
       if hpxml_bldg.building_id == 'MyBuilding'
+        assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic.csv')
         assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
@@ -313,6 +315,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
         assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
       elsif hpxml_bldg.building_id == 'MyBuilding_2'
+        assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_2.csv')
         assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
@@ -328,6 +332,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
         assert(!sf.schedules.keys.include?(SchedulesFile::ColumnSleeping))
       elsif hpxml_bldg.building_id == 'MyBuilding_3'
+        assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_3.csv')
         assert_in_epsilon(6045, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1745, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1745, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
@@ -350,7 +356,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base-multiple-buildings.xml')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic_2.csv'))
     @args_hash['building_id'] = 'MyBuilding_2'
     hpxml, result = _test_measure()
 
@@ -370,6 +376,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                                year: 2007,
                                output_path: @tmp_schedule_file_path)
 
+        assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_2.csv')
         assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
