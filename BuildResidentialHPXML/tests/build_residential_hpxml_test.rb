@@ -260,13 +260,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-garage-too-wide.xml' => ['Garage is as wide as the single-family detached unit.'],
       'error-garage-too-deep.xml' => ['Garage is as deep as the single-family detached unit.'],
       'error-vented-attic-with-zero-floor-insulation.xml' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
-      'error-different-software-program.xml' => ['hpxml.header.software_program_used=Program; cannot set software_info_program_used=Program2.',
-                                                 'hpxml.header.software_program_version=1; cannot set software_info_program_version=2.'],
-      'error-different-simulation-control.xml' => ['hpxml.header.timestep=60; cannot set simulation_control_timestep=10.',
-                                                   'hpxml.header.sim_begin_month=1, hpxml.header.sim_begin_day=1, hpxml.header.sim_end_month=12, hpxml.header.sim_end_day=31; cannot set simulation_control_run_period=Jan 2 - Dec 30.',
-                                                   'hpxml.header.sim_calendar_year=2007; cannot set simulation_control_run_period_calendar_year=2008.',
-                                                   'hpxml.header.temperature_capacitance_multiplier=1.0; cannot set simulation_control_temperature_capacitance_multiplier=2.0.'],
-      'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions'."],
+      'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
+                                                 "'Software Info: Program Version' cannot vary across dwelling units."],
+      'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
+                                                   "'Simulation Control: Run Period' cannot vary across dwelling units.",
+                                                   "'Simulation Control: Run Period Calendar Year' cannot vary across dwelling units.",
+                                                   "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."],
+      'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
       'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."]
     }
 

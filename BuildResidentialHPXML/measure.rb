@@ -3569,6 +3569,8 @@ class HPXMLFile
   end
 
   def self.unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability = nil)
+    natvent_availability = HPXML::ScheduleUnavailable if natvent_availability.nil?
+
     hpxml.header.unavailable_periods.each do |unavailable_period|
       begin_hour = 0 if begin_hour.nil?
       end_hour = 24 if end_hour.nil?
@@ -3579,10 +3581,10 @@ class HPXMLFile
                   (unavailable_period.begin_hour == begin_hour) &&
                   (unavailable_period.end_month == end_month) &&
                   (unavailable_period.end_day == end_day) &&
-                  (unavailable_period.end_hour == end_hour)
-      if unavailable_period.natvent_availability == natvent_availability
-        return true
-      end
+                  (unavailable_period.end_hour == end_hour) &&
+                  (unavailable_period.natvent_availability == natvent_availability)
+
+      return true
     end
     return false
   end
@@ -3597,10 +3599,8 @@ class HPXMLFile
     if args[:schedules_vacancy_period].is_initialized
       begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
 
-      natvent_availability = HPXML::ScheduleUnavailable
-
-      if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
-        hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+      if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+        hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
       end
     end
     if args[:schedules_power_outage_period].is_initialized
@@ -3617,20 +3617,20 @@ class HPXMLFile
 
     if args[:software_info_program_used].is_initialized
       if !hpxml.header.software_program_used.nil? && (hpxml.header.software_program_used != args[:software_info_program_used].get)
-        errors << "hpxml.header.software_program_used=#{hpxml.header.software_program_used}; cannot set software_info_program_used=#{args[:software_info_program_used].get}."
+        errors << "'Software Info: Program Used' cannot vary across dwelling units."
       end
       hpxml.header.software_program_used = args[:software_info_program_used].get
     end
     if args[:software_info_program_version].is_initialized
       if !hpxml.header.software_program_version.nil? && (hpxml.header.software_program_version != args[:software_info_program_version].get)
-        errors << "hpxml.header.software_program_version=#{hpxml.header.software_program_version}; cannot set software_info_program_version=#{args[:software_info_program_version].get}."
+        errors << "'Software Info: Program Version' cannot vary across dwelling units."
       end
       hpxml.header.software_program_version = args[:software_info_program_version].get
     end
 
     if args[:simulation_control_timestep].is_initialized
       if !hpxml.header.timestep.nil? && (hpxml.header.timestep != args[:simulation_control_timestep].get)
-        errors << "hpxml.header.timestep=#{hpxml.header.timestep}; cannot set simulation_control_timestep=#{args[:simulation_control_timestep].get}."
+        errors << "'Simulation Control: Timestep' cannot vary across dwelling units."
       end
       hpxml.header.timestep = args[:simulation_control_timestep].get
     end
@@ -3641,7 +3641,7 @@ class HPXMLFile
          (!hpxml.header.sim_begin_day.nil? && (hpxml.header.sim_begin_day != begin_day)) ||
          (!hpxml.header.sim_end_month.nil? && (hpxml.header.sim_end_month != end_month)) ||
          (!hpxml.header.sim_end_day.nil? && (hpxml.header.sim_end_day != end_day))
-        errors << "hpxml.header.sim_begin_month=#{hpxml.header.sim_begin_month}, hpxml.header.sim_begin_day=#{hpxml.header.sim_begin_day}, hpxml.header.sim_end_month=#{hpxml.header.sim_end_month}, hpxml.header.sim_end_day=#{hpxml.header.sim_end_day}; cannot set simulation_control_run_period=#{args[:simulation_control_run_period].get}."
+        errors << "'Simulation Control: Run Period' cannot vary across dwelling units."
       end
       hpxml.header.sim_begin_month = begin_month
       hpxml.header.sim_begin_day = begin_day
@@ -3651,14 +3651,14 @@ class HPXMLFile
 
     if args[:simulation_control_run_period_calendar_year].is_initialized
       if !hpxml.header.sim_calendar_year.nil? && (hpxml.header.sim_calendar_year != Integer(args[:simulation_control_run_period_calendar_year].get))
-        errors << "hpxml.header.sim_calendar_year=#{hpxml.header.sim_calendar_year}; cannot set simulation_control_run_period_calendar_year=#{args[:simulation_control_run_period_calendar_year].get}."
+        errors << "'Simulation Control: Run Period Calendar Year' cannot vary across dwelling units."
       end
       hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year].get
     end
 
     if args[:simulation_control_temperature_capacitance_multiplier].is_initialized
       if !hpxml.header.temperature_capacitance_multiplier.nil? && (hpxml.header.temperature_capacitance_multiplier != Float(args[:simulation_control_temperature_capacitance_multiplier].get))
-        errors << "hpxml.header.temperature_capacitance_multiplier=#{hpxml.header.temperature_capacitance_multiplier}; cannot set simulation_control_temperature_capacitance_multiplier=#{args[:simulation_control_temperature_capacitance_multiplier].get}."
+        errors << "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."
       end
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier].get
     end
@@ -3726,7 +3726,7 @@ class HPXMLFile
 
         emissions_scenario_exists = false
         hpxml.header.emissions_scenarios.each do |es|
-          if (es.name != name) || (es.name == name && es.emissions_type != emissions_type)
+          if (es.name != name) || (es.emissions_type != emissions_type)
             next
           end
 
@@ -3748,13 +3748,13 @@ class HPXMLFile
              (!wood_value.nil? && es.wood_value != wood_value) ||
              (!fuel_units.nil? && es.wood_pellets_units != fuel_units) ||
              (!wood_pellets_value.nil? && es.wood_pellets_value != wood_pellets_value)
-            errors << "HPXML header already includes an emissions scenario named '#{name}'."
+            errors << "HPXML header already includes an emissions scenario named '#{name}' with type '#{emissions_type}'."
           else
             emissions_scenario_exists = true
           end
         end
 
-        next unless not emissions_scenario_exists
+        next if emissions_scenario_exists
 
         hpxml.header.emissions_scenarios.add(name: name,
                                              emissions_type: emissions_type,
@@ -3936,7 +3936,7 @@ class HPXMLFile
           end
         end
 
-        next unless not utility_bill_scenario_exists
+        next if utility_bill_scenario_exists
 
         hpxml.header.utility_bill_scenarios.add(name: name,
                                                 elec_tariff_filepath: elec_tariff_filepath,
@@ -3966,9 +3966,7 @@ class HPXMLFile
     errors.each do |error|
       runner.registerError(error)
     end
-    return true if errors.empty?
-
-    return false
+    return errors.empty?
   end
 
   def self.add_building(hpxml, args)
