@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e299945c-98c8-4a5a-9af2-443cb6e01e5b</version_id>
-  <version_modified>2023-09-28T13:56:04Z</version_modified>
+  <version_id>81513a63-699a-474a-bbe3-1ecc64e6577d</version_id>
+  <version_modified>2023-10-03T19:37:23Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -130,7 +130,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3718B6AF</checksum>
+      <checksum>CB98D4F0</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -232,7 +232,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>66B122C0</checksum>
+      <checksum>DE9728DA</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -244,7 +244,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07AEAE76</checksum>
+      <checksum>0CCEE570</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -292,7 +292,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8786A75C</checksum>
+      <checksum>BF564292</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
