@@ -137,10 +137,6 @@ class Battery
     discharge_sensor.setName('battery_discharge')
     discharge_sensor.setKeyName(elcs.name.to_s)
 
-    # production_decrement_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Production Decrement Energy')
-    # production_decrement_sensor.setName('battery_production_decrement')
-    # production_decrement_sensor.setKeyName(elcs.name.to_s)
-
     loss_adj_object_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     loss_adj_object = OpenStudio::Model::OtherEquipment.new(loss_adj_object_def)
     obj_name = Constants.ObjectNameBatteryLossesAdjustment(elcs.name)
@@ -160,11 +156,10 @@ class Battery
 
     battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     battery_losses_program.setName('battery_losses')
-    battery_losses_program.addLine("Set charge_losses = -1 * #{charge_sensor.name} * (1 - #{battery.round_trip_efficiency} ** 0.5)")
-    battery_losses_program.addLine("Set discharge_losses = -1 * #{discharge_sensor.name} * (1 - #{battery.round_trip_efficiency} ** 0.5 )")
-    # battery_losses_program.addLine("Set production_decrement_losses = -1 * 0.5 * #{production_decrement_sensor.name} * (1 - #{battery.round_trip_efficiency})")
-    # battery_losses_program.addLine("Set losses = charge_losses + discharge_losses + production_decrement_losses")
+    battery_losses_program.addLine("Set charge_losses = -1 * #{charge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))")
+    battery_losses_program.addLine("Set discharge_losses = -1 * #{discharge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))")
     battery_losses_program.addLine('Set losses = charge_losses + discharge_losses')
+
     battery_losses_program.addLine("Set #{battery_adj_actuator.name} = -1 * losses / ( 3600 * SystemTimeStep )")
 
     battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
