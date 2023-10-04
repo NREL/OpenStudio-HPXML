@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3f5260e1-90db-44cb-94fe-0c84a2c08f13</version_id>
-  <version_modified>2023-10-03T23:27:37Z</version_modified>
+  <version_id>5cac7054-7eb7-432f-8d88-99d005cbdd0f</version_id>
+  <version_modified>2023-10-04T17:23:48Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -322,7 +322,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C83B7F83</checksum>
+      <checksum>3DE5829C</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -493,6 +493,12 @@
       <checksum>CE56630D</checksum>
     </file>
     <file>
+      <filename>in.schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A707BB08</checksum>
+    </file>
+    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -538,7 +544,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>97B1E416</checksum>
+      <checksum>DAC7ADDB</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>

@@ -13,10 +13,91 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     @test_files_path = File.join(@root_path, 'workflow', 'tests')
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @results_dir = File.join(@test_files_path, 'results')
+    FileUtils.mkdir_p @results_dir
   end
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+  end
+
+  def test_hvac_configurations
+    # Test autosizing calculations for all base-hvac-foo.xml sample files.
+    results_out = File.join(@results_dir, 'results_sizing.csv')
+    File.delete(results_out) if File.exist? results_out
+
+    sizing_results = {}
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
+    Dir["#{@sample_files_path}/base-hvac*.xml"].each do |hvac_hpxml|
+      next if hvac_hpxml.include? 'autosize'
+
+      hvac_hpxml = File.basename(hvac_hpxml)
+      puts "Autosizing #{hvac_hpxml}..."
+
+      hpxml, hpxml_bldg = _create_hpxml(hvac_hpxml)
+
+      # Set to autosize
+      hpxml_bldg.heating_systems.each do |htgsys|
+        htgsys.heating_capacity = nil
+      end
+      hpxml_bldg.cooling_systems.each do |clgsys|
+        clgsys.cooling_capacity = nil
+        clgsys.integrated_heating_system_capacity = nil
+      end
+      hpxml_bldg.heat_pumps.each do |hpsys|
+        hpsys.heating_capacity = nil
+        hpsys.heating_capacity_17F = nil
+        hpsys.heating_capacity_retention_fraction = nil
+        hpsys.heating_capacity_retention_temp = nil
+        hpsys.backup_heating_capacity = nil
+        hpsys.cooling_capacity = nil
+      end
+
+      if hpxml_bldg.heat_pumps.size > 0
+        hp_sizing_methodologies = [HPXML::HeatPumpSizingACCA,
+                                   HPXML::HeatPumpSizingHERS,
+                                   HPXML::HeatPumpSizingMaxLoad]
+      else
+        hp_sizing_methodologies = [nil]
+      end
+      hp_sizing_methodologies.each do |hp_sizing_methodology|
+        if not hp_sizing_methodology.nil?
+          puts "  ... using HP Sizing Methodology=#{hp_sizing_methodology}"
+        end
+        hpxml_bldg.header.heat_pump_sizing_methodology = hp_sizing_methodology
+
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _autosized_model, _autosized_hpxml, autosized_hpxml_bldg = _test_measure(args_hash)
+
+        test_name = hvac_hpxml.gsub('base-hvac-', 'base-hvac-autosize')
+        if not hp_sizing_methodology.nil?
+          test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}.xml")
+        end
+        htg_cap, clg_cap, hp_backup_cap = Outputs.get_total_hvac_capacities(autosized_hpxml_bldg)
+        sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => htg_cap.round(1),
+                                      'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
+                                      'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1) }
+      end
+    end
+
+    # Write results to a file
+    require 'csv'
+    output_keys = sizing_results.values[0].keys
+    CSV.open(results_out, 'w') do |csv|
+      csv << ['HPXML'] + output_keys
+      sizing_results.sort.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          if xml_results[key].nil?
+            csv_row << 0
+          else
+            csv_row << xml_results[key]
+          end
+        end
+        csv << csv_row
+      end
+    end
   end
 
   def test_acca_block_load_residences
