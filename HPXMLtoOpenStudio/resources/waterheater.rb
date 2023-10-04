@@ -1701,7 +1701,7 @@ class Waterheater
     new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
     new_heater.setOnCycleParasiticHeatFractiontoTank(0)
 
-    #add wh unmet loads EMS program
+    # add wh unmet loads EMS program
     wh_unmet_loads(model, new_heater)
 
     return new_heater
@@ -1813,15 +1813,14 @@ class Waterheater
   end
 
   def self.wh_unmet_loads(model, water_heater)
-
-    #EMS sensors
+    # EMS sensors
     mixed_setpoint_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     mixed_setpoint_sensor.setName('res_shower_mixsp')
     mixed_setpoint_sensor.setKeyName('mixed water temperature schedule')
 
     wh_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Use Side Outlet Temperature')
-    wh_temp_sensor.setName("#{water_heater.name.to_s} Outlet Temperature")
-    wh_temp_sensor.setKeyName("#{water_heater.name.to_s}")
+    wh_temp_sensor.setName("#{water_heater.name} Outlet Temperature")
+    wh_temp_sensor.setKeyName("#{water_heater.name}")
 
     shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
     shower_flow_sensor.setName('Fixture Volume')
@@ -1835,29 +1834,29 @@ class Waterheater
     dw_flow_sensor.setName('Dishwasher Volume')
     dw_flow_sensor.setKeyName('dishwasher')
 
-    #EMS program
+    # EMS program
     unmet_wh_loads_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    unmet_wh_loads_program.setName("#{water_heater.name.to_s} Unmet Loads")
+    unmet_wh_loads_program.setName("#{water_heater.name} Unmet Loads")
     unmet_wh_loads_program.addLine("If #{shower_flow_sensor.name} > 0,")
-    unmet_wh_loads_program.addLine("Set ShowerTime=SystemTimeStep")
-    unmet_wh_loads_program.addLine("Else")
-    unmet_wh_loads_program.addLine("Set ShowerTime=0")
-    unmet_wh_loads_program.addLine("EndIf")
+    unmet_wh_loads_program.addLine('Set ShowerTime=SystemTimeStep')
+    unmet_wh_loads_program.addLine('Else')
+    unmet_wh_loads_program.addLine('Set ShowerTime=0')
+    unmet_wh_loads_program.addLine('EndIf')
     unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} > #{mixed_setpoint_sensor.name})")
-    unmet_wh_loads_program.addLine("Set ShowerSagTime=SystemTimeStep")
+    unmet_wh_loads_program.addLine('Set ShowerSagTime=SystemTimeStep')
     unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name}*4141170*(#{wh_temp_sensor.name}-#{mixed_setpoint_sensor.name})")
-    unmet_wh_loads_program.addLine("Else")
-    unmet_wh_loads_program.addLine("Set ShowerSagTime=0,")
-    unmet_wh_loads_program.addLine("Set ShowerE=0")
-    unmet_wh_loads_program.addLine("EndIf")
+    unmet_wh_loads_program.addLine('Else')
+    unmet_wh_loads_program.addLine('Set ShowerSagTime=0,')
+    unmet_wh_loads_program.addLine('Set ShowerE=0')
+    unmet_wh_loads_program.addLine('EndIf')
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{water_heater.name.to_s} Unmet Loads")
+    program_calling_manager.setName("#{water_heater.name} Unmet Loads")
     program_calling_manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
     program_calling_manager.addProgram(unmet_wh_loads_program)
 
-    #output variables
+    # output variables
     shower_time_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ShowerTime')
     shower_time_output_var.setName('ShowerTime')
     shower_time_output_var.setTypeOfDataInVariable('Summed')
@@ -1865,7 +1864,7 @@ class Waterheater
     shower_time_output_var.setEMSProgramOrSubroutineName(unmet_wh_loads_program)
     shower_time_output_var.setUnits('hr')
 
-    #output variables
+    # output variables
     shower_unmet_energy_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ShowerE')
     shower_unmet_energy_output_var.setName('ShowerE')
     shower_unmet_energy_output_var.setTypeOfDataInVariable('Summed')
@@ -1873,13 +1872,12 @@ class Waterheater
     shower_unmet_energy_output_var.setEMSProgramOrSubroutineName(unmet_wh_loads_program)
     shower_unmet_energy_output_var.setUnits('J')
 
-    #output variables
+    # output variables
     shower_unmet_time_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ShowerSagTime')
-    shower_unmet_time_output_var.setName("ShowerSagTime")
+    shower_unmet_time_output_var.setName('ShowerSagTime')
     shower_unmet_time_output_var.setTypeOfDataInVariable('Summed')
     shower_unmet_time_output_var.setUpdateFrequency('SystemTimestep')
     shower_unmet_time_output_var.setEMSProgramOrSubroutineName(unmet_wh_loads_program)
     shower_unmet_time_output_var.setUnits('hr')
   end
-
 end
