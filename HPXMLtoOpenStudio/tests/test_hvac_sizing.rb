@@ -36,23 +36,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       puts "Autosizing #{hvac_hpxml}..."
 
       hpxml, hpxml_bldg = _create_hpxml(hvac_hpxml)
-
-      # Set to autosize
-      hpxml_bldg.heating_systems.each do |htgsys|
-        htgsys.heating_capacity = nil
-      end
-      hpxml_bldg.cooling_systems.each do |clgsys|
-        clgsys.cooling_capacity = nil
-        clgsys.integrated_heating_system_capacity = nil
-      end
-      hpxml_bldg.heat_pumps.each do |hpsys|
-        hpsys.heating_capacity = nil
-        hpsys.heating_capacity_17F = nil
-        hpsys.heating_capacity_retention_fraction = nil
-        hpsys.heating_capacity_retention_temp = nil
-        hpsys.backup_heating_capacity = nil
-        hpsys.cooling_capacity = nil
-      end
+      _remove_hardsized_capacities(hpxml_bldg)
 
       if hpxml_bldg.heat_pumps.size > 0
         hp_sizing_methodologies = [HPXML::HeatPumpSizingACCA,
@@ -61,6 +45,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       else
         hp_sizing_methodologies = [nil]
       end
+
+      hp_capacity_acca, hp_capacity_hers, hp_capacity_maxload = nil, nil, nil
       hp_sizing_methodologies.each do |hp_sizing_methodology|
         if not hp_sizing_methodology.nil?
           puts "  ... using HP Sizing Methodology=#{hp_sizing_methodology}"
@@ -78,7 +64,23 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => htg_cap.round(1),
                                       'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
                                       'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1) }
+
+        if hpxml_bldg.heat_pumps.size == 1
+          if hp_sizing_methodology == HPXML::HeatPumpSizingACCA
+            hp_capacity_acca = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+          elsif hp_sizing_methodology == HPXML::HeatPumpSizingHERS
+            hp_capacity_hers = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+          elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
+            hp_capacity_maxload = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+          end
+        end
       end
+
+      next unless hpxml_bldg.heat_pumps.size == 1
+
+      # Check that MaxLoad >= HERS >= ACCA for heat pump heating capacity
+      assert_operator(hp_capacity_maxload, :>=, hp_capacity_hers)
+      assert_operator(hp_capacity_hers, :>=, hp_capacity_acca)
     end
 
     # Write results to a file
@@ -195,43 +197,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1200, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
   end
 
-  def test_heat_pumps
-    ['base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology',
-     'base-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology',
-     'base-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology',
-     'base-hvac-autosize-ground-to-air-heat-pump-sizing-methodology',
-     'base-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology',
-     'base-hvac-autosize-pthp-sizing-methodology',
-     'base-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology',
-     'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed-sizing-methodology'].each do |hpxml_file|
-      # Run w/ ACCA sizing
-      args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-acca.xml"))
-      _model_acca, _acca_hpxml, acca_hpxml_bldg = _test_measure(args_hash)
-
-      # Run w/ HERS sizing
-      args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-hers.xml"))
-      _model_hers, _hers_hpxml, hers_hpxml_bldg = _test_measure(args_hash)
-
-      # Run w/ MaxLoad sizing
-      args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, "#{hpxml_file}-maxload.xml"))
-      _model_maxload, _maxload_hpxml, maxload_hpxml_bldg = _test_measure(args_hash)
-
-      # Check that MaxLoad >= HERS > ACCA for heat pump heating capacity
-      hp_capacity_acca = acca_hpxml_bldg.heat_pumps[0].heating_capacity
-      hp_capacity_hers = hers_hpxml_bldg.heat_pumps[0].heating_capacity
-      hp_capacity_maxload = maxload_hpxml_bldg.heat_pumps[0].heating_capacity
-      assert_operator(hp_capacity_maxload, :>=, hp_capacity_hers)
-      assert_operator(hp_capacity_hers, :>, hp_capacity_acca)
-    end
-  end
-
   def test_heat_pump_separate_backup_systems
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path) }
+
     # Run w/ ducted heat pump and ductless backup
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
+    _remove_hardsized_capacities(hpxml_bldg)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that boiler capacity equals building heating design load w/o duct load.
@@ -240,8 +212,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_epsilon(htg_design_load_without_ducts, htg_capacity, 0.001) # 0.001 to handle rounding
 
     # Run w/ ducted heat pump and ducted backup
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-furnace.xml'))
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml')
+    _remove_hardsized_capacities(hpxml_bldg)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that furnace capacity is between the building heating design load w/o duct load
@@ -254,8 +227,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_operator(htg_capacity, :<, htg_design_load_with_ducts * 0.999) # 0.999 to handle rounding
 
     # Run w/ ductless heat pump and ductless backup
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml'))
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-stove.xml')
+    _remove_hardsized_capacities(hpxml_bldg)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that stove capacity equals building heating design load
@@ -265,9 +239,16 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   end
 
   def test_heat_pump_integrated_backup_systems
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path) }
+
     # Check that HP backup heating capacity matches heating design load even when using MaxLoad in a hot climate (GitHub issue #1140)
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-maxload-miami-fl.xml'))
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    _remove_hardsized_capacities(hpxml_bldg)
+    hpxml_bldg.header.heat_pump_sizing_methodology = HPXML::HeatPumpSizingMaxLoad
+    hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '1A'
+    hpxml_bldg.state_code = 'FL'
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, hpxml_bldg.hvac_plant.hdl_total)
@@ -434,5 +415,23 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def _create_hpxml(hpxml_name)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
     return hpxml, hpxml.buildings[0]
+  end
+
+  def _remove_hardsized_capacities(hpxml_bldg)
+    hpxml_bldg.heating_systems.each do |htgsys|
+      htgsys.heating_capacity = nil
+    end
+    hpxml_bldg.cooling_systems.each do |clgsys|
+      clgsys.cooling_capacity = nil
+      clgsys.integrated_heating_system_capacity = nil
+    end
+    hpxml_bldg.heat_pumps.each do |hpsys|
+      hpsys.heating_capacity = nil
+      hpsys.heating_capacity_17F = nil
+      hpsys.heating_capacity_retention_fraction = nil
+      hpsys.heating_capacity_retention_temp = nil
+      hpsys.backup_heating_capacity = nil
+      hpsys.cooling_capacity = nil
+    end
   end
 end
