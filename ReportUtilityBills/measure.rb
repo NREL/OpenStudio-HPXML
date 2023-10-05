@@ -89,23 +89,25 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     # Require not DSE
-    (@hpxml_bldg.heating_systems + @hpxml_bldg.heat_pumps).each do |htg_system|
-      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
-      next if htg_system.distribution_system_idref.nil?
-      next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if htg_system.distribution_system.annual_heating_dse.nil?
-      next if htg_system.distribution_system.annual_heating_dse == 1
+    @hpxml_buildings.each do |hpxml_bldg|
+      (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |htg_system|
+        next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
+        next if htg_system.distribution_system_idref.nil?
+        next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+        next if htg_system.distribution_system.annual_heating_dse.nil?
+        next if htg_system.distribution_system.annual_heating_dse == 1
 
-      warnings << 'DSE is not currently supported when calculating utility bills.'
-    end
-    (@hpxml_bldg.cooling_systems + @hpxml_bldg.heat_pumps).each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
-      next if clg_system.distribution_system_idref.nil?
-      next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
-      next if clg_system.distribution_system.annual_cooling_dse.nil?
-      next if clg_system.distribution_system.annual_cooling_dse == 1
+        warnings << 'DSE is not currently supported when calculating utility bills.'
+      end
+      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |clg_system|
+        next unless clg_system.fraction_cool_load_served > 0
+        next if clg_system.distribution_system_idref.nil?
+        next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
+        next if clg_system.distribution_system.annual_cooling_dse.nil?
+        next if clg_system.distribution_system.annual_cooling_dse == 1
 
-      warnings << 'DSE is not currently supported when calculating utility bills.'
+        warnings << 'DSE is not currently supported when calculating utility bills.'
+      end
     end
 
     return warnings.uniq
@@ -164,12 +166,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     # FIXME: Relax this constraint (using a new building_id measure argument?)
-    if hpxml.buildings.size > 1
-      runner.registerWarning('Cannot currently handle an HPXML with multiple Building elements.')
+    @hpxml_header = hpxml.header
+    @hpxml_buildings = hpxml.buildings
+    if @hpxml_buildings.size > 1 && building_id == 'ALL' && @hpxml_header.utility_bill_scenarios.select { |utility_bill_scenario| !utility_bill_scenario.elec_tariff_filepath.nil? }.size > 0
+      runner.registerWarning('Cannot currently calculate detailed bills for an HPXML with multiple Building elements.')
       return result
     end
-    @hpxml_header = hpxml.header
-    @hpxml_bldg = hpxml.buildings[0]
 
     warnings = check_for_return_type_warnings()
     return result if !warnings.empty?
@@ -185,14 +187,20 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                        FT::Coal => HPXML::FuelTypeCoal }
 
     # Check for presence of fuels once
-    has_fuel = @hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+    has_fuel = {}
+    @hpxml_buildings.each do |hpxml_bldg|
+      hpxml_bldg_has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+      hpxml_bldg_has_fuel.each do |fuel, has_f|
+        has_fuel[fuel] = true if has_f
+      end
+    end
     has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
-        next if is_production && @hpxml_bldg.pv_systems.empty?
+        next if is_production && @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.pv_systems.empty? }.size == 0
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
@@ -241,12 +249,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     # FIXME: Relax this constraint (using a new building_id measure argument?)
-    if hpxml.buildings.size > 1
-      runner.registerWarning('Cannot currently handle an HPXML with multiple Building elements.')
+    @hpxml_header = hpxml.header
+    @hpxml_buildings = hpxml.buildings
+    if @hpxml_buildings.size > 1 && building_id == 'ALL' && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
+      runner.registerWarning('Cannot currently calculate detailed bills for an HPXML with multiple Building elements.')
       return false
     end
-    @hpxml_header = hpxml.header
-    @hpxml_bldg = hpxml.buildings[0]
 
     return true if @hpxml_header.utility_bill_scenarios.empty?
 
@@ -294,7 +302,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, @hpxml_bldg.pv_systems)
+      pv_systems = @hpxml_buildings.select { |hpxml_bldg| [hpxml_bldg.pv_systems] * hpxml_bldg.building_construction.number_of_units }.flatten
+      num_units = @hpxml_buildings.collect { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum(0.0)
+      warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems, num_units)
       if register_warnings(runner, warnings)
         next
       end
@@ -444,14 +454,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote monthly bills output to #{monthly_output_path}.")
   end
 
-  def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems)
+  def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems, num_units)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
         if bill_scenario.elec_tariff_filepath.nil?
-          rate.fixedmonthlycharge = bill_scenario.elec_fixed_charge
+          rate.fixedmonthlycharge = bill_scenario.elec_fixed_charge * num_units
           rate.flatratebuy = bill_scenario.elec_marginal_rate
         else
           require 'json'
@@ -525,22 +535,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         # Feed-In Tariff
         rate.feed_in_tariff_rate = bill_scenario.pv_feed_in_tariff_rate if bill_scenario.pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
       elsif fuel_type == FT::Gas
-        rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.natural_gas_marginal_rate
       elsif fuel_type == FT::Oil
-        rate.fixedmonthlycharge = bill_scenario.fuel_oil_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.fuel_oil_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.fuel_oil_marginal_rate
       elsif fuel_type == FT::Propane
-        rate.fixedmonthlycharge = bill_scenario.propane_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.propane_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.propane_marginal_rate
       elsif fuel_type == FT::WoodCord
-        rate.fixedmonthlycharge = bill_scenario.wood_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.wood_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.wood_marginal_rate
       elsif fuel_type == FT::WoodPellets
-        rate.fixedmonthlycharge = bill_scenario.wood_pellets_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.wood_pellets_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.wood_pellets_marginal_rate
       elsif fuel_type == FT::Coal
-        rate.fixedmonthlycharge = bill_scenario.coal_fixed_charge
+        rate.fixedmonthlycharge = bill_scenario.coal_fixed_charge * num_units
         rate.flatratebuy = bill_scenario.coal_marginal_rate
       end
 
