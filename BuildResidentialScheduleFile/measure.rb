@@ -102,17 +102,15 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:hpxml_output_path] = hpxml_output_path
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: 'ALL')
+    building_id = nil
+    building_id = args[:building_id].get if args[:building_id].is_initialized
+    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
 
     debug = false
     if args[:debug].is_initialized
       debug = args[:debug].get
     end
     args[:debug] = debug
-
-    if hpxml.buildings.size > 1 && !args[:building_id].is_initialized
-      fail "Argument 'building_id' required if there are multiple Building elements in the HPXML file."
-    end
 
     # random seed
     if args[:schedules_random_seed].is_initialized
