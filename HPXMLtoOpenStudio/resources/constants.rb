@@ -422,6 +422,10 @@ class Constants
     return 'unmet hours program'
   end
 
+  def self.ObjectNameUnmetLoadsProgram
+    return 'unmet loads program'
+  end
+
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
