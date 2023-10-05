@@ -303,7 +303,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       # Get utility rates
       pv_systems = @hpxml_buildings.select { |hpxml_bldg| [hpxml_bldg.pv_systems] * hpxml_bldg.building_construction.number_of_units }.flatten
-      num_units = @hpxml_buildings.collect { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum(0.0)
+      num_units = @hpxml_buildings.collect { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
       warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems, num_units)
       if register_warnings(runner, warnings)
         next
@@ -454,14 +454,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote monthly bills output to #{monthly_output_path}.")
   end
 
-  def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems, num_units)
+  def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, pv_systems, num_units = 1)
     warnings = []
     utility_rates.each do |fuel_type, rate|
       next if fuels[[fuel_type, false]].timeseries.sum == 0
 
       if fuel_type == FT::Elec
         if bill_scenario.elec_tariff_filepath.nil?
-          rate.fixedmonthlycharge = bill_scenario.elec_fixed_charge * num_units
+          rate.fixedmonthlycharge = bill_scenario.elec_fixed_charge
+          rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
           rate.flatratebuy = bill_scenario.elec_marginal_rate
         else
           require 'json'
@@ -535,22 +536,28 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         # Feed-In Tariff
         rate.feed_in_tariff_rate = bill_scenario.pv_feed_in_tariff_rate if bill_scenario.pv_compensation_type == HPXML::PVCompensationTypeFeedInTariff
       elsif fuel_type == FT::Gas
-        rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.natural_gas_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.natural_gas_marginal_rate
       elsif fuel_type == FT::Oil
-        rate.fixedmonthlycharge = bill_scenario.fuel_oil_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.fuel_oil_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.fuel_oil_marginal_rate
       elsif fuel_type == FT::Propane
-        rate.fixedmonthlycharge = bill_scenario.propane_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.propane_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.propane_marginal_rate
       elsif fuel_type == FT::WoodCord
-        rate.fixedmonthlycharge = bill_scenario.wood_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.wood_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.wood_marginal_rate
       elsif fuel_type == FT::WoodPellets
-        rate.fixedmonthlycharge = bill_scenario.wood_pellets_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.wood_pellets_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.wood_pellets_marginal_rate
       elsif fuel_type == FT::Coal
-        rate.fixedmonthlycharge = bill_scenario.coal_fixed_charge * num_units
+        rate.fixedmonthlycharge = bill_scenario.coal_fixed_charge
+        rate.fixedmonthlycharge *= num_units if !rate.fixedmonthlycharge.nil?
         rate.flatratebuy = bill_scenario.coal_marginal_rate
       end
 
