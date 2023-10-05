@@ -84,10 +84,18 @@ class Location
       abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), epw_filepath))
     end
     if not File.exist? abs_epw_path
-      # Check for weather path relative to this file
+      # Check for weather path relative to the HPXML file
       for level_deep in 1..3
         level = (['..'] * level_deep).join('/')
         abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), level, 'weather', epw_filepath))
+        break if File.exist? abs_epw_path
+      end
+    end
+    if not File.exist? abs_epw_path
+      # Check for weather path relative to this file
+      for level_deep in 1..3
+        level = (['..'] * level_deep).join('/')
+        abs_epw_path = File.absolute_path(File.join(File.dirname(__FILE__), level, 'weather', epw_filepath))
         break if File.exist? abs_epw_path
       end
     end
