@@ -83,7 +83,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Require full annual simulation if PV
     if !(@hpxml_header.sim_begin_month == 1 && @hpxml_header.sim_begin_day == 1 && @hpxml_header.sim_end_month == 12 && @hpxml_header.sim_end_day == 31)
-      if @hpxml_bldg.pv_systems.size > 0
+      if @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
         warnings << 'A full annual simulation is required for calculating utility bills for homes with PV.'
       end
     end
