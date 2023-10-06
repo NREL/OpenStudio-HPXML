@@ -584,7 +584,7 @@ class HPXMLTest < Minitest::Test
       end
 
       # FIXME: Revert this eventually
-      next if message.include? 'Cannot currently handle an HPXML with multiple Building elements'
+      next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements'
 
       flunk "Unexpected run.log message found for #{File.basename(hpxml_path)}: #{message}"
     end
