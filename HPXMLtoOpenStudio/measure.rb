@@ -1478,7 +1478,7 @@ class OSModel
 
       end
 
-      next unless not heat_pump.backup_system.nil?
+      next if heat_pump.backup_system.nil?
 
       equipment_list = model.getZoneHVACEquipmentLists.find { |el| el.thermalZone == conditioned_zone }
 

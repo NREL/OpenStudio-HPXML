@@ -18,8 +18,10 @@ __New Features__
   - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
+- Battery losses now split between charging and discharging.
 
 __Bugfixes__
+- Fixes battery resilience output to properly incorporate battery losses.
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 - Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
