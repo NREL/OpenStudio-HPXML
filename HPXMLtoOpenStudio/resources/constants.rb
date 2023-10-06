@@ -110,10 +110,6 @@ class Constants
     return 'boiler'
   end
 
-  def self.ObjectNameBoilerPilotLight(boiler_name)
-    return "#{boiler_name} pilot light"
-  end
-
   def self.ObjectNameCeilingFan
     return 'ceiling fan'
   end
