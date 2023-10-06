@@ -11,7 +11,7 @@ jobs:
   run-unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: docker://nrel/openstudio:dev-3.7.0-alpha
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v3
         with:
@@ -24,14 +24,14 @@ jobs:
           sudo apt update
           sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme
 
-#      - name: Check HPXMLs
-#        shell: bash
-#        run: |
-#          echo "Regenerating HPXML files..."
-#          openstudio tasks.rb update_hpxmls
-#          echo "Checking for HPXML differences..."
-#          git config --global --add safe.directory $(realpath .)
-#          git diff --exit-code --ignore-cr-at-eol *.xml
+      - name: Check HPXMLs
+        shell: bash
+        run: |
+          echo "Regenerating HPXML files..."
+          openstudio tasks.rb update_hpxmls
+          echo "Checking for HPXML differences..."
+          git config --global --add safe.directory $(realpath .)
+          git diff --exit-code --ignore-cr-at-eol *.xml
 
       - name: Run measure unit tests
         run: |
@@ -57,7 +57,7 @@ jobs:
   run-workflow-tests:
     runs-on: ubuntu-latest
     container:
-      image: docker://nrel/openstudio:dev-3.7.0-alpha
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v3
         with:

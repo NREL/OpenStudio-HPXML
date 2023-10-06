@@ -30,9 +30,6 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
-        # FIXME: Need to address new required PLF curve
-        next if xml.include? 'ground-to-air'
-        next if xml.include? 'base-hvac-multiple.xml'
 
         xmls << File.absolute_path(xml)
       end
@@ -42,7 +39,7 @@ class HPXMLTest < Minitest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     all_bill_results = {}
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       xml_name = File.basename(xml)
       all_results[xml_name], all_bill_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
@@ -210,8 +207,8 @@ class HPXMLTest < Minitest::Test
         # Check timeseries columns exist
         timeseries_rows = CSV.read(File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
         assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Living Space' }.size)
-        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Living Space' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Occupant Count: Conditioned Space' }.size)
+        assert_equal(1, timeseries_rows[0].select { |r| r == 'Zone People Total Heating Energy: Conditioned Space' }.size)
       else
         refute(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries.csv'))
       end
@@ -247,7 +244,6 @@ class HPXMLTest < Minitest::Test
   end
 
   def test_template_osws
-    skip # FIXME: Temporarily disabled
     # Check that simulation works using template-*.osw
     require 'json'
 
@@ -421,9 +417,8 @@ class HPXMLTest < Minitest::Test
         abs_clg_load_frac = abs_clg_load_delta / avg_clg_load
       end
       # Check that the difference is less than 1.5 MBtu or less than 10%
-      # FIXME: Temporarily disabled
-      # assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
-      # assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
+      assert((abs_htg_load_delta < 1.5) || (!abs_htg_load_frac.nil? && abs_htg_load_frac < 0.1))
+      assert((abs_clg_load_delta < 1.5) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
     end
 
     return results
@@ -571,7 +566,7 @@ class HPXMLTest < Minitest::Test
       # FIXME: Double-check this. May be addressed by https://github.com/NREL/OpenStudio-HPXML/pull/1175?
       next if message.include?('The shading transmittance for shading devices may change throughout the year') && message.include?('Choose Shading Calculation Update Frequency Method = Timestep in the ShadowCalculation object to capture all shading impacts')
       # FIXME: Double-check this.
-      next if message.include? 'Multiple speed fan will be appiled to this unit. The speed number is determined by load.'
+      next if message.include? 'Multiple speed fan will be applied to this unit. The speed number is determined by load.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -1102,7 +1097,7 @@ class HPXMLTest < Minitest::Test
       # Location
       hpxml_value = appliance.location
       if hpxml_value.nil? || HPXML::conditioned_locations.include?(hpxml_value) || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
-        hpxml_value = HPXML::LocationLivingSpace
+        hpxml_value = HPXML::LocationConditionedSpace
       end
       tabular_value = tabular_map[appliance.class]
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{tabular_value.upcase}')"
