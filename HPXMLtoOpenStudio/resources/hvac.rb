@@ -516,13 +516,10 @@ class HVAC
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
     boiler.setOnCycleParasiticElectricLoad(0)
     boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
+    boiler.setOffCycleParasiticFuelLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
-
-    # EMS program to model pilot light
-    # FUTURE: Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
-    set_boiler_pilot_light_ems_program(model, boiler, heating_system)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -1426,44 +1423,6 @@ class HVAC
     pump_program_calling_manager.setName("#{pump.name} power program calling manager")
     pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     pump_program_calling_manager.addProgram(pump_program)
-  end
-
-  def self.set_boiler_pilot_light_ems_program(model, boiler, heating_system)
-    # Create Equipment object for fuel consumption
-    loc_space = model.getSpaces[0] # Arbitrary; not used
-    fuel_type = heating_system.heating_system_fuel
-    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameBoilerPilotLight(boiler.name), loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
-
-    # Sensor
-    boiler_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
-    boiler_plr_sensor.setName("#{boiler.name} plr s")
-    boiler_plr_sensor.setKeyName(boiler.name.to_s)
-
-    # Actuator
-    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower, pilot_light_object.space.get)
-    pilot_light_act.setName("#{boiler.name} pilot light act")
-
-    # Program
-    pilot_light_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    pilot_light_program.setName("#{boiler.name} pilot light program")
-    pilot_light_program.addLine("Set #{pilot_light_act.name} = (1.0 - #{boiler_plr_sensor.name}) * #{UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W')}")
-    pilot_light_program.addLine("Set boiler_pilot_energy = #{pilot_light_act.name} * 3600 * SystemTimeStep")
-
-    # Program Calling Manager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{boiler.name} pilot light program manager")
-    program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    program_calling_manager.addProgram(pilot_light_program)
-
-    # EMS Output Variable for reporting
-    pilot_light_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_pilot_energy')
-    pilot_light_output_var.setName("#{Constants.ObjectNameBoilerPilotLight(boiler.name)} outvar")
-    pilot_light_output_var.setTypeOfDataInVariable('Summed')
-    pilot_light_output_var.setUpdateFrequency('SystemTimestep')
-    pilot_light_output_var.setEMSProgramOrSubroutineName(pilot_light_program)
-    pilot_light_output_var.setUnits('J')
-    pilot_light_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
-    pilot_light_output_var.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
   end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
