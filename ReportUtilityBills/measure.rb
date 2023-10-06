@@ -168,9 +168,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # FIXME: Relax this constraint (using a new building_id measure argument?)
     @hpxml_header = hpxml.header
     @hpxml_buildings = hpxml.buildings
-    if @hpxml_buildings.size > 1 && building_id == 'ALL' && @hpxml_header.utility_bill_scenarios.select { |utility_bill_scenario| !utility_bill_scenario.elec_tariff_filepath.nil? }.size > 0
-      runner.registerWarning('Cannot currently calculate detailed bills for an HPXML with multiple Building elements.')
-      return result
+    if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
+      uses_unit_multipliers = @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
+      if uses_unit_multipliers || (@hpxml_buildings.size > 1 && building_id == 'ALL')
+        return result
+      end
     end
 
     warnings = check_for_return_type_warnings()
@@ -252,9 +254,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # FIXME: Relax this constraint (using a new building_id measure argument?)
     @hpxml_header = hpxml.header
     @hpxml_buildings = hpxml.buildings
-    if @hpxml_buildings.size > 1 && building_id == 'ALL' && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
-      runner.registerWarning('Cannot currently calculate detailed bills for an HPXML with multiple Building elements.')
-      return false
+    if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
+      uses_unit_multipliers = @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
+      if uses_unit_multipliers || (@hpxml_buildings.size > 1 && building_id == 'ALL')
+        runner.registerWarning('Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements.')
+        return false
+      end
     end
 
     return true if @hpxml_header.utility_bill_scenarios.empty?

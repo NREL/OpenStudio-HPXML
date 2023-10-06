@@ -369,6 +369,16 @@ class ReportUtilityBillsTest < Minitest::Test
     assert_nil(actual_bills)
   end
 
+  def test_warning_detailed_rates_unit_multipliers
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-unit-multiplier.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json')
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    expected_warnings = ['Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements.']
+    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
+  end
+
   def test_monthly_prorate
     # Test begin_month == end_month
     header = HPXML::Header.new(nil)
