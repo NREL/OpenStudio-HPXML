@@ -197,10 +197,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Fuel outputs
+    has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
-        next if is_production && @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.pv_systems.empty? }.size == 0
+        next if is_production && !has_pv
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
