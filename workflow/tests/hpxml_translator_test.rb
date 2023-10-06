@@ -244,7 +244,6 @@ class HPXMLTest < Minitest::Test
   end
 
   def test_template_osws
-    skip # FIXME: Temporarily disabled
     # Check that simulation works using template-*.osw
     require 'json'
 
