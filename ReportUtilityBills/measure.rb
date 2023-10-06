@@ -291,6 +291,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       @timestamps = get_timestamps(args)
     end
 
+    pv_systems = @hpxml_buildings.collect { |hpxml_bldg| [hpxml_bldg.pv_systems] * hpxml_bldg.building_construction.number_of_units }.flatten
+    num_units = @hpxml_buildings.collect { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
+
     monthly_data = []
     @hpxml_header.utility_bill_scenarios.each do |utility_bill_scenario|
       warnings = check_for_next_type_warnings(utility_bill_scenario)
@@ -308,8 +311,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       utility_rates, utility_bills = setup_utility_outputs()
 
       # Get utility rates
-      pv_systems = @hpxml_buildings.select { |hpxml_bldg| [hpxml_bldg.pv_systems] * hpxml_bldg.building_construction.number_of_units }.flatten
-      num_units = @hpxml_buildings.collect { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
       warnings = get_utility_rates(hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems, num_units)
       if register_warnings(runner, warnings)
         next
