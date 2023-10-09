@@ -63,7 +63,7 @@ class HVAC
     fan_cfms = []
     if not cooling_system.nil?
       if not cooling_system.cooling_detailed_performance_data.empty?
-        process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg, weather_max_drybulb)
+        process_neep_detailed_performance(cooling_system, cooling_system.cooling_detailed_performance_data, clg_ap, :clg, weather_max_drybulb)
       end
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
@@ -97,7 +97,7 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         if not heating_system.heating_detailed_performance_data.empty?
-          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, weather_min_drybulb, htg_ap.hp_min_temp)
+          process_neep_detailed_performance(heating_system, heating_system.heating_detailed_performance_data, htg_ap, :htg, weather_min_drybulb, htg_ap.hp_min_temp)
         end
 
         # Heating Coil
@@ -2622,7 +2622,7 @@ class HVAC
     return gross_cap_btu_hr, gross_cop
   end
 
-  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, weather_temp, compressor_lockout_temp = nil)
+  def self.process_neep_detailed_performance(hvac, detailed_performance_data, hvac_ap, mode, weather_temp, compressor_lockout_temp = nil)
     data_array = Array.new(2) { Array.new }
     detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
@@ -2652,11 +2652,24 @@ class HVAC
     # convert net to gross
     data_array.each_with_index do |data, speed|
       data.each do |dp|
-        max_speed_capacity = data_array[-1].find { |dp_max| dp_max.outdoor_temperature == dp.outdoor_temperature }.capacity
-        cap_ratio = dp.capacity / max_speed_capacity
-        fan_ratio = cap_ratio * cfm_per_ton[speed] / cfm_per_ton[-1]
-        max_cfm = UnitConversions.convert(max_speed_capacity, 'Btu/hr', 'ton') * cfm_per_ton[-1]
-        fan_power = hvac_ap.fan_power_rated * max_cfm * (fan_ratio**3)
+        if (hvac.is_a?(HPXML::CoolingSystem) && hvac.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner) ||
+           (hvac.is_a?(HPXML::HeatPump) && hvac.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit)
+          # MSHP
+          if dp.capacity_description == HPXML::CapacityDescriptionMinimum
+            if mode == :htg
+              fan_ratio = 0.625
+            else
+              fan_ratio = 0.634
+            end
+          else
+            fan_ratio = 1.0
+          end
+        else
+          # ASHP
+          fan_ratio = 1.0
+        end
+        this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton[speed]
+        fan_power = hvac_ap.fan_power_rated * this_cfm * fan_ratio
         dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
@@ -3164,10 +3177,8 @@ class HVAC
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      # Ductless
-      # Should typically have the same fan power as installed, but we need to use a fixed value
-      # so that, e.g., grade 3 installation quality (0.58 W/cfm) has the appropriate effect.
-      hvac_ap.fan_power_rated = 0.07 # W/cfm
+      # Ductless, installed and rated value should be equal
+      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
     else
       # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
       if hvac_system.cooling_efficiency_seer <= 14
