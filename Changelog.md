@@ -1,10 +1,14 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
-- **Breaking change**: Updates to newer proposed HPXML v4.0:
+- **Breaking change**: Updates to official HPXML v4.0:
+  - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09
+  - Replaces "living space" with "conditioned space", which better represents what is modeled.
+  - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
+  - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
   - Adds "Peak Electricity: Annual Total (W)" output.
   - Adds battery resilience hours output; allows requesting timeseries output.
   - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
@@ -15,6 +19,7 @@ __New Features__
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
   - Add soil and moisture type arguments for determining ground conductivity and diffusivity.
+- Battery losses now split between charging and discharging.
 - Ground source heat pump enhancements:
   - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements.
   - Allow optional inputs related to geothermal loop: loop flow, borehole count/length/spacing/diameter/configuration, grout conductivity, pipe conductivity/diameter/shank spacing.
@@ -23,11 +28,13 @@ __New Features__
   - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 
 __Bugfixes__
+- Fixes battery resilience output to properly incorporate battery losses.
 - Fixes lighting multipliers not being applied when kWh/yr inputs are used.
 - Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
 - Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
+- Fixes ground source heat pump fan/pump adjustment to rated efficiency.
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
