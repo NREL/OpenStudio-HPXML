@@ -19,6 +19,7 @@ __New Features__
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 - Battery losses now split between charging and discharging.
+- For ground temperatures, use an adjustment based on a correlation between annual mean drybulb temperature and L. Xing's simplified design model (2014).
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
