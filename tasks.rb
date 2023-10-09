@@ -66,7 +66,6 @@ def create_hpxmls
       csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
       if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
         sch_args = { 'hpxml_path' => hpxml_path,
-                     'schedules_random_seed' => i,
                      'output_csv_path' => csv_path,
                      'hpxml_output_path' => hpxml_path,
                      'building_id' => "MyBuilding#{suffix}" }
