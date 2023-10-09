@@ -589,7 +589,12 @@ class HPXMLTest < Minitest::Test
       end
 
       # FIXME: Revert this eventually
-      next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements'
+      if hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
+        uses_unit_multipliers = hpxml.buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
+        if uses_unit_multipliers || hpxml.buildings.size > 1
+          next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements'
+        end
+      end
 
       flunk "Unexpected run.log message found for #{File.basename(hpxml_path)}: #{message}"
     end

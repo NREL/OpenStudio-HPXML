@@ -64,10 +64,10 @@ class ReportUtilityBillsTest < Minitest::Test
 
     @measure = ReportUtilityBills.new
     @hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-pv.xml')
-    hpxml = HPXML.new(hpxml_path: @hpxml_path)
-    @hpxml_bldg = hpxml.buildings[0]
+    @hpxml = HPXML.new(hpxml_path: @hpxml_path)
+    @hpxml_bldg = @hpxml.buildings[0]
 
-    @hpxml_header = hpxml.header
+    @hpxml_header = @hpxml.header
     @hpxml_header.utility_bill_scenarios.clear
     @hpxml_header.utility_bill_scenarios.add(name: 'Test',
                                              elec_fixed_charge: 8.0,
@@ -78,8 +78,7 @@ class ReportUtilityBillsTest < Minitest::Test
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
     # Check for presence of fuels once
-    has_fuel = @hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
-
+    has_fuel = @hpxml_bldg.has_fuels(Constants.FossilFuels, @hpxml.to_doc)
     HPXMLDefaults.apply_header(@hpxml_header, nil)
     HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, has_fuel)
 
@@ -118,7 +117,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_simple_pv_1kW_net_metering_user_excess_rate
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -128,7 +127,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_simple_pv_10kW_net_metering_user_excess_rate
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -920
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -139,7 +138,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1777
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -150,7 +149,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate = 0.0
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -632
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -162,7 +161,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -174,7 +173,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -412,7 +411,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_flat_pv_none
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
     _check_monthly_bills(actual_bills, actual_monthly_bills)
@@ -422,7 +421,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -433,7 +432,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -920
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -445,7 +444,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1777
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -457,7 +456,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate = 0.0
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -632
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -470,7 +469,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -483,7 +482,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
     expected_bills = _get_expected_bills(@expected_bills)
     _check_bills(expected_bills, actual_bills)
@@ -495,7 +494,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_tiered_pv_none
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     expected_bills = _get_expected_bills(@expected_bills)
@@ -507,7 +506,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -190
@@ -520,7 +519,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -867
@@ -534,7 +533,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1443
@@ -548,7 +547,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -580
@@ -563,7 +562,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
@@ -578,7 +577,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 580
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
@@ -592,7 +591,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_tou_pv_none
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     expected_bills = _get_expected_bills(@expected_bills)
@@ -604,7 +603,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -112
@@ -617,7 +616,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -681
@@ -631,7 +630,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1127
@@ -645,7 +644,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -393
@@ -660,7 +659,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
@@ -675,7 +674,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 393
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
@@ -689,7 +688,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_tiered_tou_pv_none
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     expected_bills = _get_expected_bills(@expected_bills)
@@ -701,7 +700,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -108
@@ -714,7 +713,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -665
@@ -728,7 +727,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1000
@@ -742,7 +741,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -377
@@ -757,7 +756,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
@@ -772,7 +771,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 377
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
@@ -786,7 +785,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_rtp_pv_none
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     expected_bills = _get_expected_bills(@expected_bills)
@@ -798,7 +797,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -106
@@ -811,7 +810,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -641
@@ -825,7 +824,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1060
@@ -839,7 +838,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -354
@@ -854,7 +853,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -178
@@ -869,7 +868,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_feed_in_tariff_rate = 0.12
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 108
     @expected_bills['Test: Electricity: Energy (USD)'] = 354
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1785
@@ -884,7 +883,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars_per_kw = 2.50
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 126
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
@@ -896,7 +895,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars = 7.50
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_simple, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 186
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
@@ -909,7 +908,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars_per_kw = 2.50
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 126
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
@@ -922,7 +921,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_monthly_grid_connection_fee_dollars = 7.50
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 186
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
     expected_bills = _get_expected_bills(@expected_bills)
@@ -933,7 +932,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_pv_none_min_monthly_charge
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Monthly Charge.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 96
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     expected_bills = _get_expected_bills(@expected_bills)
@@ -944,7 +943,7 @@ class ReportUtilityBillsTest < Minitest::Test
   def test_detailed_pv_none_min_annual_charge
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Annual Charge.json'
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_none_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 96
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     expected_bills = _get_expected_bills(@expected_bills)
@@ -956,7 +955,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Monthly Charge.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 96
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
@@ -969,7 +968,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Annual Charge.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 1000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 96
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -177
@@ -982,7 +981,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Monthly Charge.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 180
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -920
@@ -995,7 +994,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].elec_tariff_filepath = '../../ReportUtilityBills/resources/detailed_rates/Sample Flat Rate Min Annual Charge.json'
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 200
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -920
@@ -1009,7 +1008,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 180
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1777
@@ -1023,7 +1022,7 @@ class ReportUtilityBillsTest < Minitest::Test
     @hpxml_header.utility_bill_scenarios[-1].pv_net_metering_annual_excess_sellback_rate_type = HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
     @hpxml_bldg.pv_systems.each { |pv_system| pv_system.max_power_output = 10000.0 / @hpxml_bldg.pv_systems.size }
     utility_bill_scenario = @hpxml_header.utility_bill_scenarios[0]
-    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+    actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_10kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
     @expected_bills['Test: Electricity: Fixed (USD)'] = 200
     @expected_bills['Test: Electricity: Energy (USD)'] = 632
     @expected_bills['Test: Electricity: PV Credit (USD)'] = -1777
@@ -1054,7 +1053,7 @@ class ReportUtilityBillsTest < Minitest::Test
           utility_bill_scenario.elec_tariff_filepath = tmp_path
           File.delete(@bills_csv) if File.exist? @bills_csv
           File.delete(@bills_monthly_csv) if File.exist? @bills_monthly_csv
-          actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml_bldg.pv_systems, utility_bill_scenario)
+          actual_bills, actual_monthly_bills = _bill_calcs(@fuels_pv_1kw_detailed, @hpxml_header, @hpxml.buildings, utility_bill_scenario)
           if !File.exist?(@bills_csv)
             puts entry.name
             assert(false)
@@ -1145,12 +1144,13 @@ class ReportUtilityBillsTest < Minitest::Test
     return fuels
   end
 
-  def _bill_calcs(fuels, header, pv_systems, utility_bill_scenario)
+  def _bill_calcs(fuels, header, hpxml_buildings, utility_bill_scenario)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true }
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
-    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_systems)
+    monthly_fee = @measure.get_monthly_fee(utility_bill_scenario, hpxml_buildings)
+    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, monthly_fee)
     @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
 
     # Annual
