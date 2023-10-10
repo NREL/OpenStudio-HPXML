@@ -20,6 +20,7 @@ __New Features__
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
   - Add soil and moisture type arguments for determining ground conductivity and diffusivity.
 - Battery losses now split between charging and discharging.
+- For ground temperatures, use an adjustment based on a correlation between annual mean drybulb temperature and L. Xing's simplified design model (2014).
 - Ground source heat pump enhancements:
   - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements.
   - Allow optional inputs related to geothermal loop: loop flow, borehole count/length/spacing/diameter/configuration, grout conductivity, pipe conductivity/diameter/shank spacing.
