@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.calculate(weather, hpxml, cfa, hvac_systems)
+  def self.calculate(runner, weather, hpxml, cfa, hvac_systems)
     # Calculates heating/cooling design loads, and selects equipment
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
@@ -45,10 +45,10 @@ class HVACSizing
       apply_hvac_loads(hvac_heating, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
       apply_hvac_size_limits(hvac_cooling)
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
-      apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
+      apply_hvac_equipment_adjustments(runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
       apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_ground_loop(hvac_sizing_values, weather, hvac_cooling, @hpxml.climate_and_risk_zones.climate_zone_ieccs[0])
+      apply_hvac_ground_loop(runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
 
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
@@ -154,8 +154,8 @@ class HVACSizing
         @cool_design_temps[location] = @hpxml.header.manualj_cooling_design_temp
         @heat_design_temps[location] = @hpxml.header.manualj_heating_design_temp
       elsif HPXML::conditioned_locations.include? location
-        @cool_design_temps[location] = process_design_temp_cooling(weather, HPXML::LocationLivingSpace)
-        @heat_design_temps[location] = process_design_temp_heating(weather, HPXML::LocationLivingSpace)
+        @cool_design_temps[location] = process_design_temp_cooling(weather, HPXML::LocationConditionedSpace)
+        @heat_design_temps[location] = process_design_temp_heating(weather, HPXML::LocationConditionedSpace)
       else
         @cool_design_temps[location] = process_design_temp_cooling(weather, location)
         @heat_design_temps[location] = process_design_temp_heating(weather, location)
@@ -164,7 +164,7 @@ class HVACSizing
   end
 
   def self.process_design_temp_heating(weather, location)
-    if location == HPXML::LocationLivingSpace
+    if location == HPXML::LocationConditionedSpace
       heat_temp = @heat_setpoint
 
     elsif location == HPXML::LocationGarage
@@ -201,7 +201,7 @@ class HVACSizing
   end
 
   def self.process_design_temp_cooling(weather, location)
-    if location == HPXML::LocationLivingSpace
+    if location == HPXML::LocationConditionedSpace
       cool_temp = @cool_setpoint
 
     elsif location == HPXML::LocationGarage
@@ -226,7 +226,7 @@ class HVACSizing
       end
 
       # Calculate the garage cooling design temperature based on Table 4C
-      # Linearly interpolate between having living space over the garage and not having living space above the garage
+      # Linearly interpolate between having conditioned space over the garage and not having conditioned space above the garage
       if @daily_range_num == 0.0
         cool_temp = (@hpxml.header.manualj_cooling_design_temp +
                      (11.0 * garage_frac_under_conditioned) +
@@ -952,7 +952,7 @@ class HVACSizing
     @hpxml.slabs.each do |slab|
       next unless slab.is_thermal_boundary
 
-      if slab.interior_adjacent_to == HPXML::LocationLivingSpace # Slab-on-grade
+      if slab.interior_adjacent_to == HPXML::LocationConditionedSpace # Slab-on-grade
         f_value = calc_slab_f_value(slab, @hpxml.site.ground_conductivity)
         bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * @htd
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
@@ -1328,7 +1328,7 @@ class HVACSizing
     bldg_design_loads.Cool_Tot += total_ducts_cool_load_sens.to_f + total_ducts_cool_load_lat.to_f
   end
 
-  def self.apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
+  def self.apply_hvac_equipment_adjustments(runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
     '''
     Equipment Adjustments
     '''
@@ -1567,7 +1567,7 @@ class HVACSizing
            HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeHeatPumpPTHP,
            HPXML::HVACTypeHeatPumpRoom].include? @heating_type
-      process_heat_pump_adjustment(hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system)
+      process_heat_pump_adjustment(runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system)
       hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
       if @heating_type == HPXML::HVACTypeHeatPumpAirToAir
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (@supply_air_temp - @heat_setpoint))
@@ -1877,7 +1877,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_hvac_ground_loop(hvac_sizing_values, weather, hvac_cooling, climate_zone_iecc)
+  def self.apply_hvac_ground_loop(runner, hvac_sizing_values, weather, hvac_cooling)
     '''
     GSHP Ground Loop Sizing Calculations
     '''
@@ -1891,7 +1891,7 @@ class HVACSizing
     bore_diameter = geothermal_loop.bore_diameter
     grout_conductivity = geothermal_loop.grout_conductivity
     pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
-    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value, climate_zone_iecc)
+    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
 
     loop_flow = geothermal_loop.loop_flow
     if loop_flow.nil?
@@ -1903,10 +1903,10 @@ class HVACSizing
       num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
     end
 
-    min_bore_depth = UnitConversions.convert(24.0, 'm', 'ft') # based on g-function library
-    # In NY that's the depth that requires a mining permit, which has been a barrier for Dandelion Energy with installing GSHPs.
+    min_bore_depth = UnitConversions.convert(24.0, 'm', 'ft').round # based on g-function library
+    # In NY the following is the depth that requires a mining permit, which has been a barrier for Dandelion Energy with installing GSHPs.
     # Sounds like people are pushing ever deeper but for now we can apply this limit and add a note about where it came from.
-    max_bore_depth = UnitConversions.convert(152.0, 'm', 'ft')
+    max_bore_depth = 500 # ft
 
     bore_depth = geothermal_loop.bore_length
     if bore_depth.nil?
@@ -1916,21 +1916,31 @@ class HVACSizing
       bore_depth = (bore_length / num_bore_holes).floor # ft
 
       active_length = 5 # the active length starts about 5 ft below the surface
-      for _i in 0..4
-        if (bore_depth + active_length < min_bore_depth) && (num_bore_holes > 1)
+      for _i in 0..50
+        if (bore_depth + active_length < min_bore_depth) || (num_bore_holes > 10)
           num_bore_holes -= 1
           bore_depth = (bore_length / num_bore_holes).floor
-        elsif bore_depth + active_length > max_bore_depth
+        elsif (bore_depth + active_length > max_bore_depth)
           num_bore_holes += 1
           bore_depth = (bore_length / num_bore_holes).floor
+        end
+
+        if ((num_bore_holes == 1) && (bore_depth < min_bore_depth)) || ((num_bore_holes == 10) && (bore_depth > max_bore_depth))
+          break # we can't do any better
         end
       end
 
       bore_depth = (bore_length / num_bore_holes).floor + active_length
     end
 
-    if (bore_depth < min_bore_depth) || (bore_depth > max_bore_depth)
-      fail "Bore depth (#{bore_depth}) not between #{min_bore_depth.round(3)} and #{max_bore_depth.round(3)} ft."
+    if bore_depth < min_bore_depth
+      bore_depth = min_bore_depth
+      runner.registerWarning("Reached a minimum of 1 borehole; setting bore depth to the minimum (#{min_bore_depth} ft).")
+    end
+
+    if bore_depth > max_bore_depth
+      bore_depth = max_bore_depth
+      runner.registerWarning("Reached a maximum of 10 boreholes; setting bore depth to the maximum (#{max_bore_depth} ft).")
     end
 
     bore_config = geothermal_loop.bore_config
@@ -1938,14 +1948,16 @@ class HVACSizing
       bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     end
 
-    valid_configs = HVAC.valid_borefield_configs
-    valid_num_bores = valid_configs[bore_config]['num_boreholes']
+    valid_configs = HVAC.valid_bore_configs
+    g_functions_filename = valid_configs[bore_config]
+    g_functions_json = HVAC.get_g_functions_json(g_functions_filename)
+    valid_num_bores = HVAC.get_valid_num_bores(g_functions_json)
+
     unless valid_num_bores.include? num_bore_holes
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
-    g_functions_filename = valid_configs[bore_config]['filename']
-    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
     hvac_sizing_values.GSHP_Loop_flow = loop_flow
     hvac_sizing_values.GSHP_Bore_Depth = bore_depth
@@ -1972,7 +1984,7 @@ class HVACSizing
     end
   end
 
-  def self.process_heat_pump_adjustment(hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system)
+  def self.process_heat_pump_adjustment(runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system)
     '''
     Adjust heat pump sizing
     '''
@@ -1995,10 +2007,10 @@ class HVACSizing
       end
     end
     if (not min_compressor_temp.nil?) && (min_compressor_temp > @hpxml.header.manualj_heating_design_temp)
-      # Calculate the heating load at the switchover temperature to limit uninitialized capacity
+      # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = @hpxml.header.manualj_heating_design_temp
       @hpxml.header.manualj_heating_design_temp = min_compressor_temp
-      _alternate_bldg_design_loads, alternate_all_hvac_sizing_values = calculate(weather, @hpxml, @cfa, [hvac_system])
+      _alternate_bldg_design_loads, alternate_all_hvac_sizing_values = calculate(runner, weather, @hpxml, @cfa, [hvac_system])
       heating_load = alternate_all_hvac_sizing_values[hvac_system].Heat_Load
       heating_db = min_compressor_temp
       @hpxml.header.manualj_heating_design_temp = temp_heat_design_temp
@@ -2338,7 +2350,7 @@ class HVACSizing
 
     space_UAs = { HPXML::LocationOutside => 0.0,
                   HPXML::LocationGround => 0.0,
-                  HPXML::LocationLivingSpace => 0.0 }
+                  HPXML::LocationConditionedSpace => 0.0 }
 
     # Surface UAs
     (@hpxml.roofs + @hpxml.floors + @hpxml.walls + @hpxml.foundation_walls).each do |surface|
@@ -2348,7 +2360,7 @@ class HVACSizing
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
         space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif HPXML::conditioned_locations.include?(surface.interior_adjacent_to) || HPXML::conditioned_locations.include?(surface.exterior_adjacent_to)
-        space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
+        space_UAs[HPXML::LocationConditionedSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
         if surface.is_a? HPXML::FoundationWall
           _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
@@ -2403,7 +2415,7 @@ class HVACSizing
           sum_uat += ua * ground_db
         elsif (ua_type == HPXML::LocationOutside) || (ua_type == 'infil')
           sum_uat += ua * design_db
-        elsif ua_type == HPXML::LocationLivingSpace
+        elsif ua_type == HPXML::LocationConditionedSpace
           sum_uat += ua * conditioned_design_temp
         elsif ua_type == 'total'
         # skip
@@ -2423,7 +2435,7 @@ class HVACSizing
       max_temp_rise = 50.0
 
       # Estimate from running a few cases in E+ and DOE2 since the
-      # attic will always be a little warmer than the living space
+      # attic will always be a little warmer than the conditioned space
       # when the roof is insulated
       min_temp_rise = 5.0
 
@@ -2435,7 +2447,7 @@ class HVACSizing
       space_UAs.each do |ua_type, ua|
         if (ua_type == HPXML::LocationOutside) || (ua_type == 'infil')
           ua_outside += ua
-        elsif ua_type == HPXML::LocationLivingSpace
+        elsif ua_type == HPXML::LocationConditionedSpace
           ua_conditioned += ua
         elsif not ((ua_type == 'total') || (ua_type == HPXML::LocationGround))
           fail "Unexpected space ua type: '#{ua_type}'."
@@ -2643,10 +2655,10 @@ class HVACSizing
     hvac_cooling_ap = hvac_cooling.additional_properties
 
     # Thermal Resistance of Pipe
-    return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_cond
+    return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_conductivity
   end
 
-  def self.gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value, climate_zone_iecc)
+  def self.gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
     if hvac_cooling_ap.u_tube_spacing_type == 'b'
       beta_0 = 17.4427
       beta_1 = -0.6052
@@ -2665,19 +2677,14 @@ class HVACSizing
     rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[0]) / @htd].max
     rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[6] - 76.0) / @ctd].max
 
-    ground_temp_f = WeatherProcess.get_undisturbed_ground_temperature(weather, climate_zone_iecc)
+    ground_temp_f = weather.data.GroundMonthlyTemps.sum(0.0) / weather.data.GroundMonthlyTemps.size
     nom_length_heat = (1.0 - hvac_cooling_ap.heat_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (ground_temp_f - (2.0 * hvac_cooling_ap.design_hw - hvac_cooling_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
     nom_length_cool = (1.0 + hvac_cooling_ap.cool_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac_cooling_ap.design_chw + hvac_cooling_ap.design_delta_t) / 2.0 - ground_temp_f) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
 
     return nom_length_heat, nom_length_cool
   end
 
-  def self.gshp_gfnc_coeff(bore_config, g_functions_filename, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
-    require 'json'
-
-    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
-    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
-
+  def self.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
     actuals = { 'b' => UnitConversions.convert(bore_spacing, 'ft', 'm'),
                 'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
                 'rb' => UnitConversions.convert(bore_diameter / 2.0, 'in', 'm') }
@@ -2729,12 +2736,8 @@ class HVACSizing
       correction_factor = Math.log(rb_actual_over_rb)
       g_functions = g_functions.map { |v| v - correction_factor }
 
-      fail "Found different logtimes for '#{bore_config}' with H=#{h1} and H=#{h2}." if logtimes[0] != logtimes[1]
-
       return logtimes[0], g_functions
     end
-
-    fail "Could not find gfnc_coeff from '#{g_functions_filename}'."
   end
 
   def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
@@ -2763,8 +2766,6 @@ class HVACSizing
         end
       end
     end
-
-    fail "Could not find g-values for '#{bore_config}' with '#{num_bore_holes}' boreholes."
   end
 
   def self.calculate_average_r_value(surfaces)

@@ -57,7 +57,7 @@ class HPXMLDefaults
     apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
-    apply_pools_and_hot_tubs(hpxml, cfa, schedules_file)
+    apply_pools_and_permanent_spas(hpxml, cfa, schedules_file)
     apply_plug_loads(hpxml, cfa, schedules_file)
     apply_fuel_loads(hpxml, cfa, schedules_file)
     apply_pv_systems(hpxml)
@@ -65,7 +65,7 @@ class HPXMLDefaults
     apply_batteries(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(hpxml, weather, cfa)
+    apply_hvac_sizing(runner, hpxml, weather, cfa)
   end
 
   def self.get_default_azimuths(hpxml)
@@ -484,7 +484,7 @@ class HPXMLDefaults
     end
 
     if hpxml.site.soil_type.nil? && hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
-      hpxml.site.soil_type = HPXML::SiteSoilSoilTypeUnknown
+      hpxml.site.soil_type = HPXML::SiteSoilTypeUnknown
       hpxml.site.soil_type_isdefaulted = true
     end
 
@@ -493,78 +493,58 @@ class HPXMLDefaults
       hpxml.site.moisture_type_isdefaulted = true
     end
 
+    # Conductivity/diffusivity values come from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881 (with the exception of "unknown")
     if hpxml.site.ground_conductivity.nil? && hpxml.site.ground_diffusivity.nil?
-      if hpxml.site.soil_type == HPXML::SiteSoilSoilTypeSand
+      if hpxml.site.soil_type == HPXML::SiteSoilTypeSand
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2311 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0097 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 1.3865 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0322 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2311 + 1.3865) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0097 + 0.0322) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
-      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeSilt || hpxml.site.soil_type == HPXML::SiteSoilSoilTypeClay
+        hpxml.site.ground_conductivity_isdefaulted = true
+        hpxml.site.ground_diffusivity_isdefaulted = true
+      elsif hpxml.site.soil_type == HPXML::SiteSoilTypeSilt || hpxml.site.soil_type == HPXML::SiteSoilTypeClay
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2889 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0120 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 0.9821 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0194 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2889 + 0.9821) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0120 + 0.0194) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
-      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeLoam
-        hpxml.site.ground_conductivity = 1.2132 # Btu/hr-ft-F
         hpxml.site.ground_conductivity_isdefaulted = true
-
-        hpxml.site.ground_diffusivity = 0.0353 # ft^2/hr
         hpxml.site.ground_diffusivity_isdefaulted = true
-      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeGravel
+      elsif hpxml.site.soil_type == HPXML::SiteSoilTypeLoam
+        hpxml.site.ground_conductivity = 1.2132 # Btu/hr-ft-F
+        hpxml.site.ground_diffusivity = 0.0353 # ft^2/hr
+
+        hpxml.site.ground_conductivity_isdefaulted = true
+        hpxml.site.ground_diffusivity_isdefaulted = true
+      elsif hpxml.site.soil_type == HPXML::SiteSoilTypeGravel
         if hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeDry
           hpxml.site.ground_conductivity = 0.2311 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0097 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeWet
           hpxml.site.ground_conductivity = 1.0399 # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = 0.0291 # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         elsif hpxml.site.moisture_type == HPXML::SiteSoilMoistureTypeMixed
           hpxml.site.ground_conductivity = ((0.2311 + 1.0399) / 2.0).round(4) # Btu/hr-ft-F
-          hpxml.site.ground_conductivity_isdefaulted = true
-
           hpxml.site.ground_diffusivity = ((0.0097 + 0.0291) / 2.0).round(4) # ft^2/hr
-          hpxml.site.ground_diffusivity_isdefaulted = true
         end
-      elsif hpxml.site.soil_type == HPXML::SiteSoilSoilTypeUnknown
-        hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
         hpxml.site.ground_conductivity_isdefaulted = true
-
+        hpxml.site.ground_diffusivity_isdefaulted = true
+      elsif hpxml.site.soil_type == HPXML::SiteSoilTypeUnknown
+        hpxml.site.ground_conductivity = 1.0 # Btu/hr-ft-F
         hpxml.site.ground_diffusivity = 0.0208 # ft^2/hr
+
+        hpxml.site.ground_conductivity_isdefaulted = true
         hpxml.site.ground_diffusivity_isdefaulted = true
       end
     elsif hpxml.site.ground_conductivity.nil?
@@ -1616,9 +1596,9 @@ class HPXMLDefaults
           heat_pump.geothermal_loop_idref = hpxml.geothermal_loops[-1].id
         end
 
-        if heat_pump.geothermal_loop.pipe_size.nil?
-          heat_pump.geothermal_loop.pipe_size = 0.75 # in
-          heat_pump.geothermal_loop.pipe_size_isdefaulted = true
+        if heat_pump.geothermal_loop.pipe_diameter.nil?
+          heat_pump.geothermal_loop.pipe_diameter = 0.75 # in
+          heat_pump.geothermal_loop.pipe_diameter_isdefaulted = true
         end
 
         HVAC.set_gshp_assumptions(heat_pump, weather)
@@ -1635,23 +1615,31 @@ class HPXMLDefaults
         end
 
         if heat_pump.geothermal_loop.grout_type.nil? && heat_pump.geothermal_loop.grout_conductivity.nil?
-          heat_pump.geothermal_loop.grout_type = HPXML::GeothermalLoopGroutTypeStandard
+          heat_pump.geothermal_loop.grout_type = HPXML::GeothermalLoopGroutOrPipeTypeStandard
           heat_pump.geothermal_loop.grout_type_isdefaulted = true
         end
 
         if heat_pump.geothermal_loop.grout_conductivity.nil?
-          if heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeStandard
+          if heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeStandard
             heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
-            heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
-          elsif heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutTypeThermallyEnhanced
+          elsif heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
             heat_pump.geothermal_loop.grout_conductivity = 0.8 # Btu/h-ft-R
-            heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
           end
+          heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
         end
 
-        if heat_pump.geothermal_loop.pipe_cond.nil?
-          heat_pump.geothermal_loop.pipe_cond = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
-          heat_pump.geothermal_loop.pipe_cond_isdefaulted = true
+        if heat_pump.geothermal_loop.pipe_type.nil? && heat_pump.geothermal_loop.pipe_conductivity.nil?
+          heat_pump.geothermal_loop.pipe_type = HPXML::GeothermalLoopGroutOrPipeTypeStandard
+          heat_pump.geothermal_loop.pipe_type_isdefaulted = true
+        end
+
+        if heat_pump.geothermal_loop.pipe_conductivity.nil?
+          if heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopGroutOrPipeTypeStandard
+            heat_pump.geothermal_loop.pipe_conductivity = 0.23 # Btu/h-ft-R; Pipe thermal conductivity, default to high density polyethylene
+          elsif heat_pump.geothermal_loop.pipe_type == HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
+            heat_pump.geothermal_loop.pipe_conductivity = 0.40 # Btu/h-ft-R; 0.7 W/m-K from https://www.dropbox.com/scl/fi/91yp8e9v34vdh1isvrfvy/GeoPerformX-Spec-Sheet.pdf?rlkey=kw7p01gs46z9lfjs78bo8aujq&dl=0
+          end
+          heat_pump.geothermal_loop.pipe_conductivity_isdefaulted = true
         end
 
         if heat_pump.geothermal_loop.shank_spacing.nil?
@@ -1743,7 +1731,7 @@ class HPXMLDefaults
           ducts.each do |duct|
             primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
             primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
-            if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+            if primary_duct_location.nil? # If a home doesn't have any unconditioned spaces (outside conditioned space), place all ducts in conditioned space.
               duct.duct_surface_area = primary_duct_area + secondary_duct_area
               duct.duct_surface_area_isdefaulted = true
               duct.duct_location = secondary_duct_location
@@ -1838,7 +1826,7 @@ class HPXMLDefaults
       # Set default location based on distribution system
       dist_system = hvac_system.distribution_system
       if dist_system.nil?
-        hvac_system.location = HPXML::LocationLivingSpace
+        hvac_system.location = HPXML::LocationConditionedSpace
       else
         dist_type = dist_system.distribution_system_type
         if dist_type == HPXML::HVACDistributionTypeAir
@@ -1852,7 +1840,7 @@ class HPXMLDefaults
             uncond_duct_locations[d.duct_location] += d.duct_surface_area
           end
           if uncond_duct_locations.empty?
-            hvac_system.location = HPXML::LocationLivingSpace
+            hvac_system.location = HPXML::LocationConditionedSpace
           else
             hvac_system.location = uncond_duct_locations.key(uncond_duct_locations.values.max)
             if hvac_system.location == HPXML::LocationOutside
@@ -1873,7 +1861,7 @@ class HPXMLDefaults
             has_dse_of_one = false
           end
           if has_dse_of_one
-            hvac_system.location = HPXML::LocationLivingSpace
+            hvac_system.location = HPXML::LocationConditionedSpace
           else
             hvac_system.location = HPXML::LocationUnconditionedSpace
           end
@@ -2251,7 +2239,7 @@ class HPXMLDefaults
         clothes_washer.is_shared_appliance_isdefaulted = true
       end
       if clothes_washer.location.nil?
-        clothes_washer.location = HPXML::LocationLivingSpace
+        clothes_washer.location = HPXML::LocationConditionedSpace
         clothes_washer.location_isdefaulted = true
       end
       if clothes_washer.rated_annual_kwh.nil?
@@ -2298,7 +2286,7 @@ class HPXMLDefaults
         clothes_dryer.is_shared_appliance_isdefaulted = true
       end
       if clothes_dryer.location.nil?
-        clothes_dryer.location = HPXML::LocationLivingSpace
+        clothes_dryer.location = HPXML::LocationConditionedSpace
         clothes_dryer.location_isdefaulted = true
       end
       if clothes_dryer.combined_energy_factor.nil? && clothes_dryer.energy_factor.nil?
@@ -2346,7 +2334,7 @@ class HPXMLDefaults
         dishwasher.is_shared_appliance_isdefaulted = true
       end
       if dishwasher.location.nil?
-        dishwasher.location = HPXML::LocationLivingSpace
+        dishwasher.location = HPXML::LocationConditionedSpace
         dishwasher.location_isdefaulted = true
       end
       if dishwasher.place_setting_capacity.nil?
@@ -2414,7 +2402,7 @@ class HPXMLDefaults
         end
       else # primary refrigerator
         if refrigerator.location.nil?
-          refrigerator.location = HPXML::LocationLivingSpace
+          refrigerator.location = HPXML::LocationConditionedSpace
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
@@ -2476,7 +2464,7 @@ class HPXMLDefaults
     if hpxml.cooking_ranges.size > 0
       cooking_range = hpxml.cooking_ranges[0]
       if cooking_range.location.nil?
-        cooking_range.location = HPXML::LocationLivingSpace
+        cooking_range.location = HPXML::LocationConditionedSpace
         cooking_range.location_isdefaulted = true
       end
       if cooking_range.is_induction.nil?
@@ -2623,7 +2611,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_pools_and_hot_tubs(hpxml, cfa, schedules_file)
+  def self.apply_pools_and_permanent_spas(hpxml, cfa, schedules_file)
     nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
     hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
@@ -2681,59 +2669,59 @@ class HPXMLDefaults
       end
     end
 
-    hpxml.hot_tubs.each do |hot_tub|
-      next if hot_tub.type == HPXML::TypeNone
+    hpxml.permanent_spas.each do |spa|
+      next if spa.type == HPXML::TypeNone
 
-      if hot_tub.pump_type != HPXML::TypeNone
+      if spa.pump_type != HPXML::TypeNone
         # Pump
-        if hot_tub.pump_kwh_per_year.nil?
-          hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
-          hot_tub.pump_kwh_per_year_isdefaulted = true
+        if spa.pump_kwh_per_year.nil?
+          spa.pump_kwh_per_year = MiscLoads.get_permanent_spa_pump_default_values(cfa, nbeds)
+          spa.pump_kwh_per_year_isdefaulted = true
         end
-        if hot_tub.pump_usage_multiplier.nil?
-          hot_tub.pump_usage_multiplier = 1.0
-          hot_tub.pump_usage_multiplier_isdefaulted = true
+        if spa.pump_usage_multiplier.nil?
+          spa.pump_usage_multiplier = 1.0
+          spa.pump_usage_multiplier_isdefaulted = true
         end
-        schedules_file_includes_hot_tub_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotTubPump))
-        if hot_tub.pump_weekday_fractions.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_weekday_fractions = Schedule.HotTubPumpWeekdayFractions
-          hot_tub.pump_weekday_fractions_isdefaulted = true
+        schedules_file_includes_permanent_spa_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnPermanentSpaPump))
+        if spa.pump_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_weekday_fractions = Schedule.PermanentSpaPumpWeekdayFractions
+          spa.pump_weekday_fractions_isdefaulted = true
         end
-        if hot_tub.pump_weekend_fractions.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_weekend_fractions = Schedule.HotTubPumpWeekendFractions
-          hot_tub.pump_weekend_fractions_isdefaulted = true
+        if spa.pump_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_weekend_fractions = Schedule.PermanentSpaPumpWeekendFractions
+          spa.pump_weekend_fractions_isdefaulted = true
         end
-        if hot_tub.pump_monthly_multipliers.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_monthly_multipliers = Schedule.HotTubPumpMonthlyMultipliers
-          hot_tub.pump_monthly_multipliers_isdefaulted = true
+        if spa.pump_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_monthly_multipliers = Schedule.PermanentSpaPumpMonthlyMultipliers
+          spa.pump_monthly_multipliers_isdefaulted = true
         end
       end
 
-      next unless hot_tub.heater_type != HPXML::TypeNone
+      next unless spa.heater_type != HPXML::TypeNone
 
       # Heater
-      if hot_tub.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
-        hot_tub.heater_load_units = default_heater_load_units
-        hot_tub.heater_load_value = default_heater_load_value
-        hot_tub.heater_load_value_isdefaulted = true
+      if spa.heater_load_value.nil?
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_permanent_spa_heater_default_values(cfa, nbeds, spa.heater_type)
+        spa.heater_load_units = default_heater_load_units
+        spa.heater_load_value = default_heater_load_value
+        spa.heater_load_value_isdefaulted = true
       end
-      if hot_tub.heater_usage_multiplier.nil?
-        hot_tub.heater_usage_multiplier = 1.0
-        hot_tub.heater_usage_multiplier_isdefaulted = true
+      if spa.heater_usage_multiplier.nil?
+        spa.heater_usage_multiplier = 1.0
+        spa.heater_usage_multiplier_isdefaulted = true
       end
-      schedules_file_includes_hot_tub_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotTubHeater))
-      if hot_tub.heater_weekday_fractions.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_weekday_fractions = Schedule.HotTubHeaterWeekdayFractions
-        hot_tub.heater_weekday_fractions_isdefaulted = true
+      schedules_file_includes_permanent_spa_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnPermanentSpaHeater))
+      if spa.heater_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_weekday_fractions = Schedule.PermanentSpaHeaterWeekdayFractions
+        spa.heater_weekday_fractions_isdefaulted = true
       end
-      if hot_tub.heater_weekend_fractions.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_weekend_fractions = Schedule.HotTubHeaterWeekendFractions
-        hot_tub.heater_weekend_fractions_isdefaulted = true
+      if spa.heater_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_weekend_fractions = Schedule.PermanentSpaHeaterWeekendFractions
+        spa.heater_weekend_fractions_isdefaulted = true
       end
-      if hot_tub.heater_monthly_multipliers.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_monthly_multipliers = Schedule.HotTubHeaterMonthlyMultipliers
-        hot_tub.heater_monthly_multipliers_isdefaulted = true
+      if spa.heater_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_monthly_multipliers = Schedule.PermanentSpaHeaterMonthlyMultipliers
+        spa.heater_monthly_multipliers_isdefaulted = true
       end
     end
   end
@@ -2946,11 +2934,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(hpxml, weather, cfa)
+  def self.apply_hvac_sizing(runner, hpxml, weather, cfa)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml)
 
     # Calculate building design loads and equipment capacities/airflows
-    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml, cfa, hvac_systems)
+    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(runner, weather, hpxml, cfa, hvac_systems)
 
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh
@@ -3070,7 +3058,7 @@ class HPXMLDefaults
               geothermal_loop.num_bore_holes_isdefaulted = true
             end
             if geothermal_loop.bore_length.nil?
-              geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth # this is the length (i.e., depth) of each borehole?
+              geothermal_loop.bore_length = hvac_sizing_values.GSHP_Bore_Depth
               geothermal_loop.bore_length_isdefaulted = true
             end
             if geothermal_loop.bore_config.nil?
@@ -3082,7 +3070,7 @@ class HPXMLDefaults
       end
 
       # Cooling system
-      next unless not clg_sys.nil?
+      next if clg_sys.nil?
 
       # Cooling capacities
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)

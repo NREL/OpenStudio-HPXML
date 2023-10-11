@@ -90,6 +90,12 @@ class Constants
     return __method__.to_s
   end
 
+  def self.MoistureTypes
+    return [HPXML::SiteSoilMoistureTypeDry,
+            HPXML::SiteSoilMoistureTypeMixed,
+            HPXML::SiteSoilMoistureTypeWet]
+  end
+
   def self.ObjectNameAirflow
     return 'airflow'
   end
@@ -338,12 +344,12 @@ class Constants
     return 'misc pool pump'
   end
 
-  def self.ObjectNameMiscHotTubHeater
-    return 'misc hot tub heater'
+  def self.ObjectNameMiscPermanentSpaHeater
+    return 'misc permanent spa heater'
   end
 
-  def self.ObjectNameMiscHotTubPump
-    return 'misc hot tub pump'
+  def self.ObjectNameMiscPermanentSpaPump
+    return 'misc permanent spa pump'
   end
 
   def self.ObjectNameMiscPlugLoads
@@ -464,6 +470,16 @@ class Constants
 
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
+  end
+
+  def self.SoilTypes
+    return [HPXML::SiteSoilTypeClay,
+            HPXML::SiteSoilTypeGravel,
+            HPXML::SiteSoilTypeLoam,
+            # HPXML::SiteSoilTypeOther,
+            HPXML::SiteSoilTypeSand,
+            HPXML::SiteSoilTypeSilt,
+            HPXML::SiteSoilTypeUnknown]
   end
 
   def self.StateCodesMap

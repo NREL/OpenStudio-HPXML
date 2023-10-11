@@ -284,15 +284,15 @@ class HVAC
     ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
     ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C'))
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))
     ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(heat_pump.geothermal_loop.shank_spacing, 'in', 'm'))
     ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((hp_ap.pipe_od - hp_ap.pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
-    ground_heat_exch_vert.setGFunctionReferenceRatio(0.0005)
     ground_heat_exch_vert.setDesignFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
     ground_heat_exch_vert.setNumberofBoreHoles(hp_ap.GSHP_Bore_Holes.to_i)
     ground_heat_exch_vert.setBoreHoleLength(UnitConversions.convert(hp_ap.GSHP_Bore_Depth, 'ft', 'm'))
+    ground_heat_exch_vert.setGFunctionReferenceRatio(ground_heat_exch_vert.boreHoleRadius.get / ground_heat_exch_vert.boreHoleLength.get) # ensure this ratio is consistent with rb/H so that g values will be taken as-is
     ground_heat_exch_vert.removeAllGFunctions
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
       ground_heat_exch_vert.addGFunction(hp_ap.GSHP_G_Functions[0][i], hp_ap.GSHP_G_Functions[1][i])
@@ -715,7 +715,7 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
-  def self.apply_dehumidifiers(runner, model, dehumidifiers, living_space, unavailable_periods)
+  def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
@@ -739,7 +739,7 @@ class HVAC
     avg_energy_factor = dehumidifiers.map { |d| d.energy_factor * d.capacity }.sum / total_capacity
     total_fraction_served = dehumidifiers.map { |d| d.fraction_served }.sum
 
-    control_zone = living_space.thermalZone.get
+    control_zone = conditioned_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
     rh_setpoint = dehumidifiers[0].rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
@@ -779,11 +779,11 @@ class HVAC
     zone_hvac.additionalProperties.setFeature('HPXML_ID', dehumidifier_id) # Used by reporting measure
 
     if total_fraction_served < 1.0
-      adjust_dehumidifier_load_EMS(total_fraction_served, zone_hvac, model, living_space)
+      adjust_dehumidifier_load_EMS(total_fraction_served, zone_hvac, model, conditioned_space)
     end
   end
 
-  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space, schedules_file,
+  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
     obj_name = Constants.ObjectNameCeilingFan
     medium_cfm = 3000.0 # From ANSI 301-2019
@@ -819,7 +819,7 @@ class HVAC
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
     equip.setName(equip_def.name.to_s)
-    equip.setSpace(living_space)
+    equip.setSpace(conditioned_space)
     equip_def.setDesignLevel(ceiling_fan_design_level)
     equip_def.setFractionRadiant(0.558)
     equip_def.setFractionLatent(0)
@@ -828,7 +828,7 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
+  def self.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
     heating_sch = nil
     cooling_sch = nil
     if not schedules_file.nil?
@@ -868,10 +868,10 @@ class HVAC
 
     # Set the setpoint schedules
     thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-    thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
+    thermostat_setpoint.setName("#{conditioned_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_sch)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
-    living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+    conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
   def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
@@ -1616,7 +1616,7 @@ class HVAC
     end
   end
 
-  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, conditioned_space)
     # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
 
     # sensor
@@ -1636,7 +1636,7 @@ class HVAC
     dehumidifier_load_adj_def.setFractionLost(0)
     dehumidifier_load_adj = OpenStudio::Model::OtherEquipment.new(dehumidifier_load_adj_def)
     dehumidifier_load_adj.setName("#{zone_hvac.name} sens htg adj")
-    dehumidifier_load_adj.setSpace(living_space)
+    dehumidifier_load_adj.setSpace(conditioned_space)
     dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
 
     dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower, dehumidifier_load_adj.space.get)
@@ -3393,20 +3393,20 @@ class HVAC
     else
       hp_ap.design_hw = [35.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].min # Temperature of fluid entering indoor coil, use 35F as upper bound
     end
-    pipe_size = geothermal_loop.pipe_size
+    pipe_diameter = geothermal_loop.pipe_diameter
     # Pipe nominal size conversion to pipe outside diameter and inside diameter,
     # only pipe sizes <= 2" are used here with DR11 (dimension ratio),
-    if pipe_size == 0.75 # 3/4" pipe
+    if pipe_diameter == 0.75 # 3/4" pipe
       hp_ap.pipe_od = 1.050 # in
       hp_ap.pipe_id = 0.859 # in
-    elsif pipe_size == 1.0 # 1" pipe
+    elsif pipe_diameter == 1.0 # 1" pipe
       hp_ap.pipe_od = 1.315 # in
       hp_ap.pipe_id = 1.076 # in
-    elsif pipe_size == 1.25 # 1-1/4" pipe
+    elsif pipe_diameter == 1.25 # 1-1/4" pipe
       hp_ap.pipe_od = 1.660 # in
       hp_ap.pipe_id = 1.358 # in
     else
-      fail "Unexpected pipe size: #{pipe_size}"
+      fail "Unexpected pipe size: #{pipe_diameter}"
     end
     hp_ap.u_tube_spacing_type = 'b'
     # Calculate distance between pipes
@@ -3422,14 +3422,39 @@ class HVAC
     end
   end
 
-  def self.valid_borefield_configs
-    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => { 'num_boreholes' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'filename' => 'rectangle_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => { 'num_boreholes' => [8, 10], 'filename' => 'Open_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationC => { 'num_boreholes' => [7, 9], 'filename' => 'C_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationL => { 'num_boreholes' => [4, 5, 6, 7, 8, 9, 10], 'filename' => 'L_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationU => { 'num_boreholes' => [7, 9, 10], 'filename' => 'U_configurations_5m_v1.0.json' },
-                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => { 'num_boreholes' => [6, 7, 8, 9, 10], 'filename' => 'LopU_configurations_5m_v1.0.json' } }
+  def self.valid_bore_configs
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }
     return valid_configs
+  end
+
+  def self.get_g_functions_json(g_functions_filename)
+    require 'json'
+
+    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
+    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
+    return g_functions_json
+  end
+
+  def self.get_valid_num_bores(g_functions_json)
+    valid_num_bores = []
+    g_functions_json.each do |_key_1, values_1|
+      if values_1.keys.include?(:bore_locations)
+        valid_num_bores << values_1[:bore_locations].size
+      else
+        values_1.each do |_key_2, values_2|
+          if values_2.keys.include?(:bore_locations)
+            valid_num_bores << values_2[:bore_locations].size
+          end
+        end
+      end
+    end
+
+    return valid_num_bores
   end
 
   def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
@@ -3712,7 +3737,7 @@ class HVAC
         break
       end
     end
-    secondary_duct_location = HPXML::LocationLivingSpace
+    secondary_duct_location = HPXML::LocationConditionedSpace
 
     return primary_duct_location, secondary_duct_location
   end
