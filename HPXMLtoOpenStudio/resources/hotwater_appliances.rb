@@ -279,6 +279,25 @@ class HotWaterAndAppliances
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekend_fractions.nil?
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_monthly_multipliers.nil?
       end
+
+      #Create separate shower schedule: Used for calculating unmet loads
+      showers_schedule = nil
+      showers_col_name = SchedulesFile::ColumnHotWaterShowers
+      if not schedules_file.nil?
+        showers_schedule = schedules_file.create_schedule_file(col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      end
+      if fixtures_schedule.nil?
+        showers_unavailable_periods = Schedule.get_unavailable_periods(runner, fixtures_col_name, unavailable_periods)
+        showers_weekday_sch = hpxml.water_heating.water_showers_weekday_fractions
+        showers_weekend_sch = hpxml.water_heating.water_showers_weekend_fractions
+        showers_monthly_sch = hpxml.water_heating.water_showers_monthly_multipliers
+        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameshowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fixtures_unavailable_periods)
+        showers_schedule = showers_schedule_obj.schedule
+      else
+        runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekday_fractions.nil?
+        runner.registerWarning("Both '#{showers_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_weekend_fractions.nil?
+        runner.registerWarning("Both '#{showers_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml.water_heating.water_fixtures_monthly_multipliers.nil?
+      end
     end
 
     hpxml.water_heating_systems.each do |water_heating_system|
