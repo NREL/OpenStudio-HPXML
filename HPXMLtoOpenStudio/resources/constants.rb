@@ -397,6 +397,9 @@ class Constants
   def self.ObjectNameRoomAirConditioner
     return 'room ac'
   end
+  def self.ObjectNameShowers
+    return 'showers'
+  end
 
   def self.ObjectNameSkylightShade
     return 'skylight shade'
