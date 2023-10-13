@@ -54,6 +54,8 @@ class HPXML < Object
   NameSpace = 'http://hpxmlonline.com/2023/09'
 
   # Constants
+  FuelElementNames = ['HeatingSystemFuel', 'CoolingSystemFuel', 'HeatPumpFuel', 'BackupSystemFuel', 'FuelType', 'IntegratedHeatingSystemFuel', 'Heater/Type']
+
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
@@ -500,6 +502,32 @@ class HPXML < Object
         end
       end
     end
+  end
+
+  def has_fuels(fuels_array, hpxml_doc, building_id = nil)
+    # Returns a hash with whether each fuel in fuels_array exists
+    # across all the buildings
+    has_fuels = {}
+    fuels_array.each do |fuel|
+      has_fuels[fuel] = false
+      FuelElementNames.each do |fuel_element_name|
+        if fuel_element_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
+          fuel_element_value = HPXML::HeaterTypeGas
+        else
+          fuel_element_value = fuel
+        end
+        search_str = "/HPXML/Building[BuildingID/@id='#{building_id}']//#{fuel_element_name}[text() = '#{fuel_element_value}']"
+        if building_id.nil?
+          search_str = "/HPXML/Building//#{fuel_element_name}[text() = '#{fuel_element_value}']"
+        end
+        if XMLHelper.has_element(hpxml_doc, search_str)
+          has_fuels[fuel] = true
+          break
+        end
+      end
+    end
+
+    return has_fuels
   end
 
   # Class to store additional properties on an HPXML object that are not intended
@@ -1234,27 +1262,7 @@ class HPXML < Object
     def has_fuels(fuels_array, hpxml_doc)
       # Returns a hash with whether each fuel in fuels_array exists
       # in the HPXML Building
-      has_fuels = {}
-      fuels_array.each do |fuel|
-        has_fuels[fuel] = false
-        ['HeatingSystemFuel',
-         'CoolingSystemFuel',
-         'HeatPumpFuel',
-         'BackupSystemFuel',
-         'FuelType',
-         'IntegratedHeatingSystemFuel',
-         'Heater/Type'].each do |fuel_element_name|
-          if fuel_element_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
-            fuel_element_value = HPXML::HeaterTypeGas
-          else
-            fuel_element_value = fuel
-          end
-          if XMLHelper.has_element(hpxml_doc, "/HPXML/Building[BuildingID/@id='#{@building_id}']//#{fuel_element_name}[text() = '#{fuel_element_value}']")
-            has_fuels[fuel] = true
-            break
-          end
-        end
-      end
+      has_fuels = @parent_object.has_fuels(fuels_array, hpxml_doc, @building_id)
 
       return has_fuels
     end
