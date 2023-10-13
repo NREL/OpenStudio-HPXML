@@ -60,10 +60,26 @@ class HVAC
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
 
+    # Calculate max rated cfm
+    max_rated_fan_cfm = -9999
+    if not cooling_system.nil?
+      cooling_system.cooling_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      end
+    end
+    if not heating_system.nil?
+      htg_ap = heating_system.additional_properties
+      heating_system.heating_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      end
+    end
+
     fan_cfms = []
     if not cooling_system.nil?
       if not cooling_system.cooling_detailed_performance_data.empty?
-        process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg, weather_max_drybulb)
+        process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg, max_rated_fan_cfm, weather_max_drybulb)
       end
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
@@ -92,12 +108,11 @@ class HVAC
     end
 
     if not heating_system.nil?
-      htg_ap = heating_system.additional_properties
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         if not heating_system.heating_detailed_performance_data.empty?
-          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, weather_min_drybulb, htg_ap.hp_min_temp)
+          process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, max_rated_fan_cfm, weather_min_drybulb, htg_ap.hp_min_temp)
         end
 
         # Heating Coil
@@ -2622,7 +2637,7 @@ class HVAC
     return gross_cap_btu_hr, gross_cop
   end
 
-  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, weather_temp, compressor_lockout_temp = nil)
+  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, max_rated_fan_cfm, weather_temp, compressor_lockout_temp = nil)
     data_array = Array.new(2) { Array.new }
     detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
@@ -2652,11 +2667,9 @@ class HVAC
     # convert net to gross
     data_array.each_with_index do |data, speed|
       data.each do |dp|
-        max_speed_capacity = data_array[-1].find { |dp_max| dp_max.outdoor_temperature == dp.outdoor_temperature }.capacity
-        cap_ratio = dp.capacity / max_speed_capacity
-        fan_ratio = cap_ratio * cfm_per_ton[speed] / cfm_per_ton[-1]
-        max_cfm = UnitConversions.convert(max_speed_capacity, 'Btu/hr', 'ton') * cfm_per_ton[-1]
-        fan_power = hvac_ap.fan_power_rated * max_cfm * (fan_ratio**3)
+        this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton[speed]
+        fan_ratio = this_cfm / max_rated_fan_cfm
+        fan_power = hvac_ap.fan_power_rated * max_rated_fan_cfm * (fan_ratio**3)
         dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
