@@ -18,22 +18,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
      'base-hvac-central-ac-only-1-speed-seer2.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_path))
-      model, hpxml = _test_measure(args_hash)
-
-      # Get HPXML values
-      cooling_system = hpxml.cooling_systems[0]
-      fan_power_rated = 0.25
-      cfm_per_ton = 312.0
-      max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-      fan_power = fan_power_rated * max_cfm
-      capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
+      model, _hpxml = _test_measure(args_hash)
 
       # Check cooling coil
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-      cop = 3.73 # Expected value
-      assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+      assert_in_epsilon(3.73, clg_coil.ratedCOP, 0.01)
+      assert_in_epsilon(7230, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
       # Check EMS
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -46,24 +37,17 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_central_air_conditioner_2_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-central-ac-only-2-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    fan_power_rated = 0.18
-    cfm_per_ton = 344.1
-    max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    fan_power = fan_power_rated * max_cfm
-    capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
+    model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [4.95, 4.59] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.95, 4.59].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(capacity, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [5143, 7158].each_with_index do |capacity, i|
+      assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -75,31 +59,17 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_central_air_conditioner_var_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-central-ac-only-var-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    fan_power_rated = 0.18
-    cfm_per_ton = 400.0
-    cfm_per_ton_min = 400.0
-    clg_capacity_min_net = cooling_system.cooling_capacity * 0.394
-    max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    min_cfm = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_min
-    fan_power = fan_power_rated * max_cfm
-    fan_power_min = fan_power * ((min_cfm / max_cfm)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
+    model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cop_max = 0.1953 * cooling_system.cooling_efficiency_seer
-    cop_min = 1.231 * cop_max
-    cops = [HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_min, :clg, cop_min)[1], HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, cop_max)[1]] # Expected values
-
-    cops.each_with_index do |cop, i|
+    [5.89, 5.25].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [2780, 7169].each_with_index do |capacity, i|
+      assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -466,30 +436,19 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Get HPXML values
       heat_pump = hpxml.heat_pumps[0]
       backup_efficiency = heat_pump.backup_heating_efficiency_percent
-      fan_power_rated = 0.25
-      cfm_per_ton = 312.0
-      max_cfm = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-      fan_power = fan_power_rated * max_cfm
-      clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
-      cfm_per_ton = 384.1
-      max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-      fan_power = fan_power_rated * max_cfm
-      htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg)[0], 'Btu/hr', 'W')
       supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
       # Check cooling coil
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-      cop = 3.73 # Expected value
-      assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+      assert_in_epsilon(3.73, clg_coil.ratedCOP, 0.01)
+      assert_in_epsilon(10846, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
       # Check heating coil
       assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
       htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-      cop = 3.28 # Expected value
-      assert_in_epsilon(cop, htg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(htg_capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
+      assert_in_epsilon(3.28, htg_coil.ratedCOP, 0.01)
+      assert_in_epsilon(10262, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
 
       # Check supp heating coil
       assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -554,34 +513,27 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
-    fan_power_rated = 0.18
-    cfm_per_ton = 344.1
-    max_cfm = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    fan_power = fan_power_rated * max_cfm
-    clg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
-    cfm_per_ton = 352.2
-    max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    fan_power = fan_power_rated * max_cfm
-    htg_capacity = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity, fan_power, :htg)[0], 'Btu/hr', 'W')
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [4.95, 4.59] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.95, 4.59].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [7715, 10736].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [4.52, 4.08] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.52, 4.08].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    assert_in_epsilon(htg_capacity, htg_coil.stages[-1].grossRatedHeatingCapacity.get, 0.01)
+    [7499, 10360].each_with_index do |htg_capacity, i|
+      assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -604,42 +556,27 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
-    fan_power_rated = 0.18
-    cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 400.0
-    clg_capacity_min_net = heat_pump.cooling_capacity * 0.394
-    max_cfm_cool = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
-    min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
-    fan_power_clg_max = fan_power_rated * max_cfm_cool
-    fan_power_clg_min = fan_power_clg_max * ((min_cfm_cool / max_cfm_cool)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg)[0], 'Btu/hr', 'W')
-    cop_max = 0.1953 * heat_pump.cooling_efficiency_seer
-    cop_min = 1.231 * cop_max
-    clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, cop_min)[1]
-    clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, cop_max)[1]
-    cfm_per_ton = 400.0
-    max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    fan_power = fan_power_rated * max_cfm
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.972, fan_power, :htg)[0], 'Btu/hr', 'W')
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [clg_cop_min, clg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [5.39, 4.77].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [4169, 10753].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [4.56, 3.89] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.56, 3.89].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    assert_in_epsilon(htg_capacity_max, htg_coil.stages[-1].grossRatedHeatingCapacity.get, 0.01)
+    [3876, 10634].each_with_index do |htg_capacity, i|
+      assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -661,56 +598,26 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
-    fan_power_rated = 0.18
-    cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 400.0
-    clg_dp_min = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
-    clg_dp_max = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
-    clg_capacity_min_net = clg_dp_min.capacity
-    clg_capacity_max_net = clg_dp_max.capacity
-    clg_cop_min_net = clg_dp_min.efficiency_cop
-    clg_cop_max_net = clg_dp_max.efficiency_cop
-    max_cfm_cool = UnitConversions.convert(clg_capacity_max_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
-    min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
-    fan_power_clg_max = fan_power_rated * max_cfm_cool
-    fan_power_clg_min = fan_power_clg_max * ((min_cfm_cool / max_cfm_cool)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(clg_capacity_max_net, fan_power_clg_max, :clg)[0], 'Btu/hr', 'W')
-    clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, clg_cop_min_net)[1]
-    clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, clg_cop_max_net)[1]
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [clg_cop_min, clg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.51, 2.88].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
-
-    cfm_per_ton_htg_max = 400.0
-    cfm_per_ton_htg_min = 400.0
-    htg_dp_min = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
-    htg_dp_max = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
-    htg_capacity_min_net = htg_dp_min.capacity
-    htg_capacity_max_net = htg_dp_max.capacity
-    htg_cop_min_net = htg_dp_min.efficiency_cop
-    htg_cop_max_net = htg_dp_max.efficiency_cop
-    max_cfm_heat = UnitConversions.convert(htg_capacity_max_net, 'Btu/hr', 'ton') * cfm_per_ton_htg_max
-    min_cfm_heat = UnitConversions.convert(htg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_htg_min
-    fan_power_htg_max = fan_power_rated * max_cfm_heat
-    fan_power_htg_min = fan_power_htg_max * ((min_cfm_heat / max_cfm_heat)**3)
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(htg_capacity_max_net, fan_power_htg_max, :htg)[0], 'Btu/hr', 'W')
-    htg_cop_min = HVAC.convert_net_to_gross_capacity_cop(htg_capacity_min_net, fan_power_htg_min, :htg, htg_cop_min_net)[1]
-    htg_cop_max = HVAC.convert_net_to_gross_capacity_cop(htg_capacity_max_net, fan_power_htg_max, :htg, htg_cop_max_net)[1]
+    [3435, 10726].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [htg_cop_min, htg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.75, 3.59].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    assert_in_epsilon(htg_capacity_max, htg_coil.stages[-1].grossRatedHeatingCapacity.get, 0.01)
+    [2927, 10376].each_with_index do |htg_capacity, i|
+      assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
+    end
 
     # Check supp heating coil
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
@@ -730,46 +637,27 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_mini_split_heat_pump
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-heat-pump-ductless.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
-    fan_power_rated = 0.07
-    cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 400.0
-    clg_capacity_min_net = heat_pump.cooling_capacity * 0.255
-    max_cfm_cool = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
-    min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
-    fan_power_clg_max = fan_power_rated * max_cfm_cool
-    fan_power_clg_min = fan_power_clg_max * ((min_cfm_cool / max_cfm_cool)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg)[0], 'Btu/hr', 'W')
-    cop_max = 0.06635 * heat_pump.cooling_efficiency_seer + 1.8707
-    cop_ratio = 0.01377 * heat_pump.cooling_efficiency_seer + 1.13948
-    cop_min = cop_ratio * cop_max
-    clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, cop_min)[1]
-    clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, cop_max)[1]
-    cfm_per_ton_htg = 400.0
-    max_cfm = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * cfm_per_ton_htg
-    fan_power_htg_max = fan_power_rated * max_cfm
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(heat_pump.heating_capacity / 0.812, fan_power_htg_max, :htg)[0], 'Btu/hr', 'W')
+    model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [clg_cop_min, clg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.40, 3.20].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [2691, 10606].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [4.63, 3.31] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.63, 3.31].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    assert_in_epsilon(htg_capacity_max, htg_coil.stages[-1].grossRatedHeatingCapacity.get, 0.01)
+    [3273, 12890].each_with_index do |htg_capacity, i|
+      assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(0, model.getCoilHeatingElectrics.size)
@@ -784,60 +672,27 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_mini_split_heat_pump_detailed_performance
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
-    fan_power_rated = 0.07
-    cfm_per_ton_clg_max = 400.0
-    cfm_per_ton_clg_min = 400.0
-    clg_dp_min = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
-    clg_dp_max = heat_pump.cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
-    clg_capacity_min_net = clg_dp_min.capacity
-    clg_capacity_max_net = clg_dp_max.capacity
-    clg_cop_min_net = clg_dp_min.efficiency_cop
-    clg_cop_max_net = clg_dp_max.efficiency_cop
-    max_cfm_cool = UnitConversions.convert(clg_capacity_max_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_max
-    min_cfm_cool = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_clg_min
-    fan_power_clg_max = fan_power_rated * max_cfm_cool
-    fan_power_clg_min = fan_power_clg_max * ((min_cfm_cool / max_cfm_cool)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(clg_capacity_max_net, fan_power_clg_max, :clg)[0], 'Btu/hr', 'W')
-    clg_cop_min = HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_clg_min, :clg, clg_cop_min_net)[1]
-    clg_cop_max = HVAC.convert_net_to_gross_capacity_cop(heat_pump.cooling_capacity, fan_power_clg_max, :clg, clg_cop_max_net)[1]
+    model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [clg_cop_min, clg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.06, 3.33].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
-
-    cfm_per_ton_htg_max = 400.0
-    cfm_per_ton_htg_min = 400.0
-    htg_dp_min = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
-    htg_dp_max = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
-    htg_capacity_min_net = htg_dp_min.capacity
-    htg_capacity_max_net = htg_dp_max.capacity
-    htg_cop_min_net = htg_dp_min.efficiency_cop
-    htg_cop_max_net = htg_dp_max.efficiency_cop
-    max_cfm_heat = UnitConversions.convert(htg_capacity_max_net, 'Btu/hr', 'ton') * cfm_per_ton_htg_max
-    min_cfm_heat = UnitConversions.convert(htg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_htg_min
-    fan_power_htg_max = fan_power_rated * max_cfm_heat
-    fan_power_htg_min = fan_power_htg_max * ((min_cfm_heat / max_cfm_heat)**3)
-    htg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(htg_capacity_max_net, fan_power_htg_max, :htg)[0], 'Btu/hr', 'W')
-    htg_cop_min = HVAC.convert_net_to_gross_capacity_cop(htg_capacity_min_net, fan_power_htg_min, :htg, htg_cop_min_net)[1]
-    htg_cop_max = HVAC.convert_net_to_gross_capacity_cop(htg_capacity_max_net, fan_power_htg_max, :htg, htg_cop_max_net)[1]
+    [3041, 12557].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    cops = [htg_cop_min, htg_cop_max] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.82, 3.23].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    assert_in_epsilon(htg_capacity_max, htg_coil.stages[-1].grossRatedHeatingCapacity.get, 0.01)
+    [3557, 16426].each_with_index do |htg_capacity, i|
+      assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(0, model.getCoilHeatingElectrics.size)
@@ -852,31 +707,17 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_mini_split_air_conditioner
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-air-conditioner-only-ductless.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    fan_power_rated = 0.07
-    cfm_per_ton = 400.0
-    cfm_per_ton_min = 400
-    clg_capacity_min_net = cooling_system.cooling_capacity * 0.255
-    max_cfm = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * cfm_per_ton
-    min_cfm = UnitConversions.convert(clg_capacity_min_net, 'Btu/hr', 'ton') * cfm_per_ton_min
-    fan_power = fan_power_rated * max_cfm
-    fan_power_min = fan_power * ((min_cfm / max_cfm)**3)
-    clg_capacity_max = UnitConversions.convert(HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg)[0], 'Btu/hr', 'W')
+    model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cop_max = 0.06635 * cooling_system.cooling_efficiency_seer + 1.8707
-    cop_ratio = 0.01377 * cooling_system.cooling_efficiency_seer + 1.13948
-    cop_min = cop_ratio * cop_max
-    cops = [HVAC.convert_net_to_gross_capacity_cop(clg_capacity_min_net, fan_power_min, :clg, cop_min)[1], HVAC.convert_net_to_gross_capacity_cop(cooling_system.cooling_capacity, fan_power, :clg, cop_max)[1]] # Expected values
-    cops.each_with_index do |cop, i|
+    [4.40, 3.23].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    assert_in_epsilon(clg_capacity_max, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
+    [1794, 7086].each_with_index do |clg_capacity, i|
+      assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -900,15 +741,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
-    cop = 4.87 # Expected values
-    assert_in_epsilon(cop, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(4.87, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
     htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
-    cop = 3.6 # Expected values
-    assert_in_epsilon(cop, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(3.6, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
     assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
 
     # Check supp heating coil
@@ -936,8 +775,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 3.85 # Expected value
-    assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(3.85, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -953,8 +791,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 3.45 # Expected value
-    assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(3.45, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -970,8 +807,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 1.30 # Expected value
-    assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(1.30, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -987,8 +823,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 3.68 # Expected value
-    assert_in_epsilon(cop, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(3.68, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -1078,15 +913,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
-    cop = 4.87 # Expected values
-    assert_in_epsilon(cop, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(4.87, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
     htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
-    cop = 3.6 # Expected values
-    assert_in_epsilon(cop, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(3.6, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
     assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
 
     # Check supp heating coil
