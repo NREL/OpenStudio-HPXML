@@ -1381,10 +1381,9 @@ class HVACSizing
         # substituting in CFM = cool_load_sens_cap_design / (1.1 * ACF * (cool_setpoint - LAT))
 
         cool_load_sens_cap_design = hvac_sizing_values.Cool_Load_Lat / ((total_cap_curve_value / hvac_cooling_shr - \
-                                  (UnitConversions.convert(b_sens, 'ton', 'Btu/hr') + UnitConversions.convert(d_sens, 'ton', 'Btu/hr') * entering_temp) / \
+                                  (b_sens + d_sens * entering_temp) / \
                                   (1.1 * @acf * (@cool_setpoint - @leaving_air_temp))) / \
                                   (a_sens + c_sens * entering_temp) - 1.0)
-
         cool_cap_design = cool_load_sens_cap_design + hvac_sizing_values.Cool_Load_Lat
 
         # The SHR of the equipment at the design condition
