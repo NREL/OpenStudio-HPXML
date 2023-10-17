@@ -291,6 +291,10 @@ class HVAC
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
       ground_heat_exch_vert.addGFunction(hp_ap.GSHP_G_Functions[0][i], hp_ap.GSHP_G_Functions[1][i])
     end
+    kusuda = ground_heat_exch_vert.undisturbedGroundTemperatureModel.to_SiteGroundTemperatureUndisturbedKusudaAchenbach.get
+    kusuda.setSoilThermalConductivity(ground_heat_exch_vert.groundThermalConductivity.get)
+    kusuda.setSoilSpecificHeat(ground_heat_exch_vert.groundThermalHeatCapacity.get / kusuda.soilDensity)
+    kusuda.setAverageSoilSurfaceTemperature(ground_heat_exch_vert.groundTemperature.get)
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
