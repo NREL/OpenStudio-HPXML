@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>010207f7-46d4-4ee3-8652-0a6cc8307730</version_id>
-  <version_modified>2023-10-09T22:17:58Z</version_modified>
+  <version_id>1da630d0-1535-4783-8b76-50bc761108b9</version_id>
+  <version_modified>2023-10-17T18:48:17Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3018,15 +3018,6 @@
           <display_name>1-1/4" pipe</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>geothermal_loop_pipe_shank_spacing</name>
-      <display_name>Geothermal Loop: Pipe Shank Spacing</display_name>
-      <description>Measured as center-to-center (not edge-to-edge) distance between two branches of a vertical U-tube. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default is used.</description>
-      <type>Double</type>
-      <units>in</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>heating_system_2_type</name>
@@ -6997,7 +6988,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>48013787</checksum>
+      <checksum>4DB57C70</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>

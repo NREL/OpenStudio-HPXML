@@ -1447,12 +1447,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('in')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_pipe_shank_spacing', false)
-    arg.setDisplayName('Geothermal Loop: Pipe Shank Spacing')
-    arg.setDescription("Measured as center-to-center (not edge-to-edge) distance between two branches of a vertical U-tube. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default is used.")
-    arg.setUnits('in')
-    args << arg
-
     heating_system_2_type_choices = OpenStudio::StringVector.new
     heating_system_2_type_choices << 'none'
     heating_system_2_type_choices << HPXML::HVACTypeFurnace
@@ -5110,10 +5104,6 @@ class HPXMLFile
       end
     end
 
-    if args[:geothermal_loop_pipe_shank_spacing].is_initialized
-      shank_spacing = args[:geothermal_loop_pipe_shank_spacing].get
-    end
-
     hpxml.geothermal_loops.add(id: "GeothermalLoop#{hpxml.geothermal_loops.size + 1}",
                                loop_configuration: loop_configuration,
                                loop_flow: loop_flow,
@@ -5124,8 +5114,7 @@ class HPXMLFile
                                bore_diameter: bore_diameter,
                                grout_type: grout_type,
                                pipe_type: pipe_type,
-                               pipe_diameter: pipe_diameter,
-                               shank_spacing: shank_spacing)
+                               pipe_diameter: pipe_diameter)
     hpxml.heat_pumps[-1].geothermal_loop_idref = hpxml.geothermal_loops[-1].id
   end
 
