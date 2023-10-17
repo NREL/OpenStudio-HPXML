@@ -1146,10 +1146,6 @@ class HVACSizing
       hvac_sizing_values.Cool_Load_Sens *= max_load / hvac_sizing_values.Cool_Load_Tot
       hvac_sizing_values.Cool_Load_Lat *= max_load / hvac_sizing_values.Cool_Load_Tot
       hvac_sizing_values.Cool_Load_Tot = max_load
-
-      # Override Manual S oversize allowances:
-      @oversize_limit = 1.0
-      @oversize_delta = 0.0
     end
   end
 
