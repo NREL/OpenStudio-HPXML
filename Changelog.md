@@ -35,6 +35,7 @@ __Bugfixes__
 - Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
 - Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
 - Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
+- Fixes ground source heat pump fan/pump adjustment to rated efficiency.
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
