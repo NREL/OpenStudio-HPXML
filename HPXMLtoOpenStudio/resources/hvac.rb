@@ -60,6 +60,22 @@ class HVAC
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
 
+    # Calculate max rated cfm
+    max_rated_fan_cfm = -9999
+    if not cooling_system.nil?
+      cooling_system.cooling_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      end
+    end
+    if not heating_system.nil?
+      htg_ap = heating_system.additional_properties
+      heating_system.heating_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      end
+    end
+
     fan_cfms = []
     if not cooling_system.nil?
       if not cooling_system.cooling_detailed_performance_data.empty?
@@ -92,7 +108,6 @@ class HVAC
     end
 
     if not heating_system.nil?
-      htg_ap = heating_system.additional_properties
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
