@@ -1909,19 +1909,19 @@ class OSModel
       total_cool_load_served = @hpxml.total_fraction_cool_load_served
     end
 
-    liv_load_sensors, intgain_dehumidifier = add_total_loads_output(model, conditioned_zone, total_heat_load_served, total_cool_load_served)
+    cond_load_sensors, intgain_dehumidifier = add_total_loads_output(model, conditioned_zone, total_heat_load_served, total_cool_load_served)
     return unless add_component_loads
 
-    add_component_loads_output(model, conditioned_zone, liv_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
+    add_component_loads_output(model, conditioned_zone, cond_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
   end
 
   def self.add_total_loads_output(model, conditioned_zone, total_heat_load_served, total_cool_load_served)
     # Energy transferred in the conditioned space, used for determining heating (winter) vs cooling (summer)
-    liv_load_sensors = {}
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{conditioned_zone.name.to_s.upcase}")
-    liv_load_sensors[:htg].setName('htg_load_liv')
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{conditioned_zone.name.to_s.upcase}")
-    liv_load_sensors[:clg].setName('clg_load_liv')
+    cond_load_sensors = {}
+    cond_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{conditioned_zone.name.to_s.upcase}")
+    cond_load_sensors[:htg].setName('htg_load_cond')
+    cond_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{conditioned_zone.name.to_s.upcase}")
+    cond_load_sensors[:clg].setName('clg_load_cond')
 
     # Total energy transferred (above plus ducts)
     tot_load_sensors = {}
@@ -1947,13 +1947,13 @@ class OSModel
     program.setName(Constants.ObjectNameTotalLoadsProgram)
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
-    program.addLine("If #{liv_load_sensors[:htg].name} > 0")
+    program.addLine("If #{cond_load_sensors[:htg].name} > 0")
     s = "  Set loads_htg_tot = (#{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}) * #{total_heat_load_served}"
     if not intgain_dehumidifier.nil?
       s += " - #{intgain_dehumidifier.name}"
     end
     program.addLine(s)
-    program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
+    program.addLine("ElseIf #{cond_load_sensors[:clg].name} > 0")
     s = "  Set loads_clg_tot = (#{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}) * #{total_cool_load_served}"
     if not intgain_dehumidifier.nil?
       s += " + #{intgain_dehumidifier.name}"
@@ -1967,10 +1967,10 @@ class OSModel
     program_calling_manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
     program_calling_manager.addProgram(program)
 
-    return liv_load_sensors, intgain_dehumidifier
+    return cond_load_sensors, intgain_dehumidifier
   end
 
-  def self.add_component_loads_output(model, conditioned_zone, liv_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
+  def self.add_component_loads_output(model, conditioned_zone, cond_load_sensors, intgain_dehumidifier, total_heat_load_served, total_cool_load_served)
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
     objects_already_processed = []
 
@@ -2045,6 +2045,7 @@ class OSModel
 
         surfaces_sensors[key] << []
         vars.each do |var, name|
+          surfaces_sensors[key] << []
           sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
           sensor.setName(name)
           sensor.setKeyName(ss.name.to_s)
@@ -2277,6 +2278,16 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
+    # EMS Actuators
+    natvent_flow_actuator = nil
+    model.getEnergyManagementSystemActuators.each do |actuator|
+      next unless (actuator.actuatedComponentType == 'Zone Infiltration') && (actuator.actuatedComponentControlType == 'Air Exchange Flow Rate')
+      next unless actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(' ', '_')
+
+      natvent_flow_actuator = actuator
+      break
+    end
+
     nonsurf_names = ['intgains', 'lighting', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
 
     # EMS program
@@ -2362,17 +2373,47 @@ class OSModel
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
 
+    if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
+      thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
+      htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
+      clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
+    end
+
+    # Sensors
+    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+    tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
+    tin_sensor.setKeyName(conditioned_zone.name.to_s)
+
+    if not htg_sch.nil?
+      htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      htg_sp_sensor.setName('htg sp s')
+      htg_sp_sensor.setKeyName(htg_sch.name.to_s)
+    end
+
+    if not clg_sch.nil?
+      clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      clg_sp_sensor.setName('clg sp s')
+      clg_sp_sensor.setKeyName(clg_sch.name.to_s)
+    end
+
     # EMS program: Heating vs Cooling logic
     program.addLine('Set htg_mode = 0')
     program.addLine('Set clg_mode = 0')
-    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
+    program.addLine("If (#{cond_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
     program.addLine("  Set htg_mode = #{total_heat_load_served}")
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
+    program.addLine("ElseIf (#{cond_load_sensors[:clg].name} > 0) || (#{natvent_flow_actuator.name} > 0) || (hr_whf <> 0)") # Assign hour to cooling if cooling load or natural ventilation is operating
     program.addLine("  Set clg_mode = #{total_cool_load_served}")
-    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
-    program.addLine("  Set clg_mode = #{total_cool_load_served}")
-    program.addLine('Else') # No load, assign hour to heating if not in cooling season definition
-    program.addLine("  Set htg_mode = #{total_heat_load_served}")
+    program.addLine('Else') # No load, assign hour to cooling if temperature closer to cooling setpoint, otherwise assign hour to heating
+    if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
+      program.addLine("  Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints
+    else
+      program.addLine("  Set Tmid_setpoint = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
+    end
+    program.addLine("  If #{tin_sensor.name} > Tmid_setpoint")
+    program.addLine("    Set clg_mode = #{total_cool_load_served}")
+    program.addLine('  Else')
+    program.addLine("    Set htg_mode = #{total_heat_load_served}")
+    program.addLine('  EndIf')
     program.addLine('EndIf')
 
     [:htg, :clg].each do |mode|
