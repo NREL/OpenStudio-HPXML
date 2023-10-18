@@ -367,6 +367,7 @@
               <Pipe>
                 <Type>standard</Type>
                 <Diameter>1.0</Diameter>
+                <ShankSpacing>2.5</ShankSpacing>
               </Pipe>
               <extension>
                 <BorefieldConfiguration>Lopsided U</BorefieldConfiguration>

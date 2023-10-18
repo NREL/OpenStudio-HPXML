@@ -1670,6 +1670,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.heat_pumps[0].backup_heating_lockout_temp = hpxml.heat_pumps[0].backup_heating_switchover_temp
     hpxml.heat_pumps[0].backup_heating_switchover_temp = nil
   end
+  if hpxml_file.include? 'base-hvac-geothermal-loop.xml'
+    hpxml.geothermal_loops[0].shank_spacing = 2.5
+  end
 
   # ------------------ #
   # HPXML WaterHeating #
