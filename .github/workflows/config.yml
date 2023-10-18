@@ -9,7 +9,7 @@ on:
 
 jobs:
   run-unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     container:
       image: docker://nrel/openstudio:3.6.1
     steps:
@@ -61,7 +61,7 @@ jobs:
           path: docs/_build/html/
 
   run-workflow-tests:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     container:
       image: docker://nrel/openstudio:3.6.1
     steps:
@@ -100,7 +100,7 @@ jobs:
 
   compare-results:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: [run-workflow-tests]
     steps:
       - uses: actions/checkout@v3
@@ -152,7 +152,7 @@ jobs:
           name: comparisons
 
   update-results:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: [run-workflow-tests]
     steps:
       - uses: actions/checkout@v3
