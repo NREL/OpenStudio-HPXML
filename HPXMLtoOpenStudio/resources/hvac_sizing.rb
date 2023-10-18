@@ -2674,12 +2674,21 @@ class HVACSizing
     r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 
-    rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[0]) / @htd].max
-    rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[6] - 76.0) / @ctd].max
+    is_southern_hemisphere = (weather.header.Latitude < 0)
 
-    ground_temp_f = weather.data.GroundMonthlyTemps.sum(0.0) / weather.data.GroundMonthlyTemps.size
-    nom_length_heat = (1.0 - hvac_cooling_ap.heat_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (ground_temp_f - (2.0 * hvac_cooling_ap.design_hw - hvac_cooling_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    nom_length_cool = (1.0 + hvac_cooling_ap.cool_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac_cooling_ap.design_chw + hvac_cooling_ap.design_delta_t) / 2.0 - ground_temp_f) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    if is_southern_hemisphere
+      heating_month = 6 # July
+      cooling_month = 0 # January
+    else
+      heating_month = 0 # January
+      cooling_month = 6 # July
+    end
+
+    rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[heating_month]) / @htd].max
+    rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[cooling_month] - 76.0) / @ctd].max
+
+    nom_length_heat = (1.0 - hvac_cooling_ap.heat_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.GroundMonthlyTemps[heating_month] - (2.0 * hvac_cooling_ap.design_hw - hvac_cooling_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_cool = (1.0 + hvac_cooling_ap.cool_rated_eirs[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac_cooling_ap.design_chw + hvac_cooling_ap.design_delta_t) / 2.0 - weather.data.GroundMonthlyTemps[cooling_month]) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
 
     return nom_length_heat, nom_length_cool
   end
