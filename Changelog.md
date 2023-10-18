@@ -20,6 +20,7 @@ __New Features__
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 - Battery losses now split between charging and discharging.
+- Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
@@ -31,7 +32,7 @@ __Bugfixes__
 - Fixes ground source heat pump fan/pump adjustment to rated efficiency.
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
-- Fixes missing radiation exchange between window and sky by switching to new E+ incident solar multiplier capability.
+- Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
