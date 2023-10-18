@@ -43,6 +43,12 @@ jobs:
           path: coverage
           name: coverage
 
+      - name: Store results
+        uses: actions/upload-artifact@v3
+        with:
+          path: workflow/tests/results
+          name: results
+
       - name: Build documentation
         run: |
           cd docs
