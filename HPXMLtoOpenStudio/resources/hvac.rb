@@ -51,11 +51,8 @@ class HVAC
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
       end
-      clg_ap = cooling_system.additional_properties
-      num_speeds = clg_ap.num_speeds
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
-      num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
@@ -63,16 +60,25 @@ class HVAC
     # Calculate max rated cfm
     max_rated_fan_cfm = -9999
     if not cooling_system.nil?
-      cooling_system.cooling_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
-        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
-        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      clg_ap = cooling_system.additional_properties
+      if not cooling_system.cooling_detailed_performance_data.empty?
+        cooling_system.cooling_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+          rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
+          max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+        end
+      else
+        max_rated_fan_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
       end
     end
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
-      heating_system.heating_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
-        rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
-        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+      if not heating_system.heating_detailed_performance_data.empty?
+        heating_system.heating_detailed_performance_data.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.each do |dp|
+          rated_fan_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+          max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
+        end
+      elsif is_heatpump
+        max_rated_fan_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
       end
     end
 
@@ -82,7 +88,7 @@ class HVAC
         process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg, max_rated_fan_cfm, weather_max_drybulb)
       end
       # Cooling Coil
-      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
+      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm)
 
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
@@ -116,7 +122,7 @@ class HVAC
         end
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -179,10 +185,10 @@ class HVAC
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp)
 
     # Unitary System Performance
-    if num_speeds > 1
+    if (not clg_ap.nil?) && (clg_ap.num_speeds > 1)
       perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
       perf.setSingleModeOperation(false)
-      for speed in 1..num_speeds
+      for speed in 1..clg_ap.num_speeds
         if is_heatpump
           f = OpenStudio::Model::SupplyAirflowRatioField.new(htg_ap.heat_fan_speed_ratios[speed - 1], clg_ap.cool_fan_speed_ratios[speed - 1])
         else
@@ -1833,11 +1839,16 @@ class HVAC
 
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = fan_ratio**3 # fan power curve
+      power_fraction = calculate_fan_power_from_curve(1.0, fan_ratio)
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
     return fan
+  end
+
+  def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio)
+    # Cubic relationship fan power curve
+    return max_fan_power * (fan_ratio**3)
   end
 
   def self.set_fan_power(fan, fan_watts_per_cfm)
@@ -2669,7 +2680,7 @@ class HVAC
       data.each do |dp|
         this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton[speed]
         fan_ratio = this_cfm / max_rated_fan_cfm
-        fan_power = hvac_ap.fan_power_rated * max_rated_fan_cfm * (fan_ratio**3)
+        fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio)
         dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
@@ -2876,7 +2887,7 @@ class HVAC
     end
   end
 
-  def self.create_dx_cooling_coil(model, obj_name, cooling_system)
+  def self.create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm)
     clg_ap = cooling_system.additional_properties
 
     if cooling_system.is_a? HPXML::CoolingSystem
@@ -2886,11 +2897,10 @@ class HVAC
     end
 
     if cooling_system.cooling_detailed_performance_data.empty?
-      max_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
       clg_ap.cool_rated_capacities_gross = []
       clg_ap.cool_rated_capacities_net = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, speed|
-        fan_power = clg_ap.fan_power_rated * max_cfm * (clg_ap.cool_fan_speed_ratios[speed]**3)
+        fan_power = calculate_fan_power_from_curve(clg_ap.fan_power_rated * max_rated_fan_cfm, clg_ap.cool_fan_speed_ratios[speed])
         net_capacity = capacity_ratio * cooling_system.cooling_capacity
         clg_ap.cool_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
@@ -2979,15 +2989,14 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, heating_system)
+  def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm)
     htg_ap = heating_system.additional_properties
 
     if heating_system.heating_detailed_performance_data.empty?
-      max_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_rated_capacities_gross = []
       htg_ap.heat_rated_capacities_net = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
-        fan_power = htg_ap.fan_power_rated * max_cfm * (htg_ap.heat_fan_speed_ratios[speed]**3)
+        fan_power = calculate_fan_power_from_curve(htg_ap.fan_power_rated * max_rated_fan_cfm, htg_ap.heat_fan_speed_ratios[speed])
         net_capacity = capacity_ratio * heating_system.heating_capacity
         htg_ap.heat_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
