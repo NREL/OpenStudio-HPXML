@@ -56,7 +56,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
         _autosized_model, autosized_hpxml = _test_measure(args_hash)
 
-        test_name = hvac_hpxml.gsub('base-hvac-', 'base-hvac-autosize')
+        test_name = hvac_hpxml.gsub('base-hvac-', 'base-hvac-autosize-')
         if not hp_sizing_methodology.nil?
           test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}.xml")
         end
