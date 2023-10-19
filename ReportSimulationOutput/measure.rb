@@ -2651,13 +2651,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
           if not is_heat_pump_backup(sys_id)
-            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           else
-            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           end
         else
           fuel = object.to_BoilerHotWater.get.fuelType
-          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
@@ -2786,9 +2786,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
-          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end
