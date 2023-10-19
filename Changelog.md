@@ -33,6 +33,7 @@ __Bugfixes__
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 - Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
+- Fixes AC/HP cooling bug in cooling adjustment.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
