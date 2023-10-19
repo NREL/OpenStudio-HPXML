@@ -67,7 +67,8 @@ class HVAC
           max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
         end
       else
-        max_rated_fan_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
+        rated_fan_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
       end
     end
     if not heating_system.nil?
@@ -78,7 +79,8 @@ class HVAC
           max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
         end
       elsif is_heatpump
-        max_rated_fan_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+        rated_fan_cfm = UnitConversions.convert(heating_system.heating_capacity * htg_ap.heat_capacity_ratios[-1], 'Btu/hr', 'ton') * htg_ap.heat_rated_cfm_per_ton[-1]
+        max_rated_fan_cfm = rated_fan_cfm if rated_fan_cfm > max_rated_fan_cfm
       end
     end
 
