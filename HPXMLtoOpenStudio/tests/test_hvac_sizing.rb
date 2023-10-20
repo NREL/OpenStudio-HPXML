@@ -48,7 +48,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           hp_sizing_methodologies = [nil]
         end
 
-        hp_capacity_acca, hp_capacity_hers, hp_capacity_maxload = nil, nil, nil
+        hp_capacity_acca, hp_capacity_maxload = nil, nil
         hp_sizing_methodologies.each do |hp_sizing_methodology|
           test_name = hvac_hpxml.gsub('base-hvac-', "#{location}-hvac-autosize-")
           if not hp_sizing_methodology.nil?
@@ -67,23 +67,51 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
                                         'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
                                         'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1) }
 
-          if hpxml.heat_pumps.size == 1
-            if hp_sizing_methodology == HPXML::HeatPumpSizingACCA
-              hp_capacity_acca = autosized_hpxml.heat_pumps[0].heating_capacity
-            elsif hp_sizing_methodology == HPXML::HeatPumpSizingHERS
-              hp_capacity_hers = autosized_hpxml.heat_pumps[0].heating_capacity
-            elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
-              hp_capacity_maxload = autosized_hpxml.heat_pumps[0].heating_capacity
+          next unless hpxml.heat_pumps.size == 1
+
+          htg_load = autosized_hpxml.hvac_plant.hdl_total
+          clg_load = autosized_hpxml.hvac_plant.cdl_sens_total + autosized_hpxml.hvac_plant.cdl_lat_total
+          hp = autosized_hpxml.heat_pumps[0]
+          htg_cap = hp.heating_capacity
+          clg_cap = hp.cooling_capacity
+          charge_defect_ratio = hp.charge_defect_ratio.to_f
+          airflow_defect_ratio = hp.airflow_defect_ratio.to_f
+
+          if hp_sizing_methodology == HPXML::HeatPumpSizingACCA
+            hp_capacity_acca = htg_cap
+          elsif hp_sizing_methodology == HPXML::HeatPumpSizingHERS
+            next if hp.is_dual_fuel
+
+            if (charge_defect_ratio != 0) || (airflow_defect_ratio != 0)
+              # Check HP capacity is greater than max(htg_load, clg_load)
+              if hp.fraction_heat_load_served == 0
+                assert_operator(clg_cap, :>, clg_load)
+              elsif hp.fraction_cool_load_served == 0
+                assert_operator(htg_cap, :>, htg_load)
+              else
+                assert_operator(htg_cap, :>, [htg_load, clg_load].max)
+                assert_operator(clg_cap, :>, [htg_load, clg_load].max)
+              end
+            else
+              # Check HP capacity equals max(htg_load, clg_load)
+              if hp.fraction_heat_load_served == 0
+                assert_in_delta(clg_cap, clg_load, 1.0)
+              elsif hp.fraction_cool_load_served == 0
+                assert_in_delta(htg_cap, htg_load, 1.0)
+              else
+                assert_in_delta(htg_cap, [htg_load, clg_load].max, 1.0)
+                assert_in_delta(clg_cap, [htg_load, clg_load].max, 1.0)
+              end
             end
+          elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
+            hp_capacity_maxload = htg_cap
           end
         end
 
         next unless hpxml.heat_pumps.size == 1
 
-        # Check that MaxLoad >= HERS >= ACCA for heat pump heating capacity
-        # FIXME: Temporarily disabled
-        # assert_operator(hp_capacity_maxload, :>=, hp_capacity_hers)
-        # assert_operator(hp_capacity_hers, :>=, hp_capacity_acca)
+        # Check that MaxLoad >= >= ACCA for heat pump heating capacity
+        assert_operator(hp_capacity_maxload, :>=, hp_capacity_acca)
       end
     end
 
