@@ -116,10 +116,6 @@ class Constants
     return 'boiler'
   end
 
-  def self.ObjectNameBoilerPilotLight(boiler_name)
-    return "#{boiler_name} pilot light"
-  end
-
   def self.ObjectNameCeilingFan
     return 'ceiling fan'
   end
@@ -404,10 +400,6 @@ class Constants
     return 'room ac'
   end
 
-  def self.ObjectNameSkylightShade
-    return 'skylight shade'
-  end
-
   def self.ObjectNameSolarHotWater
     return 'solar hot water'
   end
@@ -454,10 +446,6 @@ class Constants
 
   def self.ObjectNameWholeHouseFan
     return 'whole house fan'
-  end
-
-  def self.ObjectNameWindowShade
-    return 'window shade'
   end
 
   def self.ScheduleTypeLimitsFraction
